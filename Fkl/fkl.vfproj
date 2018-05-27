@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioProject ProjectType="typeStaticLibrary" ProjectCreator="Intel Fortran" Keyword="Static Library" Version="11.0" ProjectIdGuid="{6964DE2C-F451-400C-B926-13C714A964F6}">
+	<Platforms>
+		<Platform Name="Win32"/>
+		<Platform Name="x64"/></Platforms>
+	<Configurations>
+		<Configuration Name="Debug|Win32" ConfigurationType="typeStaticLibrary">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" WarnInterfaces="true" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
+				<Tool Name="VFLibrarianTool"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/></Configuration>
+		<Configuration Name="Release|Win32" ConfigurationType="typeStaticLibrary">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" RuntimeLibrary="rtMultiThreadedDLL"/>
+				<Tool Name="VFLibrarianTool"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/></Configuration>
+		<Configuration Name="Debug|x64" OutputDirectory=".\x64\Debug\" IntermediateDirectory=".\IntDir\Debug\" TargetName="fkl" ConfigurationType="typeStaticLibrary">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" MultiProcessorCompilation="true" Optimization="optimizeFull" UseProcessorExtensions="codeExclusivelyAVX2" Parallelization="true" MatrixLibrary="mlYes" AdditionalIncludeDirectories="C:\Program Files %28x86%29\IntelSWTools\compilers_and_libraries_2018.2.185\windows\mkl\include" EnableEnhancedInstructionSet="codeArchAVX" MtuneConstruct="mcArchHSW" OpenMP="OpenMPParallelCode" F2003Semantics="true" DisableSpecificDiagnostics="5117;" WarnInterfaces="true" CommonElementAlignment="alignCommon32Bytes" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL" UseMkl="mklParallel"/>
+				<Tool Name="VFLibrarianTool" AdditionalLibraryDirectories="C:\Program Files %28x86%29\IntelSWTools\compilers_and_libraries_2018.2.185\windows\mkl\lib\intel64_win" AdditionalDependencies="mkl_intel_ilp64.lib mkl_intel_thread.lib mkl_core.lib libiomp5md.lib"/>
+				<Tool Name="VFResourceCompilerTool" AdditionalIncludeDirectories="C:\Program Files %28x86%29\IntelSWTools\compilers_and_libraries_2018.2.185\windows\mkl\include"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/></Configuration>
+		<Configuration Name="Release|x64" OutputDirectory=".\x64\Release\" IntermediateDirectory=".\IntDir\Release\" TargetName="fkl" ConfigurationType="typeStaticLibrary">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" Optimization="optimizeFull" UseProcessorExtensions="codeExclusivelyAVX2" Parallelization="true" MatrixLibrary="mlYes" AdditionalIncludeDirectories="C:\Program Files %28x86%29\IntelSWTools\compilers_and_libraries_2018.2.185\windows\mkl\include" EnableEnhancedInstructionSet="codeArchAVX" MtuneConstruct="mcArchHSW" OpenMP="OpenMPParallelCode" F2003Semantics="true" DisableSpecificDiagnostics="5117;" CommonElementAlignment="alignCommon32Bytes" RuntimeLibrary="rtMultiThreadedDLL" UseMkl="mklParallel"/>
+				<Tool Name="VFLibrarianTool" AdditionalLibraryDirectories="C:\Program Files %28x86%29\IntelSWTools\compilers_and_libraries_2018.2.185\windows\mkl\lib\intel64_win" LinkLibraryDependencies="true" AdditionalDependencies="mkl_intel_ilp64.lib mkl_intel_thread.lib mkl_core.lib libiomp5md.lib"/>
+				<Tool Name="VFResourceCompilerTool" AdditionalIncludeDirectories="C:\Program Files %28x86%29\IntelSWTools\compilers_and_libraries_2018.2.185\windows\mkl\include"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/></Configuration></Configurations>
+	<Files>
+		<Filter Name="Header Files" Filter="fi;fd">
+		<File RelativePath=".\include\fkl.h"/></Filter>
+		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
+		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<File RelativePath=".\src\_fkl_utility.f90"/>
+		<File RelativePath=".\src\Basic_Linear_Algebra.f90"/>
+		<File RelativePath=".\src\Computational_Geometry.f90"/>
+		<File RelativePath=".\src\Digital_Image_Processing.f90"/>
+		<File RelativePath=".\src\Linear_Equation_System.f90"/>
+		<File RelativePath=".\src\Modeling_of_Data.f90"/>
+		<File RelativePath=".\src\Special_Funcs.f90"/></Filter></Files>
+	<Globals/></VisualStudioProject>

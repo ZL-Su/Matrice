@@ -1,0 +1,14 @@
+import std.core
+export module dev
+export namespace dev
+{
+enum DataOpt {upload, download};
+template<typename _Ty> class Base_
+{
+public:
+	Base_() = default;
+
+	void sync() {};
+	template<DataOpt _opt> void copy() {};
+}
+}

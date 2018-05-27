@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <IncludePath>E:\Dgelo\Dropbox\Dgelom\Repos\Matrice\fkl\include;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\Dgelo\Dropbox\Dgelom\Repos\Matrice\fkl\x64\Debug;E:\Dgelo\Dropbox\Dgelom\Repos\Matrice\fkl\addin\intel;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <Link>
+      <AdditionalDependencies>fkl.lib;ifconsol.lib;ifmodintr.lib;libifcoremdd.lib;libifportmd.lib;libiomp5md.lib;libirc.lib;libmatmul.lib;libmmdd.lib;mkl_core.lib;mkl_intel_lp64.lib;mkl_intel_thread.lib;svml_dispmd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <Version>1.0</Version>
+      <SubSystem>Windows</SubSystem>
+      <MinimumRequiredVersion>10.0</MinimumRequiredVersion>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>

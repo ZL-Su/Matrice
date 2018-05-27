@@ -1,0 +1,244 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Core">
+      <UniqueIdentifier>{7bcc341d-755a-45fa-adde-f238e769d71b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Core">
+      <UniqueIdentifier>{f84bb32d-68ad-4d52-8952-07a2113ce136}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Arch">
+      <UniqueIdentifier>{81d78cf3-732d-46a4-b66b-f36f799d7465}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Util">
+      <UniqueIdentifier>{4e312bcb-d0eb-4cca-ae67-73b4291a5eca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Private">
+      <UniqueIdentifier>{fafe41e5-0b0e-4975-b5ca-72bd98101be4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Private">
+      <UniqueIdentifier>{40c8943e-f2d9-49dd-ae80-b2c086c56fa4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Addin">
+      <UniqueIdentifier>{db5e8904-7c79-4de7-8d5b-1120cb31251a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Util">
+      <UniqueIdentifier>{8fe01d56-4f66-434f-a2b3-de7013fd1a29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Util\Eigen">
+      <UniqueIdentifier>{65df26c3-6157-41b0-8f03-6beeeb1f309b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Util\Eigen\LU">
+      <UniqueIdentifier>{603378b7-bc93-4c26-9fa6-36e883267a26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\IO">
+      <UniqueIdentifier>{ca68800b-af4a-47a4-a12c-13d3d3060204}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules">
+      <UniqueIdentifier>{73b85bcb-9064-4ecc-acd7-4db405c4fc02}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="addin\interface.h">
+      <Filter>Header Files\Addin</Filter>
+    </ClInclude>
+    <ClInclude Include="src\private\generic_fast_math.hpp">
+      <Filter>Source Files\Private</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\core\matrix.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\core\vector.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\_expr_type_traits.h">
+      <Filter>Header Files\Private</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\_matrix.inl.hpp">
+      <Filter>Header Files\Private</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\_memory.h">
+      <Filter>Header Files\Private</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\util\_macros.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\_matrix_expr.hpp">
+      <Filter>Header Files\Private</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\core\solver.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\Eigen\src\LU\Determinant.h">
+      <Filter>Source Files\Util\Eigen\LU</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\Eigen\src\LU\FullPivLU.h">
+      <Filter>Source Files\Util\Eigen\LU</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\Eigen\src\LU\InverseImpl.h">
+      <Filter>Source Files\Util\Eigen\LU</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\Eigen\src\LU\PartialPivLU.h">
+      <Filter>Source Files\Util\Eigen\LU</Filter>
+    </ClInclude>
+    <ClInclude Include="src\util\Eigen\src\LU\PartialPivLU_LAPACKE.h">
+      <Filter>Source Files\Util\Eigen\LU</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\util\_type_defs.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\util\util.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\io\io.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\util\genalgs.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\_matrix_base.hpp">
+      <Filter>Header Files\Private</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\_storage.hpp">
+      <Filter>Header Files\Private</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\_dev_matrix_base.h">
+      <Filter>Header Files\Private</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\private\_memory.cpp">
+      <Filter>Source Files\Private</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\matrix_with_generic_alloc.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\matrix_base_impl.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\matrix_dynamic_impl.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\storage_base_impl.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\matrix_expr_op_impl.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\solver_impl.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\util\Eigen\Cholesky">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\CholmodSupport">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\Core">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\Dense">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\Eigen">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\Eigenvalues">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\Geometry">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\Householder">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\IterativeLinearSolvers">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\Jacobi">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\LU">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\MetisSupport">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\OrderingMethods">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\PardisoSupport">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\PaStiXSupport">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\QR">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\QtAlignedMalloc">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\Sparse">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\SparseCholesky">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\SparseCore">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\SparseLU">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\SparseQR">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\SPQRSupport">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\StdDeque">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\StdList">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\StdVector">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\SuperLUSupport">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\SVD">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="src\util\Eigen\UmfPackSupport">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="_dev_base.def">
+      <Filter>Modules</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="src\private\_dev_memory.cu">
+      <Filter>Source Files\Private</Filter>
+    </CudaCompile>
+    <CudaCompile Include="src\private\_dev_funcs.cu">
+      <Filter>Source Files\Private</Filter>
+    </CudaCompile>
+  </ItemGroup>
+</Project>
