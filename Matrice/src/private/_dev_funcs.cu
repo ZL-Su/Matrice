@@ -16,14 +16,16 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #include <stdexcept>
+#include "../../include/Matrice/private/_decl_dev_funcs.h"
+
+#if (defined __enable_cuda__ && !defined __disable_cuda__)
 #include <cuda_runtime.h>
-#include "../../include/Matrice/util/_macros.h"
 
 #pragma warning(disable: 4715 4661 4224 4267 4244 4819 4199)
 
 MATRICE_PRIVATE_BEGIN
 
-template<int _Opt = 0> void device_sync()
+template<int _Opt> void device_sync()
 {
 	cudaError_t sts;
 	switch (_Opt)
@@ -36,3 +38,4 @@ template<int _Opt = 0> void device_sync()
 template void device_sync<0>();
 
 MATRICE_PRIVATE_END
+#endif

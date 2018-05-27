@@ -117,6 +117,9 @@
     <ClInclude Include="include\Matrice\private\_dev_matrix_base.h">
       <Filter>Header Files\Private</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\private\_decl_dev_funcs.h">
+      <Filter>Header Files\Private</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\private\_memory.cpp">

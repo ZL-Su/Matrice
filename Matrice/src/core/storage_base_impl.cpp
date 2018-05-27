@@ -18,15 +18,18 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <complex>
 #include "../../include/Matrice/private/_storage.hpp"
 #include "../../include/Matrice/private/_expr_type_traits.h"
+#include "../../include/Matrice/private/_decl_dev_funcs.h"
 
 #pragma warning(disable: 4715 4661 4224 4267 4244 4819 4199)
 
-namespace dgelom { 
-namespace privt {
-template<typename _Scalar> _Scalar* device_malloc(_Scalar* p, std::size_t& w, std::size_t h);
-template<typename _Scalar> _Scalar* global_malloc(_Scalar* p, std::size_t N);
-template<typename _Scalar> void device_free(_Scalar* p);
-}
+namespace dgelom {
+//#if (defined __enable_cuda__ && !defined __disable_cuda__)
+//namespace privt {
+//template<typename _Scalar> _Scalar* device_malloc(_Scalar* p, std::size_t& w, std::size_t h);
+//template<typename _Scalar> _Scalar* global_malloc(_Scalar* p, std::size_t N);
+//template<typename _Scalar> void device_free(_Scalar* p);
+//}
+//#endif
 namespace details{
 
 template<typename _Ty> template<Location _Loc>
@@ -41,6 +44,7 @@ Storage_<_Ty>::DenseBase<_Loc>::DenseBase(int_t _rows, int_t _cols)
 		my_shared = SharedPtr(privt::aligned_malloc<value_t>(my_size), [=](pointer ptr) { privt::aligned_free(ptr); });
 		my_data = my_shared.get();
 	} break;
+#if (defined __enable_cuda__ && !defined __disable_cuda__)
 	case OnGlobal:
 	{
 		my_shared = SharedPtr(privt::global_malloc(my_data, std::size_t(my_size)), [=](pointer ptr) { privt::device_free(ptr); });
@@ -53,6 +57,7 @@ Storage_<_Ty>::DenseBase<_Loc>::DenseBase(int_t _rows, int_t _cols)
 		my_shared = SharedPtr(privt::device_malloc(my_data, my_pitch, h), [=](pointer ptr) { privt::device_free(ptr); });
 		my_pitch *= sizeof(value_t);
 	} break;
+#endif
 	default: throw("Oops, you are attempting to go outside of the earth!"); break;
 	}
 #else
@@ -62,6 +67,7 @@ Storage_<_Ty>::DenseBase<_Loc>::DenseBase(int_t _rows, int_t _cols)
 	{
 		my_data = privt::aligned_malloc(_size);
 	} break;
+#if (defined __enable_cuda__ && !defined __disable_cuda__)
 	case OnGlobal:
 	{
 		privt::global_malloc(my_data, std::size_t(my_size));
@@ -74,6 +80,7 @@ Storage_<_Ty>::DenseBase<_Loc>::DenseBase(int_t _rows, int_t _cols)
 		privt::device_malloc(my_data, my_pitch, h);
 		my_pitch *= sizeof(value_t);
 	} break;
+#endif
 	default: throw("Oops, you are attempting to go outside of the earth!"); break;
 	}
 #endif
@@ -90,6 +97,7 @@ Storage_<_Ty>::DenseBase<_Loc>::DenseBase(int_t _rows, int_t _cols, const value_
 		my_shared = SharedPtr(privt::aligned_malloc<value_t>(my_size), [=](pointer ptr) { privt::aligned_free(ptr); });
 		my_data = my_shared.get();
 	} break;
+#if (defined __enable_cuda__ && !defined __disable_cuda__)
 	case OnGlobal:
 	{
 		my_shared = SharedPtr(privt::global_malloc(my_data, std::size_t(my_size)), [=](pointer ptr) { privt::device_free(ptr); });
@@ -102,6 +110,7 @@ Storage_<_Ty>::DenseBase<_Loc>::DenseBase(int_t _rows, int_t _cols, const value_
 		my_shared = SharedPtr(privt::device_malloc(my_data, my_pitch, h), [=](pointer ptr) { privt::device_free(ptr); });
 		my_pitch *= sizeof(value_t);
 	} break;
+#endif
 	default: throw("Oops, you are attempting to go outside of the earth!"); break;
 	}
 #else
@@ -111,6 +120,7 @@ Storage_<_Ty>::DenseBase<_Loc>::DenseBase(int_t _rows, int_t _cols, const value_
 	{
 		my_data = privt::aligned_malloc(_size);
 	} break;
+#if (defined __enable_cuda__ && !defined __disable_cuda__)
 	case OnGlobal:
 	{
 		privt::global_malloc(my_data, std::size_t(my_size));
@@ -123,6 +133,7 @@ Storage_<_Ty>::DenseBase<_Loc>::DenseBase(int_t _rows, int_t _cols, const value_
 		privt::device_malloc(my_data, my_pitch, h);
 		my_pitch *= sizeof(value_t);
 	} break;
+#endif
 	default: throw("Oops, you are attempting to go outside of the earth!"); break;
 	}
 #endif
@@ -274,15 +285,15 @@ template class Storage_<unsigned char>::DenseBase<Location::OnHeap>;
 template class Storage_<unsigned char>::DenseBase<Location::OnGlobal>;
 template class Storage_<unsigned char>::DenseBase<Location::OnDevice>;
 template class Storage_<unsigned char>::DenseBase<Location::UnSpecified>;
-template class Storage_<std::complex<float>>::DenseBase<Location::OnStack>;
-template class Storage_<std::complex<float>>::DenseBase<Location::OnHeap>;
-template class Storage_<std::complex<float>>::DenseBase<Location::OnGlobal>;
-template class Storage_<std::complex<float>>::DenseBase<Location::OnDevice>;
-template class Storage_<std::complex<float>>::DenseBase<Location::UnSpecified>;
-template class Storage_<std::complex<double>>::DenseBase<Location::OnStack>;
-template class Storage_<std::complex<double>>::DenseBase<Location::OnHeap>;
-template class Storage_<std::complex<double>>::DenseBase<Location::OnGlobal>;
-template class Storage_<std::complex<double>>::DenseBase<Location::OnDevice>;
-template class Storage_<std::complex<double>>::DenseBase<Location::UnSpecified>;
+//template class Storage_<std::complex<float>>::DenseBase<Location::OnStack>;
+//template class Storage_<std::complex<float>>::DenseBase<Location::OnHeap>;
+//template class Storage_<std::complex<float>>::DenseBase<Location::OnGlobal>;
+//template class Storage_<std::complex<float>>::DenseBase<Location::OnDevice>;
+//template class Storage_<std::complex<float>>::DenseBase<Location::UnSpecified>;
+//template class Storage_<std::complex<double>>::DenseBase<Location::OnStack>;
+//template class Storage_<std::complex<double>>::DenseBase<Location::OnHeap>;
+//template class Storage_<std::complex<double>>::DenseBase<Location::OnGlobal>;
+//template class Storage_<std::complex<double>>::DenseBase<Location::OnDevice>;
+//template class Storage_<std::complex<double>>::DenseBase<Location::UnSpecified>;
 }
 }

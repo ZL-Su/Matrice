@@ -19,15 +19,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <future>
 #include "../util/_macros.h"
 #if (defined __enable_cuda__ && !defined __disable_cuda__)
+#include "_decl_dev_funcs.h"
 
 MATRICE_NAMESPACE_BEGIN_TYPES
 template<typename _Ty, int _M, int _N> class Matrix_;
 MATRICE_NAMESPACE_END_TYPES
-MATRICE_PRIVATE_BEGIN
-template<int _Opt> void device_sync();
-template<typename _Ty, int _Opt/*, typename = std::enable_if_t<std::is_literal_type_v<_Ty>>*/>
-void device_memcpy(_Ty* dptr, _Ty* hptr, std::size_t w, std::size_t h, std::size_t p);
-MATRICE_PRIVATE_END
 
 MATRICE_DEVICE_BEGIN
 template<typename _Ty, typename _Derived = types::Matrix_<_Ty, -1, -1>> 

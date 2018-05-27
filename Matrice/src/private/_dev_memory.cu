@@ -17,9 +17,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #include <complex>
 #include <stdexcept>
-#include <cuda_runtime.h>
 #include "../../include/Matrice/util/_macros.h"
 
+#if (defined __enable_cuda__ && !defined __disable_cuda__)
+#include <cuda_runtime.h>
 #pragma warning(disable: 4715 4661 4224 4267 4244 4819 4199)
 
 using std::size_t;
@@ -28,7 +29,7 @@ using std::complex;
 MATRICE_PRIVATE_BEGIN
 
 //<note> w is the columns, h is the rows </note>
-template<typename _Scalar, typename = typename std::enable_if<std::is_literal_type<_Scalar>::value>::type>
+template<typename _Scalar, typename = typename std::enable_if<std::is_scalar<_Scalar>::value>::type>
 _Scalar* device_malloc(_Scalar* dptr, size_t& w, size_t h)
 {
 	cudaError_t sts;
@@ -46,7 +47,7 @@ _Scalar* device_malloc(_Scalar* dptr, size_t& w, size_t h)
 	if (sts != cudaSuccess) throw std::runtime_error(cudaGetErrorString(sts));
 	return dptr;
 }
-template<typename _Scalar, typename = typename std::enable_if<std::is_literal_type<_Scalar>::value>::type>
+template<typename _Scalar, typename = typename std::enable_if<std::is_scalar<_Scalar>::value>::type>
 _Scalar* global_malloc(_Scalar* dptr, size_t N)
 {
 	auto sts = cudaMallocManaged(&dptr, N * sizeof(_Scalar));
@@ -54,7 +55,7 @@ _Scalar* global_malloc(_Scalar* dptr, size_t N)
 	return dptr;
 }
 //<note> w is the columns, h is the rows </note>
-template<typename _Scalar, int _Opt, typename = typename std::enable_if<std::is_literal_type<_Scalar>::value>::type>
+template<typename _Scalar, int _Opt, typename = typename std::enable_if<std::is_scalar<_Scalar>::value>::type>
 void device_memcpy(_Scalar* hptr, _Scalar* dptr, size_t w, size_t h = 1, size_t p = 1)
 {
 	if (w == 1) std::swap(w, h);
@@ -84,7 +85,7 @@ void device_memcpy(_Scalar* hptr, _Scalar* dptr, size_t w, size_t h = 1, size_t 
 	}
 	if (sts != cudaSuccess) throw std::runtime_error(cudaGetErrorString(sts));
 }
-template<typename _Scalar, typename = typename std::enable_if<std::is_literal_type<_Scalar>::value>::type>
+template<typename _Scalar, typename = typename std::enable_if<std::is_scalar<_Scalar>::value>::type>
 void device_free(_Scalar* dptr)
 {
 	if (dptr) cudaFree(dptr);
@@ -97,16 +98,12 @@ template bool* device_malloc(bool*, size_t&, size_t);
 template float* device_malloc(float*, size_t&, size_t);
 template double* device_malloc(double*, size_t&, size_t);
 template unsigned char* device_malloc(unsigned char*, size_t&, size_t);
-template complex<float>* device_malloc(complex<float>*, size_t&, size_t);
-template complex<double>* device_malloc(complex<double>*, size_t&, size_t);
 template int* global_malloc(int*, size_t);
 template char* global_malloc(char*, size_t);
 template bool* global_malloc(bool*, size_t);
 template float* global_malloc(float*, size_t);
 template double* global_malloc(double*, size_t);
 template unsigned char* global_malloc(unsigned char*, size_t);
-template complex<float>* global_malloc(complex<float>*, size_t);
-template complex<double>* global_malloc(complex<double>*, size_t);
 template void device_memcpy<int, 1>(int*, int*, size_t, size_t, size_t);
 template void device_memcpy<int, 2>(int*, int*, size_t, size_t, size_t);
 template void device_memcpy<char, 1>(char*, char*, size_t, size_t, size_t);
@@ -119,18 +116,14 @@ template void device_memcpy<double, 1>(double*, double*, size_t, size_t, size_t)
 template void device_memcpy<double, 2>(double*, double*, size_t, size_t, size_t);
 template void device_memcpy<unsigned char, 1>(unsigned char*, unsigned char*, size_t, size_t, size_t);
 template void device_memcpy<unsigned char, 2>(unsigned char*, unsigned char*, size_t, size_t, size_t);
-template void device_memcpy<complex<float>, 1>(complex<float>*, complex<float>*, size_t, size_t, size_t);
-template void device_memcpy<complex<float>, 2>(complex<float>*, complex<float>*, size_t, size_t, size_t);
-template void device_memcpy<complex<double>, 1>(complex<double>*, complex<double>*, size_t, size_t, size_t);
-template void device_memcpy<complex<double>, 2>(complex<double>*, complex<double>*, size_t, size_t, size_t);
 template void device_free(int*);
 template void device_free(char*);
 template void device_free(bool*);
 template void device_free(float*);
 template void device_free(double*);
 template void device_free(unsigned char*);
-template void device_free(complex<float>*);
-template void device_free(complex<double>*);
 #pragma endregion
 
 MATRICE_PRIVATE_END
+
+#endif

@@ -2,9 +2,6 @@
 #include <complex>
 #include <stdexcept>
 #include "../../include/Matrice/private/_memory.h"
-#ifdef __enable_cuda__
-#include <cuda_runtime.h>
-#endif
 
 namespace dgelom { namespace privt {
 
@@ -38,38 +35,6 @@ bool is_aligned(ValueType * aligned_ptr) noexcept
 	return !(reinterpret_cast<std::size_t>(reinterpret_cast<void*>(aligned_ptr)) % MATRICE_ALIGN_BYTES);
 }
 
-//#ifdef __enable_cuda__
-//template<typename ValueType> ValueType* global_malloc(ValueType* devptr, std::size_t N)
-//{
-//	auto status = cudaMallocManaged(&devptr, N * sizeof(ValueType));
-//	if (status != cudaSuccess)
-//		throw std::runtime_error(cudaGetErrorString(status));
-//	return devptr;
-//}
-//template<typename ValueType> void device_free(ValueType* devptr)
-//{
-//	cudaFree(devptr);
-//}
-//
-//template int* global_malloc(int*, std::size_t);
-//template char* global_malloc(char*, std::size_t);
-//template bool* global_malloc(bool*, std::size_t);
-//template float* global_malloc(float*, std::size_t);
-//template double* global_malloc(double*, std::size_t);
-//template unsigned char* global_malloc(unsigned char*, std::size_t);
-//template std::complex<float>* global_malloc(std::complex<float>*, std::size_t);
-//template std::complex<double>* global_malloc(std::complex<double>*, std::size_t);
-//template void device_free(int*);
-//template void device_free(char*);
-//template void device_free(bool*);
-//template void device_free(float*);
-//template void device_free(double*);
-//template void device_free(unsigned char*);
-//template void device_free(std::complex<float>*);
-//template void device_free(std::complex<double>*);
-//#endif
-
-
 template int* aligned_malloc<int>(int);
 template int* aligned_malloc<int>(std::size_t);
 template int* aligned_malloc<int>(std::ptrdiff_t);
@@ -88,12 +53,12 @@ template double* aligned_malloc<double>(std::ptrdiff_t);
 template unsigned char* aligned_malloc<unsigned char>(int);
 template unsigned char* aligned_malloc<unsigned char>(std::size_t);
 template unsigned char* aligned_malloc<unsigned char>(std::ptrdiff_t);
-template std::complex<float>* aligned_malloc<std::complex<float>>(int);
-template std::complex<float>* aligned_malloc<std::complex<float>>(std::size_t);
-template std::complex<float>* aligned_malloc<std::complex<float>>(std::ptrdiff_t);
-template std::complex<double>* aligned_malloc<std::complex<double>>(int);
-template std::complex<double>* aligned_malloc<std::complex<double>>(std::size_t);
-template std::complex<double>* aligned_malloc<std::complex<double>>(std::ptrdiff_t);
+//template std::complex<float>* aligned_malloc<std::complex<float>>(int);
+//template std::complex<float>* aligned_malloc<std::complex<float>>(std::size_t);
+//template std::complex<float>* aligned_malloc<std::complex<float>>(std::ptrdiff_t);
+//template std::complex<double>* aligned_malloc<std::complex<double>>(int);
+//template std::complex<double>* aligned_malloc<std::complex<double>>(std::size_t);
+//template std::complex<double>* aligned_malloc<std::complex<double>>(std::ptrdiff_t);
 
 template void aligned_free(int*) noexcept;
 template void aligned_free(char*) noexcept;
@@ -101,13 +66,8 @@ template void aligned_free(bool*) noexcept;
 template void aligned_free(float*) noexcept;
 template void aligned_free(double*) noexcept;
 template void aligned_free(unsigned char*) noexcept;
-template void aligned_free(std::complex<float>*) noexcept;
-template void aligned_free(std::complex<double>*) noexcept;
-
 template bool is_aligned(int*) noexcept;
 template bool is_aligned(float*) noexcept;
 template bool is_aligned(double*) noexcept;
 template bool is_aligned(unsigned char*) noexcept;
-template bool is_aligned(std::complex<float>*) noexcept;
-template bool is_aligned(std::complex<double>*) noexcept;
 }}

@@ -57,6 +57,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>.\x64\Release\</OutDir>
+    <IntDir>.\IntDir\Release\</IntDir>
+    <TargetName>matrice</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -76,6 +79,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <EnableModules>true</EnableModules>
+      <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -112,6 +116,7 @@
     <ClInclude Include="include\Matrice\core\solver.h" />
     <ClInclude Include="include\Matrice\core\vector.h" />
     <ClInclude Include="include\Matrice\io\io.h" />
+    <ClInclude Include="include\Matrice\private\_decl_dev_funcs.h" />
     <ClInclude Include="include\Matrice\private\_dev_matrix_base.h" />
     <ClInclude Include="include\Matrice\private\_matrix_base.hpp" />
     <ClInclude Include="include\Matrice\private\_matrix_expr.hpp" />
