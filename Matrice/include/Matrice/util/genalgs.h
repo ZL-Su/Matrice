@@ -20,11 +20,10 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #include "_macros.h"
 
 MATRICE_NAMESPACE_BEGIN_
-using namespace std;
-
 template<class _Fn, class _InIt, class _OutIt> inline
 void transform(_Fn _Func, const _InIt _First, const _InIt _Last, size_t _Stride, _OutIt _Dest, size_t _Invpos = 1)
 {
+	using namespace std;
 	auto _UFirst = _Unchecked(_First + _Stride - _Invpos);
 	_DEBUG_RANGE(_UFirst, _Last);
 	const auto _ULast = _Unchecked(_Last);
@@ -38,6 +37,7 @@ void transform(_Fn _Func, const _InIt _First, const _InIt _Last, size_t _Stride,
 template<class _Fn, class _InIt, class _OutIt> inline
 void transform(_Fn _Func, const _InIt _First, const _InIt _Last, _OutIt _Dest, size_t _Stride)
 {
+	using namespace std;
 	_DEBUG_RANGE(_First, _Last);
 	auto _UFirst = _Unchecked(_First);
 	const auto _ULast = _Unchecked(_Last);
@@ -46,5 +46,21 @@ void transform(_Fn _Func, const _InIt _First, const _InIt _Last, _OutIt _Dest, s
 	{
 		*_UDest = _Func(*_UFirst);
 	}
+}
+template<typename _Ty, typename _InIt = _Ty*>
+MATRICE_GLOBAL_INL _Ty reduce(_InIt _First, _InIt _Last)
+{
+	static_cast<void>(_First == _Last);
+	_Ty _Ret = 0;
+	for (; _First != _Last; ++_First) _Ret += *_First;
+	return (_Ret);
+}
+template<typename _Ty, typename _Op,  typename _InIt = _Ty*>
+MATRICE_GLOBAL_INL _Ty reduce(_InIt _First, _InIt _Last, _Op _Op)
+{
+	static_cast<void>(_First == _Last);
+	_Ty _Ret = 0;
+	for (; _First != _Last; ++_First) _Ret += _Op(_First);
+	return (_Ret);
 }
 _MATRICE_NAMESPACE_END

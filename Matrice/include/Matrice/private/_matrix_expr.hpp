@@ -18,7 +18,6 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include <functional>
 #include <cassert>
-#include <fkl.h>
 #ifdef __AVX__
 #include <immintrin.h>
 #endif

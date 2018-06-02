@@ -32,15 +32,19 @@ template<typename T1, typename T2> struct conditonal<false, T1, T2> { using type
 template<bool _Test, typename T1, typename T2> struct conditional {};
 template<typename T1, typename T2> struct conditional<true, T1, T2> { using type = T1; };
 template<typename T1, typename T2> struct conditional<false, T1, T2> { using type = T2; };
-template<int _Rows = 0, int _Cols = 0> struct compile_time_size { 
-	enum { val_1 = 0x0001, val_2 = 0x0002, val_3 = 0x0003, val_4 = 0x0004 }; 
-	enum { 
-		RunTimeDeduceInHost = 0, 
+template<int _Val> struct is_zero { enum { value = _Val == 0 ? true : false }; };
+
+template<typename T> struct is_float32 { enum { value = std::is_floating_point<T>::value && (sizeof(T) == 4) }; };
+template<typename T> struct is_float64 { enum { value = std::is_floating_point<T>::value && (sizeof(T) == 8) }; };
+
+template<int _Rows = 0, int _Cols = 0> struct compile_time_size {
+	enum { val_1 = 0x0001, val_2 = 0x0002, val_3 = 0x0003, val_4 = 0x0004 };
+	enum {
+		RunTimeDeduceInHost = 0,
 		RunTimeDeduceInDevi = -1,
 		CompileTimeRows = _Rows,
 		CompileTimeCols = _Cols,
 	};
 	static const int RunTimeDeducedInHost = 0, RunTimeDeducedInDevice = -1;
 };
-template<int _Val> struct is_zero { enum { value = _Val == 0 ? true : false }; };
 }

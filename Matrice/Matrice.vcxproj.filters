@@ -49,6 +49,18 @@
     <Filter Include="Modules">
       <UniqueIdentifier>{73b85bcb-9064-4ecc-acd7-4db405c4fc02}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Algs">
+      <UniqueIdentifier>{3f0faa25-6afa-4902-b9e0-1c9f2b3ab036}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Algs">
+      <UniqueIdentifier>{3640fba5-6486-4b0c-a935-fabed0ec90f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Funcs">
+      <UniqueIdentifier>{79f9693a-f68d-4006-9cc9-e82a05340e76}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Funcs">
+      <UniqueIdentifier>{77d6a935-87c7-44b6-aba6-a12695ca2fb0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -120,6 +132,15 @@
     <ClInclude Include="include\Matrice\private\_decl_dev_funcs.h">
       <Filter>Header Files\Private</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\funcs\linear_algebra.h">
+      <Filter>Header Files\Funcs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\similarity.h">
+      <Filter>Header Files\Algs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\private\_memory.cpp">
@@ -142,6 +163,9 @@
     </ClCompile>
     <ClCompile Include="src\core\solver_impl.cpp">
       <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="include\Matrice\algs\similarity.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -235,6 +259,12 @@
     <None Include="_dev_base.def">
       <Filter>Modules</Filter>
     </None>
+    <None Include="include\Matrice\core\cpp.hint">
+      <Filter>Header Files\Core</Filter>
+    </None>
+    <None Include="include\Matrice\private\_similarity.inl">
+      <Filter>Header Files\Private</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="src\private\_dev_memory.cu">
@@ -243,5 +273,10 @@
     <CudaCompile Include="src\private\_dev_funcs.cu">
       <Filter>Source Files\Private</Filter>
     </CudaCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Matrice.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

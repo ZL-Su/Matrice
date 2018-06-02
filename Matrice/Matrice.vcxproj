@@ -112,9 +112,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h" />
+    <ClInclude Include="include\Matrice\algs\similarity.h" />
     <ClInclude Include="include\Matrice\core\matrix.h" />
     <ClInclude Include="include\Matrice\core\solver.h" />
     <ClInclude Include="include\Matrice\core\vector.h" />
+    <ClInclude Include="include\Matrice\funcs\linear_algebra.h" />
     <ClInclude Include="include\Matrice\io\io.h" />
     <ClInclude Include="include\Matrice\private\_decl_dev_funcs.h" />
     <ClInclude Include="include\Matrice\private\_dev_matrix_base.h" />
@@ -128,6 +130,7 @@
     <ClInclude Include="include\Matrice\util\util.h" />
     <ClInclude Include="include\Matrice\util\_macros.h" />
     <ClInclude Include="include\Matrice\util\_type_defs.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="src\private\generic_fast_math.hpp" />
     <ClInclude Include="src\util\Eigen\src\LU\Determinant.h" />
     <ClInclude Include="src\util\Eigen\src\LU\FullPivLU.h" />
@@ -136,6 +139,7 @@
     <ClInclude Include="src\util\Eigen\src\LU\PartialPivLU_LAPACKE.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="include\Matrice\algs\similarity.cpp" />
     <ClCompile Include="src\core\matrix_base_impl.cpp" />
     <ClCompile Include="src\core\matrix_dynamic_impl.cpp" />
     <ClCompile Include="src\core\matrix_expr_op_impl.cpp" />
@@ -145,6 +149,8 @@
     <ClCompile Include="src\private\_memory.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="include\Matrice\core\cpp.hint" />
+    <None Include="include\Matrice\private\_similarity.inl" />
     <None Include="src\util\Eigen\Cholesky" />
     <None Include="src\util\Eigen\CholmodSupport" />
     <None Include="src\util\Eigen\Core" />
@@ -179,6 +185,9 @@
   <ItemGroup>
     <CudaCompile Include="src\private\_dev_funcs.cu" />
     <CudaCompile Include="src\private\_dev_memory.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Matrice.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

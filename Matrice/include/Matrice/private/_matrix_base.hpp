@@ -144,7 +144,8 @@ public:
 	template<format_t _Fmt = RowMajor>
 	MATRICE_GLOBAL_INL reference operator()(int _r, int _c) const { return (m_data + (_Fmt == RowMajor ? m_cols : m_rows) * _r)[_c]; }
 	///<brief> access methods </brief>
-	MATRICE_GLOBAL_FINL pointer data() const { return (m_data); }
+	MATRICE_GLOBAL_FINL pointer data() { return (m_data); }
+	MATRICE_GLOBAL_FINL const pointer data() const { return (m_data); }
 	MATRICE_GLOBAL_FINL pointer ptr(int y = 0) const { return (m_data + m_cols * y); }
 	MATRICE_HOST_ONLY constexpr const_iterator begin() const { return (m_data); }
 	MATRICE_HOST_ONLY constexpr const_iterator end() const { return (m_data + size()); }
@@ -206,6 +207,7 @@ public:
 	///<brief> in-time matrix arithmetic </brief>
 	MATRICE_GLOBAL_INL value_t max() const { return (*std::max_element(m_data, m_data + size())); }
 	MATRICE_GLOBAL_INL value_t min() const { return (*std::min_element(m_data, m_data + size())); }
+	MATRICE_GLOBAL_INL value_t sum() const { return (reduce(begin(), end())); }
 	MATRICE_GLOBAL_INL value_t det() const { return (det_impl(*static_cast<const _Derived*>(this))); }
 	template<class _Rhs> MATRICE_GLOBAL_INL value_t dot(const _Rhs& _rhs) const { return (this->operator*(_rhs)).sum(); }
 	MATRICE_GLOBAL_INL value_t norm_2() const { auto ans = dot(*this); return (ans > eps ? std::sqrt(ans) : inf); }
