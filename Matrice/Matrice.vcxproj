@@ -113,6 +113,8 @@
   <ItemGroup>
     <ClInclude Include="addin\interface.h" />
     <ClInclude Include="include\Matrice\algs\similarity.h" />
+    <ClInclude Include="include\Matrice\arch\ixpacket.h" />
+    <ClInclude Include="include\Matrice\arch\_ixbase.h" />
     <ClInclude Include="include\Matrice\core\matrix.h" />
     <ClInclude Include="include\Matrice\core\solver.h" />
     <ClInclude Include="include\Matrice\core\vector.h" />
@@ -139,7 +141,6 @@
     <ClInclude Include="src\util\Eigen\src\LU\PartialPivLU_LAPACKE.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="include\Matrice\algs\similarity.cpp" />
     <ClCompile Include="src\core\matrix_base_impl.cpp" />
     <ClCompile Include="src\core\matrix_dynamic_impl.cpp" />
     <ClCompile Include="src\core\matrix_expr_op_impl.cpp" />
@@ -149,6 +150,7 @@
     <ClCompile Include="src\private\_memory.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="include\Matrice\arch\inl\_ixpacket.inl" />
     <None Include="include\Matrice\core\cpp.hint" />
     <None Include="include\Matrice\private\_similarity.inl" />
     <None Include="src\util\Eigen\Cholesky" />

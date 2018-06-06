@@ -13,6 +13,15 @@ class IO
 public:
 	IO() {};
 
+	///<summary>
+	//@brief: Template function to cvt. number to std::string
+	//@author: Zhilong Su - Jan.10.2017 @SEU
+	///</summary>
+	template<typename _Ty> static inline  std::string strf(_Ty _val)
+	{
+		std::ostringstream strs; strs << _val; return strs.str();
+	}
+
 	template<typename _Ty, int _M, int _N = 0> static inline 
 	types::Matrix_<_Ty, (_N == 0 ? 0 : _M), _N> read(const std::string& _path)
 	{
@@ -29,10 +38,24 @@ public:
 				ret[j][i] = p(j);
 			i++;
 		}
+		fin.close();
 		return (ret);
 	}
-
-	static inline bool write(std::function<void(void)> func) { func; }
+	template<typename _Op> static
+	MATRICE_HOST_FINL auto read(const std::string& _path, _Op _op)
+	{
+		std::ifstream _Fin(_path);
+		if (!_Fin.is_open()) std::runtime_error("Cannot open file.");
+		return _op(std::forward<std::ifstream>(_Fin));
+	}
+	template<typename _Op> static 
+	MATRICE_HOST_FINL void write(const std::string& _path, _Op _op)
+	{
+		std::ofstream _Fout(_path);
+		if (!_Fout.is_open()) std::runtime_error("Cannot open file.");
+		_op(std::forward<std::ofstream>(_Fout));
+		_Fout.close();
+	}
 };
 }
 

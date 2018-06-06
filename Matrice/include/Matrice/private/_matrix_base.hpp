@@ -52,10 +52,10 @@ template<typename _Ty, int _Type = _View_traits<_Ty>::value> class PlaneView_
 	struct Step { int buf[2] = { sizeof(_Ty), sizeof(_Ty) }; int* p = buf; };
 	int type = _Type, flags = MAGIC_VAL | _Type, dims = 2; Step step;
 public:
-	constexpr PlaneView_() = default;
-	constexpr PlaneView_(int _rows, int _cols, _Ty* _data = nullptr)
+	constexpr MATRICE_GLOBAL_INL PlaneView_() = default;
+	constexpr MATRICE_GLOBAL_INL PlaneView_(int _rows, int _cols, _Ty* _data = nullptr)
 		: m_rows(_rows), m_cols(_cols), m_data(_data) { step.buf[0] = m_cols * step.buf[1]; };
-
+	constexpr MATRICE_GLOBAL_INL void update(_Ty* data) { m_data = data; }
 protected:
 	int m_rows, m_cols;
 	_Ty* m_data = nullptr;
@@ -74,7 +74,6 @@ template<typename _Ty, int _M, int _N, typename _Derived> class Base_;
 template<typename _Ty, int _M, int _N, typename _Derived = Matrix_<_Ty, _M, _N>> 
 class Base_ : public PlaneView_<_Ty>
 {
-	typedef PlaneView_<_Ty>                                        base_t;
 	typedef details::Storage_<_Ty>::Allocator<_M, _N, -1>         Storage;
 	typedef Base_                                                    _Myt;
 	typedef _Myt&                                                 myt_ref;
@@ -88,6 +87,7 @@ class Base_ : public PlaneView_<_Ty>
 	typedef typename exprs::Expr::Op::MatInv<_Ty>                MatInvOp;
 	typedef typename exprs::Expr::Op::MatTrp<_Ty>                MatTrpOp;
 public:
+	typedef PlaneView_<_Ty>                                        base_t;
 	typedef typename details::Storage_<_Ty>::value_t              value_t;
 	typedef typename details::Storage_<_Ty>::pointer              pointer;
 	typedef typename details::Storage_<_Ty>::reference          reference;

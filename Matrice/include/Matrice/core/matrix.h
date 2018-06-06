@@ -85,17 +85,18 @@ public:
 	enum { Size = __, CompileTimeRows = __, CompileTimeCols = __, };
 	MATRICE_GLOBAL_INL Matrix_(int _rows) noexcept : base_t(_rows, 1) {};
 	MATRICE_GLOBAL_INL Matrix_(Myt&& _other) noexcept : base_t(_other) {};
+	MATRICE_GLOBAL_INL Matrix_(const_my_ref _other) noexcept : base_t(_other) {};
 	template<typename... _Args> MATRICE_GLOBAL_INL Matrix_(_Args... args) noexcept : base_t(args...) {};
 	//MATRICE_GLOBAL_INL Matrix_() noexcept : base_t() {};
 	//MATRICE_GLOBAL_INL Matrix_(int _rows, int _cols) noexcept : base_t(_rows, _cols) {};
 	//MATRICE_GLOBAL_INL Matrix_(int _rows, int _cols, pointer _data) noexcept : base_t(_rows, _cols, _data) {};
 	//MATRICE_GLOBAL_INL Matrix_(int _rows, int _cols, const value_t _val) noexcept : base_t(_rows, _cols, _val) {};
-	//MATRICE_GLOBAL_INL Matrix_(const_my_ref _other) noexcept : base_t(_other) {};
 	//template<int _M, int _N>
 	//MATRICE_GLOBAL_INL Matrix_(const Matrix_<value_t, _M, _N>& _other) noexcept : base_t(_other.rows(), _other.cols(), _other.data()) {};
 	//template<typename _Expr> MATRICE_GLOBAL_INL Matrix_(const _Expr& _other) noexcept : base_t(_other) {};
 
 	template<typename _Arg> MATRICE_GLOBAL_INL Myt& operator= (const _Arg& _arg) { return base_t::operator=(_arg); }
+	MATRICE_GLOBAL_INL Myt&  operator= (const Myt& _other) { return base_t::operator=(_other); }
 	MATRICE_HOST_INL Myt& operator= (const_init_list _list) { return base_t::operator=(_list); }
 	MATRICE_GLOBAL void create(int_t rows, int_t cols = 1);
 };

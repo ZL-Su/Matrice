@@ -30,8 +30,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #endif
 #endif // __AVX__
 
-namespace dgelom { namespace privt {
-
+namespace dgelom {
+#ifdef MATRICE_ALIGN_BYTES
+#define MATRICE_ALIGNED(type) alignas(MATRICE_ALIGN_BYTES)##type
+#endif
+namespace privt {
 template<typename ValueType, typename IntegerType> ValueType* aligned_malloc(IntegerType size);
 template<typename ValueType> void aligned_free(ValueType* aligned_ptr) noexcept;
 template<typename ValueType> bool is_aligned(ValueType* aligned_ptr) noexcept;

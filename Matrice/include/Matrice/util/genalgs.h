@@ -56,11 +56,19 @@ MATRICE_GLOBAL_INL _Ty reduce(_InIt _First, _InIt _Last)
 	return (_Ret);
 }
 template<typename _Ty, typename _Op,  typename _InIt = _Ty*>
-MATRICE_GLOBAL_INL _Ty reduce(_InIt _First, _InIt _Last, _Op _Op)
+MATRICE_GLOBAL_INL _Ty reduce(_InIt _First, _InIt _Last, _Op _op)
 {
 	static_cast<void>(_First == _Last);
 	_Ty _Ret = 0;
-	for (; _First != _Last; ++_First) _Ret += _Op(_First);
+	for (; _First != _Last; ++_First) _Ret += _op(_First);
+	return (_Ret);
+}
+template<typename _InIt, typename _Op, typename = typename std::enable_if_t<std::is_pointer<_InIt>::value>::type>
+MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, _Op _op)
+{
+	static_cast<void>(_First == _Last);
+	typename remove_reference<decltype(_First[0])>::type _Ret = 0;
+	for (; _First != _Last; ++_First) _Ret += _op(_First);
 	return (_Ret);
 }
 _MATRICE_NAMESPACE_END

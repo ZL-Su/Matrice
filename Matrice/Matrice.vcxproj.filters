@@ -61,6 +61,9 @@
     <Filter Include="Source Files\Funcs">
       <UniqueIdentifier>{77d6a935-87c7-44b6-aba6-a12695ca2fb0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Arch\Inl">
+      <UniqueIdentifier>{7a24d11a-4018-4aac-b89c-eb8b6042867b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -141,6 +144,12 @@
     <ClInclude Include="include\Matrice\algs\similarity.h">
       <Filter>Header Files\Algs</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\arch\_ixbase.h">
+      <Filter>Header Files\Arch</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\arch\ixpacket.h">
+      <Filter>Header Files\Arch</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\private\_memory.cpp">
@@ -163,9 +172,6 @@
     </ClCompile>
     <ClCompile Include="src\core\solver_impl.cpp">
       <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="include\Matrice\algs\similarity.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -264,6 +270,9 @@
     </None>
     <None Include="include\Matrice\private\_similarity.inl">
       <Filter>Header Files\Private</Filter>
+    </None>
+    <None Include="include\Matrice\arch\inl\_ixpacket.inl">
+      <Filter>Header Files\Arch\Inl</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -75,12 +75,16 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #define MATRICE_GLOBAL_FINL __forceinline
 #endif
 
-#ifndef __
-#define __ 0
+#ifndef MATRICE_NONHERITABLE
+#define MATRICE_NONHERITABLE final
 #endif
 
-#ifndef _1
-#define _1 -1
+#ifndef __
+#define __ 0      //run-time deduced on host
+#endif
+
+#ifndef _RTDD
+#define _RTDD -1  //run-time deduced on device
 #endif
 
 #define MATRICE_NAMESPACE_BEGIN_ namespace dgelom {

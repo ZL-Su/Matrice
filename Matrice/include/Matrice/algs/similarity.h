@@ -31,10 +31,10 @@ template<typename T> class Metric_<metric_fn::L1, T> final
 	using value_t = T;
 	using pointer = T * ;
 public:
-	inline explicit Matric_(const pointer _data, int _n) noexcept
+	inline explicit Metric_(const pointer _data, int _n) noexcept
 		: _Data(_data), _Size(_n) {};
 
-	inline explicit value_t eval(const pointer _oth) const;
+	inline value_t eval(const pointer _oth) const;
 
 private:
 	pointer _Data;
@@ -45,10 +45,10 @@ template<typename T> class Metric_<metric_fn::L2, T> final
 	using value_t = T;
 	using pointer = T * ;
 public:
-	inline explicit Matric_(const pointer _data, int _n) noexcept
+	inline explicit Metric_(const pointer _data, int _n) noexcept
 		: _Data(_data), _Size(_n) {};
 
-	inline explicit value_t eval(const pointer _oth) const;
+	inline value_t eval(const pointer _oth) const;
 private:
 	pointer _Data;
 	size_t  _Size;
@@ -61,7 +61,7 @@ public:
 	inline explicit Metric_(const pointer _data, int _radius) noexcept
 		: _Data(_data), _Radius(_radius) { _Init(); }
 
-	inline explicit value_t eval(const pointer _oth) const;
+	inline value_t eval(const pointer _oth) const;
 
 private:
 	inline void _Init();

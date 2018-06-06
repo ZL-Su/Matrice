@@ -24,7 +24,7 @@ template<typename T> struct traits<const T> : traits<T> { using type = T; };
 struct MatrixExpr {};
 template<typename Derived, typename Expression> struct DenseExprBase {};
 template<typename Derived> struct DenseExprBase<Derived, MatrixExpr> {};
-template<typename _Ty> struct remove_reference { using type = std::remove_reference<_Ty>; };
+template<typename _Ty> struct remove_reference { using type = typename std::remove_reference<_Ty>::type; };
 template<typename _Ty> struct type_bytes { enum { value = sizeof(_Ty) }; };
 template<bool _Test, typename T1, typename T2> struct conditonal {};
 template<typename T1, typename T2> struct conditonal<true, T1, T2> { using type = T1; };
