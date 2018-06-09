@@ -247,8 +247,9 @@ template<typename _Ty> template<Location _Loc>
 Storage_<_Ty>::DenseBase<_Loc>& 
 Storage_<_Ty>::DenseBase<_Loc>::operator=(std::initializer_list<value_t> _list)
 {
+	value_t _Val = *_list.begin();
 	if (_list.size() == 1)
-		for (int_t i = 0; i < my_size; ++i) my_data[i] = *_list.begin();
+		for (int_t i = 0; i < my_size; ++i) my_data[i] = _Val;
 	else 
 		std::memcpy((void*)my_data, (void*)&(*_list.begin()), my_size * type_bytes<value_t>::value);
 	return (*this);

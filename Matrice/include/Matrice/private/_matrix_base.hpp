@@ -57,6 +57,8 @@ public:
 		: m_rows(_rows), m_cols(_cols), m_data(_data) { step.buf[0] = m_cols * step.buf[1]; };
 	constexpr MATRICE_GLOBAL_INL void update(_Ty* data) { m_data = data; }
 protected:
+	constexpr MATRICE_GLOBAL_INL void _Flush_view_buf() { step.buf[0] = m_cols * step.buf[1]; }
+protected:
 	int m_rows, m_cols;
 	_Ty* m_data = nullptr;
 };
@@ -138,24 +140,25 @@ public:
 	MATRICE_HOST_ONLY void create(int_t rows, int_t cols) { if constexpr (_M == 0) static_cast<_Derived*>(this)->create(rows, cols); };
 	///<brief> accessors </brief>
 	MATRICE_GLOBAL_INL pointer   operator[](int_t y) { return (m_data + y * m_cols); }
-	MATRICE_GLOBAL_INL pointer   operator[](int_t y) const { return (m_data + y * m_cols); }
+	MATRICE_GLOBAL_INL const pointer operator[](int_t y) const { return (m_data + y * m_cols); }
 	MATRICE_GLOBAL_INL reference operator()(int_t i) { return m_data[i]; }
-	MATRICE_GLOBAL_INL reference operator()(int_t i) const { return m_data[i]; }
+	MATRICE_GLOBAL_INL const reference operator()(int_t i) const { return m_data[i]; }
 	template<format_t _Fmt = RowMajor>
 	MATRICE_GLOBAL_INL reference operator()(int _r, int _c) const { return (m_data + (_Fmt == RowMajor ? m_cols : m_rows) * _r)[_c]; }
 	///<brief> access methods </brief>
 	MATRICE_GLOBAL_FINL pointer data() { return (m_data); }
 	MATRICE_GLOBAL_FINL const pointer data() const { return (m_data); }
-	MATRICE_GLOBAL_FINL pointer ptr(int y = 0) const { return (m_data + m_cols * y); }
-	MATRICE_HOST_ONLY constexpr const_iterator begin() const { return (m_data); }
-	MATRICE_HOST_ONLY constexpr const_iterator end() const { return (m_data + size()); }
-	MATRICE_HOST_ONLY constexpr iterator begin() { return (m_data); }
-	MATRICE_HOST_ONLY constexpr iterator end() { return (m_data + size()); }
+	MATRICE_GLOBAL_FINL pointer ptr(int y = 0) { return (m_data + m_cols * y); }
+	MATRICE_GLOBAL_FINL const pointer ptr(int y = 0) const { return (m_data + m_cols * y); }
+	MATRICE_GLOBAL_FINL constexpr const_iterator begin() const { return (m_data); }
+	MATRICE_GLOBAL_FINL constexpr const_iterator end() const { return (m_data + size()); }
+	MATRICE_GLOBAL_FINL constexpr iterator begin() { return (m_data); }
+	MATRICE_GLOBAL_FINL constexpr iterator end() { return (m_data + size()); }
 	MATRICE_GLOBAL_FINL constexpr int_t rows() const { return m_rows; }
 	MATRICE_GLOBAL_FINL constexpr int_t cols() const { return m_cols; }
 	MATRICE_GLOBAL_FINL constexpr std::size_t size() const { return m_rows*m_cols; }
-	MATRICE_GLOBAL_INL constexpr cview_t col(int_t c) const { return cview_t(*this, c); }
-	MATRICE_GLOBAL_INL _Myt view(const nested_initializer_list<std::size_t> _plain_list) const;
+	MATRICE_GLOBAL_FINL constexpr cview_t col(int_t c) const { return cview_t(*this, c); }
+	MATRICE_GLOBAL_FINL _Myt view(const nested_initializer_list<std::size_t> _plain_list) const;
 	///<brief> assignment operators </brief>
 	MATRICE_GLOBAL_INL _Derived& operator= (const_init_list _list)
 	{
@@ -163,22 +166,37 @@ public:
 		assert(size() == m_storage.size());
 #endif
 		m_storage = _list;
+		m_data = _Proxy_checked(m_storage.data());
 		return (*static_cast<_Derived*>(this));
 	}
 	MATRICE_GLOBAL_INL _Derived& operator= (const_myt_ref _other) //homotype assignment operator
 	{
-		m_storage = _other.m_storage;
-		m_data = _other.m_data;
 		m_cols = _other.m_cols, m_rows = _other.m_rows;
 		m_format = _other.m_format;
+		m_storage = _other.m_storage;
+		m_data = _Proxy_checked(m_storage.data());
+		base_t::_Flush_view_buf();
 		return (*static_cast<_Derived*>(this));
 	}
-	template<int _Rows, int _Cols> //static to dynamic
+	MATRICE_GLOBAL_INL _Derived& operator= (myt_move _other) //homotype assignment operator
+	{
+		m_cols = _other.m_cols, m_rows = _other.m_rows;
+		m_format = _other.m_format;
+		m_storage = std::forward<Storage>(_other.m_storage);
+		m_data = _Proxy_checked(m_storage.data());
+		base_t::_Flush_view_buf();
+		_other.m_storage.free();
+		_other.m_data = nullptr;
+		_other.m_cols = _other.m_rows = 0;
+		return (*static_cast<_Derived*>(this));
+	}
+	template<int _Rows, int _Cols, typename = typename std::enable_if<is_static<_Rows, _Cols>::value&&!is_static<_M, _N>::value>::type> //static to dynamic
 	MATRICE_GLOBAL_INL _Derived& operator= (Matrix_<value_t, _Rows, _Cols>& _managed)
 	{
 		m_data = _managed.data();
-		m_rows = _Rows, m_cols = _Cols;
+		m_rows = _managed.rows(), m_cols = _managed.cols();
 		m_storage.owner() = details::Storage_<value_t>::Proxy;
+		base_t::_Flush_view_buf();
 		return (*static_cast<_Derived*>(this));
 	}
 

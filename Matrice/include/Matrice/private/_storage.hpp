@@ -79,6 +79,14 @@ public:
 			return 0;
 #endif
 		}
+		MATRICE_GLOBAL_INL void free()
+		{
+			my_cols = 0, my_rows = 0, my_size = 0;
+			my_owner = Dummy, my_pitch = 0;
+			my_location = Location::UnSpecified;
+			my_shared = nullptr;
+			my_data = nullptr;
+		}
 
 	protected:
 		mutable int_t my_rows, my_cols;

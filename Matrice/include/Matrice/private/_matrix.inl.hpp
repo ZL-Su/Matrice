@@ -79,4 +79,16 @@ template<typename _Lhs, typename _Rhs,
 	     typename     _Op = Expr::MatBinaryExpr<_Lhs, _Rhs, Expr::Op::SpreadMul<value_t>>>
 MATRICE_GLOBAL_INL auto outer_product(const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
 
+template<typename _InIt, typename = std::enable_if_t<std::is_pointer_v<_InIt>>>
+MATRICE_GLOBAL_INL void _Conformity_check(_InIt _Left, _InIt _Right)
+{
+	if (_Left != _Right) std::runtime_error("Inconsistent iterators!");
+	_Left = _Right;
+}
+template<typename _InIt, typename = std::enable_if_t<std::is_pointer_v<_InIt>>>
+MATRICE_GLOBAL_INL _InIt _Proxy_checked(const _InIt _Right)
+{
+	return (_Right);
+}
+
 _MATRICE_NAMESPACE_END

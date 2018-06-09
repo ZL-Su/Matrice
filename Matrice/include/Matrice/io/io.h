@@ -1,18 +1,25 @@
 #pragma once
-
+#include <iosfwd>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
+#include <map>
 #include <functional>
+#include <experimental\filesystem>
 #include "../core/matrix.h"
 #include "../core/vector.h"
 
+namespace fs = std::experimental::filesystem;
 namespace dgelom {
 class IO 
 {
 public:
+	using FileMap = std::map<std::string, std::string>;
+	using FileInfo = std::vector<FileMap>;
 	IO() {};
 
+	static MATRICE_HOST_FINL auto workspace() { return fs::current_path(); }
 	///<summary>
 	//@brief: Template function to cvt. number to std::string
 	//@author: Zhilong Su - Jan.10.2017 @SEU
@@ -44,6 +51,7 @@ public:
 	template<typename _Op> static
 	MATRICE_HOST_FINL auto read(const std::string& _path, _Op _op)
 	{
+		if (!fs::exists(fs::path(_path))) std::runtime_error("'"_path + "' does not exist!");
 		std::ifstream _Fin(_path);
 		if (!_Fin.is_open()) std::runtime_error("Cannot open file.");
 		return _op(std::forward<std::ifstream>(_Fin));

@@ -33,7 +33,7 @@ template<bool _Test, typename T1, typename T2> struct conditional {};
 template<typename T1, typename T2> struct conditional<true, T1, T2> { using type = T1; };
 template<typename T1, typename T2> struct conditional<false, T1, T2> { using type = T2; };
 template<int _Val> struct is_zero { enum { value = _Val == 0 ? true : false }; };
-
+template<int _R, int _C> struct is_static {enum {value = _R > 0 && _C >0 ? true : false}; };
 template<typename T> struct is_float32 { enum { value = std::is_floating_point<T>::value && (sizeof(T) == 4) }; };
 template<typename T> struct is_float64 { enum { value = std::is_floating_point<T>::value && (sizeof(T) == 8) }; };
 

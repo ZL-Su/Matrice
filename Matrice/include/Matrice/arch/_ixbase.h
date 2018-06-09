@@ -38,48 +38,48 @@ template<> struct set_packet<float,  1<<1<<1>
 	using value_t = float; using pointer = value_t*;
 	MATRICE_HOST_INL constexpr auto operator()(const value_t _Value) const
 	{ return _mm_set_ps1(_Value); }
-	MATRICE_HOST_INL constexpr auto operator()(pointer _First) const
-	{ return _mm_set_ps(*(_First), *(_First++), *(_First++), *(_First++)); }
+	MATRICE_HOST_INL constexpr auto operator()(const pointer _First) const
+	{ return _mm_load_ps(_First); }
 };
 template<> struct set_packet<float,  1<<1<<1<<1>
 {
 	using value_t = float; using pointer = value_t*;
 	MATRICE_HOST_INL constexpr auto operator()(const value_t _Value) const
 	{ return _mm256_set1_ps(_Value); }
-	MATRICE_HOST_INL constexpr auto operator()(pointer _First) const
-	{ return _mm256_set_ps(*(_First), *(_First++), *(_First++), *(_First++), *(_First++), *(_First++), *(_First++), *(_First++)); }
+	MATRICE_HOST_INL constexpr auto operator()(const pointer _First) const
+	{ return _mm256_load_ps(_First); }
 };
 template<> struct set_packet<float,  1<<1<<1<<1<<1>
 {
 	using value_t = float; using pointer = value_t*;
 	MATRICE_HOST_INL constexpr auto operator()(const value_t _Value) const
-	{ return _mm256_set1_ps(_Value); }
-	MATRICE_HOST_INL constexpr auto operator()(pointer _First) const
-	{ return _mm256_set_ps(*(_First), *(_First++), *(_First++), *(_First++), *(_First++), *(_First++), *(_First++), *(_First++)); }
+	{ return _mm512_set1_ps(_Value); }
+	MATRICE_HOST_INL constexpr auto operator()(const pointer _First) const
+	{ return _mm512_load_ps(_First); }
 };
 template<> struct set_packet<double, 1<<1>
 {
-	using value_t = float; using pointer = value_t*;
+	using value_t = double; using pointer = value_t*;
 	MATRICE_HOST_INL constexpr auto operator()(const value_t _Value) const
 	{ return _mm_set1_pd(_Value); }
-	MATRICE_HOST_INL constexpr auto operator()(pointer _First) const
-	{ return _mm_set_pd(*(_First), *(_First++)); }
+	MATRICE_HOST_INL constexpr auto operator()(const pointer _First) const
+	{ return _mm_load_pd(_First); }
 };
 template<> struct set_packet<double, 1<<1<<1>
 {
-	using value_t = float; using pointer = value_t*;
+	using value_t = double; using pointer = value_t*;
 	MATRICE_HOST_INL constexpr auto operator()(const value_t _Value) const
 	{ return _mm256_set1_pd(_Value); }
-	MATRICE_HOST_INL constexpr auto operator()(pointer _First) const
-	{ return _mm256_set_pd(*(_First), *(_First++), *(_First++), *(_First++)); }
+	MATRICE_HOST_INL constexpr auto operator()(const pointer _First) const
+	{ return _mm256_load_pd(_First); }
 };
 template<> struct set_packet<double, 1<<1<<1<<1>
 {
-	using value_t = float; using pointer = value_t*;
+	using value_t = double; using pointer = value_t*;
 	MATRICE_HOST_INL constexpr auto operator()(const value_t _Value) const
 	{ return _mm512_set1_pd(_Value); }
-	MATRICE_HOST_INL constexpr auto operator()(pointer _First) const
-	{ return _mm512_set_pd(*(_First), *(_First++), *(_First++), *(_First++), *(_First++), *(_First++), *(_First++), *(_First++)); }
+	MATRICE_HOST_INL constexpr auto operator()(const pointer _First) const
+	{ return _mm512_load_pd(_First); }
 };
 #pragma endregion
 
@@ -95,8 +95,8 @@ public:
 
 protected:
 	internal_t m_data;
-	template<typename... _Args> MATRICE_HOST_FINL 
-	void _Set(_Args... _args) { m_data = _Set_op(_args...); }
+	template<typename... _Args> MATRICE_HOST_FINL constexpr
+	auto _Set(_Args... _args) { m_data = _Set_op(_args...); }
 };
 
 //template<typename T, int _Elems, typename Packet = conditional_t<T, _Elems>>

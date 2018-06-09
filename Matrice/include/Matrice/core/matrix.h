@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
-
+#include <type_traits>
 #include "../private/_matrix_base.hpp"
 #include "../private/_dev_matrix_base.h"
 
@@ -50,6 +50,7 @@ public:
 
 	MATRICE_HOST_INL Myt& operator= (const_init_list _list) { return base_t::operator=(_list); }
 	MATRICE_GLOBAL_INL Myt& operator= (const_my_ref _other) { return base_t::operator=(_other); }
+	MATRICE_GLOBAL_INL Myt& operator= (Myt&& _other) { return base_t::operator=(std::move(_other)); }
 	template<typename _Arg> MATRICE_GLOBAL_INL Myt& operator= (const _Arg& _arg) { return base_t::operator=(_arg); }
 	MATRICE_GLOBAL_INL operator Matrix_<value_t, __, __>() const { return Matrix_<value_t, __, __>(m_rows, m_cols, m_data); }
 #ifdef __use_ocv_as_view__
@@ -96,9 +97,11 @@ public:
 	//template<typename _Expr> MATRICE_GLOBAL_INL Matrix_(const _Expr& _other) noexcept : base_t(_other) {};
 
 	template<typename _Arg> MATRICE_GLOBAL_INL Myt& operator= (const _Arg& _arg) { return base_t::operator=(_arg); }
-	MATRICE_GLOBAL_INL Myt&  operator= (const Myt& _other) { return base_t::operator=(_other); }
+	MATRICE_GLOBAL_INL Myt& operator= (Myt&& _other) { return base_t::operator= (std::move(_other)); }
+	MATRICE_GLOBAL_INL Myt& operator= (const_my_ref& _other) { return base_t::operator=(_other); }
 	MATRICE_HOST_INL Myt& operator= (const_init_list _list) { return base_t::operator=(_list); }
 	MATRICE_GLOBAL void create(int_t rows, int_t cols = 1);
+	MATRICE_GLOBAL void create(int_t rows, int_t cols, value_t _val);
 };
 //matrix with host dynamic memory allocator
 template<typename _Ty> using Matrix = Matrix_<_Ty,
@@ -129,6 +132,7 @@ public:
 	template<typename... _Args> MATRICE_GLOBAL_INL Matrix_(_Args... args) noexcept : base_t(args...) {};
 
 	template<typename _Arg> MATRICE_GLOBAL_INL Myt& operator= (const _Arg& _arg) { return base_t::operator=(_arg); }
+	MATRICE_GLOBAL_INL Myt& operator= (Myt&& _other) { return base_t::operator=(std::move(_other)); }
 	MATRICE_HOST_INL Myt& operator= (const_init_list _list) { return base_t::operator=(_list); }
 	MATRICE_GLOBAL void create(int_t rows, int_t cols = 1);
 };
@@ -169,7 +173,8 @@ public:
 
 	template<typename _Arg> 
 	MATRICE_GLOBAL_INL Myt& operator= (const _Arg& _arg) { return device_base_t::operator=(_arg); }
-	MATRICE_HOST_INL Myt& operator= (const_init_list _list) { return device_base_t::operator=(_list); }
+	MATRICE_DEVICE_INL Myt& operator= (Myt&& _other) { return device_base_t::operator=(std::move(_other)); }
+	MATRICE_GLOBAL_INL Myt& operator= (const_init_list _list) { return device_base_t::operator=(_list); }
 	MATRICE_GLOBAL void create(int_t rows, int_t cols = 1);
 };
 //matrix with CUDA device memory allocator

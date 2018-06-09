@@ -39,13 +39,13 @@ class Packet_ MATRICE_NONHERITABLE : public simd::simd_base_<T, _Elems>
 	using initlist_t = typename xbase_t::initlist_t;
 	using xbase_t::m_data;
 public:
-	using value_t = typename simd::simd_base_<T, _Elems>::value_t;
+	using typename xbase_t::value_t;
 	using pointer = value_t*;
-	MATRICE_HOST_INL Packet(const value_t _value) noexcept {
+	MATRICE_HOST_INL Packet_(const value_t _value) noexcept {
 		xbase_t::_Set(_value); }
-	MATRICE_HOST_INL Packet(const pointer _data) noexcept {
+	MATRICE_HOST_INL Packet_(const pointer _data) noexcept {
 		xbase_t::_Set(_data); }
-	MATRICE_HOST_INL Packet(const initlist_t _list) noexcept { 
+	MATRICE_HOST_INL Packet_(const initlist_t _list) noexcept { 
 		xbase_t::_Set(_list.begin()); }
 
 
