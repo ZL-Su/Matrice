@@ -111,8 +111,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\Librares\Ceres1130\ceres\include\ceres\dgelom\extras.h" />
     <ClInclude Include="addin\interface.h" />
     <ClInclude Include="include\Matrice\algs\similarity.h" />
+    <ClInclude Include="include\Matrice\arch\inl\_ixpackedops.inl.hpp" />
     <ClInclude Include="include\Matrice\arch\ixpacket.h" />
     <ClInclude Include="include\Matrice\arch\_ixbase.h" />
     <ClInclude Include="include\Matrice\core\matrix.h" />

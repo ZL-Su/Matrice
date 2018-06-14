@@ -150,6 +150,12 @@
     <ClInclude Include="include\Matrice\arch\ixpacket.h">
       <Filter>Header Files\Arch</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\Librares\Ceres1130\ceres\include\ceres\dgelom\extras.h">
+      <Filter>Header Files\Addin</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\arch\inl\_ixpackedops.inl.hpp">
+      <Filter>Header Files\Arch\Inl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\private\_memory.cpp">
