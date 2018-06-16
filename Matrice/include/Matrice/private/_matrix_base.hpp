@@ -225,7 +225,7 @@ public:
 	///<brief> in-time matrix arithmetic </brief>
 	MATRICE_GLOBAL_INL value_t max() const { return (*std::max_element(m_data, m_data + size())); }
 	MATRICE_GLOBAL_INL value_t min() const { return (*std::min_element(m_data, m_data + size())); }
-	MATRICE_GLOBAL_INL value_t sum() const { return (reduce(begin(), end())); }
+	MATRICE_GLOBAL_INL value_t sum() const { return (reduce<value_t>(begin(), end())); }
 	MATRICE_GLOBAL_INL value_t det() const { return (det_impl(*static_cast<const _Derived*>(this))); }
 	template<class _Rhs> MATRICE_GLOBAL_INL value_t dot(const _Rhs& _rhs) const { return (this->operator*(_rhs)).sum(); }
 	MATRICE_GLOBAL_INL value_t norm_2() const { auto ans = dot(*this); return (ans > eps ? std::sqrt(ans) : inf); }
@@ -244,10 +244,8 @@ protected:
 	using base_t::m_rows;
 	using base_t::m_cols;
 	using base_t::m_data;
-	Storage m_storage;
-	//int m_rows, m_cols;
-	//pointer m_data;
 	format_t m_format = RowMajor;
 	type_t m_type = type_t::GDs;
+	Storage m_storage;
 };
 MATRICE_NAMESPACE_END_TYPES

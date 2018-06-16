@@ -36,6 +36,7 @@ template<class _Oprd, typename _UnaryOp> class MatUnaryExpr;
 struct Op { template<typename _Ty> struct MatMul; };
 
 struct Expr {
+	using size_t = std::size_t;
 	using default_type = double;
 	enum OpFlag { ewise = 0, mmul = 1, inv = 2, trp = 3, undef = -1 };
 	/*factorial_t<N> = N!*/
@@ -79,20 +80,20 @@ struct Expr {
 			for (int i = 0; i < n; ++i) val += static_cast<const Derived*>(this)->operator()(i);
 			return (val);
 		}
-		MATRICE_GLOBAL_INL std::size_t size() const { return M*N; }
-		MATRICE_GLOBAL_INL std::size_t rows() const { return M; }
-		MATRICE_GLOBAL_INL std::size_t cols() const { return N; }
+		MATRICE_GLOBAL_INL size_t size() const { return M*N; }
+		MATRICE_GLOBAL_INL size_t rows() const { return M; }
+		MATRICE_GLOBAL_INL size_t cols() const { return N; }
 	protected:
-		std::size_t M, K, N;
+		size_t M, K, N;
 	};
-	template<class _T1, class _T2, typename _BinaryOp>
+	template<typename _T1, typename _T2, typename _BinaryOp>
 	class EwiseBinaryExpr : public Base_<EwiseBinaryExpr<_T1, _T2, _BinaryOp>>
 	{
 	public:
 		enum { options = ewise };
 		using LOprd_t = _T1;
 		using ROprd_t = _T2;
-		using value_t = typename dgelom::conditonal<std::is_class<_T1>::value, typename _T1::value_t, _T1>::type;
+		using value_t = typename dgelom::conditional<std::is_scalar_v<_T1>, _T1, typename _T1::value_t>::type;
 		constexpr static const value_t inf = std::numeric_limits<value_t>::infinity();
 
 		MATRICE_GLOBAL_INL EwiseBinaryExpr(const value_t& _scalar, const ROprd_t& _rhs) noexcept 
@@ -100,14 +101,19 @@ struct Expr {
 		MATRICE_GLOBAL_INL EwiseBinaryExpr(const LOprd_t& _lhs, const ROprd_t& _rhs) noexcept 
 			: _LHS(_lhs), _RHS(_rhs) { M = _LHS.rows(), N = _RHS.cols(); }
 
-		MATRICE_GLOBAL_INL value_t operator() (const std::size_t _idx) const
+		MATRICE_GLOBAL_INL value_t operator() (size_t _idx)
+		{
+			if (_Scalar == inf) return _Op(_LHS(_idx), _RHS(_idx));
+			if (_Scalar != inf) return _Op(_Scalar, _RHS(_idx));
+		}
+		MATRICE_GLOBAL_INL const value_t operator() (size_t _idx) const
 		{
 			if (_Scalar == inf) return _Op(_LHS(_idx), _RHS(_idx));
 			if (_Scalar != inf) return _Op(_Scalar, _RHS(_idx));
 		}
 		template<typename _OutType> MATRICE_GLOBAL_INL void assign(_OutType& res) const
 		{
-			for (std::size_t i = 0; i < res.size(); ++i) res(i) = this->operator()(i);
+			for (size_t i = 0; i < res.size(); ++i) res(i) = this->operator()(i);
 		}
 
 	private:

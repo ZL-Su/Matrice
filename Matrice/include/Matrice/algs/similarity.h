@@ -31,10 +31,10 @@ template<typename T> class Metric_<metric_fn::L1, T> final
 	using value_t = T;
 	using pointer = T * ;
 public:
-	inline explicit Metric_(const pointer _data, int _n) noexcept
+	MATRICE_GLOBAL_INL explicit Metric_(const pointer _data, int _n) noexcept
 		: _Data(_data), _Size(_n) {};
 
-	inline value_t eval(const pointer _oth) const;
+	MATRICE_GLOBAL_INL value_t eval(const pointer _oth) const;
 
 private:
 	pointer _Data;
@@ -45,10 +45,10 @@ template<typename T> class Metric_<metric_fn::L2, T> final
 	using value_t = T;
 	using pointer = T * ;
 public:
-	inline explicit Metric_(const pointer _data, int _n) noexcept
+	MATRICE_GLOBAL_INL explicit Metric_(const pointer _data, int _n) noexcept
 		: _Data(_data), _Size(_n) {};
 
-	inline value_t eval(const pointer _oth) const;
+	MATRICE_GLOBAL_INL value_t eval(const pointer _oth) const;
 private:
 	pointer _Data;
 	size_t  _Size;
@@ -58,13 +58,13 @@ template<typename T> class Metric_<metric_fn::ZNCC, T> final
 	using value_t = T;
 	using pointer = T * ;
 public:
-	inline explicit Metric_(const pointer _data, int _radius) noexcept
+	MATRICE_GLOBAL_INL explicit Metric_(const pointer _data, int _radius) noexcept
 		: _Data(_data), _Radius(_radius) { _Init(); }
 
-	inline value_t eval(const pointer _oth) const;
+	MATRICE_GLOBAL_INL value_t eval(const pointer _oth) const;
 
 private:
-	inline void _Init();
+	MATRICE_GLOBAL_INL void _Init();
 	pointer _Data;
 	size_t  _Radius, _Size;
 	value_t _Option[2];
@@ -78,10 +78,10 @@ template<typename T, size_t _M, size_t _N> struct SMBase
 private:
 	types::Matrix_<value_t, _M, _N> m_data;
 };
-template<metric_fn Fn, typename T, size_t N> 
+template<metric_fn _Mty, typename T, size_t N> 
 class Similarity
 {
-	using Op = Metric_<Fn, T>;
+	using Op = Metric_<_Mty, T>;
 public:
 	Similarity() {}
 	Similarity(size_t m, size_t n) : base_t(m, n) {}

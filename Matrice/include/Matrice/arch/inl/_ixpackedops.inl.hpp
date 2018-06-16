@@ -16,12 +16,15 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
-#include "../private/_expr_type_traits.h"
-#include "../util/_macros.h"
+#include "../../private/_expr_type_traits.h"
+#include "../../util/_macros.h"
 
 #ifdef __AVX__
 #include <pmmintrin.h>
-
+#include <tmmintrin.h>
+#include <wmmintrin.h>
+#include <immintrin.h>
+#include <emmintrin.h>
 #ifndef HOST_STATIC_INL_CXPR_T
 #define HOST_STATIC_INL_CXPR_T static MATRICE_HOST_FINL constexpr auto 
 #endif // !HOST_STATIC_INL_CXPR_T
@@ -56,8 +59,12 @@ template<> struct simd_op<float, 4> : public simd_op_base<float, 4>
 		return base_t::_Binary([&]()->auto{return _mm_mul_ps(_Left, _Right); });
 	}
 	HOST_STATIC_INL_CXPR_T div(const type& _Left, const type& _Right)
-	{
+	{  
 		return base_t::_Binary([&]()->auto{return _mm_div_ps(_Left, _Right); });
+	}
+	HOST_STATIC_INL_CXPR_T const abs(const type& _Right) 
+	{
+		return  base_t::_Binary([&]()->type{return _mm_and_ps(_Right, _mm_castsi128_ps(_mm_set1_epi32(~(1 << 31)))); });
 	}
 };
 template<> struct simd_op<float, 8> : public simd_op_base<float, 8>
@@ -83,6 +90,10 @@ template<> struct simd_op<float, 8> : public simd_op_base<float, 8>
 	{
 		return base_t::_Binary([&]()->auto{return _mm256_div_ps(_Left, _Right); });
 	}
+	HOST_STATIC_INL_CXPR_T const abs(const type& _Right)
+	{
+		return base_t::_Binary([&]()->type{ return _mm256_and_ps(_Right, _mm256_castsi256_ps(_mm256_set1_epi32(~(1 << 31)))); });
+	}
 };
 template<> struct simd_op<float, 16> : public simd_op_base<float, 16>
 {
@@ -107,6 +118,10 @@ template<> struct simd_op<float, 16> : public simd_op_base<float, 16>
 	{
 		return base_t::_Binary([&]()->auto{return _mm512_div_ps(_Left, _Right); });
 	}
+	HOST_STATIC_INL_CXPR_T const abs(const type& _Right) 
+	{
+		return base_t::_Binary([&]()->type{return _mm512_castsi512_ps(_mm512_srli_epi64(_mm512_slli_epi64(_mm512_castps_si512(_Right), 1), 1)); });
+	}
 };
 template<> struct simd_op<double, 2> : public simd_op_base<double, 2>
 {
@@ -129,6 +144,10 @@ template<> struct simd_op<double, 2> : public simd_op_base<double, 2>
 	HOST_STATIC_INL_CXPR_T div(const type& _Left, const type& _Right)
 	{
 		return base_t::_Binary([&]()->auto{return _mm_div_pd(_Left, _Right); });
+	}
+	HOST_STATIC_INL_CXPR_T const abs(const type& _Right) 
+	{ 
+		return base_t::_Binary([&]()->type{ return _mm_and_pd(_Right, _mm_castsi128_pd(_mm_setr_epi32(-1, 0x7FFFFFFF, -1, 0x7FFFFFFF)));});
 	}
 };
 template<> struct simd_op<double, 4> : public simd_op_base<double, 4>
@@ -154,6 +173,10 @@ template<> struct simd_op<double, 4> : public simd_op_base<double, 4>
 	{
 		return base_t::_Binary([&]()->auto{return _mm256_div_pd(_Left, _Right); });
 	}
+	HOST_STATIC_INL_CXPR_T const abs(const type& _Right) 
+	{
+		return base_t::_Binary([&]()->type{ return _mm256_and_pd(_Right, _mm256_castsi256_pd(_mm256_set1_epi32(~(1 << 31)))); });
+	}
 };
 template<> struct simd_op<double, 8> : public simd_op_base<double, 8>
 {
@@ -178,6 +201,8 @@ template<> struct simd_op<double, 8> : public simd_op_base<double, 8>
 	{
 		return base_t::_Binary([&]()->auto{return _mm512_div_pd(_Left, _Right); });
 	}
+	HOST_STATIC_INL_CXPR_T const abs(const type& _Right) { return _Right; }
 };
+
 MATRICE_ARCH_END
 #endif

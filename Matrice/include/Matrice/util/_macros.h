@@ -99,3 +99,5 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #define MATRICE_PRIVATE_END  } _MATRICE_NAMESPACE_END
 #define MATRICE_ALGS_BEGIN MATRICE_NAMESPACE_BEGIN_ namespace algs {
 #define MATRICE_ALGS_END  } _MATRICE_NAMESPACE_END
+#define MATRICE_ARCH_BEGIN MATRICE_NAMESPACE_BEGIN_ namespace simd {
+#define MATRICE_ARCH_END   } _MATRICE_NAMESPACE_END

@@ -40,25 +40,40 @@ _SIMD Packet_<T, _Elems>& _SIMD Packet_<T, _Elems>::operator/ (const _SIMD Packe
 {
 	m_data = op_t::div(m_data, _other.m_data); return (*this);
 }
+template<typename T, int _Elems> MATRICE_HOST_INL
+_SIMD Packet_<T, _Elems> _SIMD Packet_<T, _Elems>::abs() const
+{
+	return (_SIMD Packet_<T, _Elems>(op_t::abs(m_data)));
+}
 
-template<typename T, int _N, typename Packet = dgelom::simd::Packet_<T, _N>>
+template<typename T, int _N, typename Packet>
 MATRICE_HOST_FINL auto operator+ (const Packet& _Left, const Packet& _Right)
 {
 	return Packet(simd_op<T, _N>::sum(_Left(), _Right()));
 }
-template<typename T, int _N, typename Packet = dgelom::simd::Packet_<T, _N>>
+template<typename T, int _N, typename Packet>
 MATRICE_HOST_FINL auto operator- (const Packet& _Left, const Packet& _Right)
 {
 	return Packet(simd_op<T, _N>::sub(_Left(), _Right()));
 }
-template<typename T, int _N, typename Packet = dgelom::simd::Packet_<T, _N>>
+template<typename T, int _N, typename Packet>
 MATRICE_HOST_FINL auto operator* (const Packet& _Left, const Packet& _Right)
 {
 	return Packet(simd_op<T, _N>::mul(_Left(), _Right()));
 }
-template<typename T, int _N, typename Packet = dgelom::simd::Packet_<T, _N>>
+template<typename T, int _N, typename Packet>
 MATRICE_HOST_FINL auto operator/ (const Packet& _Left, const Packet& _Right)
 {
 	return Packet(simd_op<T, _N>::div(_Left(), _Right()));
+}
+template<typename T, int _N, typename>
+MATRICE_HOST_FINL auto dgelom::abs(const _SIMD Packet_<T, _N>& _Right)
+{
+	return (_SIMD Packet_<T, _N>(_SIMD simd_op<T, _N>::abs(_Right())));
+}
+template<typename T, int _N, typename>
+MATRICE_HOST_FINL auto dgelom::reduce(const _SIMD Packet_<T, _N>& _Right)
+{
+	return (_Right.reduce());
 }
 #endif

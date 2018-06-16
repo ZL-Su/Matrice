@@ -40,9 +40,6 @@
     <Filter Include="Source Files\Util\Eigen">
       <UniqueIdentifier>{65df26c3-6157-41b0-8f03-6beeeb1f309b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Util\Eigen\LU">
-      <UniqueIdentifier>{603378b7-bc93-4c26-9fa6-36e883267a26}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\IO">
       <UniqueIdentifier>{ca68800b-af4a-47a4-a12c-13d3d3060204}</UniqueIdentifier>
     </Filter>
@@ -96,21 +93,6 @@
     <ClInclude Include="include\Matrice\core\solver.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\util\Eigen\src\LU\Determinant.h">
-      <Filter>Source Files\Util\Eigen\LU</Filter>
-    </ClInclude>
-    <ClInclude Include="src\util\Eigen\src\LU\FullPivLU.h">
-      <Filter>Source Files\Util\Eigen\LU</Filter>
-    </ClInclude>
-    <ClInclude Include="src\util\Eigen\src\LU\InverseImpl.h">
-      <Filter>Source Files\Util\Eigen\LU</Filter>
-    </ClInclude>
-    <ClInclude Include="src\util\Eigen\src\LU\PartialPivLU.h">
-      <Filter>Source Files\Util\Eigen\LU</Filter>
-    </ClInclude>
-    <ClInclude Include="src\util\Eigen\src\LU\PartialPivLU_LAPACKE.h">
-      <Filter>Source Files\Util\Eigen\LU</Filter>
-    </ClInclude>
     <ClInclude Include="include\Matrice\util\_type_defs.h">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
@@ -156,6 +138,12 @@
     <ClInclude Include="include\Matrice\arch\inl\_ixpackedops.inl.hpp">
       <Filter>Header Files\Arch\Inl</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\algs\imageproc.hpp">
+      <Filter>Header Files\Algs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\io\hrc.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\private\_memory.cpp">
@@ -181,93 +169,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\util\Eigen\Cholesky">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\CholmodSupport">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\Core">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\Dense">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\Eigen">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\Eigenvalues">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\Geometry">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\Householder">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\IterativeLinearSolvers">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\Jacobi">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\LU">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\MetisSupport">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\OrderingMethods">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\PardisoSupport">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\PaStiXSupport">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\QR">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\QtAlignedMalloc">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\Sparse">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\SparseCholesky">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\SparseCore">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\SparseLU">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\SparseQR">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\SPQRSupport">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\StdDeque">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\StdList">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\StdVector">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\SuperLUSupport">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\SVD">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="src\util\Eigen\UmfPackSupport">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
     <None Include="_dev_base.def">
       <Filter>Modules</Filter>
     </None>
@@ -279,6 +180,96 @@
     </None>
     <None Include="include\Matrice\arch\inl\_ixpacket.inl">
       <Filter>Header Files\Arch\Inl</Filter>
+    </None>
+    <None Include="addin\Eigen\Cholesky">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\CholmodSupport">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\Core">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\Dense">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\Eigen">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\Eigenvalues">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\Geometry">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\Householder">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\IterativeLinearSolvers">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\Jacobi">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\KLUSupport">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\LU">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\MetisSupport">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\OrderingMethods">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\PardisoSupport">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\PaStiXSupport">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\QR">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\QtAlignedMalloc">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\Sparse">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\SparseCholesky">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\SparseCore">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\SparseLU">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\SparseQR">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\SPQRSupport">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\StdDeque">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\StdList">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\StdVector">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\SuperLUSupport">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\SVD">
+      <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="addin\Eigen\UmfPackSupport">
+      <Filter>Source Files\Util\Eigen</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

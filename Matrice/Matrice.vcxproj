@@ -113,6 +113,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\Librares\Ceres1130\ceres\include\ceres\dgelom\extras.h" />
     <ClInclude Include="addin\interface.h" />
+    <ClInclude Include="include\Matrice\algs\imageproc.hpp" />
     <ClInclude Include="include\Matrice\algs\similarity.h" />
     <ClInclude Include="include\Matrice\arch\inl\_ixpackedops.inl.hpp" />
     <ClInclude Include="include\Matrice\arch\ixpacket.h" />
@@ -121,6 +122,7 @@
     <ClInclude Include="include\Matrice\core\solver.h" />
     <ClInclude Include="include\Matrice\core\vector.h" />
     <ClInclude Include="include\Matrice\funcs\linear_algebra.h" />
+    <ClInclude Include="include\Matrice\io\hrc.h" />
     <ClInclude Include="include\Matrice\io\io.h" />
     <ClInclude Include="include\Matrice\private\_decl_dev_funcs.h" />
     <ClInclude Include="include\Matrice\private\_dev_matrix_base.h" />
@@ -136,11 +138,6 @@
     <ClInclude Include="include\Matrice\util\_type_defs.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\private\generic_fast_math.hpp" />
-    <ClInclude Include="src\util\Eigen\src\LU\Determinant.h" />
-    <ClInclude Include="src\util\Eigen\src\LU\FullPivLU.h" />
-    <ClInclude Include="src\util\Eigen\src\LU\InverseImpl.h" />
-    <ClInclude Include="src\util\Eigen\src\LU\PartialPivLU.h" />
-    <ClInclude Include="src\util\Eigen\src\LU\PartialPivLU_LAPACKE.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp" />
@@ -152,38 +149,39 @@
     <ClCompile Include="src\private\_memory.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="addin\Eigen\Cholesky" />
+    <None Include="addin\Eigen\CholmodSupport" />
+    <None Include="addin\Eigen\Core" />
+    <None Include="addin\Eigen\Dense" />
+    <None Include="addin\Eigen\Eigen" />
+    <None Include="addin\Eigen\Eigenvalues" />
+    <None Include="addin\Eigen\Geometry" />
+    <None Include="addin\Eigen\Householder" />
+    <None Include="addin\Eigen\IterativeLinearSolvers" />
+    <None Include="addin\Eigen\Jacobi" />
+    <None Include="addin\Eigen\KLUSupport" />
+    <None Include="addin\Eigen\LU" />
+    <None Include="addin\Eigen\MetisSupport" />
+    <None Include="addin\Eigen\OrderingMethods" />
+    <None Include="addin\Eigen\PardisoSupport" />
+    <None Include="addin\Eigen\PaStiXSupport" />
+    <None Include="addin\Eigen\QR" />
+    <None Include="addin\Eigen\QtAlignedMalloc" />
+    <None Include="addin\Eigen\Sparse" />
+    <None Include="addin\Eigen\SparseCholesky" />
+    <None Include="addin\Eigen\SparseCore" />
+    <None Include="addin\Eigen\SparseLU" />
+    <None Include="addin\Eigen\SparseQR" />
+    <None Include="addin\Eigen\SPQRSupport" />
+    <None Include="addin\Eigen\StdDeque" />
+    <None Include="addin\Eigen\StdList" />
+    <None Include="addin\Eigen\StdVector" />
+    <None Include="addin\Eigen\SuperLUSupport" />
+    <None Include="addin\Eigen\SVD" />
+    <None Include="addin\Eigen\UmfPackSupport" />
     <None Include="include\Matrice\arch\inl\_ixpacket.inl" />
     <None Include="include\Matrice\core\cpp.hint" />
     <None Include="include\Matrice\private\_similarity.inl" />
-    <None Include="src\util\Eigen\Cholesky" />
-    <None Include="src\util\Eigen\CholmodSupport" />
-    <None Include="src\util\Eigen\Core" />
-    <None Include="src\util\Eigen\Dense" />
-    <None Include="src\util\Eigen\Eigen" />
-    <None Include="src\util\Eigen\Eigenvalues" />
-    <None Include="src\util\Eigen\Geometry" />
-    <None Include="src\util\Eigen\Householder" />
-    <None Include="src\util\Eigen\IterativeLinearSolvers" />
-    <None Include="src\util\Eigen\Jacobi" />
-    <None Include="src\util\Eigen\LU" />
-    <None Include="src\util\Eigen\MetisSupport" />
-    <None Include="src\util\Eigen\OrderingMethods" />
-    <None Include="src\util\Eigen\PardisoSupport" />
-    <None Include="src\util\Eigen\PaStiXSupport" />
-    <None Include="src\util\Eigen\QR" />
-    <None Include="src\util\Eigen\QtAlignedMalloc" />
-    <None Include="src\util\Eigen\Sparse" />
-    <None Include="src\util\Eigen\SparseCholesky" />
-    <None Include="src\util\Eigen\SparseCore" />
-    <None Include="src\util\Eigen\SparseLU" />
-    <None Include="src\util\Eigen\SparseQR" />
-    <None Include="src\util\Eigen\SPQRSupport" />
-    <None Include="src\util\Eigen\StdDeque" />
-    <None Include="src\util\Eigen\StdList" />
-    <None Include="src\util\Eigen\StdVector" />
-    <None Include="src\util\Eigen\SuperLUSupport" />
-    <None Include="src\util\Eigen\SVD" />
-    <None Include="src\util\Eigen\UmfPackSupport" />
     <None Include="_dev_base.def" />
   </ItemGroup>
   <ItemGroup>

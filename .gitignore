@@ -261,3 +261,5 @@ __pycache__/
 *.pyc
 /Matrice/Matrice.rc
 /Matrice/resource.h
+/Matrice/addin/Eigen
+/Matrice/addin/unsupported/Eigen

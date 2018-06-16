@@ -18,6 +18,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include<algorithm>
 #include "_macros.h"
+#include "../arch/ixpacket.h"
 
 MATRICE_NAMESPACE_BEGIN_
 template<class _Fn, class _InIt, class _OutIt> inline
@@ -48,11 +49,21 @@ void transform(_Fn _Func, const _InIt _First, const _InIt _Last, _OutIt _Dest, s
 	}
 }
 template<typename _Ty, typename _InIt = _Ty*>
-MATRICE_GLOBAL_INL _Ty reduce(_InIt _First, _InIt _Last)
+MATRICE_GLOBAL_INL const _Ty reduce(_InIt _First, _InIt _Last)
 {
 	static_cast<void>(_First == _Last);
 	_Ty _Ret = 0;
+#ifdef __AVX__
+	using Packed_t = simd::Packet_<_Ty, 4>;
+	decltype(auto) _Size = std::_Idl_distance<_InIt>(_First, _Last);
+	decltype(auto) _Step = Packed_t::size << 1;
+	decltype(auto) _N = _Size / _Step;
+	for (auto i = 0, j = 0; i < _N; j = (++i)*_Step)
+		_Ret += (Packed_t(_First + j) + Packed_t(_First + j +Packed_t::size)).reduce();
+	for (_First += _N * _Step; _First != _Last; ++_First) _Ret += *_First;
+#else
 	for (; _First != _Last; ++_First) _Ret += *_First;
+#endif
 	return (_Ret);
 }
 template<typename _Ty, typename _Op,  typename _InIt = _Ty*>
