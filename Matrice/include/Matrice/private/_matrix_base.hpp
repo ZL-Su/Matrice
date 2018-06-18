@@ -76,7 +76,8 @@ template<typename _Ty, int _M, int _N, typename _Derived> class Base_;
 template<typename _Ty, int _M, int _N, typename _Derived = Matrix_<_Ty, _M, _N>> 
 class Base_ : public PlaneView_<_Ty>
 {
-	typedef details::Storage_<_Ty>::Allocator<_M, _N, -1>         Storage;
+	typedef details::Storage_<_Ty>::Allocator<_M, _N, 
+		              allocator_option<_M, _N>::value>             Storage;
 	typedef Base_                                                    _Myt;
 	typedef _Myt&                                                 myt_ref;
 	typedef const _Myt&                                     const_myt_ref;

@@ -17,6 +17,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 *	*************************************************************************/
 #pragma once
 #include <type_traits>
+#include "_memory.h"
 
 namespace dgelom {
 template<typename T> struct traits {};
@@ -36,6 +37,18 @@ template<int _Val> struct is_zero { enum { value = _Val == 0 ? true : false }; }
 template<int _R, int _C> struct is_static {enum {value = _R > 0 && _C >0 ? true : false}; };
 template<typename T> struct is_float32 { enum { value = std::is_floating_point<T>::value && (sizeof(T) == 4) }; };
 template<typename T> struct is_float64 { enum { value = std::is_floating_point<T>::value && (sizeof(T) == 8) }; };
+template<int _M, int _N> struct allocator_option{ 
+	enum {
+		value = _M >0  && _N>0   ? LINEAR + COPY :  // stack allocator
+		        _M==0  && _N==-1 ? LINEAR        :  // linear device allocator
+		        _M==-1 && _N==-1 ? PITCHED       :  // pitched device allocator
+#ifdef __CXX11_SHARED__
+										 LINEAR + SHARED  // smart heap or global allocator
+#else
+		                         LINEAR + COPY    // deep heap or global allocator
+#endif      
+	}; 
+};
 
 template<int _Rows = 0, int _Cols = 0> struct compile_time_size {
 	enum { val_1 = 0x0001, val_2 = 0x0002, val_3 = 0x0003, val_4 = 0x0004 };

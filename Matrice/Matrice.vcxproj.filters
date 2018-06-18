@@ -144,6 +144,12 @@
     <ClInclude Include="include\Matrice\io\hrc.h">
       <Filter>Header Files\IO</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\private\_devops.h">
+      <Filter>Header Files\Private</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\_unified_memory.h">
+      <Filter>Header Files\Private</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\private\_memory.cpp">
@@ -277,6 +283,9 @@
       <Filter>Source Files\Private</Filter>
     </CudaCompile>
     <CudaCompile Include="src\private\_dev_funcs.cu">
+      <Filter>Source Files\Private</Filter>
+    </CudaCompile>
+    <CudaCompile Include="src\private\_dev_ops.cu">
       <Filter>Source Files\Private</Filter>
     </CudaCompile>
   </ItemGroup>

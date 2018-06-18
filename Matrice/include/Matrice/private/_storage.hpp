@@ -25,6 +25,13 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../private/_memory.h"
 #include "../private/_expr_type_traits.h"
 
+#ifndef MATRICE_ALIGNED_CLASS
+#define MATRICE_ALIGNED_CLASS class alignas(MATRICE_ALIGN_BYTES)
+#endif
+#ifndef MATRICE_ALIGNED_STRUCT
+#define MATRICE_ALIGNED_STRUCT class alignas(MATRICE_ALIGN_BYTES)
+#endif
+
 namespace dgelom { namespace details {
 typedef enum Location 
 { 
@@ -48,16 +55,23 @@ public:
 #endif
 	enum Ownership { Owner = 1, Refer = 0, Proxy = -1, Dummy = -2 };
 	///<brief> data memory </brief>
-	template<Location _Loc = UnSpecified> class DenseBase
-	{
+	template<Location _Loc = UnSpecified, size_t _Opt = LINEAR+
+#ifdef __CXX11_SHARED__
+		SHARED
+#else
+		COPY
+#endif
+	> 
+	MATRICE_ALIGNED_CLASS DenseBase {
 	public:
+		enum { location = _Loc, option = _Opt };
 		MATRICE_GLOBAL_FINL DenseBase()
 			: my_rows(0), my_cols(0), my_size(0), my_data(0), my_owner(Dummy) {}
 		MATRICE_GLOBAL_FINL DenseBase(int_t _rows, int_t _cols, pointer _data)
-			: my_rows(_rows), my_cols(_cols), my_size(my_rows*my_cols), my_data(_data), my_owner(_Loc == OnStack ? Owner : Proxy) {}
+			: my_rows(_rows), my_cols(_cols), my_size(my_rows*my_cols), my_data(_data), my_owner(location == OnStack ? Owner : Proxy) {}
 		MATRICE_GLOBAL DenseBase(int_t _rows, int_t _cols);
 		MATRICE_GLOBAL DenseBase(int_t _rows, int_t _cols, const value_t _val);
-		MATRICE_GLOBAL DenseBase(int_t _rows, int_t _cols, pointer _data, std::initializer_list<value_t> _list) noexcept;
+		MATRICE_GLOBAL DenseBase(int_t _rows, int_t _cols, pointer _data, std::initializer_list<value_t> _list);
 		MATRICE_GLOBAL DenseBase(const DenseBase& _other);
 		MATRICE_GLOBAL DenseBase(DenseBase&& _other);
 		MATRICE_GLOBAL ~DenseBase();
@@ -93,7 +107,7 @@ public:
 		mutable int_t my_size;
 		mutable pointer my_data;
 		mutable Ownership my_owner = Owner;
-		std::size_t my_pitch = 0; //used for CUDA pitched malloc only
+		std::size_t my_pitch = 1; //used for CUDA pitched malloc only
 	private:
 #ifdef __CXX11_SHARED__
 		using SharedPtr = std::shared_ptr<value_t>;
@@ -103,15 +117,15 @@ public:
 	};
 
 	///<brief> generic allocator and its specialization </brief>
-	template<int _M, int _N, int _Options> class Allocator;
+	template<int _M, int _N, size_t _Opt> class Allocator;
 
 	//<brief> Managed host memory allocator </brief>
-	template<int _M, int _N, int _Options> 
-	class Allocator : public DenseBase<OnStack>
+	template<int _M, int _N, size_t _Opt = LINEAR+COPY>
+	MATRICE_ALIGNED_CLASS Allocator : public DenseBase<OnStack, _Opt>
 	{
-		typedef DenseBase<OnStack> Base;
+		typedef DenseBase<OnStack, _Opt> Base;
 	public:
-		enum { location = OnStack, };
+		enum { location = Base::location, option = Base::option };
 		MATRICE_HOST_INL Allocator(int ph1=0, int ph2=0) : Base(_M, _N, _Data) {}
 		MATRICE_HOST_INL Allocator(int ph1, int ph2, pointer data) : Base(_M, _N, data) {}
 		MATRICE_HOST_INL Allocator(std::initializer_list<value_t> _list) : Base(_M, _N, _Data, _list) {}
@@ -129,15 +143,15 @@ public:
 			return (*this);
 		}
 	private:
-		value_t alignas(MATRICE_ALIGN_BYTES)_Data[_M*_N];
+		value_t _Data[_M*_N];
 	};
 	//<brief> Dynamic host memory allocator </brief>
-	template<int _Options> 
-	class Allocator<0, 0, _Options> : public DenseBase<OnHeap>
+	template<size_t _Opt> 
+	MATRICE_ALIGNED_CLASS Allocator<0, 0, _Opt> : public DenseBase<OnHeap, _Opt>
 	{
-		typedef DenseBase<OnHeap> Base;
+		typedef DenseBase<OnHeap, _Opt> Base;
 	public:
-		enum { location = OnHeap };
+		enum { location = Base::location, option = Base::option };
 		MATRICE_HOST_INL Allocator() : Base() {}
 		MATRICE_HOST_INL Allocator(int _m, int _n) : Base(_m, _n) {}
 		MATRICE_HOST_INL Allocator(int _m, int _n, const value_t _val) : Base(_m, _n, _val) {}
@@ -151,12 +165,12 @@ public:
 		MATRICE_HOST_INL Allocator& operator= (Allocator&& _other) { return static_cast<Allocator&>(Base::operator=(std::move(_other))); }
 	};
 	//<brief> Unified device memory allocator </brief>
-	template<int _Options> 
-	class Allocator<-1, 0, _Options> : public DenseBase<OnGlobal>
+	template<size_t _Opt>
+	MATRICE_ALIGNED_CLASS Allocator<-1, 0, _Opt> : public DenseBase<OnGlobal, _Opt>
 	{
-		typedef DenseBase<OnGlobal> Base;
+		typedef DenseBase<OnGlobal, _Opt> Base;
 	public:
-		enum { location = OnGlobal };
+		enum { location = Base::location, option = Base::option };
 		MATRICE_HOST_INL Allocator() : Base() {}
 		MATRICE_HOST_INL Allocator(int _m, int _n) : Base(_m, _n) {}
 		MATRICE_HOST_INL Allocator(int _m, int _n, pointer data) : Base(_m, _n, data) {}
@@ -168,12 +182,12 @@ public:
 		MATRICE_HOST_INL Allocator& operator= (const Allocator& _other) { return static_cast<Allocator&>(Base::operator= (_other)); }
 	};
 	//<brief> Device memory allocator </brief>
-	template<int _Options> 
-	class Allocator<-1, -1, _Options> : public DenseBase<OnDevice>
+	template<size_t _Opt>
+	MATRICE_ALIGNED_CLASS Allocator<-1, -1, _Opt> : public DenseBase<OnDevice, _Opt>
 	{
-		typedef DenseBase<OnDevice> Base;
+		typedef DenseBase<OnDevice, _Opt> Base;
 	public:
-		enum { location = OnDevice };
+		enum { location = Base::location, option = Base::option };
 		MATRICE_DEVICE_INL Allocator() : Base() {}
 		MATRICE_DEVICE_INL Allocator(int _m, int _n) : Base(_m, _n) {}
 		MATRICE_DEVICE_INL Allocator(int _m, int _n, pointer data) : Base(_m, _n, data) {}
@@ -236,7 +250,7 @@ public:
 		SharedPtr _SharedData = nullptr;
 #endif
 	};
-	template<int M, int N> class ManagedAllocator : public Base_<ManagedAllocator<M, N>, OnStack>
+	template<int M, int N> MATRICE_ALIGNED_CLASS ManagedAllocator : public Base_<ManagedAllocator<M, N>, OnStack>
 	{
 		using _Base = Base_<ManagedAllocator<M, N>, OnStack>;
 		using _Base::m_rows;
@@ -247,7 +261,7 @@ public:
 		ManagedAllocator(int _m, int _n) : _Base(M, N) { m_data = &_Data[0]; }
 
 	private:
-		value_t alignas(MATRICE_ALIGN_BYTES) _Data[M*N];
+		value_t _Data[M*N];
 		using _Base::m_data;
 	};
 	template<typename = std::enable_if<std::is_arithmetic<_Ty>::value, _Ty>::type>

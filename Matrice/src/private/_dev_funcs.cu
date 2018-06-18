@@ -25,17 +25,16 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 MATRICE_PRIVATE_BEGIN
 
-template<int _Opt> void device_sync()
+template<int _Opt> void _Device_sync()
 {
 	cudaError_t sts;
-	switch (_Opt)
-	{
+	switch (_Opt){
 	case 0: sts = cudaDeviceSynchronize(); break;
 	default: break;
 	}
 }
 
-template void device_sync<0>();
+template void _Device_sync<0>();
 
 MATRICE_PRIVATE_END
 #endif

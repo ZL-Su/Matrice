@@ -38,6 +38,7 @@ struct simd_op_base {
 	enum { N = _Elems }; using value_t = T;
 	using type = dgelom::simd::conditional_t<value_t, N>;
 	template<typename _Op> static MATRICE_HOST_FINL auto _Binary(_Op _Op) { return _Op(); }
+	template<typename _Op> static MATRICE_HOST_FINL auto _Unary(_Op _Op) { return _Op(); }
 };
 
 template<> struct simd_op<float, 4> : public simd_op_base<float, 4>
@@ -64,7 +65,7 @@ template<> struct simd_op<float, 4> : public simd_op_base<float, 4>
 	}
 	HOST_STATIC_INL_CXPR_T const abs(const type& _Right) 
 	{
-		return  base_t::_Binary([&]()->type{return _mm_and_ps(_Right, _mm_castsi128_ps(_mm_set1_epi32(~(1 << 31)))); });
+		return  base_t::_Unary([&]()->type{return _mm_and_ps(_Right, _mm_castsi128_ps(_mm_set1_epi32(~(1 << 31)))); });
 	}
 };
 template<> struct simd_op<float, 8> : public simd_op_base<float, 8>
@@ -92,7 +93,7 @@ template<> struct simd_op<float, 8> : public simd_op_base<float, 8>
 	}
 	HOST_STATIC_INL_CXPR_T const abs(const type& _Right)
 	{
-		return base_t::_Binary([&]()->type{ return _mm256_and_ps(_Right, _mm256_castsi256_ps(_mm256_set1_epi32(~(1 << 31)))); });
+		return base_t::_Unary([&]()->type{ return _mm256_and_ps(_Right, _mm256_castsi256_ps(_mm256_set1_epi32(~(1 << 31)))); });
 	}
 };
 template<> struct simd_op<float, 16> : public simd_op_base<float, 16>
@@ -120,7 +121,7 @@ template<> struct simd_op<float, 16> : public simd_op_base<float, 16>
 	}
 	HOST_STATIC_INL_CXPR_T const abs(const type& _Right) 
 	{
-		return base_t::_Binary([&]()->type{return _mm512_castsi512_ps(_mm512_srli_epi64(_mm512_slli_epi64(_mm512_castps_si512(_Right), 1), 1)); });
+		return base_t::_Unary([&]()->type{return _mm512_castsi512_ps(_mm512_srli_epi64(_mm512_slli_epi64(_mm512_castps_si512(_Right), 1), 1)); });
 	}
 };
 template<> struct simd_op<double, 2> : public simd_op_base<double, 2>
@@ -147,7 +148,7 @@ template<> struct simd_op<double, 2> : public simd_op_base<double, 2>
 	}
 	HOST_STATIC_INL_CXPR_T const abs(const type& _Right) 
 	{ 
-		return base_t::_Binary([&]()->type{ return _mm_and_pd(_Right, _mm_castsi128_pd(_mm_setr_epi32(-1, 0x7FFFFFFF, -1, 0x7FFFFFFF)));});
+		return base_t::_Unary([&]()->type{ return _mm_and_pd(_Right, _mm_castsi128_pd(_mm_setr_epi32(-1, 0x7FFFFFFF, -1, 0x7FFFFFFF)));});
 	}
 };
 template<> struct simd_op<double, 4> : public simd_op_base<double, 4>
@@ -175,7 +176,7 @@ template<> struct simd_op<double, 4> : public simd_op_base<double, 4>
 	}
 	HOST_STATIC_INL_CXPR_T const abs(const type& _Right) 
 	{
-		return base_t::_Binary([&]()->type{ return _mm256_and_pd(_Right, _mm256_castsi256_pd(_mm256_set1_epi32(~(1 << 31)))); });
+		return base_t::_Unary([&]()->type{ return _mm256_and_pd(_Right, _mm256_castsi256_pd(_mm256_set1_epi32(~(1 << 31)))); });
 	}
 };
 template<> struct simd_op<double, 8> : public simd_op_base<double, 8>

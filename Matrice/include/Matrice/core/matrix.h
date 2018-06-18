@@ -174,7 +174,7 @@ public:
 	template<typename _Arg> 
 	MATRICE_GLOBAL_INL Myt& operator= (const _Arg& _arg) { return device_base_t::operator=(_arg); }
 	MATRICE_DEVICE_INL Myt& operator= (Myt&& _other) { return device_base_t::operator=(std::move(_other)); }
-	MATRICE_GLOBAL_INL Myt& operator= (const_init_list _list) { return device_base_t::operator=(_list); }
+	MATRICE_GLOBAL_INL Myt& operator= (const_init_list _list) { return device_base_t::operator=(_list.begin()); }
 	MATRICE_GLOBAL void create(int_t rows, int_t cols = 1);
 };
 //matrix with CUDA device memory allocator

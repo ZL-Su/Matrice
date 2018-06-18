@@ -34,6 +34,8 @@ namespace dgelom {
 #ifdef MATRICE_ALIGN_BYTES
 #define MATRICE_ALIGNED(type) alignas(MATRICE_ALIGN_BYTES)##type
 #endif
+	enum { COPY = 1001, MOVE = 1002, SHARED = 1000 };
+	enum { LINEAR = 8000, PITCHED = 8001, ARRTARR = 8002, FROMARR = 8003, TOARRAY = 8004, };
 namespace privt {
 template<typename ValueType, typename IntegerType> ValueType* aligned_malloc(IntegerType size);
 template<typename ValueType> void aligned_free(ValueType* aligned_ptr) noexcept;

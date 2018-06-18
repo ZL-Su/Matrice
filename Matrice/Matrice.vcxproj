@@ -79,7 +79,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <EnableModules>true</EnableModules>
-      <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++latest /bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -125,6 +125,7 @@
     <ClInclude Include="include\Matrice\io\hrc.h" />
     <ClInclude Include="include\Matrice\io\io.h" />
     <ClInclude Include="include\Matrice\private\_decl_dev_funcs.h" />
+    <ClInclude Include="include\Matrice\private\_devops.h" />
     <ClInclude Include="include\Matrice\private\_dev_matrix_base.h" />
     <ClInclude Include="include\Matrice\private\_matrix_base.hpp" />
     <ClInclude Include="include\Matrice\private\_matrix_expr.hpp" />
@@ -132,6 +133,7 @@
     <ClInclude Include="include\Matrice\private\_matrix.inl.hpp" />
     <ClInclude Include="include\Matrice\private\_memory.h" />
     <ClInclude Include="include\Matrice\private\_storage.hpp" />
+    <ClInclude Include="include\Matrice\private\_unified_memory.h" />
     <ClInclude Include="include\Matrice\util\genalgs.h" />
     <ClInclude Include="include\Matrice\util\util.h" />
     <ClInclude Include="include\Matrice\util\_macros.h" />
@@ -187,6 +189,7 @@
   <ItemGroup>
     <CudaCompile Include="src\private\_dev_funcs.cu" />
     <CudaCompile Include="src\private\_dev_memory.cu" />
+    <CudaCompile Include="src\private\_dev_ops.cu" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Matrice.rc" />

@@ -20,6 +20,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../util/_macros.h"
 #if (defined __enable_cuda__ && !defined __disable_cuda__)
 #include "_decl_dev_funcs.h"
+#include "_devops.h"
 
 MATRICE_NAMESPACE_BEGIN_TYPES
 template<typename _Ty, int _M, int _N> class Matrix_;
@@ -39,17 +40,21 @@ public:
 	//<brief> synchronize all device threads </brief>
 	MATRICE_HOST_INL void sync() { _Future = std::async(std::launch::async, [&] { _Sync_impl(); }); }
 	//<brief> retrieve data from device memory </brief>
-	template<typename _Arg>
-	MATRICE_HOST_INL void fetch(_Arg& dst){ if (_Future.valid()) _Future.get(); _Dnload_impl(dst); }
+	MATRICE_HOST_INL void fetch(pointer dst) { if (_Future.valid()) _Future.get(); _Dnload_impl(dst); }
+	template<typename _Arg, typename = std::enable_if_t<std::is_class_v<_Arg>>>
+	MATRICE_HOST_INL void fetch(_Arg& dst){ if (_Future.valid()) _Future.get(); _Dnload_impl(dst.data()); }
 	//<brief> copy data from host to device memory </brief>
-	template<typename _Arg>
-	MATRICE_GLOBAL_INL _Derived& operator= (const _Arg& _src) { _Upload_impl(_src); return *static_cast<_Derived*>(this); }
+	MATRICE_GLOBAL_INL _Derived& operator= (const pointer _src) { _Upload_impl(_src); return *static_cast<_Derived*>(this); }
+	template<typename _Arg, typename = std::enable_if_t<std::is_class_v<_Arg>>>
+	MATRICE_GLOBAL_INL _Derived& operator= (const _Arg& _src) { _Upload_impl(_src.data()); return *static_cast<_Derived*>(this); }
+
 private:
-	MATRICE_HOST_INL void _Sync_impl() {}
+	MATRICE_HOST_INL void _Sync_impl() { privt::_Device_sync<0>(); }
 	template<typename... Args>
-	MATRICE_HOST_INL void _Upload_impl(Args... args) {}
+	MATRICE_HOST_INL void _Upload_impl(pointer args) { device_memcpy<_Ty, 1>::impl(args, _Ptr, size_t(*_W), size_t(*_H), *_P); }
 	template<typename... Args>
-	MATRICE_HOST_INL void _Dnload_impl(Args... args) {}
+	MATRICE_HOST_INL void _Dnload_impl(pointer args) { device_memcpy<_Ty, 2>::impl(args, _Ptr, size_t(*_W), size_t(*_H), *_P); }
+
 	std::future<void> _Future; 
 	pointer _Ptr;
 	size_t* _P = nullptr; 
