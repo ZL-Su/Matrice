@@ -23,6 +23,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <type_traits>
 #include "../util/_macros.h"
 #include "../private/_memory.h"
+#include "../private/_unified_memory.h"
 #include "../private/_expr_type_traits.h"
 
 #ifndef MATRICE_ALIGNED_CLASS
@@ -33,10 +34,6 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 namespace dgelom { namespace details {
-typedef enum Location 
-{ 
-	UnSpecified = -1, OnStack = 0, OnHeap = 1, OnDevice = 2, OnGlobal = 3 
-} loctn_t;
 template<typename _Ty> class Storage_
 {
 public:
@@ -74,6 +71,18 @@ public:
 		MATRICE_GLOBAL DenseBase(int_t _rows, int_t _cols, pointer _data, std::initializer_list<value_t> _list);
 		MATRICE_GLOBAL DenseBase(const DenseBase& _other);
 		MATRICE_GLOBAL DenseBase(DenseBase&& _other);
+		template<Location _From, size_t _Option>
+		MATRICE_GLOBAL DenseBase(const DenseBase<_From, _Option>& _other, pointer _data) 
+			: DenseBase<_Loc, _Opt>(_other.rows(), _other.cols(), _data)
+		{
+			privt::unified_sync<value_t, _From, _Loc, _Option>::op(my_data, _other.data(), my_rows, my_cols, _other.pitch());
+		}
+		template<Location _From, size_t _Option>
+		MATRICE_GLOBAL DenseBase(const DenseBase<_From, _Option>& _other)
+			: DenseBase<_Loc, _Opt>(_other.rows(), _other.cols())
+		{
+			privt::unified_sync<value_t, _From, _Loc, _Loc == OnDevice ? option : _Option>::op(my_data, _other.data(), my_rows, my_cols, _Loc == OnDevice ? my_pitch : _other.pitch());
+		}
 		MATRICE_GLOBAL ~DenseBase();
 
 		///<brief> operators </brief>
@@ -83,6 +92,9 @@ public:
 
 		///<brief> methods </brief>
 		MATRICE_GLOBAL_INL int_t& size() const { return (my_size);}
+		MATRICE_GLOBAL_INL int_t& rows() const { return (my_rows); }
+		MATRICE_GLOBAL_INL int_t& cols() const { return (my_cols); }
+		MATRICE_GLOBAL_INL size_t pitch() const { return (my_pitch); }
 		MATRICE_GLOBAL_INL pointer data() const { return (my_data); }
 		MATRICE_GLOBAL_INL Ownership& owner() const { return my_owner; }
 		MATRICE_GLOBAL_INL bool shared() const 
@@ -97,7 +109,7 @@ public:
 		{
 			my_cols = 0, my_rows = 0, my_size = 0;
 			my_owner = Dummy, my_pitch = 0;
-			my_location = Location::UnSpecified;
+			my_location = UnSpecified;
 			my_shared = nullptr;
 			my_data = nullptr;
 		}
@@ -131,7 +143,8 @@ public:
 		MATRICE_HOST_INL Allocator(std::initializer_list<value_t> _list) : Base(_M, _N, _Data, _list) {}
 		MATRICE_HOST_INL Allocator(const Allocator& _other) : Base(_M, _N, privt::fill_mem(_other._Data, _Data, _other.my_size)) {}
 		MATRICE_HOST_INL Allocator(Allocator&& _other) : Base(std::move(_other)) {}
-
+		template<typename... _Args>
+		MATRICE_HOST_INL Allocator(const _Args&... _args) : Base(_args..., _Data) {}
 		MATRICE_HOST_INL Allocator& operator= (const Allocator& _other)
 		{
 			Base::my_data = _Data;
@@ -159,6 +172,8 @@ public:
 		MATRICE_HOST_INL Allocator(const Allocator& _other) : Base(_other) {}
 		MATRICE_HOST_INL Allocator(Allocator&& _other) : Base(std::move(_other)) {}
 		MATRICE_HOST_INL Allocator(std::initializer_list<value_t> _list) {}
+		template<typename... _Args>
+		MATRICE_HOST_INL Allocator(const _Args&... _args) : Base(_args...) {}
 
 		MATRICE_HOST_INL Allocator& operator= (const std::initializer_list<value_t> _list) { return static_cast<Allocator&>(Base::operator= (_list)); }
 		MATRICE_HOST_INL Allocator& operator= (const Allocator& _other) { return static_cast<Allocator&>(Base::operator= (_other)); }
@@ -195,6 +210,8 @@ public:
 		MATRICE_DEVICE_INL Allocator(const Allocator& _other) : Base(_other) {}
 		MATRICE_DEVICE_INL Allocator(Allocator&& _other) : Base(std::move(_other)) {}
 		MATRICE_DEVICE_INL Allocator(std::initializer_list<value_t> _list) {}
+		template<typename... _Args>
+		MATRICE_HOST_INL Allocator(const _Args&... _args) : Base(_args...) {}
 
 		MATRICE_DEVICE_INL Allocator& operator= (const Allocator& _other) { return static_cast<Allocator&>(Base::operator= (_other)); }
 		MATRICE_GLOBAL_INL std::size_t pitch() const { return Base::my_pitch; }

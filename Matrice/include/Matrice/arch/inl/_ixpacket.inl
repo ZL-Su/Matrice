@@ -18,61 +18,65 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #ifdef __AVX__
 #include "../ixpacket.h"
-#define _SIMD dgelom::simd::
+#define _SIMD
 
 template<typename T, int _Elems> MATRICE_HOST_INL
-_SIMD Packet_<T, _Elems>& _SIMD Packet_<T, _Elems>::operator+ (const _SIMD Packet_<T, _Elems>& _other)
+Packet_<T, _Elems>& Packet_<T, _Elems>::operator+ (const Packet_<T, _Elems>& _other)
 {
-	m_data = op_t::sum(m_data, _other.m_data); return (*this);
+	m_data = transform(details::Op_<value_t>::plus<size>(), *this, _other);
+	return (*this);
 }
 template<typename T, int _Elems> MATRICE_HOST_INL 
-_SIMD Packet_<T, _Elems>& _SIMD Packet_<T, _Elems>::operator- (const _SIMD Packet_<T, _Elems>& _other)
+Packet_<T, _Elems>& Packet_<T, _Elems>::operator- (const Packet_<T, _Elems>& _other)
 {
-	m_data = op_t::sub(m_data, _other.m_data); return (*this);
+	m_data = transform(details::Op_<value_t>::minus<size>(), *this, _other);
+	return (*this);
 }
 template<typename T, int _Elems> MATRICE_HOST_INL
-_SIMD Packet_<T, _Elems>& _SIMD Packet_<T, _Elems>::operator* (const _SIMD Packet_<T, _Elems>& _other)
+Packet_<T, _Elems>& Packet_<T, _Elems>::operator* (const Packet_<T, _Elems>& _other)
 {
-	m_data = op_t::mul(m_data, _other.m_data); return (*this);
+	m_data = transform(details::Op_<value_t>::multiplies<size>(), *this, _other);
+	return (*this);
 }
 template<typename T, int _Elems> MATRICE_HOST_INL
-_SIMD Packet_<T, _Elems>& _SIMD Packet_<T, _Elems>::operator/ (const _SIMD Packet_<T, _Elems>& _other)
+Packet_<T, _Elems>& Packet_<T, _Elems>::operator/ (const Packet_<T, _Elems>& _other)
 {
-	m_data = op_t::div(m_data, _other.m_data); return (*this);
+	m_data = transform(details::Op_<value_t>::divides<size>(), *this, _other);
+	return (*this);
 }
 template<typename T, int _Elems> MATRICE_HOST_INL
-_SIMD Packet_<T, _Elems> _SIMD Packet_<T, _Elems>::abs() const
+Packet_<T, _Elems> Packet_<T, _Elems>::abs() const
 {
-	return (_SIMD Packet_<T, _Elems>(op_t::abs(m_data)));
+	return (transform(details::Op_<value_t>::abs<size>(), *this));
 }
 
-template<typename T, int _N, typename Packet>
-MATRICE_HOST_FINL auto operator+ (const Packet& _Left, const Packet& _Right)
+template<typename T, int _N, typename Packet = Packet_<T, _N>>
+MATRICE_HOST_FINL Packet operator+ (const Packet_<T, _N>& _Left, const Packet_<T, _N>& _Right)
 {
-	return Packet(simd_op<T, _N>::sum(_Left(), _Right()));
+	return (transform(details::Op_<T>::plus<_N>(), _Left, _Right));
 }
-template<typename T, int _N, typename Packet>
-MATRICE_HOST_FINL auto operator- (const Packet& _Left, const Packet& _Right)
+template<typename T, int _N, typename Packet = Packet_<T, _N>>
+MATRICE_HOST_FINL Packet operator- (const Packet_<T, _N>& _Left, const Packet_<T, _N>& _Right)
 {
-	return Packet(simd_op<T, _N>::sub(_Left(), _Right()));
+	return (transform(details::Op_<T>::minus<_N>(), _Left, _Right));
 }
-template<typename T, int _N, typename Packet>
-MATRICE_HOST_FINL auto operator* (const Packet& _Left, const Packet& _Right)
+template<typename T, int _N, typename Packet = Packet_<T, _N>>
+MATRICE_HOST_FINL Packet operator* (const Packet_<T, _N>& _Left, const Packet_<T, _N>& _Right)
 {
-	return Packet(simd_op<T, _N>::mul(_Left(), _Right()));
+	return (transform(details::Op_<T>::multiplies<_N>(), _Left, _Right));
 }
-template<typename T, int _N, typename Packet>
-MATRICE_HOST_FINL auto operator/ (const Packet& _Left, const Packet& _Right)
+template<typename T, int _N, typename Packet = Packet_<T, _N>>
+MATRICE_HOST_FINL Packet operator/ (const Packet_<T, _N>& _Left, const Packet_<T, _N>& _Right)
 {
-	return Packet(simd_op<T, _N>::div(_Left(), _Right()));
+	return (transform(details::Op_<T>::divides<_N>(), _Left, _Right));
 }
-template<typename T, int _N, typename>
-MATRICE_HOST_FINL auto dgelom::abs(const _SIMD Packet_<T, _N>& _Right)
+template<typename T, int _N, typename Packet = Packet_<T, _N>>
+MATRICE_HOST_FINL Packet abs(const Packet_<T, _N>& _Right)
 {
-	return (_SIMD Packet_<T, _N>(_SIMD simd_op<T, _N>::abs(_Right())));
+	return (transform(details::Op_<T>::abs<_N>(), _Right));
 }
-template<typename T, int _N, typename>
-MATRICE_HOST_FINL auto dgelom::reduce(const _SIMD Packet_<T, _N>& _Right)
+template<typename T, int _N, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+MATRICE_HOST_FINL T reduce(const Packet_<T, _N>& _Right)
 {
 	return (_Right.reduce());
 }

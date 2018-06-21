@@ -48,6 +48,10 @@ void transform(_Fn _Func, const _InIt _First, const _InIt _Last, _OutIt _Dest, s
 		*_UDest = _Func(*_UFirst);
 	}
 }
+template<typename _Fwdty, typename _Fn, typename = std::enable_if_t<std::is_class_v<_Fwdty>>>
+MATRICE_HOST_FINL auto for_each(_Fwdty& _Cont, _Fn _Func) { std::for_each(_Cont.begin(), _Cont.end(), _Func);}
+template<typename _Fwdty, typename _T, typename = std::enable_if_t<std::is_class_v<_Fwdty>>>
+MATRICE_HOST_FINL auto fill(_Fwdty& _Cont, _T _val) { std::fill(_Cont.begin(), _Cont.end(), _val); }
 template<typename _Ty, typename _InIt = _Ty*>
 MATRICE_GLOBAL_INL const _Ty reduce(_InIt _First, _InIt _Last)
 {

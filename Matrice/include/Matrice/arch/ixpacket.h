@@ -17,7 +17,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 #include "_ixbase.h"
-#include "./inl/_ixpackedops.inl.hpp"
+#include "./inl/_ixdetails.hpp"
 #ifdef __AVX__
 MATRICE_ARCH_BEGIN
 
@@ -29,7 +29,7 @@ class Packet_ MATRICE_NONHERITABLE : public simd::simd_base_<T, _Elems>
 {
 	using myt = Packet_;
 	using xbase_t = simd::simd_base_<T, _Elems>;
-	using op_t = simd_op<T, _Elems>;
+	using op_t = details::impl::simd_op<T, _Elems>;
 	using internal_t = typename xbase_t::internal_t;
 	using initlist_t = typename xbase_t::initlist_t;
 	using xbase_t::m_data;
@@ -50,24 +50,21 @@ public:
 	MATRICE_HOST_INL myt& operator* (const Packet_& _other);
 	MATRICE_HOST_INL myt& operator/ (const Packet_& _other);
 	MATRICE_HOST_INL myt  abs() const;
-};
-MATRICE_ARCH_END
-#pragma region <!-- operators -->
-template<typename T, int _N, typename Packet = dgelom::simd::Packet_<T, _N>>
-MATRICE_HOST_FINL auto operator+ (const Packet& _Left, const Packet& _Right);
-template<typename T, int _N, typename Packet = dgelom::simd::Packet_<T, _N>>
-MATRICE_HOST_FINL auto operator- (const Packet& _Left, const Packet& _Right);
-template<typename T, int _N, typename Packet = dgelom::simd::Packet_<T, _N>>
-MATRICE_HOST_FINL auto operator* (const Packet& _Left, const Packet& _Right);
-template<typename T, int _N, typename Packet = dgelom::simd::Packet_<T, _N>>
-MATRICE_HOST_FINL auto operator/ (const Packet& _Left, const Packet& _Right);
 
-MATRICE_NAMESPACE_BEGIN_
-template<typename T, int _N, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-MATRICE_HOST_FINL auto abs (const dgelom::simd::Packet_<T, _N>& _Right);
-template<typename T, int _N, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-MATRICE_HOST_FINL auto reduce(const dgelom::simd::Packet_<T, _N>& _Right);
-_MATRICE_NAMESPACE_END
-#pragma endregion
+	template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>> friend 
+	MATRICE_HOST_FINL Packet operator+ (const Packet_<T, _Elems>& _Left, const Packet_<T, _Elems>& _Right);
+	template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>> friend
+	MATRICE_HOST_FINL Packet operator- (const Packet_<T, _Elems>& _Left, const Packet_<T, _Elems>& _Right);
+	template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>> friend
+	MATRICE_HOST_FINL Packet operator* (const Packet_<T, _Elems>& _Left, const Packet_<T, _Elems>& _Right);
+	template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>> friend
+	MATRICE_HOST_FINL Packet operator/ (const Packet_<T, _Elems>& _Left, const Packet_<T, _Elems>& _Right);
+	template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>> friend
+	MATRICE_HOST_FINL Packet abs(const Packet_<T, _Elems>& _Right);
+	template<typename T, int _Elems, typename = std::enable_if_t<std::is_arithmetic_v<T>>> friend
+	MATRICE_HOST_FINL T reduce(const Packet_<T, _Elems>& _Right);
+};
+
 #include "./inl/_ixpacket.inl"
+MATRICE_ARCH_END
 #endif

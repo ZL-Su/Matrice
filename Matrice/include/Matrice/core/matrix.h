@@ -87,7 +87,7 @@ public:
 	MATRICE_GLOBAL_INL Matrix_(int _rows) noexcept : base_t(_rows, 1) {};
 	MATRICE_GLOBAL_INL Matrix_(Myt&& _other) noexcept : base_t(_other) {};
 	MATRICE_GLOBAL_INL Matrix_(const_my_ref _other) noexcept : base_t(_other) {};
-	template<typename... _Args> MATRICE_GLOBAL_INL Matrix_(_Args... args) noexcept : base_t(args...) {};
+	template<typename... _Args> MATRICE_GLOBAL_INL Matrix_(const _Args&... args) noexcept : base_t(args...) {};
 	//MATRICE_GLOBAL_INL Matrix_() noexcept : base_t() {};
 	//MATRICE_GLOBAL_INL Matrix_(int _rows, int _cols) noexcept : base_t(_rows, _cols) {};
 	//MATRICE_GLOBAL_INL Matrix_(int _rows, int _cols, pointer _data) noexcept : base_t(_rows, _cols, _data) {};
@@ -146,7 +146,7 @@ template<typename _Ty> using Umatrix = Matrix_<_Ty,
 	         Copyright (c) : Zhilong Su 25/May/2018
  ******************************************************************/
 template<typename _Ty>
-class Matrix_<_Ty, -1, -1> : private Base_<_Ty, -1, -1>, public device::Base_<_Ty>
+class Matrix_<_Ty, -1, -1> : public Base_<_Ty, -1, -1>, public device::Base_<_Ty>
 {
 	typedef Base_<_Ty, -1, -1>                   base_t;
 	typedef device::Base_<_Ty>            device_base_t;
@@ -163,18 +163,26 @@ public:
 	enum { Size = -1, CompileTimeRows = -1, CompileTimeCols = -1, };
 	MATRICE_GLOBAL_INL Matrix_(int _rows) noexcept : base_t(_rows, 1), 
 		device_base_t(m_data, &m_pitch, &m_cols, &m_rows) {};
+	MATRICE_GLOBAL_INL Matrix_(const Myt& _other) noexcept : base_t(_other),
+		device_base_t(m_data, &m_pitch, &m_cols, &m_rows) {};
 	MATRICE_GLOBAL_INL Matrix_(Myt&& _other) noexcept : base_t(_other), 
 		device_base_t(m_data, &m_pitch, &m_cols, &m_rows) {};
 	template<int _M = 0, int _N = _M>
-	MATRICE_HOST_INL Matrix_(const Matrix_<_Ty, _M, _N>& _hmtx) noexcept: base_t(_hmtx.rows(), _hmtx.cols()),
+	MATRICE_HOST_INL Matrix_(const Matrix_<_Ty, _M, _N>& _other) noexcept: base_t(_other),
 		device_base_t(m_data, &m_pitch, &m_cols, &m_rows) {};
-	template<typename... _Args> MATRICE_GLOBAL_INL Matrix_(_Args... args) noexcept : base_t(args...), 
+	template<typename... _Args> MATRICE_GLOBAL_INL Matrix_(const _Args&... args) noexcept : base_t(args...), 
 		device_base_t(m_data, &m_pitch, &m_cols, &m_rows) {};
 
 	template<typename _Arg> 
 	MATRICE_GLOBAL_INL Myt& operator= (const _Arg& _arg) { return device_base_t::operator=(_arg); }
 	MATRICE_DEVICE_INL Myt& operator= (Myt&& _other) { return device_base_t::operator=(std::move(_other)); }
 	MATRICE_GLOBAL_INL Myt& operator= (const_init_list _list) { return device_base_t::operator=(_list.begin()); }
+	/*template<int _M, int _N>
+	MATRICE_GLOBAL_INL operator Matrix_<value_t, _M, _N>() const {
+		Matrix_<value_t, _M, _N> _Ret(m_rows, m_cols);
+		privt::unified_sync<value_t, base_t::m_storage.location, _Ret.location, base_t::m_storage.option>::op(_Ret.data(), m_data, m_rows, m_cols, m_pitch);
+		return std::move(_Ret);
+	}*/
 	MATRICE_GLOBAL void create(int_t rows, int_t cols = 1);
 };
 //matrix with CUDA device memory allocator
@@ -200,7 +208,7 @@ class MatrixBase_
 	typedef typename details::Storage_<_Ty>::pointer   pointer;
 	typedef typename details::Storage_<_Ty>::reference reference;
 	typedef typename details::Storage_<_Ty>::idx_t     idx_t;
-	typedef typename details::Location                 loctn_t;
+	typedef typename Location                          loctn_t;
 	typedef MatrixBase_ Myt;
 public:
 	explicit MatrixBase_(const int_t _m, const int_t _n) noexcept;

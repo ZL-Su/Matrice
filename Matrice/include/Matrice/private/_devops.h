@@ -23,7 +23,6 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <cuda_runtime.h>
 MATRICE_DEVICE_BEGIN
 using std::size_t;
-using Loc = dgelom::details::Location;
 enum { LINEAR = 8000, PITCHED = 8001, ARRTARR = 8002, FROMARR = 8003, TOARRAY = 8004, };
 ///<!-- generic first-type base for device operators -->
 template<typename T> struct device_base_v1

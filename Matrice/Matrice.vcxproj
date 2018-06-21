@@ -42,6 +42,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\deps\mkl_1802_ilp64_with_tbb.props" />
     <Import Project="..\Fkl\linking\FKL_x64d.props" />
+    <Import Project="D:\boost_1_67_0\boost.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -114,10 +115,13 @@
     <ClInclude Include="..\..\..\Librares\Ceres1130\ceres\include\ceres\dgelom\extras.h" />
     <ClInclude Include="addin\interface.h" />
     <ClInclude Include="include\Matrice\algs\imageproc.hpp" />
+    <ClInclude Include="include\Matrice\algs\mbspa.h" />
     <ClInclude Include="include\Matrice\algs\similarity.h" />
-    <ClInclude Include="include\Matrice\arch\inl\_ixpackedops.inl.hpp" />
+    <ClInclude Include="include\Matrice\arch\inl\_ixops.hpp" />
+    <ClInclude Include="include\Matrice\arch\inl\_ixdetails.hpp" />
     <ClInclude Include="include\Matrice\arch\ixpacket.h" />
     <ClInclude Include="include\Matrice\arch\_ixbase.h" />
+    <ClInclude Include="include\Matrice\arch\_ixtraits.hpp" />
     <ClInclude Include="include\Matrice\core\matrix.h" />
     <ClInclude Include="include\Matrice\core\solver.h" />
     <ClInclude Include="include\Matrice\core\vector.h" />
@@ -149,6 +153,7 @@
     <ClCompile Include="src\core\solver_impl.cpp" />
     <ClCompile Include="src\core\storage_base_impl.cpp" />
     <ClCompile Include="src\private\_memory.cpp" />
+    <ClCompile Include="src\private\_unified_memory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="addin\Eigen\Cholesky" />

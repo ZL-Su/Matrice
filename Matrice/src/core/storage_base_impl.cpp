@@ -29,8 +29,9 @@ template<typename _Ty> template<Location _Loc, size_t _Opt>
 Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(int_t _rows, int_t _cols)
 	: my_rows(_rows), my_cols(_cols), my_size(my_rows*my_cols)
 {
+	if constexpr (location == Location::OnStack) return;
 #ifdef __CXX11_SHARED__
-	switch (_Loc)
+	switch (location)
 	{
 	case OnHeap:
 	{
@@ -146,7 +147,7 @@ Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(int_t _rows, int_t _cols, pointe
 }
 template<typename _Ty> template<Location _Loc, size_t _Opt>
 Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(const DenseBase & _other)
-	: my_rows(_other.my_rows), my_cols(_other.my_cols), my_size(_other.my_size)
+	: my_rows(_other.my_rows), my_cols(_other.my_cols), my_size(_other.my_size), my_pitch(_other.my_pitch)
 {
 #ifdef __CXX11_SHARED__
 	if constexpr (_Loc == OnStack) {
@@ -173,7 +174,7 @@ Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(const DenseBase & _other)
 }
 template<typename _Ty> template<Location _Loc, size_t _Opt>
 Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(DenseBase && _other)
-	: my_rows(_other.my_rows), my_cols(_other.my_cols), my_size(_other.my_size), my_owner(_other.my_owner),
+	: my_rows(_other.my_rows), my_cols(_other.my_cols), my_size(_other.my_size), my_owner(_other.my_owner), my_pitch(_other.my_pitch),
 #ifdef __CXX11_SHARED__
 	my_shared(std::move(_other.my_shared)), my_data(_other.my_data)
 #else
@@ -251,78 +252,78 @@ Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(std::initializer_list<value_t> _
 	if (_list.size() == 1)
 		for (int_t i = 0; i < my_size; ++i) my_data[i] = _Val;
 	else
-		//privt::unified_sync<value_t, Location::OnStack, Location(location), option>::op(my_data, pointer(_list.begin()), my_rows, my_cols, my_pitch);
+		//privt::unified_sync<value_t, OnStack, Location(location), option>::op(my_data, pointer(_list.begin()), my_rows, my_cols, my_pitch);
 		std::memcpy((void*)my_data, (void*)&(*_list.begin()), my_size * type_bytes<value_t>::value);
 
 	return (*this);
 }
 
 ///<brief> Explicit Specialization </brief>
-template class Storage_<int>::DenseBase<Location::OnStack, LINEAR + COPY>;
-template class Storage_<int>::DenseBase<Location::OnHeap, LINEAR + COPY>;
-template class Storage_<int>::DenseBase<Location::OnGlobal, LINEAR + COPY>;
-template class Storage_<int>::DenseBase<Location::UnSpecified>;
-template class Storage_<char>::DenseBase<Location::OnStack, LINEAR + COPY>;
-template class Storage_<char>::DenseBase<Location::OnHeap, LINEAR + COPY>;
-template class Storage_<char>::DenseBase<Location::OnGlobal, LINEAR + COPY>;
-template class Storage_<char>::DenseBase<Location::UnSpecified>;
-template class Storage_<bool>::DenseBase<Location::OnStack, LINEAR + COPY>;
-template class Storage_<bool>::DenseBase<Location::OnHeap, LINEAR + COPY>;
-template class Storage_<bool>::DenseBase<Location::OnGlobal, LINEAR + COPY>;
-template class Storage_<bool>::DenseBase<Location::UnSpecified>;
-template class Storage_<float>::DenseBase<Location::OnStack, LINEAR + COPY>;
-template class Storage_<float>::DenseBase<Location::OnHeap, LINEAR + COPY>;
-template class Storage_<float>::DenseBase<Location::OnGlobal, LINEAR + COPY>;
-template class Storage_<float>::DenseBase<Location::UnSpecified>;
-template class Storage_<double>::DenseBase<Location::OnStack, LINEAR + COPY>;
-template class Storage_<double>::DenseBase<Location::OnHeap, LINEAR + COPY>;
-template class Storage_<double>::DenseBase<Location::OnGlobal, LINEAR + COPY>;
-template class Storage_<double>::DenseBase<Location::UnSpecified>;
-template class Storage_<unsigned char>::DenseBase<Location::OnStack, LINEAR + COPY>;
-template class Storage_<unsigned char>::DenseBase<Location::OnHeap, LINEAR + COPY>;
-template class Storage_<unsigned char>::DenseBase<Location::OnGlobal, LINEAR + COPY>;
-template class Storage_<unsigned char>::DenseBase<Location::UnSpecified>;
-template class Storage_<int>::DenseBase<Location::OnStack, LINEAR+SHARED>;
-template class Storage_<int>::DenseBase<Location::OnHeap, LINEAR+SHARED>;
-template class Storage_<int>::DenseBase<Location::OnGlobal, LINEAR+SHARED>;
-//template class Storage_<int>::DenseBase<Location::OnDevice, LINEAR+SHARED>;
-//template class Storage_<int>::DenseBase<Location::UnSpecified, LINEAR+SHARED>;
-template class Storage_<char>::DenseBase<Location::OnStack, LINEAR+SHARED>;
-template class Storage_<char>::DenseBase<Location::OnHeap, LINEAR+SHARED>;
-template class Storage_<char>::DenseBase<Location::OnGlobal, LINEAR+SHARED>;
-//template class Storage_<char>::DenseBase<Location::OnDevice, LINEAR+SHARED>;
-//template class Storage_<char>::DenseBase<Location::UnSpecified, LINEAR+SHARED>;
-template class Storage_<bool>::DenseBase<Location::OnStack, LINEAR+SHARED>;
-template class Storage_<bool>::DenseBase<Location::OnHeap, LINEAR+SHARED>;
-template class Storage_<bool>::DenseBase<Location::OnGlobal, LINEAR+SHARED>;
-//template class Storage_<bool>::DenseBase<Location::OnDevice, LINEAR+SHARED>;
-//template class Storage_<bool>::DenseBase<Location::UnSpecified, LINEAR+SHARED>;
-template class Storage_<float>::DenseBase<Location::OnStack, LINEAR+SHARED>;
-template class Storage_<float>::DenseBase<Location::OnHeap, LINEAR+SHARED>;
-template class Storage_<float>::DenseBase<Location::OnGlobal, LINEAR+SHARED>;
-//template class Storage_<float>::DenseBase<Location::OnDevice, LINEAR+SHARED>;
-//template class Storage_<float>::DenseBase<Location::UnSpecified, LINEAR+SHARED>;
-template class Storage_<double>::DenseBase<Location::OnStack, LINEAR+SHARED>;
-template class Storage_<double>::DenseBase<Location::OnHeap, LINEAR+SHARED>;
-template class Storage_<double>::DenseBase<Location::OnGlobal, LINEAR+SHARED>;
-//template class Storage_<double>::DenseBase<Location::OnDevice, LINEAR+SHARED>;
-//template class Storage_<double>::DenseBase<Location::UnSpecified, LINEAR+SHARED>;
-template class Storage_<unsigned char>::DenseBase<Location::OnStack, LINEAR+SHARED>;
-template class Storage_<unsigned char>::DenseBase<Location::OnHeap, LINEAR+SHARED>;
-template class Storage_<unsigned char>::DenseBase<Location::OnGlobal, LINEAR+SHARED>;
-//template class Storage_<unsigned char>::DenseBase<Location::OnDevice, LINEAR+SHARED>;
-//template class Storage_<unsigned char>::DenseBase<Location::UnSpecified, LINEAR+SHARED>;
-template class Storage_<int>::DenseBase<Location::OnDevice, LINEAR>;
-template class Storage_<char>::DenseBase<Location::OnDevice, LINEAR>;
-template class Storage_<bool>::DenseBase<Location::OnDevice, LINEAR>;
-template class Storage_<float>::DenseBase<Location::OnDevice, LINEAR>;
-template class Storage_<double>::DenseBase<Location::OnDevice, LINEAR>;
-template class Storage_<unsigned char>::DenseBase<Location::OnDevice, LINEAR>;
-template class Storage_<int>::DenseBase<Location::OnDevice, PITCHED>;
-template class Storage_<char>::DenseBase<Location::OnDevice, PITCHED>;
-template class Storage_<bool>::DenseBase<Location::OnDevice, PITCHED>;
-template class Storage_<float>::DenseBase<Location::OnDevice, PITCHED>;
-template class Storage_<double>::DenseBase<Location::OnDevice, PITCHED>;
-template class Storage_<unsigned char>::DenseBase<Location::OnDevice, PITCHED>;
+template class Storage_<int>::DenseBase<OnStack, LINEAR + COPY>;
+template class Storage_<int>::DenseBase<OnHeap, LINEAR + COPY>;
+template class Storage_<int>::DenseBase<OnGlobal, LINEAR + COPY>;
+template class Storage_<int>::DenseBase<UnSpecified>;
+template class Storage_<char>::DenseBase<OnStack, LINEAR + COPY>;
+template class Storage_<char>::DenseBase<OnHeap, LINEAR + COPY>;
+template class Storage_<char>::DenseBase<OnGlobal, LINEAR + COPY>;
+template class Storage_<char>::DenseBase<UnSpecified>;
+template class Storage_<bool>::DenseBase<OnStack, LINEAR + COPY>;
+template class Storage_<bool>::DenseBase<OnHeap, LINEAR + COPY>;
+template class Storage_<bool>::DenseBase<OnGlobal, LINEAR + COPY>;
+template class Storage_<bool>::DenseBase<UnSpecified>;
+template class Storage_<float>::DenseBase<OnStack, LINEAR + COPY>;
+template class Storage_<float>::DenseBase<OnHeap, LINEAR + COPY>;
+template class Storage_<float>::DenseBase<OnGlobal, LINEAR + COPY>;
+template class Storage_<float>::DenseBase<UnSpecified>;
+template class Storage_<double>::DenseBase<OnStack, LINEAR + COPY>;
+template class Storage_<double>::DenseBase<OnHeap, LINEAR + COPY>;
+template class Storage_<double>::DenseBase<OnGlobal, LINEAR + COPY>;
+template class Storage_<double>::DenseBase<UnSpecified>;
+template class Storage_<unsigned char>::DenseBase<OnStack, LINEAR + COPY>;
+template class Storage_<unsigned char>::DenseBase<OnHeap, LINEAR + COPY>;
+template class Storage_<unsigned char>::DenseBase<OnGlobal, LINEAR + COPY>;
+template class Storage_<unsigned char>::DenseBase<UnSpecified>;
+template class Storage_<int>::DenseBase<OnStack, LINEAR+SHARED>;
+template class Storage_<int>::DenseBase<OnHeap, LINEAR+SHARED>;
+template class Storage_<int>::DenseBase<OnGlobal, LINEAR+SHARED>;
+//template class Storage_<int>::DenseBase<OnDevice, LINEAR+SHARED>;
+//template class Storage_<int>::DenseBase<UnSpecified, LINEAR+SHARED>;
+template class Storage_<char>::DenseBase<OnStack, LINEAR+SHARED>;
+template class Storage_<char>::DenseBase<OnHeap, LINEAR+SHARED>;
+template class Storage_<char>::DenseBase<OnGlobal, LINEAR+SHARED>;
+//template class Storage_<char>::DenseBase<OnDevice, LINEAR+SHARED>;
+//template class Storage_<char>::DenseBase<UnSpecified, LINEAR+SHARED>;
+template class Storage_<bool>::DenseBase<OnStack, LINEAR+SHARED>;
+template class Storage_<bool>::DenseBase<OnHeap, LINEAR+SHARED>;
+template class Storage_<bool>::DenseBase<OnGlobal, LINEAR+SHARED>;
+//template class Storage_<bool>::DenseBase<OnDevice, LINEAR+SHARED>;
+//template class Storage_<bool>::DenseBase<UnSpecified, LINEAR+SHARED>;
+template class Storage_<float>::DenseBase<OnStack, LINEAR+SHARED>;
+template class Storage_<float>::DenseBase<OnHeap, LINEAR+SHARED>;
+template class Storage_<float>::DenseBase<OnGlobal, LINEAR+SHARED>;
+//template class Storage_<float>::DenseBase<OnDevice, LINEAR+SHARED>;
+//template class Storage_<float>::DenseBase<UnSpecified, LINEAR+SHARED>;
+template class Storage_<double>::DenseBase<OnStack, LINEAR+SHARED>;
+template class Storage_<double>::DenseBase<OnHeap, LINEAR+SHARED>;
+template class Storage_<double>::DenseBase<OnGlobal, LINEAR+SHARED>;
+//template class Storage_<double>::DenseBase<OnDevice, LINEAR+SHARED>;
+//template class Storage_<double>::DenseBase<UnSpecified, LINEAR+SHARED>;
+template class Storage_<unsigned char>::DenseBase<OnStack, LINEAR+SHARED>;
+template class Storage_<unsigned char>::DenseBase<OnHeap, LINEAR+SHARED>;
+template class Storage_<unsigned char>::DenseBase<OnGlobal, LINEAR+SHARED>;
+//template class Storage_<unsigned char>::DenseBase<OnDevice, LINEAR+SHARED>;
+//template class Storage_<unsigned char>::DenseBase<UnSpecified, LINEAR+SHARED>;
+template class Storage_<int>::DenseBase<OnDevice, LINEAR>;
+template class Storage_<char>::DenseBase<OnDevice, LINEAR>;
+template class Storage_<bool>::DenseBase<OnDevice, LINEAR>;
+template class Storage_<float>::DenseBase<OnDevice, LINEAR>;
+template class Storage_<double>::DenseBase<OnDevice, LINEAR>;
+template class Storage_<unsigned char>::DenseBase<OnDevice, LINEAR>;
+template class Storage_<int>::DenseBase<OnDevice, PITCHED>;
+template class Storage_<char>::DenseBase<OnDevice, PITCHED>;
+template class Storage_<bool>::DenseBase<OnDevice, PITCHED>;
+template class Storage_<float>::DenseBase<OnDevice, PITCHED>;
+template class Storage_<double>::DenseBase<OnDevice, PITCHED>;
+template class Storage_<unsigned char>::DenseBase<OnDevice, PITCHED>;
 }
 }

@@ -98,6 +98,8 @@ struct Expr {
 
 		MATRICE_GLOBAL_INL EwiseBinaryExpr(const value_t& _scalar, const ROprd_t& _rhs) noexcept 
 			: _Scalar(_scalar), _LHS(_rhs), _RHS(_rhs) { M = _LHS.rows(), N = _RHS.cols(); }
+		MATRICE_GLOBAL_INL EwiseBinaryExpr(const LOprd_t& _lhs, const value_t& _scalar) noexcept
+			: _Scalar(_scalar), _LHS(_lhs), _RHS(_lhs) { M = _LHS.rows(), N = _RHS.cols(); }
 		MATRICE_GLOBAL_INL EwiseBinaryExpr(const LOprd_t& _lhs, const ROprd_t& _rhs) noexcept 
 			: _LHS(_lhs), _RHS(_rhs) { M = _LHS.rows(), N = _RHS.cols(); }
 

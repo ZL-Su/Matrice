@@ -135,9 +135,6 @@
     <ClInclude Include="..\..\..\Librares\Ceres1130\ceres\include\ceres\dgelom\extras.h">
       <Filter>Header Files\Addin</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\arch\inl\_ixpackedops.inl.hpp">
-      <Filter>Header Files\Arch\Inl</Filter>
-    </ClInclude>
     <ClInclude Include="include\Matrice\algs\imageproc.hpp">
       <Filter>Header Files\Algs</Filter>
     </ClInclude>
@@ -149,6 +146,18 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_unified_memory.h">
       <Filter>Header Files\Private</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\mbspa.h">
+      <Filter>Header Files\Algs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\arch\_ixtraits.hpp">
+      <Filter>Header Files\Arch</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\arch\inl\_ixdetails.hpp">
+      <Filter>Header Files\Arch\Inl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\arch\inl\_ixops.hpp">
+      <Filter>Header Files\Arch\Inl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -172,6 +181,9 @@
     </ClCompile>
     <ClCompile Include="src\core\solver_impl.cpp">
       <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\private\_unified_memory.cpp">
+      <Filter>Source Files\Private</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -21,6 +21,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #if (defined __enable_cuda__ && !defined __disable_cuda__)
 #include "_decl_dev_funcs.h"
 #include "_devops.h"
+#include "_unified_memory.h"
 
 MATRICE_NAMESPACE_BEGIN_TYPES
 template<typename _Ty, int _M, int _N> class Matrix_;
@@ -32,6 +33,7 @@ class Base_
 {
 	using size_t = std::size_t;
 	using intp_t = int*;
+	using value_t = _Ty;
 	using pointer = _Ty * ;
 public:
 	MATRICE_GLOBAL_INL Base_() = default;

@@ -95,7 +95,7 @@ public:
 	typedef typename details::Storage_<_Ty>::pointer              pointer;
 	typedef typename details::Storage_<_Ty>::reference          reference;
 	typedef typename details::Storage_<_Ty>::idx_t                  idx_t;
-	typedef typename details::Location                            loctn_t;
+	typedef typename Location                                     loctn_t;
 	typedef typename pointer                                     iterator;
 	typedef const iterator                                 const_iterator;
 	typedef const std::initializer_list<value_t>          const_init_list;
@@ -115,11 +115,13 @@ public:
 
 	MATRICE_GLOBAL_INL Base_() noexcept :base_t(_M<0?0:_M, _N<0?0:_N), m_storage() { m_data = m_storage.data(); }
 	MATRICE_GLOBAL_INL Base_(int _rows, int _cols) noexcept :base_t(_rows, _cols), m_storage(_rows, _cols) { m_data = m_storage.data(); }
-	MATRICE_GLOBAL_INL Base_(int _rows, int _cols, pointer data) noexcept :base_t(_rows, _cols, data) /*,m_storage(_rows, _cols, data)*/ {}
+	MATRICE_GLOBAL_INL Base_(int _rows, int _cols, pointer data) noexcept :base_t(_rows, _cols, data), m_storage(_rows, _cols, data) {}
 	MATRICE_GLOBAL_INL Base_(int _rows, int _cols, value_t _val) noexcept :base_t(_rows, _cols), m_storage(_rows, _cols, _val) { m_data = m_storage.data(); }
 	MATRICE_GLOBAL_INL Base_(const std::initializer_list<value_t> _list) noexcept :base_t(_M, _N), m_storage(_list) { m_data = m_storage.data(); }
 	MATRICE_GLOBAL_INL Base_(const_myt_ref _other) noexcept :base_t(_other.m_rows, _other.m_cols), m_storage(_other.m_storage) { m_data = m_storage.data(); }
 	MATRICE_GLOBAL_INL Base_(myt_move _other) noexcept :base_t(_other.m_rows, _other.m_cols), m_storage(std::move(_other.m_storage)) { m_data = m_storage.data(); }
+	template<int _Rows, int _Cols>
+	MATRICE_GLOBAL_INL Base_(const Matrix_<value_t, _Rows, _Cols>& _other) noexcept :base_t(_other.rows(), _other.cols()), m_storage(_other.m_storage) { m_data = m_storage.data(); }
 	
 	template<typename _Lhs, typename _Rhs, typename _Op>
 	MATRICE_GLOBAL_INL Base_(const exprs::Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Op>& expr) 
@@ -247,6 +249,7 @@ protected:
 	using base_t::m_data;
 	format_t m_format = RowMajor;
 	type_t m_type = type_t::GDs;
+public:
 	Storage m_storage;
 };
 MATRICE_NAMESPACE_END_TYPES

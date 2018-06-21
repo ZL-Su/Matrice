@@ -34,6 +34,10 @@ namespace dgelom {
 #ifdef MATRICE_ALIGN_BYTES
 #define MATRICE_ALIGNED(type) alignas(MATRICE_ALIGN_BYTES)##type
 #endif
+	typedef enum Location
+	{
+		UnSpecified = -1, OnStack = 0, OnHeap = 1, OnDevice = 2, OnGlobal = 3
+	} loctn_t;
 	enum { COPY = 1001, MOVE = 1002, SHARED = 1000 };
 	enum { LINEAR = 8000, PITCHED = 8001, ARRTARR = 8002, FROMARR = 8003, TOARRAY = 8004, };
 namespace privt {
