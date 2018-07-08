@@ -20,6 +20,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../../util/_macros.h"
 
 #ifdef __AVX__
+#include <mmintrin.h>
 #include <pmmintrin.h>
 #include <tmmintrin.h>
 #include <wmmintrin.h>
@@ -30,7 +31,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 MATRICE_ARCH_BEGIN namespace details{ namespace impl {
 #ifndef MATRICE_HOST_ICEA
-#define MATRICE_HOST_ICEA MATRICE_HOST_INL constexpr auto
+#define MATRICE_HOST_ICEA MATRICE_HOST_FINL constexpr auto
 #endif
 #ifndef HOST_STATIC_INL_CXPR_T
 #define HOST_STATIC_INL_CXPR_T static MATRICE_HOST_FINL constexpr auto 
@@ -42,7 +43,11 @@ template<typename T, int _Elems> struct packet_op_base
 	using pointer = value_t*;
 	using raw_type = conditional_t<value_t, _Elems>;
 };
-template<typename T, int _Elems> struct packet_op { using value_t = T; };
+template<typename T, int _Elems> 
+struct packet_op : packet_op_base<T, _Elems>
+{
+	static_assert(true, "Oops, unsupported type.");
+};
 template<> struct packet_op<size_t, 4> : packet_op_base<size_t, 4>
 {
 	MATRICE_HOST_ICEA operator()(const value_t _Value) const

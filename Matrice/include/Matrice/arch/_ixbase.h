@@ -13,7 +13,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.If not, see <http://www.gnu.org/licenses/>.
+along with this program. If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 #include <initializer_list>
@@ -22,7 +22,6 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #ifdef __AVX__
 #include "./inl/_ixops.hpp"
 MATRICE_ARCH_BEGIN
-
 template<typename T, int _Elems> class simd_base_
 {
 	details::impl::packet_op<T, _Elems> _op;
@@ -45,6 +44,9 @@ public:
 	MATRICE_HOST_FINL auto& operator= (const_internal _arg) { m_data = _arg; return(*this); }
 	MATRICE_HOST_FINL constexpr auto& operator[](size_t i) { return _op(m_data)[i]; }
 	MATRICE_HOST_FINL constexpr const auto& operator[](size_t i) const { return _op(m_data)[i]; }
+	MATRICE_HOST_FINL auto operator() (pointer data) const { _op(m_data, data); }
+	template<typename fwdty>
+	MATRICE_HOST_FINL auto operator() (fwdty& arg) const { _op(m_data, arg.data()); }
 	MATRICE_HOST_FINL auto data() { return (m_data); }
 	MATRICE_HOST_FINL const auto data()const { return (m_data); }
 	MATRICE_HOST_FINL auto begin() { return _op(m_data); }
@@ -54,6 +56,9 @@ public:
 	MATRICE_HOST_FINL auto reduce() { return (_op + begin()); }
 	MATRICE_HOST_FINL const auto reduce()const { return (_op + begin()); }
 	MATRICE_HOST_FINL auto unpack(pointer data) const { _op(m_data, data); }
+	template<typename fwdty>
+	MATRICE_HOST_FINL auto unpack(fwdty& arg) const { _op(m_data, arg.data()); }
+	
 protected:
 	template<typename... _Args> MATRICE_HOST_FINL constexpr
 	auto _Op(_Args... _args)  { return _op(_args...); }
@@ -62,11 +67,10 @@ protected:
 	internal_t m_data;
 };
 
-template<typename T, int _Elems> MATRICE_HOST_INL 
+template<typename T, int _Elems> MATRICE_HOST_FINL 
 T reduce(const simd_base_<T, _Elems>& _Packed)
 {
 	return dgelom::reduce(_Packed.begin(), _Packed.end());
 }
-
 MATRICE_ARCH_END
 #endif

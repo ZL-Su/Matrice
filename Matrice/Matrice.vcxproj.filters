@@ -61,6 +61,12 @@
     <Filter Include="Header Files\Arch\Inl">
       <UniqueIdentifier>{7a24d11a-4018-4aac-b89c-eb8b6042867b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Util\Eigen\src">
+      <UniqueIdentifier>{9d566996-b84a-460c-8f43-9b3cfcb16746}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Algs\Geometry">
+      <UniqueIdentifier>{1d26a66c-7be6-40d6-8bcc-50f3ee2ee1a1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -158,6 +164,51 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\arch\inl\_ixops.hpp">
       <Filter>Header Files\Arch\Inl</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\Eigen\src\Geometry\AlignedBox.h">
+      <Filter>Source Files\Util\Eigen\src</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\Eigen\src\Geometry\AngleAxis.h">
+      <Filter>Source Files\Util\Eigen\src</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\Eigen\src\Geometry\EulerAngles.h">
+      <Filter>Source Files\Util\Eigen\src</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\Eigen\src\Geometry\Homogeneous.h">
+      <Filter>Source Files\Util\Eigen\src</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\Eigen\src\Geometry\Hyperplane.h">
+      <Filter>Source Files\Util\Eigen\src</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\Eigen\src\Geometry\OrthoMethods.h">
+      <Filter>Source Files\Util\Eigen\src</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\Eigen\src\Geometry\ParametrizedLine.h">
+      <Filter>Source Files\Util\Eigen\src</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\Eigen\src\Geometry\Quaternion.h">
+      <Filter>Source Files\Util\Eigen\src</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\Eigen\src\Geometry\Rotation2D.h">
+      <Filter>Source Files\Util\Eigen\src</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\Eigen\src\Geometry\RotationBase.h">
+      <Filter>Source Files\Util\Eigen\src</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\Eigen\src\Geometry\Scaling.h">
+      <Filter>Source Files\Util\Eigen\src</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\Eigen\src\Geometry\Transform.h">
+      <Filter>Source Files\Util\Eigen\src</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\Eigen\src\Geometry\Translation.h">
+      <Filter>Source Files\Util\Eigen\src</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\Eigen\src\Geometry\Umeyama.h">
+      <Filter>Source Files\Util\Eigen\src</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\geometry\transform.h">
+      <Filter>Header Files\Algs\Geometry</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -288,6 +339,9 @@
     </None>
     <None Include="addin\Eigen\UmfPackSupport">
       <Filter>Source Files\Util\Eigen</Filter>
+    </None>
+    <None Include="include\Matrice\private\inl\_storage_base.inl">
+      <Filter>Header Files\Private</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

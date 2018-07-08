@@ -33,25 +33,78 @@ template<typename _Ty> class Matrix;
 template<typename _Ty, int _Rows, int _cols> class Matrix_;
 template<class _Lhs, class _Rhs, typename _BinaryOp> class MatBinaryExpr;
 template<class _Oprd, typename _UnaryOp> class MatUnaryExpr;
-struct Op { template<typename _Ty> struct MatMul; };
 
 struct Expr {
 	using size_t = std::size_t;
 	using default_type = double;
 	enum OpFlag { ewise = 0, mmul = 1, inv = 2, trp = 3, undef = -1 };
+
 	/*factorial_t<N> = N!*/
 	template<int N> struct factorial_t { enum { value = factorial_t<N - 1>::value*N }; };
 	template<> struct factorial_t<0> { enum { value = 1 }; };
+
+	template<int _Option> struct option {enum{value = _Option | expr}; };
+
+	struct Op
+	{
+		template<typename _Ty> using EwiseSum = std::plus<_Ty>;
+		template<typename _Ty> using EwiseMin = std::minus<_Ty>;
+		template<typename _Ty> using EwiseMul = std::multiplies<_Ty>;
+		template<typename _Ty> using EwiseDiv = std::divides<_Ty>;
+		template<typename _Ty> struct MatInv { enum { flag = inv }; MATRICE_GLOBAL _Ty* operator()(int M, _Ty* Out, _Ty* In = nullptr) const; };
+		template<typename _Ty> struct MatTrp { enum { flag = trp }; MATRICE_HOST_FINL _Ty operator()(int M, _Ty* Out, _Ty* i) const { return (Out[int(i[1])*M + int(i[0])]); } };
+		template<typename _Ty> struct SpreadMul
+		{
+			enum { flag = undef };
+			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
+				_Ty operator() (const _Lhs& lhs, const _Rhs& rhs, int r, int c) const { return (lhs(r) * rhs(c)); }
+		};
+		template<typename _Ty> struct MatMul
+		{
+			enum { flag = mmul };
+			template<typename _Rhs> MATRICE_GLOBAL_FINL
+				_Ty operator() (const _Ty* lhs, const _Rhs& rhs, int c, int _plh = 0) const
+			{
+				_Ty val = _Ty(0);
+				const int K = rhs.rows(), N = rhs.cols();
+#ifdef __disable_simd__
+				for (int k = 0; k < K; ++k) val += lhs[k] * rhs(k*N + c);
+#else
+#ifdef __AVX__
+				for (int k = 0; k < K; ++k) val += lhs[k] * rhs(k*N + c);
+#endif
+#endif
+				return (val);
+			}
+			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
+				_Ty operator() (const _Lhs& lhs, const _Rhs& rhs, int r, int c) const
+			{
+				_Ty _Ret = _Ty(0), val = 0;
+				const int K = rhs.rows(), N = rhs.cols(), _Idx = r * lhs.cols();
+#ifdef __disable_simd__
+				for (int k = 0; k < K; ++k) {
+					_Ret += lhs(_Idx + k) * rhs(k*N + c);
+				}
+#else
+#ifdef __AVX__
+				for (int k = 0; k < K; ++k) _Ret += lhs(_Idx + k) * rhs(k*N + c);
+#endif
+#endif
+				return (_Ret);
+			}
+		};
+	};
+
 	template<typename _Op> struct Base_
 	{
 		using Derived = _Op;
 		//using value_type = typename dgelom::conditonal<std::is_class<_Op>::value, typename _Op::value_t, default_type>::type;
-		template<typename _Ty> MATRICE_GLOBAL_INL operator Matrix<_Ty>()
+		template<typename _Ty> MATRICE_GLOBAL_FINL operator Matrix<_Ty>()
 		{
 			Matrix<_Ty> ret(static_cast<Derived*>(this)->rows(), static_cast<Derived*>(this)->cols());
 			return (ret = *static_cast<Derived*>(this));
 		}
-		template<typename _Ty, int _M, int _N> MATRICE_GLOBAL_INL operator Matrix_<_Ty, _M, _N>()
+		template<typename _Ty, int _M, int _N> MATRICE_GLOBAL_FINL operator Matrix_<_Ty, _M, _N>()
 		{
 			Matrix<_Ty> ret; return (ret = *static_cast<Derived*>(this));
 		}
@@ -60,13 +113,20 @@ struct Expr {
 			_OutType ret(static_cast<const Derived*>(this)->rows(), static_cast<const Derived*>(this)->cols());
 			return (ret = *static_cast<const Derived*>(this));
 		}
-		template<typename _OutType> MATRICE_GLOBAL_INL void assign(_OutType& res) const
+		template<typename _OutType> MATRICE_GLOBAL_INL _OutType& assign(_OutType& res) const
 		{
-			if (res.size() == 0) res.create(M, N); static_cast<const Derived*>(this)->assign(res);
+#ifdef _DEBUG
+			if (res.size() == 0) res.create(M, N);
+#endif
+			static_cast<const Derived*>(this)->assign_to(res);
+			return (res);
 		}
 		template<typename _OutType> MATRICE_GLOBAL_INL void synch(_OutType& res) const
 		{
-			if (res.size() == 0) res.create(M, N); static_cast<const Derived*>(this)->assign(res);
+#ifdef _DEBUG
+			if (res.size() == 0) res.create(M, N);
+#endif
+			static_cast<const Derived*>(this)->assign(res);
 		}
 		template<typename _Rhs> MATRICE_GLOBAL_INL
 		MatBinaryExpr<Derived, _Rhs, Op::MatMul<typename _Rhs::value_t>> mul(const _Rhs& _rhs)
@@ -80,17 +140,18 @@ struct Expr {
 			for (int i = 0; i < n; ++i) val += static_cast<const Derived*>(this)->operator()(i);
 			return (val);
 		}
-		MATRICE_GLOBAL_INL size_t size() const { return M*N; }
-		MATRICE_GLOBAL_INL size_t rows() const { return M; }
-		MATRICE_GLOBAL_INL size_t cols() const { return N; }
+		MATRICE_GLOBAL_FINL size_t size() const { return M*N; }
+		MATRICE_GLOBAL_FINL size_t rows() const { return M; }
+		MATRICE_GLOBAL_FINL size_t cols() const { return N; }
 	protected:
 		size_t M, K, N;
 	};
-	template<typename _T1, typename _T2, typename _BinaryOp>
-	class EwiseBinaryExpr : public Base_<EwiseBinaryExpr<_T1, _T2, _BinaryOp>>
+
+	template<typename _T1, typename _T2, typename _BinaryOp> class EwiseBinaryExpr 
+		: public Base_<EwiseBinaryExpr<_T1, _T2, _BinaryOp>>
 	{
 	public:
-		enum { options = ewise };
+		enum { options = option<ewise>::value };
 		using LOprd_t = _T1;
 		using ROprd_t = _T2;
 		using value_t = typename dgelom::conditional<std::is_scalar_v<_T1>, _T1, typename _T1::value_t>::type;
@@ -113,7 +174,7 @@ struct Expr {
 			if (_Scalar == inf) return _Op(_LHS(_idx), _RHS(_idx));
 			if (_Scalar != inf) return _Op(_Scalar, _RHS(_idx));
 		}
-		template<typename _OutType> MATRICE_GLOBAL_INL void assign(_OutType& res) const
+		template<typename _Mty> MATRICE_GLOBAL_INL void assign_to(_Mty& res) const
 		{
 			for (size_t i = 0; i < res.size(); ++i) res(i) = this->operator()(i);
 		}
@@ -126,11 +187,12 @@ struct Expr {
 		using Base_<EwiseBinaryExpr<_T1, _T2, _BinaryOp>>::M;
 		using Base_<EwiseBinaryExpr<_T1, _T2, _BinaryOp>>::N;
 	};
-	template<class _T1, class _T2, typename _BinaryOp>
-	class MatBinaryExpr : public Base_<MatBinaryExpr<_T1, _T2, _BinaryOp>>
+
+	template<class _T1, class _T2, typename _BinaryOp> class MatBinaryExpr 
+		: public Base_<MatBinaryExpr<_T1, _T2, _BinaryOp>>
 	{
 	public:
-		enum{options = _BinaryOp::flag};
+		enum{options = option<_BinaryOp::flag>::value};
 		using LOprd_t = _T1; using ROprd_t = _T2;
 		using value_t = typename dgelom::conditonal<std::is_class<_T1>::value, typename _T1::value_t, default_type>::type;
 
@@ -153,7 +215,7 @@ struct Expr {
 			int r = _idx / N, c = _idx - r * N;
 			return _Op(_LHS, _RHS, r, c);
 		}
-		template<typename _OutType> MATRICE_GLOBAL_INL void assign(_OutType& res) const
+		template<typename _Mty> MATRICE_GLOBAL_INL void assign_to(_Mty& res) const
 		{
 			for (int i = 0; i < res.size(); ++i) res(i) = this->operator()(i);
 		}
@@ -165,55 +227,59 @@ struct Expr {
 		using Base_<MatBinaryExpr<_T1, _T2, _BinaryOp>>::K;
 		using Base_<MatBinaryExpr<_T1, _T2, _BinaryOp>>::N;
 	};
-	template<class _Oprd, typename _UnaryOp>
-	class MatUnaryExpr : public Base_<MatUnaryExpr<_Oprd, _UnaryOp>>
+
+	template<class _Oprd, typename _UnaryOp> class MatUnaryExpr 
+		: public Base_<MatUnaryExpr<_Oprd, _UnaryOp>>
 	{
 	public:
-		enum {options = _UnaryOp::flag};
+		enum {options = option<_UnaryOp::flag>::value};
 		using value_t = typename dgelom::conditonal<std::is_class<_Oprd>::value, typename _Oprd::value_t, typename dgelom::conditonal<std::is_scalar<_Oprd>::value, _Oprd, default_type>::type>::type;
-		MATRICE_GLOBAL_INL MatUnaryExpr(const _Oprd& inout) noexcept
+		MATRICE_GLOBAL_FINL MatUnaryExpr(const _Oprd& inout) noexcept
 			: _RHS(inout), _ANS(inout) {
-			M = _RHS.rows(), N = _RHS.cols(); 
-			if constexpr (options == OpFlag::trp) std::swap(M, N);
+			M = _RHS.rows(), N = _RHS.cols();
+			if constexpr (options & trp == trp) std::swap(M, N);
 		}
-		MATRICE_GLOBAL_INL MatUnaryExpr(const _Oprd& _rhs, _Oprd& _ans)
+		MATRICE_GLOBAL_FINL MatUnaryExpr(const _Oprd& _rhs, _Oprd& _ans)
 			: _RHS(_rhs), _ANS(_ans) {
 			M = _RHS.rows(), N = _RHS.cols();
-			if constexpr (options == OpFlag::trp) std::swap(M, N);
+			if constexpr (options & trp == trp) std::swap(M, N);
 		}
-		MATRICE_GLOBAL_INL MatUnaryExpr(MatUnaryExpr&& _other)
+		MATRICE_GLOBAL_FINL MatUnaryExpr(MatUnaryExpr&& _other)
 			: options(_other.options) {
 			*this = std::move(_other);
 		}
 
-		MATRICE_GLOBAL_INL auto operator()() const 
+		MATRICE_GLOBAL_FINL auto operator()() const 
 		{ 
 			return _Op(M, _ANS.data(), _RHS.data());
 		}
-		MATRICE_GLOBAL_INL value_t operator() (int r, int c) const 
+		MATRICE_GLOBAL_FINL value_t operator() (int r, int c) const 
 		{ 
-			if constexpr (options == OpFlag::inv) return _ANS(c + r * N);
-			if constexpr (options == OpFlag::trp) return _ANS(r + c * N);
+			if constexpr (options & inv == inv) return _ANS(c + r * N);
+			if constexpr (options & trp == trp) return _ANS(r + c * N);
 		}
-		MATRICE_GLOBAL_INL value_t operator() (int _idx) const 
+		MATRICE_GLOBAL_FINL value_t operator() (int _idx) const 
 		{ 
-			if constexpr (options == OpFlag::trp) _idx = _idx * M + _idx / N * (1 - N * M);
+			if constexpr (options & trp == trp)
+				_idx = _idx * M + _idx / N * (1 - N * M);
 			return _ANS(_idx);
 		}
-		MATRICE_GLOBAL_INL const _Oprd& ans() const { return _ANS; }
+		MATRICE_GLOBAL_FINL _Oprd& ans() { return _ANS; }
+		MATRICE_GLOBAL_FINL const _Oprd& ans() const { return _ANS; }
 		template<typename _Rhs, typename _Ret = MatBinaryExpr<MatUnaryExpr, _Rhs, Op::MatMul<value_t>>> MATRICE_GLOBAL_INL _Ret mul(const _Rhs& _rhs)
 		{
-			if constexpr (options == OpFlag::inv) {
-				this->operator()(); return _Ret(*this, _rhs);
-			}
-			if constexpr (options == OpFlag::trp) {
-				return _Ret(*this, _rhs);
-			}
+			if constexpr (options & inv == inv) this->operator()();
+			if constexpr (options & trp == trp)                   ;
+			return _Ret(*this, _rhs);
 		}
-		template<typename _OutType> MATRICE_GLOBAL_INL void assign(_OutType& res) const
+		template<typename _Mty> MATRICE_GLOBAL_INL void assign_to(_Mty& res) const
 		{
-			if constexpr (_UnaryOp::flag == inv) _Op(M, res.data(), _RHS.data());
-			if constexpr (_UnaryOp::flag == trp) for (int i = 0; i < size(); ++i) res(i) = (*this)(i);
+			if constexpr (options & inv == inv) {
+				_Op(M, res.data(), _RHS.data());
+			}
+			if constexpr (options & trp == trp) {
+				for (int i = 0; i < size(); ++i) res(i) = (*this)(i);
+			}
 		} /*i*N+(1-N*M)*(i/M) is replaced by i at left hand*/
 	private:
 		const _Oprd& _RHS;
@@ -222,53 +288,6 @@ struct Expr {
 		using Base_<MatUnaryExpr<_Oprd, _UnaryOp>>::M;
 		using Base_<MatUnaryExpr<_Oprd, _UnaryOp>>::N;
 		using Base_<MatUnaryExpr<_Oprd, _UnaryOp>>::size;
-	};
-	struct Op 
-	{
-	template<typename _Ty> using EwiseSum = std::plus<_Ty>;
-	template<typename _Ty> using EwiseMin = std::minus<_Ty>;
-	template<typename _Ty> using EwiseMul = std::multiplies<_Ty>;
-	template<typename _Ty> using EwiseDiv = std::divides<_Ty>;
-	template<typename _Ty> struct MatInv { enum { flag = inv }; MATRICE_GLOBAL _Ty* operator()(int M, _Ty* Out, _Ty* In = nullptr) const; };
-	template<typename _Ty> struct MatTrp { enum { flag = trp }; MATRICE_HOST_INL _Ty operator()(int M, _Ty* Out, _Ty* i) const { return (Out[int(i[1])*M + int(i[0])]); } };
-	template<typename _Ty> struct SpreadMul
-	{
-		enum { flag = undef };
-		template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_INL
-		_Ty operator() (const _Lhs& lhs, const _Rhs& rhs, int r, int c) const { return (lhs(r) * rhs(c)); }
-	};
-	template<typename _Ty> struct MatMul
-	{
-		enum { flag = mmul };
-		template<typename _Rhs> MATRICE_GLOBAL
-		_Ty operator() (const _Ty* lhs, const _Rhs& rhs, int c, int _plh = 0) const
-		{
-			_Ty val = _Ty(0);
-			const int K = rhs.rows(), N = rhs.cols();
-#ifdef __disable_simd__
-			for (int k = 0; k < K; ++k) val += lhs[k] * rhs(k*N + c);
-#else
-#ifdef __AVX__
-			for (int k = 0; k < K; ++k) val += lhs[k] * rhs(k*N + c);
-#endif
-#endif
-			return (val);
-		}
-		template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_INL
-		_Ty operator() (const _Lhs& lhs, const _Rhs& rhs, int r, int c) const
-		{
-			_Ty val = _Ty(0);
-			const int K = rhs.rows(), N = rhs.cols(), idx = r * lhs.cols();
-#ifdef __disable_simd__
-			for (int k = 0; k < K; ++k) val += lhs(idx + k) * rhs(k*N + c);
-#else
-#ifdef __AVX__
-			for (int k = 0; k < K; ++k) val += lhs(idx + k) * rhs(k*N + c);
-#endif
-#endif
-			return (val);
-		}
-	};
 	};
 };
 

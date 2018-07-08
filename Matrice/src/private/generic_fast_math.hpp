@@ -22,7 +22,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <host_defines.h>
 #define __global_inl__ __inline__ __host__ __device__
 #else
-#define __global_inl__ inline
+#define __global_inl__ __forceinline
 #endif
 
 namespace dgelom { namespace privt {

@@ -23,6 +23,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <list>
 #include <utility>
 #include <algorithm>
+#include <numeric>
 
 #include <boost/array.hpp>
 #include <boost/multi_array.hpp>
@@ -41,8 +42,9 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #include "../util/genalgs.h"
 #include "../arch/ixpacket.h"
+#include "../core/vector.h"
 
-namespace mba {
+namespace dgelom {
 	template<typename T, size_t N>
 	using plane_array = std::array<T, N>;
 	namespace detail {
@@ -71,9 +73,9 @@ namespace mba {
 				done = (0 == dim);
 			}
 
-			size_t operator[](size_t d) const { return i[d]; }
-			const index& operator*() const { return i; }
-			size_t position() const { return idx; }
+			MATRICE_HOST_FINL size_t operator[](size_t d) const { return i[d]; }
+			MATRICE_HOST_FINL const index& operator*() const { return i; }
+			MATRICE_HOST_FINL size_t position() const { return idx; }
 
 			grid_iterator& operator++() {
 				done = true;
@@ -88,7 +90,7 @@ namespace mba {
 				return *this;
 			}
 
-			operator bool() const { return !done; }
+			MATRICE_HOST_FINL operator bool() const { return !done; }
 
 		private:
 			index N, i;
@@ -119,26 +121,21 @@ namespace mba {
 
 		// Value of k-th B-Spline basic function at t.
 		template<typename _T, typename = std::enable_if_t<std::is_arithmetic_v<_T>>>
-		inline constexpr _T Bspline(size_t k, _T t) {
+		MATRICE_HOST_FINL constexpr _T _Bspline_kernel(size_t k, _T t) {
 			assert(0 <= t && t < 1);
 			assert(k < 4);
 
 			switch (k) {
-			case 0:
-				return (t * (t * (-t + 3) - 3) + 1) / 6;
-			case 1:
-				return (t * t * (3 * t - 6) + 4) / 6;
-			case 2:
-				return (t * (t * (-3 * t + 3) + 3) + 1) / 6;
-			case 3:
-				return t * t * t / 6;
-			default:
-				return 0;
+			case 0: return (t * (t * (-t + 3) - 3) + 1) / 6;
+			case 1: return (t * t * (3 * t - 6) + 4) / 6;
+			case 2: return (t * (t * (-3 * t + 3) + 3) + 1) / 6;
+			case 3: return t * t * t / 6;
+			default: return 0;
 			}
 		}
 
 		// Checks if p is between lo and hi
-		template <typename T, size_t N>
+		template <typename T, size_t N> MATRICE_HOST_FINL
 		bool boxed(const plane_array<T, N> &lo, const plane_array<T, N> &p, const plane_array<T, N> &hi) {
 			for (unsigned i = 0; i < N; ++i) {
 				if (p[i] < lo[i] || p[i] > hi[i]) return false;
@@ -146,11 +143,11 @@ namespace mba {
 			return true;
 		}
 		template<typename _T, typename = std::enable_if_t<std::is_arithmetic_v<_T>>>
-		inline _T safe_divide(_T a, _T b) {
+		MATRICE_HOST_FINL _T safe_divide(_T a, _T b) {
 			return b == 0.0 ? 0.0 : a / b;
 		}
 
-		template <typename _T, unsigned _Nod> class control_lattice 
+		template<typename _T, unsigned _Nod> class control_lattice 
 		{
 		public:
 			using value_t = _T;
@@ -161,7 +158,7 @@ namespace mba {
 
 			virtual value_t operator()(const point &p) const = 0;
 
-			virtual void report(std::ostream&) const = 0;
+			virtual void report(std::ostream& os) const = 0;
 
 			template <class CooIter, class ValIter>
 			value_t residual(CooIter coo_begin, CooIter coo_end, ValIter val_begin) const {
@@ -188,7 +185,7 @@ namespace mba {
 			initial_approximation(std::function<value_t(const point&)> f)
 				: f(f) {}
 
-			value_t operator()(const point &p) const { return f(p); }
+			MATRICE_HOST_FINL value_t operator()(const point &p) const { return f(p); }
 
 			void report(std::ostream &os) const {os << "initial approximation";}
 
@@ -242,7 +239,7 @@ namespace mba {
 					for (grid_iterator<_Nod> d(4); d; ++d) {
 						value_t prod = 1.0;
 						for (unsigned k = 0; k < _Nod; ++k)
-							prod *= Bspline(d[k], s[k]);
+							prod *= _Bspline_kernel(d[k], s[k]);
 
 						w[d.position()] = prod;
 						sum_w2 += prod * prod;
@@ -281,11 +278,10 @@ namespace mba {
 
 				for (grid_iterator<_Nod> d(4); d; ++d) {
 					value_t w = 1.0;
-					for (unsigned k = 0; k < _Nod; ++k) w *= Bspline(d[k], s[k]);
+					for (unsigned k = 0; k < _Nod; ++k) w *= _Bspline_kernel(d[k], s[k]);
 
 					f += w * phi(i + (*d));
 				}
-
 				return f;
 			}
 
@@ -387,7 +383,7 @@ namespace mba {
 					for (grid_iterator<_Nod> d(4); d; ++d) {
 						value_t prod = 1.0;
 						for (unsigned k = 0; k < _Nod; ++k) 
-							prod *= Bspline(d[k], s[k]);
+							prod *= _Bspline_kernel(d[k], s[k]);
 
 						w[d.position()] = prod;
 						sum_w2 += prod * prod;
@@ -425,9 +421,9 @@ namespace mba {
 				for (grid_iterator<_Nod> d(4); d; ++d) {
 					value_t w = 1.0;
 					for (unsigned k = 0; k < _Nod; ++k) 
-						w *= Bspline(d[k], s[k]);
+						w *= _Bspline_kernel(d[k], s[k]);
 
-					f += w * _Get_hpi(i + (*d));
+					f += w * _Get_phi(i + (*d));
 				}
 
 				return f;
@@ -468,7 +464,7 @@ namespace mba {
 				boost::transform(a, b, boost::begin(a), std::plus<value_t>());
 			}
 
-			value_t _Get_hpi(const index &i) const {
+			value_t _Get_phi(const index &i) const {
 				typename sparse_grid::const_iterator c = phi.find(i);
 				return c == phi.end() ? 0.0 : c->second;
 			}
@@ -482,7 +478,7 @@ namespace mba {
 		using value_t = _T;
 		typedef typename detail::control_lattice<value_t, _Nod>::point point;
 
-		template <class CooIter, class ValIter>
+		template <class CooIter, class ValIter> inline
 		linear_approximation(CooIter coo_begin, CooIter coo_end, ValIter val_begin)
 		{
 			namespace ublas = boost::numeric::ublas;
@@ -497,7 +493,7 @@ namespace mba {
 			}
 
 			ublas::matrix<value_t> A(_Nod + 1, _Nod + 1); A.clear();
-			ublas::vector<value_t> f(_Nod + 1);         f.clear();
+			ublas::vector<value_t> f(_Nod + 1);           f.clear();
 
 			CooIter p = coo_begin;
 			ValIter v = val_begin;
@@ -541,7 +537,7 @@ namespace mba {
 			}
 		}
 
-		value_t operator()(const point &p) const {
+		inline value_t operator()(const point &p) const {
 			value_t f = C[_Nod];
 
 			for (unsigned i = 0; i < _Nod; ++i)
@@ -553,12 +549,19 @@ namespace mba {
 		plane_array<value_t, _Nod + 1> C;
 	};
 
-	template <typename _T, size_t _Nod> class MBA {
+	template <typename _T, size_t _Nod, size_t _Max_levels = 8> class MBA {
 	public:
 		using value_t = _T;
 		typedef plane_array<size_t, _Nod> index;
 		typedef plane_array<value_t, _Nod> point;
-
+		using point_t = types::Vec_<value_t, _Nod>;
+		struct configration {
+			value_t tolerance = std::numeric_limits<value_t>::epsilon();
+			value_t min_fill = 0.5;
+			types::Vec4_<value_t> range; //{min_x, min_y, max_x, max_y}
+			plane_array<size_t, _Nod> grid = { 3, 3 }; //
+			
+		};
 		template <class CooIter, class ValIter>
 		MBA(
 			const point &coo_min, const point &coo_max, index grid,
@@ -589,22 +592,24 @@ namespace mba {
 			);
 		}
 
-		value_t operator()(const point &p) const {
-			value_t f = 0.0;
-
-			//BOOST_FOREACH(const std::shared_ptr<lattice> &psi, cl) { f += (*psi)(p); }
-			dgelom::for_each(cl, [&](const auto& psi) {f += (*psi)(p); });
-
+		template <class CooRange, class ValRange>
+		MBA(const configration& config, CooRange coo, ValRange val, std::function<value_t(point)> initial = std::function<value_t(point)>())
+		{
+			_Init(point{config.range.x, config.range.y}, 
+				   point{config.range.z, config.range.w}, config.grid,
+				   boost::begin(coo), boost::end(coo), boost::begin(val),
+				   _Max_levels, config.tolerance, config.min_fill, initial);
+		}
+		// \param: p - the interpolation point
+		inline value_t operator()(const types::Vec_<value_t, _Nod> &p) const 
+		{
+			value_t f = 0.0; point _P = p;
+			dgelom::for_each(cl, [&](const auto& psi) {f += (*psi)(_P); });
 			return f;
 		}
 
 		friend std::ostream& operator<<(std::ostream &os, const MBA &h) {
 			size_t level = 0;
-			/*BOOST_FOREACH(const std::shared_ptr<lattice> &psi, h.cl) {
-				os << "level " << ++level << ": ";
-				psi->report(os);
-				os << std::endl;
-			}*/
 			dgelom::for_each(h.cl, [&](const auto& psi) {
 				os << "level " << ++level << ": ";
 				psi->report(os);
@@ -620,7 +625,7 @@ namespace mba {
 		typedef detail::control_lattice_sparse<value_t, _Nod> sparse_lattice;
 
 
-		std::list< std::shared_ptr<lattice> > cl;
+		std::list<std::shared_ptr<lattice>> cl;
 
 		template <class CooIter, class ValIter>
 		void _Init(
@@ -630,14 +635,14 @@ namespace mba {
 			std::function<value_t(point)> initial
 		)
 		{
-			using namespace mba::detail;
+			using namespace dgelom::detail;
 
 			const ptrdiff_t n = std::distance(coo_begin, coo_end);
 			std::vector<value_t> val(val_begin, val_begin + n);
 
-			value_t res, eps = 0.0;
-			for (ptrdiff_t i = 0; i < n; ++i)
-				eps = std::max(eps, std::abs(val[i]));
+			value_t res = value_t(0);
+			auto minmax = std::minmax_element(val.begin(), val.end());
+			auto eps = std::max(std::abs(*minmax.first), std::abs(*minmax.second));
 			eps *= tol;
 
 			if (initial) {

@@ -62,42 +62,32 @@ public:
 	MATRICE_ALIGNED_CLASS DenseBase {
 	public:
 		enum { location = _Loc, option = _Opt };
-		MATRICE_GLOBAL_FINL DenseBase()
-			: my_rows(0), my_cols(0), my_size(0), my_data(0), my_owner(Dummy) {}
-		MATRICE_GLOBAL_FINL DenseBase(int_t _rows, int_t _cols, pointer _data)
-			: my_rows(_rows), my_cols(_cols), my_size(my_rows*my_cols), my_data(_data), my_owner(location == OnStack ? Owner : Proxy) {}
+		MATRICE_GLOBAL_FINL DenseBase();
+		MATRICE_GLOBAL_FINL DenseBase(int_t _rows, int_t _cols, pointer _data);
+		MATRICE_GLOBAL_FINL DenseBase(int_t _rows, int_t _cols, pointer _data, std::initializer_list<value_t> _list);
 		MATRICE_GLOBAL DenseBase(int_t _rows, int_t _cols);
 		MATRICE_GLOBAL DenseBase(int_t _rows, int_t _cols, const value_t _val);
-		MATRICE_GLOBAL DenseBase(int_t _rows, int_t _cols, pointer _data, std::initializer_list<value_t> _list);
 		MATRICE_GLOBAL DenseBase(const DenseBase& _other);
 		MATRICE_GLOBAL DenseBase(DenseBase&& _other);
 		template<Location _From, size_t _Option>
-		MATRICE_GLOBAL DenseBase(const DenseBase<_From, _Option>& _other, pointer _data) 
-			: DenseBase<_Loc, _Opt>(_other.rows(), _other.cols(), _data)
-		{
-			privt::unified_sync<value_t, _From, _Loc, _Option>::op(my_data, _other.data(), my_rows, my_cols, _other.pitch());
-		}
+		MATRICE_GLOBAL_FINL DenseBase(const DenseBase<_From, _Option>& _other, pointer _data);
 		template<Location _From, size_t _Option>
-		MATRICE_GLOBAL DenseBase(const DenseBase<_From, _Option>& _other)
-			: DenseBase<_Loc, _Opt>(_other.rows(), _other.cols())
-		{
-			privt::unified_sync<value_t, _From, _Loc, _Loc == OnDevice ? option : _Option>::op(my_data, _other.data(), my_rows, my_cols, _Loc == OnDevice ? my_pitch : _other.pitch());
-		}
-		MATRICE_GLOBAL ~DenseBase();
+		MATRICE_GLOBAL_FINL DenseBase(const DenseBase<_From, _Option>& _other);
+		MATRICE_GLOBAL_FINL ~DenseBase();
 
 		///<brief> operators </brief>
 		MATRICE_GLOBAL DenseBase& operator=(const DenseBase& _other);
 		MATRICE_GLOBAL DenseBase& operator=(DenseBase&& _other);
-		MATRICE_GLOBAL DenseBase& operator=(std::initializer_list<value_t> _list);
+		MATRICE_GLOBAL_FINL auto& operator=(std::initializer_list<value_t> _list);
 
 		///<brief> methods </brief>
-		MATRICE_GLOBAL_INL int_t& size() const { return (my_size);}
-		MATRICE_GLOBAL_INL int_t& rows() const { return (my_rows); }
-		MATRICE_GLOBAL_INL int_t& cols() const { return (my_cols); }
-		MATRICE_GLOBAL_INL size_t pitch() const { return (my_pitch); }
-		MATRICE_GLOBAL_INL pointer data() const { return (my_data); }
-		MATRICE_GLOBAL_INL Ownership& owner() const { return my_owner; }
-		MATRICE_GLOBAL_INL bool shared() const 
+		MATRICE_GLOBAL_FINL int_t& size() const { return (my_size);}
+		MATRICE_GLOBAL_FINL int_t& rows() const { return (my_rows); }
+		MATRICE_GLOBAL_FINL int_t& cols() const { return (my_cols); }
+		MATRICE_GLOBAL_FINL size_t pitch() const { return (my_pitch); }
+		MATRICE_GLOBAL_FINL pointer data() const { return (my_data); }
+		MATRICE_GLOBAL_FINL Ownership& owner() const { return my_owner; }
+		MATRICE_GLOBAL_FINL bool shared() const 
 		{
 #ifdef __CXX11_SHARED__
 			return (my_shared.get());
@@ -105,7 +95,7 @@ public:
 			return 0;
 #endif
 		}
-		MATRICE_GLOBAL_INL void free()
+		MATRICE_GLOBAL_FINL void free()
 		{
 			my_cols = 0, my_rows = 0, my_size = 0;
 			my_owner = Dummy, my_pitch = 0;
@@ -138,14 +128,14 @@ public:
 		typedef DenseBase<OnStack, _Opt> Base;
 	public:
 		enum { location = Base::location, option = Base::option };
-		MATRICE_HOST_INL Allocator(int ph1=0, int ph2=0) : Base(_M, _N, _Data) {}
-		MATRICE_HOST_INL Allocator(int ph1, int ph2, pointer data) : Base(_M, _N, data) {}
-		MATRICE_HOST_INL Allocator(std::initializer_list<value_t> _list) : Base(_M, _N, _Data, _list) {}
-		MATRICE_HOST_INL Allocator(const Allocator& _other) : Base(_M, _N, privt::fill_mem(_other._Data, _Data, _other.my_size)) {}
-		MATRICE_HOST_INL Allocator(Allocator&& _other) : Base(std::move(_other)) {}
+		MATRICE_HOST_FINL Allocator(int ph1=0, int ph2=0) : Base(_M, _N, _Data) {}
+		MATRICE_HOST_FINL Allocator(int ph1, int ph2, pointer data) : Base(_M, _N, data) {}
+		MATRICE_HOST_FINL Allocator(std::initializer_list<value_t> _list) : Base(_M, _N, _Data, _list) {}
+		MATRICE_HOST_FINL Allocator(const Allocator& _other) : Base(_M, _N, privt::fill_mem(_other._Data, _Data, _other.my_size)) {}
+		MATRICE_HOST_FINL Allocator(Allocator&& _other) : Base(std::move(_other)) {}
 		template<typename... _Args>
-		MATRICE_HOST_INL Allocator(const _Args&... _args) : Base(_args..., _Data) {}
-		MATRICE_HOST_INL Allocator& operator= (const Allocator& _other)
+		MATRICE_HOST_FINL Allocator(const _Args&... _args) : Base(_args..., _Data) {}
+		MATRICE_HOST_FINL Allocator& operator= (const Allocator& _other)
 		{
 			Base::my_data = _Data;
 			Base::my_cols = _other.my_cols;
@@ -217,7 +207,7 @@ public:
 		MATRICE_GLOBAL_INL std::size_t pitch() const { return Base::my_pitch; }
 	};
 
-
+#pragma region <!-- decrepated -->
 	///<brief> specialization allocator classes </brief>
 	template<class DerivedAllocator, Location _Loc> class Base_
 	{
@@ -327,7 +317,7 @@ public:
 	private:
 		using _Base::m_data;
 	};
+#pragma endregion
 };
-}
-}
-
+}} 
+#include "inl\_storage_base.inl"

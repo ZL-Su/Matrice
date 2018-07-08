@@ -69,10 +69,7 @@ ValueType* fill_mem(const ValueType* src, ValueType* dst, Integer size)
 	return (dst);
 }
 
-//#ifdef __enable_cuda__
-//template<typename ValueType> ValueType* global_malloc(ValueType* devptr, std::size_t N);
-//template<typename ValueType> void device_free(ValueType* devptr);
-//#endif
+
 
 }
 }

@@ -137,14 +137,7 @@ Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(int_t _rows, int_t _cols, const 
 #endif
 	if constexpr (_Loc != OnDevice) for (std::size_t i = 0; i < my_size; ++i) my_data[i] = _val;
 }	
-template<typename _Ty> template<Location _Loc, size_t _Opt>
-Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(int_t _rows, int_t _cols, pointer _data, std::initializer_list<value_t> _list)
-	: my_rows(_rows), my_cols(_cols), my_data(_data), my_size(my_rows*my_cols), my_owner(Owner)
-{
-	if (_list.size() == 1) 
-		for (int_t i = 0; i < my_size; ++i) my_data[i] = *_list.begin();
-	else std::memcpy((void*)my_data, (void*)&(*_list.begin()), _list.size() * type_bytes<value_t>::value);
-}
+
 template<typename _Ty> template<Location _Loc, size_t _Opt>
 Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(const DenseBase & _other)
 	: my_rows(_other.my_rows), my_cols(_other.my_cols), my_size(_other.my_size), my_pitch(_other.my_pitch)
@@ -187,18 +180,7 @@ Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(DenseBase && _other)
 	_other.my_rows = 0, _other.my_cols = 0, _other.my_size = 0;
 	_other.my_data = 0, _other.my_owner = Dummy;
 }
-template<typename _Ty> template<Location _Loc, size_t _Opt>
-Storage_<_Ty>::DenseBase<_Loc, _Opt>::~DenseBase()
-{
-#ifndef __CXX11_SHARED__
-	if (my_data && my_owner = Owner)
-	{
-		if constexpr (_Loc == OnHeap) privt::aligned_free(my_data);
-		if constexpr (my_location == OnGlobal) privt::device_free(my_data);
-		if constexpr (my_location == OnDevice) privt::device_free(my_data);
-	}
-#endif
-}
+
 template<typename _Ty> template<Location _Loc, size_t _Opt>
 Storage_<_Ty>::DenseBase<_Loc, _Opt>& 
 Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(const DenseBase& _other)
@@ -244,19 +226,6 @@ Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(DenseBase && _other)
 	_other.my_data = 0, _other.my_owner = Owner;
 	return (*this);
 }
-template<typename _Ty> template<Location _Loc, size_t _Opt>
-Storage_<_Ty>::DenseBase<_Loc, _Opt>&
-Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(std::initializer_list<value_t> _list)
-{
-	value_t _Val = *_list.begin();
-	if (_list.size() == 1)
-		for (int_t i = 0; i < my_size; ++i) my_data[i] = _Val;
-	else
-		//privt::unified_sync<value_t, OnStack, Location(location), option>::op(my_data, pointer(_list.begin()), my_rows, my_cols, my_pitch);
-		std::memcpy((void*)my_data, (void*)&(*_list.begin()), my_size * type_bytes<value_t>::value);
-
-	return (*this);
-}
 
 ///<brief> Explicit Specialization </brief>
 template class Storage_<int>::DenseBase<OnStack, LINEAR + COPY>;
@@ -286,33 +255,21 @@ template class Storage_<unsigned char>::DenseBase<UnSpecified>;
 template class Storage_<int>::DenseBase<OnStack, LINEAR+SHARED>;
 template class Storage_<int>::DenseBase<OnHeap, LINEAR+SHARED>;
 template class Storage_<int>::DenseBase<OnGlobal, LINEAR+SHARED>;
-//template class Storage_<int>::DenseBase<OnDevice, LINEAR+SHARED>;
-//template class Storage_<int>::DenseBase<UnSpecified, LINEAR+SHARED>;
 template class Storage_<char>::DenseBase<OnStack, LINEAR+SHARED>;
 template class Storage_<char>::DenseBase<OnHeap, LINEAR+SHARED>;
 template class Storage_<char>::DenseBase<OnGlobal, LINEAR+SHARED>;
-//template class Storage_<char>::DenseBase<OnDevice, LINEAR+SHARED>;
-//template class Storage_<char>::DenseBase<UnSpecified, LINEAR+SHARED>;
 template class Storage_<bool>::DenseBase<OnStack, LINEAR+SHARED>;
 template class Storage_<bool>::DenseBase<OnHeap, LINEAR+SHARED>;
 template class Storage_<bool>::DenseBase<OnGlobal, LINEAR+SHARED>;
-//template class Storage_<bool>::DenseBase<OnDevice, LINEAR+SHARED>;
-//template class Storage_<bool>::DenseBase<UnSpecified, LINEAR+SHARED>;
 template class Storage_<float>::DenseBase<OnStack, LINEAR+SHARED>;
 template class Storage_<float>::DenseBase<OnHeap, LINEAR+SHARED>;
 template class Storage_<float>::DenseBase<OnGlobal, LINEAR+SHARED>;
-//template class Storage_<float>::DenseBase<OnDevice, LINEAR+SHARED>;
-//template class Storage_<float>::DenseBase<UnSpecified, LINEAR+SHARED>;
 template class Storage_<double>::DenseBase<OnStack, LINEAR+SHARED>;
 template class Storage_<double>::DenseBase<OnHeap, LINEAR+SHARED>;
 template class Storage_<double>::DenseBase<OnGlobal, LINEAR+SHARED>;
-//template class Storage_<double>::DenseBase<OnDevice, LINEAR+SHARED>;
-//template class Storage_<double>::DenseBase<UnSpecified, LINEAR+SHARED>;
 template class Storage_<unsigned char>::DenseBase<OnStack, LINEAR+SHARED>;
 template class Storage_<unsigned char>::DenseBase<OnHeap, LINEAR+SHARED>;
 template class Storage_<unsigned char>::DenseBase<OnGlobal, LINEAR+SHARED>;
-//template class Storage_<unsigned char>::DenseBase<OnDevice, LINEAR+SHARED>;
-//template class Storage_<unsigned char>::DenseBase<UnSpecified, LINEAR+SHARED>;
 template class Storage_<int>::DenseBase<OnDevice, LINEAR>;
 template class Storage_<char>::DenseBase<OnDevice, LINEAR>;
 template class Storage_<bool>::DenseBase<OnDevice, LINEAR>;

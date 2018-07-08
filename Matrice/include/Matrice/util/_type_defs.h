@@ -20,9 +20,11 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 namespace dgelom 
 {
 	using default_type = double;
+	using index_t = std::ptrdiff_t;
 	enum solver_type
 	{
 		AUTO = 0x0000, LUF = 0x0001, CHD = 0x0002, QRD = 0x0003,
 		SVD = 0x0004, ITER = 0x0005, SPAR = 0x0006, GLS = 0x0007
 	};
+	enum { expr = 0x0099 };
 }

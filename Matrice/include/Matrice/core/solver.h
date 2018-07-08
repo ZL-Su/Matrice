@@ -93,6 +93,7 @@ struct LinearOp final
 		enum { option = solver_type::SVD };
 
 		constexpr Svd(const _Mtx& args) : U(args) {
+			S.create(U.cols(), 1), V.create(U.cols(), U.cols());
 			OpBase<value_t>::_Future = std::async(std::launch::async, [&] {
 				using Op = OpBase<value_t>;
 				return OpBase<value_t>::_Impl(Op::_Aview = U, Op::_Bview = S, Op::_Cview = V);
@@ -111,11 +112,14 @@ struct LinearOp final
 
 			return (X);
 		}
-		
+		//\return singular values
+		MATRICE_HOST_FINL auto& sv() { OpBase<value_t>::_Launch(); return (S); }
+		//\return V^{T} expression
+		MATRICE_HOST_FINL auto vt() { OpBase<value_t>::_Launch(); return (V.transpose()); }
 	private:
 		const _Mtx& U;
 		Matrix_<value_t, _Mtx::CompileTimeCols, min(_Mtx::CompileTimeCols,1)> S;
-		Matrix_<value_t, _Mtx::CompileTimeCols, _Mtx::CompileTimeCols> V;
+		Matrix_<value_t, _Mtx::CompileTimeCols, _Mtx::CompileTimeCols> V; //V not V^{T}
 	};
 	template<typename _T> struct Evv : public OpBase<typename _T::value_t>
 	{
@@ -133,7 +137,7 @@ struct LinearOp final
 
 struct Solver final
 {
-	template<typename _Op = LinearOp::Auto> class Linear_ : public SolverBase<Linear_<_Op>>
+	template<typename _Op = LinearOp::Auto<Matrix<default_type>>> class Linear_ : public SolverBase<Linear_<_Op>>
 	{
 		using Base = SolverBase<Linear_<_Op>>;
 		using value_t = typename _Op::value_t;

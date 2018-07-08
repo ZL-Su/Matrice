@@ -113,7 +113,22 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Librares\Ceres1130\ceres\include\ceres\dgelom\extras.h" />
+    <ClInclude Include="addin\Eigen\src\Geometry\AlignedBox.h" />
+    <ClInclude Include="addin\Eigen\src\Geometry\AngleAxis.h" />
+    <ClInclude Include="addin\Eigen\src\Geometry\EulerAngles.h" />
+    <ClInclude Include="addin\Eigen\src\Geometry\Homogeneous.h" />
+    <ClInclude Include="addin\Eigen\src\Geometry\Hyperplane.h" />
+    <ClInclude Include="addin\Eigen\src\Geometry\OrthoMethods.h" />
+    <ClInclude Include="addin\Eigen\src\Geometry\ParametrizedLine.h" />
+    <ClInclude Include="addin\Eigen\src\Geometry\Quaternion.h" />
+    <ClInclude Include="addin\Eigen\src\Geometry\Rotation2D.h" />
+    <ClInclude Include="addin\Eigen\src\Geometry\RotationBase.h" />
+    <ClInclude Include="addin\Eigen\src\Geometry\Scaling.h" />
+    <ClInclude Include="addin\Eigen\src\Geometry\Transform.h" />
+    <ClInclude Include="addin\Eigen\src\Geometry\Translation.h" />
+    <ClInclude Include="addin\Eigen\src\Geometry\Umeyama.h" />
     <ClInclude Include="addin\interface.h" />
+    <ClInclude Include="include\Matrice\algs\geometry\transform.h" />
     <ClInclude Include="include\Matrice\algs\imageproc.hpp" />
     <ClInclude Include="include\Matrice\algs\mbspa.h" />
     <ClInclude Include="include\Matrice\algs\similarity.h" />
@@ -188,6 +203,7 @@
     <None Include="addin\Eigen\UmfPackSupport" />
     <None Include="include\Matrice\arch\inl\_ixpacket.inl" />
     <None Include="include\Matrice\core\cpp.hint" />
+    <None Include="include\Matrice\private\inl\_storage_base.inl" />
     <None Include="include\Matrice\private\_similarity.inl" />
     <None Include="_dev_base.def" />
   </ItemGroup>

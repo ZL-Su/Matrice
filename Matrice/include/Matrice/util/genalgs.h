@@ -21,7 +21,14 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #include "../arch/ixpacket.h"
 
 MATRICE_NAMESPACE_BEGIN_
-template<class _Fn, class _InIt, class _OutIt> inline
+template<class _InIt, class _OutIt> MATRICE_HOST_FINL
+void transform(const _InIt _First, const _InIt _Last, _OutIt _Dest)
+{
+	static_cast<void>(_First == _Last);
+	auto _UFirst = _First; size_t i = 0;
+	for (; _UFirst != _Last; ++_UFirst, ++i) _Dest[i] = *_UFirst;
+}
+template<class _Fn, class _InIt, class _OutIt> MATRICE_HOST_INL
 void transform(_Fn _Func, const _InIt _First, const _InIt _Last, size_t _Stride, _OutIt _Dest, size_t _Invpos = 1)
 {
 	using namespace std;
@@ -35,7 +42,7 @@ void transform(_Fn _Func, const _InIt _First, const _InIt _Last, size_t _Stride,
 	}
 	*(_UDest) = _Func(*_UFirst);
 }
-template<class _Fn, class _InIt, class _OutIt> inline
+template<class _Fn, class _InIt, class _OutIt> MATRICE_HOST_INL
 void transform(_Fn _Func, const _InIt _First, const _InIt _Last, _OutIt _Dest, size_t _Stride)
 {
 	using namespace std;
@@ -70,6 +77,14 @@ MATRICE_GLOBAL_INL const _Ty reduce(_InIt _First, _InIt _Last)
 #endif
 	return (_Ret);
 }
+template<typename _InIt, typename = std::enable_if_t<std::is_pointer_v<_InIt>>>
+MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, index_t _Stride)
+{
+	static_cast<void>(_First == _Last);
+	typename remove_reference<decltype(*_First)>::type _Ret = 0;
+	for (; _First < _Last; _First += _Stride) _Ret += *(_First);
+	return (_Ret);
+}
 template<typename _Ty, typename _Op,  typename _InIt = _Ty*>
 MATRICE_GLOBAL_INL _Ty reduce(_InIt _First, _InIt _Last, _Op _op)
 {
@@ -78,7 +93,8 @@ MATRICE_GLOBAL_INL _Ty reduce(_InIt _First, _InIt _Last, _Op _op)
 	for (; _First != _Last; ++_First) _Ret += _op(_First);
 	return (_Ret);
 }
-template<typename _InIt, typename _Op, typename = typename std::enable_if_t<std::is_pointer<_InIt>::value>::type>
+
+template<typename _InIt, typename _Op, typename = std::enable_if_t<std::is_pointer_v<_InIt>&&std::is_function_v<_Op>>>
 MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, _Op _op)
 {
 	static_cast<void>(_First == _Last);

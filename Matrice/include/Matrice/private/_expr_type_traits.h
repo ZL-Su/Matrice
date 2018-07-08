@@ -17,6 +17,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 *	*************************************************************************/
 #pragma once
 #include <type_traits>
+#include "../util/_type_defs.h"
 #include "_memory.h"
 
 namespace dgelom {
@@ -34,6 +35,7 @@ template<bool _Test, typename T1, typename T2> struct conditional {};
 template<typename T1, typename T2> struct conditional<true, T1, T2> { using type = T1; };
 template<typename T1, typename T2> struct conditional<false, T1, T2> { using type = T2; };
 template<bool _Test, typename T1, typename T2> using conditional_t = typename conditional<_Test, T1, T2>::type;
+template<int _Opt> struct is_expression { enum { value = _Opt & expr == expr ? true : false }; };
 template<int _Val> struct is_zero { enum { value = _Val == 0 ? true : false }; };
 template<int _R, int _C> struct is_static {enum {value = _R > 0 && _C >0 ? true : false}; };
 template<typename T> struct is_common_int64 { enum { value = std::is_integral_v<T> && sizeof(T) == 8 }; };
