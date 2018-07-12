@@ -152,16 +152,16 @@ struct Expr {
 	{
 	public:
 		enum { options = option<ewise>::value };
-		using LOprd_t = _T1;
-		using ROprd_t = _T2;
+		using Lopd_t = _T1;
+		using Ropd_t = _T2;
 		using value_t = typename dgelom::conditional<std::is_scalar_v<_T1>, _T1, typename _T1::value_t>::type;
 		constexpr static const value_t inf = std::numeric_limits<value_t>::infinity();
 
-		MATRICE_GLOBAL_INL EwiseBinaryExpr(const value_t& _scalar, const ROprd_t& _rhs) noexcept 
+		MATRICE_GLOBAL_INL EwiseBinaryExpr(const value_t _scalar, const Ropd_t& _rhs) noexcept
 			: _Scalar(_scalar), _LHS(_rhs), _RHS(_rhs) { M = _LHS.rows(), N = _RHS.cols(); }
-		MATRICE_GLOBAL_INL EwiseBinaryExpr(const LOprd_t& _lhs, const value_t& _scalar) noexcept
+		MATRICE_GLOBAL_INL EwiseBinaryExpr(const Lopd_t& _lhs, const value_t _scalar) noexcept
 			: _Scalar(_scalar), _LHS(_lhs), _RHS(_lhs) { M = _LHS.rows(), N = _RHS.cols(); }
-		MATRICE_GLOBAL_INL EwiseBinaryExpr(const LOprd_t& _lhs, const ROprd_t& _rhs) noexcept 
+		MATRICE_GLOBAL_INL EwiseBinaryExpr(const Lopd_t& _lhs, const Ropd_t& _rhs) noexcept
 			: _LHS(_lhs), _RHS(_rhs) { M = _LHS.rows(), N = _RHS.cols(); }
 
 		MATRICE_GLOBAL_INL value_t operator() (size_t _idx)
@@ -181,7 +181,7 @@ struct Expr {
 
 	private:
 		const value_t _Scalar = std::numeric_limits<value_t>::infinity();
-		const LOprd_t& _LHS; const ROprd_t& _RHS;
+		const Lopd_t& _LHS; const Ropd_t& _RHS;
 		//std::function<value_t(value_t, value_t)> _Op = _BinaryOp();
 		_BinaryOp _Op;
 		using Base_<EwiseBinaryExpr<_T1, _T2, _BinaryOp>>::M;
@@ -193,10 +193,10 @@ struct Expr {
 	{
 	public:
 		enum{options = option<_BinaryOp::flag>::value};
-		using LOprd_t = _T1; using ROprd_t = _T2;
+		using Lopd_t = _T1; using Ropd_t = _T2;
 		using value_t = typename dgelom::conditonal<std::is_class<_T1>::value, typename _T1::value_t, default_type>::type;
 
-		MATRICE_GLOBAL_INL MatBinaryExpr(const LOprd_t& _lhs, const ROprd_t& _rhs) noexcept 
+		MATRICE_GLOBAL_INL MatBinaryExpr(const Lopd_t& _lhs, const Ropd_t& _rhs) noexcept 
 			: _LHS(_lhs), _RHS(_rhs) {
 			M = _LHS.rows(), K = _LHS.cols(), N = _RHS.cols();
 			if (K != _RHS.rows() && K == N) N = _RHS.rows();
@@ -220,8 +220,8 @@ struct Expr {
 			for (int i = 0; i < res.size(); ++i) res(i) = this->operator()(i);
 		}
 	private:
-		const LOprd_t& _LHS; 
-		const ROprd_t& _RHS;
+		const Lopd_t& _LHS; 
+		const Ropd_t& _RHS;
 		_BinaryOp _Op;
 		using Base_<MatBinaryExpr<_T1, _T2, _BinaryOp>>::M;
 		using Base_<MatBinaryExpr<_T1, _T2, _BinaryOp>>::K;

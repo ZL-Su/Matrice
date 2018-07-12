@@ -23,6 +23,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_matrix_expr.hpp"
 #include "_matrix.inl.hpp"
 #include "_storage.hpp"
+#include "_iterator.h"
 #include "../../../addin/interface.h"
 #include "../util/_type_defs.h"
 #include "../core/solver.h"
@@ -72,7 +73,7 @@ template<typename _Ty, int _M, int _N, typename _Derived> class Base_;
 
 /*******************************************************************
 	              Generic Base for Matrix Class
-	          Copyright (c) : Zhilong Su 14/Feb/2018
+	    Copyright (c) : Zhilong (Dgelom) Su, since 14/Feb/2018
  ******************************************************************/
 template<typename _Ty, int _M, int _N, typename _Derived = Matrix_<_Ty, _M, _N>> 
 class Base_ : public PlaneView_<_Ty>
@@ -90,6 +91,7 @@ class Base_ : public PlaneView_<_Ty>
 	typedef typename exprs::Expr::Op::MatMul<_Ty>                MatMulOp;
 	typedef typename exprs::Expr::Op::MatInv<_Ty>                MatInvOp;
 	typedef typename exprs::Expr::Op::MatTrp<_Ty>                MatTrpOp;
+	using fwd_iterator = _Matrix_forward_iterator<_Ty>;
 public:
 	typedef PlaneView_<_Ty>                                        base_t;
 	typedef typename details::Storage_<_Ty>::value_t              value_t;
@@ -160,6 +162,32 @@ public:
 	MATRICE_GLOBAL_FINL constexpr const_iterator end() const { return (m_data + size()); }
 	MATRICE_GLOBAL_FINL constexpr iterator begin() { return (m_data); }
 	MATRICE_GLOBAL_FINL constexpr iterator end() { return (m_data + size()); }
+
+	MATRICE_GLOBAL_FINL fwd_iterator cbegin(size_t i) {
+		return fwd_iterator(m_data + i, m_rows, m_cols);
+	}
+	MATRICE_GLOBAL_FINL fwd_iterator cend(size_t i) {
+		return fwd_iterator(_End(m_data + i, m_rows, m_cols));
+	}
+	MATRICE_GLOBAL_FINL const fwd_iterator cbegin(size_t i) const {
+		return fwd_iterator(m_data + i, m_rows, m_cols);
+	}
+	MATRICE_GLOBAL_FINL const fwd_iterator cend(size_t i) const {
+		return fwd_iterator(_End(m_data + i, m_rows, m_cols));
+	}
+	MATRICE_GLOBAL_FINL fwd_iterator rbegin(size_t i) {
+		return fwd_iterator(m_data + i * m_cols, m_cols);
+	}
+	MATRICE_GLOBAL_FINL fwd_iterator rend(size_t i) {
+		return fwd_iterator(_End(m_data + i * m_cols, m_cols));
+	}
+	MATRICE_GLOBAL_FINL const fwd_iterator rbegin(size_t i) const {
+		return fwd_iterator(m_data + i * m_cols, m_cols);
+	}
+	MATRICE_GLOBAL_FINL const fwd_iterator rend(size_t i) const {
+		return fwd_iterator(_End(m_data + i * m_cols, m_cols));
+	}
+
 	MATRICE_GLOBAL_FINL constexpr int_t rows() const { return m_rows; }
 	MATRICE_GLOBAL_FINL constexpr int_t cols() const { return m_cols; }
 	MATRICE_GLOBAL_FINL constexpr std::size_t size() const { return m_rows*m_cols; }

@@ -28,6 +28,17 @@ void transform(const _InIt _First, const _InIt _Last, _OutIt _Dest)
 	auto _UFirst = _First; size_t i = 0;
 	for (; _UFirst != _Last; ++_UFirst, ++i) _Dest[i] = *_UFirst;
 }
+template<class _InIt, class _OutIt> MATRICE_HOST_FINL
+void transform(const _InIt _First, const _InIt _Last, _OutIt _Dest, size_t _Dstep)
+{
+	using namespace std;
+	auto _UFirst = _Unchecked(_First);
+	_DEBUG_RANGE(_UFirst, _Last);
+	const auto _ULast = _Unchecked(_Last);
+	auto _UDest = _Unchecked_n(_Dest, _Idl_distance<_InIt>(_UFirst, _ULast));
+	for (; _UFirst != _ULast; ++_UFirst, _UDest += _Dstep)
+		*_UDest = *_UFirst;
+}
 template<class _Fn, class _InIt, class _OutIt> MATRICE_HOST_INL
 void transform(_Fn _Func, const _InIt _First, const _InIt _Last, size_t _Stride, _OutIt _Dest, size_t _Invpos = 1)
 {
@@ -59,6 +70,14 @@ template<typename _Fwdty, typename _Fn, typename = std::enable_if_t<std::is_clas
 MATRICE_HOST_FINL auto for_each(_Fwdty& _Cont, _Fn _Func) { std::for_each(_Cont.begin(), _Cont.end(), _Func);}
 template<typename _Fwdty, typename _T, typename = std::enable_if_t<std::is_class_v<_Fwdty>>>
 MATRICE_HOST_FINL auto fill(_Fwdty& _Cont, _T _val) { std::fill(_Cont.begin(), _Cont.end(), _val); }
+template<typename _FwdIt, typename _T, typename = std::enable_if_t<std::is_scalar_v<_FwdIt>>>
+MATRICE_HOST_FINL auto fill(_FwdIt _First, _FwdIt _Last, size_t _Stride, const _T& _Val)
+{
+	_DEBUG_RANGE(_First, _Last);
+	auto _UFirst = _Unchecked(_First);
+	const auto _ULast = _Unchecked(_Last);
+	for (; _UFirst < _ULast; _UFirst += _Stride) *_UFirst = _Val;
+}
 template<typename _Ty, typename _InIt = _Ty*>
 MATRICE_GLOBAL_INL const _Ty reduce(_InIt _First, _InIt _Last)
 {
@@ -90,16 +109,24 @@ MATRICE_GLOBAL_INL _Ty reduce(_InIt _First, _InIt _Last, _Op _op)
 {
 	static_cast<void>(_First == _Last);
 	_Ty _Ret = 0;
-	for (; _First != _Last; ++_First) _Ret += _op(_First);
+	for (; _First != _Last; ++_First) _Ret += _op(*_First);
 	return (_Ret);
 }
-
 template<typename _InIt, typename _Op, typename = std::enable_if_t<std::is_pointer_v<_InIt>&&std::is_function_v<_Op>>>
 MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, _Op _op)
 {
 	static_cast<void>(_First == _Last);
 	typename remove_reference<decltype(_First[0])>::type _Ret = 0;
-	for (; _First != _Last; ++_First) _Ret += _op(_First);
+	for (; _First != _Last; ++_First) _Ret += _op(*_First);
+	return (_Ret);
+}
+template<template<typename> class _Op, typename _InIt, typename _Scalar, typename _Func>
+MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, _Scalar _Value, _Func _Fn, _Op<_Scalar> _op = _Op<_Scalar>())
+{
+	static_assert(std::is_arithmetic_v<_Scalar>, "Oops, template parameter '_Scalar' is illegal!");
+	static_cast<void>(_First == _Last);
+	typename remove_reference<decltype(_First[0])>::type _Ret = 0;
+	for (; _First != _Last; ++_First) _Ret += _Fn(_op(*_First, _Value));
 	return (_Ret);
 }
 _MATRICE_NAMESPACE_END

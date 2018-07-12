@@ -28,7 +28,9 @@ public:
 		MATRICE_HOST_INL const auto operator()(size_t i) const {
 			return std::string(m_path + m_names[0][i]);
 		}
-		MATRICE_HOST_INL const auto count() const { return m_names.front().size(); }
+		MATRICE_HOST_FINL auto& names(size_t i = 0) { return (m_names[i]); }
+		MATRICE_HOST_FINL const auto& names(size_t i = 0) const { return (m_names[i]); }
+		MATRICE_HOST_FINL const auto count() const { return m_names.front().size(); }
 	private:
 		MATRICE_HOST_INL void _Init() {
 			m_subpaths.clear();

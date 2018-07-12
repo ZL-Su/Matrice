@@ -210,6 +210,12 @@
     <ClInclude Include="include\Matrice\algs\geometry\transform.h">
       <Filter>Header Files\Algs\Geometry</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\algs\geometry\normalization.h">
+      <Filter>Header Files\Algs\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\_iterator.h">
+      <Filter>Header Files\Private</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\private\_memory.cpp">

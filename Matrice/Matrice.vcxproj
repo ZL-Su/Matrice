@@ -128,6 +128,7 @@
     <ClInclude Include="addin\Eigen\src\Geometry\Translation.h" />
     <ClInclude Include="addin\Eigen\src\Geometry\Umeyama.h" />
     <ClInclude Include="addin\interface.h" />
+    <ClInclude Include="include\Matrice\algs\geometry\normalization.h" />
     <ClInclude Include="include\Matrice\algs\geometry\transform.h" />
     <ClInclude Include="include\Matrice\algs\imageproc.hpp" />
     <ClInclude Include="include\Matrice\algs\mbspa.h" />
@@ -146,6 +147,7 @@
     <ClInclude Include="include\Matrice\private\_decl_dev_funcs.h" />
     <ClInclude Include="include\Matrice\private\_devops.h" />
     <ClInclude Include="include\Matrice\private\_dev_matrix_base.h" />
+    <ClInclude Include="include\Matrice\private\_iterator.h" />
     <ClInclude Include="include\Matrice\private\_matrix_base.hpp" />
     <ClInclude Include="include\Matrice\private\_matrix_expr.hpp" />
     <ClInclude Include="include\Matrice\private\_expr_type_traits.h" />
