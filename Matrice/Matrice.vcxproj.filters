@@ -25,9 +25,6 @@
     <Filter Include="Header Files\Util">
       <UniqueIdentifier>{4e312bcb-d0eb-4cca-ae67-73b4291a5eca}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Private">
-      <UniqueIdentifier>{fafe41e5-0b0e-4975-b5ca-72bd98101be4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Private">
       <UniqueIdentifier>{40c8943e-f2d9-49dd-ae80-b2c086c56fa4}</UniqueIdentifier>
     </Filter>
@@ -67,6 +64,9 @@
     <Filter Include="Header Files\Algs\Geometry">
       <UniqueIdentifier>{1d26a66c-7be6-40d6-8bcc-50f3ee2ee1a1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Details">
+      <UniqueIdentifier>{fafe41e5-0b0e-4975-b5ca-72bd98101be4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -82,19 +82,19 @@
       <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_expr_type_traits.h">
-      <Filter>Header Files\Private</Filter>
+      <Filter>Header Files\Details</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_matrix.inl.hpp">
-      <Filter>Header Files\Private</Filter>
+      <Filter>Header Files\Details</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_memory.h">
-      <Filter>Header Files\Private</Filter>
+      <Filter>Header Files\Details</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\util\_macros.h">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_matrix_expr.hpp">
-      <Filter>Header Files\Private</Filter>
+      <Filter>Header Files\Details</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\core\solver.h">
       <Filter>Header Files\Core</Filter>
@@ -112,16 +112,16 @@
       <Filter>Header Files\Util</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_matrix_base.hpp">
-      <Filter>Header Files\Private</Filter>
+      <Filter>Header Files\Details</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_storage.hpp">
-      <Filter>Header Files\Private</Filter>
+      <Filter>Header Files\Details</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_dev_matrix_base.h">
-      <Filter>Header Files\Private</Filter>
+      <Filter>Header Files\Details</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_decl_dev_funcs.h">
-      <Filter>Header Files\Private</Filter>
+      <Filter>Header Files\Details</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
@@ -148,10 +148,10 @@
       <Filter>Header Files\IO</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_devops.h">
-      <Filter>Header Files\Private</Filter>
+      <Filter>Header Files\Details</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_unified_memory.h">
-      <Filter>Header Files\Private</Filter>
+      <Filter>Header Files\Details</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\mbspa.h">
       <Filter>Header Files\Algs</Filter>
@@ -214,7 +214,7 @@
       <Filter>Header Files\Algs\Geometry</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_iterator.h">
-      <Filter>Header Files\Private</Filter>
+      <Filter>Header Files\Details</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -251,7 +251,7 @@
       <Filter>Header Files\Core</Filter>
     </None>
     <None Include="include\Matrice\private\_similarity.inl">
-      <Filter>Header Files\Private</Filter>
+      <Filter>Header Files\Details</Filter>
     </None>
     <None Include="include\Matrice\arch\inl\_ixpacket.inl">
       <Filter>Header Files\Arch\Inl</Filter>
@@ -347,7 +347,7 @@
       <Filter>Source Files\Util\Eigen</Filter>
     </None>
     <None Include="include\Matrice\private\inl\_storage_base.inl">
-      <Filter>Header Files\Private</Filter>
+      <Filter>Header Files\Details</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

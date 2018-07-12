@@ -92,6 +92,8 @@ class Base_ : public PlaneView_<_Ty>
 	typedef typename exprs::Expr::Op::MatInv<_Ty>                MatInvOp;
 	typedef typename exprs::Expr::Op::MatTrp<_Ty>                MatTrpOp;
 	using fwd_iterator = _Matrix_forward_iterator<_Ty>;
+	using rwise_iterator = _Matrix_rwise_iterator<_Ty>;
+	using cwise_iterator = _Matrix_cwise_iterator<_Ty>;
 public:
 	typedef PlaneView_<_Ty>                                        base_t;
 	typedef typename details::Storage_<_Ty>::value_t              value_t;
@@ -162,7 +164,8 @@ public:
 	MATRICE_GLOBAL_FINL constexpr const_iterator end() const { return (m_data + size()); }
 	MATRICE_GLOBAL_FINL constexpr iterator begin() { return (m_data); }
 	MATRICE_GLOBAL_FINL constexpr iterator end() { return (m_data + size()); }
-
+#pragma region <!-- iterators -->
+	//column iterator for accessing elements in current column
 	MATRICE_GLOBAL_FINL fwd_iterator cbegin(size_t i) {
 		return fwd_iterator(m_data + i, m_rows, m_cols);
 	}
@@ -175,6 +178,8 @@ public:
 	MATRICE_GLOBAL_FINL const fwd_iterator cend(size_t i) const {
 		return fwd_iterator(_End(m_data + i, m_rows, m_cols));
 	}
+
+	//row iterator for accessing elements in current row
 	MATRICE_GLOBAL_FINL fwd_iterator rbegin(size_t i) {
 		return fwd_iterator(m_data + i * m_cols, m_cols);
 	}
@@ -188,6 +193,34 @@ public:
 		return fwd_iterator(_End(m_data + i * m_cols, m_cols));
 	}
 
+	//column-wise iterator for accessing elements
+	MATRICE_GLOBAL_FINL cwise_iterator cwbegin(size_t i = 0) {
+		return cwise_iterator(m_data + i * m_rows, m_cols, m_rows);
+	}
+	MATRICE_GLOBAL_FINL cwise_iterator cwend() {
+		return cwise_iterator(_End(m_data, m_cols));
+	}
+	MATRICE_GLOBAL_FINL const cwise_iterator cwbegin(size_t i = 0) const {
+		return cwise_iterator(m_data + i * m_rows, m_cols, m_rows);
+	}
+	MATRICE_GLOBAL_FINL const cwise_iterator cwend(size_t i = 0) const {
+		return cwise_iterator(_End(m_data, m_cols));
+	}
+
+	//row-wise iterator for accessing elements
+	MATRICE_GLOBAL_FINL rwise_iterator rwbegin(size_t i = 0) {
+		return rwise_iterator(m_data + i * m_cols, m_rows, m_cols);
+	}
+	MATRICE_GLOBAL_FINL rwise_iterator rwend() {
+		return rwise_iterator(_End(m_data, m_rows, m_cols));
+	}
+	MATRICE_GLOBAL_FINL const rwise_iterator rwbegin(size_t i = 0) const {
+		return rwise_iterator(m_data + i * m_cols, m_rows, m_cols);
+	}
+	MATRICE_GLOBAL_FINL const rwise_iterator rwend() const {
+		return rwise_iterator(_End(m_data, m_rows, m_cols));
+	}
+#pragma endregion
 	MATRICE_GLOBAL_FINL constexpr int_t rows() const { return m_rows; }
 	MATRICE_GLOBAL_FINL constexpr int_t cols() const { return m_cols; }
 	MATRICE_GLOBAL_FINL constexpr std::size_t size() const { return m_rows*m_cols; }
