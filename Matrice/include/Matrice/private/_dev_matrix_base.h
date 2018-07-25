@@ -50,6 +50,8 @@ public:
 	template<typename _Arg, typename = std::enable_if_t<std::is_class_v<_Arg>>>
 	MATRICE_GLOBAL_INL _Derived& operator= (const _Arg& _src) { _Upload_impl(_src.data()); return *static_cast<_Derived*>(this); }
 
+	MATRICE_GLOBAL_INL _Derived& operator+ (const Base_& _other);
+
 private:
 	MATRICE_HOST_INL void _Sync_impl() { privt::_Device_sync<0>(); }
 	template<typename... Args>

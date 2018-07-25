@@ -131,6 +131,9 @@
     <ClInclude Include="include\Matrice\algs\geometry\normalization.h" />
     <ClInclude Include="include\Matrice\algs\geometry\transform.h" />
     <ClInclude Include="include\Matrice\algs\imageproc.hpp" />
+    <ClInclude Include="include\Matrice\algs\interpolation.h" />
+    <ClInclude Include="include\Matrice\algs\interpolation\_base.h" />
+    <ClInclude Include="include\Matrice\algs\interpolation\_bicubic_spline_interp.h" />
     <ClInclude Include="include\Matrice\algs\mbspa.h" />
     <ClInclude Include="include\Matrice\algs\similarity.h" />
     <ClInclude Include="include\Matrice\arch\inl\_ixops.hpp" />
@@ -155,11 +158,13 @@
     <ClInclude Include="include\Matrice\private\_memory.h" />
     <ClInclude Include="include\Matrice\private\_storage.hpp" />
     <ClInclude Include="include\Matrice\private\_unified_memory.h" />
+    <ClInclude Include="include\Matrice\private\_view.h" />
     <ClInclude Include="include\Matrice\util\genalgs.h" />
     <ClInclude Include="include\Matrice\util\util.h" />
     <ClInclude Include="include\Matrice\util\_macros.h" />
     <ClInclude Include="include\Matrice\util\_type_defs.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="src\private\cuda\_ewise_kernels.cuh" />
     <ClInclude Include="src\private\generic_fast_math.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -210,6 +215,7 @@
     <None Include="_dev_base.def" />
   </ItemGroup>
   <ItemGroup>
+    <CudaCompile Include="src\private\cuda\_dev_matrix_base.cu" />
     <CudaCompile Include="src\private\_dev_funcs.cu" />
     <CudaCompile Include="src\private\_dev_memory.cu" />
     <CudaCompile Include="src\private\_dev_ops.cu" />

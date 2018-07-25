@@ -25,9 +25,6 @@
     <Filter Include="Header Files\Util">
       <UniqueIdentifier>{4e312bcb-d0eb-4cca-ae67-73b4291a5eca}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Private">
-      <UniqueIdentifier>{40c8943e-f2d9-49dd-ae80-b2c086c56fa4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Addin">
       <UniqueIdentifier>{db5e8904-7c79-4de7-8d5b-1120cb31251a}</UniqueIdentifier>
     </Filter>
@@ -67,13 +64,31 @@
     <Filter Include="Header Files\Details">
       <UniqueIdentifier>{fafe41e5-0b0e-4975-b5ca-72bd98101be4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Algs\Interpolation">
+      <UniqueIdentifier>{09dc6d7a-3c4e-4659-a01c-2a7664b15a30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Algs\Interpolation">
+      <UniqueIdentifier>{bc8d757e-80ae-4262-8fba-5cb0dde7cfcc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Details\CUDA">
+      <UniqueIdentifier>{21e75018-4d93-41b3-9e9e-6e14505aedd0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Details">
+      <UniqueIdentifier>{40c8943e-f2d9-49dd-ae80-b2c086c56fa4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Details\CUDA">
+      <UniqueIdentifier>{1495b890-5406-4fc5-b486-9958c5d373e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Details\CUDA\Kernels">
+      <UniqueIdentifier>{dfbb5ca2-534e-4ad5-9cf9-331c258f7d76}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
       <Filter>Header Files\Addin</Filter>
     </ClInclude>
     <ClInclude Include="src\private\generic_fast_math.hpp">
-      <Filter>Source Files\Private</Filter>
+      <Filter>Source Files\Details</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\core\matrix.h">
       <Filter>Header Files\Core</Filter>
@@ -117,12 +132,6 @@
     <ClInclude Include="include\Matrice\private\_storage.hpp">
       <Filter>Header Files\Details</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\private\_dev_matrix_base.h">
-      <Filter>Header Files\Details</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Matrice\private\_decl_dev_funcs.h">
-      <Filter>Header Files\Details</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -146,9 +155,6 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\io\hrc.h">
       <Filter>Header Files\IO</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Matrice\private\_devops.h">
-      <Filter>Header Files\Details</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_unified_memory.h">
       <Filter>Header Files\Details</Filter>
@@ -216,10 +222,34 @@
     <ClInclude Include="include\Matrice\private\_iterator.h">
       <Filter>Header Files\Details</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\algs\interpolation\_bicubic_spline_interp.h">
+      <Filter>Header Files\Algs\Interpolation</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\interpolation.h">
+      <Filter>Header Files\Algs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\interpolation\_base.h">
+      <Filter>Header Files\Algs\Interpolation</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\_view.h">
+      <Filter>Header Files\Details</Filter>
+    </ClInclude>
+    <ClInclude Include="src\private\cuda\_ewise_kernels.cuh">
+      <Filter>Source Files\Details\CUDA\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\_decl_dev_funcs.h">
+      <Filter>Header Files\Details\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\_dev_matrix_base.h">
+      <Filter>Header Files\Details\CUDA</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\_devops.h">
+      <Filter>Header Files\Details\CUDA</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\private\_memory.cpp">
-      <Filter>Source Files\Private</Filter>
+      <Filter>Source Files\Details</Filter>
     </ClCompile>
     <ClCompile Include="src\core\matrix_with_generic_alloc.cpp">
       <Filter>Source Files\Core</Filter>
@@ -240,7 +270,7 @@
       <Filter>Source Files\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\private\_unified_memory.cpp">
-      <Filter>Source Files\Private</Filter>
+      <Filter>Source Files\Details</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -351,14 +381,17 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="src\private\_dev_memory.cu">
-      <Filter>Source Files\Private</Filter>
+    <CudaCompile Include="src\private\cuda\_dev_matrix_base.cu">
+      <Filter>Source Files\Details\CUDA</Filter>
     </CudaCompile>
     <CudaCompile Include="src\private\_dev_funcs.cu">
-      <Filter>Source Files\Private</Filter>
+      <Filter>Source Files\Details\CUDA</Filter>
+    </CudaCompile>
+    <CudaCompile Include="src\private\_dev_memory.cu">
+      <Filter>Source Files\Details\CUDA</Filter>
     </CudaCompile>
     <CudaCompile Include="src\private\_dev_ops.cu">
-      <Filter>Source Files\Private</Filter>
+      <Filter>Source Files\Details\CUDA</Filter>
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>

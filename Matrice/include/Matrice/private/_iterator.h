@@ -193,6 +193,7 @@ public:
 private:
 	size_t _My_range = base_type::_My_step;
 };
+
 /**********************************************************************
 						Column-wise Forward Range Iterator 
 	    Copyright (c) : Zhilong (Dgelom) Su, since 12/Jul/2018

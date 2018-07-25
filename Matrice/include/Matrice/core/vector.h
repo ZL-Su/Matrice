@@ -54,6 +54,8 @@ public:
 	template<typename _Rval>
 	vec_global_inl Vec_& operator= (const _Rval& _rval)
 	{ return static_cast<Vec_&>(_Base::operator= (_rval)); }
+	vec_global_inl operator typename _Base::pointer() { return data(); }
+
 	vec_global_inl Vec_& normalize(const value_t _val = _Base::inf)
 	{ return static_cast<Vec_&>(_Base::operator = (_Base::normalize(_val))); }
 	vec_global_inl value_t dot(const_my_ref _other) const
