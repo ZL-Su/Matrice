@@ -246,6 +246,9 @@
     <ClInclude Include="include\Matrice\private\_devops.h">
       <Filter>Header Files\Details\CUDA</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\algs\interpolation\_interpolation.h">
+      <Filter>Header Files\Algs\Interpolation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\private\_memory.cpp">
@@ -271,6 +274,9 @@
     </ClCompile>
     <ClCompile Include="src\private\_unified_memory.cpp">
       <Filter>Source Files\Details</Filter>
+    </ClCompile>
+    <ClCompile Include="src\algorithm\_bicubic_spline_interp.cpp">
+      <Filter>Source Files\Algs\Interpolation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -378,6 +384,9 @@
     </None>
     <None Include="include\Matrice\private\inl\_storage_base.inl">
       <Filter>Header Files\Details</Filter>
+    </None>
+    <None Include="include\Matrice\algs\interpolation\_base.inl">
+      <Filter>Header Files\Algs\Interpolation</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

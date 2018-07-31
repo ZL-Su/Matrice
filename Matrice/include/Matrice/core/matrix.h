@@ -46,7 +46,7 @@ public:
 	MATRICE_HOST_FINL   Matrix_(const_init_list _list) noexcept : base_t(_list) {}
 	MATRICE_GLOBAL_FINL Matrix_(Myt&& _other) noexcept : base_t(_other) {}
 	MATRICE_GLOBAL_FINL Matrix_(const_my_ref _other) noexcept : base_t(_other) {};
-	MATRICE_GLOBAL_FINL Matrix_(int _pld1 = 0, int _pld2 = 0) noexcept : base_t() {};
+	MATRICE_GLOBAL_FINL Matrix_(int _pld1=0, int _pld2=0) noexcept : base_t() {};
 	template<typename _Arg> MATRICE_GLOBAL_FINL Matrix_(const _Arg& _arg) noexcept : base_t(_arg) {};
 
 	MATRICE_HOST_FINL Myt& operator= (const_init_list _list) { return base_t::operator=(_list); }
@@ -161,10 +161,12 @@ class Matrix_<_Ty, -1, -1> : public Base_<_Ty, -1, -1>, public device::Base_<_Ty
 	using base_t::m_cols;
 	std::size_t m_pitch = base_t::m_storage.pitch();
 public:
+	enum { Size = -1, CompileTimeRows = -1, CompileTimeCols = -1, };
 	using typename base_t::value_t;
 	using typename base_t::pointer;
 	using typename base_t::const_init_list;
-	enum { Size = -1, CompileTimeRows = -1, CompileTimeCols = -1, };
+	using device_base_t::operator+;
+
 	MATRICE_GLOBAL_INL Matrix_(int _rows) noexcept : base_t(_rows, 1), 
 		device_base_t(m_data, &m_pitch, &m_cols, &m_rows) {};
 	MATRICE_GLOBAL_INL Matrix_(const Myt& _other) noexcept : base_t(_other),
@@ -179,6 +181,7 @@ public:
 
 	template<typename _Arg> 
 	MATRICE_GLOBAL_INL Myt& operator= (const _Arg& _arg) { return device_base_t::operator=(_arg); }
+	MATRICE_DEVICE_INL Myt& operator= (const Myt& _other) { return device_base_t::operator=(_other); }
 	MATRICE_DEVICE_INL Myt& operator= (Myt&& _other) { return device_base_t::operator=(std::move(_other)); }
 	MATRICE_GLOBAL_INL Myt& operator= (const_init_list _list) { return device_base_t::operator=(_list.begin()); }
 	/*template<int _M, int _N>
@@ -188,6 +191,7 @@ public:
 		return std::move(_Ret);
 	}*/
 	MATRICE_GLOBAL void create(int_t rows, int_t cols = 1);
+
 };
 //matrix with CUDA device memory allocator
 template<typename _Ty> using Dmatrix = Matrix_<_Ty,

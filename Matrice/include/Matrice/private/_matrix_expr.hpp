@@ -147,15 +147,15 @@ struct Expr {
 		size_t M, K, N;
 	};
 
-	template<typename _T1, typename _T2, typename _BinaryOp> class EwiseBinaryExpr 
-		: public Base_<EwiseBinaryExpr<_T1, _T2, _BinaryOp>>
+	template<typename T, typename U, typename _BinaryOp> class EwiseBinaryExpr 
+		: public Base_<EwiseBinaryExpr<T, U, _BinaryOp>>
 	{
 	public:
 		enum { options = option<ewise>::value };
-		using Lopd_t = _T1;
-		using Ropd_t = _T2;
-		using value_t = typename dgelom::conditional<std::is_scalar_v<_T1>, _T1, typename _T1::value_t>::type;
-		constexpr static const value_t inf = std::numeric_limits<value_t>::infinity();
+		using Lopd_t = T;
+		using Ropd_t = U;
+		using value_t = conditional_t<std::is_scalar_v<T>, T, typename T::value_t>;
+		static constexpr value_t inf = std::numeric_limits<value_t>::infinity();
 
 		MATRICE_GLOBAL_INL EwiseBinaryExpr(const value_t _scalar, const Ropd_t& _rhs) noexcept
 			: _Scalar(_scalar), _LHS(_rhs), _RHS(_rhs) { M = _LHS.rows(), N = _RHS.cols(); }
@@ -184,8 +184,8 @@ struct Expr {
 		const Lopd_t& _LHS; const Ropd_t& _RHS;
 		//std::function<value_t(value_t, value_t)> _Op = _BinaryOp();
 		_BinaryOp _Op;
-		using Base_<EwiseBinaryExpr<_T1, _T2, _BinaryOp>>::M;
-		using Base_<EwiseBinaryExpr<_T1, _T2, _BinaryOp>>::N;
+		using Base_<EwiseBinaryExpr<T, U, _BinaryOp>>::M;
+		using Base_<EwiseBinaryExpr<T, U, _BinaryOp>>::N;
 	};
 
 	template<class _T1, class _T2, typename _BinaryOp> class MatBinaryExpr 

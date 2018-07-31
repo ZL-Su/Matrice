@@ -32,9 +32,10 @@ template<typename _Ty, typename _Derived = types::Matrix_<_Ty, -1, -1>>
 class Base_
 {
 	using size_t = std::size_t;
-	using intp_t = int*;
+	using intp_t = std::add_pointer_t<int>;
 	using value_t = _Ty;
-	using pointer = _Ty * ;
+	using pointer = std::add_pointer_t<value_t>;
+	using derived_t = _Derived;
 public:
 	MATRICE_GLOBAL_INL Base_() = default;
 	MATRICE_GLOBAL_INL Base_(pointer pdev, size_t* p, intp_t w, intp_t h):_Ptr(pdev), _P(p), _W(w), _H(h) {};
@@ -50,8 +51,7 @@ public:
 	template<typename _Arg, typename = std::enable_if_t<std::is_class_v<_Arg>>>
 	MATRICE_GLOBAL_INL _Derived& operator= (const _Arg& _src) { _Upload_impl(_src.data()); return *static_cast<_Derived*>(this); }
 
-	MATRICE_GLOBAL_INL _Derived& operator+ (const Base_& _other);
-
+	MATRICE_GLOBAL_INL _Derived& operator+(const _Derived& _other);
 private:
 	MATRICE_HOST_INL void _Sync_impl() { privt::_Device_sync<0>(); }
 	template<typename... Args>

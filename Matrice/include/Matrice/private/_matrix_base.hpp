@@ -24,6 +24,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_matrix.inl.hpp"
 #include "_storage.hpp"
 #include "_iterator.h"
+#include "_view.h"
 #include "../../../addin/interface.h"
 #include "../util/_type_defs.h"
 #include "../core/solver.h"
@@ -91,9 +92,12 @@ class Base_ : public PlaneView_<_Ty>
 	typedef typename exprs::Expr::Op::MatMul<_Ty>                MatMulOp;
 	typedef typename exprs::Expr::Op::MatInv<_Ty>                MatInvOp;
 	typedef typename exprs::Expr::Op::MatTrp<_Ty>                MatTrpOp;
-	using fwd_iterator = _Matrix_forward_iterator<_Ty>;
+	using fwd_iterator   = _Matrix_forward_iterator<_Ty>;
 	using rwise_iterator = _Matrix_rwise_iterator<_Ty>;
 	using cwise_iterator = _Matrix_cwise_iterator<_Ty>;
+	using row_view_t     = _Matrix_rview<_Ty>;
+	using col_view_t     = _Matrix_cview<_Ty>;
+	using block_view_t   = _Matrix_block<_Ty>;
 public:
 	typedef PlaneView_<_Ty>                                        base_t;
 	typedef typename details::Storage_<_Ty>::value_t              value_t;
@@ -219,6 +223,29 @@ public:
 	}
 	MATRICE_GLOBAL_FINL const rwise_iterator rwend() const {
 		return rwise_iterator(_End(m_data, m_rows, m_cols));
+	}
+#pragma endregion
+#pragma region <!-- views -->
+	//view of i-th row 
+	MATRICE_GLOBAL_FINL auto rview(size_t i) {
+		return row_view_t(m_data + m_cols * i, m_cols);
+	}
+	MATRICE_GLOBAL_FINL const auto rview(size_t i) const {
+		return row_view_t(m_data + m_cols * i, m_cols);
+	}
+	//view of i-th column
+	MATRICE_GLOBAL_FINL auto cview(size_t i) {
+		return col_view_t(m_data + i, m_rows, m_cols, i);
+	}
+	MATRICE_GLOBAL_FINL const auto cview(size_t i) const {
+		return col_view_t(m_data + i, m_rows, m_cols, i);
+	}
+	//view of submatrix [x0, x1) : [y0, y1)
+	MATRICE_GLOBAL_FINL auto block(index_t x0, index_t x1, index_t y0, index_t y1) {
+		return block_view_t(m_data, m_cols, {x0, y0, x1, y1});
+	}
+	MATRICE_GLOBAL_FINL const auto block(index_t x0, index_t x1, index_t y0, index_t y1) const {
+		return block_view_t(m_data, m_cols, { x0, y0, x1, y1 });
 	}
 #pragma endregion
 	MATRICE_GLOBAL_FINL constexpr int_t rows() const { return m_rows; }
