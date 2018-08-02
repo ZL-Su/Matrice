@@ -29,7 +29,7 @@ protected:
 	auto _Impl(_Args... args) { return static_cast<derived_t*>(this)->m_op(args...); }
 };
 
-struct LinearOp final
+struct LinearOp MATRICE_NONHERITABLE
 {
 	struct info_t { solver_type alg = AUTO; int status = 1; int sign = 1; };
 	template<typename _T> class OpBase 
@@ -135,7 +135,7 @@ struct LinearOp final
 	};
 };
 
-struct Solver final
+struct Solver MATRICE_NONHERITABLE
 {
 	template<typename _Op = LinearOp::Auto<Matrix<default_type>>> class Linear_ : public SolverBase<Linear_<_Op>>
 	{
@@ -149,7 +149,8 @@ struct Solver final
 	};
 };
 
-template<typename _Ty> class Solver_ final
+#pragma region <!-- deprecated -->
+template<typename _Ty> class Solver_ MATRICE_NONHERITABLE
 {
 public:
 	const int dynamic = 0;
@@ -191,4 +192,5 @@ public:
 		Matrix_<CompileTimeRows, CompileTimeCols> A;
 	};
 };
+#pragma endregion
 MATRICE_NAMESPACE_END_TYPES

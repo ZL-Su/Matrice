@@ -82,6 +82,9 @@
     <Filter Include="Source Files\Details\CUDA\Kernels">
       <UniqueIdentifier>{dfbb5ca2-534e-4ad5-9cf9-331c258f7d76}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Algs\Similarity">
+      <UniqueIdentifier>{e268adf3-df8c-4756-8292-9b6c94e70680}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -137,9 +140,6 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\funcs\linear_algebra.h">
       <Filter>Header Files\Funcs</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Matrice\algs\similarity.h">
-      <Filter>Header Files\Algs</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\arch\_ixbase.h">
       <Filter>Header Files\Arch</Filter>
@@ -248,6 +248,15 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\interpolation\_interpolation.h">
       <Filter>Header Files\Algs\Interpolation</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\similarity.h">
+      <Filter>Header Files\Algs\Similarity</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\similarity\_icgn_impl.h">
+      <Filter>Header Files\Algs\Similarity</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\similarity\_similarity_traits.h">
+      <Filter>Header Files\Algs\Similarity</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -20,7 +20,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_bicubic_spline_interp.h"
 
 MATRICE_ALGS_BEGIN
-// partial specialization for interpolation
+
 template<typename _Ty, size_t _Options>
 class Interpolation MATRICE_NONHERITABLE
 {

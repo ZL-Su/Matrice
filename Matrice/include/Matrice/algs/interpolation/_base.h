@@ -27,23 +27,28 @@ enum {
 
 	BSPLINE    = 2307,
 	BILINEAR   = 2152,
-	BICUBIC    = 2153,
-	BIQUINTIC  = 2155,
-	BISEPTIC   = 2157
+	BICUBIC    = 2156,
+	BIQUINTIC  = 2160,
+	BISEPTIC   = 2164
 };
 
 template<typename _Ty, size_t _Options> class BilinearInterp;
 template<typename _Ty, size_t _Options> class BicubicSplineInterp;
+template<typename _Ty, size_t _Options> class BiquinticSplineInterp;
+template<typename _Ty, size_t _Options> class BisepticSplineInterp;
 
-template<typename _Ty, size_t _Options> struct interpolation_traits
-{
-	static_assert(_Options == INTERP|BILINEAR, "Illegal options.");
-	using type = BilinearInterp<_Ty, _Options>;
-};
-template<typename _Ty> struct interpolation_traits<_Ty, INTERP|BICUBIC|BSPLINE>
-{
-	using type = BicubicSplineInterp<_Ty, INTERP | BICUBIC | BSPLINE>;
-};
+template<typename _Ty, size_t _Options> 
+struct interpolation_traits
+{ using type = BilinearInterp<_Ty, _Options>; };
+template<typename _Ty> 
+struct interpolation_traits<_Ty, INTERP|BICUBIC|BSPLINE>
+{ using type = BicubicSplineInterp<_Ty, INTERP|BICUBIC|BSPLINE>; };
+template<typename _Ty>
+struct interpolation_traits<_Ty, INTERP|BIQUINTIC|BSPLINE>
+{ using type = BiquinticSplineInterp<_Ty, INTERP|BIQUINTIC|BSPLINE>; };
+template<typename _Ty>
+struct interpolation_traits<_Ty, INTERP|BISEPTIC|BSPLINE>
+{ using type = BisepticSplineInterp<_Ty, INTERP|BISEPTIC|BSPLINE>; };
 
 template<typename _Ty, size_t _Options>
 using interpolation_traits_t = typename interpolation_traits<_Ty, _Options>::type;
@@ -55,6 +60,7 @@ public:
 	using value_t = _Ty;
 	using value_type = value_t;
 	using matrix_t = types::Matrix<value_type>;
+
 	template<typename... _Args>
 	MATRICE_GLOBAL_FINL InterpBase_(const _Args&... args);
 
