@@ -31,9 +31,12 @@ template<typename _Rhs, typename value_t> value_t det_impl(const _Rhs & a)
 	if (N == 2) return (p[0]*p[3] - p[1]*p[2]);
 	if (N == 3) return (p[0]*(p[4]*p[8] - p[5]*p[7]) - p[1]*(p[3]*p[8] - p[5]*p[6]) + p[2]*(p[3]*p[7] - p[4]*p[6]));
 
+	if constexpr (type_bytes<value_t>::value == 4)
+		return fblas::_sdetm(fkl::sptr(p), a.rows());
 	if constexpr (type_bytes<value_t>::value == 8)
 		return fblas::_ddetm(fkl::dptr(p), a.rows());
-	else return std::numeric_limits<value_t>::infinity();
+	
+	return std::numeric_limits<value_t>::infinity();
 }
 template float det_impl(const types::Matrix_<float, 2, 2>&);
 template float det_impl(const types::Matrix_<float, 3, 3>&);

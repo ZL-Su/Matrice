@@ -137,25 +137,12 @@ template<typename _Ty> template<int _M, int _N, solver_type _alg>
 void Solver_<_Ty>::Linear<_M, _N, _alg>::_Pre_solve()
 {
 	using Matrix = Matrix_<_M, _N>;
-	typename Matrix::pointer pCoef = A.data(); int layout = A.format;
+	typename Matrix::pointer pCoef = A.data(); 
+	int layout = matrix_traits<>::is_rmajor(A.format) ? rmaj : cmaj;
+
 	if constexpr(SolverType == solver_type::AUTO && CompileTimeRows == CompileTimeCols)
 	{
-		if (A.storage_type() == Matrix::type_t::GDs) {
-			if constexpr (type_bytes<value_t>::value == 4)
-#ifdef __use_mkl__
-				options.status = LAPACKE_sgetrf(layout, _M, _N, (float*)pCoef, _N, options.iwp.data());
-#else
-				options.status = flapk::_sLU(fkl::sptr(pCoef), options.iwp, _N);
-#endif
-			if constexpr (type_bytes<value_t>::value == 8)
-#ifdef __use_mkl__
-				options.status = LAPACKE_dgetrf(layout, _M, _N, (double*)pCoef, _N, options.iwp.data());
-#else
-				options.status = flapk::_dLU(fkl::dptr(pCoef), options.iwp, _N);
-#endif
-			options.used_alg = solver_type::LUF;
-		}
-		if (A.storage_type() == Matrix::type_t::DSm) {
+		if (matrix_traits<>::is_symmetric(A.format)) {
 			if constexpr (type_bytes<value_t>::value == 4)
 #ifdef __use_mkl__
 				options.status = LAPACKE_spotrf(layout, 'L', _N, (float*)pCoef, _N);
@@ -171,8 +158,25 @@ void Solver_<_Ty>::Linear<_M, _N, _alg>::_Pre_solve()
 #endif
 			options.used_alg = solver_type::CHD;
 		}
+		else {
+			if constexpr (type_bytes<value_t>::value == 4)
+#ifdef __use_mkl__
+				options.status = LAPACKE_sgetrf(layout, _M, _N, (float*)pCoef, _N, options.iwp.data());
+#else
+				options.status = flapk::_sLU(fkl::sptr(pCoef), options.iwp, _N);
+#endif
+			if constexpr (type_bytes<value_t>::value == 8)
+#ifdef __use_mkl__
+				options.status = LAPACKE_dgetrf(layout, _M, _N, (double*)pCoef, _N, options.iwp.data());
+#else
+				options.status = flapk::_dLU(fkl::dptr(pCoef), options.iwp, _N);
+#endif
+			options.used_alg = solver_type::LUF;
+		}
 	}
-
+	if constexpr (CompileTimeRows != CompileTimeCols) {
+		options.used_alg = solver_type::SVD;
+	}
 }
 
 template void Solver_<float>::Linear<0, 0, solver_type::AUTO>::_Pre_solve();
@@ -195,11 +199,31 @@ MATRICE_NAMESPACE_BEGIN_TYPES
 template<typename _T> LinearOp::info_t LinearOp::OpBase<_T>::_Impl(view_t& A)
 {
 	typename view_t::pointer pCoef = A.data();
-	int layout = A.format, _M = A.rows(), _N = A.cols();
-	assert(_M == _N);
+	size_t _M = A.rows(), _N = A.cols();
+	if (_M != _N) throw std::runtime_error("Support only for square matrix.");
+
+	int layout = matrix_traits<>::is_rmajor(A.format) ? rmaj : cmaj;
 	info_t info;
 
-	if (A.storage_type() == view_t::type_t::GDs) {
+	if (matrix_traits<>::is_symmetric(A.format)) {
+		info.alg = solver_type::CHD;
+		if constexpr (type_bytes<value_t>::value == 4)
+#ifdef __use_mkl__
+			info.status = LAPACKE_spotrf(layout, 'L', _N, (float*)pCoef, _N);
+#else
+			info.status = flapk::_scholy(fkl::sptr(pCoef), _N);
+
+#endif
+		if constexpr (type_bytes<value_t>::value == 8)
+#ifdef __use_mkl__
+			info.status = LAPACKE_dpotrf(layout, 'L', _N, (double*)pCoef, _N);
+#else
+			info.status = flapk::_dcholy(fkl::dptr(pCoef), _N);
+#endif
+		return info;
+	}
+
+	{ //general dense matrix
 		info.alg = solver_type::LUF;
 		Matrix_<int, view_t::CompileTimeCols, min(view_t::CompileTimeCols, 1)> iwp(_N, 1);
 		if constexpr (type_bytes<value_t>::value == 4)
@@ -217,23 +241,6 @@ template<typename _T> LinearOp::info_t LinearOp::OpBase<_T>::_Impl(view_t& A)
 		for (int i = 1; i <= _N; ++i) if (i != iwp(i)) info.sign *= -1;
 		return info;
 	}
-	if (A.storage_type() == view_t::type_t::DSm) {
-		info.alg = solver_type::CHD;
-		if constexpr (type_bytes<value_t>::value == 4)
-#ifdef __use_mkl__
-			info.status = LAPACKE_spotrf(layout, 'L', _N, (float*)pCoef, _N);
-#else
-			info.status = flapk::_scholy(fkl::sptr(pCoef), _N);
-
-#endif
-		if constexpr (type_bytes<value_t>::value == 8)
-#ifdef __use_mkl__
-			info.status = LAPACKE_dpotrf(layout, 'L', _N, (double*)pCoef, _N);
-#else
-			info.status = flapk::_dcholy(fkl::dptr(pCoef), _N);
-#endif
-		return info;
-	}
 }
 template LinearOp::info_t LinearOp::OpBase<float>::_Impl(Matrix_<value_t, __, __>&);
 template LinearOp::info_t LinearOp::OpBase<double>::_Impl(Matrix_<value_t, __, __>&);
@@ -242,10 +249,8 @@ template<typename _T> void LinearOp::OpBase<_T>::_Impl(view_t& A, view_t& X)
 {
 	const int_t n = A.cols() - 1;
 	const int_t inc = X.cols();
-	if (this->_Info.alg == solver_type::GLS)
-	{
-		return;
-	}
+
+	if (this->_Info.alg == solver_type::GLS) return;
 
 	auto _fn = [&](typename view_t::iterator b)->typename view_t::iterator {
 		for (int_t i = 1; i <= n; ++i) {

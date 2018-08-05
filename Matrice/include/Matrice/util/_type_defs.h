@@ -26,5 +26,16 @@ namespace dgelom
 		AUTO = 0x0000, LUF = 0x0001, CHD = 0x0002, QRD = 0x0003,
 		SVD = 0x0004, ITER = 0x0005, SPAR = 0x0006, GLS = 0x0007
 	};
-	enum { expr = 0x0099 };
+	enum {
+		expr = 0x0099,
+		rmaj = 101,
+		cmaj = 102,
+		gene = 103,
+		symm = 104,
+		diag = 105,
+		band = 106,
+		utri = 107,
+		ltri = 108,
+		spar = 109,
+	};
 }

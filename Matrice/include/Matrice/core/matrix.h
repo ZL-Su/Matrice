@@ -68,14 +68,7 @@ public:
 	using base_t::operator ocv_view_t;
 #endif
 };
-//matrix with host managed memory allocator [float]
-template<int _Rows, int _Cols> using Matrixf = Matrix_<float, 
-	compile_time_size<_Rows, _Cols>::CompileTimeRows, 
-	compile_time_size<_Rows, _Cols>::CompileTimeCols>;
-//matrix with host managed memory allocator [double]
-template<int _Rows, int _Cols> using Matrixd = Matrix_<double,
-	compile_time_size<_Rows, _Cols>::CompileTimeRows,
-	compile_time_size<_Rows, _Cols>::CompileTimeCols>;
+
 
 /*******************************************************************
     Generic Matrix Class with Aligned Dynamic Memory Allocation
@@ -126,10 +119,7 @@ public:
 	MATRICE_GLOBAL void create(int_t rows, int_t cols = 1);
 	MATRICE_GLOBAL void create(int_t rows, int_t cols, value_t _val);
 };
-//matrix with host dynamic memory allocator
-template<typename _Ty> using Matrix = Matrix_<_Ty,
-	compile_time_size<>::RunTimeDeducedInHost,
-	compile_time_size<>::RunTimeDeducedInHost>;
+
 
 #if (defined __enable_cuda__ && !defined __disable_cuda__)
 /*******************************************************************
@@ -139,9 +129,11 @@ template<typename _Ty> using Matrix = Matrix_<_Ty,
 template<typename _Ty>
 class Matrix_<_Ty, -1, __> : public Base_<_Ty, -1, __>
 {
-	typedef Base_<_Ty, -1, __>                   base_t;
 	using Myt = Matrix_;
-	using Myt_const_reference = std::add_lvalue_reference_t<Myt>;
+	using Myt_reference = std::add_lvalue_reference_t<Myt>;
+	using Myt_const_reference = add_const_reference_t<Myt>;
+	using Myt_move_reference = std::add_rvalue_reference_t<Myt>;
+	using base_t = Base_<_Ty, -1, __>;
 	using base_t::m_data;
 	using base_t::m_rows;
 	using base_t::m_cols;
@@ -151,18 +143,15 @@ public:
 	using typename base_t::const_init_list;
 	enum { Size = __, CompileTimeRows = -1, CompileTimeCols = __, };
 	MATRICE_GLOBAL_INL Matrix_(int _rows) noexcept : base_t(_rows, 1) {};
-	MATRICE_GLOBAL_INL Matrix_(Myt&& _other) noexcept : base_t(_other) {};
+	MATRICE_GLOBAL_INL Matrix_(Myt_move_reference _other) noexcept : base_t(_other) {};
 	template<typename... _Args> MATRICE_GLOBAL_INL Matrix_(_Args... args) noexcept : base_t(args...) {};
 
-	template<typename _Arg> MATRICE_GLOBAL_INL Myt& operator= (const _Arg& _arg) { return base_t::operator=(_arg); }
-	MATRICE_GLOBAL_INL Myt& operator= (Myt&& _other) { return base_t::operator=(std::move(_other)); }
-	MATRICE_HOST_INL Myt& operator= (const_init_list _list) { return base_t::operator=(_list); }
+	template<typename _Arg> MATRICE_GLOBAL_INL Myt_reference operator= (add_const_reference<_Arg> _arg) { return base_t::operator=(_arg); }
+	MATRICE_GLOBAL_INL Myt_reference operator= (Myt_move_reference _other) { return base_t::operator=(std::move(_other)); }
+	MATRICE_HOST_INL Myt_reference operator= (const_init_list _list) { return base_t::operator=(_list); }
 	MATRICE_GLOBAL void create(int_t rows, int_t cols = 1);
 };
-//matrix with CUDA unified memory allocator
-template<typename _Ty> using Umatrix = Matrix_<_Ty,
-	compile_time_size<>::RunTimeDeducedInDevice,
-	compile_time_size<>::RunTimeDeducedInHost>;
+
 
 /*******************************************************************
     Generic Matrix Class with Device Memory Allocation (CUDA)
@@ -171,10 +160,12 @@ template<typename _Ty> using Umatrix = Matrix_<_Ty,
 template<typename _Ty>
 class Matrix_<_Ty, -1, -1> : public Base_<_Ty, -1, -1>, public device::Base_<_Ty>
 {
-	typedef Base_<_Ty, -1, -1>                   base_t;
-	typedef device::Base_<_Ty>            device_base_t;
-	using Myt = Matrix_;
-	using Myt_const_reference = std::add_lvalue_reference_t<Myt>;
+	using Myt = Matrix_<_Ty, -1, -1>;
+	using Myt_reference = std::add_lvalue_reference_t<Myt>;
+	using Myt_const_reference = add_const_reference_t<Myt>;
+	using Myt_move_reference = std::add_rvalue_reference_t<Myt>;
+	using device_base_t = device::Base_<_Ty>;
+	using base_t = Base_<_Ty, -1, -1>;
 	using base_t::m_data;
 	using base_t::m_rows;
 	using base_t::m_cols;
@@ -188,21 +179,21 @@ public:
 
 	MATRICE_GLOBAL_INL Matrix_(int _rows) noexcept : base_t(_rows, 1), 
 		device_base_t(m_data, &m_pitch, &m_cols, &m_rows) {};
-	MATRICE_GLOBAL_INL Matrix_(const Myt& _other) noexcept : base_t(_other),
+	MATRICE_GLOBAL_INL Matrix_(Myt_const_reference _other) noexcept : base_t(_other),
 		device_base_t(m_data, &m_pitch, &m_cols, &m_rows) {};
-	MATRICE_GLOBAL_INL Matrix_(Myt&& _other) noexcept : base_t(_other), 
+	MATRICE_GLOBAL_INL Matrix_(Myt_move_reference _other) noexcept : base_t(_other), 
 		device_base_t(m_data, &m_pitch, &m_cols, &m_rows) {};
 	template<int _M = 0, int _N = _M>
-	MATRICE_HOST_INL Matrix_(const Matrix_<_Ty, _M, _N>& _other) noexcept: base_t(_other),
+	MATRICE_HOST_INL Matrix_(add_const_reference_t<Matrix_<_Ty, _M, _N>> _other) noexcept: base_t(_other),
 		device_base_t(m_data, &m_pitch, &m_cols, &m_rows) {};
 	template<typename... _Args> MATRICE_GLOBAL_INL Matrix_(const _Args&... args) noexcept : base_t(args...), 
 		device_base_t(m_data, &m_pitch, &m_cols, &m_rows) {};
 
 	template<typename _Arg> 
-	MATRICE_GLOBAL_INL Myt& operator= (const _Arg& _arg) { return device_base_t::operator=(_arg); }
-	MATRICE_DEVICE_INL Myt& operator= (const Myt& _other) { return device_base_t::operator=(_other); }
-	MATRICE_DEVICE_INL Myt& operator= (Myt&& _other) { return device_base_t::operator=(std::move(_other)); }
-	MATRICE_GLOBAL_INL Myt& operator= (const_init_list _list) { return device_base_t::operator=(_list.begin()); }
+	MATRICE_GLOBAL_INL Myt_reference operator= (add_const_reference_t<_Arg> _arg) { return device_base_t::operator=(_arg); }
+	MATRICE_DEVICE_INL Myt_reference operator= (Myt_const_reference _other) { return device_base_t::operator=(_other); }
+	MATRICE_DEVICE_INL Myt_reference operator= (Myt_move_reference _other) { return device_base_t::operator=(std::move(_other)); }
+	MATRICE_GLOBAL_INL Myt_reference operator= (const_init_list _list) { return device_base_t::operator=(_list.begin()); }
 	/*template<int _M, int _N>
 	MATRICE_GLOBAL_INL operator Matrix_<value_t, _M, _N>() const {
 		Matrix_<value_t, _M, _N> _Ret(m_rows, m_cols);
@@ -212,57 +203,30 @@ public:
 	MATRICE_GLOBAL void create(int_t rows, int_t cols = 1);
 
 };
-//matrix with CUDA device memory allocator
-template<typename _Ty> using Dmatrix = Matrix_<_Ty,
-	compile_time_size<>::RunTimeDeducedInDevice,
-	compile_time_size<>::RunTimeDeducedInDevice>;
-#endif
 
-#pragma region Matrix base which using storage class as template arg. 
-template<typename _Ty, class _Storage = details::Storage_<_Ty>::
-#ifdef __CXX11__
-	SharedAllocator<_Ty>
-#else
-	DynamicAllocator<_Ty>
 #endif
->
-class MatrixBase_
-#ifdef __use_ocv_as_view__
-	: public ocv_view_t
-#endif
-{
-	typedef typename details::Storage_<_Ty>::value_t   value_t;
-	typedef typename details::Storage_<_Ty>::pointer   pointer;
-	typedef typename details::Storage_<_Ty>::reference reference;
-	typedef typename details::Storage_<_Ty>::idx_t     idx_t;
-	typedef typename Location                          loctn_t;
-	typedef MatrixBase_ Myt;
-public:
-	explicit MatrixBase_(const int_t _m, const int_t _n) noexcept;
-	explicit MatrixBase_() noexcept 
-		: m_storage(), m_rows(m_storage.rows()), m_cols(m_storage.cols())
-	{
-		if (m_storage.location() == loctn_t::OnStack)
-		{
-			m_data = m_storage.data();
-#ifdef __use_ocv_as_view__
-			*static_cast<ocv_view_t*>(this) = ocv_view_t(m_storage.rows(), m_storage.cols(), ocv_view_t_cast<value_t>::type, m_data);
-#endif
-		}
-	};
-
-public:
-	inline value_t& operator[] (int_t idx) const { return m_data[idx]; }
-	inline value_t& operator() (int_t ridx, int_t cidx) const { return m_data[cidx+ridx* m_cols]; }
-	inline pointer ptr(int_t ridx) const { return (m_data + ridx*m_cols); }
-	inline value_t& colmaj(int_t ridx, int_t cidx) const { return m_data[ridx + cidx * m_rows]; }
-
-protected:
-	pointer m_data;
-	_Storage m_storage;
-private:
-	std::size_t m_rows, m_cols;
-};
-#pragma endregion
 MATRICE_NAMESPACE_END_TYPES
-namespace dge = dgelom::types;
+
+MATRICE_NAMESPACE_BEGIN_
+//\matrix type with host managed memory allocator
+template<typename T, int _M, int _N, size_t _Options = rmaj|gene, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+using Matrix_ = types::Matrix_<T, _M, _N>;
+
+//\matrix type with host dynamic memory allocator
+template<typename T, size_t _Options = rmaj | gene> using Matrix = Matrix_<T,
+	compile_time_size<>::RunTimeDeducedInHost,
+	compile_time_size<>::RunTimeDeducedInHost,
+	_Options>;
+
+//\matrix type with unified memory allocator
+template<typename T, size_t _Options = rmaj | gene> using Umatrix = Matrix_<T,
+	compile_time_size<>::RunTimeDeducedInDevice,
+	compile_time_size<>::RunTimeDeducedInHost,
+	_Options>;
+
+//\matrix type with device memory allocator
+template<typename T, size_t _Options = rmaj | gene> using Dmatrix = Matrix_<T,
+	compile_time_size<>::RunTimeDeducedInDevice,
+	compile_time_size<>::RunTimeDeducedInDevice,
+	_Options>;
+_MATRICE_NAMESPACE_END

@@ -59,7 +59,7 @@ template<typename _Ty, typename _Derived> class InterpBase_
 public:
 	using value_t = _Ty;
 	using value_type = value_t;
-	using matrix_t = types::Matrix<value_type>;
+	using matrix_t = Matrix<value_type>;
 
 	template<typename... _Args>
 	MATRICE_GLOBAL_FINL InterpBase_(const _Args&... args);

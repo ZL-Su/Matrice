@@ -183,7 +183,6 @@
     <ClCompile Include="src\core\matrix_base_impl.cpp" />
     <ClCompile Include="src\core\matrix_dynamic_impl.cpp" />
     <ClCompile Include="src\core\matrix_expr_op_impl.cpp" />
-    <ClCompile Include="src\core\matrix_with_generic_alloc.cpp" />
     <ClCompile Include="src\core\solver_impl.cpp" />
     <ClCompile Include="src\core\storage_base_impl.cpp" />
     <ClCompile Include="src\private\_memory.cpp" />

@@ -86,6 +86,43 @@ template<> struct _View_trait<int> { enum { value = 0x0016 }; };
 template<> struct _View_trait<float> { enum { value = 0x0032 }; };
 template<> struct _View_trait<double> { enum { value = 0x0064 }; };
 
+template<size_t _Options = 0> struct matrix_traits { 
+	enum { value = _Options };
+	MATRICE_GLOBAL_FINL static auto layout_type(size_t _format) {
+		return (_format & rmaj == rmaj) ? rmaj : cmaj;
+	}
+	MATRICE_GLOBAL_FINL static auto storage_type(size_t _format) {
+		return (_format & symm == symm) ? symm : (_format & diag == diag) ? diag :
+			    (_format & band == band) ? band : (_format & utri == utri) ? utri :
+				 (_format & ltri == ltri) ? ltri : (_format & spar == spar) ? spar :
+				 gene;
+	}
+	MATRICE_GLOBAL_FINL static bool is_rmajor(size_t _format) {
+		return _format & rmaj == rmaj;
+	}
+	MATRICE_GLOBAL_FINL static bool is_cmajor(size_t _format) {
+		return _format & cmaj == cmaj;
+	}
+	MATRICE_GLOBAL_FINL static bool is_symmetric(size_t _format) {
+		return _format & symm == symm;
+	}
+	MATRICE_GLOBAL_FINL static bool is_diagnal(size_t _format) {
+		return _format & diag == diag;
+	}
+	MATRICE_GLOBAL_FINL static bool is_banded(size_t _format) {
+		return _format & band == band;
+	}
+	MATRICE_GLOBAL_FINL static bool is_sparse(size_t _format) {
+		return _format & spar == spar;
+	}
+	MATRICE_GLOBAL_FINL static bool is_uppertr(size_t _format) {
+		return _format & utri == utri;
+	}
+	MATRICE_GLOBAL_FINL static bool is_lowertr(size_t _format) {
+		return _format & ltri == ltri;
+	}
+};
+
 template<int _Rows = 0, int _Cols = 0> struct compile_time_size {
 	enum { val_1 = 0x0001, val_2 = 0x0002, val_3 = 0x0003, val_4 = 0x0004 };
 	enum {

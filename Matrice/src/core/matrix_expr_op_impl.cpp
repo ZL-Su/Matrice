@@ -13,7 +13,6 @@ MATRICE_NAMESPACE_EXPR_BEGIN
 template<typename _Ty>
 _Ty * Expr::Op::MatInv<_Ty>::operator()(int M, _Ty * Out, _Ty * In) const
 {
-	using fkl::sptr; using fkl::dptr;
 	if (!In) return (Out);
 	if (M == 2) { privt::_inv2x2m(In, Out); return (Out); };
 	if (M == 3) { privt::_inv3x3m(In, Out); return (Out); };
@@ -23,13 +22,13 @@ _Ty * Expr::Op::MatInv<_Ty>::operator()(int M, _Ty * Out, _Ty * In) const
 #ifdef __use_mkl__
 		LAPACKE_sgetri(LAPACK_ROW_MAJOR, M, (float*)Out, M, nullptr);
 #else
-		flapk::_sginv((sptr)Out, M);
+		flapk::_sginv((fkl::sptr)Out, M);
 #endif
 	if constexpr (type_bytes<_Ty>::value == 8)
 #ifdef __use_mkl__
 		LAPACKE_dgetri(LAPACK_ROW_MAJOR, M, (double*)Out, M, nullptr);
 #else
-		flapk::_dginv((dptr)Out, M);
+		flapk::_dginv((fkl::dptr)Out, M);
 #endif
 	return (Out);
 }

@@ -105,17 +105,7 @@ public:
 	using base_t = PlaneView_<value_type>;
 	using loctn_t = Location;
 
-	typedef enum StorageFormat { RowMajor = 101, ColMajor = 102 }format_t;
-	typedef enum StorageType { GDs, GTd, GBd, GSp, DSm, BSm, SSm } type_t;
-	enum { options = Expr::OpFlag::undef | _Myt_storage_type::location };
-	typedef struct Column_View
-	{
-		Column_View(const _Derived& ref, int_t _c) : myref(ref), c(_c) {};
-		int_t c = 0;
-		const _Derived& myref;
-		reference operator() (int_t r) { return myref(r, c); }
-		reference operator() (int_t r) const { return myref(r, c); }
-	} cview_t;
+	enum { options = _Myt_storage_type::location };
 	constexpr static const _Ty inf = std::numeric_limits<_Ty>::infinity();
 	constexpr static const _Ty eps = std::numeric_limits<_Ty>:: epsilon();
 
@@ -131,13 +121,13 @@ public:
 	MATRICE_GLOBAL_FINL Base_(const Matrix_<value_t, _Rows, _Cols>& _other) noexcept :base_t(_other.rows(), _other.cols()), m_storage(_other.m_storage) { m_data = m_storage.data(); }
 	
 	template<typename _Lhs, typename _Rhs, typename _Op>
-	MATRICE_GLOBAL_FINL Base_(const exprs::Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Op>& expr)
+	MATRICE_GLOBAL_FINL Base_(const Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Op>& expr)
 		:base_t(m_rows = expr.rows(), m_cols = expr.cols()), m_storage(m_rows, m_cols) { m_data = m_storage.data(); expr.assign(*this); }
 	template<typename _Lhs, typename _Rhs, typename _Op>
-	MATRICE_GLOBAL_FINL Base_(const exprs::Expr::MatBinaryExpr<_Lhs, _Rhs, _Op>& expr) 
+	MATRICE_GLOBAL_FINL Base_(const Expr::MatBinaryExpr<_Lhs, _Rhs, _Op>& expr) 
 		:base_t(m_rows = expr.rows(), m_cols = expr.cols()), m_storage(m_rows, m_cols) { m_data = m_storage.data(); expr.assign(*this); }
 	template<typename _Rhs, typename _Op>
-	MATRICE_GLOBAL_FINL Base_(const exprs::Expr::MatUnaryExpr<_Rhs, _Op>& expr) 
+	MATRICE_GLOBAL_FINL Base_(const Expr::MatUnaryExpr<_Rhs, _Op>& expr) 
 		:base_t(m_rows = expr.rows(), m_cols = expr.cols()), m_storage(m_rows, m_cols) { m_data = m_storage.data(); expr.assign(*this); }
 
 	///<brief> opencv interface </brief>
@@ -154,8 +144,8 @@ public:
 	MATRICE_GLOBAL_FINL const pointer operator[](index_t y) const { return (m_data + y * m_cols); }
 	MATRICE_GLOBAL_FINL reference operator()(index_t i) { return m_data[i]; }
 	MATRICE_GLOBAL_FINL const reference operator()(index_t i) const { return m_data[i]; }
-	template<format_t _Fmt = RowMajor>
-	MATRICE_GLOBAL_INL reference operator()(int _r, int _c) const { return (m_data + (_Fmt == RowMajor ? m_cols : m_rows) * _r)[_c]; }
+	template<size_t _Format = rmaj>
+	MATRICE_GLOBAL_INL reference operator()(int _r, int _c) const { return (m_data + (_Format == rmaj ? m_cols : m_rows) * _r)[_c]; }
 	///<brief> access methods </brief>
 	MATRICE_GLOBAL_FINL pointer data() { return (m_data); }
 	MATRICE_GLOBAL_FINL const pointer data() const { return (m_data); }
@@ -252,7 +242,6 @@ public:
 	MATRICE_GLOBAL_FINL constexpr auto rows() const { return m_rows; }
 	MATRICE_GLOBAL_FINL constexpr auto cols() const { return m_cols; }
 	MATRICE_GLOBAL_FINL constexpr auto size() const { return m_rows*m_cols; }
-	MATRICE_GLOBAL_FINL constexpr cview_t col(index_t c) const { return cview_t(*this, c); }
 
 
 	///<brief> assignment operators </brief>
@@ -298,30 +287,30 @@ public:
 
 #pragma region <!-- Lazied Operators for Matrix Arithmetic -->
 	template<typename _Rhs> MATRICE_GLOBAL_INL auto operator+ (const _Rhs& _opd) const 
-	{ return exprs::Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_sum>(*this, _opd);}
+	{ return Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_sum>(*this, _opd);}
 	template<typename _Rhs> MATRICE_GLOBAL_INL auto operator- (const _Rhs& _opd) const 
-	{ return exprs::Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_min>(*this, _opd); }
+	{ return Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_min>(*this, _opd); }
 	template<typename _Rhs> MATRICE_GLOBAL_INL auto operator* (const _Rhs& _opd) const 
-	{ return exprs::Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_mul>(*this, _opd); }
+	{ return Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_mul>(*this, _opd); }
 	template<typename _Rhs> MATRICE_GLOBAL_INL auto operator/ (const _Rhs& _opd) const 
-	{ return exprs::Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_div>(*this, _opd); }
+	{ return Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_div>(*this, _opd); }
 	template<typename _Rhs> MATRICE_GLOBAL_INL auto mul(const _Rhs& rhs) const 
-	{ return exprs::Expr::MatBinaryExpr<_Myt, _Rhs, _Xop_mat_mul>(*this, rhs); }
+	{ return Expr::MatBinaryExpr<_Myt, _Rhs, _Xop_mat_mul>(*this, rhs); }
 	MATRICE_HOST_FINL auto inv() const 
-	{ return exprs::Expr::MatUnaryExpr<_Myt, _Xop_mat_inv>(*this); }
+	{ return Expr::MatUnaryExpr<_Myt, _Xop_mat_inv>(*this); }
 	MATRICE_HOST_FINL auto inv(_Myt_const_reference _rhs) 
-	{ return exprs::Expr::MatUnaryExpr<_Myt, _Xop_mat_inv>(_rhs, *this); }
+	{ return Expr::MatUnaryExpr<_Myt, _Xop_mat_inv>(_rhs, *this); }
 	MATRICE_HOST_FINL auto transpose() 
-	{ return exprs::Expr::MatUnaryExpr<_Myt, _Xop_mat_trp>(*this); }
+	{ return Expr::MatUnaryExpr<_Myt, _Xop_mat_trp>(*this); }
 	MATRICE_GLOBAL_FINL auto normalize(value_t _val = inf) 
-	{ return ((std::abs(_val) < eps ? value_t(1) : value_t(1) / (_val == inf ? max() : _val))*(*this)); }
-	MATRICE_GLOBAL_INL exprs::Expr::MatBinaryExpr<_Myt, _Myt, _Xop_mat_mul> spread();
+	{ return ((abs(_val) < eps ? value_t(1) : value_t(1) / (_val == inf ? max() : _val))*(*this)); }
+	MATRICE_GLOBAL_INL Expr::MatBinaryExpr<_Myt, _Myt, _Xop_mat_mul> spread();
 #pragma endregion
 
 #pragma region <!-- Triggers for Suspended Expression -->
-	template<typename... _Args> MATRICE_GLOBAL_INL auto& operator= (const exprs::Expr::EwiseBinaryExpr<_Args...>& _Ex){ return (*static_cast<_Derived*>(&_Ex.assign(*this))); }
-	template<typename... _Args> MATRICE_GLOBAL_INL auto& operator= (const exprs::Expr::MatBinaryExpr<_Args...>& _Ex) { return (*static_cast<_Derived*>(&_Ex.assign(*this))); }
-	template<typename... _Args> MATRICE_GLOBAL_INL auto& operator= (const exprs::Expr::MatUnaryExpr<_Args...>& _Ex) { return (*static_cast<_Derived*>(&_Ex.assign(*this))); }
+	template<typename... _Args> MATRICE_GLOBAL_INL auto& operator= (const Expr::EwiseBinaryExpr<_Args...>& _Ex){ return (*static_cast<_Derived*>(&_Ex.assign(*this))); }
+	template<typename... _Args> MATRICE_GLOBAL_INL auto& operator= (const Expr::MatBinaryExpr<_Args...>& _Ex) { return (*static_cast<_Derived*>(&_Ex.assign(*this))); }
+	template<typename... _Args> MATRICE_GLOBAL_INL auto& operator= (const Expr::MatUnaryExpr<_Args...>& _Ex) { return (*static_cast<_Derived*>(&_Ex.assign(*this))); }
 #pragma endregion
 
 	///<brief> in-time matrix arithmetic </brief>
@@ -331,24 +320,25 @@ public:
 	MATRICE_GLOBAL_FINL value_t det() const { return (det_impl(*static_cast<const _Derived*>(this))); }
 	MATRICE_GLOBAL_FINL value_t trace() const { return (reduce(begin(), end(), cols() + 1)); }
 	template<class _Rhs> MATRICE_GLOBAL_FINL value_t dot(const _Rhs& _rhs) const { return (this->operator*(_rhs)).sum(); }
-	MATRICE_GLOBAL_FINL value_t norm_2() const { auto ans = dot(*this); return (ans > eps ? std::sqrt(ans) : inf); }
+	MATRICE_GLOBAL_FINL value_t norm_2() const { auto ans = dot(*this); return (ans > eps ? sqrt(ans) : inf); }
+
 	template<typename _Rhs, typename _Ret = _Rhs> MATRICE_HOST_INL _Ret& solve(_Rhs& b) { typename Solver_<value_t>::Linear<_M, _N, AUTO> solver(*static_cast<_Derived*>(this)); return solver.solve(b); }
 	MATRICE_HOST_INL auto solve() { typename Solver_<value_t>::Linear<_M, _N, SVD> solver; return solver(*static_cast<_Derived*>(this)); }
 
 	///<brief> properties </brief>
-	__declspec(property(get = _Prop_format_getter)) format_t format;
-	constexpr MATRICE_HOST_FINL format_t _Prop_format_getter() const { return m_format; }
-	__declspec(property(get = _Prop_empty_getter)) bool empty;
-	constexpr MATRICE_HOST_FINL bool _Prop_empty_getter() const { return (size() == 0); }
-	constexpr MATRICE_GLOBAL_FINL type_t& storage_type() { return m_type; }
-	constexpr MATRICE_GLOBAL_FINL type_t storage_type() const { return m_type; }
+	__declspec(property(get=_Format_getter, put=_Format_setter))size_t format;
+	MATRICE_HOST_FINL size_t _Format_getter() const { return m_format; }
+	MATRICE_HOST_FINL void _Format_setter(size_t format) { m_format = rmaj|format; }
+
+	__declspec(property(get = _Empty_getter)) bool empty;
+	MATRICE_HOST_FINL bool _Empty_getter() const { return (size() == 0); }
 
 protected:
 	using base_t::m_rows;
 	using base_t::m_cols;
 	using base_t::m_data;
-	format_t m_format = RowMajor;
-	type_t m_type = type_t::GDs;
+
+	size_t m_format = rmaj|gene;
 
 public:
 	_Myt_storage_type m_storage;

@@ -266,9 +266,6 @@
     <ClCompile Include="src\private\_memory.cpp">
       <Filter>Source Files\Details</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\matrix_with_generic_alloc.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
