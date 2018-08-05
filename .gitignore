@@ -263,3 +263,5 @@ __pycache__/
 /Matrice/resource.h
 /Matrice/addin/Eigen
 /Matrice/addin/unsupported/Eigen
+/Fkl/linking/FKL_x64_Pro.props
+/Matrice/include/Matrice/algs/similarity/inline/_icgn_impl.inl

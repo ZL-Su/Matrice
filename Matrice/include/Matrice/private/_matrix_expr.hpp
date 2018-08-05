@@ -22,7 +22,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <immintrin.h>
 #endif
 #include "../util/_macros.h"
-#include "_expr_type_traits.h"
+#include "_type_traits.h"
 #include "_storage.hpp"
 
 #pragma warning(disable: 4715)

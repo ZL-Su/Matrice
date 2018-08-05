@@ -17,7 +17,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #include <complex>
 #include "../../include/Matrice/private/_storage.hpp"
-#include "../../include/Matrice/private/_expr_type_traits.h"
+#include "../../include/Matrice/private/_type_traits.h"
 #include "../../include/Matrice/private/_unified_memory.h"
 #include "../../include/Matrice/private/_decl_dev_funcs.h"
 

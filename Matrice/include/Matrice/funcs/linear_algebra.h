@@ -1,7 +1,7 @@
 
 #pragma once
 #include <type_traits>
-#include "../private/_expr_type_traits.h"
+#include "../private/_type_traits.h"
 #ifdef __use_mkl__
 #include <mkl.h>
 #else

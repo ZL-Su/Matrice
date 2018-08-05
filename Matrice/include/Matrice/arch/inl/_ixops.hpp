@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
-#include "../../private/_expr_type_traits.h"
+#include "../../private/_type_traits.h"
 #ifdef __AVX__
 #include "../_ixtraits.hpp"
 #include "_ixdetails.hpp"

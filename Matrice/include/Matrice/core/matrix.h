@@ -30,9 +30,12 @@ MATRICE_NAMESPACE_BEGIN_TYPES
 template<typename _Ty, int _M, int _N>
 class Matrix_ : public Base_<_Ty, _M, _N>
 {
-	typedef Base_<_Ty, _M, _N> base_t;
-	typedef Matrix_                                     Myt;
-	typedef const Myt&                         const_my_ref;
+	using Myt = Matrix_;
+	using Myt_const = std::add_const_t<Myt>;
+	using Myt_reference = std::add_lvalue_reference_t<Myt>;
+	using Myt_move_reference = std::add_rvalue_reference_t<Myt>;
+	using Myt_const_reference = std::add_lvalue_reference_t<Myt_const>;
+	using base_t = Base_<_Ty, _M, _N>;
 	using base_t::m_rows;
 	using base_t::m_cols;
 	using base_t::m_data;
@@ -44,19 +47,23 @@ public:
 	MATRICE_GLOBAL_FINL Matrix_(const value_t _val) noexcept : base_t({_val}) {};
 	MATRICE_GLOBAL_FINL Matrix_(pointer data) noexcept : base_t(_M, _N, data) {};
 	MATRICE_HOST_FINL   Matrix_(const_init_list _list) noexcept : base_t(_list) {}
-	MATRICE_GLOBAL_FINL Matrix_(Myt&& _other) noexcept : base_t(_other) {}
-	MATRICE_GLOBAL_FINL Matrix_(const_my_ref _other) noexcept : base_t(_other) {};
+	MATRICE_GLOBAL_FINL Matrix_(Myt_move_reference _other) noexcept : base_t(_other) {}
+	MATRICE_GLOBAL_FINL Matrix_(Myt_const_reference _other) noexcept : base_t(_other) {};
 	MATRICE_GLOBAL_FINL Matrix_(int _pld1=0, int _pld2=0) noexcept : base_t() {};
-	template<typename _Arg> MATRICE_GLOBAL_FINL Matrix_(const _Arg& _arg) noexcept : base_t(_arg) {};
+	template<typename... _Arg> 
+	MATRICE_GLOBAL_FINL Matrix_(const _Arg&... _arg) noexcept : base_t(_arg...) {};
 
-	MATRICE_HOST_FINL Myt& operator= (const_init_list _list) { return base_t::operator=(_list); }
-	MATRICE_GLOBAL_FINL Myt& operator= (const_my_ref _other) { return base_t::operator=(_other); }
-	MATRICE_GLOBAL_FINL Myt& operator= (Myt&& _other) { return base_t::operator=(std::move(_other)); }
-	template<typename _Arg> MATRICE_GLOBAL_FINL Myt& operator= (const _Arg& _arg) { return base_t::operator=(_arg); }
+	MATRICE_HOST_FINL Myt_reference operator= (const_init_list _list) { return base_t::operator=(_list); }
+	MATRICE_GLOBAL_FINL Myt_reference operator= (Myt_const_reference _other) { return base_t::operator=(_other); }
+	MATRICE_GLOBAL_FINL Myt_reference operator= (Myt_move_reference _other) { return base_t::operator=(std::move(_other)); }
+	template<typename _Arg>
+	MATRICE_GLOBAL_FINL Myt_reference operator= (add_const_reference_t<_Arg> _arg) { return base_t::operator=(_arg); }
+
 	MATRICE_GLOBAL_FINL operator std::array<value_t, Size>() const { return _Fill_array<value_t, Size>(base_t::begin()); }
 	MATRICE_GLOBAL_FINL operator std::array<value_t, Size>() { return _Fill_array<value_t, Size>(base_t::begin()); }
 	MATRICE_GLOBAL_FINL operator Matrix_<value_t, __, __>() const { return Matrix_<value_t, __, __>(m_rows, m_cols, m_data); }
 	MATRICE_GLOBAL_FINL operator Matrix_<value_t, __, __>() { return Matrix_<value_t, __, __>(m_rows, m_cols, m_data); }
+
 #ifdef __use_ocv_as_view__
 	using base_t::operator ocv_view_t;
 #endif
@@ -77,9 +84,13 @@ template<int _Rows, int _Cols> using Matrixd = Matrix_<double,
 template<typename _Ty>
 class Matrix_<_Ty, __, __> : public Base_<_Ty, __, __>
 {
-	typedef Base_<_Ty, __, __> base_t;
-	typedef Matrix_                                 Myt;
-	typedef const Myt&                     const_my_ref;
+	using Myt = Matrix_;
+	using Myt_const = std::add_const_t<Myt>;
+	using Myt_reference = std::add_lvalue_reference_t<Myt>;
+	using Myt_move_reference = std::add_rvalue_reference_t<Myt>;
+	using Myt_const_reference = std::add_lvalue_reference_t<Myt_const>;
+	template<typename _Xop> using Myt_xpr_type = Expr::Base_<_Xop>;
+	using base_t = Base_<_Ty, __, __>;
 	using base_t::m_data;
 	using base_t::m_rows;
 	using base_t::m_cols;
@@ -88,10 +99,12 @@ public:
 	using typename base_t::pointer;
 	using typename base_t::const_init_list;
 	enum { Size = __, CompileTimeRows = __, CompileTimeCols = __, };
+
 	MATRICE_GLOBAL_FINL Matrix_(int _rows) noexcept : base_t(_rows, 1) {};
 	MATRICE_GLOBAL_FINL Matrix_(Myt&& _other) noexcept : base_t(_other) {};
-	MATRICE_GLOBAL_FINL Matrix_(const_my_ref _other) noexcept : base_t(_other) {};
-	template<typename... _Args> MATRICE_GLOBAL_FINL Matrix_(const _Args&... args) noexcept : base_t(args...) {};
+	MATRICE_GLOBAL_FINL Matrix_(Myt_const_reference _other) noexcept : base_t(_other) {};
+	template<typename... _Args> 
+	MATRICE_GLOBAL_FINL Matrix_(const _Args&... args) noexcept : base_t(args...) {};
 	//MATRICE_GLOBAL_INL Matrix_() noexcept : base_t() {};
 	//MATRICE_GLOBAL_INL Matrix_(int _rows, int _cols) noexcept : base_t(_rows, _cols) {};
 	//MATRICE_GLOBAL_INL Matrix_(int _rows, int _cols, pointer _data) noexcept : base_t(_rows, _cols, _data) {};
@@ -100,10 +113,16 @@ public:
 	//MATRICE_GLOBAL_INL Matrix_(const Matrix_<value_t, _M, _N>& _other) noexcept : base_t(_other.rows(), _other.cols(), _other.data()) {};
 	//template<typename _Expr> MATRICE_GLOBAL_INL Matrix_(const _Expr& _other) noexcept : base_t(_other) {};
 
-	template<typename _Arg> MATRICE_GLOBAL_FINL Myt& operator= (const _Arg& _arg) { return base_t::operator=(_arg); }
-	MATRICE_GLOBAL_FINL Myt& operator= (Myt&& _other) { return base_t::operator= (std::move(_other)); }
-	MATRICE_GLOBAL_FINL Myt& operator= (const_my_ref& _other) { return base_t::operator=(_other); }
-	MATRICE_HOST_FINL Myt& operator= (const_init_list _list) { return base_t::operator=(_list); }
+	MATRICE_GLOBAL_INL Myt_reference operator= (Myt_const_reference _other) { 
+		return base_t::operator=(_other); 
+	}
+	MATRICE_GLOBAL_INL Myt_reference operator= (Myt_move_reference _other) { 
+		return base_t::operator= (std::forward<Myt>(_other)); 
+	}
+	MATRICE_GLOBAL_FINL Myt_reference operator= (const_init_list _list) { return base_t::operator=(_list); }
+	template<typename _Arg> 
+	MATRICE_GLOBAL_FINL Myt_reference operator= (add_const_reference_t<_Arg> _arg) { return base_t::operator=(_arg); }
+
 	MATRICE_GLOBAL void create(int_t rows, int_t cols = 1);
 	MATRICE_GLOBAL void create(int_t rows, int_t cols, value_t _val);
 };
@@ -121,8 +140,8 @@ template<typename _Ty>
 class Matrix_<_Ty, -1, __> : public Base_<_Ty, -1, __>
 {
 	typedef Base_<_Ty, -1, __>                   base_t;
-	typedef Matrix_                                 Myt;
-	typedef const Myt&                     const_my_ref;
+	using Myt = Matrix_;
+	using Myt_const_reference = std::add_lvalue_reference_t<Myt>;
 	using base_t::m_data;
 	using base_t::m_rows;
 	using base_t::m_cols;
@@ -154,8 +173,8 @@ class Matrix_<_Ty, -1, -1> : public Base_<_Ty, -1, -1>, public device::Base_<_Ty
 {
 	typedef Base_<_Ty, -1, -1>                   base_t;
 	typedef device::Base_<_Ty>            device_base_t;
-	typedef Matrix_                                 Myt;
-	typedef const Myt&                     const_my_ref;
+	using Myt = Matrix_;
+	using Myt_const_reference = std::add_lvalue_reference_t<Myt>;
 	using base_t::m_data;
 	using base_t::m_rows;
 	using base_t::m_cols;

@@ -19,7 +19,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #include <iterator>
 #include <valarray>
-#include "_expr_type_traits.h"
+#include "_type_traits.h"
 #include "_matrix_expr.hpp"
 #include "_matrix.inl.hpp"
 #include "_storage.hpp"
@@ -44,12 +44,7 @@ MATRICE_NAMESPACE_BEGIN_
 	typedef int                                             int_t;
 #endif
 
-template<typename T> struct _View_traits { enum { value = 0x0000 }; };
-template<> struct _View_traits<unsigned char> { enum { value = 0x0008 }; };
-template<> struct _View_traits<int> { enum { value = 0x0016 }; };
-template<> struct _View_traits<float> { enum { value = 0x0032 }; };
-template<> struct _View_traits<double> { enum { value = 0x0064 }; };
-template<typename _Ty, int _Type = _View_traits<_Ty>::value> class PlaneView_
+template<typename _Ty, int _Type = _View_trait<_Ty>::value> class PlaneView_
 {
 	enum { MAGIC_VAL = 0x42FF0000 };
 	struct Step { int buf[2] = { sizeof(_Ty), sizeof(_Ty) }; int* p = buf; };
@@ -79,38 +74,40 @@ template<typename _Ty, int _M, int _N, typename _Derived> class Base_;
 template<typename _Ty, int _M, int _N, typename _Derived = Matrix_<_Ty, _M, _N>> 
 class Base_ : public PlaneView_<_Ty>
 {
-	typedef details::Storage_<_Ty>::Allocator<_M, _N, 
-		              allocator_option<_M, _N>::value>             Storage;
-	typedef Base_                                                    _Myt;
-	typedef _Myt&                                                 myt_ref;
-	typedef const _Myt&                                     const_myt_ref;
-	typedef _Myt&&                                               myt_move;
-	typedef typename exprs::Expr::Op::EwiseSum<_Ty>            EwiseSumOp;
-	typedef typename exprs::Expr::Op::EwiseMin<_Ty>            EwiseMinOp;
-	typedef typename exprs::Expr::Op::EwiseMul<_Ty>            EwiseMulOp;
-	typedef typename exprs::Expr::Op::EwiseDiv<_Ty>            EwiseDivOp;
-	typedef typename exprs::Expr::Op::MatMul<_Ty>                MatMulOp;
-	typedef typename exprs::Expr::Op::MatInv<_Ty>                MatInvOp;
-	typedef typename exprs::Expr::Op::MatTrp<_Ty>                MatTrpOp;
-	using fwd_iterator   = _Matrix_forward_iterator<_Ty>;
-	using rwise_iterator = _Matrix_rwise_iterator<_Ty>;
-	using cwise_iterator = _Matrix_cwise_iterator<_Ty>;
-	using row_view_t     = _Matrix_rview<_Ty>;
-	using col_view_t     = _Matrix_cview<_Ty>;
-	using block_view_t   = _Matrix_block<_Ty>;
+	using _Myt_storage_type = typename details::Storage_<_Ty>::Allocator<_M, _N, allocator_trait<_M, _N>::value>;
+	using _Myt = Base_;
+	using _Myt_const = std::add_const_t<_Myt>;
+	using _Myt_reference = std::add_lvalue_reference_t<_Myt>;
+	using _Myt_const_reference = std::add_lvalue_reference_t<_Myt_const>;
+	using _Myt_move_reference = std::add_rvalue_reference_t<Base_>;
+	using _Myt_fwd_iterator	= _Matrix_forward_iterator<_Ty>;
+	using _Myt_rwise_iterator = _Matrix_rwise_iterator<_Ty>;
+	using _Myt_cwise_iterator = _Matrix_cwise_iterator<_Ty>;
+	using _Myt_rview_type = _Matrix_rview<_Ty>;
+	using _Myt_cview_type = _Matrix_cview<_Ty>;
+	using _Myt_blockview_type = _Matrix_block<_Ty>;
+	using _Xop_ewise_sum = typename exprs::Expr::Op::EwiseSum<_Ty>;
+	using _Xop_ewise_min = typename exprs::Expr::Op::EwiseMin<_Ty>;
+	using _Xop_ewise_mul = typename exprs::Expr::Op::EwiseMul<_Ty>;
+	using _Xop_ewise_div = typename exprs::Expr::Op::EwiseDiv<_Ty>;
+	using _Xop_mat_mul = typename exprs::Expr::Op::MatMul<_Ty>;
+	using _Xop_mat_inv = typename exprs::Expr::Op::MatInv<_Ty>;
+	using _Xop_mat_trp = typename exprs::Expr::Op::MatTrp<_Ty>;
 public:
-	typedef PlaneView_<_Ty>                                        base_t;
-	typedef typename details::Storage_<_Ty>::value_t              value_t;
-	typedef typename details::Storage_<_Ty>::pointer              pointer;
-	typedef typename details::Storage_<_Ty>::reference          reference;
-	typedef typename details::Storage_<_Ty>::idx_t                  idx_t;
-	typedef typename Location                                     loctn_t;
-	typedef typename pointer                                     iterator;
-	typedef const iterator                                 const_iterator;
-	typedef const std::initializer_list<value_t>          const_init_list;
+	using value_t = _Ty;
+	using value_type = value_t;
+	using pointer = std::add_pointer_t<value_type>;
+	using reference = std::add_lvalue_reference_t<value_type>;
+	using iterator = pointer;
+	using const_iterator = std::add_const_t<iterator>;
+	using const_init_list = std::add_const_t<std::initializer_list<value_type>>;
+	template<typename _Xop> using expr_type = Expr::Base_<_Xop>;
+	using base_t = PlaneView_<value_type>;
+	using loctn_t = Location;
+
 	typedef enum StorageFormat { RowMajor = 101, ColMajor = 102 }format_t;
 	typedef enum StorageType { GDs, GTd, GBd, GSp, DSm, BSm, SSm } type_t;
-	enum { options = Expr::OpFlag::undef | Storage::location };
+	enum { options = Expr::OpFlag::undef | _Myt_storage_type::location };
 	typedef struct Column_View
 	{
 		Column_View(const _Derived& ref, int_t _c) : myref(ref), c(_c) {};
@@ -126,9 +123,9 @@ public:
 	MATRICE_GLOBAL_FINL Base_(int _rows, int _cols) noexcept :base_t(_rows, _cols), m_storage(_rows, _cols) { m_data = m_storage.data(); }
 	MATRICE_GLOBAL_FINL Base_(int _rows, int _cols, pointer data) noexcept :base_t(_rows, _cols, data), m_storage(_rows, _cols, data) {}
 	MATRICE_GLOBAL_FINL Base_(int _rows, int _cols, value_t _val) noexcept :base_t(_rows, _cols), m_storage(_rows, _cols, _val) { m_data = m_storage.data(); }
-	MATRICE_GLOBAL_FINL Base_(const std::initializer_list<value_t> _list) noexcept :base_t(_M, _N), m_storage(_list) { m_data = m_storage.data(); }
-	MATRICE_GLOBAL_FINL Base_(const_myt_ref _other) noexcept :base_t(_other.m_rows, _other.m_cols), m_storage(_other.m_storage) { m_data = m_storage.data(); }
-	MATRICE_GLOBAL_FINL Base_(myt_move _other) noexcept :base_t(_other.m_rows, _other.m_cols), m_storage(std::move(_other.m_storage)) { m_data = m_storage.data(); }
+	MATRICE_GLOBAL_FINL Base_(const_init_list _list) noexcept :base_t(_M, _N), m_storage(_list) { m_data = m_storage.data(); }
+	MATRICE_GLOBAL_FINL Base_(_Myt_const_reference _other) noexcept :base_t(_other.m_rows, _other.m_cols), m_storage(_other.m_storage) { m_data = m_storage.data(); }
+	MATRICE_GLOBAL_FINL Base_(_Myt_move_reference _other) noexcept :base_t(_other.m_rows, _other.m_cols), m_storage(std::move(_other.m_storage)) { m_data = m_storage.data(); }
 	MATRICE_GLOBAL_FINL Base_(const std::valarray<value_t>& _other, int _rows = 1) noexcept :base_t(_rows, _other.size() / _rows), m_storage(_rows, _other.size() / _rows, _other.data()) { m_data = m_storage.data(); }
 	template<int _Rows, int _Cols>
 	MATRICE_GLOBAL_FINL Base_(const Matrix_<value_t, _Rows, _Cols>& _other) noexcept :base_t(_other.rows(), _other.cols()), m_storage(_other.m_storage) { m_data = m_storage.data(); }
@@ -151,12 +148,12 @@ public:
 #endif
 public:
 	///<brief> dynamic create methods </brief>
-	MATRICE_HOST_ONLY void create(int_t rows, int_t cols) { if constexpr (_M == 0) static_cast<_Derived*>(this)->create(rows, cols); };
+	MATRICE_HOST_ONLY void create(size_t rows, size_t cols) { if constexpr (_M == 0) static_cast<_Derived*>(this)->create(rows, cols); };
 	///<brief> accessors </brief>
-	MATRICE_GLOBAL_FINL pointer   operator[](int_t y) { return (m_data + y * m_cols); }
-	MATRICE_GLOBAL_FINL const pointer operator[](int_t y) const { return (m_data + y * m_cols); }
-	MATRICE_GLOBAL_FINL reference operator()(int_t i) { return m_data[i]; }
-	MATRICE_GLOBAL_FINL const reference operator()(int_t i) const { return m_data[i]; }
+	MATRICE_GLOBAL_FINL pointer operator[](index_t y) { return (m_data + y * m_cols); }
+	MATRICE_GLOBAL_FINL const pointer operator[](index_t y) const { return (m_data + y * m_cols); }
+	MATRICE_GLOBAL_FINL reference operator()(index_t i) { return m_data[i]; }
+	MATRICE_GLOBAL_FINL const reference operator()(index_t i) const { return m_data[i]; }
 	template<format_t _Fmt = RowMajor>
 	MATRICE_GLOBAL_INL reference operator()(int _r, int _c) const { return (m_data + (_Fmt == RowMajor ? m_cols : m_rows) * _r)[_c]; }
 	///<brief> access methods </brief>
@@ -170,90 +167,94 @@ public:
 	MATRICE_GLOBAL_FINL constexpr iterator end() { return (m_data + size()); }
 #pragma region <!-- iterators -->
 	//column iterator for accessing elements in current column
-	MATRICE_GLOBAL_FINL fwd_iterator cbegin(size_t i) {
-		return fwd_iterator(m_data + i, m_rows, m_cols);
+	MATRICE_GLOBAL_FINL _Myt_fwd_iterator cbegin(size_t i) {
+		return _Myt_fwd_iterator(m_data + i, m_rows, m_cols);
 	}
-	MATRICE_GLOBAL_FINL fwd_iterator cend(size_t i) {
-		return fwd_iterator(_End(m_data + i, m_rows, m_cols));
+	MATRICE_GLOBAL_FINL _Myt_fwd_iterator cend(size_t i) {
+		return _Myt_fwd_iterator(_End(m_data + i, m_rows, m_cols));
 	}
-	MATRICE_GLOBAL_FINL const fwd_iterator cbegin(size_t i) const {
-		return fwd_iterator(m_data + i, m_rows, m_cols);
+	MATRICE_GLOBAL_FINL const _Myt_fwd_iterator cbegin(size_t i) const {
+		return _Myt_fwd_iterator(m_data + i, m_rows, m_cols);
 	}
-	MATRICE_GLOBAL_FINL const fwd_iterator cend(size_t i) const {
-		return fwd_iterator(_End(m_data + i, m_rows, m_cols));
+	MATRICE_GLOBAL_FINL const _Myt_fwd_iterator cend(size_t i) const {
+		return _Myt_fwd_iterator(_End(m_data + i, m_rows, m_cols));
 	}
 
 	//row iterator for accessing elements in current row
-	MATRICE_GLOBAL_FINL fwd_iterator rbegin(size_t i) {
-		return fwd_iterator(m_data + i * m_cols, m_cols);
+	MATRICE_GLOBAL_FINL _Myt_fwd_iterator rbegin(size_t i) {
+		return _Myt_fwd_iterator(m_data + i * m_cols, m_cols);
 	}
-	MATRICE_GLOBAL_FINL fwd_iterator rend(size_t i) {
-		return fwd_iterator(_End(m_data + i * m_cols, m_cols));
+	MATRICE_GLOBAL_FINL _Myt_fwd_iterator rend(size_t i) {
+		return _Myt_fwd_iterator(_End(m_data + i * m_cols, m_cols));
 	}
-	MATRICE_GLOBAL_FINL const fwd_iterator rbegin(size_t i) const {
-		return fwd_iterator(m_data + i * m_cols, m_cols);
+	MATRICE_GLOBAL_FINL const _Myt_fwd_iterator rbegin(size_t i) const {
+		return _Myt_fwd_iterator(m_data + i * m_cols, m_cols);
 	}
-	MATRICE_GLOBAL_FINL const fwd_iterator rend(size_t i) const {
-		return fwd_iterator(_End(m_data + i * m_cols, m_cols));
+	MATRICE_GLOBAL_FINL const _Myt_fwd_iterator rend(size_t i) const {
+		return _Myt_fwd_iterator(_End(m_data + i * m_cols, m_cols));
 	}
 
 	//column-wise iterator for accessing elements
-	MATRICE_GLOBAL_FINL cwise_iterator cwbegin(size_t i = 0) {
-		return cwise_iterator(m_data + i * m_rows, m_cols, m_rows);
+	MATRICE_GLOBAL_FINL _Myt_cwise_iterator cwbegin(size_t i = 0) {
+		return _Myt_cwise_iterator(m_data + i * m_rows, m_cols, m_rows);
 	}
-	MATRICE_GLOBAL_FINL cwise_iterator cwend() {
-		return cwise_iterator(_End(m_data, m_cols));
+	MATRICE_GLOBAL_FINL _Myt_cwise_iterator cwend() {
+		return _Myt_cwise_iterator(_End(m_data, m_cols));
 	}
-	MATRICE_GLOBAL_FINL const cwise_iterator cwbegin(size_t i = 0) const {
-		return cwise_iterator(m_data + i * m_rows, m_cols, m_rows);
+	MATRICE_GLOBAL_FINL const _Myt_cwise_iterator cwbegin(size_t i = 0) const {
+		return _Myt_cwise_iterator(m_data + i * m_rows, m_cols, m_rows);
 	}
-	MATRICE_GLOBAL_FINL const cwise_iterator cwend(size_t i = 0) const {
-		return cwise_iterator(_End(m_data, m_cols));
+	MATRICE_GLOBAL_FINL const _Myt_cwise_iterator cwend(size_t i = 0) const {
+		return _Myt_cwise_iterator(_End(m_data, m_cols));
 	}
 
 	//row-wise iterator for accessing elements
-	MATRICE_GLOBAL_FINL rwise_iterator rwbegin(size_t i = 0) {
-		return rwise_iterator(m_data + i * m_cols, m_rows, m_cols);
+	MATRICE_GLOBAL_FINL _Myt_rwise_iterator rwbegin(size_t i = 0) {
+		return _Myt_rwise_iterator(m_data + i * m_cols, m_rows, m_cols);
 	}
-	MATRICE_GLOBAL_FINL rwise_iterator rwend() {
-		return rwise_iterator(_End(m_data, m_rows, m_cols));
+	MATRICE_GLOBAL_FINL _Myt_rwise_iterator rwend() {
+		return _Myt_rwise_iterator(_End(m_data, m_rows, m_cols));
 	}
-	MATRICE_GLOBAL_FINL const rwise_iterator rwbegin(size_t i = 0) const {
-		return rwise_iterator(m_data + i * m_cols, m_rows, m_cols);
+	MATRICE_GLOBAL_FINL const _Myt_rwise_iterator rwbegin(size_t i = 0) const {
+		return _Myt_rwise_iterator(m_data + i * m_cols, m_rows, m_cols);
 	}
-	MATRICE_GLOBAL_FINL const rwise_iterator rwend() const {
-		return rwise_iterator(_End(m_data, m_rows, m_cols));
+	MATRICE_GLOBAL_FINL const _Myt_rwise_iterator rwend() const {
+		return _Myt_rwise_iterator(_End(m_data, m_rows, m_cols));
 	}
 #pragma endregion
 #pragma region <!-- views -->
 	//view of i-th row 
-	MATRICE_GLOBAL_FINL auto rview(size_t i) {
-		return row_view_t(m_data + m_cols * i, m_cols);
+	MATRICE_GLOBAL_FINL _Myt_rview_type rview(size_t i) {
+		return _Myt_rview_type(m_data + m_cols * i, m_cols);
 	}
-	MATRICE_GLOBAL_FINL const auto rview(size_t i) const {
-		return row_view_t(m_data + m_cols * i, m_cols);
+	MATRICE_GLOBAL_FINL const _Myt_rview_type rview(size_t i) const {
+		return _Myt_rview_type(m_data + m_cols * i, m_cols);
 	}
 	//view of i-th column
-	MATRICE_GLOBAL_FINL auto cview(size_t i) {
-		return col_view_t(m_data + i, m_rows, m_cols, i);
+	MATRICE_GLOBAL_FINL _Myt_cview_type cview(size_t i) {
+		return _Myt_cview_type(m_data + i, m_rows, m_cols, i);
 	}
-	MATRICE_GLOBAL_FINL const auto cview(size_t i) const {
-		return col_view_t(m_data + i, m_rows, m_cols, i);
+	MATRICE_GLOBAL_FINL const _Myt_cview_type cview(size_t i) const {
+		return _Myt_cview_type(m_data + i, m_rows, m_cols, i);
 	}
 	//view of submatrix [x0, x1) : [y0, y1)
-	MATRICE_GLOBAL_FINL auto block(index_t x0, index_t x1, index_t y0, index_t y1) {
-		return block_view_t(m_data, m_cols, {x0, y0, x1, y1});
+	MATRICE_GLOBAL_FINL _Myt_blockview_type block(index_t x0, index_t x1, index_t y0, index_t y1) {
+		return _Myt_blockview_type(m_data, m_cols, {x0, y0, x1, y1});
 	}
-	MATRICE_GLOBAL_FINL const auto block(index_t x0, index_t x1, index_t y0, index_t y1) const {
-		return block_view_t(m_data, m_cols, { x0, y0, x1, y1 });
+	MATRICE_GLOBAL_FINL const _Myt_blockview_type block(index_t x0, index_t x1, index_t y0, index_t y1) const {
+		return _Myt_blockview_type(m_data, m_cols, { x0, y0, x1, y1 });
 	}
 #pragma endregion
-	MATRICE_GLOBAL_FINL constexpr int_t rows() const { return m_rows; }
-	MATRICE_GLOBAL_FINL constexpr int_t cols() const { return m_cols; }
-	MATRICE_GLOBAL_FINL constexpr std::size_t size() const { return m_rows*m_cols; }
-	MATRICE_GLOBAL_FINL constexpr cview_t col(int_t c) const { return cview_t(*this, c); }
+#ifdef _HAS_CXX17
 	MATRICE_GLOBAL_FINL operator std::valarray<value_t>() { return std::valarray<value_t>(m_data, size()); }
 	MATRICE_GLOBAL_FINL operator std::valarray<value_t>() const { return std::valarray<value_t>(m_data, size()); }
+#endif
+	MATRICE_GLOBAL_FINL constexpr auto rows() const { return m_rows; }
+	MATRICE_GLOBAL_FINL constexpr auto cols() const { return m_cols; }
+	MATRICE_GLOBAL_FINL constexpr auto size() const { return m_rows*m_cols; }
+	MATRICE_GLOBAL_FINL constexpr cview_t col(index_t c) const { return cview_t(*this, c); }
+
+
 	///<brief> assignment operators </brief>
 	MATRICE_GLOBAL_FINL _Derived& operator= (const_init_list _list)
 	{
@@ -264,7 +265,7 @@ public:
 		m_data = _Proxy_checked(m_storage.data());
 		return (*static_cast<_Derived*>(this));
 	}
-	MATRICE_GLOBAL_FINL _Derived& operator= (const_myt_ref _other) //homotype assignment operator
+	MATRICE_GLOBAL_INL _Derived& operator= (_Myt_const_reference _other) //homotype assignment operator
 	{
 		m_cols = _other.m_cols, m_rows = _other.m_rows;
 		m_format = _other.m_format;
@@ -273,11 +274,11 @@ public:
 		base_t::_Flush_view_buf();
 		return (*static_cast<_Derived*>(this));
 	}
-	MATRICE_GLOBAL_FINL _Derived& operator= (myt_move _other) //homotype assignment operator
+	MATRICE_GLOBAL_INL _Derived& operator= (_Myt_move_reference _other) //homotype assignment operator
 	{
 		m_cols = _other.m_cols, m_rows = _other.m_rows;
 		m_format = _other.m_format;
-		m_storage = std::forward<Storage>(_other.m_storage);
+		m_storage = std::forward<_Myt_storage_type>(_other.m_storage);
 		m_data = _Proxy_checked(m_storage.data());
 		base_t::_Flush_view_buf();
 		_other.m_storage.free();
@@ -297,24 +298,24 @@ public:
 
 #pragma region <!-- Lazied Operators for Matrix Arithmetic -->
 	template<typename _Rhs> MATRICE_GLOBAL_INL auto operator+ (const _Rhs& _opd) const 
-	{ return exprs::Expr::EwiseBinaryExpr<_Myt, _Rhs, EwiseSumOp>(*this, _opd);}
+	{ return exprs::Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_sum>(*this, _opd);}
 	template<typename _Rhs> MATRICE_GLOBAL_INL auto operator- (const _Rhs& _opd) const 
-	{ return exprs::Expr::EwiseBinaryExpr<_Myt, _Rhs, EwiseMinOp>(*this, _opd); }
+	{ return exprs::Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_min>(*this, _opd); }
 	template<typename _Rhs> MATRICE_GLOBAL_INL auto operator* (const _Rhs& _opd) const 
-	{ return exprs::Expr::EwiseBinaryExpr<_Myt, _Rhs, EwiseMulOp>(*this, _opd); }
+	{ return exprs::Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_mul>(*this, _opd); }
 	template<typename _Rhs> MATRICE_GLOBAL_INL auto operator/ (const _Rhs& _opd) const 
-	{ return exprs::Expr::EwiseBinaryExpr<_Myt, _Rhs, EwiseDivOp>(*this, _opd); }
+	{ return exprs::Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_div>(*this, _opd); }
 	template<typename _Rhs> MATRICE_GLOBAL_INL auto mul(const _Rhs& rhs) const 
-	{ return exprs::Expr::MatBinaryExpr<_Myt, _Rhs, MatMulOp>(*this, rhs); }
+	{ return exprs::Expr::MatBinaryExpr<_Myt, _Rhs, _Xop_mat_mul>(*this, rhs); }
 	MATRICE_HOST_FINL auto inv() const 
-	{ return exprs::Expr::MatUnaryExpr<_Myt, MatInvOp>(*this); }
-	MATRICE_HOST_FINL auto inv(const_myt_ref _rhs) 
-	{ return exprs::Expr::MatUnaryExpr<_Myt, MatInvOp>(_rhs, *this); }
+	{ return exprs::Expr::MatUnaryExpr<_Myt, _Xop_mat_inv>(*this); }
+	MATRICE_HOST_FINL auto inv(_Myt_const_reference _rhs) 
+	{ return exprs::Expr::MatUnaryExpr<_Myt, _Xop_mat_inv>(_rhs, *this); }
 	MATRICE_HOST_FINL auto transpose() 
-	{ return exprs::Expr::MatUnaryExpr<_Myt, MatTrpOp>(*this); }
+	{ return exprs::Expr::MatUnaryExpr<_Myt, _Xop_mat_trp>(*this); }
 	MATRICE_GLOBAL_FINL auto normalize(value_t _val = inf) 
 	{ return ((std::abs(_val) < eps ? value_t(1) : value_t(1) / (_val == inf ? max() : _val))*(*this)); }
-	MATRICE_GLOBAL_INL exprs::Expr::MatBinaryExpr<_Myt, _Myt, MatMulOp> spread();
+	MATRICE_GLOBAL_INL exprs::Expr::MatBinaryExpr<_Myt, _Myt, _Xop_mat_mul> spread();
 #pragma endregion
 
 #pragma region <!-- Triggers for Suspended Expression -->
@@ -348,7 +349,8 @@ protected:
 	using base_t::m_data;
 	format_t m_format = RowMajor;
 	type_t m_type = type_t::GDs;
+
 public:
-	Storage m_storage;
+	_Myt_storage_type m_storage;
 };
 MATRICE_NAMESPACE_END_TYPES

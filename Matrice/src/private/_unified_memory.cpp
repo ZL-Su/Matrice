@@ -15,12 +15,12 @@ template<typename _Scalar, Location _Host>
 _Scalar* unified_sync<_Scalar, _Host, OnDevice, LINEAR>::op(pointer _Dst, const_pointer _Src, size_t _Rows, size_t _Cols, size_t _1)
 {
 	auto _Stat = cudaMemcpy(_Dst, _Src, _Rows*_Cols * sizeof(_Scalar), ::cudaMemcpyHostToDevice);
-	if (_Stat != cudaSuccess)
+	if (_Stat != cudaSuccess){
 #ifdef _DEBUG
 		throw std::runtime_error(cudaGetErrorString(_Stat));
-#else
-		return nullptr
 #endif
+		return nullptr;
+	}
 	else return (_Dst);
 }
 template int* unified_sync<int, OnStack, OnDevice, LINEAR>::op(pointer, const_pointer, size_t, size_t, size_t);
@@ -40,12 +40,12 @@ template<typename _Scalar, Location _Host>
 _Scalar* unified_sync<_Scalar, _Host, OnDevice, PITCHED>::op(pointer _Dst, const_pointer _Src, size_t _Rows, size_t _Cols, size_t _Pytes)
 {
 	auto _Stat = cudaMemcpy2D(_Dst, _Pytes, _Src, _Cols * sizeof(_Scalar), _Cols * sizeof(_Scalar), _Rows, ::cudaMemcpyHostToDevice);
-	if (_Stat != cudaSuccess)
+	if (_Stat != cudaSuccess) {
 #ifdef _DEBUG
 		throw std::runtime_error(cudaGetErrorString(_Stat));
-#else
-		return nullptr
 #endif
+		return nullptr;
+	}
 	else return (_Dst);
 }
 template uchar* unified_sync<uchar, OnStack, OnDevice, PITCHED>::op(pointer, const_pointer, size_t, size_t, size_t);
@@ -65,12 +65,12 @@ template<typename _Scalar, Location _Host>
 _Scalar* unified_sync<_Scalar, OnDevice, _Host, LINEAR>::op(pointer _Dst, const_pointer _Src, size_t _Rows, size_t _Cols, size_t _1)
 {
 	auto _Stat = cudaMemcpy(_Dst, _Src, _Rows *_Cols * sizeof(_Scalar), ::cudaMemcpyDeviceToHost);
-	if (_Stat != cudaSuccess)
+	if (_Stat != cudaSuccess) {
 #ifdef _DEBUG
 		throw std::runtime_error(cudaGetErrorString(_Stat));
-#else
-		return nullptr
 #endif
+		return nullptr;
+	}
 	else return (_Dst);
 }
 template uchar* unified_sync<uchar, OnDevice, OnStack, LINEAR>::op(pointer, const_pointer, size_t, size_t, size_t);
@@ -90,12 +90,12 @@ template<typename _Scalar, Location _Host>
 _Scalar* unified_sync<_Scalar, OnDevice, _Host, PITCHED>::op(pointer _Dst, const_pointer _Src, size_t _Rows, size_t _Cols, size_t _Pytes)
 {
 	auto _Stat = cudaMemcpy2D(_Dst, _Cols * sizeof(_Scalar), _Src, _Pytes, _Cols * sizeof(_Scalar), _Rows, ::cudaMemcpyDeviceToHost);
-	if (_Stat != cudaSuccess)
+	if (_Stat != cudaSuccess) {
 #ifdef _DEBUG
 		throw std::runtime_error(cudaGetErrorString(_Stat));
-#else
-		return nullptr
 #endif
+		return nullptr;
+	}
 	else return (_Dst);
 }
 
@@ -116,12 +116,12 @@ template<typename _Scalar>
 _Scalar* unified_sync<_Scalar, OnDevice, OnDevice, LINEAR>::op(pointer _Dst, const_pointer _Src, size_t _Rows, size_t _Cols, size_t _1)
 {
 	auto _Stat = cudaMemcpy(_Dst, _Src, _Rows *_Cols * sizeof(_Scalar), ::cudaMemcpyDeviceToDevice);
-	if (_Stat != cudaSuccess)
+	if (_Stat != cudaSuccess) {
 #ifdef _DEBUG
 		throw std::runtime_error(cudaGetErrorString(_Stat));
-#else
-		return nullptr
 #endif
+		return nullptr;
+	}
 	else return (_Dst);
 }
 template uchar* unified_sync<uchar, OnDevice, OnDevice, LINEAR>::op(pointer, const_pointer, size_t, size_t, size_t);
@@ -135,12 +135,12 @@ template<typename _Scalar>
 _Scalar* unified_sync<_Scalar, OnDevice, OnDevice, PITCHED>::op(pointer _Dst, const_pointer _Src, size_t _Rows, size_t _Cols, size_t _Pytes)
 {
 	auto _Stat = cudaMemcpy2D(_Dst, _Pytes, _Src, _Pytes, _Cols * sizeof(_Scalar), _Rows, ::cudaMemcpyDeviceToDevice);
-	if (_Stat != cudaSuccess)
+	if (_Stat != cudaSuccess) {
 #ifdef _DEBUG
 		throw std::runtime_error(cudaGetErrorString(_Stat));
-#else
-		return nullptr
 #endif
+		return nullptr;
+	}
 	else return (_Dst);
 }
 template uchar* unified_sync<uchar, OnDevice, OnDevice, PITCHED>::op(pointer, const_pointer, size_t, size_t, size_t);

@@ -41,13 +41,13 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\deps\mkl_1802_ilp64_with_tbb.props" />
-    <Import Project="..\Fkl\linking\FKL_x64d.props" />
     <Import Project="D:\boost_1_67_0\boost.props" />
+    <Import Project="..\Fkl\linking\FKL_x64.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\deps\mkl_1802_ilp64_with_tbb.props" />
-    <Import Project="..\Fkl\linking\FKL_x64.props" />
+    <Import Project="..\Fkl\linking\FKL_x64_Pro.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -81,12 +81,19 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <EnableModules>true</EnableModules>
       <AdditionalOptions>/std:c++latest /bigobj %(AdditionalOptions)</AdditionalOptions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>_dev_base.def</ModuleDefinitionFile>
     </Link>
+    <Lib>
+      <AdditionalDependencies>cudart.lib;mkl_tbb_thread.lib;tbb.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
+    <Lib>
+      <AdditionalLibraryDirectories>C:\Program Files %28x86%29\IntelSWTools\compilers_and_libraries_2018.2.185\windows\mkl\lib\intel64_win;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -102,6 +109,7 @@
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -156,7 +164,7 @@
     <ClInclude Include="include\Matrice\private\_iterator.h" />
     <ClInclude Include="include\Matrice\private\_matrix_base.hpp" />
     <ClInclude Include="include\Matrice\private\_matrix_expr.hpp" />
-    <ClInclude Include="include\Matrice\private\_expr_type_traits.h" />
+    <ClInclude Include="include\Matrice\private\_type_traits.h" />
     <ClInclude Include="include\Matrice\private\_matrix.inl.hpp" />
     <ClInclude Include="include\Matrice\private\_memory.h" />
     <ClInclude Include="include\Matrice\private\_storage.hpp" />
@@ -213,6 +221,7 @@
     <None Include="addin\Eigen\SVD" />
     <None Include="addin\Eigen\UmfPackSupport" />
     <None Include="include\Matrice\algs\interpolation\_base.inl" />
+    <None Include="include\Matrice\algs\similarity\inline\_icgn_impl.inl" />
     <None Include="include\Matrice\arch\inl\_ixpacket.inl" />
     <None Include="include\Matrice\core\cpp.hint" />
     <None Include="include\Matrice\private\inl\_storage_base.inl" />

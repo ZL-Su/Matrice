@@ -18,7 +18,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include <type_traits>
 #include "../util/_macros.h"
-#include "_expr_type_traits.h"
+#include "_type_traits.h"
 #include "_memory.h"
 
 MATRICE_PRIVATE_BEGIN

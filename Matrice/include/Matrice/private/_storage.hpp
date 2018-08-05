@@ -24,7 +24,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../util/_macros.h"
 #include "../private/_memory.h"
 #include "../private/_unified_memory.h"
-#include "../private/_expr_type_traits.h"
+#include "../private/_type_traits.h"
 
 #ifndef MATRICE_ALIGNED_CLASS
 #define MATRICE_ALIGNED_CLASS class alignas(MATRICE_ALIGN_BYTES)
@@ -155,10 +155,9 @@ public:
 		typedef DenseBase<OnHeap, _Opt> Base;
 	public:
 		enum { location = Base::location, option = Base::option };
-		MATRICE_HOST_INL Allocator() : Base() {}
-		MATRICE_HOST_INL Allocator(int _m, int _n) : Base(_m, _n) {}
-		MATRICE_HOST_INL Allocator(int _m, int _n, const value_t _val) : Base(_m, _n, _val) {}
-		MATRICE_HOST_INL Allocator(int _m, int _n, pointer data) : Base(_m, _n, data) {}
+		MATRICE_HOST_FINL Allocator(int _m, int _n) : Base(_m, _n) {}
+		MATRICE_HOST_FINL Allocator(int _m, int _n, const value_t _val) : Base(_m, _n, _val) {}
+		MATRICE_HOST_FINL Allocator(int _m, int _n, pointer data) : Base(_m, _n, data) {}
 		MATRICE_HOST_INL Allocator(const Allocator& _other) : Base(_other) {}
 		MATRICE_HOST_INL Allocator(Allocator&& _other) : Base(std::move(_other)) {}
 		MATRICE_HOST_INL Allocator(std::initializer_list<value_t> _list) {}

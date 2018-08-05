@@ -85,6 +85,9 @@
     <Filter Include="Header Files\Algs\Similarity">
       <UniqueIdentifier>{e268adf3-df8c-4756-8292-9b6c94e70680}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Algs\Similarity\inl">
+      <UniqueIdentifier>{27de2c91-dab0-4bcb-8926-885fff4adc73}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -98,9 +101,6 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\core\vector.h">
       <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Matrice\private\_expr_type_traits.h">
-      <Filter>Header Files\Details</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_matrix.inl.hpp">
       <Filter>Header Files\Details</Filter>
@@ -258,6 +258,9 @@
     <ClInclude Include="include\Matrice\algs\similarity\_similarity_traits.h">
       <Filter>Header Files\Algs\Similarity</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\private\_type_traits.h">
+      <Filter>Header Files\Details</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\private\_memory.cpp">
@@ -396,6 +399,9 @@
     </None>
     <None Include="include\Matrice\algs\interpolation\_base.inl">
       <Filter>Header Files\Algs\Interpolation</Filter>
+    </None>
+    <None Include="include\Matrice\algs\similarity\inline\_icgn_impl.inl">
+      <Filter>Header Files\Algs\Similarity\inl</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

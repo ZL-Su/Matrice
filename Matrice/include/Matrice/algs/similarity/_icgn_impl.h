@@ -71,7 +71,7 @@ public:
 		const_matrix_reference _Ref, const_matrix_reference _Q,
 		const point_t& _Initpos, options_type& _Opts)
 		:m_reference(_Ref), m_coeff(_Q), 
-		 m_initpos(_Initpos), m_options(_Opts){}
+		 m_pos(_Initpos), m_options(_Opts){}
 
 protected:
 	// \engine for iterative solver
@@ -79,13 +79,16 @@ protected:
 		return static_cast<derived_type*>(this)->_Solver_impl(_Args...);
 	}
 
-	// \initial feature position
-	point_t m_initpos;
+	// \feature position: m_pos[new] <-- m_pos[old] + delta_pos
+	point_t m_pos;
 
 	// \options for iterative refinement
 	options_type m_options;
 
-	// \view of reference image
+	// \current image buffer: G
+	matrix_type m_current;
+
+	// \view of reference image: F
 	const_matrix_reference m_reference;
 
 	// \precomputed interpolation coeff.
@@ -98,16 +101,19 @@ class _GaussNewton_impl_ic MATRICE_NONHERITABLE
 {
 	using base_type = _GaussNewton_base<_Ty, _Options, _GaussNewton_impl_ic<_Ty, _Options>>;
 	using typename base_type::value_type;
+	using base_type::m_coeff;
 	using param_type = types::Vec_(value_type, internals::static_size<6>::value);
 public:
 	template<typename... _Args> MATRICE_HOST_FINL
-	_GaussNewton_impl_ic(const _Args&... _Args) :base_type(_Args...) {}
+	_GaussNewton_impl_ic(const _Args&... _Args) :base_type(_Args...) {
+		base_type::m_current(base_type::m_options() << 1 | 1, base_type::m_options() << 1 | 1, zero<value_type>::value);
+	}
 
 	MATRICE_HOST_FINL auto _Solver_impl(param_type& _Params);
 
 private:
 	value_type m_favg, m_fssd;
-
 };
 }
 MATRICE_ALGS_END
+#include "inline\_icgn_impl.inl"

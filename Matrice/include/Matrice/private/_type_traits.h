@@ -26,8 +26,11 @@ template<typename T> struct traits<const T> : traits<T> { using type = T; };
 struct MatrixExpr {};
 template<typename Derived, typename Expression> struct DenseExprBase {};
 template<typename Derived> struct DenseExprBase<Derived, MatrixExpr> {};
+
 template<typename _Ty> struct remove_reference { using type = typename std::remove_reference<_Ty>::type; };
+
 template<typename _Ty> struct type_bytes { enum { value = sizeof(_Ty) }; };
+
 template<bool _Test, typename T1, typename T2> struct conditonal {};
 template<typename T1, typename T2> struct conditonal<true, T1, T2> { using type = T1; };
 template<typename T1, typename T2> struct conditonal<false, T1, T2> { using type = T2; };
@@ -35,15 +38,36 @@ template<bool _Test, typename T1, typename T2> struct conditional {};
 template<typename T1, typename T2> struct conditional<true, T1, T2> { using type = T1; };
 template<typename T1, typename T2> struct conditional<false, T1, T2> { using type = T2; };
 template<bool _Test, typename T1, typename T2> using conditional_t = typename conditional<_Test, T1, T2>::type;
+
 template<int _Opt> struct is_expression { enum { value = _Opt & expr == expr ? true : false }; };
+
 template<int _Val> struct is_zero { enum { value = _Val == 0 ? true : false }; };
+
 template<int _R, int _C> struct is_static {enum {value = _R > 0 && _C >0 ? true : false}; };
+
 template<typename T> struct is_common_int64 { enum { value = std::is_integral_v<T> && sizeof(T) == 8 }; };
 template<typename T> struct is_int64 { enum { value = std::is_signed_v<T> && std::is_integral_v<T> && sizeof(T) == 8 }; };
 template<typename T> struct is_uint64 { enum { value = std::is_unsigned_v<T> && std::is_integral_v<T> && sizeof(T) == 8 }; };
+
 template<typename T> struct is_float32 { enum { value = std::is_floating_point<T>::value && (sizeof(T) == 4) }; };
 template<typename T> struct is_float64 { enum { value = std::is_floating_point<T>::value && (sizeof(T) == 8) }; };
-template<int _M, int _N> struct allocator_option{ 
+
+template<typename T> struct add_const_reference {
+	using type = std::add_lvalue_reference_t<std::add_const_t<T>>;
+};
+template<typename T> using add_const_reference_t = typename add_const_reference<T>::type;
+
+template<typename T> struct add_const_pointer {
+	using type = std::add_pointer_t<std::add_const_t<T>>;
+};
+template<typename T> using add_const_pointer_t = typename add_const_pointer<T>::type;
+
+template<typename T> struct add_pointer_const {
+	using type = std::add_const_t<std::add_pointer_t<T>>;
+};
+template<typename T> using add_pointer_const_t = typename add_pointer_const<T>::type;
+
+template<int _M, int _N> struct allocator_trait{ 
 	enum {
 		value = _M >0  && _N>0   ? LINEAR + COPY :  // stack allocator
 		        _M==0  && _N==-1 ? LINEAR        :  // linear device allocator
@@ -55,6 +79,12 @@ template<int _M, int _N> struct allocator_option{
 #endif      
 	}; 
 };
+
+template<typename T> struct _View_trait { enum { value = 0x0000 }; };
+template<> struct _View_trait<unsigned char> { enum { value = 0x0008 }; };
+template<> struct _View_trait<int> { enum { value = 0x0016 }; };
+template<> struct _View_trait<float> { enum { value = 0x0032 }; };
+template<> struct _View_trait<double> { enum { value = 0x0064 }; };
 
 template<int _Rows = 0, int _Cols = 0> struct compile_time_size {
 	enum { val_1 = 0x0001, val_2 = 0x0002, val_3 = 0x0003, val_4 = 0x0004 };

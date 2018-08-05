@@ -1,5 +1,5 @@
 #pragma once
-#include "../private/_expr_type_traits.h"
+#include "../private/_type_traits.h"
 #include "../util/_macros.h"
 #ifdef __AVX__
 #include <mmintrin.h>    //_m64
