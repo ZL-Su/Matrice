@@ -86,20 +86,29 @@ public:
 	MATRICE_GLOBAL_FINL auto cols() { return (static_cast<_Derived*>(this)->cols()); }
 	MATRICE_GLOBAL_FINL void create(size_t, size_t) {}
 
+	MATRICE_GLOBAL_INL auto& operator= (value_type _Val) {
+		auto _Derived_this = static_cast<_Derived*>(this);
+		for (size_t i = 0; i < size(); ++i) _Derived_this->operator()(i) = _Val;
+		return (_Derived_this);
+	}
+	MATRICE_GLOBAL_FINL auto& operator= (std::initializer_list<value_type> _L) {
+		auto _Derived_this = static_cast<_Derived*>(this);
+		for (size_t i = 0; i < size(); ++i) _Derived_this->operator()(i) = *(_L.begin()+i);
+		return (_Derived_this);
+	}
 	template<typename _Matx>
 	MATRICE_GLOBAL_INL auto& operator= (const _Matx& _M) {
-		for (size_t i = 0; i < size(); ++i) this->operator()(i) = _M(i);
-		return (*static_cast<_Derived*>(this));
+		auto _Derived_this = static_cast<_Derived*>(this);
+		for (size_t i = 0; i < size(); ++i) _Derived_this->operator()(i) = _M(i);
+		return (_Derived_this);
 	}
 	template<typename _Arg> 
 	MATRICE_GLOBAL_INL auto& operator= (const Expr::Base_<_Arg>& _Ex) { 
-		return (*static_cast<_Derived*>(&_Ex.assign(*this))); }
-	template<typename... _Args> 
-	MATRICE_GLOBAL_INL auto& operator= (const Expr::MatBinaryExpr<_Args...>& _Ex) { 
-		return (*static_cast<_Derived*>(&_Ex.assign(*this))); }
+		return (_Ex.assign(*static_cast<_Derived*>(this))); }
+	/*template<typename... _Args>
+	MATRICE_GLOBAL_INL auto& operator= (const Expr::MatBinaryExpr<_Args...>& _Ex) { return (*static_cast<_Derived*>(&_Ex.assign(*this))); }
 	template<typename... _Args>
-	MATRICE_GLOBAL_INL auto& operator= (const Expr::MatUnaryExpr<_Args...>& _Ex) { 
-		return (*static_cast<_Derived*>(&_Ex.assign(*this))); }
+	MATRICE_GLOBAL_INL auto& operator= (const Expr::MatUnaryExpr<_Args...>& _Ex) { return (*static_cast<_Derived*>(&_Ex.assign(*this))); }*/
 
 	template<typename _Op = Expr::EwiseBinaryExpr<_Derived, _Derived, Expr::Op::EwiseSum<value_t>>>
 	MATRICE_GLOBAL_FINL auto operator+(const value_t _Right) {
@@ -226,12 +235,12 @@ public:
 		return (_My_data + i * _My_stride);
 	}
 	//i zero-based local linear index
-	MATRICE_GLOBAL_FINL reference operator() (difference_type i) {
-		auto _Row = i / size();
+	MATRICE_GLOBAL_INL reference operator() (difference_type i) {
+		auto _Row = i / _My_size;
 		return this->operator[](_Row)[i - _My_size * _Row];
 	}
-	MATRICE_GLOBAL_FINL const reference operator() (difference_type i) const {
-		auto _Row = i / size();
+	MATRICE_GLOBAL_INL const reference operator() (difference_type i) const {
+		auto _Row = i / _My_size;
 		return this->operator[](_Row)[i - _My_size * _Row];
 	}
 

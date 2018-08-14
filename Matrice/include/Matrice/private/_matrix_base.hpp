@@ -228,10 +228,10 @@ public:
 		return _Myt_cview_type(m_data + i, m_rows, m_cols, i);
 	}
 	//view of submatrix [x0, x1) : [y0, y1)
-	MATRICE_GLOBAL_FINL _Myt_blockview_type block(index_t x0, index_t x1, index_t y0, index_t y1) {
+	MATRICE_GLOBAL_INL _Myt_blockview_type block(index_t x0, index_t x1, index_t y0, index_t y1) {
 		return _Myt_blockview_type(m_data, m_cols, {x0, y0, x1, y1});
 	}
-	MATRICE_GLOBAL_FINL const _Myt_blockview_type block(index_t x0, index_t x1, index_t y0, index_t y1) const {
+	MATRICE_GLOBAL_INL const _Myt_blockview_type block(index_t x0, index_t x1, index_t y0, index_t y1) const {
 		return _Myt_blockview_type(m_data, m_cols, { x0, y0, x1, y1 });
 	}
 #pragma endregion
