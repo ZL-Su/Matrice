@@ -19,7 +19,7 @@ public:
 	using FileInfo = std::vector<FileMap>;
 	template<size_t _Nsubfolder = 0> struct Dir_ 
 	{
-		Dir_() : m_path(workspace().string()) { _Init(); }
+		Dir_() : m_path(fs::current_path().string()) { _Init(); }
 		Dir_(const std::string& _path) : m_path(_path) { _Init(); }
 
 		MATRICE_HOST_INL const auto operator()(size_t i, size_t j) const {
@@ -56,9 +56,11 @@ public:
 		std::vector<std::string> m_subpaths;
 		std::vector<std::vector<std::string>> m_names;
 	};
+
 	IO() {};
 
 	static MATRICE_HOST_FINL auto workspace() { return fs::current_path(); }
+
 	template<is_skip_folder _Fopt = is_skip_folder::Y>
 	static MATRICE_HOST_INL auto filenames(const std::string& dir)
 	{

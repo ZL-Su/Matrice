@@ -85,10 +85,15 @@ struct Op_ MATRICE_NONHERITABLE
 	};
 };
 template<typename _Fn, typename... _Args>
-matrice_inl_cxauto _Transform_impl(_Fn _Func, const _Args&... _args) { return _Func(_args...); }
+matrice_inl_cxauto _Transform_impl(/*_Fn _Func, */const _Args&... _args) {
+	_Fn _Func;
+	return _Func(_args...); 
+}
 }
 template<typename _Fn, typename... _Args>
-matrice_inl_cxauto transform(_Fn _Func, const _Args&... _args) { return (details::_Transform_impl(_Func, _args.data()...)); }
+matrice_inl_cxauto transform(/*_Fn _Func, */const _Args&... _args) { 
+	return (details::_Transform_impl<_Fn>(/*_Func, */_args.data()...)); 
+}
 MATRICE_ARCH_END
 
 #endif

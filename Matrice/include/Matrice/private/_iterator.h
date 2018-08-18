@@ -75,7 +75,7 @@ public:
 #if _ITERATOR_DEBUG_LEVEL == 2
 		if (_Offset != 0) {
 			if (_My_ptr + _Offset < _My_ptr || _My_end < _My_ptr + _Offset) {
-				_DEBUG_ERROR("iterator + offset out of range");
+				throw std::runtime_error("iterator + offset out of range");
 			}
 		}
 #endif

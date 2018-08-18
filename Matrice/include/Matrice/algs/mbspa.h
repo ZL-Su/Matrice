@@ -32,8 +32,6 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <boost/range/numeric.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/type_traits.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/foreach.hpp>
 #include <boost/io/ios_state.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
@@ -43,6 +41,8 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../util/genalgs.h"
 #include "../arch/ixpacket.h"
 #include "../core/vector.h"
+
+//multi-level bspline interpolation
 
 namespace dgelom {
 	template<typename T, size_t N>

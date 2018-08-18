@@ -137,7 +137,8 @@ struct LinearOp MATRICE_NONHERITABLE
 
 struct Solver MATRICE_NONHERITABLE
 {
-	template<typename _Op = LinearOp::Auto<Matrix<default_type>>> class Linear_ : public SolverBase<Linear_<_Op>>
+	template<typename _Op = LinearOp::Auto<Matrix_<default_type, __, __>>> 
+	class Linear_ : public SolverBase<Linear_<_Op>>
 	{
 		using Base = SolverBase<Linear_<_Op>>;
 		using value_t = typename _Op::value_t;

@@ -29,7 +29,7 @@ class Packet_ MATRICE_NONHERITABLE : public simd::simd_base_<T, _Elems>
 {
 	using myt = Packet_;
 	using xbase_t = simd::simd_base_<T, _Elems>;
-	using op_t = details::impl::simd_op<T, _Elems>;
+	using op_t = details::Op_<T>;
 	using internal_t = typename xbase_t::internal_t;
 	using initlist_t = typename xbase_t::initlist_t;
 	using xbase_t::m_data;
@@ -102,6 +102,6 @@ template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>>
 MATRICE_HOST_FINL Packet operator/ (T* _Left, const Packet_<T, _Elems>& _Right);
 #pragma endregion
 
-#include "./inl/_ixpacket.inl"
 MATRICE_ARCH_END
 #endif
+#include "./inl/_ixpacket.inl"

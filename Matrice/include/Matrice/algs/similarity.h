@@ -74,17 +74,17 @@ template<typename T, size_t _M, size_t _N> struct SMBase
 {
 	using value_t = T;
 	SMBase(size_t m, size_t n) : m_data(m, n) {}
-	const value_t& avg() const { return m_mean; }
+	const value_t avg() const { return m_data.sum()/m_data.size(); }
 private:
 	types::Matrix_<value_t, _M, _N> m_data;
 };
-template<metric_fn _Mty, typename T, size_t N> 
+template<metric_fn _Mety, typename T, size_t N> 
 class Similarity
 {
-	using Op = Metric_<_Mty, T>;
+	using Op = Metric_<_Mety, T>;
 public:
 	Similarity() {}
-	Similarity(size_t m, size_t n) : base_t(m, n) {}
+	Similarity(size_t m, size_t n) {}
 
 private:
 	Op _Impl;

@@ -322,9 +322,6 @@ public:
 	template<class _Rhs> MATRICE_GLOBAL_FINL value_t dot(const _Rhs& _rhs) const { return (this->operator*(_rhs)).sum(); }
 	MATRICE_GLOBAL_FINL value_t norm_2() const { auto ans = dot(*this); return (ans > eps ? sqrt(ans) : inf); }
 
-	template<typename _Rhs, typename _Ret = _Rhs> MATRICE_HOST_INL _Ret& solve(_Rhs& b) { typename Solver_<value_t>::Linear<_M, _N, AUTO> solver(*static_cast<_Derived*>(this)); return solver.solve(b); }
-	MATRICE_HOST_INL auto solve() { typename Solver_<value_t>::Linear<_M, _N, SVD> solver; return solver(*static_cast<_Derived*>(this)); }
-
 	///<brief> properties </brief>
 	__declspec(property(get=_Format_getter, put=_Format_setter))size_t format;
 	MATRICE_HOST_FINL size_t _Format_getter() const { return m_format; }

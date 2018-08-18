@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #pragma once
+#include <xutility>
 #include<algorithm>
 #include "_macros.h"
 #include "../arch/ixpacket.h"
@@ -32,10 +33,9 @@ template<class _InIt, class _OutIt> MATRICE_HOST_FINL
 void transform(const _InIt _First, const _InIt _Last, _OutIt _Dest, size_t _Dstep)
 {
 	using namespace std;
-	auto _UFirst = _Unchecked(_First);
-	_DEBUG_RANGE(_UFirst, _Last);
-	const auto _ULast = _Unchecked(_Last);
-	auto _UDest = _Unchecked_n(_Dest, _Idl_distance<_InIt>(_UFirst, _ULast));
+	auto _UFirst = (_First);
+	const auto _ULast = (_Last);
+	auto _UDest = (_Dest);
 	for (; _UFirst != _ULast; ++_UFirst, _UDest += _Dstep)
 		*_UDest = *_UFirst;
 }
@@ -43,10 +43,9 @@ template<class _Fn, class _InIt, class _OutIt> MATRICE_HOST_INL
 void transform(_Fn _Func, const _InIt _First, const _InIt _Last, size_t _Stride, _OutIt _Dest, size_t _Invpos = 1)
 {
 	using namespace std;
-	auto _UFirst = _Unchecked(_First + _Stride - _Invpos);
-	_DEBUG_RANGE(_UFirst, _Last);
-	const auto _ULast = _Unchecked(_Last);
-	auto _UDest = _Unchecked_n(_Dest, _Idl_distance<_InIt>(_UFirst, _ULast));
+	auto _UFirst = (_First + _Stride - _Invpos);
+	const auto _ULast = (_Last);
+	auto _UDest = (_Dest);
 	for (; (_UFirst + _Invpos) != _ULast; _UFirst += _Stride, (void)++_UDest)
 	{
 		*_UDest = _Func(*_UFirst);
@@ -57,10 +56,9 @@ template<class _Fn, class _InIt, class _OutIt> MATRICE_HOST_INL
 void transform(_Fn _Func, const _InIt _First, const _InIt _Last, _OutIt _Dest, size_t _Stride)
 {
 	using namespace std;
-	_DEBUG_RANGE(_First, _Last);
-	auto _UFirst = _Unchecked(_First);
-	const auto _ULast = _Unchecked(_Last);
-	auto _UDest = _Unchecked_n(_Dest, _Idl_distance<_InIt>(_UFirst, _ULast));
+	auto _UFirst = (_First);
+	const auto _ULast = (_Last);
+	auto _UDest = (_Dest);
 	for (; _UFirst != _ULast; ++_UFirst, (void)(_UDest+=_Stride))
 	{
 		*_UDest = _Func(*_UFirst);
@@ -73,9 +71,8 @@ MATRICE_HOST_FINL auto fill(_Fwdty& _Cont, _T _val) { std::fill(_Cont.begin(), _
 template<typename _FwdIt, typename _T, typename = std::enable_if_t<std::is_scalar_v<_FwdIt>>>
 MATRICE_HOST_FINL auto fill(_FwdIt _First, _FwdIt _Last, size_t _Stride, const _T& _Val)
 {
-	_DEBUG_RANGE(_First, _Last);
-	auto _UFirst = _Unchecked(_First);
-	const auto _ULast = _Unchecked(_Last);
+	auto _UFirst = (_First);
+	const auto _ULast = (_Last);
 	for (; _UFirst < _ULast; _UFirst += _Stride) *_UFirst = _Val;
 }
 template<typename _Ty, typename _InIt = _Ty*>
