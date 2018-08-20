@@ -7,7 +7,7 @@
 #include <fkl.h>
 #endif
 
-namespace dgelom {namespace types {
+MATRICE_NAMESPACE_BEGIN_TYPES
 
 template<typename _Ty> template<int _M, int _N, solver_type _alg>
 void Solver_<_Ty>::Linear<_M, _N, _alg>::_solver_kernel(iterator b)
@@ -77,7 +77,7 @@ void Solver_<_Ty>::Linear<_M, _N, _alg>::_solver_kernel(iterator b, int inc)
 	{
 		Matrix_<value_t, __, __> A_view = A, temp_b(n + 1, 1);
 		for (int_t i = 0; i < n; ++i) temp_b(i) = b[i*inc];
-		temp_b = typename dgelom::solve::LinearOp::Gls(A_view, temp_b);
+		temp_b = typename solve::LinearOp::Gls(A_view, temp_b);
 		for (int_t i = 0; i < n; ++i) b[i*inc] = temp_b(i);
 		return;
 	}
@@ -192,9 +192,7 @@ template void Solver_<double>::Linear<4, 4, solver_type::AUTO>::_Pre_solve();
 template void Solver_<double>::Linear<5, 5, solver_type::AUTO>::_Pre_solve();
 template void Solver_<double>::Linear<6, 6, solver_type::AUTO>::_Pre_solve();
 
-}}
-
-MATRICE_NAMESPACE_BEGIN_TYPES
+//
 
 template<typename _T> LinearOp::info_t LinearOp::OpBase<_T>::_Impl(view_t& A)
 {

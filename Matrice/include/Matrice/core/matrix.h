@@ -28,14 +28,14 @@ MATRICE_NAMESPACE_BEGIN_TYPES
 	          Copyright (c) : Zhilong Su 14/Feb/2018
 *******************************************************************/
 template<typename _Ty, int _M, int _N>
-class Matrix_ : public Base_<_Ty, _M, _N>
+class Matrix_ : public Base_<Matrix_<_Ty, _M, _N>>
 {
 	using Myt = Matrix_;
 	using Myt_const = std::add_const_t<Myt>;
 	using Myt_reference = std::add_lvalue_reference_t<Myt>;
 	using Myt_move_reference = std::add_rvalue_reference_t<Myt>;
 	using Myt_const_reference = std::add_lvalue_reference_t<Myt_const>;
-	using base_t = Base_<_Ty, _M, _N>;
+	using base_t = Base_<Matrix_<_Ty, _M, _N>>;
 	using base_t::m_rows;
 	using base_t::m_cols;
 	using base_t::m_data;
@@ -75,15 +75,15 @@ public:
 	         Copyright (c) : Zhilong Su 14/Feb/2018
  ******************************************************************/
 template<typename _Ty>
-class Matrix_<_Ty, __, __> : public Base_<_Ty, __, __>
+class Matrix_<_Ty, __, __> : public Base_<Matrix_<_Ty, __, __>>
 {
-	using Myt = Matrix_;
+	using Myt = Matrix_<_Ty, __, __>;
 	using Myt_const = std::add_const_t<Myt>;
 	using Myt_reference = std::add_lvalue_reference_t<Myt>;
 	using Myt_move_reference = std::add_rvalue_reference_t<Myt>;
 	using Myt_const_reference = std::add_lvalue_reference_t<Myt_const>;
 	template<typename _Xop> using Myt_xpr_type = Expr::Base_<_Xop>;
-	using base_t = Base_<_Ty, __, __>;
+	using base_t = Base_<Myt>;
 	using base_t::m_data;
 	using base_t::m_rows;
 	using base_t::m_cols;
@@ -127,13 +127,13 @@ public:
 	         Copyright (c) : Zhilong Su 24/May/2018
  ******************************************************************/
 template<typename _Ty>
-class Matrix_<_Ty, -1, __> : public Base_<_Ty, -1, __>
+class Matrix_<_Ty, -1, __> : public Base_<Matrix_<_Ty, -1, __>>
 {
-	using Myt = Matrix_;
+	using Myt = Matrix_<_Ty, -1, __>;
 	using Myt_reference = std::add_lvalue_reference_t<Myt>;
 	using Myt_const_reference = add_const_reference_t<Myt>;
 	using Myt_move_reference = std::add_rvalue_reference_t<Myt>;
-	using base_t = Base_<_Ty, -1, __>;
+	using base_t = Base_<Matrix_<_Ty, -1, __>>;
 	using base_t::m_data;
 	using base_t::m_rows;
 	using base_t::m_cols;
@@ -158,14 +158,14 @@ public:
 	         Copyright (c) : Zhilong Su 25/May/2018
  ******************************************************************/
 template<typename _Ty>
-class Matrix_<_Ty, -1, -1> : public Base_<_Ty, -1, -1>, public device::Base_<_Ty>
+class Matrix_<_Ty, -1, -1> : public Base_<Matrix_<_Ty, -1, -1>>, public device::Base_<_Ty>
 {
 	using Myt = Matrix_<_Ty, -1, -1>;
 	using Myt_reference = std::add_lvalue_reference_t<Myt>;
 	using Myt_const_reference = add_const_reference_t<Myt>;
 	using Myt_move_reference = std::add_rvalue_reference_t<Myt>;
 	using device_base_t = device::Base_<_Ty>;
-	using base_t = Base_<_Ty, -1, -1>;
+	using base_t = Base_<Matrix_<_Ty, -1, -1>>;
 	using base_t::m_data;
 	using base_t::m_rows;
 	using base_t::m_cols;
