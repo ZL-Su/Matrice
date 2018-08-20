@@ -123,9 +123,9 @@ public:
 
 	//<brief> Managed host memory allocator </brief>
 	template<int _M, int _N, size_t _Opt = LINEAR+COPY>
-	MATRICE_ALIGNED_CLASS Allocator : public DenseBase<OnStack, _Opt>
+	MATRICE_ALIGNED_CLASS Allocator : public DenseBase<OnStack, allocator_traits<_M,_N>::value>
 	{
-		typedef DenseBase<OnStack, _Opt> Base;
+		typedef DenseBase<OnStack, allocator_traits<_M,_N>::value> Base;
 	public:
 		enum { location = Base::location, option = Base::option };
 		MATRICE_HOST_FINL Allocator(int ph1=0, int ph2=0) : Base(_M, _N, _Data) {}
@@ -150,9 +150,9 @@ public:
 	};
 	//<brief> Dynamic host memory allocator </brief>
 	template<size_t _Opt> 
-	MATRICE_ALIGNED_CLASS Allocator<0, 0, _Opt> : public DenseBase<OnHeap, _Opt>
+	MATRICE_ALIGNED_CLASS Allocator<0, 0, _Opt> : public DenseBase<OnHeap, allocator_traits<0, 0>::value>
 	{
-		typedef DenseBase<OnHeap, _Opt> Base;
+		typedef DenseBase<OnHeap, allocator_traits<0,0>::value> Base;
 	public:
 		enum { location = Base::location, option = Base::option };
 		MATRICE_HOST_FINL Allocator(int _m, int _n) : Base(_m, _n) {}
@@ -170,9 +170,9 @@ public:
 	};
 	//<brief> Unified device memory allocator </brief>
 	template<size_t _Opt>
-	MATRICE_ALIGNED_CLASS Allocator<-1, 0, _Opt> : public DenseBase<OnGlobal, _Opt>
+	MATRICE_ALIGNED_CLASS Allocator<-1, 0, _Opt> : public DenseBase<OnGlobal, allocator_traits<-1, 0>::value>
 	{
-		typedef DenseBase<OnGlobal, _Opt> Base;
+		typedef DenseBase<OnGlobal, allocator_traits<-1, 0>::value> Base;
 	public:
 		enum { location = Base::location, option = Base::option };
 		MATRICE_HOST_INL Allocator() : Base() {}
@@ -187,9 +187,9 @@ public:
 	};
 	//<brief> Device memory allocator </brief>
 	template<size_t _Opt>
-	MATRICE_ALIGNED_CLASS Allocator<-1, -1, _Opt> : public DenseBase<OnDevice, _Opt>
+	MATRICE_ALIGNED_CLASS Allocator<-1, -1, _Opt> : public DenseBase<OnDevice, allocator_traits<-1, -1>::value>
 	{
-		typedef DenseBase<OnDevice, _Opt> Base;
+		typedef DenseBase<OnDevice, allocator_traits<-1, -1>::value> Base;
 	public:
 		enum { location = Base::location, option = Base::option };
 		MATRICE_DEVICE_INL Allocator() : Base() {}

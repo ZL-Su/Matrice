@@ -138,11 +138,11 @@ void Solver_<_Ty>::Linear<_M, _N, _alg>::_Pre_solve()
 {
 	using Matrix = Matrix_<_M, _N>;
 	typename Matrix::pointer pCoef = A.data(); 
-	int layout = matrix_traits<>::is_rmajor(A.format) ? rmaj : cmaj;
+	int layout = layout_traits<decltype(A)>::is_rmajor(A.format) ? rmaj : cmaj;
 
 	if constexpr(SolverType == solver_type::AUTO && CompileTimeRows == CompileTimeCols)
 	{
-		if (matrix_traits<>::is_symmetric(A.format)) {
+		if (layout_traits<decltype(A)>::is_symmetric(A.format)) {
 			if constexpr (type_bytes<value_t>::value == 4)
 #ifdef __use_mkl__
 				options.status = LAPACKE_spotrf(layout, 'L', _N, (float*)pCoef, _N);
@@ -202,10 +202,10 @@ template<typename _T> LinearOp::info_t LinearOp::OpBase<_T>::_Impl(view_t& A)
 	size_t _M = A.rows(), _N = A.cols();
 	if (_M != _N) throw std::runtime_error("Support only for square matrix.");
 
-	int layout = matrix_traits<>::is_rmajor(A.format) ? rmaj : cmaj;
+	int layout = layout_traits<view_t>::is_rmajor(A.format) ? rmaj : cmaj;
 	info_t info;
 
-	if (matrix_traits<>::is_symmetric(A.format)) {
+	if (layout_traits<view_t>::is_symmetric(A.format)) {
 		info.alg = solver_type::CHD;
 		if constexpr (type_bytes<value_t>::value == 4)
 #ifdef __use_mkl__

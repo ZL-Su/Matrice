@@ -20,16 +20,12 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../util/_type_defs.h"
 #include "_memory.h"
 
-namespace dgelom {
-template<typename T> struct traits {};
-template<typename T> struct traits<const T> : traits<T> { using type = T; };
-struct MatrixExpr {};
-template<typename Derived, typename Expression> struct DenseExprBase {};
-template<typename Derived> struct DenseExprBase<Derived, MatrixExpr> {};
+MATRICE_NAMESPACE_BEGIN_
 
-template<typename _Ty> struct remove_reference { using type = typename std::remove_reference<_Ty>::type; };
+template<typename T> struct remove_reference { using type = typename std::remove_reference<T>::type; };
+template<typename T> using remove_reference_t = remove_reference<T>;
 
-template<typename _Ty> struct type_bytes { enum { value = sizeof(_Ty) }; };
+template<typename T> struct type_bytes { enum { value = sizeof(T) }; };
 
 template<bool _Test, typename T1, typename T2> struct conditonal {};
 template<typename T1, typename T2> struct conditonal<true, T1, T2> { using type = T1; };
@@ -67,27 +63,42 @@ template<typename T> struct add_pointer_const {
 };
 template<typename T> using add_pointer_const_t = typename add_pointer_const<T>::type;
 
-template<int _M, int _N> struct allocator_trait{ 
-	enum {
-		value = _M >0  && _N>0   ? LINEAR + COPY :  // stack allocator
-		        _M==0  && _N==-1 ? LINEAR        :  // linear device allocator
-		        _M==-1 && _N==-1 ? PITCHED       :  // pitched device allocator
-#ifdef __CXX11_SHARED__
-										 LINEAR + SHARED  // smart heap or global allocator
-#else
-		                         LINEAR + COPY    // deep heap or global allocator
-#endif      
-	}; 
-};
-
 template<typename T> struct _View_trait { enum { value = 0x0000 }; };
 template<> struct _View_trait<unsigned char> { enum { value = 0x0008 }; };
 template<> struct _View_trait<int> { enum { value = 0x0016 }; };
 template<> struct _View_trait<float> { enum { value = 0x0032 }; };
 template<> struct _View_trait<double> { enum { value = 0x0064 }; };
 
-template<size_t _Options = 0> struct matrix_traits { 
-	enum { value = _Options };
+template<typename T, typename = std::enable_if_t<std::is_class_v<T>>>
+struct traits { using type = typename T::value_t; };
+
+template<typename Mty, typename = std::enable_if_t<std::is_class_v<Mty>>>
+struct matrix_traits : traits<Mty> {
+	enum { M = Mty::CompileTimeRows };
+	enum { N = Mty::CompileTimeRows };
+};
+
+template<typename Exp, typename = std::enable_if_t<std::is_class_v<Exp>>>
+struct expression_traits : traits<Exp> {
+	enum { options = Exp::options };
+	static_assert(is_expression<options>::value, "Not expression type.");
+};
+
+template<int _M, int _N> struct allocator_traits {
+	enum {
+		value = _M > 0 && _N > 0 ? LINEAR + COPY :  // stack allocator
+		_M == 0 && _N == -1 ? LINEAR :  // linear device allocator
+		_M == -1 && _N == -1 ? PITCHED :  // pitched device allocator
+#ifdef __CXX11_SHARED__
+		LINEAR + SHARED  // smart heap or global allocator
+#else
+		LINEAR + COPY    // deep heap or global allocator
+#endif      
+	};
+};
+
+template<typename Mty, typename = std::enable_if_t<std::is_class_v<Mty>>> 
+struct layout_traits : traits<Mty> {
 	MATRICE_GLOBAL_FINL static auto layout_type(size_t _format) {
 		return (_format & rmaj == rmaj) ? rmaj : cmaj;
 	}
@@ -133,4 +144,4 @@ template<int _Rows = 0, int _Cols = 0> struct compile_time_size {
 	};
 	static const int RunTimeDeducedInHost = 0, RunTimeDeducedInDevice = -1;
 };
-}
+_MATRICE_NAMESPACE_END
