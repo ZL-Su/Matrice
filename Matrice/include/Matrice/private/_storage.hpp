@@ -52,13 +52,15 @@ public:
 #endif
 	enum Ownership { Owner = 1, Refer = 0, Proxy = -1, Dummy = -2 };
 	///<brief> data memory </brief>
-	template<Location _Loc = UnSpecified, size_t _Opt = LINEAR+
+	template<
+		Location _Loc = UnSpecified, 
+		size_t _Opt = LINEAR+
 #ifdef __CXX11_SHARED__
 		SHARED
 #else
 		COPY
-#endif
-	> 
+#endif 
+			 > 
 	MATRICE_ALIGNED_CLASS DenseBase {
 	public:
 		enum { location = _Loc, option = _Opt };
@@ -87,16 +89,14 @@ public:
 		MATRICE_GLOBAL_FINL size_t pitch() const { return (my_pitch); }
 		MATRICE_GLOBAL_FINL pointer data() const { return (my_data); }
 		MATRICE_GLOBAL_FINL Ownership& owner() const { return my_owner; }
-		MATRICE_GLOBAL_FINL bool shared() const 
-		{
+		MATRICE_GLOBAL_FINL bool shared() const {
 #ifdef __CXX11_SHARED__
 			return (my_shared.get());
 #else
 			return 0;
 #endif
 		}
-		MATRICE_GLOBAL_FINL void free()
-		{
+		MATRICE_GLOBAL_FINL void free() {
 			my_cols = 0, my_rows = 0, my_size = 0;
 			my_owner = Dummy, my_pitch = 0;
 			my_location = UnSpecified;
@@ -122,10 +122,10 @@ public:
 	template<int _M, int _N, size_t _Opt> class Allocator;
 
 	//<brief> Managed host memory allocator </brief>
-	template<int _M, int _N, size_t _Opt = LINEAR+COPY>
-	MATRICE_ALIGNED_CLASS Allocator : public DenseBase<OnStack, allocator_traits<_M,_N>::value>
+	template<int _M, int _N, size_t _Opt = allocator_traits<_M, _N>::value>
+	MATRICE_ALIGNED_CLASS Allocator : public DenseBase<OnStack, _Opt>
 	{
-		typedef DenseBase<OnStack, allocator_traits<_M,_N>::value> Base;
+		typedef DenseBase<OnStack, _Opt> Base;
 	public:
 		enum { location = Base::location, option = Base::option };
 		MATRICE_HOST_FINL Allocator(int ph1=0, int ph2=0) : Base(_M, _N, _Data) {}
@@ -149,8 +149,8 @@ public:
 		value_t _Data[_M*_N];
 	};
 	//<brief> Dynamic host memory allocator </brief>
-	template<size_t _Opt> 
-	MATRICE_ALIGNED_CLASS Allocator<0, 0, _Opt> : public DenseBase<OnHeap, allocator_traits<0, 0>::value>
+	template<size_t _Opt>
+	MATRICE_ALIGNED_CLASS Allocator<0, 0, _Opt> : public DenseBase<OnHeap, _Opt>
 	{
 		typedef DenseBase<OnHeap, allocator_traits<0,0>::value> Base;
 	public:

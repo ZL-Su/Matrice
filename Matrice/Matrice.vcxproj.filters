@@ -37,9 +37,6 @@
     <Filter Include="Header Files\IO">
       <UniqueIdentifier>{ca68800b-af4a-47a4-a12c-13d3d3060204}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Modules">
-      <UniqueIdentifier>{73b85bcb-9064-4ecc-acd7-4db405c4fc02}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Algs">
       <UniqueIdentifier>{3f0faa25-6afa-4902-b9e0-1c9f2b3ab036}</UniqueIdentifier>
     </Filter>
@@ -289,9 +286,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="_dev_base.def">
-      <Filter>Modules</Filter>
-    </None>
     <None Include="include\Matrice\core\cpp.hint">
       <Filter>Header Files\Core</Filter>
     </None>

@@ -70,27 +70,42 @@ template<typename _Ty, int _M, int _N> struct matrix_traits<Matrix_<_Ty, _M, _N>
 	enum { M = _M, N = _N };
 	struct size { struct rows { enum { value = M }; }; struct cols { enum { value = N }; }; };
 };
-template</*typename _Ty, int _M, int _N, */typename _Derived> class Base_;
+template<typename _Derived, typename _Traits, typename _Type> class Base_;
 
 /*******************************************************************
 	              Generic Base for Matrix Class
 	    Copyright (c) : Zhilong (Dgelom) Su, since 14/Feb/2018
  ******************************************************************/
-//template<typename _Ty, int _M, int _N>
-template<typename _Derived> 
-class Base_ : public PlaneView_<typename matrix_traits<_Derived>::type>
+template
+<
+	typename _Derived, 
+	typename _Traits = matrix_traits<_Derived>, 
+	typename _Type = typename _Traits::type
+>
+class Base_ : public PlaneView_<typename _Traits::type>
 {
-	using _Myt_traits = matrix_traits<_Derived>;
-	enum { _M = _Myt_traits::size::rows::value, _N = _Myt_traits::size::cols::value };
-	using _Myt_storage_type = typename details::Storage_<typename _Myt_traits::type>::
-			Allocator<_Myt_traits::size::rows::value, _Myt_traits::size::cols::value>;
+	enum { _M = _Traits::size::rows::value, _N = _Traits::size::cols::value };
+	using _Myt_storage_type = typename details::Storage_<_Type>::template Allocator<_M, _N>;
 	using _Myt = Base_;
 	using _Myt_const = std::add_const_t<_Myt>;
 	using _Myt_reference = std::add_lvalue_reference_t<_Myt>;
 	using _Myt_const_reference = std::add_lvalue_reference_t<_Myt_const>;
-	using _Myt_move_reference = std::add_rvalue_reference_t<Base_>;
+	using _Myt_move_reference = std::add_rvalue_reference_t<_Myt>;
+	using _Myt_fwd_iterator = _Matrix_forward_iterator<_Type>;
+	using _Myt_rwise_iterator = _Matrix_rwise_iterator<_Type>;
+	using _Myt_cwise_iterator = _Matrix_cwise_iterator<_Type>;
+	using _Myt_rview_type = _Matrix_rview<_Type>;
+	using _Myt_cview_type = _Matrix_cview<_Type>;
+	using _Myt_blockview_type = _Matrix_block<_Type>;
+	using _Xop_ewise_sum = typename Expr::Op::EwiseSum<_Type>;
+	using _Xop_ewise_min = typename Expr::Op::EwiseMin<_Type>;
+	using _Xop_ewise_mul = typename Expr::Op::EwiseMul<_Type>;
+	using _Xop_ewise_div = typename Expr::Op::EwiseDiv<_Type>;
+	using _Xop_mat_mul = typename Expr::Op::MatMul<_Type>;
+	using _Xop_mat_inv = typename Expr::Op::MatInv<_Type>;
+	using _Xop_mat_trp = typename Expr::Op::MatTrp<_Type>;
 public:
-	using value_t = typename _Myt_traits::type;
+	using value_t = _Type;
 	using value_type = value_t;
 	using pointer = std::add_pointer_t<value_t>;
 	using reference = std::add_lvalue_reference_t<value_t>;
@@ -100,19 +115,6 @@ public:
 	template<typename _Xop> using expr_type = Expr::Base_<_Xop>;
 	using base_t = PlaneView_<value_t>;
 	using loctn_t = Location;
-	using _Myt_fwd_iterator = _Matrix_forward_iterator<value_t>;
-	using _Myt_rwise_iterator = _Matrix_rwise_iterator<value_t>;
-	using _Myt_cwise_iterator = _Matrix_cwise_iterator<value_t>;
-	using _Myt_rview_type = _Matrix_rview<value_t>;
-	using _Myt_cview_type = _Matrix_cview<value_t>;
-	using _Myt_blockview_type = _Matrix_block<value_t>;
-	using _Xop_ewise_sum = typename Expr::Op::EwiseSum<value_t>;
-	using _Xop_ewise_min = typename Expr::Op::EwiseMin<value_t>;
-	using _Xop_ewise_mul = typename Expr::Op::EwiseMul<value_t>;
-	using _Xop_ewise_div = typename Expr::Op::EwiseDiv<value_t>;
-	using _Xop_mat_mul = typename Expr::Op::MatMul<value_t>;
-	using _Xop_mat_inv = typename Expr::Op::MatInv<value_t>;
-	using _Xop_mat_trp = typename Expr::Op::MatTrp<value_t>;
 
 	enum { options = _Myt_storage_type::location };
 	constexpr static const value_t inf = std::numeric_limits<value_t>::infinity();
