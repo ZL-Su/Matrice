@@ -131,7 +131,13 @@ struct Expr {
 		MATRICE_GLOBAL_INL auto sum() const {
 			default_type val = 0.0;
 			int n = static_cast<const Derived*>(this)->size();
-			for (int i = 0; i < n; ++i) val += static_cast<const Derived*>(this)->operator()(i);
+#pragma omp parallel if(n>100)
+		{
+#pragma omp for reduction(+:val)
+			for (int i = 0; i < n; ++i) 
+				val += static_cast<const Derived*>(this)->operator()(i);
+		}
+			
 			return (val);
 		}
 		MATRICE_GLOBAL_FINL size_t size() const { return M*N; }
@@ -171,7 +177,8 @@ struct Expr {
 		}
 		template<typename _Mty> MATRICE_GLOBAL_INL void assign_to(_Mty& res) const
 		{
-			for (size_t i = 0; i < res.size(); ++i) res(i) = this->operator()(i);
+#pragma omp parallel for
+			for (index_t i = 0; i < res.size(); ++i) res(i) = this->operator()(i);
 		}
 
 	private:
@@ -208,6 +215,7 @@ struct Expr {
 		}
 		template<typename _Mty> MATRICE_GLOBAL_INL void assign_to(_Mty& res) const
 		{
+#pragma omp parallel for
 			for (int i = 0; i < res.size(); ++i) res(i) = this->operator()(i);
 		}
 	private:
@@ -264,6 +272,7 @@ struct Expr {
 				_Op(M, res.data(), _RHS.data());
 			}
 			if constexpr (options & trp == trp) {
+#pragma omp parallel for
 				for (int i = 0; i < size(); ++i) res(i) = (*this)(i);
 			}
 		} /*i*N+(1-N*M)*(i/M) is replaced by i at left hand*/

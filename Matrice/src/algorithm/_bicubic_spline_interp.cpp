@@ -9,7 +9,7 @@ void BicubicSplineInterp<_Ty, _Options>::_Bspline_coeff(const matrix_t& _Data) {
 	//initialization
 	const value_t _Z = -2. + sqrt(value_t(3));
 	const value_t _A = _Z / (_Z*_Z - 1);
-	const size_t _K0 = static_cast<size_t>(log(base_t::m_eps) / log(abs(_Z))) + 1;
+	const index_t _K0 = static_cast<index_t>(log(base_t::m_eps) / log(abs(_Z))) + 1;
 
 	matrix_t _Buff(_Height, _Width);
 
@@ -17,9 +17,13 @@ void BicubicSplineInterp<_Ty, _Options>::_Bspline_coeff(const matrix_t& _Data) {
 
 	//pre-calculate the initial value for the first recursion
 	matrix_t _R0(1, _Width, zero<value_t>::value);
-	for (size_t _Row = 0; _Row < _K0; ++_Row) {
+#pragma omp parallel if(_K0 > 100)
+{
+#pragma omp for
+	for (index_t _Row = 0; _Row < _K0; ++_Row) {
 		_R0 = _R0 + _Data.rview(_Row) * pow(_Z, _Row);
 	}
+}
 
 	_Buff.rview(0) = _R0;
 	for (size_t _Row = 1; _Row < _Height; ++_Row) {
@@ -35,9 +39,13 @@ void BicubicSplineInterp<_Ty, _Options>::_Bspline_coeff(const matrix_t& _Data) {
 
 	//pre-calculate the initial value for the first recursion
 	matrix_t _C0(_Height, 1, zero<value_t>::value);
-	for (size_t _Col = 0; _Col < _K0; ++_Col) {
+#pragma omp parallel if(_K0 > 100)
+{
+#pragma omp for
+	for (index_t _Col = 0; _Col < _K0; ++_Col) {
 		_C0 = _C0 + m_coeff.cview(_Col) * pow(_Z, _Col);
 	}
+}
 
 	_Buff.cview(0) = _C0;
 	for (size_t _Col = 1; _Col < _Width; ++_Col) {
