@@ -51,6 +51,13 @@ struct Expr {
 		template<typename _Ty> using EwiseMin = std::minus<_Ty>;
 		template<typename _Ty> using EwiseMul = std::multiplies<_Ty>;
 		template<typename _Ty> using EwiseDiv = std::divides<_Ty>;
+		template<typename _Ty> struct EwiseSqrt
+		{
+			enum { flag = ewise };
+			MATRICE_GLOBAL_FINL auto operator() (const _Ty& _Val) const {
+				return (std::sqrt(_Val));
+			}
+		};
 		template<typename _Ty> struct MatInv { enum { flag = inv }; MATRICE_GLOBAL _Ty* operator()(int M, _Ty* Out, _Ty* In = nullptr) const; };
 		template<typename _Ty> struct MatTrp { enum { flag = trp }; MATRICE_HOST_FINL _Ty operator()(int M, _Ty* Out, _Ty* i) const { return (Out[int(i[1])*M + int(i[0])]); } };
 		template<typename _Ty> struct SpreadMul
@@ -187,6 +194,28 @@ struct Expr {
 		_BinaryOp _Op;
 		using Base_<EwiseBinaryExpr<T, U, _BinaryOp>>::M;
 		using Base_<EwiseBinaryExpr<T, U, _BinaryOp>>::N;
+	};
+
+	template<typename T, typename _UnaryOp> class EwiseUnaryExpr 
+		: public Base_<EwiseUnaryExpr<T, _UnaryOp>>
+	{
+		using my_type = EwiseUnaryExpr;
+		using const_reference_t = add_const_reference_t<T>;
+	public:
+		enum { options = option<_UnaryOp::flag>>::value };
+		using value_t = conditional_t<std::is_scalar_v<T>, T, typename T::value_t>;
+		EwiseUnaryExpr(const_reference_t _rhs) noexcept
+			:_RHS(_rhs) { M = _rhs.rows(), N = _rhs.cols() }
+
+		MATRICE_GLOBAL_INL value_t operator() (size_t _idx) {
+			return _Op(_RHS(_idx));
+		}
+
+	private:
+		_UnaryOp _Op;
+		const_reference_t _RHS;
+		using Base_<my_type>::M;
+		using Base_<my_type>::N
 	};
 
 	template<class _T1, class _T2, typename _BinaryOp> class MatBinaryExpr 
