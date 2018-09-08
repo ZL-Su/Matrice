@@ -15,8 +15,14 @@ constexpr _Ret max(const T1& a, const T2& b) { return a < b ? b : a; }
 template<typename T1, typename T2, typename _Ret = typename std::decay<decltype(true ? T1() : T2())>::type> MATRICE_GLOBAL_FINL
 constexpr _Ret min(const T1& a, const T2& b) { return a < b ? a : b; }
 
-template<typename T, typename _Ret = T> MATRICE_GLOBAL_FINL
-constexpr _Ret sqrt(const T& x) { return std::sqrt(x); }
+template<typename T, typename _Ret = T, typename = std::enable_if_t<std::is_arithmetic_v<T>>> 
+MATRICE_GLOBAL_FINL constexpr _Ret sqrt(const T& x) {
+	return std::sqrt(x);
+}
+template<typename T, typename = std::enable_if_t<std::is_class_v<T>>>
+MATRICE_GLOBAL_FINL constexpr auto sqrt(const T& x) {
+	return (x.sqrt());
+}
 template<typename T, typename _Ret = T> MATRICE_GLOBAL_FINL
 constexpr _Ret abs(const T& x) { return std::abs(x); }
 template<typename T, typename _Ret = T> MATRICE_GLOBAL_FINL

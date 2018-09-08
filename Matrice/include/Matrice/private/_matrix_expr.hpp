@@ -38,12 +38,10 @@ struct Expr {
 	using size_t = std::size_t;
 	using default_type = double;
 	enum OpFlag { ewise = 0, mmul = 1, inv = 2, trp = 3, undef = -1 };
-
+	template<int _Option> struct option { enum { value = _Option | expr }; };
 	/*factorial_t<N> = N!*/
 	template<int N> struct factorial_t { enum { value = factorial_t<N - 1>::value*N }; };
 	template<> struct factorial_t<0> { enum { value = 1 }; };
-
-	template<int _Option> struct option {enum{value = _Option | expr}; };
 
 	struct Op
 	{
@@ -202,20 +200,33 @@ struct Expr {
 		using my_type = EwiseUnaryExpr;
 		using const_reference_t = add_const_reference_t<T>;
 	public:
-		enum { options = option<_UnaryOp::flag>>::value };
+		enum { options = expression_options<_UnaryOp>::value };
 		using value_t = conditional_t<std::is_scalar_v<T>, T, typename T::value_t>;
 		EwiseUnaryExpr(const_reference_t _rhs) noexcept
-			:_RHS(_rhs) { M = _rhs.rows(), N = _rhs.cols() }
+			:_RHS(_rhs) { M = _rhs.rows(), N = _rhs.cols(); }
 
 		MATRICE_GLOBAL_INL value_t operator() (size_t _idx) {
 			return _Op(_RHS(_idx));
+		}
+		MATRICE_GLOBAL_INL const value_t operator() (size_t _idx) const {
+			return _Op(_RHS(_idx));
+		}
+
+		template<typename _Mty> MATRICE_GLOBAL_INL void assign_to(_Mty& res) const {
+#pragma omp parallel for
+			for (index_t i = 0; i < res.size(); ++i) res(i) = this->operator()(i);
+		}
+
+		MATRICE_GLOBAL_INL auto eval() const {
+			T _Ret(M, N);
+			return std::forward<T>(_Ret = this->assign(_Ret));
 		}
 
 	private:
 		_UnaryOp _Op;
 		const_reference_t _RHS;
 		using Base_<my_type>::M;
-		using Base_<my_type>::N
+		using Base_<my_type>::N;
 	};
 
 	template<class _T1, class _T2, typename _BinaryOp> class MatBinaryExpr 
@@ -314,5 +325,11 @@ struct Expr {
 		using Base_<MatUnaryExpr<_Oprd, _UnaryOp>>::size;
 	};
 };
+
+template<
+	typename _Exp, 
+	typename = std::enable_if_t<is_expression_v<_Exp>>
+	>
+using _Matrix_exp = typename Expr::Base_<_Exp>;
 
 MATRICE_NAMESPACE_EXPR_END

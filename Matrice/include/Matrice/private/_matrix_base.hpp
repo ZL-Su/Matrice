@@ -101,6 +101,7 @@ class Base_ : public PlaneView_<typename _Traits::type>
 	using _Xop_ewise_min = typename Expr::Op::EwiseMin<_Type>;
 	using _Xop_ewise_mul = typename Expr::Op::EwiseMul<_Type>;
 	using _Xop_ewise_div = typename Expr::Op::EwiseDiv<_Type>;
+	using _Xop_ewise_sqrt = typename Expr::Op::EwiseSqrt<_Type>;
 	using _Xop_mat_mul = typename Expr::Op::MatMul<_Type>;
 	using _Xop_mat_inv = typename Expr::Op::MatInv<_Type>;
 	using _Xop_mat_trp = typename Expr::Op::MatTrp<_Type>;
@@ -137,6 +138,9 @@ public:
 	template<typename _Lhs, typename _Rhs, typename _Op>
 	MATRICE_GLOBAL_FINL Base_(const Expr::MatBinaryExpr<_Lhs, _Rhs, _Op>& expr) 
 		:base_t(m_rows = expr.rows(), m_cols = expr.cols()), m_storage(m_rows, m_cols) { m_data = m_storage.data(); expr.assign(*this); }
+	template<typename _Exp>
+	MATRICE_GLOBAL_FINL Base_(const exprs::_Matrix_exp<_Exp>& expr)
+		: base_t(m_rows = expr.rows(), m_cols = expr.cols()), m_storage(m_rows, m_cols) { m_data = m_storage.data(); expr.assign(*this); }
 	template<typename _Rhs, typename _Op>
 	MATRICE_GLOBAL_FINL Base_(const Expr::MatUnaryExpr<_Rhs, _Op>& expr) 
 		:base_t(m_rows = expr.rows(), m_cols = expr.cols()), m_storage(m_rows, m_cols) { m_data = m_storage.data(); expr.assign(*this); }
@@ -307,6 +311,7 @@ public:
 	{ return Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_div>(*this, _opd); }
 	template<typename _Rhs> MATRICE_GLOBAL_INL auto mul(const _Rhs& rhs) const 
 	{ return Expr::MatBinaryExpr<_Myt, _Rhs, _Xop_mat_mul>(*this, rhs); }
+	MATRICE_GLOBAL_FINL auto sqrt() const { return Expr::EwiseUnaryExpr<_Myt, _Xop_ewise_sqrt>(*this); }
 	MATRICE_HOST_FINL auto inv() const 
 	{ return Expr::MatUnaryExpr<_Myt, _Xop_mat_inv>(*this); }
 	MATRICE_HOST_FINL auto inv(_Myt_const_reference _rhs) 
@@ -320,6 +325,7 @@ public:
 
 #pragma region <!-- Triggers for Suspended Expression -->
 	template<typename... _Args> MATRICE_GLOBAL_INL auto& operator= (const Expr::EwiseBinaryExpr<_Args...>& _Ex){ return (*static_cast<_Derived*>(&_Ex.assign(*this))); }
+	template<typename... _Args> MATRICE_GLOBAL_INL auto& operator= (const Expr::EwiseUnaryExpr<_Args...>& _Ex) { return (*static_cast<_Derived*>(&_Ex.assign(*this))); }
 	template<typename... _Args> MATRICE_GLOBAL_INL auto& operator= (const Expr::MatBinaryExpr<_Args...>& _Ex) { return (*static_cast<_Derived*>(&_Ex.assign(*this))); }
 	template<typename... _Args> MATRICE_GLOBAL_INL auto& operator= (const Expr::MatUnaryExpr<_Args...>& _Ex) { return (*static_cast<_Derived*>(&_Ex.assign(*this))); }
 #pragma endregion
@@ -331,7 +337,7 @@ public:
 	MATRICE_GLOBAL_FINL value_t det() const { return (det_impl(*static_cast<const _Derived*>(this))); }
 	MATRICE_GLOBAL_FINL value_t trace() const { return (reduce(begin(), end(), cols() + 1)); }
 	template<class _Rhs> MATRICE_GLOBAL_FINL value_t dot(const _Rhs& _rhs) const { return (this->operator*(_rhs)).sum(); }
-	MATRICE_GLOBAL_FINL value_t norm_2() const { auto ans = dot(*this); return (ans > eps ? sqrt(ans) : inf); }
+	MATRICE_GLOBAL_FINL value_t norm_2() const { auto ans = dot(*this); return (ans > eps ? dgelom::sqrt(ans) : inf); }
 
 	///<brief> properties </brief>
 	__declspec(property(get=_Format_getter, put=_Format_setter))size_t format;
