@@ -7,7 +7,7 @@ MATRICE_DEVICE_BEGIN namespace kernels {
 template<typename _Scalar> __global__ void
 _Ewise_reduce(const _Scalar* _Data, size_t _Size, _Scalar& _Ret) {
 	_Ret = _Scalar(0);
-
+	
 	const auto _Idx = blockIdx.x*blockDim.x + threadIdx.x;
 	if (_Idx < _Size) _Ret += _Data[_Idx];
 }

@@ -211,8 +211,7 @@ Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(const DenseBase& _other)
 	return (*this);
 }
 template<typename _Ty> template<Location _Loc, size_t _Opt>
-Storage_<_Ty>::DenseBase<_Loc, _Opt>& 
-Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(DenseBase && _other)
+Storage_<_Ty>::DenseBase<_Loc, _Opt>& Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(DenseBase && _other)
 {
 	my_owner = _other.my_owner, my_size = _other.my_size;
 	my_rows = _other.my_rows, my_cols = _other.my_cols;

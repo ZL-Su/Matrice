@@ -3,17 +3,17 @@
 
 MATRICE_DEVICE_BEGIN
 
-template<typename _Ty, typename _Derived>
-_Derived& Base_<_Ty, _Derived>::operator+(const _Derived& _other) {
-	const auto _M = *_other._H, _N = *_other._W;
+template<typename arith_type>
+Base_<arith_type>::pointer Base_<arith_type>::operator+(const pointer _other) {
+	const int _M = *_H, _N = *_W;
 
-	dim3 _Blocks(static_cast<size_t>(ceil(_M*_N / 512.)));
-	kernels::_Ewise_plus<<<_Blocks, 512>>>(_Ptr, _other._Ptr, _Ptr, _M*_N);
+	dim3 _Blocks(ceil<size_t>(_M*_N / 32.));
+	kernels::_Ewise_plus<<<_Blocks, 32>>>(_Ptr, _other, _Ptr, _M*_N);
 
-	return (*static_cast<_Derived*>(this));
+	return (_Ptr);
 }
-template<typename _Ty> using DMatrix = types::Matrix_<_Ty, -1, -1>;
-DMatrix<float>& Base_<float, DMatrix<float>>::operator+(const DMatrix<float>&);
-DMatrix<double>& Base_<double, DMatrix<double>>::operator+(const DMatrix<double>&);
 
+template class Base_<float>;
+template class Base_<double>;
+template class Base_<unsigned char>;
 MATRICE_DEVICE_END

@@ -38,8 +38,7 @@ template<bool _Test, typename T1, typename T2> using conditional_t = typename co
 template<typename Exp> struct expression_options { enum { value = Exp::flag | expr }; };
 
 template<int _Opt> struct is_expression { enum { value = _Opt & expr == expr ? true : false }; };
-template<typename Exp> MATRICE_GLOBAL_INL
-constexpr bool is_expression_v = is_expression<Exp::options>::value;
+template<typename Exp> constexpr bool is_expression_v = is_expression<Exp::options>::value;
 
 template<int _Val> struct is_zero { enum { value = _Val == 0 ? true : false }; };
 

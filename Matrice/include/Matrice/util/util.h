@@ -23,13 +23,13 @@ template<typename T, typename = std::enable_if_t<std::is_class_v<T>>>
 MATRICE_GLOBAL_FINL constexpr auto sqrt(const T& x) {
 	return (x.sqrt());
 }
-template<typename T, typename _Ret = T> MATRICE_GLOBAL_FINL
+template<typename T, typename _Ret = T> MATRICE_HOST_FINL
 constexpr _Ret abs(const T& x) { return std::abs(x); }
-template<typename T, typename _Ret = T> MATRICE_GLOBAL_FINL
+template<typename T, typename _Ret = T> MATRICE_HOST_FINL
 constexpr _Ret log(const T& x) { return std::log(x); }
-template<typename _Ret, typename T> MATRICE_GLOBAL_FINL
+template<typename _Ret, typename T> MATRICE_HOST_FINL
 constexpr _Ret floor(const T& x) { return static_cast<_Ret>(std::floor(x)); }
-template<typename T, typename _Ret> MATRICE_GLOBAL_FINL
+template<typename _Ret, typename T> MATRICE_HOST_FINL
 constexpr _Ret ceil(const T& x) { return static_cast<_Ret>(std::ceil(x)); }
 template<typename T1, typename T2, typename _Ret = typename std::decay<decltype(true ? T1() : T2())>::type> MATRICE_GLOBAL_FINL
 constexpr _Ret pow(const T1& x, const T2& y) { return std::pow(x,y); }

@@ -26,11 +26,11 @@ template<typename T, int _Elems> class simd_base_
 {
 	details::impl::packet_op<T, _Elems> _op;
 public:
-	using value_t    = T;
-	using const_value_t = const value_t;
-	using pointer    = value_t*;
-	using const_pointer = const pointer;
-	using internal_t = conditional_t<value_t, _Elems>;
+	using value_t        = T;
+	using const_value_t  = const value_t;
+	using pointer        = value_t*;
+	using const_pointer  = const pointer;
+	using internal_t     = conditional_t<value_t, _Elems>;
 	using const_internal = const internal_t;
 	using initlist_t = std::initializer_list<value_t>;
 	MATRICE_HOST_FINL simd_base_() noexcept {}
@@ -68,9 +68,8 @@ protected:
 };
 
 template<typename T, int _Elems> MATRICE_HOST_FINL 
-T reduce(const simd_base_<T, _Elems>& _Packed)
-{
-	return dgelom::reduce(_Packed.begin(), _Packed.end());
+T reduce(const simd_base_<T, _Elems>& _Packed) {
+	return dgelom::reduce<T>(_Packed.begin(), _Packed.end());
 }
 MATRICE_ARCH_END
 #endif

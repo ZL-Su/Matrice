@@ -97,10 +97,10 @@ class Base_ : public PlaneView_<typename _Traits::type>
 	using _Myt_rview_type = _Matrix_rview<_Type>;
 	using _Myt_cview_type = _Matrix_cview<_Type>;
 	using _Myt_blockview_type = _Matrix_block<_Type>;
-	using _Xop_ewise_sum = typename Expr::Op::EwiseSum<_Type>;
-	using _Xop_ewise_min = typename Expr::Op::EwiseMin<_Type>;
-	using _Xop_ewise_mul = typename Expr::Op::EwiseMul<_Type>;
-	using _Xop_ewise_div = typename Expr::Op::EwiseDiv<_Type>;
+	using _Xop_ewise_sum  = typename Expr::Op::EwiseSum<_Type>;
+	using _Xop_ewise_min  = typename Expr::Op::EwiseMin<_Type>;
+	using _Xop_ewise_mul  = typename Expr::Op::EwiseMul<_Type>;
+	using _Xop_ewise_div  = typename Expr::Op::EwiseDiv<_Type>;
 	using _Xop_ewise_sqrt = typename Expr::Op::EwiseSqrt<_Type>;
 	using _Xop_mat_mul = typename Expr::Op::MatMul<_Type>;
 	using _Xop_mat_inv = typename Expr::Op::MatInv<_Type>;
@@ -153,7 +153,10 @@ public:
 #endif
 public:
 	///<brief> dynamic create methods </brief>
-	MATRICE_HOST_ONLY void create(size_t rows, size_t cols) { if constexpr (_M == 0) static_cast<_Derived*>(this)->create(rows, cols); };
+	MATRICE_HOST_ONLY void create(size_t rows, size_t cols) { 
+		if constexpr (_M == 0)
+			static_cast<_Derived*>(this)->create(rows, cols); 
+	};
 	///<brief> accessors </brief>
 	MATRICE_GLOBAL_FINL pointer operator[](index_t y) { return (m_data + y * m_cols); }
 	MATRICE_GLOBAL_FINL const pointer operator[](index_t y) const { return (m_data + y * m_cols); }
@@ -166,10 +169,12 @@ public:
 	MATRICE_GLOBAL_FINL const pointer data() const { return (m_data); }
 	MATRICE_GLOBAL_FINL pointer ptr(int y = 0) { return (m_data + m_cols * y); }
 	MATRICE_GLOBAL_FINL const pointer ptr(int y = 0) const { return (m_data + m_cols * y); }
-	MATRICE_GLOBAL_FINL constexpr const_iterator begin() const { return (m_data); }
-	MATRICE_GLOBAL_FINL constexpr const_iterator end() const { return (m_data + size()); }
+
 	MATRICE_GLOBAL_FINL constexpr iterator begin() { return (m_data); }
 	MATRICE_GLOBAL_FINL constexpr iterator end() { return (m_data + size()); }
+	MATRICE_GLOBAL_FINL constexpr const_iterator begin() const { return (m_data); }
+	MATRICE_GLOBAL_FINL constexpr const_iterator end() const { return (m_data + size()); }
+
 #pragma region <!-- iterators -->
 	//column iterator for accessing elements in current column
 	MATRICE_GLOBAL_FINL _Myt_fwd_iterator cbegin(size_t i) {
@@ -227,6 +232,7 @@ public:
 		return _Myt_rwise_iterator(_End(m_data, m_rows, m_cols));
 	}
 #pragma endregion
+
 #pragma region <!-- views -->
 	//view of i-th row 
 	MATRICE_GLOBAL_FINL _Myt_rview_type rview(size_t i) {
@@ -250,6 +256,7 @@ public:
 		return _Myt_blockview_type(m_data, m_cols, { x0, y0, x1, y1 });
 	}
 #pragma endregion
+
 #ifdef _HAS_CXX17
 	MATRICE_GLOBAL_FINL operator std::valarray<value_t>() { return std::valarray<value_t>(m_data, size()); }
 	MATRICE_GLOBAL_FINL operator std::valarray<value_t>() const { return std::valarray<value_t>(m_data, size()); }
@@ -257,7 +264,6 @@ public:
 	MATRICE_GLOBAL_FINL constexpr auto rows() const { return m_rows; }
 	MATRICE_GLOBAL_FINL constexpr auto cols() const { return m_cols; }
 	MATRICE_GLOBAL_FINL constexpr auto size() const { return m_rows*m_cols; }
-
 
 	///<brief> assignment operators </brief>
 	MATRICE_GLOBAL_FINL _Derived& operator= (const_init_list _list)
@@ -290,7 +296,10 @@ public:
 		_other.m_cols = _other.m_rows = 0;
 		return (*static_cast<_Derived*>(this));
 	}
-	template<int _Rows, int _Cols, typename = typename std::enable_if<is_static<_Rows, _Cols>::value&&!is_static<_M, _N>::value>::type> //static to dynamic
+	template<
+		int _Rows, int _Cols, 
+		typename = typename std::enable_if<is_static<_Rows, _Cols>::value&&!is_static<_M, _N>::value>::type
+	> //static to dynamic
 	MATRICE_GLOBAL_FINL _Derived& operator= (Matrix_<value_t, _Rows, _Cols>& _managed)
 	{
 		m_data = _managed.data();

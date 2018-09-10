@@ -53,9 +53,9 @@ public:
 	MATRICE_HOST_FINL myt& operator/ (const Packet_& _other);
 	MATRICE_HOST_FINL myt  abs() const;
 
-	template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>> friend
+	template<typename T, int _Elems, typename Packet> friend
 	MATRICE_HOST_FINL Packet abs(const Packet_<T, _Elems>& _Right);
-	template<typename T, int _Elems, typename = std::enable_if_t<std::is_arithmetic_v<T>>> friend
+	template<typename T, int _Elems, typename> friend
 	MATRICE_HOST_FINL T reduce(const Packet_<T, _Elems>& _Right);
 };
 

@@ -190,10 +190,23 @@ public:
 		device_base_t(m_data, &m_pitch, &m_cols, &m_rows) {};
 
 	template<typename _Arg> 
-	MATRICE_GLOBAL_INL Myt_reference operator= (add_const_reference_t<_Arg> _arg) { return device_base_t::operator=(_arg); }
-	MATRICE_DEVICE_INL Myt_reference operator= (Myt_const_reference _other) { return device_base_t::operator=(_other); }
-	MATRICE_DEVICE_INL Myt_reference operator= (Myt_move_reference _other) { return device_base_t::operator=(std::move(_other)); }
-	MATRICE_GLOBAL_INL Myt_reference operator= (const_init_list _list) { return device_base_t::operator=(_list.begin()); }
+	MATRICE_GLOBAL_INL Myt_reference operator= (add_const_reference_t<_Arg> _arg) { 
+		return device_base_t::operator=(_arg); 
+	}
+	MATRICE_DEVICE_INL Myt_reference operator= (Myt_const_reference _other) { 
+		return device_base_t::operator=(_other); 
+	}
+	MATRICE_DEVICE_INL Myt_reference operator= (Myt_move_reference _other) { 
+		return device_base_t::operator=(std::move(_other)); 
+	}
+	MATRICE_GLOBAL_INL Myt_reference operator= (const_init_list _list) { 
+		return device_base_t::operator=(_list.begin()); 
+	}
+
+	MATRICE_GLOBAL_INL Myt_reference operator+(Myt_const_reference _other) {
+		m_data = (*this) + _other.data();
+		return (*this);
+	}
 	/*template<int _M, int _N>
 	MATRICE_GLOBAL_INL operator Matrix_<value_t, _M, _N>() const {
 		Matrix_<value_t, _M, _N> _Ret(m_rows, m_cols);

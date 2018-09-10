@@ -28,14 +28,14 @@ template<typename _Ty, int _M, int _N> class Matrix_;
 MATRICE_NAMESPACE_END_TYPES
 
 MATRICE_DEVICE_BEGIN
-template<typename _Ty, typename _Derived = types::Matrix_<_Ty, -1, -1>> 
-class Base_
+
+template<typename _Ty> class Base_
 {
 	using size_t = std::size_t;
 	using intp_t = std::add_pointer_t<int>;
 	using value_t = _Ty;
 	using pointer = std::add_pointer_t<value_t>;
-	using derived_t = _Derived;
+	using derived_t = types::Matrix_<_Ty, -1, -1>;
 public:
 	MATRICE_GLOBAL_INL Base_() = default;
 	MATRICE_GLOBAL_INL Base_(pointer pdev, size_t* p, intp_t w, intp_t h):_Ptr(pdev), _P(p), _W(w), _H(h) {};
@@ -46,18 +46,23 @@ public:
 	MATRICE_HOST_INL void fetch(pointer dst) { if (_Future.valid()) _Future.get(); _Dnload_impl(dst); }
 	template<typename _Arg, typename = std::enable_if_t<std::is_class_v<_Arg>>>
 	MATRICE_HOST_INL void fetch(_Arg& dst){ if (_Future.valid()) _Future.get(); _Dnload_impl(dst.data()); }
-	//<brief> copy data from host to device memory </brief>
-	MATRICE_GLOBAL_INL _Derived& operator= (const pointer _src) { _Upload_impl(_src); return *static_cast<_Derived*>(this); }
-	template<typename _Arg, typename = std::enable_if_t<std::is_class_v<_Arg>>>
-	MATRICE_GLOBAL_INL _Derived& operator= (const _Arg& _src) { _Upload_impl(_src.data()); return *static_cast<_Derived*>(this); }
 
-	MATRICE_GLOBAL_INL _Derived& operator+(const _Derived& _other);
+	//<brief> copy data from host to device memory </brief>
+	MATRICE_GLOBAL_INL pointer operator= (const pointer _src) {
+		_Upload_impl(_src); return (_Ptr);
+	}
+	template<typename _Arg, typename = std::enable_if_t<std::is_class_v<_Arg>>>
+	MATRICE_GLOBAL_INL derived_t& operator= (const _Arg& _src) { 
+		_Upload_impl(_src.data()); return *static_cast<derived_t*>(this); 
+	}
+
+	MATRICE_HOST_INL pointer operator+(const pointer _other);
 private:
 	MATRICE_HOST_INL void _Sync_impl() { privt::_Device_sync<0>(); }
 	template<typename... Args>
-	MATRICE_HOST_INL void _Upload_impl(pointer args) { device_memcpy<_Ty, 1>::impl(args, _Ptr, size_t(*_W), size_t(*_H), *_P); }
+	MATRICE_HOST_INL void _Upload_impl(pointer args) { device_memcpy<value_t, 1>::impl(args, _Ptr, size_t(*_W), size_t(*_H), *_P); }
 	template<typename... Args>
-	MATRICE_HOST_INL void _Dnload_impl(pointer args) { device_memcpy<_Ty, 2>::impl(args, _Ptr, size_t(*_W), size_t(*_H), *_P); }
+	MATRICE_HOST_INL void _Dnload_impl(pointer args) { device_memcpy<value_t, 2>::impl(args, _Ptr, size_t(*_W), size_t(*_H), *_P); }
 
 	std::future<void> _Future; 
 	pointer _Ptr;

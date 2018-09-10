@@ -220,6 +220,7 @@
     <None Include="addin\Eigen\SuperLUSupport" />
     <None Include="addin\Eigen\SVD" />
     <None Include="addin\Eigen\UmfPackSupport" />
+    <None Include="cpp.hint" />
     <None Include="include\Matrice\algs\interpolation\_base.inl" />
     <None Include="include\Matrice\algs\similarity\inline\_icgn_impl.inl" />
     <None Include="include\Matrice\arch\inl\_ixpacket.inl" />

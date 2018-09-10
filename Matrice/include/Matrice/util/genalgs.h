@@ -68,7 +68,7 @@ template<typename _Fwdty, typename _Fn, typename = std::enable_if_t<std::is_clas
 MATRICE_HOST_FINL auto for_each(_Fwdty& _Cont, _Fn _Func) { std::for_each(_Cont.begin(), _Cont.end(), _Func);}
 template<typename _Fwdty, typename _T, typename = std::enable_if_t<std::is_class_v<_Fwdty>>>
 MATRICE_HOST_FINL auto fill(_Fwdty& _Cont, _T _val) { std::fill(_Cont.begin(), _Cont.end(), _val); }
-template<typename _FwdIt, typename _T, typename = std::enable_if_t<std::is_scalar_v<_FwdIt>>>
+template<typename _FwdIt, typename _T, typename = std::enable_if_t<std::is_scalar_v<_T>>>
 MATRICE_HOST_FINL auto fill(_FwdIt _First, _FwdIt _Last, size_t _Stride, const _T& _Val)
 {
 	auto _UFirst = (_First);

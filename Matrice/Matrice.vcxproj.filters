@@ -85,6 +85,9 @@
     <Filter Include="Header Files\Algs\Similarity\inl">
       <UniqueIdentifier>{27de2c91-dab0-4bcb-8926-885fff4adc73}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Details\inl">
+      <UniqueIdentifier>{09339ca4-a7f2-41af-9dce-ed8962478bb9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -289,9 +292,6 @@
     <None Include="include\Matrice\core\cpp.hint">
       <Filter>Header Files\Core</Filter>
     </None>
-    <None Include="include\Matrice\private\_similarity.inl">
-      <Filter>Header Files\Details</Filter>
-    </None>
     <None Include="include\Matrice\arch\inl\_ixpacket.inl">
       <Filter>Header Files\Arch\Inl</Filter>
     </None>
@@ -385,20 +385,21 @@
     <None Include="addin\Eigen\UmfPackSupport">
       <Filter>Source Files\Util\Eigen</Filter>
     </None>
-    <None Include="include\Matrice\private\inl\_storage_base.inl">
-      <Filter>Header Files\Details</Filter>
-    </None>
     <None Include="include\Matrice\algs\interpolation\_base.inl">
       <Filter>Header Files\Algs\Interpolation</Filter>
     </None>
     <None Include="include\Matrice\algs\similarity\inline\_icgn_impl.inl">
       <Filter>Header Files\Algs\Similarity\inl</Filter>
     </None>
+    <None Include="cpp.hint" />
+    <None Include="include\Matrice\private\_similarity.inl">
+      <Filter>Header Files\Details\inl</Filter>
+    </None>
+    <None Include="include\Matrice\private\inl\_storage_base.inl">
+      <Filter>Header Files\Details\inl</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="src\private\cuda\_dev_matrix_base.cu">
-      <Filter>Source Files\Details\CUDA</Filter>
-    </CudaCompile>
     <CudaCompile Include="src\private\_dev_funcs.cu">
       <Filter>Source Files\Details\CUDA</Filter>
     </CudaCompile>
@@ -406,6 +407,9 @@
       <Filter>Source Files\Details\CUDA</Filter>
     </CudaCompile>
     <CudaCompile Include="src\private\_dev_ops.cu">
+      <Filter>Source Files\Details\CUDA</Filter>
+    </CudaCompile>
+    <CudaCompile Include="src\private\cuda\_dev_matrix_base.cu">
       <Filter>Source Files\Details\CUDA</Filter>
     </CudaCompile>
   </ItemGroup>
