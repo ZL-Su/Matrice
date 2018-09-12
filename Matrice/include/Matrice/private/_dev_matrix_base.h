@@ -41,11 +41,18 @@ public:
 	MATRICE_GLOBAL_INL Base_(pointer pdev, size_t* p, intp_t w, intp_t h):_Ptr(pdev), _P(p), _W(w), _H(h) {};
 
 	//<brief> synchronize all device threads </brief>
-	MATRICE_HOST_INL void sync() { _Future = std::async(std::launch::async, [&] { _Sync_impl(); }); }
+	MATRICE_HOST_INL void sync() { 
+		_Future = std::async(std::launch::async, [&] { _Sync_impl(); }); 
+	}
+
 	//<brief> retrieve data from device memory </brief>
-	MATRICE_HOST_INL void fetch(pointer dst) { if (_Future.valid()) _Future.get(); _Dnload_impl(dst); }
+	MATRICE_HOST_INL void fetch(pointer dst) { 
+		if (_Future.valid()) _Future.get(); _Dnload_impl(dst); 
+	}
 	template<typename _Arg, typename = std::enable_if_t<std::is_class_v<_Arg>>>
-	MATRICE_HOST_INL void fetch(_Arg& dst){ if (_Future.valid()) _Future.get(); _Dnload_impl(dst.data()); }
+	MATRICE_HOST_INL void fetch(_Arg& dst) { 
+		if (_Future.valid()) _Future.get(); _Dnload_impl(dst.data()); 
+	}
 
 	//<brief> copy data from host to device memory </brief>
 	MATRICE_GLOBAL_INL pointer operator= (const pointer _src) {

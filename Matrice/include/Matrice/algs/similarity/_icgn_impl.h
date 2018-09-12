@@ -25,7 +25,7 @@ MATRICE_ALGS_BEGIN
 template<size_t _Options> struct _Options_similarity
 {
 	// \encapsulate interpolation type, similarity-metric type, etc.
-	enum { Options = _Options };
+	enum { options = _Options };
 
 	// \subset radius, default value is 10
 	size_t _My_radius = 10;
@@ -44,26 +44,25 @@ template<size_t _Options> struct _Options_similarity
 	MATRICE_GLOBAL_FINL operator default_type() { return _My_epsilon; }
 };
 namespace details {
-template<typename _Ty, size_t _Options, typename _Derived>
-class _GaussNewton_base
+template<typename _Derived> class _GaussNewton_base
 {
 	using derived_type = _Derived;
+	using value_type = typename internals::gn_solver_traits<derived_type>::type;
 protected:
-	using options_type = _Options_similarity<_Options>;
-	enum {Size = internals::static_size<options_type::Options>::value};
-	using stack_vector = types::Vec_<_Ty, Size>;
-	using stack_matrix = types::Matrix_<_Ty, Size, Size>;
-	using matrix_type  = types::Matrix<_Ty>;
+	using options_type = _Options_similarity<internals::gn_solver_traits<derived_type>::options>;
+	enum {dof = internals::static_size<options_type::options>::value};
+	using stack_vector = types::Vec_<value_type, dof>;
+	using stack_matrix = Matrix_<value_type, dof, dof>;
+	using matrix_type  = Matrix<value_type>;
 	using const_matrix_reference = const std::add_lvalue_reference_t<matrix_type>;
 	struct status_type
 	{
 		bool _Is_success = false;
-		_Ty _Value_1 = std::numeric_limits<_Ty>::quiet_NaN();
-		_Ty _Value_2 = std::numeric_limits<_Ty>::quiet_NaN();
+		value_type _Value_1 = std::numeric_limits<value_type>::quiet_NaN();
+		value_type _Value_2 = std::numeric_limits<value_type>::quiet_NaN();
 	};
 public:
 	using value_t = typename matrix_type::value_t;
-	using value_type = value_t;
 	using pointer = std::add_pointer_t<value_t>;
 	using point_t = types::Vec_<value_t, internals::static_size<2>::value>;
 
@@ -71,11 +70,14 @@ public:
 		const_matrix_reference _Ref, const_matrix_reference _Q,
 		const point_t& _Initpos, options_type& _Opts)
 		:m_reference(_Ref), m_coeff(_Q), 
-		 m_pos(_Initpos), m_options(_Opts){}
+		 m_pos(_Initpos), m_options(_Opts){
+		m_ksize = m_options() << 1 | 1;
+		m_current(m_ksize, m_ksize, zero<value_type>::value);
+	}
 
 protected:
 	// \engine for iterative solver
-	template<typename... _Args> MATRICE_HOST_FINL auto _Solver(_Args... _Args) {
+	template<typename... _Args> MATRICE_HOST_FINL auto _Solve(_Args... _Args) {
 		return static_cast<derived_type*>(this)->_Solver_impl(_Args...);
 	}
 
@@ -84,6 +86,9 @@ protected:
 
 	// \options for iterative refinement
 	options_type m_options;
+
+	// \kernel size
+	std::size_t m_ksize;
 
 	// \current image buffer: G
 	matrix_type m_current;
@@ -97,22 +102,23 @@ protected:
 
 template<typename _Ty, size_t _Options>
 class _GaussNewton_impl_ic MATRICE_NONHERITABLE
-	: public _GaussNewton_base<_Ty, _Options, _GaussNewton_impl_ic<_Ty, _Options>>
+	: public _GaussNewton_base<_GaussNewton_impl_ic<_Ty, _Options>>
 {
-	using base_type = _GaussNewton_base<_Ty, _Options, _GaussNewton_impl_ic<_Ty, _Options>>;
-	using typename base_type::value_type;
-	using base_type::m_coeff;
+	using base_type = _GaussNewton_base<_GaussNewton_impl_ic<_Ty, _Options>>;
+	using value_type = typename base_type::value_t;
 	using param_type = types::Vec_(value_type, internals::static_size<6>::value);
 public:
+	enum { options = _Options };
+	using value_t = value_type;
 	template<typename... _Args> MATRICE_HOST_FINL
-	_GaussNewton_impl_ic(const _Args&... _Args) :base_type(_Args...) {
-		base_type::m_current(base_type::m_options() << 1 | 1, base_type::m_options() << 1 | 1, zero<value_type>::value);
-	}
+	_GaussNewton_impl_ic(const _Args&... _Args): base_type(_Args...) {}
 
 	MATRICE_HOST_FINL auto _Solver_impl(param_type& _Params);
 
 private:
 	value_type m_favg, m_fssd;
+	using base_type::m_coeff;
+	using base_type::m_ksize;
 };
 }
 MATRICE_ALGS_END

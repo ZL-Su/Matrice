@@ -248,7 +248,7 @@ public:
 	MATRICE_GLOBAL_FINL const _Myt_cview_type cview(size_t i) const {
 		return _Myt_cview_type(m_data + i, m_rows, m_cols, i);
 	}
-	//view of submatrix [x0, x1) : [y0, y1)
+	//view of submatrix: x \in [x0, x1) and y \in [y0, y1)
 	MATRICE_GLOBAL_INL _Myt_blockview_type block(index_t x0, index_t x1, index_t y0, index_t y1) {
 		return _Myt_blockview_type(m_data, m_cols, {x0, y0, x1, y1});
 	}
