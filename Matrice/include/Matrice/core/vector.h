@@ -143,3 +143,25 @@ public:
 	vec_global_inl void _w_setter(value_t _w) { data()[3] = _w; }
 };
 MATRICE_NAMESPACE_END_TYPES
+
+MATRICE_NAMESPACE_BEGIN_
+// \a generic managed vector type
+template<typename _Ty, int _Dim,
+	std::enable_if_t<std::is_arithmetic_v<_Ty>>>
+using Vec_ = types::Vec_<_Ty, _Dim>;
+
+// \managed vector type with 2 entities: x, y
+template<typename _Ty, 
+	std::enable_if_t<std::is_arithmetic_v<_Ty>>>
+using Vec2_ = types::Vec_<_Ty, 2>;
+
+// \managed vector type with 3 entities: x, y, z
+template<typename _Ty,
+	std::enable_if_t<std::is_arithmetic_v<_Ty>>>
+using Vec3_ = types::Vec3_<_Ty>;
+
+// \managed vector type with 4 entities: x, y, z, w
+template<typename _Ty,
+	std::enable_if_t<std::is_arithmetic_v<_Ty>>>
+using Vec4_ = types::Vec4_<_Ty>;
+_MATRICE_NAMESPACE_END
