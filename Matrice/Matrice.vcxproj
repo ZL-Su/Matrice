@@ -165,6 +165,7 @@
     <ClInclude Include="include\Matrice\private\_iterator.h" />
     <ClInclude Include="include\Matrice\private\_matrix_base.hpp" />
     <ClInclude Include="include\Matrice\private\_matrix_expr.hpp" />
+    <ClInclude Include="include\Matrice\private\_range.h" />
     <ClInclude Include="include\Matrice\private\_type_traits.h" />
     <ClInclude Include="include\Matrice\private\_matrix.inl.hpp" />
     <ClInclude Include="include\Matrice\private\_memory.h" />
