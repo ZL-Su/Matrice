@@ -19,6 +19,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #include <iterator>
 #include <valarray>
+#include <functional>
 #include "_type_traits.h"
 #include "_matrix_expr.hpp"
 #include "_matrix.inl.hpp"
@@ -347,6 +348,9 @@ public:
 	MATRICE_GLOBAL_FINL value_t trace() const { return (reduce(begin(), end(), cols() + 1)); }
 	template<class _Rhs> MATRICE_GLOBAL_FINL value_t dot(const _Rhs& _rhs) const { return (this->operator*(_rhs)).sum(); }
 	MATRICE_GLOBAL_FINL value_t norm_2() const { auto ans = dot(*this); return (ans > eps ? dgelom::sqrt(ans) : inf); }
+
+	template<typename _Fty>
+	MATRICE_GLOBAL_FINL void each(_Fty _Fn) { for (auto& _Val : *this) _Fn(_Val); }
 
 	///<brief> properties </brief>
 	__declspec(property(get=_Format_getter, put=_Format_setter))size_t format;

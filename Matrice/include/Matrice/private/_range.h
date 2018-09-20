@@ -29,18 +29,26 @@ public:
 		return (*this);
 	}
 
-	value_t operator[](index_t i) { return (m_begin + i * m_stride); }
-	const value_t operator[](index_t i) const { return (m_begin + i * m_stride); }
+	value_t operator[](index_t i) { return (m_pos = m_begin + i * m_stride); }
+	const_value_t operator[](index_t i) const { return (m_pos = m_begin + i * m_stride); }
 	value_t operator()(index_t i) { return operator[](i); }
-	const value_t operator()(index_t i) const { return operator[](i); }
+	const_value_t operator()(index_t i) const { return operator[](i); }
+
+	value_t& value() { return m_pos; }
+	const_value_t& value() const { return m_pos; }
+
+	MATRICE_GLOBAL_FINL operator bool() const { return (m_pos + m_stride < m_end); }
 
 private:
 	value_t m_begin, m_end, m_stride = value_t(1);
+	mutable value_t m_pos = m_begin;
 };
 
 MATRICE_PRIVATE_END
 
 MATRICE_NAMESPACE_BEGIN_
+
+// \TEMPLATE CLASS range : [begin, end[, stride])
 template<typename _Ty>
 class range MATRICE_NONHERITABLE : public privt::_Range_base<_Ty> 
 {
