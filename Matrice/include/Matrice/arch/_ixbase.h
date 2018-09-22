@@ -22,17 +22,19 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #ifdef __AVX__
 #include "./inl/_ixops.hpp"
 MATRICE_ARCH_BEGIN
+
+// \TEMPLATE base class for simd 
 template<typename T, int _Elems> class simd_base_
 {
 	details::impl::packet_op<T, _Elems> _op;
 public:
 	using value_t        = T;
-	using const_value_t  = const value_t;
-	using pointer        = value_t*;
-	using const_pointer  = const pointer;
+	using const_value_t  = std::add_const_t<value_t>;
+	using pointer        = std::add_pointer_t<value_t>;
+	using const_pointer  = std::add_const_t<pointer>;
 	using internal_t     = conditional_t<value_t, _Elems>;
-	using const_internal = const internal_t;
-	using initlist_t = std::initializer_list<value_t>;
+	using const_internal = std::add_const_t<internal_t>;
+	using initlist_t     = std::initializer_list<value_t>;
 	MATRICE_HOST_FINL simd_base_() noexcept {}
 	MATRICE_HOST_FINL simd_base_(const_internal _arg) noexcept : m_data(_arg) {}
 	MATRICE_HOST_FINL simd_base_(const_value_t _arg) noexcept : m_data(_op(_arg)) {}

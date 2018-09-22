@@ -4,7 +4,7 @@
 MATRICE_ALGS_BEGIN
 namespace details { namespace internals {
 template<size_t _Values> struct static_size
-{
+{ 
 	enum { value = 
 		(_Values & bilinear == bilinear) ? 3 :
 		(_Values & bcspline == bcspline) ? 4 :

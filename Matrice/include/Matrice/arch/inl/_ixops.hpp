@@ -38,61 +38,57 @@ struct Op_ MATRICE_NONHERITABLE
 		enum {num_of_elem = _Elems};
 		using type = conditional_t<value_t, num_of_elem>;
 	};
-	template<size_t _Elems> struct plus
-	{
-		enum { num_of_elem = _Elems };
-		using type = conditional_t<value_t, num_of_elem>;
+
+	template<size_t _Elems> struct plus {
+		using type = typename _base_type<_Elems>::type;
+		enum { size = _base_type<_Elems>::num_of_elem };
 		matrice_inl_cxauto operator() (const type& _Left, const type& _Right)
 		{
-			return impl::simd_op<value_t, num_of_elem>::sum(_Left, _Right);
+			return impl::simd_op<value_t, size>::sum(_Left, _Right);
 		}
 	};
-	template<size_t _Elems> struct minus
-	{
-		enum { num_of_elem = _Elems };
-		using type = conditional_t<value_t, num_of_elem>;
+	template<size_t _Elems> struct minus {
+		using type = typename _base_type<_Elems>::type;
+		enum { size = _base_type<_Elems>::num_of_elem };
 		matrice_inl_cxauto operator() (const type& _Left, const type& _Right)
 		{
-			return impl::simd_op<value_t, num_of_elem>::sub(_Left, _Right);
+			return impl::simd_op<value_t, size>::sub(_Left, _Right);
 		}
 	};
-	template<size_t _Elems> struct multiplies
-	{
-		enum { num_of_elem = _Elems };
-		using type = conditional_t<value_t, num_of_elem>;
+	template<size_t _Elems> struct multiplies {
+		using type = typename _base_type<_Elems>::type;
+		enum { size = _base_type<_Elems>::num_of_elem };
 		matrice_inl_cxauto operator() (const type& _Left, const type& _Right)
 		{
-			return impl::simd_op<value_t, num_of_elem>::mul(_Left, _Right);
+			return impl::simd_op<value_t, size>::mul(_Left, _Right);
 		}
 	};
-	template<size_t _Elems> struct divides
-	{
-		enum { num_of_elem = _Elems };
-		using type = conditional_t<value_t, num_of_elem>;
+	template<size_t _Elems> struct divides {
+		using type = typename _base_type<_Elems>::type;
+		enum { size = _base_type<_Elems>::num_of_elem };
 		matrice_inl_cxauto operator() (const type& _Left, const type& _Right)
 		{
-			return impl::simd_op<value_t, num_of_elem>::div(_Left, _Right);
+			return impl::simd_op<value_t, size>::div(_Left, _Right);
 		}
 	};
-	template<size_t _Elems> struct abs
-	{
-		enum { num_of_elem = _Elems };
-		using type = conditional_t<value_t, num_of_elem>;
+	template<size_t _Elems> struct abs {
+		using type = typename _base_type<_Elems>::type;
+		enum { size = _base_type<_Elems>::num_of_elem };
 		matrice_inl_cxauto operator() (const type& _Right)
 		{
-			return impl::simd_op<value_t, num_of_elem>::abs(_Right);
+			return impl::simd_op<value_t, size>::abs(_Right);
 		}
 	};
 };
 template<typename _Fn, typename... _Args>
-matrice_inl_cxauto _Transform_impl(/*_Fn _Func, */const _Args&... _args) {
+matrice_inl_cxauto _Transform_impl(const _Args&... _args) {
 	_Fn _Func;
 	return _Func(_args...); 
 }
 }
 template<typename _Fn, typename... _Args>
-matrice_inl_cxauto transform(/*_Fn _Func, */const _Args&... _args) { 
-	return (details::_Transform_impl<_Fn>(/*_Func, */_args.data()...)); 
+matrice_inl_cxauto transform(const _Args&... _args) { 
+	return (details::_Transform_impl<_Fn>(_args.data()...)); 
 }
 MATRICE_ARCH_END
 

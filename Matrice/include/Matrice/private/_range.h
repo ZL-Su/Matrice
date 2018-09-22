@@ -36,6 +36,7 @@ public:
 
 	value_t& value() { return m_pos; }
 	const_value_t& value() const { return m_pos; }
+	std::size_t size() const { return (m_end - m_begin) / m_stride; }
 
 	MATRICE_GLOBAL_FINL operator bool() const { return (m_pos + m_stride < m_end); }
 

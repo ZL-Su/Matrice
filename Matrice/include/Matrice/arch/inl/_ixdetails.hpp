@@ -40,7 +40,7 @@ MATRICE_ARCH_BEGIN namespace details{ namespace impl {
 template<typename T, int _Elems> struct packet_op_base 
 { 
 	using value_t = T;
-	using pointer = value_t*;
+	using pointer = std::add_pointer_t<value_t>;
 	using raw_type = conditional_t<value_t, _Elems>;
 };
 template<typename T, int _Elems> 
@@ -82,21 +82,21 @@ template<> struct packet_op<ptrdiff_t, 4> : packet_op_base<ptrdiff_t, 4>
 	MATRICE_HOST_ICEA operator+ (const pointer _First) const
 	{ return (_First[0] + _First[1] + _First[2] + _First[3]); }
 };
-template<> struct packet_op<float, 4>
+template<> struct packet_op<float, 4> : packet_op_base<float, 4>
 {
-	using value_t = float; using pointer = value_t*;
-	using raw_packt_t = conditional_t<float, 4>;
+	//using value_t = float; using pointer = value_t*;
+	//using raw_packt_t = conditional_t<float, 4>;
 	MATRICE_HOST_ICEA operator()(const value_t _Value) const
 	{ return _mm_set_ps1(_Value); }
 	MATRICE_HOST_ICEA operator()(const pointer _First) const
 	{ return _mm_load_ps(_First); }
-	MATRICE_HOST_ICEA operator()(raw_packt_t& _Packet) const
+	MATRICE_HOST_ICEA operator()(raw_type& _Packet) const
 	{ return  _Packet.m128_f32; }
-	MATRICE_HOST_ICEA operator()(const raw_packt_t& _Packet) const 
+	MATRICE_HOST_ICEA operator()(const raw_type& _Packet) const
 	{ return  _Packet.m128_f32; }
-	MATRICE_HOST_ICEA operator()(raw_packt_t& _Packet, pointer _Dst) const
+	MATRICE_HOST_ICEA operator()(raw_type& _Packet, pointer _Dst) const
 	{ _mm_store_ps(_Dst, _Packet); }
-	MATRICE_HOST_ICEA operator()(const raw_packt_t& _Packet, pointer _Dst) const
+	MATRICE_HOST_ICEA operator()(const raw_type& _Packet, pointer _Dst) const
 	{ _mm_store_ps(_Dst, _Packet); }
 	MATRICE_HOST_ICEA operator+ (const pointer _First) const
 	{ return (_First[0] + _First[1] + _First[2] + _First[3]); }
