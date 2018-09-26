@@ -132,6 +132,20 @@ public:
 	{
 		for_each(_paths, [&_op](const auto& path) {write(path, _op); });
 	}
+	template<typename _Ty = std::string> static 
+	MATRICE_HOST_FINL auto split(const std::string& _string, char _token) {
+		std::vector<_Ty> _Res;
+
+		auto _String = std::string(1, _token) + _string;
+		auto _Pos = _String.begin();
+		while (_Pos != _String.end()) {
+			auto _Pos_last = _Pos+1;
+			_Pos = std::find(_Pos_last, _String.end(), _token);
+			_Res.push_back(stonv<_Ty>(_String.substr(std::distance(_String.begin(), _Pos_last), std::distance(_Pos_last, _Pos))));
+		}
+
+		return (_Res);
+	}
 };
 template<typename... _Args> MATRICE_HOST_ICEA
 read(_Args... _args) { return IO::read(_args...); };

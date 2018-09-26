@@ -45,14 +45,14 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 //multi-level bspline interpolation
 
 namespace dgelom {
-	template<typename T, size_t N>
+	template<typename T, std::size_t N>
 	using plane_array = std::array<T, N>;
 	namespace detail {
-
-		template <size_t N, size_t M>
-		struct power : std::integral_constant<size_t, N * power<N, M - 1>::value> {};
-		template <size_t N>
-		struct power<N, 0> : std::integral_constant<size_t, 1> {};
+		
+		template <std::size_t N, std::size_t M>
+		struct power : std::integral_constant<std::size_t, N * power<N, M - 1>::value> {};
+		template <std::size_t N>
+		struct power<N, 0> : std::integral_constant<std::size_t, 1> {};
 
 		/// N-dimensional grid iterator (nested loop with variable depth).
 		template <unsigned _Nod> class grid_iterator 
@@ -142,13 +142,15 @@ namespace dgelom {
 			}
 			return true;
 		}
+
 		template<typename _T, typename = std::enable_if_t<std::is_arithmetic_v<_T>>>
 		MATRICE_HOST_FINL _T safe_divide(_T a, _T b) {
-			return b == 0.0 ? 0.0 : a / b;
+			return (b == 0.0 ? 0.0 : a / b);
 		}
 
-		template<typename _T, unsigned _Nod> class control_lattice 
-		{
+		// \TEMPLATE PARAMs: _T - value type, _Nod - number of dimension
+		template<typename _T, unsigned _Nod> 
+		class control_lattice {
 		public:
 			using value_t = _T;
 			typedef plane_array<size_t, _Nod> index;
@@ -176,6 +178,7 @@ namespace dgelom {
 			}
 		};
 
+		// \TEMPLATE PARAMs: _T - value type, _Nod - number of dimension
 		template <typename _T, unsigned _Nod>
 		class initial_approximation : public control_lattice<_T, _Nod> {
 		public:
@@ -193,6 +196,7 @@ namespace dgelom {
 			std::function<value_t(const point&)> f;
 		};
 
+		// \TEMPLATE PARAMs: _T - value type, _Nod - number of dimension
 		template <typename _T, unsigned _Nod>
 		class control_lattice_dense : public control_lattice<_T, _Nod> {
 		public:
@@ -217,6 +221,11 @@ namespace dgelom {
 
 				std::fill(delta.data(), delta.data() + delta.num_elements(), 0.0);
 				std::fill(omega.data(), omega.data() + omega.num_elements(), 0.0);
+
+				/*plane_array<value_t, _Nod> delta_std(grid);
+				plane_array<value_t, _Nod> omega_std(grid);
+				std::fill(delta_std.data(), delta_std.data() + delta_std.size(), 0.0);
+				std::fill(delta_std.data(), delta_std.data() + delta_std.size(), 0.0);*/
 
 				CooIter p = coo_begin;
 				ValIter v = val_begin;
@@ -412,7 +421,7 @@ namespace dgelom {
 
 				for (unsigned d = 0; d < _Nod; ++d) {
 					value_t u = (p[d] - cmin[d]) * hinv[d];
-					i[d] = floor(u) - 1;
+					i[d] = floor<value_t>(u) - 1;
 					s[d] = u - floor(u);
 				}
 

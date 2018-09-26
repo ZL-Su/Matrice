@@ -97,7 +97,7 @@ MATRICE_GLOBAL_FINL auto _Fill_array(const _Valty* _First)
 	if (_First + _N - 1 == nullptr) std::runtime_error("Unconformable shape!");
 #endif
 	std::array<_Valty, _N> _Ret;
-	std::_Copy_n_unchecked(_First, _N, _Ret.data());
+	std::_Copy_unchecked(_First, _First + _N, _Ret.data());
 	return (_Ret);
 }
 _MATRICE_NAMESPACE_END
