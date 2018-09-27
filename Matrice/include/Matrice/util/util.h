@@ -63,8 +63,10 @@ namespace details {
 		static MATRICE_HOST_FINL auto value(const std::string& _Str) { return std::stoull(_Str); }
 	};
 }
-template<typename T> MATRICE_HOST_FINL
-constexpr T stonv(const std::string& _Str) { return details::string_to_numval<T>::value(_Str);
+
+template<typename T = std::string> MATRICE_HOST_FINL
+constexpr T stonv(const std::string& _Str) { 
+	return details::string_to_numval<T>::value(_Str);
 }
 
 

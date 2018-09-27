@@ -132,6 +132,8 @@ public:
 	{
 		for_each(_paths, [&_op](const auto& path) {write(path, _op); });
 	}
+
+	// \split a string with the given token
 	template<typename _Ty = std::string> static 
 	MATRICE_HOST_FINL auto split(const std::string& _string, char _token) {
 		std::vector<_Ty> _Res;

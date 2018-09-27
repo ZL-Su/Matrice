@@ -563,14 +563,15 @@ namespace dgelom {
 		using value_t = _T;
 		typedef plane_array<size_t, _Nod> index;
 		typedef plane_array<value_t, _Nod> point;
-		using point_t = types::Vec_<value_t, _Nod>;
+		using point_t = dgelom::Vec_<value_t, _Nod>;
 		struct configration {
 			value_t tolerance = std::numeric_limits<value_t>::epsilon();
 			value_t min_fill = 0.5;
-			types::Vec4_<value_t> range; //{min_x, min_y, max_x, max_y}
+			dgelom::Vec4_<value_t> range; //{min_x, min_y, max_x, max_y}
 			plane_array<size_t, _Nod> grid = { 3, 3 }; //
 			
 		};
+
 		template <class CooIter, class ValIter>
 		MBA(
 			const point &coo_min, const point &coo_max, index grid,
@@ -596,7 +597,7 @@ namespace dgelom {
 		{
 			_Init(
 				coo_min, coo_max, grid,
-				boost::begin(coo), boost::end(coo), boost::begin(val),
+				std::begin(coo), std::end(coo), std::begin(val),
 				max_levels, tol, min_fill, initial
 			);
 		}
@@ -606,25 +607,40 @@ namespace dgelom {
 		{
 			_Init(point{config.range.x, config.range.y}, 
 				   point{config.range.z, config.range.w}, config.grid,
-				   boost::begin(coo), boost::end(coo), boost::begin(val),
+				   std::begin(coo), std::end(coo), std::begin(val),
 				   _Max_levels, config.tolerance, config.min_fill, initial);
 		}
 		// \param: p - the interpolation point
 		inline value_t operator()(const types::Vec_<value_t, _Nod> &p) const 
 		{
-			value_t f = 0.0; point _P = p;
-			dgelom::for_each(cl, [&](const auto& psi) {f += (*psi)(_P); });
-			return f;
+			value_t _F = 0.0; point _P = p;
+			dgelom::for_each(cl, [&](const auto& psi) {_F += (*psi)(_P); });
+			return _F;
 		}
 
 		friend std::ostream& operator<<(std::ostream &os, const MBA &h) {
-			size_t level = 0;
+			size_t _Level = 0;
 			dgelom::for_each(h.cl, [&](const auto& psi) {
-				os << "level " << ++level << ": ";
+				os << "level " << ++_Level << ": ";
 				psi->report(os);
 				os << std::endl;
 			});
 			return os;
+		}
+
+		// \read src data from file located at _path
+		inline static auto read(const std::string& _Path) {
+			std::vector<point> _Coords;
+			std::vector<value_t> _Values;
+			dgelom::IO::read(_Path, [&_Coords, &_Values](auto& fin) {
+				std::string _Line; fin >> _Line;
+				while (fin >> _Line) {
+					auto _Splitted = dgelom::IO::split<value_t>(_Line, ',');
+					_Coords.push_back({ _Splitted[0], _Splitted[1] });
+					_Values.push_back(_Splitted[2]);
+				}
+			});
+			return (std::make_tuple(_Coords, _Values));
 		}
 
 	private:

@@ -230,7 +230,7 @@ template<> struct simd_op<size_t, 4> : public simd_op_base<size_t, 4>
 	}
 	HOST_STATIC_INL_CXPR_T div(const type& _Left, const type& _Right)
 	{
-		//return base_t::_Binary([&]()->auto{return _mm256_div_epu64(_Left, _Right); });
+		//return base_t::_Binary([&]()->auto{return _mm256_div_epu32(_Left, _Right); });
 	}
 	HOST_STATIC_INL_CXPR_T const abs(const type& _Right)
 	{

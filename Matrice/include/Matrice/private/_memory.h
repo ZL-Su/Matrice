@@ -58,7 +58,7 @@ ValueType* fill_mem(const ValueType* src, ValueType* dst, Integer size)
 	if (size == 8) { _FILOP(0), _FILOP(1), _FILOP(2), _FILOP(3), _FILOP(4), _FILOP(5), _FILOP(6), _FILOP(7); _RET; }
 	if (size == 9) { _FILOP(0), _FILOP(1), _FILOP(2), _FILOP(3), _FILOP(4), _FILOP(5), _FILOP(6), _FILOP(7), _FILOP(8); _RET; }
 
-	if (size > 9) { std::copy(src, src + size, dst); return (dst); }
+	if (size > 9) { std::copy(src, src + size, dst); _RET; }
 
 #undef _FILOP
 #undef _RET

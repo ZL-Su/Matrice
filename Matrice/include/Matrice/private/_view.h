@@ -100,7 +100,7 @@ public:
 	MATRICE_GLOBAL_INL auto& operator= (const _Matx& _M) {
 		auto _Derived_this = static_cast<_Derived*>(this);
 		for (size_t i = 0; i < size(); ++i) _Derived_this->operator()(i) = _M(i);
-		return (_Derived_this);
+		return (*this);
 	}
 	template<typename _Arg> 
 	MATRICE_GLOBAL_INL auto& operator= (const Expr::Base_<_Arg>& _Ex) { 
