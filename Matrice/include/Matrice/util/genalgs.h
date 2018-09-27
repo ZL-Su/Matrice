@@ -66,6 +66,7 @@ void transform(_Fn _Func, const _InIt _First, const _InIt _Last, _OutIt _Dest, s
 }
 template<typename _Fwdty, typename _Fn, typename = std::enable_if_t<std::is_class_v<_Fwdty>>>
 MATRICE_HOST_FINL auto for_each(_Fwdty& _Cont, _Fn _Func) { std::for_each(_Cont.begin(), _Cont.end(), _Func);}
+
 template<typename _Fwdty, typename _T, typename = std::enable_if_t<std::is_class_v<_Fwdty>>>
 MATRICE_HOST_FINL auto fill(_Fwdty& _Cont, _T _val) { std::fill(_Cont.begin(), _Cont.end(), _val); }
 template<typename _FwdIt, typename _T, typename = std::enable_if_t<std::is_scalar_v<_T>>>
@@ -75,24 +76,28 @@ MATRICE_HOST_FINL auto fill(_FwdIt _First, _FwdIt _Last, size_t _Stride, const _
 	const auto _ULast = (_Last);
 	for (; _UFirst < _ULast; _UFirst += _Stride) *_UFirst = _Val;
 }
+
+// \return: sum of range [_First, _Last)
 template<typename _Ty, typename _InIt = _Ty*>
 MATRICE_GLOBAL_INL const _Ty reduce(_InIt _First, _InIt _Last)
 {
 	static_cast<void>(_First == _Last);
 	_Ty _Ret = 0;
 #ifdef __AVX__
-	using Packed_t = simd::Packet_<_Ty, 4>;
-	decltype(auto) _Size = std::_Idl_distance<_InIt>(_First, _Last);
-	decltype(auto) _Step = Packed_t::size << 1;
+	using packed_type = simd::Packet_<_Ty, 4>;
+	decltype(auto) _Size = std::distance(_First, _Last);
+	decltype(auto) _Step = packed_type::size << 1;
 	decltype(auto) _N = _Size / _Step;
 	for (auto i = 0, j = 0; i < _N; j = (++i)*_Step)
-		_Ret += (Packed_t(_First + j) + Packed_t(_First + j +Packed_t::size)).reduce();
+		_Ret += (packed_type(_First + j) + packed_type(_First + j + packed_type::size)).reduce();
 	for (_First += _N * _Step; _First != _Last; ++_First) _Ret += *_First;
 #else
 	for (; _First != _Last; ++_First) _Ret += *_First;
 #endif
 	return (_Ret);
 }
+
+// \return: sum of range [_First, _Last) with step := _Stride
 template<typename _InIt, typename = std::enable_if_t<std::is_pointer_v<_InIt>>>
 MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, index_t _Stride)
 {
