@@ -86,18 +86,19 @@ public:
 	MATRICE_GLOBAL_FINL auto cols() { return (static_cast<_Derived*>(this)->cols()); }
 	MATRICE_GLOBAL_FINL void create(size_t, size_t) {}
 
-	MATRICE_GLOBAL_INL auto& operator= (value_type _Val) {
+	template<typename _Ty, typename = std::enable_if_t<std::is_fundamental_v<_Ty>>>
+	MATRICE_GLOBAL_INL auto& operator= (const _Ty _Val) {
 		auto _Derived_this = static_cast<_Derived*>(this);
-		for (size_t i = 0; i < size(); ++i) _Derived_this->operator()(i) = _Val;
-		return (_Derived_this);
+		for (size_t i = 0; i < size(); ++i) _Derived_this->operator()(i) = static_cast<value_type>(_Val);
+		return (*this);
 	}
-	MATRICE_GLOBAL_FINL auto& operator= (std::initializer_list<value_type> _L) {
+	MATRICE_GLOBAL_FINL auto& operator= (const std::initializer_list<value_type> _L) {
 		auto _Derived_this = static_cast<_Derived*>(this);
 		for (size_t i = 0; i < size(); ++i) _Derived_this->operator()(i) = *(_L.begin()+i);
-		return (_Derived_this);
+		return (*this);
 	}
-	template<typename _Matx>
-	MATRICE_GLOBAL_INL auto& operator= (const _Matx& _M) {
+	template<typename _Mty, typename = std::enable_if_t<std::is_class_v<_Mty>>>
+	MATRICE_GLOBAL_INL auto& operator= (const _Mty& _M) {
 		auto _Derived_this = static_cast<_Derived*>(this);
 		for (size_t i = 0; i < size(); ++i) _Derived_this->operator()(i) = _M(i);
 		return (*this);
