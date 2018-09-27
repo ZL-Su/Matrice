@@ -470,7 +470,7 @@ namespace dgelom {
 			}
 
 			static void _Ewise_append(two_doubles &a, const two_doubles &b) {
-				boost::transform(a, b, boost::begin(a), std::plus<value_t>());
+				boost::transform(a, b, std::begin(a), std::plus<value_t>());
 			}
 
 			value_t _Get_phi(const index &i) const {
