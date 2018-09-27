@@ -61,15 +61,14 @@ namespace dgelom {
 			typedef plane_array<size_t, _Nod> index;
 
 			explicit grid_iterator(const plane_array<size_t, _Nod> &dims)
-				: N(dims), idx(0)
-			{
-				dgelom::fill(i, 0);
+				: N(dims), idx(0) {
+				fill(i, 0);
 				done = (i == N);
 			}
 
 			explicit grid_iterator(size_t dim) : idx(0) {
-				dgelom::fill(N, dim);
-				dgelom::fill(i, 0);
+				fill(N, dim);
+				fill(i, 0);
 				done = (0 == dim);
 			}
 
@@ -77,7 +76,7 @@ namespace dgelom {
 			MATRICE_HOST_FINL const index& operator*() const { return i; }
 			MATRICE_HOST_FINL size_t position() const { return idx; }
 
-			grid_iterator& operator++() {
+			MATRICE_HOST_FINL grid_iterator& operator++() {
 				done = true;
 				for (size_t d = _Nod; d--; ) {
 					if (++i[d] < N[d]) {
@@ -87,10 +86,10 @@ namespace dgelom {
 					i[d] = 0;
 				}
 				++idx;
-				return *this;
+				return (*this);
 			}
 
-			MATRICE_HOST_FINL operator bool() const { return !done; }
+			MATRICE_HOST_FINL operator bool() const { return (!done); }
 
 		private:
 			index N, i;
@@ -101,21 +100,21 @@ namespace dgelom {
 		template <typename T, size_t N> inline constexpr
 		plane_array<T, N> operator+(plane_array<T, N> a, plane_array<T, N> b) {
 			static_assert(N <= 4, "Dimensions cannot be greater than 4.");
-			(dgelom::simd::Packet_<T, 4>(b.data()) + dgelom::simd::Packet_<T, 4>(a.data())).unpack(a.data());
+			(simd::Packet_<T, 4>(b.data()) + simd::Packet_<T, 4>(a.data())).unpack(a.data());
 			return a;
 		}
 
 		template <typename T, size_t N, typename C> inline constexpr
 		plane_array<T, N> operator-(plane_array<T, N> a, C b) {
 			static_assert(N <= 4, "Dimensions cannot be greater than 4.");
-			(dgelom::simd::Packet_<T, 4>(a.data()) - dgelom::simd::Packet_<T, 4>(b)).unpack(a.data());
+			(simd::Packet_<T, 4>(a.data()) - simd::Packet_<T, 4>(b)).unpack(a.data());
 			return a;
 		}
 
 		template <typename T, size_t N, typename C> inline constexpr
 		plane_array<T, N> operator*(plane_array<T, N> a, C b) {
 			static_assert(N <= 4, "Dimensions cannot be greater than 4.");
-			(dgelom::simd::Packet_<T, 4>(a.data()) * dgelom::simd::Packet_<T, 4>(b)).unpack(a.data());
+			(simd::Packet_<T, 4>(a.data()) * simd::Packet_<T, 4>(b)).unpack(a.data());
 			return a;
 		}
 
@@ -221,11 +220,6 @@ namespace dgelom {
 
 				std::fill(delta.data(), delta.data() + delta.num_elements(), 0.0);
 				std::fill(omega.data(), omega.data() + omega.num_elements(), 0.0);
-
-				/*plane_array<value_t, _Nod> delta_std(grid);
-				plane_array<value_t, _Nod> omega_std(grid);
-				std::fill(delta_std.data(), delta_std.data() + delta_std.size(), 0.0);
-				std::fill(delta_std.data(), delta_std.data() + delta_std.size(), 0.0);*/
 
 				CooIter p = coo_begin;
 				ValIter v = val_begin;
@@ -425,17 +419,17 @@ namespace dgelom {
 					s[d] = u - floor(u);
 				}
 
-				value_t f = 0;
+				value_t _F = 0;
 
 				for (grid_iterator<_Nod> d(4); d; ++d) {
 					value_t w = 1.0;
 					for (unsigned k = 0; k < _Nod; ++k) 
 						w *= _Bspline_kernel(d[k], s[k]);
 
-					f += w * _Get_phi(i + (*d));
+					_F += w * _Get_phi(i + (*d));
 				}
 
-				return f;
+				return (_F);
 			}
 
 			void report(std::ostream &os) const {
@@ -558,16 +552,19 @@ namespace dgelom {
 		plane_array<value_t, _Nod + 1> C;
 	};
 
-	template <typename _T, size_t _Nod, size_t _Max_levels = 8> class MBA {
+	template <typename _T, size_t _Nod, 
+		size_t _Max_levels = 8> 
+	class MBA MATRICE_NONHERITABLE 
+	{
 	public:
 		using value_t = _T;
 		typedef plane_array<size_t, _Nod> index;
 		typedef plane_array<value_t, _Nod> point;
-		using point_t = dgelom::Vec_<value_t, _Nod>;
+		using point_t = Vec_<value_t, _Nod>;
 		struct configration {
 			value_t tolerance = std::numeric_limits<value_t>::epsilon();
 			value_t min_fill = 0.5;
-			dgelom::Vec4_<value_t> range; //{min_x, min_y, max_x, max_y}
+			Vec4_<value_t> range; //{min_x, min_y, max_x, max_y}
 			plane_array<size_t, _Nod> grid = { 3, 3 }; //
 			
 		};
@@ -611,16 +608,18 @@ namespace dgelom {
 				   _Max_levels, config.tolerance, config.min_fill, initial);
 		}
 		// \param: p - the interpolation point
-		inline value_t operator()(const types::Vec_<value_t, _Nod> &p) const 
+		inline value_t operator()(const Vec_<value_t, _Nod> &p) const 
 		{
 			value_t _F = 0.0; point _P = p;
-			dgelom::for_each(cl, [&](const auto& psi) {_F += (*psi)(_P); });
+			for_each(cl, [&](const auto& psi) {
+				_F += (*psi)(_P); 
+			});
 			return _F;
 		}
 
 		friend std::ostream& operator<<(std::ostream &os, const MBA &h) {
 			size_t _Level = 0;
-			dgelom::for_each(h.cl, [&](const auto& psi) {
+			for_each(h.cl, [&](const auto& psi) {
 				os << "level " << ++_Level << ": ";
 				psi->report(os);
 				os << std::endl;
@@ -632,10 +631,10 @@ namespace dgelom {
 		inline static auto read(const std::string& _Path) {
 			std::vector<point> _Coords;
 			std::vector<value_t> _Values;
-			dgelom::IO::read(_Path, [&_Coords, &_Values](auto& fin) {
+			IO::read(_Path, [&_Coords, &_Values](auto& fin) {
 				std::string _Line; fin >> _Line;
 				while (fin >> _Line) {
-					auto _Splitted = dgelom::IO::split<value_t>(_Line, ',');
+					auto _Splitted = IO::split<value_t>(_Line, ',');
 					_Coords.push_back({ _Splitted[0], _Splitted[1] });
 					_Values.push_back(_Splitted[2]);
 				}
@@ -667,7 +666,7 @@ namespace dgelom {
 
 			value_t res = value_t(0);
 			auto minmax = std::minmax_element(val.begin(), val.end());
-			auto eps = std::max(std::abs(*minmax.first), std::abs(*minmax.second));
+			auto eps = max(abs(*minmax.first), abs(*minmax.second));
 			eps *= tol;
 
 			if (initial) {
