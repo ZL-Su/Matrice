@@ -29,56 +29,56 @@
  */
 template<typename _Clock = std::chrono::high_resolution_clock> class HRC_ final
 {
-	typedef std::chrono::time_point<_Clock> time_point;
+	using time_point_type =  std::chrono::time_point<_Clock>;
 public:
 	HRC_() { }
 	~HRC_() { }
 
 public:
-	// start-timer of high resolution clock
-	__declspec(property(get = _prop_time_getter)) time_point start;
-	// stop-timer of high resolution clock
-	__declspec(property(get = _prop_time_getter)) time_point stop;
-	constexpr time_point _prop_time_getter() { return (m_start = _Clock::now()); }
+	// \start-timer of high resolution clock
+	__declspec(property(get = _prop_time_getter)) time_point_type start;
+	// \stop-timer of high resolution clock
+	__declspec(property(get = _prop_time_getter)) time_point_type stop;
+	constexpr auto _prop_time_getter() { return (m_start = _Clock::now()); }
 
-	// return elapsed time
-	inline auto elapsed_time(const time_point& _start)
+	// \return elapsed time
+	inline auto elapsed_time(const time_point_type& _start)
 	{
 		using namespace std;
-		auto now = _Clock::now();
+		const auto now = _Clock::now();
 		auto interval = chrono::duration_cast<chrono::nanoseconds>(
 			now - _start).count();
-		m_time = (double)interval / m_ns2msconst;
+		m_time = static_cast<double>(interval) / m_ns2msconst;
 		return m_time;
 	}
 
-	// output elasped time of runing target represented by _txt
-	inline auto elapsed_time(const time_point& _start, const std::string& _txt)
+	// \output elasped time of runing target represented by _txt
+	inline auto elapsed_time(const time_point_type& _start, const std::string& _txt)
 	{
 		using namespace std;
-		auto now = _Clock::now();
+		const auto now = _Clock::now();
 		auto interval = chrono::duration_cast<chrono::nanoseconds>(
 			now - _start).count();
-		m_time = (double)interval / m_ns2msconst;
+		m_time = static_cast<double>(interval) / m_ns2msconst;
 		cout <<" >> [Timer Message] Elapsed time of " 
 			<< _txt << setprecision(9)
 			<< " " << m_time << "ms" << endl;
 		return m_time;
 	}
 
-	// output elasped time of runing target represented by _txt
+	// \output elasped time of runing target represented by _txt
 	inline auto elapsed_time(const std::string& _txt)
 	{
 		using namespace std;
 		auto interval = chrono::duration_cast<chrono::nanoseconds>(_Clock::now() - m_start).count();
 		cout << " >> [Timer Message] Elapsed time of "
 			<< _txt << setprecision(9)
-			<< " " << (m_time = (double)interval / m_ns2msconst) << "ms" << endl;
+			<< " " << (m_time = static_cast<double>(interval) / m_ns2msconst) << "ms" << endl;
 		return m_time;
 	}
 
 private:
 	double m_time;
-	time_point m_start;
+	time_point_type m_start;
 	const double m_ns2msconst = 1.0e6;
 };

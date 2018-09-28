@@ -138,7 +138,7 @@ public:
 	MATRICE_HOST_FINL auto split(const std::string& _string, char _token) {
 		std::vector<_Ty> _Res;
 
-		auto _String = std::string(1, _token) + _string;
+		const auto _String = std::string(1, _token) + _string;
 		auto _Pos = _String.begin();
 		while (_Pos != _String.end()) {
 			auto _Pos_last = _Pos+1;
@@ -148,6 +148,7 @@ public:
 
 		return (_Res);
 	}
+
 };
 template<typename... _Args> MATRICE_HOST_ICEA
 read(_Args... _args) { return IO::read(_args...); };
@@ -157,3 +158,36 @@ template<typename T> MATRICE_HOST_ICEA
 defpath(const T local) { return std::forward<std::string>(IO::workspace().string() + "\\" + IO::strf(local)); };
 }
 
+// \Class: std::string helper  
+// \Coded by: dgelom su
+class string_helper final {
+
+	using basic_value_type = char;
+	using value_type = std::string;
+	using const_value_type = std::add_const_t<value_type>;
+	using value_reference = std::add_lvalue_reference_t<value_type>;
+	using const_value_reference = std::add_const_t<value_reference>;
+
+public:
+
+	// \Given a string and a token, return data items with type of "_Ty"
+	template<typename _Ty = value_type> static 
+	_INLINE_VAR auto split(const_value_reference _Str, basic_value_type _Token) {
+		std::vector<_Ty> _Res;
+		const_value_type _String = value_type(1, _Token) + _Str;
+
+		auto _Pos = _String.begin();
+		while (_Pos != _String.end()) {
+			auto _Pos_last = _Pos + 1;
+
+			_Pos = std::find(_Pos_last, _String.end(), _Token);
+
+			_Res.push_back(dgelom::stonv<_Ty>(_String.substr(
+				std::distance(_String.begin(), _Pos_last), 
+				std::distance(_Pos_last, _Pos)
+			)));
+		}
+		return std::forward<decltype(_Res)>(_Res);
+	}
+
+};
