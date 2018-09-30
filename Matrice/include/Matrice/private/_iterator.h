@@ -43,8 +43,10 @@ public:
 	using reference = std::add_lvalue_reference_t<typename std::pointer_traits<pointer>::element_type>;
 	using difference_type = std::ptrdiff_t;
 
-	MATRICE_GLOBAL_FINL iterator_base(pointer _Ptr) noexcept :_My_ptr(_Ptr), _My_size(0), _My_step(0) {}
-	MATRICE_GLOBAL_FINL iterator_base(pointer _Ptr, size_t _Size, size_t _Step =  1) noexcept :_My_ptr(_Ptr), _My_size(_Size), _My_step(_Step) {}
+	MATRICE_GLOBAL_FINL iterator_base(pointer _Ptr) noexcept 
+		:_My_ptr(_Ptr), _My_begin(_Ptr), _My_size(0), _My_step(0) {}
+	MATRICE_GLOBAL_FINL iterator_base(pointer _Ptr, size_t _Size, size_t _Step =  1) noexcept 
+		:_My_ptr(_Ptr), _My_begin(_Ptr), _My_size(_Size), _My_step(_Step) {}
 	
 	MATRICE_GLOBAL_FINL reference operator*() const { 
 		return ((reference)(*_My_ptr));
@@ -118,25 +120,29 @@ public:
 		return (!(_Right > *this));
 	}
 
-	//test for iterator end condition
+	// \test for iterator end condition
 	MATRICE_GLOBAL_FINL operator bool() { return (_My_ptr != _My_end); }
 
-	//return pointer to current object
+	// \return pointer to current object
 	MATRICE_GLOBAL_FINL operator pointer() { return (_My_ptr); }
 
-	//forward range iteration methods for [this->_My_ptr, this->_My_end)
+	// \forward range iteration methods for [this->_My_ptr, this->_My_end)
 	MATRICE_GLOBAL_FINL auto& begin() { return (*this); }
 	MATRICE_GLOBAL_FINL auto end() { auto _Tmp = *this; return (_Tmp += _My_size); }
 	MATRICE_GLOBAL_FINL const auto& begin() const { return (*this); }
 	MATRICE_GLOBAL_FINL const auto end() const { auto _Tmp = *this; return (_Tmp += _My_size); }
+	// \current iterator position
+	MATRICE_GLOBAL_FINL auto pos() const { return std::distance(_My_begin, _My_ptr)/_My_step; }
 
 protected:
 	size_t _My_size;
 	size_t _My_step;
-	pointer _My_ptr;
+	pointer _My_ptr = nullptr;
 	pointer _My_end = _End(_My_ptr, _My_size, _My_step);
 	pointer _My_last = _My_end - _My_step;
 
+private:
+	const pointer _My_begin = nullptr;
 };
 template<typename _Ty>
 MATRICE_GLOBAL_FINL iterator_base<_Ty> operator+ (typename iterator_base<_Ty>::difference_type _Offset, iterator_base<_Ty> _Next) {
@@ -174,21 +180,37 @@ public:
 	MATRICE_GLOBAL_FINL _Matrix_rwise_iterator(_Args... _args) noexcept
 		: base_type(_args...) {}
 
-	MATRICE_GLOBAL_FINL typename base_type::reference operator[](typename base_type::difference_type _Offset) const {
+	// \element-wise accessor
+	MATRICE_GLOBAL_FINL auto& operator[](typename base_type::difference_type _Offset) const {
 		return (*(base_type::_My_ptr + _Offset));
 	}
-
+	// \copy data from another iterator
 	MATRICE_GLOBAL_FINL _Matrix_rwise_iterator& operator= (const base_type& _Iter) {
 		std::copy(_Iter.begin(), _Iter.end(), base_type::_My_ptr);
 		return (*this);
 	}
+	// \copy data from another pointer
 	MATRICE_GLOBAL_FINL _Matrix_rwise_iterator& operator= (const typename base_type::pointer _Ptr) {
 		std::copy(_Ptr, _Ptr + base_type::_My_step, base_type::_My_ptr);
 		return (*this);
 	}
-	MATRICE_GLOBAL_FINL _Matrix_rwise_iterator& operator= (const std::initializer_list<_Ty> _Ilist) {
-		std::copy(_Ilist.begin(), _Ilist.end(), base_type::_My_ptr);
+	// \copy data from initializer list
+	MATRICE_GLOBAL_FINL _Matrix_rwise_iterator& operator= (const std::initializer_list<_Ty> _List) {
+		std::copy(_List.begin(), _List.end(), base_type::_My_ptr);
 		return (*this);
+	}
+	// \iterator to tranverse the element in current row 
+	MATRICE_GLOBAL_FINL auto begin() {
+		return base_type(base_type::_My_ptr, _My_range);
+	}
+	MATRICE_GLOBAL_FINL const auto begin() const {
+		return base_type(base_type::_My_ptr, _My_range);
+	}
+	MATRICE_GLOBAL_FINL auto end() {
+		return base_type(base_type::_My_ptr + _My_range, _My_range);
+	}
+	MATRICE_GLOBAL_FINL const auto end() const {
+		return base_type(base_type::_My_ptr + _My_range, _My_range);
 	}
 private:
 	size_t _My_range = base_type::_My_step;
@@ -214,27 +236,41 @@ public:
 		: base_type(_args...) {
 		std::swap(_My_range, base_type::_My_step);
 	}
-
-	MATRICE_GLOBAL_FINL typename base_type::reference operator[](typename base_type::difference_type _Offset) const {
+	// \element-wise accessor
+	MATRICE_GLOBAL_FINL auto& operator[](typename base_type::difference_type _Offset) const {
 		return (*(base_type::_My_ptr + _Offset*base_type::_My_size));
 	}
-
+	// \copy data from another iterator
 	MATRICE_GLOBAL_FINL _Matrix_cwise_iterator& operator= (const base_type& _Iter) {
 		base_type _Tmp(base_type::_My_ptr, _My_range, base_type::_My_size);
 		std::copy(_Iter.begin(), _Iter.end(), _Tmp.begin());
 		return (*this);
 	}
+	// \copy data from another pointer
 	MATRICE_GLOBAL_FINL _Matrix_cwise_iterator& operator= (const typename base_type::pointer _Ptr) {
 		base_type _Tmp(base_type::_My_ptr, _My_range, base_type::_My_size);
 		std::copy(_Ptr, _Ptr + base_type::_My_step, _Tmp.begin());
 		return (*this);
 	}
-	MATRICE_GLOBAL_FINL _Matrix_cwise_iterator& operator= (const std::initializer_list<_Ty> _Ilist) {
+	// \copy data from initializer list
+	MATRICE_GLOBAL_FINL _Matrix_cwise_iterator& operator= (const std::initializer_list<_Ty> _List) {
 		base_type _Tmp(base_type::_My_ptr, _My_range, base_type::_My_size);
-		std::copy(_Ilist.begin(), _Ilist.end(), _Tmp.begin());
+		std::copy(_List.begin(), _List.end(), _Tmp.begin());
 		return (*this);
 	}
-
+	// \iterator to tranverse the element in current column
+	MATRICE_GLOBAL_FINL auto begin() {
+		return base_type(base_type::_My_ptr, _My_range, base_type::_My_size);
+	}
+	MATRICE_GLOBAL_FINL const auto begin() const {
+		return base_type(base_type::_My_ptr, _My_range, base_type::_My_size);
+	}
+	MATRICE_GLOBAL_FINL auto end() {
+		return base_type(_End(base_type::_My_ptr, _My_range, base_type::_My_size), _My_range, base_type::_My_size);
+	}
+	MATRICE_GLOBAL_FINL const auto end() const {
+		return base_type(_End(base_type::_My_ptr, _My_range, base_type::_My_size), _My_range, base_type::_My_size);
+	}
 private:
 	size_t _My_range = 1;
 };

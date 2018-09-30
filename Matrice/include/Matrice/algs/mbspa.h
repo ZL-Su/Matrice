@@ -41,6 +41,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../util/genalgs.h"
 #include "../arch/ixpacket.h"
 #include "../core/vector.h"
+#include "../private/_range.h"
 
 //multi-level bspline interpolation
 
@@ -123,7 +124,7 @@ namespace dgelom {
 		MATRICE_HOST_FINL constexpr _T _Bspline_kernel(size_t k, _T t) {
 			assert(0 <= t && t < 1);
 			assert(k < 4);
-
+			
 			switch (k) {
 			case 0: return (t * (t * (-t + 3) - 3) + 1) / 6;
 			case 1: return (t * t * (3 * t - 6) + 4) / 6;
@@ -565,8 +566,16 @@ namespace dgelom {
 			value_t tolerance = std::numeric_limits<value_t>::epsilon();
 			value_t min_fill = 0.5;
 			Vec4_<value_t> range; //{min_x, min_y, max_x, max_y}
-			plane_array<size_t, _Nod> grid = { 3, 3 }; //
-			
+			plane_array<size_t, _Nod> grid = { 3, 3 };
+
+			// \return: (max_y - min_y)/grid[1]
+			MATRICE_GLOBAL_FINL auto rows() const {
+				return (range[3] / grid[1]);
+			}
+			// \return: (max_x - min_x)/grid[0]
+			MATRICE_GLOBAL_FINL auto cols() const {
+				return (range[2] / grid[0]);
+			}
 		};
 
 		template <class CooIter, class ValIter>

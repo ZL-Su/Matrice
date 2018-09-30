@@ -39,7 +39,7 @@ public:
 	__declspec(property(get = _prop_time_getter)) time_point_type start;
 	// \stop-timer of high resolution clock
 	__declspec(property(get = _prop_time_getter)) time_point_type stop;
-	constexpr auto _prop_time_getter() { return (m_start = _Clock::now()); }
+	constexpr time_point_type _prop_time_getter() { return (m_start = _Clock::now()); }
 
 	// \return elapsed time
 	inline auto elapsed_time(const time_point_type& _start)
