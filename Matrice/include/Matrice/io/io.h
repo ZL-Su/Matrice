@@ -84,12 +84,16 @@ public:
 		return std::move(_Ret);
 	}
 	///<summary>
-	//@brief: Template function to cvt. number to std::string
+	//@brief: Template function to cvt. numeric value to std::string
 	//@author: Zhilong Su - Jan.10.2017 @SEU
 	///</summary>
 	template<typename _Ty> static MATRICE_HOST_FINL std::string strf(_Ty _val)
 	{
+#ifdef __CXX11__
+		return (std::to_string(_val));
+#elif
 		std::ostringstream strs; strs << _val; return strs.str();
+#endif
 	}
 
 	template<typename _Ty, int _M, int _N = 0> static inline 
