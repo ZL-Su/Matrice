@@ -24,7 +24,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 MATRICE_ALGS_BEGIN
 template<size_t _Options> struct _Options_similarity
 {
-	// \encapsulate interpolation type, similarity-metric type, etc.
+	// \interpolation type
 	enum { options = _Options };
 
 	// \subset radius, default value is 10
