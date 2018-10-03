@@ -121,8 +121,9 @@ class _GaussNewton_impl_ic MATRICE_NONHERITABLE
 public:
 	enum { options = options_type::options };
 	using value_t = value_type;
-	using typename base_type::point_t;
 	using options_t = options_type;
+	using param_t = param_type;
+	using typename base_type::point_t;
 
 	MATRICE_HOST_FINL _GaussNewton_impl_ic(const _Myt& _other) = default;
 	MATRICE_HOST_FINL _GaussNewton_impl_ic(_Myt&& _other) = default;

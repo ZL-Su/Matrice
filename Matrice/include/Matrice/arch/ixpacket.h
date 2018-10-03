@@ -34,7 +34,7 @@ class Packet_ MATRICE_NONHERITABLE : public simd::simd_base_<T, _Elems>
 	using initlist_t = typename xbase_t::initlist_t;
 	using xbase_t::m_data;
 public:
-	enum {size = _Elems};
+	enum {size = xbase_t::size};
 	using typename xbase_t::value_t;
 	using pointer = value_t*;
 	MATRICE_HOST_FINL Packet_() noexcept : xbase_t() {}

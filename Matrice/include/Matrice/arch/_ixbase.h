@@ -28,11 +28,12 @@ template<typename T, int _Elems> class simd_base_
 {
 	details::impl::packet_op<T, _Elems> _op;
 public:
+	enum { size = _Elems };
 	using value_t        = T;
 	using const_value_t  = std::add_const_t<value_t>;
 	using pointer        = std::add_pointer_t<value_t>;
 	using const_pointer  = std::add_const_t<pointer>;
-	using internal_t     = conditional_t<value_t, _Elems>;
+	using internal_t     = conditional_t<value_t, size>;
 	using const_internal = std::add_const_t<internal_t>;
 	using initlist_t     = std::initializer_list<value_t>;
 	MATRICE_HOST_FINL simd_base_() noexcept {}
@@ -53,13 +54,19 @@ public:
 	MATRICE_HOST_FINL const auto data()const { return (m_data); }
 	MATRICE_HOST_FINL auto begin() { return _op(m_data); }
 	MATRICE_HOST_FINL const auto begin()const { return _op(m_data); }
-	MATRICE_HOST_FINL auto end() { return (_op(m_data)+_Elems); }
-	MATRICE_HOST_FINL const auto end()const { return (_op(m_data) + _Elems); }
+	MATRICE_HOST_FINL auto end() { return (_op(m_data)+ size); }
+	MATRICE_HOST_FINL const auto end()const { return (_op(m_data) + size); }
 	MATRICE_HOST_FINL auto reduce() { return (_op + begin()); }
 	MATRICE_HOST_FINL const auto reduce()const { return (_op + begin()); }
+
+	// \unpack to memory block that 'data' point to 
 	MATRICE_HOST_FINL auto unpack(pointer data) const { _op(m_data, data); }
+	// \unpack to a container 'arg' with method data()
 	template<typename fwdty>
 	MATRICE_HOST_FINL auto unpack(fwdty& arg) const { _op(m_data, arg.data()); }
+
+	// \evaluate the vectorizable size for given 'length'
+	MATRICE_HOST_FINL auto vsize(std::size_t _Len) const { return (_Len - _Len%size); }
 	
 protected:
 	template<typename... _Args> MATRICE_HOST_FINL constexpr
