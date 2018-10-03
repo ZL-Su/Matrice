@@ -84,49 +84,60 @@ public:
 		return std::move(_Ret);
 	}
 	///<summary>
-	//@brief: Template function to cvt. number to std::string
+	//@brief: Template function to cvt. numeric value to std::string
 	//@author: Zhilong Su - Jan.10.2017 @SEU
 	///</summary>
 	template<typename _Ty> static MATRICE_HOST_FINL std::string strf(_Ty _val)
 	{
+#ifdef __CXX11__
+		return (std::to_string(_val));
+#elif
 		std::ostringstream strs; strs << _val; return strs.str();
+#endif
 	}
 
-	template<typename _Ty, int _M, int _N = 0> static inline 
-	types::Matrix_<_Ty, (_N == 0 ? 0 : _M), _N> read(std::string _path)
+	template<typename _Ty, int _M, int _N = 0> static 
+	MATRICE_HOST_INL auto read(std::string _path)
 	{
-		types::Vec_<_Ty, _M> cell;
-		std::vector<types::Vec_<_Ty, _M>> data;
+		types::Vec_<_Ty, _M> _Cell;
+		std::vector<decltype(_Cell)> data;
 		std::ifstream fin(_path); assert(fin);
 		if constexpr (_M == 3)
-			while (fin >> cell(0) >> cell(1) >> cell(2))
-				data.push_back(std::move(cell));
-		types::Matrix_<_Ty, _N == 0 ? 0 : _M, _N> ret(_M, data.size());
+			while (fin >> _Cell(0) >> _Cell(1) >> _Cell(2))
+				data.push_back(std::move(_Cell));
+		types::Matrix_<_Ty, _N == 0 ? 0 : _M, _N> _Ret(_M, data.size());
 		std::size_t i = 0;
 		for (const auto& p : data) {
 			for (int j = 0; j < _M; ++j)
-				ret[j][i] = p(j);
+				_Ret[j][i] = p(j);
 			i++;
 		}
 		fin.close();
-		return (ret);
+		return (_Ret);
 	}
 	template<typename _Op> static
 	MATRICE_HOST_INL auto read(std::string _path, _Op _op)
 	{
-		if (!fs::exists(fs::path(_path))) std::runtime_error("'" + _path + "' does not exist!");
+		if (!fs::exists(fs::path(_path))) 
+			throw std::runtime_error("'" + _path + "' does not exist!");
+
 		std::ifstream _Fin(_path);
-		if (!_Fin.is_open()) std::runtime_error("Cannot open file.");
+		if (!_Fin.is_open()) 
+			throw std::runtime_error("Cannot open file.");
 		return _op(_Fin);
 	}
+	//
 	template<typename _Op> static 
 	MATRICE_HOST_FINL void write(std::string _path, _Op _op)
 	{
 		std::ofstream _Fout(_path);
-		if (!_Fout.is_open()) std::runtime_error("Cannot open file.");
+		if (!_Fout.is_open()) 
+			throw std::runtime_error("Cannot open file.");
+
 		_op(std::forward<std::ofstream>(_Fout));
 		_Fout.close();
 	}
+	// \multi-path write
 	template<typename _Op> static
 	MATRICE_HOST_FINL void write(const std::initializer_list<std::string> _paths, _Op _op)
 	{
@@ -150,10 +161,14 @@ public:
 	}
 
 };
+
+// \read interface
 template<typename... _Args> MATRICE_HOST_ICEA
-read(_Args... _args) { return IO::read(_args...); };
+read(_Args... _args) { try { return IO::read(_args...); } catch (std::exception& _E) { throw _E; } };
+// \write interface
 template<typename... _Args> MATRICE_HOST_ICEA
-write(_Args... _args) { return IO::write(_args...); };
+write(_Args... _args) { try { return IO::write(_args...); } catch (std::exception& _E) { throw _E; } };
+// \definite a path under current folder
 template<typename T> MATRICE_HOST_ICEA 
 defpath(const T local) { return std::forward<std::string>(IO::workspace().string() + "\\" + IO::strf(local)); };
 }
