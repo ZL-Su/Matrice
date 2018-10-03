@@ -67,10 +67,11 @@ public:
 	using pointer = std::add_pointer_t<value_t>;
 	using point_t = Vec_<value_t, internal::static_size<2>::value>;
 
-	_GaussNewton_base(const options_type& _Opts,
+	_GaussNewton_base(
 		const_matrix_reference _Ref, 
 		const_matrix_reference _Q,
-		const point_t& _Initpos)
+		const point_t& _Initpos,
+		const options_type& _Opts)
 		:m_reference(_Ref), m_coeff(_Q), 
 		m_pos(_Initpos), m_options(_Opts),
 		m_ksize(_Opts() << 1 | 1),

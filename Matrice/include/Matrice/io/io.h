@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <functional>
+#include <type_traits>
 #include <experimental\filesystem>
 #include "../core/matrix.h"
 #include "../core/vector.h"
@@ -84,15 +85,22 @@ public:
 		return std::move(_Ret);
 	}
 	///<summary>
-	//@brief: Template function to cvt. numeric value to std::string
+	//@brief: Template function to cvt. any value to std::string
 	//@author: Zhilong Su - Jan.10.2017 @SEU
 	///</summary>
-	template<typename _Ty> static MATRICE_HOST_FINL std::string strf(_Ty _val)
+	template<typename _Ty>
+	static MATRICE_HOST_FINL std::string strf(_Ty _val)
+	{
+		std::ostringstream strs; strs << _val; return strs.str();
+	}
+	// \TEMPLATE function to cvt. numeric value to std::string
+	template<typename _Ty>
+	static MATRICE_HOST_FINL std::string strfn(_Ty _val)
 	{
 #ifdef __CXX11__
 		return (std::to_string(_val));
 #elif
-		std::ostringstream strs; strs << _val; return strs.str();
+		return strf(_val);
 #endif
 	}
 
