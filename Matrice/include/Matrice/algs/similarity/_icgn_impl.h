@@ -43,15 +43,16 @@ template<size_t _Options> struct _Options_similarity
 	MATRICE_GLOBAL_FINL const auto& operator()() const { return (_My_radius); }
 	MATRICE_GLOBAL_FINL operator default_type() { return _My_epsilon; }
 };
-namespace details {
+namespace detail {
+// \TEMPLATE base class for Gaussian-Newton algorithm [thread-safe]
 template<typename _Derived> class _GaussNewton_base
 {
 	using derived_type = _Derived;
-	using value_type = typename internals::gn_solver_traits<derived_type>::type;
+	using value_type = typename internal::gn_solver_traits<derived_type>::type;
 protected:
-	using options_type = _Options_similarity<internals::gn_solver_traits<derived_type>::options>;
-	enum {dof = internals::static_size<options_type::options>::value};
-	using stack_vector = types::Vec_<value_type, dof>;
+	using options_type = _Options_similarity<internal::gn_solver_traits<derived_type>::options>;
+	enum {dof = internal::static_size<options_type::options>::value}; //DOF
+	using stack_vector = Vec_<value_type, dof>;
 	using stack_matrix = Matrix_<value_type, dof, dof>;
 	using matrix_type  = Matrix<value_type>;
 	using const_matrix_reference = const std::add_lvalue_reference_t<matrix_type>;
@@ -64,20 +65,26 @@ protected:
 public:
 	using value_t = typename matrix_type::value_t;
 	using pointer = std::add_pointer_t<value_t>;
-	using point_t = types::Vec_<value_t, internals::static_size<2>::value>;
+	using point_t = Vec_<value_t, internal::static_size<2>::value>;
 
-	_GaussNewton_base(
-		const_matrix_reference _Ref, const_matrix_reference _Q,
-		const point_t& _Initpos, options_type& _Opts)
+	_GaussNewton_base(const options_type& _Opts,
+		const_matrix_reference _Ref, 
+		const_matrix_reference _Q,
+		const point_t& _Initpos)
 		:m_reference(_Ref), m_coeff(_Q), 
-		 m_pos(_Initpos), m_options(_Opts){
-		m_ksize = m_options() << 1 | 1;
-		m_current(m_ksize, m_ksize, zero<value_type>::value);
-	}
+		m_pos(_Initpos), m_options(_Opts),
+		m_ksize(_Opts() << 1 | 1),
+		m_current(matrix_type(m_ksize, m_ksize, zero<value_type>::value)) {}
+
+	// \set initial pos
+	MATRICE_HOST_FINL auto& pos() { return (m_pos); }
+	// \get refined pos
+	MATRICE_HOST_FINL const auto& pos() const { return (m_pos); }
 
 protected:
 	// \engine for iterative solver
-	template<typename... _Args> MATRICE_HOST_FINL auto _Solve(_Args... _Args) {
+	template<typename... _Args> 
+	MATRICE_HOST_FINL auto _Solve(_Args... _Args) {
 		return static_cast<derived_type*>(this)->_Solver_impl(_Args...);
 	}
 
@@ -100,18 +107,27 @@ protected:
 	const_matrix_reference m_coeff;
 };
 
+// TEMPLATE impl class for IC-GN optimization [thread-safe]
 template<typename _Ty, size_t _Options>
 class _GaussNewton_impl_ic MATRICE_NONHERITABLE
 	: public _GaussNewton_base<_GaussNewton_impl_ic<_Ty, _Options>>
 {
-	using base_type = _GaussNewton_base<_GaussNewton_impl_ic<_Ty, _Options>>;
+	using _Myt = _GaussNewton_impl_ic;
+	using base_type = _GaussNewton_base<_Myt>;
 	using value_type = typename base_type::value_t;
-	using param_type = types::Vec_(value_type, internals::static_size<6>::value);
+	using typename base_type::options_type;
+	using typename base_type::const_matrix_reference;
+	using param_type = Vec_<value_type, internal::static_size<6>::value>;
 public:
-	enum { options = _Options };
+	enum { options = options_type::options };
 	using value_t = value_type;
-	template<typename... _Args> MATRICE_HOST_FINL
-	_GaussNewton_impl_ic(const _Args&... _Args): base_type(_Args...) {}
+	using typename base_type::point_t;
+	using options_t = options_type;
+
+	MATRICE_HOST_FINL _GaussNewton_impl_ic(const _Myt& _other) = default;
+	MATRICE_HOST_FINL _GaussNewton_impl_ic(_Myt&& _other) = default;
+	MATRICE_HOST_FINL _GaussNewton_impl_ic(const_matrix_reference _ref, const_matrix_reference _Q, point_t _Initp = { 0 }, options_t _Opts = options_t()) noexcept
+		: base_type(_ref, _Q, _Initp, _Opts) {}
 
 	MATRICE_HOST_FINL auto _Solver_impl(param_type& _Params);
 
@@ -119,6 +135,7 @@ private:
 	value_type m_favg, m_fssd;
 	using base_type::m_coeff;
 	using base_type::m_ksize;
+	using base_type::m_current;
 };
 }
 MATRICE_ALGS_END
