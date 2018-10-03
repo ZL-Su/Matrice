@@ -29,7 +29,7 @@ class Packet_ MATRICE_NONHERITABLE : public simd::simd_base_<T, _Elems>
 {
 	using myt = Packet_;
 	using xbase_t = simd::simd_base_<T, _Elems>;
-	using op_t = details::Op_<T>;
+	using op_t = detail::Op_<T>;
 	using internal_t = typename xbase_t::internal_t;
 	using initlist_t = typename xbase_t::initlist_t;
 	using xbase_t::m_data;

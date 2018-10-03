@@ -25,8 +25,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <wmmintrin.h>
 #include <xmmintrin.h>
 
-MATRICE_ARCH_BEGIN 
-namespace details {
+MATRICE_ARCH_BEGIN  namespace detail {
 #define matrice_inl_cxauto MATRICE_HOST_FINL constexpr auto
 
 template<typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
@@ -88,7 +87,7 @@ matrice_inl_cxauto _Transform_impl(const _Args&... _args) {
 }
 template<typename _Fn, typename... _Args>
 matrice_inl_cxauto transform(const _Args&... _args) { 
-	return (details::_Transform_impl<_Fn>(_args.data()...)); 
+	return (detail::_Transform_impl<_Fn>(_args.data()...)); 
 }
 MATRICE_ARCH_END
 

@@ -161,16 +161,19 @@ MATRICE_HOST_FINL T reduce(const Packet_<T, _N>& _Right)
 {
 	return (_Right.reduce());
 }
-template<typename _InIt, typename _OutIt, typename _Op, typename = std::enable_if_t<std::is_pointer_v<_InIt>&&std::is_pointer_v<_OutIt>>>
-void transform(const _InIt _Src, _OutIt _Dst, size_t _N, _Op _Fn) {
+template<typename _InIt, typename _OutIt, typename _Op, 
+	typename = std::enable_if_t<std::is_pointer_v<_InIt>&&std::is_pointer_v<_OutIt>>>
+void transform(const _InIt _Begin, const _InIt _End, _OutIt _Dst, _Op _Fn) {
 	enum { _Elems = 4 };
-	using value_t = std::remove_reference_t<decltype(*_Src)>;
-	size_t _Packed_size = _N / _Elems;
-	for (size_t i = 0; i < _Packed_size; ++i) {
-		_Fn(Packet_<value_t, _Elems>(_Src + i * _Elems)).unpack(_Dst + i * _Elems);
+	using value_t = std::remove_reference_t<decltype(*_Begin)>;
+
+	auto _N = std::distance(_Begin, _End);
+	auto _Packed_size = vsize<_Elems>(_N);
+	for (std::size_t i = 0; i < _Packed_size; i += _Elems) {
+		_Fn(Packet_<value_t, _Elems>(_Begin + i)).unpack(_Dst + i);
 	}
-	for (size_t i = _Packed_size * _Elems; i < _N; ++i) {
-		*(_Dst + i) = _Fn(*(_Src + i));
+	for (std::size_t i = _Packed_size; i < _N; ++i) {
+		*(_Dst + i) = _Fn(*(_Begin + i));
 	}
 }
 MATRICE_ARCH_END

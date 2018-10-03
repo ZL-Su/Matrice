@@ -26,7 +26,7 @@ MATRICE_ARCH_BEGIN
 // \TEMPLATE base class for simd 
 template<typename T, int _Elems> class simd_base_
 {
-	details::impl::packet_op<T, _Elems> _op;
+	detail::impl::packet_op<T, _Elems> _op;
 public:
 	enum { size = _Elems };
 	using value_t        = T;
@@ -75,6 +75,11 @@ protected:
 	auto _Op(_Args&... _args) { return _op(_args...); }
 	internal_t m_data;
 };
+
+template<std::size_t _Elems>
+MATRICE_HOST_FINL std::size_t vsize(std::size_t _Len) {
+	return (_Len - _Len % _Elems);
+}
 
 template<typename T, int _Elems> MATRICE_HOST_FINL 
 T reduce(const simd_base_<T, _Elems>& _Packed) {

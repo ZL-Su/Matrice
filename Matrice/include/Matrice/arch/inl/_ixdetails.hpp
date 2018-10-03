@@ -29,7 +29,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <zmmintrin.h>
 #include <xmmintrin.h>
 
-MATRICE_ARCH_BEGIN namespace details{ namespace impl {
+MATRICE_ARCH_BEGIN namespace detail{ namespace impl {
 #ifndef MATRICE_HOST_ICEA
 #define MATRICE_HOST_ICEA MATRICE_HOST_FINL constexpr auto
 #endif
