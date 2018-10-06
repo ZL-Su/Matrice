@@ -34,7 +34,7 @@ constexpr _Ret ceil(const T& x) { return static_cast<_Ret>(std::ceil(x)); }
 template<typename T1, typename T2, typename _Ret = typename std::decay<decltype(true ? T1() : T2())>::type> MATRICE_GLOBAL_FINL
 constexpr _Ret pow(const T1& x, const T2& y) { return std::pow(x,y); }
 
-namespace details {
+namespace detail {
 	template<typename _Ty> struct string_to_numval {
 		static MATRICE_HOST_FINL auto value(const std::string& _Str) { return (_Str); }
 	};
@@ -66,7 +66,7 @@ namespace details {
 
 template<typename T = std::string> MATRICE_HOST_FINL
 constexpr T stonv(const std::string& _Str) { 
-	return details::string_to_numval<T>::value(_Str);
+	return detail::string_to_numval<T>::value(_Str);
 }
 
 

@@ -62,7 +62,7 @@ protected:
 	_Ty* m_data = nullptr;
 };
 
-namespace types {
+_TYPES_BEGIN
 
 template<typename _Ty> using nested_initializer_list = std::initializer_list<std::initializer_list<_Ty>>;
 template<typename _Ty, int _M, int _N> class Matrix_;
@@ -86,7 +86,7 @@ template
 class Base_ : public PlaneView_<typename _Traits::type>
 {
 	enum { _M = _Traits::size::rows::value, _N = _Traits::size::cols::value };
-	using _Myt_storage_type = typename details::Storage_<_Type>::template Allocator<_M, _N>;
+	using _Myt_storage_type = typename detail::Storage_<_Type>::template Allocator<_M, _N>;
 	using _Myt = Base_;
 	using _Myt_const = std::add_const_t<_Myt>;
 	using _Myt_reference = std::add_lvalue_reference_t<_Myt>;
@@ -305,7 +305,7 @@ public:
 	{
 		m_data = _managed.data();
 		m_rows = _managed.rows(), m_cols = _managed.cols();
-		m_storage.owner() = details::Storage_<value_t>::Proxy;
+		m_storage.owner() = detail::Storage_<value_t>::Proxy;
 		base_t::_Flush_view_buf();
 		return (*static_cast<_Derived*>(this));
 	}

@@ -1,7 +1,7 @@
 #pragma once
 #include "../_storage.hpp"
 
-MATRICE_NAMESPACE_BEGIN_ namespace details {
+MATRICE_NAMESPACE_BEGIN_ namespace detail {
 
 template<typename _Ty>
 template<Location _Loc, size_t _Opt>

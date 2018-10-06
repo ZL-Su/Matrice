@@ -4,7 +4,7 @@
 #include "../../core/matrix.h"
 #include "../../core/vector.h"
 
-namespace dgelom { namespace details {
+namespace dgelom { namespace detail {
 template<typename _Ty, typename = std::enable_if_t<std::is_arithmetic_v<_Ty>>>
 MATRICE_HOST_INL types::Vec3_<_Ty> _Rodrigues_impl(const types::Matrix_<_Ty, 3, 3>& _R)
 {
@@ -45,7 +45,7 @@ MATRICE_HOST_INL types::Vec3_<_Ty> _Rodrigues_impl(const types::Matrix_<_Ty, 3, 
 
 template<typename _Ty, size_t _Cols, typename _Outty>
 MATRICE_HOST_INL auto rodrigues(const types::Matrix_<_Ty, 3, _Cols>& _Left, _Outty _Right) {
-	auto _Ret = details::_Rodrigues_impl(_Left);
+	auto _Ret = detail::_Rodrigues_impl(_Left);
 	if constexpr (std::is_pointer_v<_Outty>)
 		dgelom::transform(_Ret.begin(), _Ret.end(), _Right);
 	else _Right = _Ret;

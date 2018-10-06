@@ -58,9 +58,6 @@
     <Filter Include="Header Files\Algs\Geometry">
       <UniqueIdentifier>{1d26a66c-7be6-40d6-8bcc-50f3ee2ee1a1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Details">
-      <UniqueIdentifier>{fafe41e5-0b0e-4975-b5ca-72bd98101be4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Algs\Interpolation">
       <UniqueIdentifier>{09dc6d7a-3c4e-4659-a01c-2a7664b15a30}</UniqueIdentifier>
     </Filter>
@@ -82,25 +79,28 @@
     <Filter Include="Header Files\Algs\Similarity\inl">
       <UniqueIdentifier>{27de2c91-dab0-4bcb-8926-885fff4adc73}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Details\inl">
+    <Filter Include="Header Files\Detail">
+      <UniqueIdentifier>{fafe41e5-0b0e-4975-b5ca-72bd98101be4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Detail\inl">
       <UniqueIdentifier>{09339ca4-a7f2-41af-9dce-ed8962478bb9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Details\range">
+    <Filter Include="Header Files\Detail\range">
       <UniqueIdentifier>{165383fa-e670-4f08-8f52-f59cf41de1d4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Details\cuda">
+    <Filter Include="Header Files\Detail\cuda">
       <UniqueIdentifier>{21e75018-4d93-41b3-9e9e-6e14505aedd0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Details\matrix">
+    <Filter Include="Header Files\Detail\matrix">
       <UniqueIdentifier>{a6e47179-54cc-4d7b-bf5f-3e2254a17bae}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Details\memory">
+    <Filter Include="Header Files\Detail\memory">
       <UniqueIdentifier>{8c517709-fbaa-47bc-966d-c990cb36a487}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Details\traits">
+    <Filter Include="Header Files\Detail\traits">
       <UniqueIdentifier>{a5b1a51a-45a9-4305-8e89-e42f8309e07d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Details\iterator">
+    <Filter Include="Header Files\Detail\iterator">
       <UniqueIdentifier>{3e37ef73-5605-4977-8159-953c98b298be}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -229,13 +229,13 @@
       <Filter>Source Files\Details\CUDA\Kernels</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_decl_dev_funcs.h">
-      <Filter>Header Files\Details\cuda</Filter>
+      <Filter>Header Files\Detail\cuda</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_dev_matrix_base.h">
-      <Filter>Header Files\Details\cuda</Filter>
+      <Filter>Header Files\Detail\cuda</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_devops.h">
-      <Filter>Header Files\Details\cuda</Filter>
+      <Filter>Header Files\Detail\cuda</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\interpolation\_interpolation.h">
       <Filter>Header Files\Algs\Interpolation</Filter>
@@ -250,34 +250,34 @@
       <Filter>Header Files\Algs\Similarity</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_matrix.inl.hpp">
-      <Filter>Header Files\Details\matrix</Filter>
+      <Filter>Header Files\Detail\matrix</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_matrix_base.hpp">
-      <Filter>Header Files\Details\matrix</Filter>
+      <Filter>Header Files\Detail\matrix</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_matrix_expr.hpp">
-      <Filter>Header Files\Details\matrix</Filter>
+      <Filter>Header Files\Detail\matrix</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_memory.h">
-      <Filter>Header Files\Details\memory</Filter>
+      <Filter>Header Files\Detail\memory</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_storage.hpp">
-      <Filter>Header Files\Details\memory</Filter>
+      <Filter>Header Files\Detail\memory</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_unified_memory.h">
-      <Filter>Header Files\Details\memory</Filter>
+      <Filter>Header Files\Detail\memory</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_type_traits.h">
-      <Filter>Header Files\Details\traits</Filter>
+      <Filter>Header Files\Detail\traits</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_iterator.h">
-      <Filter>Header Files\Details\iterator</Filter>
+      <Filter>Header Files\Detail\iterator</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_view.h">
-      <Filter>Header Files\Details\iterator</Filter>
+      <Filter>Header Files\Detail\iterator</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_range.h">
-      <Filter>Header Files\Details\range</Filter>
+      <Filter>Header Files\Detail\range</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -411,10 +411,10 @@
     </None>
     <None Include="cpp.hint" />
     <None Include="include\Matrice\private\_similarity.inl">
-      <Filter>Header Files\Details\inl</Filter>
+      <Filter>Header Files\Detail\inl</Filter>
     </None>
     <None Include="include\Matrice\private\inl\_storage_base.inl">
-      <Filter>Header Files\Details\inl</Filter>
+      <Filter>Header Files\Detail\inl</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
