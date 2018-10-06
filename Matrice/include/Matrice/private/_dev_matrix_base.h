@@ -29,6 +29,7 @@ MATRICE_NAMESPACE_END_TYPES
 
 MATRICE_DEVICE_BEGIN
 
+// \CLASS TEMPLATE to make base class for device matrix
 template<typename _Ty> class Base_
 {
 	using size_t = std::size_t;

@@ -45,6 +45,7 @@ MATRICE_NAMESPACE_BEGIN_
 	typedef int                                             int_t;
 #endif
 
+// \CLASS TEMPLATE to make plane view for all matrix types
 template<typename _Ty, int _Type = _View_trait<_Ty>::value> class PlaneView_
 {
 	enum { MAGIC_VAL = 0x42FF0000 };
