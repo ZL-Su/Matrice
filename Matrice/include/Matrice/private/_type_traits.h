@@ -66,7 +66,7 @@ template<typename T> struct add_pointer_const {
 };
 template<typename T> using add_pointer_const_t = typename add_pointer_const<T>::type;
 
-template<typename T> struct _View_trait { enum { value = 0x0000 }; };
+template<typename T> struct _View_trait { enum { value = 0x0008*sizeof(T) }; };
 template<> struct _View_trait<unsigned char> { enum { value = 0x0008 }; };
 template<> struct _View_trait<int> { enum { value = 0x0016 }; };
 template<> struct _View_trait<float> { enum { value = 0x0032 }; };
