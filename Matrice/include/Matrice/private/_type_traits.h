@@ -75,6 +75,9 @@ template<> struct _View_trait<double> { enum { value = 0x0064 }; };
 template<typename T, typename = std::enable_if_t<std::is_class_v<T>>>
 struct traits { using type = typename T::value_t; };
 
+template<typename _Ty> struct is_matrix : std::false_type {};
+template<typename _Ty> MATRICE_GLOBAL_INL constexpr bool is_matrix_v = is_matrix<_Ty>::value;
+
 template<typename Mty, typename = std::enable_if_t<std::is_class_v<Mty>>>
 struct matrix_traits : traits<Mty> {
 	enum { M = Mty::CompileTimeRows };

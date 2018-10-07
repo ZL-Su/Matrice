@@ -67,6 +67,7 @@ _TYPES_BEGIN
 
 template<typename _Ty> using nested_initializer_list = std::initializer_list<std::initializer_list<_Ty>>;
 template<typename _Ty, int _M, int _N> class Matrix_;
+template<typename _Ty, int _M, int _N> struct is_matrix <Matrix_<_Ty, _M, _N>> : std::true_type {};
 template<typename _Ty, int _M, int _N> struct matrix_traits<Matrix_<_Ty, _M, _N>> {
 	using type = _Ty;
 	enum { M = _M, N = _N };

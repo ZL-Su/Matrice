@@ -23,7 +23,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #pragma warning(disable: 4715 4661 4224 4267 4244 4819 4199)
 
-namespace dgelom { namespace details{
+namespace dgelom { namespace detail{
 
 template<typename _Ty> template<Location _Loc, size_t _Opt>
 Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(int_t _rows, int_t _cols)
