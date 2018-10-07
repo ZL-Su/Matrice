@@ -103,6 +103,12 @@
     <Filter Include="Header Files\Detail\iterator">
       <UniqueIdentifier>{3e37ef73-5605-4977-8159-953c98b298be}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Algs\Deeplearning">
+      <UniqueIdentifier>{6d8667e1-1847-4041-9193-50d3f55843e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Algs\Deeplearning\Kernels">
+      <UniqueIdentifier>{7411fc17-630f-4228-9570-11270751a97b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -278,6 +284,9 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_range.h">
       <Filter>Header Files\Detail\range</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\deeplearning\_kernels.h">
+      <Filter>Header Files\Algs\Deeplearning\Kernels</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

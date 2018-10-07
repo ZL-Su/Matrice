@@ -137,6 +137,7 @@
     <ClInclude Include="addin\Eigen\src\Geometry\Translation.h" />
     <ClInclude Include="addin\Eigen\src\Geometry\Umeyama.h" />
     <ClInclude Include="addin\interface.h" />
+    <ClInclude Include="include\Matrice\algs\deeplearning\_kernels.h" />
     <ClInclude Include="include\Matrice\algs\geometry\normalization.h" />
     <ClInclude Include="include\Matrice\algs\geometry\transform.h" />
     <ClInclude Include="include\Matrice\algs\imageproc.hpp" />
