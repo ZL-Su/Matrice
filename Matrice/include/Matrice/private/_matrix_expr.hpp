@@ -41,19 +41,19 @@ struct is_matrix <types::Matrix_<_Ty, _M, _N>> : std::true_type {};
 template<typename _Derived, typename _Traits, typename _Ty> 
 struct is_matrix<types::Base_<_Derived, _Traits, _Ty>> : std::true_type {};
 
-template<typename _Ty, int _M, int _N> 
-struct matrix_traits<types::Matrix_<_Ty, _M, _N>> {
+template<typename _Ty, int _Rows, int _Cols> 
+struct matrix_traits<types::Matrix_<_Ty, _Rows, _Cols>> {
 	using type = _Ty;
-	enum { M = _M, N = _N };
-	struct size { struct rows { enum { value = M }; }; struct cols { enum { value = N }; }; };
+	enum { _M = _Rows, _N = _Cols };
+	struct size { struct rows { enum { value = _M }; }; struct cols { enum { value = _N }; }; };
 	static constexpr bool Is_base = std::false_type::value;
 };
 
 template<typename _Derived, typename _Traits, typename _Ty>
 struct matrix_traits<types::Base_<_Derived, _Traits, _Ty>> {
 	using type = _Ty;
-	enum {M = _Traits::M, N = _Traits::N};
-	struct size { struct rows { enum { value = M }; }; struct cols { enum { value = N }; }; };
+	enum {_M = _Traits::_M, _N = _Traits::_N};
+	struct size { struct rows { enum { value = _M }; }; struct cols { enum { value = _N }; }; };
 	static constexpr bool Is_base = std::true_type::value;
 };
 _MATRICE_NAMESPACE_END
@@ -133,14 +133,17 @@ struct Expr {
 		using matrix_type = conditional_t<is_matrix_v<T>, T, U>;
 		using value_type = typename matrix_type::value_t;
 		enum {
-			_M = matrix_traits<matrix_type>::M,
-			_N = is_matrix_v<U> ? matrix_traits<U>::N : matrix_traits<matrix_type>::N
+			_M = matrix_traits<matrix_type>::_M,
+			_N = conditional_size_v<is_matrix_v<U>, matrix_traits<U>::_N, matrix_traits<matrix_type>::_N>
 		};
 	};
 	template<typename _Op> struct Base_
 	{
 		using Derived = _Op;
-		using const_derived_pointer = const std::add_pointer_t<Derived>;
+		using derived_pointer = std::add_pointer_t<Derived>;
+		using const_derived = std::add_const_t<Derived>;
+		using const_derived_pointer = std::add_pointer_t<const_derived>;
+#define _CDTHIS static_cast<const_derived_pointer>(this)
 
 		/*template<typename _Ty> MATRICE_GLOBAL_FINL operator Matrix<_Ty>() {
 			Matrix<_Ty> ret(static_cast<Derived*>(this)->rows(), static_cast<Derived*>(this)->cols());
@@ -150,67 +153,67 @@ struct Expr {
 			Matrix_<_Ty, _M, _N> ret; 
 			return (ret = *static_cast<Derived*>(this));
 		}*/
+
 		// \evaluate the matrix expression
-		MATRICE_GLOBAL_INL auto eval() const {
-			return static_cast<const_derived_pointer>(this)->eval_impl();
-		}
+		MATRICE_GLOBAL_INL auto eval() const { return _CDTHIS->eval_impl(); }
 		template<typename _OutType> MATRICE_GLOBAL_INL _OutType eval() const {
-			_OutType ret(static_cast<const Derived*>(this)->rows(), static_cast<const Derived*>(this)->cols());
-			return std::forward<_OutType>(ret = *static_cast<const Derived*>(this));
+			_OutType ret(_CDTHIS->rows(), _CDTHIS->cols());
+			return std::forward<_OutType>(ret = *_CDTHIS);
 		}
+		// \retrieve the evaluated result
 		template<typename _OutType> MATRICE_GLOBAL_INL _OutType& assign(_OutType& res) const {
 #ifdef _DEBUG
 			if (res.size() == 0) res.create(M, N);
 #endif
-			static_cast<const Derived*>(this)->assign_to(res);
+			_CDTHIS->assign_to(res);
 			return (res);
 		}
+		// \retrieve the evaluated result
 		template<typename _OutType> MATRICE_GLOBAL_INL void synch(_OutType& res) const {
 #ifdef _DEBUG
 			if (res.size() == 0) res.create(M, N);
 #endif
-			static_cast<const Derived*>(this)->assign(res);
+			_CDTHIS->assign(res);
 		}
-		template<typename _Rhs> MATRICE_GLOBAL_INL
-		MatBinaryExpr<Derived, _Rhs, Op::MatMul<typename _Rhs::value_t>> mul(const _Rhs& _rhs) {
-			return MatBinaryExpr<Derived, _Rhs, Op::MatMul<typename _Rhs::value_t>>(*static_cast<Derived*>(this), _rhs);
+		// \formulate matmul expression
+		template<typename _Rhs> MATRICE_GLOBAL_INL auto mul(const _Rhs& _rhs) const {
+			return MatBinaryExpr<Derived, _Rhs, Op::MatMul<typename _Rhs::value_t>>(*_CDTHIS, _rhs);
 		}
+		// \summation over all entries
 		MATRICE_GLOBAL_INL auto sum() const {
-			default_type val = 0.0;
-			int n = static_cast<const Derived*>(this)->size();
+			default_type _Ret = 0.0; int n = _CDTHIS->size();
 #pragma omp parallel if(n>100)
 		{
-#pragma omp for reduction(+:val)
-			for (int i = 0; i < n; ++i) 
-				val += static_cast<const Derived*>(this)->operator()(i);
+#pragma omp for reduction(+:_Ret)
+			for (int i = 0; i < n; ++i) _Ret += _CDTHIS->operator()(i);
 		}
-			
-			return (val);
+			return (_Ret);
 		}
+
 		MATRICE_GLOBAL_FINL size_t size() const { return M*N; }
 		MATRICE_GLOBAL_FINL size_t rows() const { return M; }
 		MATRICE_GLOBAL_FINL size_t cols() const { return N; }
 	protected:
 		size_t M, K, N;
+#undef _CDTHIS
 	};
 
 	// \matrix element-wise binary operation expression: +, -, *, /, ...
 	template<typename T, typename U, typename _BinaryOp> class EwiseBinaryExpr 
 		: public Base_<EwiseBinaryExpr<T, U, _BinaryOp>>//, _Base_v1<T, U>
 	{
+		using matrix_type = conditional_t<is_matrix_v<T>, T, U>;
 	public:
-		//enum {_M = _Base_v1<T, U>::_M, _N = _Base_v1<T, U>::_N};
 		enum { options = option<ewise>::value };
-		using Lopd_t = T;
-		using Ropd_t = U;
+		enum {_M = 0, _N = 0};
 		using value_t = conditional_t<std::is_scalar_v<T>, T, typename T::value_t>;
 		static constexpr value_t inf = std::numeric_limits<value_t>::infinity();
 
-		MATRICE_GLOBAL_INL EwiseBinaryExpr(const value_t _scalar, const Ropd_t& _rhs) noexcept
+		MATRICE_GLOBAL_INL EwiseBinaryExpr(const value_t _scalar, const U& _rhs) noexcept
 			: _Scalar(_scalar), _LHS(_rhs), _RHS(_rhs) { M = _LHS.rows(), N = _RHS.cols(); }
-		MATRICE_GLOBAL_INL EwiseBinaryExpr(const Lopd_t& _lhs, const value_t _scalar) noexcept
+		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T& _lhs, const value_t _scalar) noexcept
 			: _Scalar(_scalar), _LHS(_lhs), _RHS(_lhs) { M = _LHS.rows(), N = _RHS.cols(); }
-		MATRICE_GLOBAL_INL EwiseBinaryExpr(const Lopd_t& _lhs, const Ropd_t& _rhs) noexcept
+		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T& _lhs, const U& _rhs) noexcept
 			: _LHS(_lhs), _RHS(_rhs) { M = _LHS.rows(), N = _RHS.cols(); }
 
 		MATRICE_GLOBAL_INL value_t operator() (size_t _idx)
@@ -224,7 +227,7 @@ struct Expr {
 			if (_Scalar != inf) return _Op(_Scalar, _RHS(_idx));
 		}
 		MATRICE_GLOBAL_INL auto eval_impl() const {
-			types::Matrix_<value_t, 0, 0> _Ret(M, N);
+			types::Matrix_<value_t, _M, _N> _Ret(M, N);
 			this->assign_to(_Ret);
 			return std::forward<decltype(_Ret)>(_Ret);
 		}
@@ -236,7 +239,7 @@ struct Expr {
 
 	private:
 		const value_t _Scalar = std::numeric_limits<value_t>::infinity();
-		const Lopd_t& _LHS; const Ropd_t& _RHS;
+		const T& _LHS; const U& _RHS;
 		_BinaryOp _Op;
 		using Base_<EwiseBinaryExpr<T, U, _BinaryOp>>::M;
 		using Base_<EwiseBinaryExpr<T, U, _BinaryOp>>::N;
@@ -249,7 +252,9 @@ struct Expr {
 		using my_type = EwiseUnaryExpr;
 		using const_reference_t = add_const_reference_t<T>;
 	public:
-		enum { options = expression_options<_UnaryOp>::value };
+		enum { options = expression_options<_UnaryOp>::value,
+			_M = conditional_size_v<is_matrix_v<T>, matrix_traits<T>::_M, 0>, 
+			_N = conditional_size_v<is_matrix_v<T>, matrix_traits<T>::_N, 0> };
 		using value_t = conditional_t<std::is_scalar_v<T>, T, typename T::value_t>;
 		EwiseUnaryExpr(const_reference_t _rhs) noexcept
 			:_RHS(_rhs) { M = _rhs.rows(), N = _rhs.cols(); }
@@ -261,7 +266,7 @@ struct Expr {
 			return _Op(_RHS(_idx));
 		}
 		MATRICE_GLOBAL_INL auto eval_impl() const {
-			types::Matrix_<value_t, 0, 0> _Ret(M, N);
+			types::Matrix_<value_t, _M, _N> _Ret(M, N);
 			this->assign_to(_Ret);
 			return std::forward<decltype(_Ret)>(_Ret);
 		}
@@ -283,6 +288,7 @@ struct Expr {
 	{
 	public:
 		enum{options = option<_BinaryOp::flag>::value};
+		enum {_M = 0, _N = 0};
 		using value_t = conditional_t<std::is_class<T>::value, typename T::value_t, default_type>;
 
 		MATRICE_GLOBAL_INL MatBinaryExpr(const T& _lhs, const U& _rhs) noexcept 
@@ -302,7 +308,7 @@ struct Expr {
 			return _Op(_LHS, _RHS, r, c);
 		}
 		MATRICE_GLOBAL_INL auto eval_impl() const {
-			types::Matrix_<value_t, 0, 0> _Ret(M, N);
+			types::Matrix_<value_t, _M, _N> _Ret(M, N);
 			this->assign_to(_Ret);
 			return std::forward<decltype(_Ret)>(_Ret);
 		}
@@ -327,6 +333,7 @@ struct Expr {
 	{
 	public:
 		enum {options = option<_UnaryOp::flag>::value};
+		enum {_M = 0, _N = 0};
 		using value_t = conditional_t<std::is_class_v<T>, typename T::value_t, conditional_t<std::is_scalar_v<T>, T, default_type>>;
 		MATRICE_GLOBAL_FINL MatUnaryExpr(const T& inout) noexcept
 			: _RHS(inout), _ANS(inout) {
@@ -364,7 +371,7 @@ struct Expr {
 		}
 
 		MATRICE_GLOBAL_INL auto eval_impl() const {
-			types::Matrix_<value_t, options & trp == trp ? 0 : 0, options & trp == trp ? 0 : 0> _Ret(M, N);
+			types::Matrix_<value_t, options & trp == trp ? _N : _M, options & trp == trp ? _M : _N> _Ret(M, N);
 			this->assign_to(_Ret);
 			return std::forward<decltype(_Ret)>(_Ret);
 		}

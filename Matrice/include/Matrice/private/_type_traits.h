@@ -23,9 +23,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 MATRICE_NAMESPACE_BEGIN_
 
 template<typename T> struct remove_reference { using type = typename std::remove_reference<T>::type; };
-template<typename T> using remove_reference_t = remove_reference<T>;
+template<typename T> using remove_reference_t = typename remove_reference<T>::type;
 
 template<typename T> struct type_bytes { enum { value = sizeof(T) }; };
+template<typename T> MATRICE_GLOBAL_INL constexpr int type_bytes_v = type_bytes<T>::value;
 
 template<bool _Test, typename T1, typename T2> struct conditonal {};
 template<typename T1, typename T2> struct conditonal<true, T1, T2> { using type = T1; };
@@ -35,14 +36,14 @@ template<typename T1, typename T2> struct conditional<true, T1, T2> { using type
 template<typename T1, typename T2> struct conditional<false, T1, T2> { using type = T2; };
 template<bool _Test, typename T1, typename T2> using conditional_t = typename conditional<_Test, T1, T2>::type;
 
-template<typename Exp> struct expression_options { enum { value = Exp::flag | expr }; };
+template<bool _Test, int _N1, int _N2> struct conditional_size {};
+template<int _N1, int _N2 > struct conditional_size<std::true_type::value, _N1, _N2> { enum { value = _N1 }; };
+template<int _N1, int _N2 > struct conditional_size<std::false_type::value, _N1, _N2> { enum { value = _N2 }; };
+template<bool _Test, int _N1, int _N2> MATRICE_GLOBAL_INL constexpr int conditional_size_v = conditional_size<_Test, _N1, _N2>::value;
 
-template<int _Opt> struct is_expression { enum { value = _Opt & expr == expr ? true : false }; };
-template<typename Exp> constexpr bool is_expression_v = is_expression<Exp::options>::value;
+template<int _Val> struct is_zero { enum { value = _Val == 0 }; };
 
-template<int _Val> struct is_zero { enum { value = _Val == 0 ? true : false }; };
-
-template<int _R, int _C> struct is_static {enum {value = _R > 0 && _C >0 ? true : false}; };
+template<int _R, int _C> struct is_static {enum {value = _R > 0 && _C >0 }; };
 
 template<typename T> struct is_common_int64 { enum { value = std::is_integral_v<T> && sizeof(T) == 8 }; };
 template<typename T> struct is_int64 { enum { value = std::is_signed_v<T> && std::is_integral_v<T> && sizeof(T) == 8 }; };
@@ -81,13 +82,14 @@ template<typename _Ty> MATRICE_GLOBAL_INL constexpr bool is_matrix_v = is_matrix
 template<typename Mty, typename = std::enable_if_t<std::is_class_v<Mty>>>
 struct matrix_traits : traits<Mty> {};
 
-template<typename _Ty> struct is_matexp :std::false_type {};
-template<typename _Ty> MATRICE_GLOBAL_INL constexpr bool is_matexp_v = is_matexp<_Ty>::value;
+template<typename Exp> struct expression_options { enum { value = Exp::flag | expr }; };
+template<typename Exp> struct is_expression :std::false_type {};
+template<typename Exp> MATRICE_GLOBAL_INL constexpr bool is_expression_v = is_expression<Exp>::value;
 
 template<typename Exp, typename = std::enable_if_t<std::is_class_v<Exp>>>
 struct expression_traits : traits<Exp> {
+	static_assert(is_expression<Exp>::value, "Not expression type.");
 	enum { options = Exp::options };
-	static_assert(is_expression<options>::value, "Not expression type.");
 };
 
 template<int _M, int _N> struct allocator_traits {
