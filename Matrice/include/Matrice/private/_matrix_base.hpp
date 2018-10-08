@@ -66,14 +66,6 @@ protected:
 _TYPES_BEGIN
 
 template<typename _Ty> using nested_initializer_list = std::initializer_list<std::initializer_list<_Ty>>;
-template<typename _Ty, int _M, int _N> class Matrix_;
-template<typename _Ty, int _M, int _N> struct is_matrix <Matrix_<_Ty, _M, _N>> : std::true_type {};
-template<typename _Ty, int _M, int _N> struct matrix_traits<Matrix_<_Ty, _M, _N>> {
-	using type = _Ty;
-	enum { M = _M, N = _N };
-	struct size { struct rows { enum { value = M }; }; struct cols { enum { value = N }; }; };
-};
-template<typename _Derived, typename _Traits, typename _Type> class Base_;
 
 /*******************************************************************
 	              Generic Base for Matrix Class
@@ -119,8 +111,9 @@ public:
 	template<typename _Xop> using expr_type = Expr::Base_<_Xop>;
 	using base_t = PlaneView_<value_t>;
 	using loctn_t = Location;
-
+	
 	enum { options = _Myt_storage_type::location };
+	enum { Size = _M*_N, CompileTimeRows = _M, CompileTimeCols = _N, };
 	constexpr static const value_t inf = std::numeric_limits<value_t>::infinity();
 	constexpr static const value_t eps = std::numeric_limits<value_t>::epsilon();
 
@@ -177,6 +170,7 @@ public:
 	MATRICE_GLOBAL_FINL constexpr iterator end() { return (m_data + size()); }
 	MATRICE_GLOBAL_FINL constexpr const_iterator begin() const { return (m_data); }
 	MATRICE_GLOBAL_FINL constexpr const_iterator end() const { return (m_data + size()); }
+	_Myt base() const { return *(this); }
 
 #pragma region <!-- iterators -->
 	//column iterator for accessing elements in current column

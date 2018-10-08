@@ -79,10 +79,10 @@ template<typename _Ty> struct is_matrix : std::false_type {};
 template<typename _Ty> MATRICE_GLOBAL_INL constexpr bool is_matrix_v = is_matrix<_Ty>::value;
 
 template<typename Mty, typename = std::enable_if_t<std::is_class_v<Mty>>>
-struct matrix_traits : traits<Mty> {
-	enum { M = Mty::CompileTimeRows };
-	enum { N = Mty::CompileTimeRows };
-};
+struct matrix_traits : traits<Mty> {};
+
+template<typename _Ty> struct is_matexp :std::false_type {};
+template<typename _Ty> MATRICE_GLOBAL_INL constexpr bool is_matexp_v = is_matexp<_Ty>::value;
 
 template<typename Exp, typename = std::enable_if_t<std::is_class_v<Exp>>>
 struct expression_traits : traits<Exp> {
