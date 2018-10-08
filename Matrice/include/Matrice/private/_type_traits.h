@@ -87,10 +87,9 @@ template<typename Exp> struct is_expression :std::false_type {};
 template<typename Exp> MATRICE_GLOBAL_INL constexpr bool is_expression_v = is_expression<Exp>::value;
 
 template<typename Exp, typename = std::enable_if_t<std::is_class_v<Exp>>>
-struct expression_traits : traits<Exp> {
-	//static_assert(is_expression<Exp>::value, "Not expression type.");
-	//enum { options = Exp::options };
-};
+struct expression_traits : traits<Exp> {};
+template<typename Exp, typename = std::enable_if_t<is_expression_v<Exp>>> 
+struct exp_size { enum { _M = Exp::CompileTimeRows, _N = Exp::CompileTimeCols }; };
 
 template<typename _Ty> struct is_iterator: std::false_type {};
 template<typename _Ty> MATRICE_GLOBAL_INL constexpr bool is_iterator_v = is_iterator<_Ty>::value;
@@ -160,4 +159,13 @@ template<int _Rows = 0, int _Cols = 0> struct compile_time_size {
 	};
 	static const int RunTimeDeducedInHost = 0, RunTimeDeducedInDevice = -1;
 };
+
+template<int _N1, int _N2> struct max_integer {
+	enum { value = conditional_size_v<(_N1>_N2), _N1, _N2> };
+};
+template<int _N1, int _N2> MATRICE_GLOBAL_INL constexpr int max_integer_v = max_integer<_N1, _N2>::value;
+template<int _N1, int _N2> struct min_integer {
+	enum { value = conditional_size_v<(_N1>_N2), _N2, _N1> };
+};
+template<int _N1, int _N2> MATRICE_GLOBAL_INL constexpr int min_integer_v = min_integer<_N1, _N2>::value;
 _MATRICE_NAMESPACE_END

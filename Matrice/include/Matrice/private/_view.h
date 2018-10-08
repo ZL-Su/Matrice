@@ -35,6 +35,7 @@ public:
 	using difference_type = std::ptrdiff_t;
 	using pointer = std::add_pointer_t<value_type>;
 	using reference = std::add_lvalue_reference_t<value_type>;
+	enum { CompileTimeRows = 0, CompileTimeCols = 0 };
 	struct range_type
 	{
 		// _Rang = {from_x, from_y, end_x, end_y} : [from_x, end_x), [from_y, end_y)
