@@ -88,9 +88,17 @@ template<typename Exp> MATRICE_GLOBAL_INL constexpr bool is_expression_v = is_ex
 
 template<typename Exp, typename = std::enable_if_t<std::is_class_v<Exp>>>
 struct expression_traits : traits<Exp> {
-	static_assert(is_expression<Exp>::value, "Not expression type.");
-	enum { options = Exp::options };
+	//static_assert(is_expression<Exp>::value, "Not expression type.");
+	//enum { options = Exp::options };
 };
+
+template<typename _Ty> struct is_iterator: std::false_type {};
+template<typename _Ty> MATRICE_GLOBAL_INL constexpr bool is_iterator_v = is_iterator<_Ty>::value;
+template<typename Itr> struct iterator_traits : traits<Itr> {};
+
+template<typename _Ty> struct is_mtxview : std::false_type {};
+template<typename _Ty> MATRICE_GLOBAL_INL constexpr bool is_mtxview_v = is_mtxview<_Ty>::value;
+template<typename View> struct mtxview_traits : traits<View> {};
 
 template<int _M, int _N> struct allocator_traits {
 	enum {

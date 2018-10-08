@@ -103,6 +103,7 @@ class Base_ : public PlaneView_<typename _Traits::type>
 public:
 	using value_t = _Type;
 	using value_type = value_t;
+	using matrix_type = _Derived;
 	using pointer = std::add_pointer_t<value_t>;
 	using reference = std::add_lvalue_reference_t<value_t>;
 	using iterator = pointer;
@@ -150,8 +151,7 @@ public:
 public:
 	///<brief> dynamic create methods </brief>
 	MATRICE_HOST_ONLY void create(size_t rows, size_t cols) { 
-		if constexpr (_M == 0)
-			static_cast<_Derived*>(this)->create(rows, cols); 
+		if constexpr (_M <= 0 && _N <= 0) static_cast<_Derived*>(this)->create(rows, cols); 
 	};
 	///<brief> accessors </brief>
 	MATRICE_GLOBAL_FINL pointer operator[](index_t y) { return (m_data + y * m_cols); }
@@ -170,7 +170,8 @@ public:
 	MATRICE_GLOBAL_FINL constexpr iterator end() { return (m_data + size()); }
 	MATRICE_GLOBAL_FINL constexpr const_iterator begin() const { return (m_data); }
 	MATRICE_GLOBAL_FINL constexpr const_iterator end() const { return (m_data + size()); }
-	_Myt base() const { return *(this); }
+	MATRICE_GLOBAL_FINL constexpr auto eval() const { return (*static_cast<_Derived*>(this)); }
+
 
 #pragma region <!-- iterators -->
 	//column iterator for accessing elements in current column

@@ -139,11 +139,13 @@ struct Expr {
 	};
 	template<typename _Op> struct Base_
 	{
+#define _CDTHIS static_cast<const_derived_pointer>(this)
+
 		using Derived = _Op;
 		using derived_pointer = std::add_pointer_t<Derived>;
 		using const_derived = std::add_const_t<Derived>;
 		using const_derived_pointer = std::add_pointer_t<const_derived>;
-#define _CDTHIS static_cast<const_derived_pointer>(this)
+		//enum {_M = expression_traits<Derived>::_M, _N = expression_traits<Derived>::_N };
 
 		/*template<typename _Ty> MATRICE_GLOBAL_FINL operator Matrix<_Ty>() {
 			Matrix<_Ty> ret(static_cast<Derived*>(this)->rows(), static_cast<Derived*>(this)->cols());
@@ -193,8 +195,10 @@ struct Expr {
 		MATRICE_GLOBAL_FINL size_t size() const { return M*N; }
 		MATRICE_GLOBAL_FINL size_t rows() const { return M; }
 		MATRICE_GLOBAL_FINL size_t cols() const { return N; }
+
 	protected:
 		size_t M, K, N;
+
 #undef _CDTHIS
 	};
 
@@ -202,12 +206,12 @@ struct Expr {
 	template<typename T, typename U, typename _BinaryOp> class EwiseBinaryExpr 
 		: public Base_<EwiseBinaryExpr<T, U, _BinaryOp>>//, _Base_v1<T, U>
 	{
-		using matrix_type = conditional_t<is_matrix_v<T>, T, U>;
 	public:
 		enum { options = option<ewise>::value };
 		enum {_M = 0, _N = 0};
 		using value_t = conditional_t<std::is_scalar_v<T>, T, typename T::value_t>;
 		static constexpr value_t inf = std::numeric_limits<value_t>::infinity();
+		static constexpr auto _Is_T_exp = is_expression_v<T>;
 
 		MATRICE_GLOBAL_INL EwiseBinaryExpr(const value_t _scalar, const U& _rhs) noexcept
 			: _Scalar(_scalar), _LHS(_rhs), _RHS(_rhs) { M = _LHS.rows(), N = _RHS.cols(); }
@@ -394,7 +398,51 @@ struct Expr {
 		using Base_<MatUnaryExpr<T, _UnaryOp>>::size;
 	};
 };
-
+template<typename _Derived>
+struct is_expression<Expr::Base_<_Derived>> :std::true_type {};
+template<typename T, typename U, typename _Op>
+struct is_expression<Expr::EwiseBinaryExpr<T, U, _Op>> :std::true_type {};
+template<typename T, typename _Op> 
+struct is_expression<Expr::EwiseUnaryExpr<T, _Op>> :std::true_type {};
+template<typename T, typename U, typename _Op>
+struct is_expression<Expr::MatBinaryExpr<T, U, _Op>> :std::true_type {};
+template<typename T, typename _Op>
+struct is_expression<Expr::MatUnaryExpr<T, _Op>> :std::true_type {};
+template<typename T, typename U, typename _Op>
+struct expression_traits<Expr::EwiseBinaryExpr<T, U, _Op>> {
+	using abstract_type = conditional_t<is_matrix_v<T>, T, U>;
+	using matrix_type = conditional_t<is_matrix_v<abstract_type>, abstract_type, conditional_t<is_expression_v<abstract_type>, typename abstract_type::matrix_type, types::Matrix<typename abstract_type::value_t>>>;
+	enum {
+		_M = matrix_traits<matrix_type>::size::rows::value,
+		_N = matrix_traits<matrix_type>::size::cols::value
+	};
+};
+template<typename T, typename _Op>
+struct expression_traits<Expr::EwiseUnaryExpr<T, _Op>> {
+	using matrix_type = conditional_t<is_matrix_v<T>, T, conditional_t<is_expression_v<T>, typename T::matrix_type, types::Matrix<typename T::value_t>>>;
+	enum {
+		_M = matrix_traits<matrix_type>::size::rows::value,
+		_N = matrix_traits<matrix_type>::size::cols::value
+	};
+};
+template<typename T, typename U, typename _Op>
+struct expression_traits<Expr::MatBinaryExpr<T, U, _Op>> {
+	using matrix_type_1 = conditional_t<is_matrix_v<T>, T, conditional_t<is_expression_v<T>, typename T::matrix_type, types::Matrix<typename T::value_t>>>;
+	using matrix_type_2 = conditional_t<is_matrix_v<U>, U, conditional_t<is_expression_v<U>, typename U::matrix_type, types::Matrix<typename U::value_t>>>;
+	enum {
+		_M = matrix_traits<matrix_type_1>::size::rows::value,
+		_N = matrix_traits<matrix_type_2>::size::cols::value
+	};
+	using matrix_type = types::Matrix_<typename matrix_type_1::value_t, _M, _N>;
+};
+template<typename T, typename _Op>
+struct expression_traits<Expr::MatUnaryExpr<T, _Op>> {
+	using matrix_type = conditional_t<is_matrix_v<T>, T, conditional_t<is_expression_v<T>, typename T::matrix_type, types::Matrix<typename T::value_t>>>;
+	enum {
+		_M = matrix_traits<matrix_type>::size::rows::value,
+		_N = matrix_traits<matrix_type>::size::cols::value
+	};
+};
 template<
 	typename _Exp, 
 	typename = std::enable_if_t<is_expression_v<_Exp>>
