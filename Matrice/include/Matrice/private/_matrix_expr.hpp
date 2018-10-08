@@ -143,7 +143,11 @@ struct Expr {
 			CompileTimeCols = myt_traits::cols};
 
 		// \evaluate the matrix expression
-		MATRICE_GLOBAL_INL auto eval() const { return _CDTHIS->eval_impl(); }
+		MATRICE_GLOBAL_INL auto eval() const { 
+			matrix_type _Ret(M, N);
+			_CDTHIS->assign_to(_Ret);
+			return std::forward<matrix_type>(_Ret);
+		}
 		template<typename _OutType> MATRICE_GLOBAL_INL _OutType eval() const {
 			_OutType ret(_CDTHIS->rows(), _CDTHIS->cols());
 			return std::forward<_OutType>(ret = *_CDTHIS);
@@ -169,11 +173,11 @@ struct Expr {
 		}
 		// \summation over all entries
 		MATRICE_GLOBAL_INL auto sum() const {
-			default_type _Ret = 0.0; int n = _CDTHIS->size();
-#pragma omp parallel if(n>100)
+			default_type _Ret = 0.0; int _Size = _CDTHIS->size();
+#pragma omp parallel if(_Size > 100)
 		{
 #pragma omp for reduction(+:_Ret)
-			for (int i = 0; i < n; ++i) _Ret += _CDTHIS->operator()(i);
+			for (int i = 0; i < _Size; ++i) _Ret += _CDTHIS->operator()(i);
 		}
 			return (_Ret);
 		}
@@ -218,11 +222,7 @@ struct Expr {
 			if (_Scalar == inf) return _Op(_LHS(_idx), _RHS(_idx));
 			if (_Scalar != inf) return _Op(_Scalar, _RHS(_idx));
 		}
-		MATRICE_GLOBAL_INL auto eval_impl() const {
-			matrix_type _Ret(M, N);
-			this->assign_to(_Ret);
-			return std::forward<decltype(_Ret)>(_Ret);
-		}
+
 		template<typename _Mty> MATRICE_GLOBAL_INL void assign_to(_Mty& res) const
 		{
 #pragma omp parallel for
@@ -259,11 +259,7 @@ struct Expr {
 		MATRICE_GLOBAL_INL const value_t operator() (size_t _idx) const {
 			return _Op(_RHS(_idx));
 		}
-		MATRICE_GLOBAL_INL auto eval_impl() const {
-			types::Matrix_<value_t, CompileTimeRows, CompileTimeCols> _Ret(M, N);
-			this->assign_to(_Ret);
-			return std::forward<decltype(_Ret)>(_Ret);
-		}
+
 		template<typename _Mty> MATRICE_GLOBAL_INL void assign_to(_Mty& res) const {
 #pragma omp parallel for
 			for (index_t i = 0; i < res.size(); ++i) res(i) = this->operator()(i);
@@ -303,11 +299,6 @@ struct Expr {
 		MATRICE_GLOBAL_INL value_t operator() (int _idx) const {
 			int r = _idx / N, c = _idx - r * N;
 			return _Op(_LHS, _RHS, r, c);
-		}
-		MATRICE_GLOBAL_INL auto eval_impl() const {
-			types::Matrix_<value_t, CompileTimeRows, CompileTimeCols> _Ret(M, N);
-			this->assign_to(_Ret);
-			return std::forward<decltype(_Ret)>(_Ret);
 		}
 
 		template<typename _Mty> MATRICE_GLOBAL_INL void assign_to(_Mty& res) const
@@ -372,21 +363,13 @@ struct Expr {
 			return _Ret(*this, _rhs);
 		}
 
-		MATRICE_GLOBAL_INL auto eval_impl() const {
-			types::Matrix_<value_t, 
-				options & trp == trp ? CompileTimeCols : CompileTimeRows, 
-				options & trp == trp ? CompileTimeRows : CompileTimeCols> _Ret(M, N);
-			this->assign_to(_Ret);
-			return std::forward<decltype(_Ret)>(_Ret);
-		}
-
 		template<typename _Mty>MATRICE_GLOBAL_INL void assign_to(_Mty& res)const {
 			if constexpr (options & inv == inv) {
 				_Op(M, res.data(), _RHS.data());
 			}
 			if constexpr (options & trp == trp) {
-#pragma omp parallel for
-				for (int i = 0; i < size(); ++i) res(i) = (*this)(i);
+				const int _Size = this->size();
+				for (int i = 0; i < _Size; ++i) res(i) = (*this)(i);
 			}
 		} /*i*N+(1-N*M)*(i/M) is replaced by i at left hand*/
 	private:
