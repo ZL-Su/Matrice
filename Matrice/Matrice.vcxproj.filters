@@ -109,6 +109,9 @@
     <Filter Include="Header Files\Algs\Deeplearning\Kernels">
       <UniqueIdentifier>{7411fc17-630f-4228-9570-11270751a97b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Examples">
+      <UniqueIdentifier>{0654c52d-0bad-45dd-8f68-e5de533be0c1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -287,6 +290,9 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\deeplearning\_kernels.h">
       <Filter>Header Files\Algs\Deeplearning\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="examples\basic_matrix_usage.h">
+      <Filter>Examples</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
