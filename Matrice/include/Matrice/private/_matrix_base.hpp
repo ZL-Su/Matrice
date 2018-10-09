@@ -28,6 +28,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_view.h"
 #include "../../../addin/interface.h"
 #include "../util/_type_defs.h"
+#include "../util/_conditions.h"
 #include "../core/solver.h"
 
 #pragma warning(disable: 4715 4661 4224 4267 4244 4819 4199)
@@ -346,8 +347,17 @@ public:
 	template<class _Rhs> MATRICE_GLOBAL_FINL value_t dot(const _Rhs& _rhs) const { return (this->operator*(_rhs)).sum(); }
 	MATRICE_GLOBAL_FINL value_t norm_2() const { auto ans = dot(*this); return (ans > eps ? dgelom::sqrt(ans) : inf); }
 
-	template<typename _Fty>
+	template<typename _Fty/*, typename = std::enable_if_t<std::is_function_v<_Fty>>*/>
 	MATRICE_GLOBAL_FINL void each(_Fty _Fn) { for (auto& _Val : *this) _Fn(_Val); }
+
+	//template<typename _Fty/*, typename = std::enable_if_t<std::is_function_v<_Fty>>*/>
+	//MATRICE_GLOBAL_FINL void where(_Fty _Cond, const value_type _Val) {
+	//	static_assert(!std::is_function_v<_Fty>, "A function expression is required.");
+	//	this->each([&](auto& _My_val) {_My_val = _Cond(_My_val) ? _Val : _My_val; });
+	//}
+	MATRICE_GLOBAL_FINL void where(std::function<bool(const value_type&)> _Cond, const value_type _Val) {
+		this->each([&](auto& _My_val) {_My_val = _Cond(_My_val) ? _Val : _My_val; });
+	}
 
 	///<brief> properties </brief>
 	__declspec(property(get=_Format_getter, put=_Format_setter))size_t format;

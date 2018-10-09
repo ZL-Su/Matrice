@@ -103,3 +103,5 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #define MATRICE_ARCH_END   } _MATRICE_NAMESPACE_END
 #define _TYPES_BEGIN namespace types {
 #define _TYPES_END }
+#define _CONDITIONS_BEGIN namespace conds {
+#define _CONDITIONS_END }

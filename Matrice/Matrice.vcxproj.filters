@@ -294,6 +294,9 @@
     <ClInclude Include="examples\basic_matrix_usage.h">
       <Filter>Examples</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\util\_conditions.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\private\_memory.cpp">
