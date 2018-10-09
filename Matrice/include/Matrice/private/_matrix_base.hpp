@@ -347,14 +347,9 @@ public:
 	template<class _Rhs> MATRICE_GLOBAL_FINL value_t dot(const _Rhs& _rhs) const { return (this->operator*(_rhs)).sum(); }
 	MATRICE_GLOBAL_FINL value_t norm_2() const { auto ans = dot(*this); return (ans > eps ? dgelom::sqrt(ans) : inf); }
 
-	template<typename _Fty/*, typename = std::enable_if_t<std::is_function_v<_Fty>>*/>
+	template<typename _Fty>
 	MATRICE_GLOBAL_FINL void each(_Fty _Fn) { for (auto& _Val : *this) _Fn(_Val); }
 
-	//template<typename _Fty/*, typename = std::enable_if_t<std::is_function_v<_Fty>>*/>
-	//MATRICE_GLOBAL_FINL void where(_Fty _Cond, const value_type _Val) {
-	//	static_assert(!std::is_function_v<_Fty>, "A function expression is required.");
-	//	this->each([&](auto& _My_val) {_My_val = _Cond(_My_val) ? _Val : _My_val; });
-	//}
 	MATRICE_GLOBAL_FINL void where(std::function<bool(const value_type&)> _Cond, const value_type _Val) {
 		this->each([&](auto& _My_val) {_My_val = _Cond(_My_val) ? _Val : _My_val; });
 	}
