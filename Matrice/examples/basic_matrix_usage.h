@@ -20,7 +20,7 @@ int main() try
 		"_Rows" and "_Cols".
 	*/
 
-	// \create a 3x3 matrix on the stack without giving initial values
+	// \create a 3x3 matrix on the stack by giving _Rows > 0 and _Cols > 0
 	dgelom::Matrix_<default_type, 3, 3> _Mat33;
 
 	// \create a 3x3 zero-valued matrix on the stack
@@ -29,7 +29,7 @@ int main() try
 	// \create a 3x3 identity matrix on the stack
 	dgelom::Matrix_<default_type, 3, 3> _Iden33{ 1., 0., 0., 0., 1., 0., 0., 0., 1. };
 
-	// \create a 3x3 matrix from a pointer
+	// \create a 3x3 matrix from a pointer, one example:
 	default_type _Ptr[9] = {/*....*/ };
 	dgelom::Matrix_<default_type, 3, 3> _Mat33_from_ptr(_Ptr);
 
@@ -37,10 +37,12 @@ int main() try
 	dgelom::Matrix_<default_type, 3, 3> _Mat33_copy_1(_Mat33); //use copy constructuor
 	dgelom::Matrix_<default_type, 3, 3> _Mat33_copy_2 = _Mat33;            //use assignment operator
 
-	// \create a dynamic matrix on host
+	// \create a dynamic matrix on host by specifying _Rows = 0 and _Cols = 0
 	dgelom::Matrix_<default_type, 0, 0> _Mat_1; //empty matrix
 	dgelom::Matrix_<default_type, 0, 0> _Mat_2(3, 3); // 3x3 matrix
 	dgelom::Matrix_<default_type, 0, 0> _Mat_2(3, 3, dgelom::zero<default_type>::value); // 3x3 matrix, initialized by zeros
+	// ...or, use the more compact alias type
+	dgelom::Matrix<default_type> _Mat_3/*(...)*/;
 
 #pragma endregion
 }
