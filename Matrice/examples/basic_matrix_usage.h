@@ -40,9 +40,17 @@ int main() try
 	// \create a dynamic matrix on host by specifying _Rows = 0 and _Cols = 0
 	dgelom::Matrix_<default_type, 0, 0> _Mat_1; //empty matrix
 	dgelom::Matrix_<default_type, 0, 0> _Mat_2(3, 3); // 3x3 matrix
-	dgelom::Matrix_<default_type, 0, 0> _Mat_2(3, 3, dgelom::zero<default_type>::value); // 3x3 matrix, initialized by zeros
+	dgelom::Matrix_<default_type, 0, 0> _Mat_3(3, 3, dgelom::zero<default_type>::value); // 3x3 matrix, initialized by zeros
+	dgelom::Matrix_<default_type, 0, 0> _Mat_4(3, 3, _Ptr); // from a pointer
 	// ...or, use the more compact alias type
-	dgelom::Matrix<default_type> _Mat_3/*(...)*/;
+	dgelom::Matrix<default_type> _Mat_5/*(...)*/;
+
+	// \even, we can create matrix like this
+	dgelom::Matrix_<default_type, 3, 3> _Mat33_from_dyn(_Mat_3);
+	dgelom::Matrix_<default_type, 0, 0> _Mat_from_sta(_Zero33);
+	// ...or, the matrix can be created like this
+	dgelom::Matrix_<default_type, 3, 3> _Mat33_from_dyn_1 = _Mat_3;
+	dgelom::Matrix_<default_type, 0, 0> _Mat_from_sta_1 = _Zero33;
 
 #pragma endregion
 }
