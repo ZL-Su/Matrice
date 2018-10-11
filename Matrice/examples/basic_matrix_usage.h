@@ -11,6 +11,7 @@ using default_type = dgelom::default_type;
 int main() try
 {
 #pragma region \how to create a matrix
+	{
 	/* 
 	The matrix type has a uniform interface like:
 		template<typename T, int _Rows, int _Cols> class Matrix_<T, _Rows, _Cols>.
@@ -51,7 +52,47 @@ int main() try
 	// ...or, the matrix can be created like this
 	dgelom::Matrix_<default_type, 3, 3> _Mat33_from_dyn_1 = _Mat_3;
 	dgelom::Matrix_<default_type, 0, 0> _Mat_from_sta_1 = _Zero33;
+	}
+#pragma endregion
 
+#pragma region <!-- Basic matrix operations -->
+	/*
+	What you should know before using matrix operations:
+		(1) All operations are almost applied to all matrix types,
+		(2) Almost all matrix operations are implemented with the lazy 
+			 evaluation technology, aiming to avoid the unnecessary cell
+			 computation and data copy,
+		(3) Be careful to use the 'auto' keyword for matrix operations 
+			 except that you absolutely know what you are doing.
+	*/
+	{
+		// Given two matrices A and B:
+		using matrix_t = dgelom::Matrix_<default_type, 3, 3>;
+		matrix_t A{ 1., 0., 0., 0., 1., 0., 0., 0., 1. }, B{ 0.25 };
+
+		// \Element-wise operations: +, -, *, /
+		matrix_t A_plus_B = A + B;
+		matrix_t A_minus_B = A - B;
+		matrix_t A_dotm_B = A * B;
+		matrix_t A_over_B = A / B;
+
+		// ...or, we just forming expressions but not executing the operations:
+		auto A_plus_B_exp = A + B;
+		auto A_minus_B_exp = A - B;
+		auto A_dotm_B_exp = A * B;
+		auto A_over_B_exp = A / B;
+
+		// Of cource, Matrice lib has supported several ways to evaluate an expression,
+		// ...invoke evaluation by passing a expression to a matrix:
+		matrix_t Ewise_sum_1(A_plus_B_exp); 
+		// or...
+		matrix_t Ewise_sum_2 = A_plus_B_exp; 
+
+		// or use the 'eval()' method of the expression...
+		auto Ewise_sum_3 = A_plus_B_exp.eval(); 
+		// in the above way, the returned matrix type is inferred automatically, which generally is the optimal matrix type. If you wanna use the return type that you specified, the templated version of 'eval()' method should be called as follows
+		auto Ewise_sum_4 = A_plus_B_exp.eval<dgelom::Matrix<default_type>>();
+	}
 #pragma endregion
 }
 catch (std::exception& _E) { throw _E; }
