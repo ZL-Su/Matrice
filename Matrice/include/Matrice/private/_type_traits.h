@@ -176,4 +176,14 @@ struct is_type_condition : std::false_type {};
 template<template<typename> typename C>
 struct is_type_condition<C, std::enable_if_t<std::is_same<bool, std::remove_cv_t<decltype(C<int>::value)>>::value>> : std::true_type {};
 
+/**
+ * has_method_Fn<T, _Args> is true_type iff T has method T.Fn(_Args...)
+ */
+#define _HAS_METHOD(_Name) \
+template<typename _Ty, typename... _Args> struct has_method_##_Name { \
+	static constexpr bool value = std::is_same_v<decltype(_Check<_Ty>(0)), std::true_type::value>; \
+private: \
+	template<typename _C> static auto _Check(int)->decltype(std::declval<_C>()._Name(std::declval<_Args>()...), std::true_type()); \
+	template<typename _C> static std::false_type _Check(...); \
+};
 _MATRICE_NAMESPACE_END
