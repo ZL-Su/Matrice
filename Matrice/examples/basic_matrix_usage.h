@@ -10,10 +10,10 @@ using default_type = dgelom::default_type;
 
 int main() try
 {
-#pragma region \how to create a matrix
+#pragma region <!-- How to create a matrix -->
 	{
 	/* 
-	The matrix type has a uniform interface like:
+	The matrix type has a uniform interface as follows:
 		template<typename T, int _Rows, int _Cols> class Matrix_<T, _Rows, _Cols>.
 	Template parameter "T" must be a scalar type, which gives the data type of 
 		the matrix; "_Rows" and "_Cols" give the compile time size of the matrix.

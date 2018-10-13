@@ -40,7 +40,7 @@ _CONDITIONS_BEGIN
 #endif
 
 #ifndef _XGT(_Test_val)
-#define _XGt(_Test_val) _VAL(>_Test_val) //\greater than _Test_val
+#define _XGT(_Test_val) _VAL(>_Test_val) //\greater than _Test_val
 #endif
 
 #ifndef _XGQ(_Test_val)
