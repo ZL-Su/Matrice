@@ -19,6 +19,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #include "_type_traits.h"
 #include "_size_traits.h"
+#include "_typelist.h"
 
 DGE_MATRICE_BEGIN
 /**
@@ -30,9 +31,17 @@ template<typename _Ret, typename... _Args>
 struct is_function_type<_Ret(_Args...)> : std::true_type {};
 template<typename _Ty> using is_function_type_t = typename is_function_type<_Ty>::type;
 
+/**
+ * Access information about result type or arguments from a function type.
+ * Example:
+ * using A = function_traits<int (float, double)>::return_type // A == int
+ * using A = function_traits<int (float, double)>::parameter_types::tuple_type // A == tuple<float, double>
+ */
 template<typename _Fty, typename = std::enable_if_t<std::is_function_v<_Fty>>> struct function_traits {};
 template<typename _Ret, typename... _Args> struct function_traits<_Ret(_Args...)> {
-	using type = _Ret(_Args...);
+	using plain_type = _Ret(_Args...);
 	using return_type = _Ret;
+	using argument_type_list = tl::typelist<_Args...>;
+	static constexpr auto nargs = sizeof...(_Args);
 };
 DGE_MATRICE_END
