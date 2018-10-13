@@ -576,6 +576,9 @@
     <ClInclude Include="include\Matrice\util\_macro_conditions.h">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\private\_function_traits.h">
+      <Filter>Header Files\Detail\traits</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\private\_memory.cpp">
