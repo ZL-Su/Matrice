@@ -17,7 +17,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 *	*************************************************************************/
 #pragma once
 
-#include"_type_traits.h"
+#include "../util/_macros.h"
 
 DGE_MATRICE_BEGIN
 template<int _Rows = 0, int _Cols = 0> struct compile_time_size {

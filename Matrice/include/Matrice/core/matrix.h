@@ -227,19 +227,19 @@ using Matrix_ = types::Matrix_<T, _M, _N>;
 
 //\matrix type with host dynamic memory allocator
 template<typename T, size_t _Options = rmaj | gene> using Matrix = Matrix_<T,
-	compile_time_size<>::RunTimeDeducedInHost,
-	compile_time_size<>::RunTimeDeducedInHost,
+	compile_time_size<>::RunTimeDeducedOnHost,
+	compile_time_size<>::RunTimeDeducedOnHost,
 	_Options>;
 
 //\matrix type with unified memory allocator
 template<typename T, size_t _Options = rmaj | gene> using Umatrix = Matrix_<T,
-	compile_time_size<>::RunTimeDeducedInDevice,
-	compile_time_size<>::RunTimeDeducedInHost,
+	compile_time_size<>::RunTimeDeducedOnDevice,
+	compile_time_size<>::RunTimeDeducedOnHost,
 	_Options>;
 
 //\matrix type with device memory allocator
 template<typename T, size_t _Options = rmaj | gene> using Dmatrix = Matrix_<T,
-	compile_time_size<>::RunTimeDeducedInDevice,
-	compile_time_size<>::RunTimeDeducedInDevice,
+	compile_time_size<>::RunTimeDeducedOnDevice,
+	compile_time_size<>::RunTimeDeducedOnDevice,
 	_Options>;
 _MATRICE_NAMESPACE_END

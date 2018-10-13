@@ -36,13 +36,12 @@ template<typename T1, typename T2> struct conditional<true, T1, T2> { using type
 template<typename T1, typename T2> struct conditional<false, T1, T2> { using type = T2; };
 template<bool _Test, typename T1, typename T2> using conditional_t = typename conditional<_Test, T1, T2>::type;
 
-template<bool _Test, int _N1, int _N2> struct conditional_size {};
-template<int _N1, int _N2 > struct conditional_size<std::true_type::value, _N1, _N2> { enum { value = _N1 }; };
-template<int _N1, int _N2 > struct conditional_size<std::false_type::value, _N1, _N2> { enum { value = _N2 }; };
-template<bool _Test, int _N1, int _N2> MATRICE_GLOBAL_INL constexpr int conditional_size_v = conditional_size<_Test, _N1, _N2>::value;
+//template<bool _Test, int _N1, int _N2> struct conditional_size {};
+//template<int _N1, int _N2 > struct conditional_size<std::true_type::value, _N1, _N2> { enum { value = _N1 }; };
+//template<int _N1, int _N2 > struct conditional_size<std::false_type::value, _N1, _N2> { enum { value = _N2 }; };
+//template<bool _Test, int _N1, int _N2> MATRICE_GLOBAL_INL constexpr int conditional_size_v = conditional_size<_Test, _N1, _N2>::value;
 
 template<int _Val> struct is_zero { enum { value = _Val == 0 }; };
-
 template<int _R, int _C> struct is_static {enum {value = _R > 0 && _C >0 }; };
 
 template<typename T> struct is_common_int64 { enum { value = std::is_integral_v<T> && sizeof(T) == 8 }; };
@@ -149,23 +148,22 @@ struct layout_traits : traits<Mty> {
 	}
 };
 
-template<int _Rows = 0, int _Cols = 0> struct compile_time_size {
-	enum { val_1 = 0x0001, val_2 = 0x0002, val_3 = 0x0003, val_4 = 0x0004 };
-	enum {
-		RunTimeDeduceInHost = 0,
-		RunTimeDeduceInDevi = -1,
-		CompileTimeRows = _Rows,
-		CompileTimeCols = _Cols,
-	};
-	static const int RunTimeDeducedInHost = 0, RunTimeDeducedInDevice = -1;
-};
-
-template<int _N1, int _N2> struct max_integer {
-	enum { value = conditional_size_v<(_N1>_N2), _N1, _N2> };
-};
-template<int _N1, int _N2> MATRICE_GLOBAL_INL constexpr int max_integer_v = max_integer<_N1, _N2>::value;
-template<int _N1, int _N2> struct min_integer {
-	enum { value = conditional_size_v<(_N1>_N2), _N2, _N1> };
-};
-template<int _N1, int _N2> MATRICE_GLOBAL_INL constexpr int min_integer_v = min_integer<_N1, _N2>::value;
+//template<int _Rows = 0, int _Cols = 0> struct compile_time_size {
+//	enum { val_1 = 0x0001, val_2 = 0x0002, val_3 = 0x0003, val_4 = 0x0004 };
+//	enum {
+//		RunTimeDeduceInHost = 0,
+//		RunTimeDeduceInDevi = -1,
+//		CompileTimeRows = _Rows,
+//		CompileTimeCols = _Cols,
+//	};
+//	static const int RunTimeDeducedInHost = 0, RunTimeDeducedInDevice = -1;
+//};
+//template<int _N1, int _N2> struct max_integer {
+//	enum { value = conditional_size_v<(_N1>_N2), _N1, _N2> };
+//};
+//template<int _N1, int _N2> MATRICE_GLOBAL_INL constexpr int max_integer_v = max_integer<_N1, _N2>::value;
+//template<int _N1, int _N2> struct min_integer {
+//	enum { value = conditional_size_v<(_N1>_N2), _N2, _N1> };
+//};
+//template<int _N1, int _N2> MATRICE_GLOBAL_INL constexpr int min_integer_v = min_integer<_N1, _N2>::value;
 _MATRICE_NAMESPACE_END

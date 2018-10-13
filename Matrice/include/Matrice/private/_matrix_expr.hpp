@@ -23,7 +23,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #endif
 #include "../util/_macros.h"
 #include "_type_traits.h"
-//#include "_storage.hpp"
+#include "_size_traits.h"
 
 #pragma warning(disable: 4715)
 
