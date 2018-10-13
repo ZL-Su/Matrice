@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 *	*************************************************************************/
 #pragma once
-
+#include <functional>
 #include "_type_traits.h"
 #include "_size_traits.h"
 #include "_typelist.h"
@@ -40,6 +40,7 @@ template<typename _Ty> using is_function_type_t = typename is_function_type<_Ty>
 template<typename _Fty, typename = std::enable_if_t<std::is_function_v<_Fty>>> struct function_traits {};
 template<typename _Ret, typename... _Args> struct function_traits<_Ret(_Args...)> {
 	using plain_type = _Ret(_Args...);
+	using function_type = std::function<_Ret(_Args...)>;
 	using return_type = _Ret;
 	using argument_type_list = tl::typelist<_Args...>;
 	static constexpr auto nargs = sizeof...(_Args);

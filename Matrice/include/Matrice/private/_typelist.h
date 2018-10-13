@@ -24,11 +24,22 @@ namespace detail {
 	template<typename... _Args> struct false_t : std::false_type {};
 	template<typename... _Args> MATRICE_GLOBAL_INL constexpr auto false_t_v = false_t<_Args...>::value;
 }
-
+/**
+ * Forward declarations
+ */
+template<typename _TyList> struct to_tuple;
+template<typename _TyList> struct size;
+template<std::size_t _Idx, typename _TyList> struct element;
 /**
  * Type holding a list of types for compile time type computations
  */
 template<typename... _Args> struct typelist final {
+
+	static constexpr std::size_t ntypes = size<typelist>::value;
+	using tuple_type = typename to_tuple<typelist>::type;
+	template<std::size_t _Idx>
+	using type = typename element<_Idx, typelist>::type;
+
 private:
 	typelist() = delete; // not for instantiation
 };
@@ -91,8 +102,6 @@ struct concat<typelist<_HeadTys...>> final { using type = typelist<_HeadTys...>;
 template<> struct concat<> final { using type = typelist<>; };
 template<typename... _TyLists> using concat_t = typename concat<_TyLists...>::type;
 
-
-
 /**
  * Filters the types in a type list by a type trait.
  * Examples:
@@ -115,8 +124,6 @@ struct filter<_Cond, typelist<>> final {
 };
 template<template <typename> class _Cond, typename _TyList>
 using filter_t = typename filter<_Cond, _TyList>::type;
-
-
 
 /**
  * Counts how many types in the list fulfill a type trait
@@ -209,9 +216,7 @@ using element_t = typename element<_Idx, _TyList>::type;
  */
 template <typename _TyList>
 struct last final {
-	static_assert(
-		detail::false_t_v<_TyList>,
-		"In tl::last<T>, the T argument must be typelist<...>.");
+	static_assert(detail::false_t_v<_TyList>, "In tl::last<T>, the T argument must be typelist<...>.");
 };
 template <typename _Head, typename... _Tails>
 struct last<typelist<_Head, _Tails...>> final { using type = typename last<typelist<_Tails...>>::type; };
@@ -229,8 +234,8 @@ static_assert( std::is_same_v<int, last_t<typelist<double, float, int>>>, "");
 template<typename _TyList> struct reverse final {
 	static_assert(detail::false_t_v<_TyList>, "In dgelom::reverse<T>, the T argument must be typelist<...>.");
 };
-template<class Head, class... Tail> struct reverse<typelist<Head, Tail...>> final {
-	using type = concat_t<typename reverse<typelist<Tail...>>::type, typelist<Head>>;
+template<typename _Head, typename... _Tails> struct reverse<typelist<_Head, _Tails...>> final {
+	using type = concat_t<typename reverse<typelist<_Tails...>>::type, typelist<_Head>>;
 };
 template<> struct reverse<typelist<>> final { using type = typelist<>; };
 template<typename _TyList> using reverse_t = typename reverse<_TyList>::type;
@@ -265,11 +270,10 @@ template<typename _TyList> using reverse_t = typename reverse<_TyList>::type;
  *   //  sizes  ==  std::tuple<size_t, size_t, size_t>{8, 1, 4}
  */
 namespace detail {
-	template<class T> struct type_ final {
-		using type = T;
-	};
+	template<class T> struct type_ final { using type = T; };
+
 	template<typename _TyList> struct map_types_to_values final {
-		static_assert(detail::false_t<_TyList>::value, "In typelist::map_types_to_values<T>, the T argument must be typelist<...>.");
+		static_assert(detail::false_t_v<_TyList>, "In typelist::map_types_to_values<T>, the T argument must be typelist<...>.");
 	};
 	template<typename... _Tys> struct map_types_to_values<typelist<_Tys...>> final {
 		template<typename _Fty>
@@ -278,10 +282,11 @@ namespace detail {
 		}
 	};
 }
-
-template<typename _TyList, typename _Fty> auto map_types_to_values(_Fty&& func)->
-decltype(detail::map_types_to_values<_TyList>::call(std::forward<_Fty>(func))) {
-	return detail::map_types_to_values<_TyList>::call(std::forward<_Fty>(func));
 }
 
+template<typename... _Args> using typelist = tl::typelist<_Args...>;
+
+template<typename _TyList, typename _Fty> auto map_types_to_values(_Fty&& func)->
+decltype(tl::detail::map_types_to_values<_TyList>::call(std::forward<_Fty>(func))) {
+	return tl::detail::map_types_to_values<_TyList>::call(std::forward<_Fty>(func));
 } DGE_MATRICE_END
