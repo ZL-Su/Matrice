@@ -138,4 +138,42 @@ struct layout_traits : traits<_Ty> {
 		return _format & ltri == ltri;
 	}
 };
+
+/**
+ * is_equality_comparable<T> is true_type iff the equality operator is defined for T.
+ */
+template<typename T, typename Enable = void> struct is_equality_comparable : std::false_type {};
+template<typename T> struct is_equality_comparable<T, std::void_t<decltype(std::declval<T&>() == std::declval<T&>())>> : std::true_type {};
+template<typename T> using is_equality_comparable_t = typename is_equality_comparable<T>::type;
+
+/**
+ * is_hashable<T> is true_type iff std::hash is defined for T
+ */
+template<typename T, typename Enable = void> struct is_hashable : std::false_type {};
+template<typename T> struct is_hashable<T, std::void_t<decltype(std::hash<T>()(std::declval<T&>()))>> : std::true_type {};
+template<typename T> using is_hashable_t = typename is_hashable<T>::type;
+
+/**
+ * is_instantiation_of<T, I> is true_type iff I is a template instantiation of T (e.g. vector<int> is an instantiation of vector)
+ *  Example:
+ *    is_instantiation_of_t<vector, vector<int>> // true
+ *    is_instantiation_of_t<pair, pair<int, string>> // true
+ *    is_instantiation_of_t<vector, pair<int, string>> // false
+ */
+template <template<class...> class Template, class T>
+struct is_instantiation_of : std::false_type {};
+template <template <class...> class Template, class... Args>
+struct is_instantiation_of<Template, Template<Args...>> : std::true_type {};
+template<template<class...> class Template, class T> using is_instantiation_of_t = typename is_instantiation_of<Template, T>::type;
+
+/**
+ * is_type_condition<C> is true_type iff C<...> is a type trait representing a condition (i.e. has a constexpr static bool ::value member)
+ * Example:
+ *   is_type_condition<std::is_reference>  // true
+ */
+template<template<typename> typename C, typename Enable = void>
+struct is_type_condition : std::false_type {};
+template<template<typename> typename C>
+struct is_type_condition<C, std::enable_if_t<std::is_same<bool, std::remove_cv_t<decltype(C<int>::value)>>::value>> : std::true_type {};
+
 _MATRICE_NAMESPACE_END
