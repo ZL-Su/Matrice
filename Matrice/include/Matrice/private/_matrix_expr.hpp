@@ -27,8 +27,9 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #pragma warning(disable: 4715)
 
-MATRICE_NAMESPACE_BEGIN_
-// \forward declaration 
+DGE_MATRICE_BEGIN
+#pragma region <!-- Forward declarations and matrix traits supplements -->
+// \forward declarations 
 _TYPES_BEGIN
 template<typename _Ty> class Matrix;
 template<typename _Ty, int _Rows, int _cols> class Matrix_;
@@ -56,11 +57,12 @@ struct matrix_traits<types::Base_<_Derived, _Traits, _Ty>> {
 	struct size { struct rows { enum { value = _M }; }; struct cols { enum { value = _N }; }; };
 	static constexpr bool Is_base = std::true_type::value;
 };
-_MATRICE_NAMESPACE_END
+#pragma endregion
+DGE_MATRICE_END
 
 MATRICE_NAMESPACE_EXPR_BEGIN
-template<class _Lhs, class _Rhs, typename _BinaryOp> class MatBinaryExpr;
-template<class _Lhs, typename _UnaryOp> class MatUnaryExpr;
+template<typename _T, typename _U, typename _Op> class MatBinaryExpr;
+template<typename _T, typename _Op> class MatUnaryExpr;
 
 struct Expr {
 	using size_t = std::size_t;
