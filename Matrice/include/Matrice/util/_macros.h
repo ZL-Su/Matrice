@@ -89,6 +89,8 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #define MATRICE_NAMESPACE_BEGIN_ namespace dgelom {
 #define _MATRICE_NAMESPACE_END                   }
+#define DGE_MATRICE_BEGIN namespace dgelom {
+#define DGE_MATRICE_END }
 #define MATRICE_NAMESPACE_BEGIN_TYPES MATRICE_NAMESPACE_BEGIN_ namespace types {
 #define MATRICE_NAMESPACE_END_TYPES  } _MATRICE_NAMESPACE_END
 #define MATRICE_NAMESPACE_EXPR_BEGIN MATRICE_NAMESPACE_BEGIN_ namespace exprs {

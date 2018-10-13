@@ -573,6 +573,9 @@
     <ClInclude Include="include\Matrice\algs\deeplearning\caffe2\utils\zmq_helper.h">
       <Filter>Header Files\Algs\Deeplearning\Caffe2\utils</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\private\_size_traits.h">
+      <Filter>Header Files\Detail\traits</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\private\_memory.cpp">
