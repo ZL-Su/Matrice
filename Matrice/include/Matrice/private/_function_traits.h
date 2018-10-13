@@ -42,7 +42,7 @@ template<typename _Ret, typename... _Args> struct function_traits<_Ret(_Args...)
 	using plain_type = _Ret(_Args...);
 	using function_type = std::function<_Ret(_Args...)>;
 	using return_type = _Ret;
-	using argument_type_list = tl::typelist<_Args...>;
-	static constexpr auto nargs = sizeof...(_Args);
+	using argument_type_list = typelist<_Args...>;
+	static constexpr auto nargts = argument_type_list::ntypes;
 };
 DGE_MATRICE_END

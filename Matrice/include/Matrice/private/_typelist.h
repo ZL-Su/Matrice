@@ -50,7 +50,7 @@ private:
  *   3  ==  size<typelist<int, int, double>>::value
  */
 template<typename _TyList> struct size final {
-	static_assert(detail::false_t_v<_TyList>, "In dgelom::size<T>, T must be typelist<...>.");
+	static_assert(detail::false_t_v<_TyList>, "In tl::size<T>, T must be typelist<...>.");
 };
 template<typename... _Tys> struct size<typelist<_Tys...>> final {
 	static constexpr std::size_t value = sizeof...(_Tys);
@@ -63,7 +63,7 @@ template<typename... _Tys> MATRICE_GLOBAL_INL constexpr auto size_v = size<_Tys>
  *   std::tuple<int, string>  ==  to_tuple_t<typelist<int, string>>
  */
 template<typename _TyList> struct to_tuple final {
-	static_assert(detail::false_t_v<_TyList>, "In typelist::to_tuple<T>, T must be typelist<...>.");
+	static_assert(detail::false_t_v<_TyList>, "In tl::to_tuple<T>, T must be typelist<...>.");
 };
 template<typename... _Tys> struct to_tuple<typelist<_Tys...>> final {
 	using type = std::tuple<_Tys...>;
@@ -77,7 +77,7 @@ template<typename _TyList> using to_tuple_t = typename to_tuple<_TyList>::type;
  *   typelist<int, string>  ==  from_tuple_t<std::tuple<int, string>>
  */
 template<typename _Tuple> struct from_tuple final {
-	static_assert(detail::false_t_v<_Tuple>, "In typelist::from_tuple<T>, T must be std::tuple<...>.");
+	static_assert(detail::false_t_v<_Tuple>, "In tl::from_tuple<T>, T must be std::tuple<...>.");
 };
 template<typename... _Tys> struct from_tuple<std::tuple<_Tys...>> final {
 	using type = typelist<_Tys...>;
@@ -91,7 +91,7 @@ template<class Tuple> using from_tuple_t = typename from_tuple<Tuple>::type;
  *   typelist<int, string, int>  ==  concat_t<typelist<int, string>, typelist<int>>
  */
 template<typename... _TyLists> struct concat final {
-	static_assert(detail::false_t_v<_TyLists...>, "In typelist::concat<T1, ...>, the T arguments each must be typelist<...>.");
+	static_assert(detail::false_t_v<_TyLists...>, "In tl::concat<T1, ...>, the T arguments each must be typelist<...>.");
 };
 template<typename... _Head1Tys, typename... _Head2Tys, typename... _TailLists>
 struct concat<typelist<_Head1Tys...>, typelist<_Head2Tys...>, _TailLists...> final {
@@ -108,18 +108,18 @@ template<typename... _TyLists> using concat_t = typename concat<_TyLists...>::ty
  *   typelist<int&, const string&&>  ==  filter_t<std::is_reference, typelist<void, string, int&, bool, const string&&, int>>
  */
 template<template <typename> class _Cond, typename _TyList> struct filter final {
-	static_assert(detail::false_t<_TyList>::value, "In typelist::filter<_Cond, _TyList>, the _TyList argument must be typelist<...>.");
+	static_assert(detail::false_t<_TyList>::value, "In tl::filter<_Cond, _TyList>, the _TyList argument must be typelist<...>.");
 };
 template<template <typename> class _Cond, class _Head, class... _Tails>
 struct filter<_Cond, typelist<_Head, _Tails...>> final {
-	static_assert(is_type_condition<_Cond>::value, "In typelist::filter<_Cond, _TyList>, the _Cond argument must be a condition type trait, i.e. have a static constexpr bool ::value member.");
+	static_assert(is_type_condition<_Cond>::value, "In tl::filter<_Cond, _TyList>, the _Cond argument must be a condition type trait, i.e. have a static constexpr bool ::value member.");
 	using type = conditional_t<_Cond<_Head>::value,
 		concat_t<typelist<_Head>, typename filter<_Cond, typelist<_Tails...>>::type>,
 		typename filter<_Cond, typelist<_Tails...>>::type>;
 };
 template<template <typename> class _Cond>
 struct filter<_Cond, typelist<>> final {
-	static_assert(is_type_condition<_Cond>::value, "In typelist::filter<_Cond, _TyList>, the _Cond argument must be a condition type trait, i.e. have a static constexpr bool ::value member.");
+	static_assert(is_type_condition<_Cond>::value, "In tl::filter<_Cond, _TyList>, the _Cond argument must be a condition type trait, i.e. have a static constexpr bool ::value member.");
 	using type = typelist<>;
 };
 template<template <typename> class _Cond, typename _TyList>
@@ -132,8 +132,8 @@ using filter_t = typename filter<_Cond, _TyList>::type;
  */
 template<template <typename> class _Cond, typename _TyList>
 struct count_if final {
-	static_assert(is_type_condition<_Cond>::value, "In typelist::count_if<_Cond, _TyList>, the _Cond argument must be a condition type trait, i.e. have a static constexpr bool ::value member.");
-	static_assert(is_instantiation_of<typelist, _TyList>::value, "In typelist::count_if<_Cond, _TyList>, the _TyList argument must be typelist<...>.");
+	static_assert(is_type_condition<_Cond>::value, "In tl::count_if<_Cond, _TyList>, the _Cond argument must be a condition type trait, i.e. have a static constexpr bool ::value member.");
+	static_assert(is_instantiation_of<typelist, _TyList>::value, "In tl::count_if<_Cond, _TyList>, the _TyList argument must be typelist<...>.");
 	// TODO Direct implementation might be faster
 	static constexpr size_t value = size<filter_t<_Cond, _TyList>>::value;
 };
@@ -273,7 +273,7 @@ namespace detail {
 	template<class T> struct type_ final { using type = T; };
 
 	template<typename _TyList> struct map_types_to_values final {
-		static_assert(detail::false_t_v<_TyList>, "In typelist::map_types_to_values<T>, the T argument must be typelist<...>.");
+		static_assert(detail::false_t_v<_TyList>, "In tl::map_types_to_values<T>, the T argument must be typelist<...>.");
 	};
 	template<typename... _Tys> struct map_types_to_values<typelist<_Tys...>> final {
 		template<typename _Fty>
