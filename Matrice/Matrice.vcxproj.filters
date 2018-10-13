@@ -303,9 +303,6 @@
     <ClInclude Include="examples\basic_matrix_usage.h">
       <Filter>Examples</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\util\_conditions.h">
-      <Filter>Header Files\Util</Filter>
-    </ClInclude>
     <ClInclude Include="include\Matrice\algs\deeplearning\caffe2\core\allocator.h">
       <Filter>Header Files\Algs\Deeplearning\Caffe2\core</Filter>
     </ClInclude>
@@ -575,6 +572,9 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_size_traits.h">
       <Filter>Header Files\Detail\traits</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\util\_macro_conditions.h">
+      <Filter>Header Files\Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

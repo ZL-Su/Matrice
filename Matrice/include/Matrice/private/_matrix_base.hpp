@@ -28,7 +28,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_view.h"
 #include "../../../addin/interface.h"
 #include "../util/_type_defs.h"
-#include "../util/_conditions.h"
+#include "../util/_macro_conditions.h"
 #include "../core/solver.h"
 
 #pragma warning(disable: 4715 4661 4224 4267 4244 4819 4199)

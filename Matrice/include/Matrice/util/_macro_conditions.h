@@ -19,34 +19,34 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #include "_macros.h"
 
-MATRICE_NAMESPACE_BEGIN_
+DGE_MATRICE_BEGIN
 _CONDITIONS_BEGIN
 
 // \condition expression: _Test_val satisfies _Bool_exp, for exampe _My_val < _Test_val 
-#ifndef _VAL(_Bool_exp)
-#define _VAL(_Bool_exp) [](const auto& _My_val){return (_My_val _Bool_exp);}
+#ifndef _COND_VAL(_Bool_exp)
+#define _COND_VAL(_Bool_exp) [](const auto& _My_val){return (_My_val _Bool_exp);}
 #endif
 
-#ifndef _XLT(_Test_val)
-#define _XLT(_Test_val) _VAL(<_Test_val) //\less than _Test_val
+#ifndef _COND_LT(_Test_val)
+#define _COND_LT(_Test_val) _COND_VAL(<_Test_val) //\less than _Test_val
 #endif
 
-#ifndef _XLQ(_Test_val)
-#define _XLQ(_Test_val) _VAL(<=_Test_val) //\less than or equal to _Test_val
+#ifndef _COND_LQ(_Test_val)
+#define _COND_LQ(_Test_val) _COND_VAL(<=_Test_val) //\less than or equal to _Test_val
 #endif
 
-#ifndef _XEQ(_Test_val)
-#define _XEQ(_Test_val) _VAL(==_Test_val) //\equal to _Test_val
+#ifndef _COND_EQ(_Test_val)
+#define _COND_EQ(_Test_val) _COND_VAL(==_Test_val) //\equal to _Test_val
 #endif
 
-#ifndef _XGT(_Test_val)
-#define _XGT(_Test_val) _VAL(>_Test_val) //\greater than _Test_val
+#ifndef _COND_GT(_Test_val)
+#define _COND_GT(_Test_val) _COND_VAL(>_Test_val) //\greater than _Test_val
 #endif
 
-#ifndef _XGQ(_Test_val)
-#define _XGQ(_Test_val) _VAL(>=_Test_val) //\greater than or equal to _Test_val
+#ifndef _COND_GQ(_Test_val)
+#define _COND_GQ(_Test_val) _COND_VAL(>=_Test_val) //\greater than or equal to _Test_val
 #endif
 
 _CONDITIONS_END
-_MATRICE_NAMESPACE_END
+DGE_MATRICE_END
 
