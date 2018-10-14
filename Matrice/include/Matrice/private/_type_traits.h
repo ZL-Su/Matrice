@@ -20,7 +20,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../util/_type_defs.h"
 #include "_memory.h"
 
-MATRICE_NAMESPACE_BEGIN_
+DGE_MATRICE_BEGIN
 
 template<typename T> struct remove_reference { using type = typename std::remove_reference<T>::type; };
 template<typename T> using remove_reference_t = typename remove_reference<T>::type;
@@ -186,4 +186,4 @@ private: \
 	template<typename _C> static auto _Check(int)->decltype(std::declval<_C>()._Name(std::declval<_Args>()...), std::true_type()); \
 	template<typename _C> static std::false_type _Check(...); \
 };
-_MATRICE_NAMESPACE_END
+DGE_MATRICE_END
