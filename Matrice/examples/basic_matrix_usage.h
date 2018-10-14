@@ -92,6 +92,14 @@ int main() try
 		auto Ewise_sum_3 = A_plus_B_exp.eval(); 
 		// in the above way, the returned matrix type is inferred automatically, which generally is the optimal matrix type. If you wanna use the return type that you specified, the templated version of 'eval()' method should be called as follows
 		auto Ewise_sum_4 = A_plus_B_exp.eval<dgelom::Matrix<default_type>>();
+
+		// \Metrix-level operations: matmul, transpose, inverse...
+		// ...expresstion
+		auto A_mul_B_exp = A.mul(B);
+		// ...direct evaluation
+		matrix_t A_mul_B = A.mul(B);
+		// ...or matrix_t A_mul_B = A_mul_B_exp;
+		// ...or auto A_mul_B = A_mul_B_exp.eval();
 	}
 #pragma endregion
 }
