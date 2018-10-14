@@ -28,13 +28,13 @@ template<typename T> using remove_reference_t = typename remove_reference<T>::ty
 template<typename T> struct type_bytes { enum { value = sizeof(T) }; };
 template<typename T> MATRICE_GLOBAL_INL constexpr int type_bytes_v = type_bytes<T>::value;
 
-template<bool _Test, typename T1, typename T2> struct conditonal {};
-template<typename T1, typename T2> struct conditonal<true, T1, T2> { using type = T1; };
-template<typename T1, typename T2> struct conditonal<false, T1, T2> { using type = T2; };
-template<bool _Test, typename T1, typename T2> struct conditional {};
-template<typename T1, typename T2> struct conditional<true, T1, T2> { using type = T1; };
-template<typename T1, typename T2> struct conditional<false, T1, T2> { using type = T2; };
-template<bool _Test, typename T1, typename T2> using conditional_t = typename conditional<_Test, T1, T2>::type;
+template<bool _Test, typename T, typename U> struct conditonal {};
+template<typename T, typename U> struct conditonal<true, T, U> { using type = T; };
+template<typename T, typename U> struct conditonal<false, T, U> { using type = U; };
+template<bool _Test, typename T, typename U> struct conditional {};
+template<typename T, typename U> struct conditional<true, T, U> { using type = T; };
+template<typename T, typename U> struct conditional<false, T, U> { using type = U; };
+template<bool _Test, typename T, typename U> using conditional_t = typename conditional<_Test, T, U>::type;
 
 template<int _Val> struct is_zero { enum { value = _Val == 0 }; };
 template<int _R, int _C> struct is_static {enum {value = _R > 0 && _C >0 }; };
@@ -70,8 +70,8 @@ template<> struct _View_trait<double> { enum { value = 0x0064 }; };
 template<typename T, typename = std::enable_if_t<std::is_class_v<T>>>
 struct traits { using type = typename T::value_t; };
 
-template<typename _Ty> struct is_matrix : std::false_type {};
-template<typename _Ty> MATRICE_GLOBAL_INL constexpr bool is_matrix_v = is_matrix<_Ty>::value;
+template<typename T> struct is_matrix : std::false_type {};
+template<typename T> MATRICE_GLOBAL_INL constexpr bool is_matrix_v = is_matrix<T>::value;
 template<typename Mty, typename = std::enable_if_t<is_matrix_v<Mty>>>
 struct matrix_traits : traits<Mty> {};
 
@@ -81,12 +81,12 @@ template<typename Exp> MATRICE_GLOBAL_INL constexpr bool is_expression_v = is_ex
 template<class Exp, typename = std::enable_if_t<is_expression_v<Exp>>>
 struct expression_traits : traits<Exp> {};
 
-template<typename _Ty> struct is_iterator: std::false_type {};
-template<typename _Ty> MATRICE_GLOBAL_INL constexpr bool is_iterator_v = is_iterator<_Ty>::value;
+template<typename T> struct is_iterator: std::false_type {};
+template<typename T> MATRICE_GLOBAL_INL constexpr bool is_iterator_v = is_iterator<T>::value;
 template<typename Itr> struct iterator_traits : traits<Itr> {};
 
-template<typename _Ty> struct is_mtxview : std::false_type {};
-template<typename _Ty> MATRICE_GLOBAL_INL constexpr bool is_mtxview_v = is_mtxview<_Ty>::value;
+template<typename T> struct is_mtxview : std::false_type {};
+template<typename T> MATRICE_GLOBAL_INL constexpr bool is_mtxview_v = is_mtxview<T>::value;
 template<typename View> struct mtxview_traits : traits<View> {};
 
 template<int _M, int _N> struct allocator_traits {
@@ -102,8 +102,8 @@ template<int _M, int _N> struct allocator_traits {
 	};
 };
 
-template<class _Ty, typename = std::enable_if_t<is_matrix_v<_Ty> || is_expression_v<_Ty>>> 
-struct layout_traits : traits<_Ty> {
+template<class T, typename = std::enable_if_t<is_matrix_v<T> || is_expression_v<T>>> 
+struct layout_traits : traits<T> {
 	MATRICE_GLOBAL_FINL static auto layout_type(size_t _format) {
 		return (_format & rmaj == rmaj) ? rmaj : cmaj;
 	}
@@ -180,8 +180,8 @@ struct is_type_condition<C, std::enable_if_t<std::is_same<bool, std::remove_cv_t
  * has_method_Fn<T, _Args> is true_type iff T has method T.Fn(_Args...)
  */
 #define _HAS_METHOD(_Name) \
-template<typename _Ty, typename... _Args> struct has_method_##_Name { \
-	static constexpr bool value = std::is_same_v<decltype(_Check<_Ty>(0)), std::true_type::value>; \
+template<typename T, typename... _Args> struct has_method_##_Name { \
+	static constexpr bool value = std::is_same_v<decltype(_Check<T>(0)), std::true_type::value>; \
 private: \
 	template<typename _C> static auto _Check(int)->decltype(std::declval<_C>()._Name(std::declval<_Args>()...), std::true_type()); \
 	template<typename _C> static std::false_type _Check(...); \
