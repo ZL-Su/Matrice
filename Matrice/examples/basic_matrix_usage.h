@@ -5,6 +5,7 @@
 #pragma once
 
 #include "../include/Matrice/core/matrix.h"
+#include "../include/Matrice/core/vector.h"
 
 using default_type = dgelom::default_type;
 
@@ -55,7 +56,7 @@ int main() try
 	}
 #pragma endregion
 
-#pragma region <!-- Basic matrix operations -->
+#pragma region <!-- Basic matrix(vector) operations -->
 	/*
 	What you should know before using matrix operations:
 		(1) All operations are almost applied to all matrix types,
@@ -101,6 +102,24 @@ int main() try
 		// ...or matrix_t A_mul_B = A_mul_B_exp;
 		// ...or auto A_mul_B = A_mul_B_exp.eval();
 	}
+#pragma endregion
+
+#pragma region <!-- Basis of linear algebra -->
+	{
+		using matrix_t = dgelom::Matrix_<default_type, 3, 3>;
+		using vector_t = dgelom::Vec_<default_type, 3>;
+		// Given a matrix A and vectors x and b, 
+		matrix_t A{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+		vector_t x{ 1, 0, 0 }, b{ 0.5 };
+		// ...Matrice can create the expression y = Ax+b as
+		auto y_exp = A.mul(x) + b; //Note that y_exp is just an expression
+		// if we wanna retrieve the values of y, it's should be evaluated
+		vector_t y = y_exp; // or auto y = y_exp.eval();
+
+		// ...inversely, we can estimate x in a trivial way as
+		x = A.inv().eval().mul(y_exp - b);
+	}
+	
 #pragma endregion
 }
 catch (std::exception& _E) { throw _E; }
