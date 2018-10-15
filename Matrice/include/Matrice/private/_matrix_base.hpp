@@ -20,6 +20,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <iterator>
 #include <valarray>
 #include <functional>
+#include <tuple>
 #include "_type_traits.h"
 #include "_matrix_expr.hpp"
 #include "_matrix.inl.hpp"
@@ -34,17 +35,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma warning(disable: 4715 4661 4224 4267 4244 4819 4199)
 
 #ifndef _HAS_CXX17
-#  error Matrice library must be compiled as C++ 17
+#  error Matrice library must be compiled as C++ 17 or above.
 #endif
 
-MATRICE_NAMESPACE_BEGIN_
-
-#ifndef MATRICE_INT
-#define MATRICE_INT                                std::ptrdiff_t
-	typedef MATRICE_INT                                     int_t;
-#else
-	typedef int                                             int_t;
-#endif
+DGE_MATRICE_BEGIN
 
 // \CLASS TEMPLATE to make plane view for all matrix types
 template<typename _Ty, int _Type = _View_trait<_Ty>::value> class PlaneView_
@@ -263,6 +257,9 @@ public:
 	MATRICE_GLOBAL_FINL constexpr auto rows() const { return m_rows; }
 	MATRICE_GLOBAL_FINL constexpr auto cols() const { return m_cols; }
 	MATRICE_GLOBAL_FINL constexpr auto size() const { return m_rows*m_cols; }
+	MATRICE_GLOBAL_FINL constexpr auto shape() const {
+		return std::forward_as_tuple(m_rows, m_cols);
+	}
 
 	///<brief> assignment operators </brief>
 	MATRICE_GLOBAL_FINL _Derived& operator= (const_init_list _list)
@@ -372,4 +369,4 @@ protected:
 public:
 	_Myt_storage_type m_storage;
 };
-MATRICE_NAMESPACE_END_TYPES
+DGE_MATRICE_END
