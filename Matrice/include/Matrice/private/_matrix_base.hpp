@@ -369,4 +369,5 @@ protected:
 public:
 	_Myt_storage_type m_storage;
 };
+_TYPES_END
 DGE_MATRICE_END
