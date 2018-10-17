@@ -114,3 +114,5 @@ typedef int                                             int_t;
 #define _TYPES_END }
 #define _CONDITIONS_BEGIN namespace conds {
 #define _CONDITIONS_END }
+#define _DETAIL_BEGIN namespace detail {
+#define _DETAIL_END }

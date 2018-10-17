@@ -50,8 +50,8 @@ public:
 	MATRICE_HOST_FINL constexpr auto& operator[](size_t i) { return My_op(m_data)[i]; }
 	MATRICE_HOST_FINL constexpr const auto& operator[](size_t i) const { return My_op(m_data)[i]; }
 	MATRICE_HOST_FINL auto operator() (pointer data) const { My_op(m_data, data); }
-	template<typename fwdty>
-	MATRICE_HOST_FINL auto operator() (fwdty& arg) const { My_op(m_data, arg.data()); }
+	template<typename _Fwdty>
+	MATRICE_HOST_FINL auto operator() (_Fwdty& arg) const { My_op(m_data, arg.data()); }
 	MATRICE_HOST_FINL auto data() { return (m_data); }
 	MATRICE_HOST_FINL const auto data()const { return (m_data); }
 	MATRICE_HOST_FINL auto begin() { return My_op(m_data); }

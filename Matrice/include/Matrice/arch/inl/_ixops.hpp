@@ -27,15 +27,20 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 MATRICE_ARCH_BEGIN  namespace detail {
 
-template<typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
-struct Op_ MATRICE_NONHERITABLE
-{
+///<brief> SIMD operator definitions for application level. </brief>
+template<
+	typename T, 
+	typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+struct Op_ MATRICE_NONHERITABLE {
 	using value_t = T;
-	template<size_t _Elems> struct _base_type {
+	template<size_t _Elems = 4> struct _base_type {
 		enum {num_of_elem = _Elems};
 		using type = conditional_t<value_t, num_of_elem>;
 	};
 
+	/**
+	 * ... - vertical binary arithmetic operations.
+	 */
 	template<size_t _Elems> struct plus : _base_type<_Elems> {
 		using type = typename _base_type<_Elems>::type;
 		enum { size = _base_type<_Elems>::num_of_elem };
@@ -64,6 +69,10 @@ struct Op_ MATRICE_NONHERITABLE
 			return impl::simd_vop<value_t, size>::div(_Left, _Right);
 		}
 	};
+
+	/**
+	 * ... - vertical unary arithmetic operations.
+	 */
 	template<size_t _Elems> struct abs {
 		using type = typename _base_type<_Elems>::type;
 		enum { size = _base_type<_Elems>::num_of_elem };
@@ -72,8 +81,10 @@ struct Op_ MATRICE_NONHERITABLE
 		}
 	};
 
-	template<size_t _Elems>
-	using adaptor = impl::simd_hop<value_t, _Elems>;
+	/**
+	 * adaptor - for data loading, storing and horizontal collection.
+	 */
+	template<size_t _Elems> using adaptor = impl::simd_hop<value_t, _Elems>;
 };
 template<typename _Fn, typename... _Args>
 HOST_INL_CXPR_T _Transform_impl(const _Args&... _args) {

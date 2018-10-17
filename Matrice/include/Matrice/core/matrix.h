@@ -59,6 +59,10 @@ public:
 	template<typename _Arg>
 	MATRICE_GLOBAL_FINL Myt_reference operator= (add_const_reference_t<_Arg> _arg) { return base_t::operator=(_arg); }
 
+	MATRICE_GLOBAL_FINL constexpr auto size() const { return (Size); }
+	MATRICE_GLOBAL_FINL constexpr auto rows() const { return (CompileTimeRows); }
+	MATRICE_GLOBAL_FINL constexpr auto cols() const { return (CompileTimeCols); }
+
 	MATRICE_GLOBAL_FINL operator std::array<value_t, Size>() const { return _Fill_array<value_t, Size>(base_t::begin()); }
 	MATRICE_GLOBAL_FINL operator std::array<value_t, Size>() { return _Fill_array<value_t, Size>(base_t::begin()); }
 	MATRICE_GLOBAL_FINL operator Matrix_<value_t, __, __>() const { return Matrix_<value_t, __, __>(m_rows, m_cols, m_data); }

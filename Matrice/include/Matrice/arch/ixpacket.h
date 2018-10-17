@@ -36,15 +36,15 @@ class Packet_ MATRICE_NONHERITABLE : public simd::simd_base_<T, _Elems>
 public:
 	enum {size = xbase_t::size};
 	using typename xbase_t::value_t;
-	using typename xbase_t::pointer;
+	using pointer = std::add_pointer_t<value_t>;
 
 	MATRICE_HOST_FINL Packet_() noexcept : xbase_t() {}
 	MATRICE_HOST_FINL Packet_(const value_t _arg) noexcept : xbase_t(_arg) {}
 	MATRICE_HOST_FINL Packet_(const pointer _arg) noexcept : xbase_t(_arg) {}
 	MATRICE_HOST_FINL Packet_(const initlist_t _arg) noexcept : xbase_t(pointer(_arg.begin())) {}
 	MATRICE_HOST_FINL Packet_(const internal_t _arg) noexcept : xbase_t(_arg) {}
-	template<typename fwdty, typename = std::enable_if_t<std::is_class_v<fwdty>>>
-	MATRICE_HOST_FINL Packet_(const fwdty& _arg) noexcept : xbase_t(_arg.data()) {}
+	template<typename _Fwdty, typename = std::enable_if_t<std::is_class_v<_Fwdty>>>
+	MATRICE_HOST_FINL Packet_(const _Fwdty& _arg) noexcept : xbase_t(_arg.data()) {}
 
 	MATRICE_HOST_FINL auto& operator()() { return (m_data); }
 	MATRICE_HOST_FINL const auto& operator()() const { return (m_data); }

@@ -42,10 +42,19 @@ template<typename T, int _Elems> struct simd_hop_base
 	using value_t = T;
 	using pointer = std::add_pointer_t<value_t>;
 	using raw_type = conditional_t<value_t, _Elems>;
+
+	template<std::size_t _N = _Elems - 1>  struct _Reduce_n {
+		HOST_STATIC_INL_CXPR_T value(const pointer _Data[[_N]]) {
+			return (_Reduce_n<_N - 1>::value(_Data) + _Data[_N]);
+		}
+	};
+	template<> struct _Reduce_n<0> {
+		HOST_STATIC_INL_CXPR_T value(const pointer _Data[[]]) {
+			return (_Data[0]);
+		}
+	};
 };
-template<typename T, int _Elems> 
-struct simd_hop : simd_hop_base<T, _Elems>
-{
+template<typename T, int _Elems> struct simd_hop : simd_hop_base<T, _Elems> {
 	static_assert(true, "Oops! In simd_hop<T, _Elems>, T and/or _Elems may not be supported.");
 };
 template<> struct simd_hop<size_t, 4> : simd_hop_base<size_t, 4>
@@ -63,7 +72,7 @@ template<> struct simd_hop<size_t, 4> : simd_hop_base<size_t, 4>
 	HOST_INL_CXPR_T operator()(const raw_type& _Packet, pointer _Dst) const
 	{ _mm256_store_si256((raw_type*)_Dst, _Packet); }
 	HOST_INL_CXPR_T operator+ (const pointer _First) const
-	{ return (_First[0] + _First[1] + _First[2] + _First[3]); }
+	{ return (_Reduce_n<>::value(_First)); }
 };
 template<> struct simd_hop<ptrdiff_t, 4> : simd_hop_base<ptrdiff_t, 4>
 {
@@ -80,7 +89,7 @@ template<> struct simd_hop<ptrdiff_t, 4> : simd_hop_base<ptrdiff_t, 4>
 	HOST_INL_CXPR_T operator()(const raw_type& _Packet, pointer _Dst) const
 	{ _mm256_store_si256((raw_type*)_Dst, _Packet); }
 	HOST_INL_CXPR_T operator+ (const pointer _First) const
-	{ return (_First[0] + _First[1] + _First[2] + _First[3]); }
+	{ return (_Reduce_n<>::value(_First)); }
 };
 template<> struct simd_hop<float, 4> : simd_hop_base<float, 4>
 {
@@ -97,7 +106,7 @@ template<> struct simd_hop<float, 4> : simd_hop_base<float, 4>
 	HOST_INL_CXPR_T operator()(const raw_type& _Packet, pointer _Dst) const
 	{ _mm_store_ps(_Dst, _Packet); }
 	HOST_INL_CXPR_T operator+ (const pointer _First) const
-	{ return (_First[0] + _First[1] + _First[2] + _First[3]); }
+	{ return (_Reduce_n<>::value(_First)); }
 };
 template<> struct simd_hop<float, 8> : simd_hop_base<float, 8>
 {
@@ -114,7 +123,7 @@ template<> struct simd_hop<float, 8> : simd_hop_base<float, 8>
 	HOST_INL_CXPR_T operator()(const raw_type& _Packet, pointer _Dst) const
 	{ _mm256_store_ps(_Dst, _Packet); }
 	HOST_INL_CXPR_T operator+ (const pointer _First) const
-	{	return (_First[0] + _First[1] + _First[2] + _First[3] + _First[4] + _First[5] + _First[6] + _First[7]);}
+	{	return (_Reduce_n<>::value(_First)); }
 };
 template<> struct simd_hop<float, 16> : simd_hop_base<float, 16>
 {
@@ -131,7 +140,7 @@ template<> struct simd_hop<float, 16> : simd_hop_base<float, 16>
 	HOST_INL_CXPR_T operator()(const raw_type& _Packet, pointer _Dst) const
 	{ _mm512_store_ps(_Dst, _Packet); }
 	HOST_INL_CXPR_T operator+ (const pointer _First) const
-	{	return (_First[0] + _First[1] + _First[2] + _First[3] + _First[4] + _First[5] + _First[6] + _First[7]+ _First[8] + _First[9] + _First[10] + _First[11] + _First[12] + _First[13] + _First[14] + _First[15]);}
+	{	return (_Reduce_n<>::value(_First)); }
 };
 template<> struct simd_hop<double, 2> : simd_hop_base<double, 2>
 { 
@@ -148,7 +157,7 @@ template<> struct simd_hop<double, 2> : simd_hop_base<double, 2>
 	HOST_INL_CXPR_T operator()(const raw_type& _Packet, pointer _Dst) const
 	{ _mm_store_pd(_Dst, _Packet); }
 	HOST_INL_CXPR_T operator+ (const pointer _First) const
-	{ return (_First[0] + _First[1]); }
+	{ return (_Reduce_n<>::value(_First)); }
 };
 template<> struct simd_hop<double, 4> : simd_hop_base<double, 4>
 {
@@ -165,7 +174,7 @@ template<> struct simd_hop<double, 4> : simd_hop_base<double, 4>
 	HOST_INL_CXPR_T operator()(const raw_type& _Packet, pointer _Dst) const
 	{ _mm256_store_pd(_Dst, _Packet); }
 	HOST_INL_CXPR_T operator+ (const pointer _First) const
-	{ return (_First[0] + _First[1] + _First[2] + _First[3]); }
+	{ return (_Reduce_n<>::value(_First)); }
 };
 template<> struct simd_hop<double, 8> : simd_hop_base<double, 8>
 {
@@ -182,16 +191,17 @@ template<> struct simd_hop<double, 8> : simd_hop_base<double, 8>
 	HOST_INL_CXPR_T operator()(const raw_type& _Packet, pointer _Dst) const
 	{ _mm512_store_pd(_Dst, _Packet); }
 	HOST_INL_CXPR_T operator+ (const pointer _First) const
-	{	return (_First[0] + _First[1] + _First[2] + _First[3] + _First[4] + _First[5] + _First[6] + _First[7]);}
+	{	return (_Reduce_n<>::value(_First)); }
 };
 #pragma endregion
 
 #pragma region <!-- raw-type level operators (RLO) : vertical arithmetic operation -->
-template<typename T, int _Elems> struct simd_vop
-{ enum { N = _Elems }; using value_t = T; };
+template<typename T, int _Elems> struct simd_vop { 
+	enum { N = _Elems }; 
+	using value_t = T; 
+};
 
-template<typename T, int _Elems, typename derived = simd_vop<T, _Elems>>
-struct simd_vop_base {
+template<typename T, int _Elems, typename derived = simd_vop<T, _Elems>> struct simd_vop_base {
 	enum { N = _Elems }; using value_t = T;
 	using type = dgelom::simd::conditional_t<value_t, N>;
 	template<typename _Op> HOST_STATIC_INL_CXPR_T _Binary(_Op _Op) { return _Op(); }
@@ -204,52 +214,43 @@ template<> struct simd_vop<size_t, 4> : public simd_vop_base<size_t, 4>
 	using base_t::value_t;
 	using base_t::type;
 	using base_t::N;
-	HOST_STATIC_INL_CXPR_T sum(const type& _Left, const type& _Right)
-	{
+
+	HOST_STATIC_INL_CXPR_T sum(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm256_add_epi64(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T sub(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T sub(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm256_sub_epi64(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T mul(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T mul(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm256_mul_epu32(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T div(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T div(const type& _Left, const type& _Right) {
 		//return base_t::_Binary([&]()->auto{return _mm256_div_epu32(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T const abs(const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T const abs(const type& _Right) {
 		return base_t::_Unary([&]()->type {return _mm256_and_si256(_Right, _mm256_castsi128_si256(_mm_set1_epi32(~(1 << 31)))); });
 	}
 };
-
 template<> struct simd_vop<float, 4> : public simd_vop_base<float, 4>
 {
 	using base_t = simd_vop_base<float, 4>;
 	using base_t::value_t;
 	using base_t::type;
 	using base_t::N;
-	HOST_STATIC_INL_CXPR_T sum(const type& _Left, const type& _Right)
-	{
+
+	HOST_STATIC_INL_CXPR_T sum(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm_add_ps(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T sub(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T sub(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm_sub_ps(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T mul(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T mul(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm_mul_ps(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T div(const type& _Left, const type& _Right)
-	{  
+	HOST_STATIC_INL_CXPR_T div(const type& _Left, const type& _Right) {  
 		return base_t::_Binary([&]()->auto{return _mm_div_ps(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T const abs(const type& _Right) 
-	{
+	HOST_STATIC_INL_CXPR_T const abs(const type& _Right) {
 		return  base_t::_Unary([&]()->type{return _mm_and_ps(_Right, _mm_castsi128_ps(_mm_set1_epi32(~(1 << 31)))); });
 	}
 };
@@ -260,24 +261,19 @@ template<> struct simd_vop<float, 8> : public simd_vop_base<float, 8>
 	using base_t::type;
 	using base_t::N;
 
-	HOST_STATIC_INL_CXPR_T sum(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T sum(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm256_add_ps(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T sub(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T sub(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm256_sub_ps(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T mul(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T mul(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm256_mul_ps(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T div(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T div(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm256_div_ps(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T const abs(const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T const abs(const type& _Right) {
 		return base_t::_Unary([&]()->type{ return _mm256_and_ps(_Right, _mm256_castsi256_ps(_mm256_set1_epi32(~(1 << 31)))); });
 	}
 };
@@ -288,24 +284,19 @@ template<> struct simd_vop<float, 16> : public simd_vop_base<float, 16>
 	using base_t::type;
 	using base_t::N;
 	
-	HOST_STATIC_INL_CXPR_T sum(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T sum(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm512_add_ps(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T sub(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T sub(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm512_sub_ps(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T mul(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T mul(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm512_mul_ps(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T div(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T div(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm512_div_ps(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T const abs(const type& _Right) 
-	{
+	HOST_STATIC_INL_CXPR_T const abs(const type& _Right) {
 		return base_t::_Unary([&]()->type{return _mm512_castsi512_ps(_mm512_srli_epi64(_mm512_slli_epi64(_mm512_castps_si512(_Right), 1), 1)); });
 	}
 };
@@ -315,24 +306,19 @@ template<> struct simd_vop<double, 2> : public simd_vop_base<double, 2>
 	using base_t::value_t;
 	using base_t::type;
 	using base_t::N;
-	HOST_STATIC_INL_CXPR_T sum(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T sum(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm_add_pd(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T sub(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T sub(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm_sub_pd(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T mul(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T mul(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm_mul_pd(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T div(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T div(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm_div_pd(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T const abs(const type& _Right) 
-	{ 
+	HOST_STATIC_INL_CXPR_T const abs(const type& _Right) { 
 		return base_t::_Unary([&]()->type{ return _mm_and_pd(_Right, _mm_castsi128_pd(_mm_setr_epi32(-1, 0x7FFFFFFF, -1, 0x7FFFFFFF)));});
 	}
 };
@@ -343,24 +329,19 @@ template<> struct simd_vop<double, 4> : public simd_vop_base<double, 4>
 	using base_t::type;
 	using base_t::N;
 
-	HOST_STATIC_INL_CXPR_T sum(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T sum(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm256_add_pd(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T sub(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T sub(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm256_sub_pd(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T mul(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T mul(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm256_mul_pd(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T div(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T div(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm256_div_pd(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T const abs(const type& _Right) 
-	{
+	HOST_STATIC_INL_CXPR_T const abs(const type& _Right) {
 		return base_t::_Unary([&]()->type{ return _mm256_and_pd(_Right, _mm256_castsi256_pd(_mm256_set1_epi32(~(1 << 31)))); });
 	}
 };
@@ -371,20 +352,16 @@ template<> struct simd_vop<double, 8> : public simd_vop_base<double, 8>
 	using base_t::type;
 	using base_t::N;
 
-	HOST_STATIC_INL_CXPR_T sum(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T sum(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm512_add_pd(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T sub(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T sub(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm512_sub_pd(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T mul(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T mul(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm512_mul_pd(_Left, _Right); });
 	}
-	HOST_STATIC_INL_CXPR_T div(const type& _Left, const type& _Right)
-	{
+	HOST_STATIC_INL_CXPR_T div(const type& _Left, const type& _Right) {
 		return base_t::_Binary([&]()->auto{return _mm512_div_pd(_Left, _Right); });
 	}
 	HOST_STATIC_INL_CXPR_T const abs(const type& _Right) { return _Right; }

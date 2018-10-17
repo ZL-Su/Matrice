@@ -131,4 +131,18 @@ MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, _Scalar _Value, _Func 
 	for (; _First != _Last; ++_First) _Ret += _Fn(_op(*_First, _Value));
 	return (_Ret);
 }
-_MATRICE_NAMESPACE_END
+_DETAIL_BEGIN
+template<std::size_t _N>  struct _Reduce_n {
+	template<typename _Ty> static
+	MATRICE_GLOBAL_INL auto value(const _Ty* _Data[[_N]]) {
+		return (_Reduce_n<_N - 1>::value(_Data) + _Data[_N]);
+	}
+};
+template<> struct _Reduce_n<0> {
+	template<typename _Ty> static
+	MATRICE_GLOBAL_INL auto value(const _Ty* _Data[[]]) { return (_Data[0]); }
+};
+_DETAIL_END
+template<std::size_t _Size = 1> using reduce_n_t = detail::_Reduce_n<_Size - 1>;
+
+DGE_MATRICE_END
