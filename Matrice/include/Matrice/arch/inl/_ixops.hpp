@@ -19,74 +19,70 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../../private/_type_traits.h"
 #ifdef __AVX__
 #include "../_ixtraits.hpp"
-#include "_ixdetails.hpp"
+#include "_ixop_impls.hpp"
 #include <pmmintrin.h>
 #include <tmmintrin.h>
 #include <wmmintrin.h>
 #include <xmmintrin.h>
 
 MATRICE_ARCH_BEGIN  namespace detail {
-#define matrice_inl_cxauto MATRICE_HOST_FINL constexpr auto
 
 template<typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
 struct Op_ MATRICE_NONHERITABLE
 {
 	using value_t = T;
-	template<size_t _Elems> struct _base_type
-	{
+	template<size_t _Elems> struct _base_type {
 		enum {num_of_elem = _Elems};
 		using type = conditional_t<value_t, num_of_elem>;
 	};
 
-	template<size_t _Elems> struct plus {
+	template<size_t _Elems> struct plus : _base_type<_Elems> {
 		using type = typename _base_type<_Elems>::type;
 		enum { size = _base_type<_Elems>::num_of_elem };
-		matrice_inl_cxauto operator() (const type& _Left, const type& _Right)
-		{
-			return impl::simd_op<value_t, size>::sum(_Left, _Right);
+		HOST_INL_CXPR_T operator() (const type& _Left, const type& _Right) {
+			return impl::simd_vop<value_t, size>::sum(_Left, _Right);
 		}
 	};
 	template<size_t _Elems> struct minus {
 		using type = typename _base_type<_Elems>::type;
 		enum { size = _base_type<_Elems>::num_of_elem };
-		matrice_inl_cxauto operator() (const type& _Left, const type& _Right)
-		{
-			return impl::simd_op<value_t, size>::sub(_Left, _Right);
+		HOST_INL_CXPR_T operator() (const type& _Left, const type& _Right) {
+			return impl::simd_vop<value_t, size>::sub(_Left, _Right);
 		}
 	};
 	template<size_t _Elems> struct multiplies {
 		using type = typename _base_type<_Elems>::type;
 		enum { size = _base_type<_Elems>::num_of_elem };
-		matrice_inl_cxauto operator() (const type& _Left, const type& _Right)
-		{
-			return impl::simd_op<value_t, size>::mul(_Left, _Right);
+		HOST_INL_CXPR_T operator() (const type& _Left, const type& _Right) {
+			return impl::simd_vop<value_t, size>::mul(_Left, _Right);
 		}
 	};
 	template<size_t _Elems> struct divides {
 		using type = typename _base_type<_Elems>::type;
 		enum { size = _base_type<_Elems>::num_of_elem };
-		matrice_inl_cxauto operator() (const type& _Left, const type& _Right)
-		{
-			return impl::simd_op<value_t, size>::div(_Left, _Right);
+		HOST_INL_CXPR_T operator() (const type& _Left, const type& _Right) {
+			return impl::simd_vop<value_t, size>::div(_Left, _Right);
 		}
 	};
 	template<size_t _Elems> struct abs {
 		using type = typename _base_type<_Elems>::type;
 		enum { size = _base_type<_Elems>::num_of_elem };
-		matrice_inl_cxauto operator() (const type& _Right)
-		{
-			return impl::simd_op<value_t, size>::abs(_Right);
+		HOST_INL_CXPR_T operator() (const type& _Right) {
+			return impl::simd_vop<value_t, size>::abs(_Right);
 		}
 	};
+
+	template<size_t _Elems>
+	using adaptor = impl::simd_hop<value_t, _Elems>;
 };
 template<typename _Fn, typename... _Args>
-matrice_inl_cxauto _Transform_impl(const _Args&... _args) {
+HOST_INL_CXPR_T _Transform_impl(const _Args&... _args) {
 	_Fn _Func;
 	return _Func(_args...); 
 }
 }
 template<typename _Fn, typename... _Args>
-matrice_inl_cxauto transform(const _Args&... _args) { 
+HOST_INL_CXPR_T transform(const _Args&... _args) { 
 	return (detail::_Transform_impl<_Fn>(_args.data()...)); 
 }
 MATRICE_ARCH_END

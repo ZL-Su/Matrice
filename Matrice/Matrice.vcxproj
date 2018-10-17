@@ -241,7 +241,7 @@
     <ClInclude Include="include\Matrice\algs\similarity\_icgn_impl.h" />
     <ClInclude Include="include\Matrice\algs\similarity\_similarity_traits.h" />
     <ClInclude Include="include\Matrice\arch\inl\_ixops.hpp" />
-    <ClInclude Include="include\Matrice\arch\inl\_ixdetails.hpp" />
+    <ClInclude Include="include\Matrice\arch\inl\_ixop_impls.hpp" />
     <ClInclude Include="include\Matrice\arch\ixpacket.h" />
     <ClInclude Include="include\Matrice\arch\_ixbase.h" />
     <ClInclude Include="include\Matrice\arch\_ixtraits.hpp" />

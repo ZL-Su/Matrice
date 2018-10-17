@@ -171,13 +171,13 @@ public:
 };
 
 // \read interface
-template<typename... _Args> MATRICE_HOST_ICEA
+template<typename... _Args> HOST_INL_CXPR_T
 read(_Args... _args) { try { return IO::read(_args...); } catch (std::exception& _E) { throw _E; } };
 // \write interface
-template<typename... _Args> MATRICE_HOST_ICEA
+template<typename... _Args> HOST_INL_CXPR_T
 write(_Args... _args) { try { return IO::write(_args...); } catch (std::exception& _E) { throw _E; } };
 // \definite a path under current folder
-template<typename T> MATRICE_HOST_ICEA 
+template<typename T> HOST_INL_CXPR_T
 defpath(const T local) { return std::forward<std::string>(IO::workspace().string() + "\\" + IO::strf(local)); };
 }
 

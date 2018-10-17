@@ -32,6 +32,10 @@ template<typename T, int _Elems> struct simd_traits
 	struct is_sfp8 { enum { value = is_float32<T>::value && _Elems == 8 }; };
 	struct is_dfp8 { enum { value = is_float64<T>::value && _Elems == 8 }; };
 };
+template<typename T, int _Elems> MATRICE_HOST_INL
+constexpr auto is_simd_sfx8_v = simd_traits<T, _Elems>::is_sfp8::value;
+template<typename T, int _Elems> MATRICE_HOST_INL
+constexpr auto is_simd_dfx8_v = simd_traits<T, _Elems>::is_dfp8::value;
 #pragma endregion
 MATRICE_ARCH_END
 #endif // __AVX__

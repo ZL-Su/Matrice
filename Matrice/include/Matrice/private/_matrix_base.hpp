@@ -257,9 +257,7 @@ public:
 	MATRICE_GLOBAL_FINL constexpr auto rows() const { return m_rows; }
 	MATRICE_GLOBAL_FINL constexpr auto cols() const { return m_cols; }
 	MATRICE_GLOBAL_FINL constexpr auto size() const { return m_rows*m_cols; }
-	MATRICE_GLOBAL_FINL constexpr auto shape() const {
-		return std::forward_as_tuple(m_rows, m_cols);
-	}
+	MATRICE_GLOBAL_FINL constexpr auto shape() const { return std::tie(m_rows, m_cols); }
 
 	///<brief> assignment operators </brief>
 	MATRICE_GLOBAL_FINL _Derived& operator= (const_init_list _list)

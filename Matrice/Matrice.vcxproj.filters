@@ -180,9 +180,6 @@
     <ClInclude Include="include\Matrice\arch\_ixtraits.hpp">
       <Filter>Header Files\Arch</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\arch\inl\_ixdetails.hpp">
-      <Filter>Header Files\Arch\Inl</Filter>
-    </ClInclude>
     <ClInclude Include="include\Matrice\arch\inl\_ixops.hpp">
       <Filter>Header Files\Arch\Inl</Filter>
     </ClInclude>
@@ -581,6 +578,9 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_typelist.h">
       <Filter>Header Files\Detail\traits</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\arch\inl\_ixop_impls.hpp">
+      <Filter>Header Files\Arch\Inl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

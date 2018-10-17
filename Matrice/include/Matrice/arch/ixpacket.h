@@ -17,7 +17,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 #include "_ixbase.h"
-#include "./inl/_ixdetails.hpp"
+#include "./inl/_ixop_impls.hpp"
 #ifdef __AVX__
 MATRICE_ARCH_BEGIN
 
@@ -27,16 +27,17 @@ MATRICE_ARCH_BEGIN
 template<typename T, int _Elems>
 class Packet_ MATRICE_NONHERITABLE : public simd::simd_base_<T, _Elems>
 {
-	using myt = Packet_;
+	using Myt = Packet_;
 	using xbase_t = simd::simd_base_<T, _Elems>;
-	using op_t = detail::Op_<T>;
-	using internal_t = typename xbase_t::internal_t;
-	using initlist_t = typename xbase_t::initlist_t;
+	using typename xbase_t::internal_t;
+	using typename xbase_t::initlist_t;
+	using typename xbase_t::op_t;
 	using xbase_t::m_data;
 public:
 	enum {size = xbase_t::size};
 	using typename xbase_t::value_t;
-	using pointer = value_t*;
+	using typename xbase_t::pointer;
+
 	MATRICE_HOST_FINL Packet_() noexcept : xbase_t() {}
 	MATRICE_HOST_FINL Packet_(const value_t _arg) noexcept : xbase_t(_arg) {}
 	MATRICE_HOST_FINL Packet_(const pointer _arg) noexcept : xbase_t(_arg) {}
@@ -47,11 +48,11 @@ public:
 
 	MATRICE_HOST_FINL auto& operator()() { return (m_data); }
 	MATRICE_HOST_FINL const auto& operator()() const { return (m_data); }
-	MATRICE_HOST_FINL myt& operator+ (const Packet_& _other);
-	MATRICE_HOST_FINL myt& operator- (const Packet_& _other);
-	MATRICE_HOST_FINL myt& operator* (const Packet_& _other);
-	MATRICE_HOST_FINL myt& operator/ (const Packet_& _other);
-	MATRICE_HOST_FINL myt  abs() const;
+	MATRICE_HOST_FINL Myt& operator+ (const Packet_& _other);
+	MATRICE_HOST_FINL Myt& operator- (const Packet_& _other);
+	MATRICE_HOST_FINL Myt& operator* (const Packet_& _other);
+	MATRICE_HOST_FINL Myt& operator/ (const Packet_& _other);
+	MATRICE_HOST_FINL Myt  abs() const;
 
 	template<typename T, int _Elems, typename Packet> friend
 	MATRICE_HOST_FINL Packet abs(const Packet_<T, _Elems>& _Right);
