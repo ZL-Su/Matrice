@@ -18,7 +18,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include <type_traits>
 #include <valarray>
-#include "_matrix.inl.hpp"
+#include "_abstract_ops.hpp"
 #include "../util/_macros.h"
 
 MATRICE_NAMESPACE_BEGIN_TYPES
@@ -112,19 +112,19 @@ public:
 	template<typename... _Args>
 	MATRICE_GLOBAL_INL auto& operator= (const Expr::MatUnaryExpr<_Args...>& _Ex) { return (*static_cast<_Derived*>(&_Ex.assign(*this))); }*/
 
-	template<typename _Op = Expr::EwiseBinaryExpr<_Derived, _Derived, Expr::Op::EwiseSum<value_t>>>
+	template<typename _Op = Expr::EwiseBinaryExpr<_Derived, _Derived, _Exp_op::_Ewise_sum<value_t>>>
 	MATRICE_GLOBAL_FINL auto operator+(const value_t _Right) {
 		return _Op(*static_cast<_Derived*>(this), _Right);
 	}
-	template<typename _Op = Expr::EwiseBinaryExpr<_Derived, _Derived, Expr::Op::EwiseMin<value_t>>>
+	template<typename _Op = Expr::EwiseBinaryExpr<_Derived, _Derived, _Exp_op::_Ewise_min<value_t>>>
 	MATRICE_GLOBAL_FINL auto operator-(const value_t _Right) {
 		return _Op(*static_cast<_Derived*>(this), _Right);
 	}
-	template<typename _Op = Expr::EwiseBinaryExpr<_Derived, _Derived, Expr::Op::EwiseMul<value_t>>>
+	template<typename _Op = Expr::EwiseBinaryExpr<_Derived, _Derived, _Exp_op::_Ewise_mul<value_t>>>
 	MATRICE_GLOBAL_FINL auto operator*(const value_t _Right) {
 		return _Op(*static_cast<_Derived*>(this), _Right);
 	}
-	template<typename _Op = Expr::EwiseBinaryExpr<_Derived, _Derived, Expr::Op::EwiseDiv<value_t>>>
+	template<typename _Op = Expr::EwiseBinaryExpr<_Derived, _Derived, _Exp_op::_Ewise_div<value_t>>>
 	MATRICE_GLOBAL_FINL auto operator/(const value_t _Right) {
 		return _Op(*static_cast<_Derived*>(this), _Right);
 	}

@@ -19,11 +19,10 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #include <array>
 #include "_type_traits.h"
 
-MATRICE_NAMESPACE_BEGIN_
+DGE_MATRICE_BEGIN
 
 using exprs::Expr;
 
-#pragma region <!-- friends -->
 // element-wise addition
 template<typename _Rhs,
 	typename _Op = Expr::EwiseBinaryExpr<_Rhs, _Rhs, _Exp_op::_Ewise_sum<typename _Rhs::value_t>>>
@@ -60,44 +59,52 @@ template<typename _Lhs, typename _Rhs,
 	typename value_t = std::common_type_t<typename _Lhs::value_t, typename _Rhs::value_t>,
 	typename     _Op = Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Exp_op::_Ewise_div<value_t>>>
 MATRICE_GLOBAL_FINL auto operator/ (const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
-#pragma endregion
+
+// element-wise exp()
+template<typename _Rhs,
+	typename value_t = typename std::enable_if_t<std::is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>,
+	typename     _Op = Expr::EwiseUnaryExpr<_Rhs, _Exp_op::_Ewise_exp<value_t>>>
+	MATRICE_GLOBAL_FINL auto exp(const _Rhs& _right) { return _Op(_right); }
 
 // determinent expression of square matrix
 template<typename _Rhs,
-	     typename value_t = typename std::enable_if<std::is_scalar<typename _Rhs::value_t>::value, typename _Rhs::value_t>::type>
+	      typename value_t = typename std::enable_if_t<std::is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>>
 MATRICE_HOST_ONLY value_t det_impl(const _Rhs& a);
+
 // transpose expression
 template<typename _Rhs,
-	     typename value_t = typename std::enable_if<std::is_scalar<typename _Rhs::value_t>::value, typename _Rhs::value_t>::type, 
+	     typename value_t = typename std::enable_if_t<std::is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>, 
 	     typename     _Op = Expr::MatUnaryExpr<_Rhs, _Exp_op::_Mat_trp<value_t>>>
 MATRICE_GLOBAL_FINL auto transpose(const _Rhs& _right) { return _Op(_right); }
+
 // outer product expression : xy^T
 template<typename _Lhs, typename _Rhs,
 	     typename value_t = std::common_type_t<typename _Lhs::value_t, typename _Rhs::value_t>, 
 	     typename     _Op = Expr::MatBinaryExpr<_Lhs, _Rhs, _Exp_op::_Mat_sprmul<value_t>>>
-MATRICE_GLOBAL_FINL auto outer_product(const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
+MATRICE_GLOBAL_FINL auto outer_product(const _Lhs& _left, const _Rhs& _right) {
+	return _Op(_left, _right); 
+}
 
+// helper operators
 template<typename _InIt, typename = std::enable_if_t<std::is_pointer_v<_InIt>>>
-MATRICE_GLOBAL_FINL void _Conformity_check(_InIt _Left, _InIt _Right)
-{
+MATRICE_GLOBAL_FINL void _Conformity_check(_InIt _Left, _InIt _Right) {
 #ifdef _DEBUG
-	if (_Left != _Right) std::runtime_error("Inconsistent iterators!");
+	if (_Left != _Right) throw std::runtime_error("Inconsistent iterators!");
 #endif
 	_Left = _Right;
 }
 template<typename _InIt, typename = std::enable_if_t<std::is_pointer_v<_InIt>>>
-MATRICE_GLOBAL_FINL _InIt _Proxy_checked(const _InIt _Right)
-{
+MATRICE_GLOBAL_FINL _InIt _Proxy_checked(const _InIt _Right) {
 	return (_Right);
 }
 template<typename _Valty, size_t _N, typename = std::enable_if_t<std::is_arithmetic_v<_Valty>>>
-MATRICE_GLOBAL_FINL auto _Fill_array(const _Valty* _First)
-{
+MATRICE_GLOBAL_FINL auto _Fill_array(const _Valty* _First) {
 #ifdef _DEBUG
-	if (_First + _N - 1 == nullptr) std::runtime_error("Unconformable shape!");
+	if (_First + _N - 1 == nullptr) throw std::runtime_error("Unconformable shape!");
 #endif
 	std::array<_Valty, _N> _Ret;
 	std::_Copy_unchecked(_First, _First + _N, _Ret.data());
 	return (_Ret);
 }
-_MATRICE_NAMESPACE_END
+
+DGE_MATRICE_END

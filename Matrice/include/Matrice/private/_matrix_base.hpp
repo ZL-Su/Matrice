@@ -23,7 +23,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <tuple>
 #include "_type_traits.h"
 #include "_matrix_expr.hpp"
-#include "_matrix.inl.hpp"
+#include "_abstract_ops.hpp"
 #include "_storage.hpp"
 #include "_iterator.h"
 #include "_view.h"

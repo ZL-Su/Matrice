@@ -264,9 +264,6 @@
     <ClInclude Include="include\Matrice\algs\similarity\_similarity_traits.h">
       <Filter>Header Files\Algs\Similarity</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\private\_matrix.inl.hpp">
-      <Filter>Header Files\Detail\matrix</Filter>
-    </ClInclude>
     <ClInclude Include="include\Matrice\private\_matrix_base.hpp">
       <Filter>Header Files\Detail\matrix</Filter>
     </ClInclude>
@@ -581,6 +578,9 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\arch\inl\_ixop_impls.hpp">
       <Filter>Header Files\Arch\Inl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\_abstract_ops.hpp">
+      <Filter>Header Files\Detail\matrix</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
