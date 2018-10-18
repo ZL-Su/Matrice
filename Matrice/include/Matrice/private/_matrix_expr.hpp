@@ -74,28 +74,32 @@ struct Expr {
 	template<int N> struct factorial_t { enum { value = factorial_t<N - 1>::value*N }; };
 	template<> struct factorial_t<0> { enum { value = 1 }; };
 
-	struct Op
-	{
-		template<typename _Ty> using EwiseSum = std::plus<_Ty>;
-		template<typename _Ty> using EwiseMin = std::minus<_Ty>;
-		template<typename _Ty> using EwiseMul = std::multiplies<_Ty>;
-		template<typename _Ty> using EwiseDiv = std::divides<_Ty>;
-		template<typename _Ty> struct EwiseSqrt
-		{
-			enum { flag = ewise };
-			MATRICE_GLOBAL_FINL auto operator() (const _Ty& _Val) const {
-				return (std::sqrt(_Val));
-			}
-		};
-		template<typename _Ty> struct MatInv { enum { flag = inv }; MATRICE_GLOBAL _Ty* operator()(int M, _Ty* Out, _Ty* In = nullptr) const; };
-		template<typename _Ty> struct MatTrp { enum { flag = trp }; MATRICE_HOST_FINL _Ty operator()(int M, _Ty* Out, _Ty* i) const { return (Out[int(i[1])*M + int(i[0])]); } };
-		template<typename _Ty> struct SpreadMul
+#define EWISE_OP(_Name) \
+template<typename _Ty> struct _Ewise_##_Name { \
+	enum {flag = ewise}; \
+	MATRICE_GLOBAL_FINL constexpr auto operator() (const _Ty& _Val) const {\
+		return (std::_Name(_Val)); \
+	}\
+}
+	struct Op {
+		template<typename _Ty> using _Ewise_sum = std::plus<_Ty>;
+		template<typename _Ty> using _Ewise_min = std::minus<_Ty>;
+		template<typename _Ty> using _Ewise_mul = std::multiplies<_Ty>;
+		template<typename _Ty> using _Ewise_div = std::divides<_Ty>;
+
+		EWISE_OP(sqrt); EWISE_OP(exp); 
+		EWISE_OP(log); EWISE_OP(log2); EWISE_OP(log10);
+
+		template<typename _Ty> struct _Mat_inv { enum { flag = inv }; MATRICE_GLOBAL _Ty* operator()(int M, _Ty* Out, _Ty* In = nullptr) const; };
+		template<typename _Ty> struct _Mat_trp { enum { flag = trp }; MATRICE_HOST_FINL _Ty operator()(int M, _Ty* Out, _Ty* i) const { return (Out[int(i[1])*M + int(i[0])]); } };
+		// \matrix spread multiply
+		template<typename _Ty> struct _Mat_sprmul
 		{
 			enum { flag = undef };
 			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
 				_Ty operator() (const _Lhs& lhs, const _Rhs& rhs, int r, int c) const { return (lhs(r) * rhs(c)); }
 		};
-		template<typename _Ty> struct MatMul
+		template<typename _Ty> struct _Mat_mul
 		{
 			enum { flag = mmul };
 			template<typename _Rhs> MATRICE_GLOBAL_FINL
@@ -392,7 +396,10 @@ using _Matrix_exp = typename Expr::Base_<_Exp>;
 
 MATRICE_NAMESPACE_EXPR_END
 
-MATRICE_NAMESPACE_BEGIN_
+DGE_MATRICE_BEGIN
+
+using _Exp_op = exprs::Expr::Op;
+
 template<typename _Derived>
 struct is_expression<exprs::Expr::Base_<_Derived>> :std::true_type {};
 template<typename T, typename U, typename _Op>
@@ -449,4 +456,4 @@ struct expression_traits<exprs::Expr::MatUnaryExpr<T, _Op>> {
 	};
 	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
 };
-_MATRICE_NAMESPACE_END
+DGE_MATRICE_END

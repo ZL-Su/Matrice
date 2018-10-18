@@ -9,9 +9,13 @@
 #include "../../include/Matrice/private/_memory.h"
 #include "../private/generic_fast_math.hpp"
 
+#define _EXPOP_EXPLICIT_INSTANTIATION(_Type, _Desc, _Name) \
+template _Type* Expr::Op::_##_Desc##_##_Name<_Type>::operator()(\
+int, _Type*, _Type*) const;
+
 MATRICE_NAMESPACE_EXPR_BEGIN
 template<typename _Ty>
-_Ty * Expr::Op::MatInv<_Ty>::operator()(int M, _Ty * Out, _Ty * In) const
+_Ty * Expr::Op::_Mat_inv<_Ty>::operator()(int M, _Ty * Out, _Ty * In) const
 {
 	if (!In) return (Out);
 	if (M == 2) { privt::_inv2x2m(In, Out); return (Out); };
@@ -32,6 +36,9 @@ _Ty * Expr::Op::MatInv<_Ty>::operator()(int M, _Ty * Out, _Ty * In) const
 #endif
 	return (Out);
 }
-template float* Expr::Op::MatInv<float>::operator()(int, float*, float*) const;
-template double* Expr::Op::MatInv<double>::operator()(int, double*, double*) const;
+
+_EXPOP_EXPLICIT_INSTANTIATION(float, Mat, inv)
+_EXPOP_EXPLICIT_INSTANTIATION(double, Mat, inv)
+//template float* Expr::Op::_Mat_inv<float>::operator()(int, float*, float*) const;
+//template double* Expr::Op::_Mat_inv<double>::operator()(int, double*, double*) const;
 MATRICE_NAMESPACE_EXPR_END

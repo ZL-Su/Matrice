@@ -74,6 +74,8 @@ template
 >
 class Base_ : public PlaneView_<typename _Traits::type>
 {
+#define _EXPOP(_Desc, _Name) typename _Exp_op::_##_Desc##_##_Name<_Type>
+
 	enum { _M = _Traits::size::rows::value, _N = _Traits::size::cols::value };
 	using _Myt_storage_type = typename detail::Storage_<_Type>::template Allocator<_M, _N>;
 	using _Myt = Base_;
@@ -87,14 +89,18 @@ class Base_ : public PlaneView_<typename _Traits::type>
 	using _Myt_rview_type = _Matrix_rview<_Type>;
 	using _Myt_cview_type = _Matrix_cview<_Type>;
 	using _Myt_blockview_type = _Matrix_block<_Type>;
-	using _Xop_ewise_sum  = typename Expr::Op::EwiseSum<_Type>;
-	using _Xop_ewise_min  = typename Expr::Op::EwiseMin<_Type>;
-	using _Xop_ewise_mul  = typename Expr::Op::EwiseMul<_Type>;
-	using _Xop_ewise_div  = typename Expr::Op::EwiseDiv<_Type>;
-	using _Xop_ewise_sqrt = typename Expr::Op::EwiseSqrt<_Type>;
-	using _Xop_mat_mul = typename Expr::Op::MatMul<_Type>;
-	using _Xop_mat_inv = typename Expr::Op::MatInv<_Type>;
-	using _Xop_mat_trp = typename Expr::Op::MatTrp<_Type>;
+	using _Xop_ewise_sum   = _EXPOP(Ewise, sum);
+	using _Xop_ewise_min   = _EXPOP(Ewise, min);
+	using _Xop_ewise_mul   = _EXPOP(Ewise, mul);
+	using _Xop_ewise_div   = _EXPOP(Ewise, div);
+	using _Xop_ewise_sqrt  = _EXPOP(Ewise, sqrt);
+	using _Xop_ewise_exp   = _EXPOP(Ewise, exp);
+	using _Xop_ewise_log   = _EXPOP(Ewise, log);
+	using _Xop_ewise_log2  = _EXPOP(Ewise, log2);
+	using _Xop_ewise_log10 = _EXPOP(Ewise, log10);
+	using _Xop_mat_mul     = _EXPOP(Mat, mul);
+	using _Xop_mat_inv     = _EXPOP(Mat, inv);
+	using _Xop_mat_trp     = _EXPOP(Mat, trp);
 public:
 	using value_t = _Type;
 	using value_type = value_t;
