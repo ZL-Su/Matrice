@@ -24,63 +24,90 @@ DGE_MATRICE_BEGIN
 using exprs::Expr;
 
 // element-wise addition
-template<typename _Rhs,
+template<
+	typename _Lhs, typename _Scalar,
+	typename _Op = Expr::EwiseBinaryExpr<_Lhs, _Lhs, _Exp_op::_Ewise_sum<typename _Lhs::value_t>>,
+	typename = std::enable_if_t<std::is_scalar_v<_Scalar>>>
+MATRICE_GLOBAL_FINL auto operator+ (const _Lhs& _opd, const _Scalar _scalar) { return _Op(_scalar, _opd); }
+template<
+	typename _Rhs,
 	typename _Op = Expr::EwiseBinaryExpr<_Rhs, _Rhs, _Exp_op::_Ewise_sum<typename _Rhs::value_t>>>
-MATRICE_GLOBAL_FINL auto operator+ (typename _Rhs::value_t _scalar, const _Rhs& _opd) { 
-	return _Op(_scalar, _opd); }
-template<typename _Lhs, class _Rhs,
+MATRICE_GLOBAL_FINL auto operator+ (typename _Rhs::value_t _scalar, const _Rhs& _opd) { return _Op(_scalar, _opd); }
+template<
+	typename _Lhs, typename _Rhs,
 	typename value_t = std::common_type_t<typename _Lhs::value_t, typename _Rhs::value_t>,
 	typename     _Op = Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Exp_op::_Ewise_sum<value_t>>>
 MATRICE_GLOBAL_FINL auto operator+ (const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
 // element-wise subtraction
-template<typename _Rhs,
+template<
+	typename _Lhs,
+	typename _Op = Expr::EwiseBinaryExpr<_Lhs, _Lhs, _Exp_op::_Ewise_min<typename _Lhs::value_t>>>
+MATRICE_GLOBAL_FINL auto operator- (const _Lhs& _opd, typename _Lhs::value_t _scalar) { return _Op(-_scalar, _opd); }
+template<
+	typename _Rhs,
 	typename _Op = Expr::EwiseBinaryExpr<_Rhs, _Rhs, _Exp_op::_Ewise_min<typename _Rhs::value_t>>>
 MATRICE_GLOBAL_FINL auto operator- (typename _Rhs::value_t _scalar, const _Rhs& _opd) { return _Op(_scalar, _opd); }
-template<typename _Lhs, class _Rhs,
+template<
+	typename _Lhs, class _Rhs,
 	typename value_t = std::common_type_t<typename _Lhs::value_t, typename _Rhs::value_t>,
 	typename     _Op = Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Exp_op::_Ewise_min<value_t>>>
 MATRICE_GLOBAL_FINL auto operator- (const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
 // element-wise multiplication
-template<typename _Lhs,
-	typename _Op = Expr::EwiseBinaryExpr<_Lhs, _Lhs, _Exp_op::_Ewise_mul<typename _Lhs::value_t>>>
-MATRICE_GLOBAL_FINL auto operator* (const _Lhs& _opd, typename _Lhs::value_t _scalar) { return _Op(_scalar, _opd); }
-template<typename _Rhs,
+template<
+	typename _Lhs, typename _Scalar,
+	typename _Op = Expr::EwiseBinaryExpr<_Lhs, _Lhs, _Exp_op::_Ewise_mul<typename _Lhs::value_t>>,
+	typename = std::enable_if_t<std::is_scalar_v<_Scalar>>>
+MATRICE_GLOBAL_FINL auto operator* (const _Lhs& _opd, const _Scalar _scalar) { return _Op(_scalar, _opd); }
+template<
+	typename _Rhs,
 	typename _Op = Expr::EwiseBinaryExpr<_Rhs, _Rhs, _Exp_op::_Ewise_mul<typename _Rhs::value_t>>>
 MATRICE_GLOBAL_FINL auto operator* (typename _Rhs::value_t _scalar, const _Rhs& _opd) { return _Op(_scalar, _opd); }
-template<typename _Lhs, class _Rhs,
+template<
+	typename _Lhs, class _Rhs,
 	typename value_t = std::common_type_t<typename _Lhs::value_t, typename _Rhs::value_t>,
 	typename     _Op = Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Exp_op::_Ewise_mul<value_t>>>
 MATRICE_GLOBAL_FINL auto operator* (const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
 // element-wise division
-template<typename _Rhs,
+template<
+	typename _Lhs, typename _Scalar,
+	typename _Op = Expr::EwiseBinaryExpr<_Lhs, _Lhs, _Exp_op::_Ewise_mul<typename _Lhs::value_t>>,
+	typename = std::enable_if_t<std::is_scalar_v<_Scalar>>>
+MATRICE_GLOBAL_FINL auto operator/ (const _Lhs& _opd, const _Scalar _scalar) { return _Op(1./_scalar, _opd); }
+template<
+	typename _Rhs,
 	typename  _Op = Expr::EwiseBinaryExpr<_Rhs, _Rhs, _Exp_op::_Ewise_div<typename _Rhs::value_t>>>
 MATRICE_GLOBAL_FINL auto operator/ (typename _Rhs::value_t _scalar, const _Rhs& _opd) { return _Op(_scalar, _opd); }
-template<typename _Lhs, typename _Rhs,
+template<
+	typename _Lhs, typename _Rhs,
 	typename value_t = std::common_type_t<typename _Lhs::value_t, typename _Rhs::value_t>,
 	typename     _Op = Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Exp_op::_Ewise_div<value_t>>>
 MATRICE_GLOBAL_FINL auto operator/ (const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
 
 // element-wise exp()
-template<typename _Rhs,
+template<
+	typename _Rhs,
 	typename value_t = typename std::enable_if_t<std::is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>,
 	typename     _Op = Expr::EwiseUnaryExpr<_Rhs, _Exp_op::_Ewise_exp<value_t>>>
 	MATRICE_GLOBAL_FINL auto exp(const _Rhs& _right) { return _Op(_right); }
 
 // determinent expression of square matrix
-template<typename _Rhs,
-	      typename value_t = typename std::enable_if_t<std::is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>>
+template<
+	typename _Rhs,
+	typename value_t = typename std::enable_if_t<std::is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>>
 MATRICE_HOST_ONLY value_t det_impl(const _Rhs& a);
 
 // transpose expression
-template<typename _Rhs,
-	     typename value_t = typename std::enable_if_t<std::is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>, 
-	     typename     _Op = Expr::MatUnaryExpr<_Rhs, _Exp_op::_Mat_trp<value_t>>>
+template<
+	typename _Rhs,
+	typename value_t = typename std::enable_if_t<std::is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>, 
+	typename     _Op = Expr::MatUnaryExpr<_Rhs, _Exp_op::_Mat_trp<value_t>>>
 MATRICE_GLOBAL_FINL auto transpose(const _Rhs& _right) { return _Op(_right); }
 
 // outer product expression : xy^T
-template<typename _Lhs, typename _Rhs,
-	     typename value_t = std::common_type_t<typename _Lhs::value_t, typename _Rhs::value_t>, 
-	     typename     _Op = Expr::MatBinaryExpr<_Lhs, _Rhs, _Exp_op::_Mat_sprmul<value_t>>>
+template<
+	typename _Lhs, typename _Rhs,
+	typename value_t = std::common_type_t<typename _Lhs::value_t, typename _Rhs::value_t>, 
+	typename     _Op = Expr::MatBinaryExpr<_Lhs, _Rhs, _Exp_op::_Mat_sprmul<value_t>>>
 MATRICE_GLOBAL_FINL auto outer_product(const _Lhs& _left, const _Rhs& _right) {
 	return _Op(_left, _right); 
 }
