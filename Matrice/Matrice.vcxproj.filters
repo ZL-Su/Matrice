@@ -144,9 +144,6 @@
     <ClInclude Include="include\Matrice\util\_type_defs.h">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\util\util.h">
-      <Filter>Header Files\Util</Filter>
-    </ClInclude>
     <ClInclude Include="include\Matrice\io\io.h">
       <Filter>Header Files\IO</Filter>
     </ClInclude>
@@ -581,6 +578,9 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_abstract_ops.hpp">
       <Filter>Header Files\Detail\matrix</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\util\utils.h">
+      <Filter>Header Files\Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

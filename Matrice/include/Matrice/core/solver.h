@@ -6,7 +6,7 @@
 #include <type_traits>
 #include "../private/_type_traits.h"
 #include "../util/_type_defs.h"
-#include "../util/util.h"
+#include "../util/utils.h"
 #include "../util/genalgs.h"
 
 MATRICE_NAMESPACE_BEGIN_TYPES

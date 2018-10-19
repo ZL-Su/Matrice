@@ -83,12 +83,26 @@ template<
 	typename     _Op = Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Exp_op::_Ewise_div<value_t>>>
 MATRICE_GLOBAL_FINL auto operator/ (const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
 
+// element-wise sqrt()
+template<
+	typename _Rhs,
+	typename value_t = typename std::enable_if_t<std::is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>,
+	typename     _Op = Expr::EwiseUnaryExpr<_Rhs, _Exp_op::_Ewise_sqrt<value_t>>>
+MATRICE_GLOBAL_FINL auto sqrt(const _Rhs& _right) { return _Op(_right); }
+
 // element-wise exp()
 template<
 	typename _Rhs,
 	typename value_t = typename std::enable_if_t<std::is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>,
 	typename     _Op = Expr::EwiseUnaryExpr<_Rhs, _Exp_op::_Ewise_exp<value_t>>>
-	MATRICE_GLOBAL_FINL auto exp(const _Rhs& _right) { return _Op(_right); }
+MATRICE_GLOBAL_FINL auto exp(const _Rhs& _right) { return _Op(_right); }
+
+// element-wise log()
+template<
+	typename _Rhs,
+	typename value_t = typename std::enable_if_t<std::is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>,
+	typename     _Op = Expr::EwiseUnaryExpr<_Rhs, _Exp_op::_Ewise_log<value_t>>>
+MATRICE_GLOBAL_FINL auto log(const _Rhs& _right) { return _Op(_right); }
 
 // determinent expression of square matrix
 template<

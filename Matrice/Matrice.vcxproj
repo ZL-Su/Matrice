@@ -268,7 +268,7 @@
     <ClInclude Include="include\Matrice\private\_unified_memory.h" />
     <ClInclude Include="include\Matrice\private\_view.h" />
     <ClInclude Include="include\Matrice\util\genalgs.h" />
-    <ClInclude Include="include\Matrice\util\util.h" />
+    <ClInclude Include="include\Matrice\util\utils.h" />
     <ClInclude Include="include\Matrice\util\_macro_conditions.h" />
     <ClInclude Include="include\Matrice\util\_macros.h" />
     <ClInclude Include="include\Matrice\util\_type_defs.h" />
