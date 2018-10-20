@@ -121,6 +121,9 @@
     <Filter Include="Header Files\Algs\Deeplearning\Caffe2\utils">
       <UniqueIdentifier>{debce821-1802-4c42-a3b7-377821b46f15}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Funcs\inl">
+      <UniqueIdentifier>{407111c2-4a6a-4866-8e0c-0725adbd3b89}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -152,9 +155,6 @@
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Matrice\funcs\linear_algebra.h">
-      <Filter>Header Files\Funcs</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\arch\_ixbase.h">
       <Filter>Header Files\Arch</Filter>
@@ -581,6 +581,9 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\util\utils.h">
       <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\funcs\_functions.h">
+      <Filter>Header Files\Funcs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

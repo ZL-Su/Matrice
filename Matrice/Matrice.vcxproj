@@ -248,7 +248,7 @@
     <ClInclude Include="include\Matrice\core\matrix.h" />
     <ClInclude Include="include\Matrice\core\solver.h" />
     <ClInclude Include="include\Matrice\core\vector.h" />
-    <ClInclude Include="include\Matrice\funcs\linear_algebra.h" />
+    <ClInclude Include="include\Matrice\funcs\_functions.h" />
     <ClInclude Include="include\Matrice\io\hrc.h" />
     <ClInclude Include="include\Matrice\io\io.h" />
     <ClInclude Include="include\Matrice\private\_decl_dev_funcs.h" />
