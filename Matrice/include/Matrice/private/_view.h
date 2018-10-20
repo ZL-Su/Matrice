@@ -21,14 +21,20 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_abstract_ops.hpp"
 #include "../util/_macros.h"
 
-MATRICE_NAMESPACE_BEGIN_TYPES
-
+DGE_MATRICE_BEGIN
+_TYPES_BEGIN
+template<typename _Ty, int _Rows, int _cols> class Matrix_;
 /**********************************************************************
 						       Matrix view base class 
 	    Copyright (c) : Zhilong (Dgelom) Su, since 25/Jul/2018
  **********************************************************************/
 template<typename _Ty, typename _Derived> class _View_base 
 {
+#define _VIEW_EWISE_OP(_OPERATION) \
+for (std::size_t i = 0; i < size(); ++i) {\
+	static_cast<_Derived*>(this)->operator()(i) = _OPERATION;\
+} return (*this)
+
 public:
 	using value_t = _Ty;
 	using value_type = value_t;
@@ -82,31 +88,37 @@ public:
 		return _My_data[i*_My_stride];
 	}
 
-	MATRICE_GLOBAL_FINL auto size() { return (static_cast<_Derived*>(this)->size()); }
-	MATRICE_GLOBAL_FINL auto rows() { return (static_cast<_Derived*>(this)->rows()); }
-	MATRICE_GLOBAL_FINL auto cols() { return (static_cast<_Derived*>(this)->cols()); }
+	MATRICE_GLOBAL_FINL auto size() const { return (static_cast<const _Derived*>(this)->size()); }
+	MATRICE_GLOBAL_FINL auto rows() const { return (static_cast<const _Derived*>(this)->rows()); }
+	MATRICE_GLOBAL_FINL auto cols() const { return (static_cast<const _Derived*>(this)->cols()); }
+	MATRICE_GLOBAL_FINL constexpr auto shape() const { return std::tie(rows(), cols()); }
 	MATRICE_GLOBAL_FINL void create(size_t, size_t) {}
+	/***
+	 * \Evaluate a view to a true matrix.
+	 */
+	MATRICE_GLOBAL_FINL auto eval() const {
+		Matrix_<value_type, 0, 0> _Ret(rows(), cols());
+		for (std::size_t _Idx = 0; _Idx < size(); ++_Idx) {
+			_Ret(_Idx) = this->operator()(_Idx);
+		}
+		return std::forward<decltype(_Ret)>(_Ret);
+	}
 
 	template<typename _Ty, typename = std::enable_if_t<std::is_fundamental_v<_Ty>>>
 	MATRICE_GLOBAL_INL auto& operator= (const _Ty _Val) {
-		auto _Derived_this = static_cast<_Derived*>(this);
-		for (size_t i = 0; i < size(); ++i) _Derived_this->operator()(i) = static_cast<value_type>(_Val);
-		return (*this);
+		_VIEW_EWISE_OP(static_cast<value_type>(_Val));
 	}
 	MATRICE_GLOBAL_FINL auto& operator= (const std::initializer_list<value_type> _L) {
-		auto _Derived_this = static_cast<_Derived*>(this);
-		for (size_t i = 0; i < size(); ++i) _Derived_this->operator()(i) = *(_L.begin()+i);
-		return (*this);
+		_VIEW_EWISE_OP(*(_L.begin() + i));
 	}
 	template<typename _Mty, typename = std::enable_if_t<std::is_class_v<_Mty>>>
 	MATRICE_GLOBAL_INL auto& operator= (const _Mty& _M) {
-		auto _Derived_this = static_cast<_Derived*>(this);
-		for (size_t i = 0; i < size(); ++i) _Derived_this->operator()(i) = _M(i);
-		return (*this);
+		_VIEW_EWISE_OP(_M(i));
 	}
 	template<typename _Arg> 
 	MATRICE_GLOBAL_INL auto& operator= (const Expr::Base_<_Arg>& _Ex) { 
-		return (_Ex.assign(*static_cast<_Derived*>(this))); }
+		return (_Ex.assign(*static_cast<_Derived*>(this))); 
+	}
 	/*template<typename... _Args>
 	MATRICE_GLOBAL_INL auto& operator= (const Expr::MatBinaryExpr<_Args...>& _Ex) { return (*static_cast<_Derived*>(&_Ex.assign(*this))); }
 	template<typename... _Args>
@@ -133,6 +145,8 @@ protected:
 	size_t  _My_size;
 	size_t  _My_stride;
 	size_t  _My_offset;
+
+#undef _VIEW_EWISE_OP
 };
 
 /**********************************************************************
@@ -253,4 +267,5 @@ public:
 private:
 	range_type _My_range;
 };
-MATRICE_NAMESPACE_END_TYPES
+_TYPES_END
+DGE_MATRICE_END

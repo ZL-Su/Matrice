@@ -171,7 +171,7 @@ public:
 	MATRICE_GLOBAL_FINL constexpr iterator end() { return (m_data + size()); }
 	MATRICE_GLOBAL_FINL constexpr const_iterator begin() const { return (m_data); }
 	MATRICE_GLOBAL_FINL constexpr const_iterator end() const { return (m_data + size()); }
-	MATRICE_GLOBAL_FINL constexpr auto eval() const { return (*static_cast<_Derived*>(this)); }
+	MATRICE_GLOBAL_FINL constexpr auto eval() const { return (*static_cast<const _Derived*>(this)); }
 
 
 #pragma region <!-- iterators -->
@@ -233,21 +233,21 @@ public:
 #pragma endregion
 
 #pragma region <!-- views -->
-	//view of i-th row 
+	// \View of i-th row 
 	MATRICE_GLOBAL_FINL _Myt_rview_type rview(size_t i) {
 		return _Myt_rview_type(m_data + m_cols * i, m_cols);
 	}
 	MATRICE_GLOBAL_FINL const _Myt_rview_type rview(size_t i) const {
 		return _Myt_rview_type(m_data + m_cols * i, m_cols);
 	}
-	//view of i-th column
+	// \View of i-th column
 	MATRICE_GLOBAL_FINL _Myt_cview_type cview(size_t i) {
 		return _Myt_cview_type(m_data + i, m_rows, m_cols, i);
 	}
 	MATRICE_GLOBAL_FINL const _Myt_cview_type cview(size_t i) const {
 		return _Myt_cview_type(m_data + i, m_rows, m_cols, i);
 	}
-	//view of submatrix: x \in [x0, x1) and y \in [y0, y1)
+	// \View of submatrix: x \in [x0, x1) and y \in [y0, y1)
 	MATRICE_GLOBAL_INL _Myt_blockview_type block(index_t x0, index_t x1, index_t y0, index_t y1) {
 		return _Myt_blockview_type(m_data, m_cols, {x0, y0, x1, y1});
 	}

@@ -21,6 +21,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "../util/genalgs.h"
 #ifdef __AVX__
 #include "./inl/_ixops.hpp"
+
 MATRICE_ARCH_BEGIN
 
 // \TEMPLATE base class for simd 
@@ -87,5 +88,6 @@ template<typename T, int _Elems> MATRICE_HOST_FINL
 T reduce(const simd_base_<T, _Elems>& _Packed) {
 	return dgelom::reduce<T>(_Packed.begin(), _Packed.end());
 }
+
 MATRICE_ARCH_END
 #endif

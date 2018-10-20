@@ -21,6 +21,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../util/_macros.h"
 #include "../util/utils.h"
 #include "../private/_type_traits.h"
+#include "../private/_size_traits.h"
 #include "../arch/ixpacket.h"
 #ifdef __use_mkl__
 #include <mkl.h>
@@ -46,8 +47,7 @@ _DETAIL_END
 template<typename _T, 
 	typename = std::enable_if_t<is_matrix_v<_T>||is_expression_v<_T>||is_mtxview_v<_T>>>
 MATRICE_HOST_INL constexpr _T det(const _T& _x) {
-	const auto _Mtx = _x.eval();
-	return detail::_Det(_Mtx.data(), _Mtx.rows());
+	return _x.eval().det();
 }
 
 /**
@@ -61,26 +61,18 @@ MATRICE_HOST_INL constexpr value_t dot(const _T& _x, const _U& _y) {
 #endif
 	const auto _Left = _x.eval();
 	const auto _Right = _y.eval();
-	constexpr auto _Size = min(_Left.size(), _Right.size());
+	const auto _Size = min(_Left.size(), _Right.size());
 
-	constexpr std::size_t _Stride = 
-#ifdef __AVX__
-		4
-#elif  __AVX2__
-		8
-#endif
-		;
+	constexpr std::size_t _Stride = packet_size_v;
 	const auto _Vsize = simd::vsize<_Stride>(_Size);
+
 	using packet_type = simd::Packet_<float, _Stride>;
 	auto _Ret = zero<value_t>::value;
-	
 	for (std::size_t _Idx = 0; _Idx < _Vsize; _Idx += _Stride) {
 		_Ret += (
 			packet_type(_Left.data() + _Idx)*
-			packet_type(_Right.data() + _Idx)
-			).reduce();
+			packet_type(_Right.data() + _Idx) ).reduce();
 	}
-
 	for (std::size_t _Idx = _Vsize; _Idx < _Size; ++_Idx) {
 		_Ret += _Left(_Idx)*_Right(_Idx);
 	}
