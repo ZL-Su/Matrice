@@ -9,8 +9,8 @@
 #include "../util/utils.h"
 #include "../util/genalgs.h"
 
-MATRICE_NAMESPACE_BEGIN_TYPES
-
+DGE_MATRICE_BEGIN
+_TYPES_BEGIN
 template<typename _Ty, int _M, int _N> class Matrix_;
 
 template<class _Derived> class SolverBase
@@ -194,4 +194,13 @@ public:
 	};
 };
 #pragma endregion
-MATRICE_NAMESPACE_END_TYPES
+_TYPES_END
+
+
+/**
+ *\Linear solver, default _Op is auto-solver-kernel.
+ */
+template<typename _Op = types::LinearOp::Auto<types::Matrix_<default_type, __, __>>> 
+using linear_solver = types::Solver::Linear_<_Op>;
+
+DGE_MATRICE_END
