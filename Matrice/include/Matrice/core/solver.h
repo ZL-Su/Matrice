@@ -36,8 +36,8 @@ struct LinearOp MATRICE_NONHERITABLE
 	{
 	public:
 		using value_t = typename conditional <std::is_scalar<_T>::value, _T, default_type>::type;
-	private:
 		using view_t = Matrix_<value_t, __, __>;
+
 	protected:
 		info_t _Info;
 		view_t _Aview, _Bview, _Cview, _Dview;
@@ -103,7 +103,7 @@ struct LinearOp MATRICE_NONHERITABLE
 			OpBase<value_t>::_Launch();
 			Matrix_<value_t, _Mtx::CompileTimeCols, min(_Mtx::CompileTimeCols, 1)> X(U.cols(), 1);
 			transform([&](value_t val)->value_t{return (val);}, V.begin(), V.end(), V.cols(), X.begin());
-			return (X);
+			return std::forward<decltype(X)>(X);
 		}
 		template<typename _Ret = Matrix_<value_t, N, min(N, 1)>> constexpr _Ret& operator() (_Ret& X){
 			OpBase<value_t>::_Launch();
