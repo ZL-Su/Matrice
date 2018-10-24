@@ -124,6 +124,9 @@
     <Filter Include="Header Files\Funcs\inl">
       <UniqueIdentifier>{407111c2-4a6a-4866-8e0c-0725adbd3b89}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Detail\math">
+      <UniqueIdentifier>{09d662a5-59d1-425a-ad61-94962031c256}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -584,6 +587,9 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\funcs\_functions.h">
       <Filter>Header Files\Funcs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\math\_svd.h">
+      <Filter>Header Files\Detail\math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
