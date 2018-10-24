@@ -40,14 +40,14 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\deps\mkl_1802_ilp64_with_tbb.props" />
     <Import Project="D:\boost_1_67_0\boost.props" />
     <Import Project="..\Fkl\linking\FKL_x64.props" />
+    <Import Project="..\deps\mkl_1900_ilp64_with_tbb.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\deps\mkl_1802_ilp64_with_tbb.props" />
-    <Import Project="..\Fkl\linking\FKL_x64_Pro.props" />
+    <Import Project="..\Fkl\linking\FKL_x64.props" />
+    <Import Project="..\deps\mkl_1900_ilp64_with_tbb.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

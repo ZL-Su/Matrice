@@ -4,11 +4,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <IncludePath>E:\Dgelo\Dropbox\Dgelom\Repos\Matrice\fkl\include;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\Dgelo\Dropbox\Dgelom\Repos\Matrice\fkl\x64\Debug;$(LibraryPath)</LibraryPath>
+    <LibraryPath>E:\Dgelo\Dropbox\Dgelom\Repos\Matrice\fkl\x64\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>
-      <AdditionalDependencies>fkl.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>fkl.lib;libiomp5md.lib;svml_dispmd.lib%(AdditionalDependencies)</AdditionalDependencies>
       <Version>1.0</Version>
       <SubSystem>Windows</SubSystem>
       <MinimumRequiredVersion>10.0</MinimumRequiredVersion>
