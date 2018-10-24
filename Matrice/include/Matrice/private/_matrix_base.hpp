@@ -342,7 +342,7 @@ public:
 	///<brief> in-time matrix arithmetic </brief>
 	MATRICE_GLOBAL_FINL value_t max() const { return (*std::max_element(m_data, m_data + size())); }
 	MATRICE_GLOBAL_FINL value_t min() const { return (*std::min_element(m_data, m_data + size())); }
-	MATRICE_GLOBAL_FINL value_t sum() const { return (reduce<value_t>(begin(), end())); }
+	MATRICE_GLOBAL_FINL value_t sum() const { return (reduce(begin(), end())); }
 	MATRICE_GLOBAL_FINL value_t det() const { return (det_impl(*static_cast<const _Derived*>(this))); }
 	MATRICE_GLOBAL_FINL value_t trace() const { return (reduce(begin(), end(), cols() + 1)); }
 	template<class _Rhs> MATRICE_GLOBAL_FINL value_t dot(const _Rhs& _rhs) const { return (this->operator*(_rhs)).sum(); }

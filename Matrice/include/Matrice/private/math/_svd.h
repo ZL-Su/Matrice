@@ -70,13 +70,16 @@ public:
 		_V.create(_A_view.cols(), _A_view.cols());
 	}
 	MATRICE_GLOBAL_INL auto operator()() {
-		flapk::_sgesvd(_A_view.data(), _S.data(), _V.data(), _A_view.rows(), _A_view.cols);
+		flapk::_sgesvd(_A_view.data(), _S.data(), _V.data(), _A_view.rows(), _A_view.cols());
 		return std::make_tuple(_A_view, std::ref(_S), std::ref(_V));
 	}
+	/**
+	 *\Static svd operator, which is thread-safe totally.
+	 */
 	MATRICE_GLOBAL_INL static auto op(const matrix_type& _A) {
-		types::Matrix_<value_t, CompileTimeCols, 1> S(_A.rows, _A.cols);
-		types::Matrix_<value_t, CompileTimeCols, CompileTimeCols> V(_A.rows, _A.cols);
-		flapk::_sgesvd(_A.data(), S.data(), V.data(), _A.rows(), _A.cols);
+		types::Matrix_<value_t, CompileTimeCols, 1> S(_A.rows(), _A.cols());
+		types::Matrix_<value_t, CompileTimeCols, CompileTimeCols> V(_A.rows(), _A.cols());
+		flapk::_sgesvd(_A.data(), S.data(), V.data(), _A.rows(), _A.cols());
 		return std::make_tuple(_A, std::ref(S), std::ref(V));
 	}
 
@@ -106,13 +109,16 @@ public:
 		_V.create(_A_view.cols(), _A_view.cols());
 	}
 	MATRICE_GLOBAL_INL auto operator()() {
-		flapk::_dgesvd(_A_view.data(), _S.data(), _V.data(), _A_view.rows(), _A_view.cols);
+		flapk::_dgesvd(_A_view.data(), _S.data(), _V.data(), _A_view.rows(), _A_view.cols());
 		return std::make_tuple(_A_view, std::ref(_S), std::ref(_V));
 	}
+	/**
+	 *\Static svd operator, which is thread-safe totally.
+	 */
 	MATRICE_GLOBAL_INL static auto op(const matrix_type& _A) {
-		types::Matrix_<value_t, CompileTimeCols, 1> S(_A.rows, _A.cols);
-		types::Matrix_<value_t, CompileTimeCols, CompileTimeCols> V(_A.rows, _A.cols);
-		flapk::_dgesvd(_A.data(), S.data(), V.data(), _A.rows(), _A.cols);
+		types::Matrix_<value_t, CompileTimeCols, 1> S(_A.rows(), _A.cols());
+		types::Matrix_<value_t, CompileTimeCols, CompileTimeCols> V(_A.rows(), _A.cols());
+		flapk::_dgesvd(_A.data(), S.data(), V.data(), _A.rows(), _A.cols());
 		return std::make_tuple(_A, std::ref(S), std::ref(V));
 	}
 

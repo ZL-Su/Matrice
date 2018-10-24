@@ -78,13 +78,14 @@ MATRICE_HOST_FINL auto fill(_FwdIt _First, _FwdIt _Last, size_t _Stride, const _
 }
 
 // \return: sum of range [_First, _Last)
-template<typename _Ty, typename _InIt = _Ty*>
-MATRICE_GLOBAL_INL const _Ty reduce(_InIt _First, _InIt _Last)
+template<typename _InIt, typename value_type = typename std::pointer_traits<_InIt>::element_type>
+MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last)
 {
 	static_cast<void>(_First == _Last);
-	_Ty _Ret = 0;
+
+	value_type _Ret = 0;
 #ifdef __AVX__
-	using packed_type = simd::Packet_<_Ty, 4>;
+	using packed_type = simd::Packet_<value_type, 4>;
 	decltype(auto) _Size = std::distance(_First, _Last);
 	decltype(auto) _Step = packed_type::size << 1;
 	decltype(auto) _N = _Size / _Step;
