@@ -606,6 +606,9 @@
     <ClInclude Include="include\Matrice\private\nonfree\_lnalge.h">
       <Filter>Header Files\Detail\nonfree</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\private\math\_linear_solver.h">
+      <Filter>Header Files\Detail\math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">

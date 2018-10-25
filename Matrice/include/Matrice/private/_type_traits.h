@@ -177,6 +177,11 @@ template<template<typename> typename C>
 struct is_type_condition<C, std::enable_if_t<std::is_same<bool, std::remove_cv_t<decltype(C<int>::value)>>::value>> : std::true_type {};
 
 /**
+ * retrieve solver traits
+ */
+template<typename _Ty> struct solver_traits {};
+
+/**
  * has_method_Fn<T, _Args> is true_type iff T has method T.Fn(_Args...)
  */
 #define _HAS_METHOD(_Name) \
