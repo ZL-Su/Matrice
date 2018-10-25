@@ -253,7 +253,7 @@
     <ClInclude Include="include\Matrice\io\hrc.h" />
     <ClInclude Include="include\Matrice\io\io.h" />
     <ClInclude Include="include\Matrice\private\math\_svd.h" />
-    <ClInclude Include="include\Matrice\private\nonfree\_lnage.h" />
+    <ClInclude Include="include\Matrice\private\nonfree\_lnalge.h" />
     <ClInclude Include="include\Matrice\private\_decl_dev_funcs.h" />
     <ClInclude Include="include\Matrice\private\_devops.h" />
     <ClInclude Include="include\Matrice\private\_dev_matrix_base.h" />
@@ -326,7 +326,7 @@
     <None Include="include\Matrice\arch\inl\_ixpacket.inl" />
     <None Include="include\Matrice\core\cpp.hint" />
     <None Include="include\Matrice\private\inl\_storage_base.inl" />
-    <None Include="include\Matrice\private\nonfree\inl\_lnage.inl" />
+    <None Include="include\Matrice\private\nonfree\inl\_lnalge.inl" />
     <None Include="include\Matrice\private\_similarity.inl" />
   </ItemGroup>
   <ItemGroup>

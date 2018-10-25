@@ -1,5 +1,5 @@
 #pragma once
-#include "../_lnage.h"
+#include "../_lnalge.h"
 #ifdef __use_mkl__
 #include <mkl.h>
 #else
@@ -10,7 +10,7 @@ DGE_MATRICE_BEGIN _DETAIL_BEGIN
 /**
  *\Specialization for float-type.
  */
-template<> struct _Lnage_kernel_impl<float> {
+template<> struct _Lnalge_kernel_impl<float> {
 	using pointer = std::add_pointer_t<float>;
 	using size_type = std::tuple<int, int>;
 	MATRICE_HOST_INL static int svd(pointer _A, pointer _S, pointer _Vt, const size_type& _Size) {
@@ -28,7 +28,7 @@ template<> struct _Lnage_kernel_impl<float> {
 /**
  *\Specialization for double-type.
  */
-template<> struct _Lnage_kernel_impl<double> {
+template<> struct _Lnalge_kernel_impl<double> {
 	using pointer = std::add_pointer_t<double>;
 	using size_type = std::tuple<int, int>;
 	MATRICE_HOST_INL static int svd(pointer _A, pointer _S, pointer _Vt, const size_type& _Size) {

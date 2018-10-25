@@ -18,13 +18,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include <tuple>
 #include "../_matrix_base.hpp"
-//#ifdef __use_mkl__
-//#include <mkl.h>
-//#else
-//#include <fkl.h>
-//#endif
-#include <fkl.h>
-#include "../nonfree/_lnage.h"
+#include "../nonfree/_lnalge.h"
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN

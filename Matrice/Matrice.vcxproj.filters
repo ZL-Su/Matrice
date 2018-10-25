@@ -603,7 +603,7 @@
     <ClInclude Include="include\Matrice\private\math\_svd.h">
       <Filter>Header Files\Detail\math</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\private\nonfree\_lnage.h">
+    <ClInclude Include="include\Matrice\private\nonfree\_lnalge.h">
       <Filter>Header Files\Detail\nonfree</Filter>
     </ClInclude>
   </ItemGroup>
@@ -743,7 +743,7 @@
     <None Include="include\Matrice\private\inl\_storage_base.inl">
       <Filter>Header Files\Detail\inl</Filter>
     </None>
-    <None Include="include\Matrice\private\nonfree\inl\_lnage.inl">
+    <None Include="include\Matrice\private\nonfree\inl\_lnalge.inl">
       <Filter>Header Files\Detail\nonfree\inl</Filter>
     </None>
   </ItemGroup>
