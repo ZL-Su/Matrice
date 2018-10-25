@@ -19,10 +19,16 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <type_traits>
 #include <valarray>
 #include "_abstract_ops.hpp"
-#include "../util/_macros.h"
+#include "../util/utils.h"
 
 DGE_MATRICE_BEGIN
 _TYPES_BEGIN
+#define _VIEW_EWISE_COPY_N(_LEFT, _N)\
+if(_N > size()) \
+	throw std::runtime_error("Over the range in _Matrix_xview::eval().");\
+for(std::size_t _Idx = 0; _Idx < _N; ++_Idx) {\
+	_LEFT(_Idx) = this->operator()(_Idx);\
+}
 template<typename _Ty, int _Rows, int _cols> class Matrix_;
 /**********************************************************************
 						       Matrix view base class 
@@ -92,15 +98,24 @@ public:
 	MATRICE_GLOBAL_FINL auto rows() const { return (static_cast<const _Derived*>(this)->rows()); }
 	MATRICE_GLOBAL_FINL auto cols() const { return (static_cast<const _Derived*>(this)->cols()); }
 	MATRICE_GLOBAL_FINL constexpr auto shape() const { return std::tie(rows(), cols()); }
-	MATRICE_GLOBAL_FINL void create(size_t, size_t) {}
-	/***
+	MATRICE_GLOBAL_FINL void create(std::size_t, std::size_t) {}
+	MATRICE_GLOBAL_FINL value_t sum() const {
+		value_t _Ret = 0;
+#pragma omp parallel if (size() > 100)
+		{
+#pragma omp for reduction (+ : _Ret)
+			for (std::ptrdiff_t _Idx = 0; _Idx < size(); ++_Idx) {
+				_Ret += this->operator()(_Idx);
+			}
+		}
+		return (_Ret);
+	}
+	/**
 	 * \Evaluate a view to a true matrix.
 	 */
 	MATRICE_GLOBAL_FINL auto eval() const {
 		Matrix_<value_type, 0, 0> _Ret(rows(), cols());
-		for (std::size_t _Idx = 0; _Idx < size(); ++_Idx) {
-			_Ret(_Idx) = this->operator()(_Idx);
-		}
+		_VIEW_EWISE_COPY_N(_Ret, size())
 		return std::forward<decltype(_Ret)>(_Ret);
 	}
 
@@ -174,11 +189,18 @@ public:
 	MATRICE_GLOBAL_FINL _Matrix_rview(pointer _Ptr, size_t _Size, size_t _Stride = 1, size_t _Offset = 1)
 		:_Base(_Ptr, _Size, _Stride, _Offset) {}
 
-	MATRICE_GLOBAL_FINL auto rows() const { return 1; }
-	MATRICE_GLOBAL_FINL auto cols() const { return _My_size; }
-	MATRICE_GLOBAL_FINL auto size() const { return _My_size; }
+	MATRICE_GLOBAL_FINL constexpr auto rows() const { return 1; }
+	MATRICE_GLOBAL_FINL constexpr auto cols() const { return _My_size; }
+	MATRICE_GLOBAL_FINL constexpr auto size() const { return _My_size; }
 
-	MATRICE_GLOBAL_FINL value_t sum() const;
+	/**
+	 *\Retrieve the first _N element into a true static row-matrix.
+	 */
+	template<std::size_t _N> MATRICE_GLOBAL_FINL auto eval() const {
+		Matrix_<value_t, min(_N, 1), _N> _Ret;
+		_VIEW_EWISE_COPY_N(_Ret, _N)
+		return std::forward<decltype(_Ret)>(_Ret);
+	}
 };
 
 /**********************************************************************
@@ -206,11 +228,18 @@ public:
 	MATRICE_GLOBAL_FINL _Matrix_cview(pointer _Ptr, size_t _Size, size_t _Stride = 1, size_t _Offset = 1)
 		:_Base(_Ptr, _Size, _Stride, _Offset) {}
 
-	MATRICE_GLOBAL_FINL auto rows() const { return _My_size; }
-	MATRICE_GLOBAL_FINL auto cols() const { return 1; }
-	MATRICE_GLOBAL_FINL auto size() const { return _My_size; }
+	MATRICE_GLOBAL_FINL constexpr auto rows() const { return _My_size; }
+	MATRICE_GLOBAL_FINL constexpr auto cols() const { return 1; }
+	MATRICE_GLOBAL_FINL constexpr auto size() const { return _My_size; }
 
-	MATRICE_GLOBAL_FINL value_t sum() const;
+	/**
+	 *\Retrieve the first _N element into a true static column-matrix.
+	 */
+	template<std::size_t _N> MATRICE_GLOBAL_FINL auto eval() const {
+		Matrix_<value_t, _N, min(_N, 1)> _Ret;
+		_VIEW_EWISE_COPY_N(_Ret, _N)
+		return std::forward<decltype(_Ret)>(_Ret);
+	}
 };
 
 /**********************************************************************
@@ -267,5 +296,7 @@ public:
 private:
 	range_type _My_range;
 };
+#undef _VIEW_EWISE_COPY_N
+
 _TYPES_END
 DGE_MATRICE_END

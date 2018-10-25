@@ -267,12 +267,21 @@ public:
 	MATRICE_GLOBAL_FINL constexpr auto shape() const { return std::tie(m_rows, m_cols); }
 
 	///<brief> assignment operators </brief>
-	MATRICE_GLOBAL_FINL _Derived& operator= (const_init_list _list)
-	{
+	MATRICE_GLOBAL_FINL _Derived& operator= (const_init_list _list) {
 #ifdef _DEBUG
 		assert(size() == m_storage.size());
 #endif
 		m_storage = _list;
+		m_data = _Proxy_checked(m_storage.data());
+		return (*static_cast<_Derived*>(this));
+	}
+	MATRICE_GLOBAL_FINL _Derived& operator= (const _Myt_rwise_iterator& _It) {
+		std::copy(_It.begin(), _It.end(), m_storage.data());
+		m_data = _Proxy_checked(m_storage.data());
+		return (*static_cast<_Derived*>(this));
+	}
+	MATRICE_GLOBAL_FINL _Derived& operator= (const _Myt_cwise_iterator& _It) {
+		std::copy(_It.begin(), _It.end(), m_storage.data());
 		m_data = _Proxy_checked(m_storage.data());
 		return (*static_cast<_Derived*>(this));
 	}
