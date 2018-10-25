@@ -24,6 +24,7 @@
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseIntelMKL>No</UseIntelMKL>
+    <UseILP64Interfaces>true</UseILP64Interfaces>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -69,7 +70,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;_SCL_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_LIB;_SCL_SECURE_NO_WARNINGS;__use_mkl__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <DisableSpecificWarnings>4006;4221;</DisableSpecificWarnings>
@@ -93,7 +94,7 @@
       <AdditionalDependencies>cudart.lib;mkl_tbb_thread.lib;tbb.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <Lib>
-      <AdditionalLibraryDirectories>C:\Program Files %28x86%29\IntelSWTools\compilers_and_libraries_2018.2.185\windows\mkl\lib\intel64_win;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019\windows\tbb\lib\intel64_win\vc14;C:\Program Files %28x86%29\IntelSWTools\compilers_and_libraries_2019\windows\mkl\lib\intel64_win;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -252,6 +253,7 @@
     <ClInclude Include="include\Matrice\io\hrc.h" />
     <ClInclude Include="include\Matrice\io\io.h" />
     <ClInclude Include="include\Matrice\private\math\_svd.h" />
+    <ClInclude Include="include\Matrice\private\nonfree\_lnage.h" />
     <ClInclude Include="include\Matrice\private\_decl_dev_funcs.h" />
     <ClInclude Include="include\Matrice\private\_devops.h" />
     <ClInclude Include="include\Matrice\private\_dev_matrix_base.h" />
@@ -324,6 +326,7 @@
     <None Include="include\Matrice\arch\inl\_ixpacket.inl" />
     <None Include="include\Matrice\core\cpp.hint" />
     <None Include="include\Matrice\private\inl\_storage_base.inl" />
+    <None Include="include\Matrice\private\nonfree\inl\_lnage.inl" />
     <None Include="include\Matrice\private\_similarity.inl" />
   </ItemGroup>
   <ItemGroup>

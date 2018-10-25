@@ -33,11 +33,11 @@ DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
 template<typename _Ty> MATRICE_HOST_INL constexpr
 _Ty _Det(const _Ty* data, int n, typename std::enable_if<is_float32<_Ty>::value>::type* = 0) { 
-	return fblas::_sdetm(data, n); 
+	return fblas::_sdetm(static_cast<float*>(data), n);
 }
 template<typename _Ty> MATRICE_HOST_INL constexpr
-_Ty _Det(const _Ty* data, int n, typename std::enable_if<is_float64<_Ty>::value>::type* = 0) {
-	return fblas::_ddetm(data, n);
+_Ty _Det(_Ty* data, int n, typename std::enable_if<is_float64<_Ty>::value>::type* = 0) {
+	return fblas::_ddetm(static_cast<double*>(data), n);
 }
 _DETAIL_END
 
@@ -46,8 +46,8 @@ _DETAIL_END
  */
 template<typename _T, 
 	typename = std::enable_if_t<is_matrix_v<_T>||is_expression_v<_T>||is_mtxview_v<_T>>>
-MATRICE_HOST_INL constexpr _T det(const _T& _x) {
-	return _x.eval().det();
+MATRICE_HOST_INL constexpr typename _T::value_t det(const _T& _x) {
+	return detail::_Det(_x.eval().data(), _x.rows());
 }
 
 /**

@@ -110,6 +110,7 @@ public:
 	using iterator = pointer;
 	using const_iterator = std::add_const_t<iterator>;
 	using const_init_list = std::add_const_t<std::initializer_list<value_t>>;
+	using shape_t = std::tuple<std::size_t, std::size_t>;
 	template<typename _Xop> using expr_type = Expr::Base_<_Xop>;
 	using base_t = PlaneView_<value_t>;
 	using loctn_t = Location;

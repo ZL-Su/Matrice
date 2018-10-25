@@ -16,11 +16,11 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #include "../../include/Matrice/core/matrix.h"
-#ifdef __use_mkl__
-#include <mkl.h>
-#else
+//#ifdef __use_mkl__
+//#include <mkl.h>
+//#else
 #include <fkl.h>
-#endif
+//#endif
 
 MATRICE_NAMESPACE_BEGIN_
 

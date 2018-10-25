@@ -18,14 +18,14 @@ template<class _Derived> class SolverBase
 {
 	using derived_t = _Derived;
 public:
-	struct Options{ int iwp[max(1, derived_t::CompileTimeCols)]; int status; solver_type used_alg = solver_type(derived_t::SolverType);};
+	struct Options{ 
+		int status;
+		int iwp[max(1, derived_t::CompileTimeCols)]; 
+		solver_type used_alg = solver_type(derived_t::SolverType);
+	};
 	constexpr SolverBase() = default;
 
 protected:
-	template<typename... _Args>
-	void _Prep(_Args... args) { static_cast<derived_t*>(this)->_Pre_solve(args...); };
-	template<typename... _Args>
-	void _Perf(_Args... args) { static_cast<derived_t*>(this)->_solver_kernel(args...); }
 	template<typename... _Args>
 	auto _Impl(_Args... args) { return static_cast<derived_t*>(this)->m_op(args...); }
 };
@@ -61,8 +61,8 @@ struct LinearOp MATRICE_NONHERITABLE
 				return OpBase<value_t>::_Impl(OpBase<value_t>::_Aview = A); });
 		}
 
-		template<typename _Ret = Matrix_<value_t, N, min(N, 1)>> constexpr _Ret& operator() (_Ret& X)
-		{
+		template<typename _Ret = Matrix_<value_t, N, min(N, 1)>> 
+		MATRICE_HOST_INL constexpr _Ret& operator() (_Ret& X) {
 			OpBase<value_t>::_Launch();
 			OpBase<value_t>::_Impl(OpBase<value_t>::_Aview, OpBase<value_t>::_Bview = X);
 			return (X);
@@ -79,7 +79,8 @@ struct LinearOp MATRICE_NONHERITABLE
 
 		constexpr Gls(const _Mty& arg) : A(arg) { OpBase<value_t>::_Info.alg = option; };
 
-		template<typename _Rhs> constexpr _Rhs& operator() (_Rhs& b) const { 
+		template<typename _Rhs> 
+		MATRICE_HOST_INL constexpr _Rhs& operator() (_Rhs& b) const {
 			return OpBase<value_t>::_Impl(OpBase<value_t>::_Aview = A, OpBase<value_t>::_Bview = b);
 		};
 
@@ -93,17 +94,17 @@ struct LinearOp MATRICE_NONHERITABLE
 		enum { N = _Mtx::CompileTimeCols };
 		enum { option = solver_type::SVD };
 
-		constexpr Svd(const _Mtx& args) : U(args) {
-			S.create(U.cols(), 1), V.create(U.cols(), U.cols());
+		constexpr Svd(const _Mtx& _Coeff) : U(_Coeff) {
+			S.create(U.cols(), 1), Vt.create(U.cols(), U.cols());
 			OpBase<value_t>::_Future = std::async(std::launch::async, [&] {
 				using Op = OpBase<value_t>;
-				return OpBase<value_t>::_Impl(Op::_Aview = U, Op::_Bview = S, Op::_Cview = V);
+				return OpBase<value_t>::_Impl(Op::_Aview = U, Op::_Bview = S, Op::_Cview = Vt);
 			});
 		};
 		constexpr auto operator() (std::_Ph<0> _ph = {}) {
 			OpBase<value_t>::_Launch();
 			Matrix_<value_t, _Mtx::CompileTimeCols, min(_Mtx::CompileTimeCols, 1)> X(U.cols(), 1);
-			transform([&](value_t val)->value_t{return (val);}, V.begin(), V.end(), V.cols(), X.begin());
+			X = Vt.rbegin(Vt.size() - 1);
 			return std::forward<decltype(X)>(X);
 		}
 		template<typename _Ret = Matrix_<value_t, N, min(N, 1)>> constexpr _Ret& operator() (_Ret& X){
@@ -116,11 +117,11 @@ struct LinearOp MATRICE_NONHERITABLE
 		//\return singular values
 		MATRICE_HOST_FINL auto& sv() { OpBase<value_t>::_Launch(); return (S); }
 		//\return V^{T} expression
-		MATRICE_HOST_FINL auto vt() { OpBase<value_t>::_Launch(); return (V.transpose()); }
+		MATRICE_HOST_FINL auto vt() { OpBase<value_t>::_Launch(); return (Vt); }
 	private:
 		const _Mtx& U;
 		Matrix_<value_t, _Mtx::CompileTimeCols, min(_Mtx::CompileTimeCols,1)> S;
-		Matrix_<value_t, _Mtx::CompileTimeCols, _Mtx::CompileTimeCols> V; //V not V^{T}
+		Matrix_<value_t, _Mtx::CompileTimeCols, _Mtx::CompileTimeCols> Vt; //V^{T}
 	};
 	template<typename _T> struct Evv : public OpBase<typename _T::value_t>
 	{
@@ -150,51 +151,6 @@ struct Solver MATRICE_NONHERITABLE
 		template<typename... _Args> constexpr auto solve(const _Args&... args) { return Base::_Impl(args...); }
 	};
 };
-
-#pragma region <!-- deprecated -->
-template<typename _Ty> class Solver_ MATRICE_NONHERITABLE
-{
-public:
-	const int dynamic = 0;
-	using default_type = double;
-	using value_t = typename conditional<std::is_scalar<_Ty>::value, _Ty, default_type>::type;
-	template<int _M, int _N> using Matrix_ = Matrix_<value_t, _M, _N>;
-
-	template<int _M, int _N, solver_type _alg = solver_type::AUTO>
-	class Linear : public SolverBase<Linear<_M, _N, _alg>>
-	{
-		using Base = SolverBase<Linear<_M, _N, _alg>>;
-		using typename Base::Options;
-		using iterator = typename Matrix_<_M, _N>::iterator;
-	public:
-		using op_t = std::plus<value_t>;
-		enum { SolverType = _alg };
-		enum { CompileTimeRows = _M, CompileTimeCols = _N };
-		constexpr Linear() = default;
-		constexpr Linear(const Matrix_<_M, _N>& coef) : A(coef) { _Pre_solve(); }
-
-		auto operator()(const Matrix_<CompileTimeRows, CompileTimeCols>& coef)
-		{
-			Matrix_<CompileTimeCols, min(CompileTimeCols, 1)> x(CompileTimeCols, 1);
-			A = coef; Base::_Perf(x.begin());
-			return (x);
-		}
-		
-		template<int ComileTimeNrhs> auto& solve(Matrix_<CompileTimeCols, ComileTimeNrhs>& b)
-		{
-			for (std::ptrdiff_t offset = 0; offset < ComileTimeNrhs; ++offset) 
-				Base::_Perf(b.begin() + offset, ComileTimeNrhs);
-			return (b);
-		}
-		void _solver_kernel(iterator x);
-		void _solver_kernel(iterator x, int inc);
-	private:
-		void _Pre_solve();
-		Options options;
-		Matrix_<CompileTimeRows, CompileTimeCols> A;
-	};
-};
-#pragma endregion
 _TYPES_END
 
 

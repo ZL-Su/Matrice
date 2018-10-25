@@ -8,7 +8,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>
-      <AdditionalDependencies>fkl.lib;libiomp5md.lib;svml_dispmd.lib%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>fkl.lib;libiomp5md.lib;svml_dispmd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Version>1.0</Version>
       <SubSystem>Windows</SubSystem>
       <MinimumRequiredVersion>10.0</MinimumRequiredVersion>

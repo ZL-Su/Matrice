@@ -585,7 +585,7 @@ col_loop: DO i = 1, n, inc
             call swaprow(V, i, mmloc(1));
             call swaprow(V, l, mmloc(2));
         ENDDO
-        
+        V = transpose(V)
 100     return
     end function gsvd_sp
     integer(c_int) function gsvd_dp(A, W, V, row, col) bind(c, name = '_dgesvd')
@@ -740,7 +740,7 @@ col_loop: DO i = 1, n, inc
             call swaprow(V, i, mmloc(1));
             call swaprow(V, l, mmloc(2));
         ENDDO
-        
+        V = transpose(V)
 100     return
     end function gsvd_dp
     

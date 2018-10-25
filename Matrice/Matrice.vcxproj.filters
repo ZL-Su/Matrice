@@ -127,6 +127,18 @@
     <Filter Include="Header Files\Detail\math">
       <UniqueIdentifier>{09d662a5-59d1-425a-ad61-94962031c256}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Details\Nonfree">
+      <UniqueIdentifier>{cb69b4a1-807c-46ea-b885-2e50d86ec807}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Detail\nonfree">
+      <UniqueIdentifier>{c5af5bf5-c77b-41c2-b880-4a6b9604f5a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Detail\nonfree\inl">
+      <UniqueIdentifier>{ffdc0ac3-3e00-45a3-824d-5b0216a5f8c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Details\Memory">
+      <UniqueIdentifier>{2742bc85-21e3-4cb4-9738-d0fa0ca1f42e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -591,11 +603,11 @@
     <ClInclude Include="include\Matrice\private\math\_svd.h">
       <Filter>Header Files\Detail\math</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\private\nonfree\_lnage.h">
+      <Filter>Header Files\Detail\nonfree</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\private\_memory.cpp">
-      <Filter>Source Files\Details</Filter>
-    </ClCompile>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
@@ -611,11 +623,14 @@
     <ClCompile Include="src\core\solver_impl.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\private\_unified_memory.cpp">
-      <Filter>Source Files\Details</Filter>
-    </ClCompile>
     <ClCompile Include="src\algorithm\_bicubic_spline_interp.cpp">
       <Filter>Source Files\Algs\Interpolation</Filter>
+    </ClCompile>
+    <ClCompile Include="src\private\_memory.cpp">
+      <Filter>Source Files\Details\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="src\private\_unified_memory.cpp">
+      <Filter>Source Files\Details\Memory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -727,6 +742,9 @@
     </None>
     <None Include="include\Matrice\private\inl\_storage_base.inl">
       <Filter>Header Files\Detail\inl</Filter>
+    </None>
+    <None Include="include\Matrice\private\nonfree\inl\_lnage.inl">
+      <Filter>Header Files\Detail\nonfree\inl</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
