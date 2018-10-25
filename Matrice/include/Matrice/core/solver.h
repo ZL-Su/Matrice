@@ -39,11 +39,17 @@ struct Solver MATRICE_NONHERITABLE
 };
 _TYPES_END
 
+/**
+ *\Linear algebra system kernel.
+ */
+using linear_alg_op = detail::LinearOp;
 
 /**
  *\Linear solver, default _Op is auto-solver-kernel.
  */
-template<typename _Op = detail::LinearOp::Auto<types::Matrix_<default_type, __, __>>>
+template<
+	typename _Op = linear_alg_op::Auto<types::Matrix_<default_type, __, __>>,
+	typename = std::enable_if_t<is_matrix_v<typename _Op::_Mty>>>
 using linear_solver = types::Solver::Linear_<_Op>;
 
 DGE_MATRICE_END

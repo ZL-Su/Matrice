@@ -8,7 +8,7 @@
 #include <fkl.h>
 #endif
 
-MATRICE_NAMESPACE_BEGIN_TYPES
+DGE_MATRICE_BEGIN _DETAIL_BEGIN
 
 /**
  *\Perform decomposition for coeff. matrix A.
@@ -131,4 +131,4 @@ template<typename _T> LinearOp::info_t LinearOp::OpBase<_T>::_Impl(view_t& U, vi
 template LinearOp::info_t LinearOp::OpBase<float>::_Impl(Matrix_<value_t, __, __>&, Matrix_<value_t, __, __>&, Matrix_<value_t, __, __>&);
 template LinearOp::info_t LinearOp::OpBase<double>::_Impl(Matrix_<value_t, __, __>&, Matrix_<value_t, __, __>&, Matrix_<value_t, __, __>&);
 
-MATRICE_NAMESPACE_END_TYPES
+_DETAIL_END DGE_MATRICE_END
