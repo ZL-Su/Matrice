@@ -37,7 +37,10 @@ template<typename T, typename U> struct conditional<false, T, U> { using type = 
 template<bool _Test, typename T, typename U> using conditional_t = typename conditional<_Test, T, U>::type;
 
 template<int _Val> struct is_zero { enum { value = _Val == 0 }; };
+template<int _Val> MATRICE_GLOBAL_INL constexpr auto is_zero_v = is_zero<_Val>::value;
+
 template<int _R, int _C> struct is_static {enum {value = _R > 0 && _C >0 }; };
+template<int _R, int _C> MATRICE_GLOBAL_INL constexpr auto is_static_v = is_static<_R, _C>::value;
 
 template<typename T> struct is_common_int64 { enum { value = std::is_integral_v<T> && sizeof(T) == 8 }; };
 template<typename T> struct is_int64 { enum { value = std::is_signed_v<T> && std::is_integral_v<T> && sizeof(T) == 8 }; };

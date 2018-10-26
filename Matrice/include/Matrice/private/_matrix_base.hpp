@@ -74,6 +74,9 @@ template
 >
 class Base_ : public PlaneView_<typename _Traits::type>
 {
+#define _PTRLINK { m_data = m_storage.data(); }
+#define _PTRLINK_EVAL { m_data = m_storage.data(); expr.assign(*this); }
+#define _SHAPE std::get<0>(_Shape), std::get<1>(_Shape)
 #define _EXPOP(_Desc, _Name) typename _Exp_op::_##_Desc##_##_Name<_Type>
 
 	enum { _M = _Traits::size::rows::value, _N = _Traits::size::cols::value };
@@ -120,29 +123,55 @@ public:
 	constexpr static const value_t inf = std::numeric_limits<value_t>::infinity();
 	constexpr static const value_t eps = std::numeric_limits<value_t>::epsilon();
 
-	MATRICE_GLOBAL_FINL Base_() noexcept :base_t(_M<0?0:_M, _N<0?0:_N), m_storage() { m_data = m_storage.data(); }
-	MATRICE_GLOBAL_FINL Base_(int _rows, int _cols) noexcept :base_t(_rows, _cols), m_storage(_rows, _cols) { m_data = m_storage.data(); }
-	MATRICE_GLOBAL_FINL Base_(int _rows, int _cols, pointer data) noexcept :base_t(_rows, _cols, data), m_storage(_rows, _cols, data) {}
-	MATRICE_GLOBAL_FINL Base_(int _rows, int _cols, value_t _val) noexcept :base_t(_rows, _cols), m_storage(_rows, _cols, _val) { m_data = m_storage.data(); }
-	MATRICE_GLOBAL_FINL Base_(const_init_list _list) noexcept :base_t(_M, _N), m_storage(_list) { m_data = m_storage.data(); }
-	MATRICE_GLOBAL_FINL Base_(_Myt_const_reference _other) noexcept :base_t(_other.m_rows, _other.m_cols), m_storage(_other.m_storage) { m_data = m_storage.data(); }
-	MATRICE_GLOBAL_FINL Base_(_Myt_move_reference _other) noexcept :base_t(_other.m_rows, _other.m_cols), m_storage(std::move(_other.m_storage)) { m_data = m_storage.data(); }
-	MATRICE_GLOBAL_FINL Base_(const std::valarray<value_t>& _other, int _rows = 1) noexcept :base_t(_rows, _other.size() / _rows), m_storage(_rows, _other.size() / _rows, _other.data()) { m_data = m_storage.data(); }
-	template<int _Rows, int _Cols>
-	MATRICE_GLOBAL_FINL Base_(const Matrix_<value_t, _Rows, _Cols>& _other) noexcept :base_t(_other.rows(), _other.cols()), m_storage(_other.m_storage) { m_data = m_storage.data(); }
-	
-	template<typename _Lhs, typename _Rhs, typename _Op>
-	MATRICE_GLOBAL_FINL Base_(const Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Op>& expr)
-		:base_t(m_rows = expr.rows(), m_cols = expr.cols()), m_storage(m_rows, m_cols) { m_data = m_storage.data(); expr.assign(*this); }
-	template<typename _Lhs, typename _Rhs, typename _Op>
-	MATRICE_GLOBAL_FINL Base_(const Expr::MatBinaryExpr<_Lhs, _Rhs, _Op>& expr) 
-		:base_t(m_rows = expr.rows(), m_cols = expr.cols()), m_storage(m_rows, m_cols) { m_data = m_storage.data(); expr.assign(*this); }
+	MATRICE_GLOBAL_FINL Base_() noexcept
+		:base_t(_M<0?0:_M, _N<0?0:_N), m_storage() _PTRLINK
+	MATRICE_GLOBAL_FINL Base_(int _rows, int _cols) noexcept 
+		:base_t(_rows, _cols), m_storage(_rows, _cols) _PTRLINK
+	MATRICE_GLOBAL_FINL Base_(const shape_t& _Shape) noexcept
+		:base_t(_SHAPE), m_storage(m_rows, m_cols) _PTRLINK
+	MATRICE_GLOBAL_FINL Base_(int _rows, int _cols, pointer data) noexcept 
+		:base_t(_rows, _cols, data), m_storage(_rows, _cols, data) {}
+	MATRICE_GLOBAL_FINL Base_(const shape_t& _Shape, pointer _Data) noexcept
+		:base_t(_SHAPE), m_storage(m_rows, m_cols, _Data) _PTRLINK
+	MATRICE_GLOBAL_FINL Base_(int _rows, int _cols, value_t _val) noexcept 
+		:base_t(_rows, _cols), m_storage(_rows, _cols, _val) _PTRLINK
+	MATRICE_GLOBAL_FINL Base_(const shape_t& _Shape, value_t _Val) noexcept
+		:base_t(_SHAPE), m_storage(m_rows, m_cols, _Val) _PTRLINK
+	MATRICE_GLOBAL_FINL Base_(const_init_list _list) noexcept 
+		:base_t(_M, _N), m_storage(_list) _PTRLINK
+	MATRICE_GLOBAL_FINL Base_(_Myt_const_reference _other) noexcept 
+		:base_t(_other.m_rows, _other.m_cols), m_storage(_other.m_storage) _PTRLINK
+	MATRICE_GLOBAL_FINL Base_(_Myt_move_reference _other) noexcept 
+		:base_t(_other.m_rows, _other.m_cols), m_storage(std::move(_other.m_storage)) _PTRLINK
+
+	/**
+	 *\from STD valarray<...>
+	 */
+	MATRICE_GLOBAL_FINL Base_(const std::valarray<value_t>& _other, int _rows = 1) noexcept 
+		:base_t(_rows, _other.size() / _rows), m_storage(_rows, _other.size() / _rows, _other.data()) _PTRLINK
+
+	/**
+	 *\from explicit specified matrix type
+	 */
+	template<int _Rows, int _Cols, typename _Mty = Matrix_<value_t, _Rows, _Cols>>
+	MATRICE_GLOBAL_FINL Base_(const _Mty& _other) noexcept 
+		:base_t(_other.rows(), _other.cols()), m_storage(_other.m_storage) _PTRLINK
+
+	/**
+	 *\from expression
+	 */
 	template<typename _Exp>
 	MATRICE_GLOBAL_FINL Base_(const exprs::_Matrix_exp<_Exp>& expr)
-		: base_t(m_rows = expr.rows(), m_cols = expr.cols()), m_storage(m_rows, m_cols) { m_data = m_storage.data(); expr.assign(*this); }
+		: base_t(m_rows = expr.rows(), m_cols = expr.cols()), m_storage(m_rows, m_cols) _PTRLINK_EVAL
+	template<typename _Lhs, typename _Rhs, typename _Op>
+	MATRICE_GLOBAL_FINL Base_(const Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Op>& expr)
+		:base_t(m_rows = expr.rows(), m_cols = expr.cols()), m_storage(m_rows, m_cols) _PTRLINK_EVAL
+	template<typename _Lhs, typename _Rhs, typename _Op>
+	MATRICE_GLOBAL_FINL Base_(const Expr::MatBinaryExpr<_Lhs, _Rhs, _Op>& expr) 
+		:base_t(m_rows = expr.rows(), m_cols = expr.cols()), m_storage(m_rows, m_cols) _PTRLINK_EVAL
 	template<typename _Rhs, typename _Op>
 	MATRICE_GLOBAL_FINL Base_(const Expr::MatUnaryExpr<_Rhs, _Op>& expr) 
-		:base_t(m_rows = expr.rows(), m_cols = expr.cols()), m_storage(m_rows, m_cols) { m_data = m_storage.data(); expr.assign(*this); }
+		:base_t(m_rows = expr.rows(), m_cols = expr.cols()), m_storage(m_rows, m_cols) _PTRLINK_EVAL
 
 	///<brief> opencv interface </brief>
 #ifdef __use_ocv_as_view__
@@ -151,10 +180,16 @@ public:
 	MATRICE_HOST_FINL operator ocv_view_t() const { return ocv_view_t(m_rows, m_cols, ocv_view_t_cast<value_t>::type, m_data); }
 #endif
 public:
-	///<brief> dynamic create methods </brief>
-	MATRICE_HOST_ONLY void create(size_t rows, size_t cols) { 
+	/**
+	 *\dynamic matrix creation
+	 */
+	MATRICE_HOST_ONLY void create(std::size_t rows, std::size_t cols) { 
 		if constexpr (_M <= 0 && _N <= 0) static_cast<_Derived*>(this)->create(rows, cols); 
 	};
+	MATRICE_HOST_ONLY void create(const shape_t& _Shape) {
+		if constexpr (_M <= 0 && _N <= 0) static_cast<_Derived*>(this)->create(_SHAPE);
+	};
+
 	///<brief> accessors </brief>
 	MATRICE_GLOBAL_FINL pointer operator[](index_t y) { return (m_data + y * m_cols); }
 	MATRICE_GLOBAL_FINL const pointer operator[](index_t y) const { return (m_data + y * m_cols); }
@@ -162,6 +197,7 @@ public:
 	MATRICE_GLOBAL_FINL const reference operator()(index_t i) const { return m_data[i]; }
 	template<size_t _Format = rmaj>
 	MATRICE_GLOBAL_INL reference operator()(int _r, int _c) const { return (m_data + (_Format == rmaj ? m_cols : m_rows) * _r)[_c]; }
+
 	///<brief> access methods </brief>
 	MATRICE_GLOBAL_FINL pointer data() { return (m_data); }
 	MATRICE_GLOBAL_FINL const pointer data() const { return (m_data); }
@@ -176,7 +212,9 @@ public:
 
 
 #pragma region <!-- iterators -->
-	//column iterator for accessing elements in current column
+	/**
+	 *\column iterator for accessing elements in i-th column
+	 */
 	MATRICE_GLOBAL_FINL _Myt_fwd_iterator cbegin(size_t i) {
 		return _Myt_fwd_iterator(m_data + i, m_rows, m_cols);
 	}
@@ -190,7 +228,9 @@ public:
 		return _Myt_fwd_iterator(_End(m_data + i, m_rows, m_cols));
 	}
 
-	//row iterator for accessing elements in current row
+	/**
+	 *\row iterator for accessing elements in i-th row
+	 */
 	MATRICE_GLOBAL_FINL _Myt_fwd_iterator rbegin(size_t i) {
 		return _Myt_fwd_iterator(m_data + i * m_cols, m_cols);
 	}
@@ -204,7 +244,9 @@ public:
 		return _Myt_fwd_iterator(_End(m_data + i * m_cols, m_cols));
 	}
 
-	//column-wise iterator for accessing elements
+	/**
+	 *\column-wise iterator for accessing elements
+	 */
 	MATRICE_GLOBAL_FINL _Myt_cwise_iterator cwbegin(size_t i = 0) {
 		return _Myt_cwise_iterator(m_data + i * m_rows, m_cols, m_rows);
 	}
@@ -218,7 +260,9 @@ public:
 		return _Myt_cwise_iterator(_End(m_data, m_cols));
 	}
 
-	//row-wise iterator for accessing elements
+	/**
+	 * \row-wise iterator for accessing elements
+	 */
 	MATRICE_GLOBAL_FINL _Myt_rwise_iterator rwbegin(size_t i = 0) {
 		return _Myt_rwise_iterator(m_data + i * m_cols, m_rows, m_cols);
 	}
@@ -258,15 +302,27 @@ public:
 #pragma endregion
 
 #ifdef _HAS_CXX17
+	/**
+	 * \interface for STD valarray<...>
+	 * Example: std::valarray<float> _Valarr = _M;
+	 */
 	MATRICE_GLOBAL_FINL operator std::valarray<value_t>() { return std::valarray<value_t>(m_data, size()); }
 	MATRICE_GLOBAL_FINL operator std::valarray<value_t>() const { return std::valarray<value_t>(m_data, size()); }
 #endif
+
+	/**
+	 * \size properties
+	 */
 	MATRICE_GLOBAL_FINL constexpr auto rows() const { return m_rows; }
 	MATRICE_GLOBAL_FINL constexpr auto cols() const { return m_cols; }
 	MATRICE_GLOBAL_FINL constexpr auto size() const { return m_rows*m_cols; }
 	MATRICE_GLOBAL_FINL constexpr auto shape() const { return std::tie(m_rows, m_cols); }
 
 	///<brief> assignment operators </brief>
+
+	/**
+	 * \assignment operator, from initializer list
+	 */
 	MATRICE_GLOBAL_FINL _Derived& operator= (const_init_list _list) {
 #ifdef _DEBUG
 		assert(size() == m_storage.size());
@@ -275,18 +331,26 @@ public:
 		m_data = _Proxy_checked(m_storage.data());
 		return (*static_cast<_Derived*>(this));
 	}
+	/**
+	 * \assignment operator, from row-wise iterator
+	 */
 	MATRICE_GLOBAL_FINL _Derived& operator= (const _Myt_rwise_iterator& _It) {
 		std::copy(_It.begin(), _It.end(), m_storage.data());
 		m_data = _Proxy_checked(m_storage.data());
 		return (*static_cast<_Derived*>(this));
 	}
+	/**
+	 * \assignment operator, from column-wise iterator
+	 */
 	MATRICE_GLOBAL_FINL _Derived& operator= (const _Myt_cwise_iterator& _It) {
 		std::copy(_It.begin(), _It.end(), m_storage.data());
 		m_data = _Proxy_checked(m_storage.data());
 		return (*static_cast<_Derived*>(this));
 	}
-	MATRICE_GLOBAL_INL _Derived& operator= (_Myt_const_reference _other) //homotype assignment operator
-	{
+	/**
+	 * \homotype copy assignment operator
+	 */
+	MATRICE_GLOBAL_INL _Derived& operator= (_Myt_const_reference _other) {
 		m_cols = _other.m_cols, m_rows = _other.m_rows;
 		m_format = _other.m_format;
 		m_storage = _other.m_storage;
@@ -294,8 +358,10 @@ public:
 		base_t::_Flush_view_buf();
 		return (*static_cast<_Derived*>(this));
 	}
-	MATRICE_GLOBAL_INL _Derived& operator= (_Myt_move_reference _other) //homotype assignment operator
-	{
+	/**
+	 * \homotype move assignment operator
+	 */
+	MATRICE_GLOBAL_INL _Derived& operator= (_Myt_move_reference _other) {
 		m_cols = _other.m_cols, m_rows = _other.m_rows;
 		m_format = _other.m_format;
 		m_storage = std::forward<_Myt_storage_type>(_other.m_storage);
@@ -306,12 +372,13 @@ public:
 		_other.m_cols = _other.m_rows = 0;
 		return (*static_cast<_Derived*>(this));
 	}
-	template<
-		int _Rows, int _Cols, 
-		typename = typename std::enable_if<is_static<_Rows, _Cols>::value&&!is_static<_M, _N>::value>::type
-	> //static to dynamic
-	MATRICE_GLOBAL_FINL _Derived& operator= (Matrix_<value_t, _Rows, _Cols>& _managed)
-	{
+	/**
+	 * \try to convert managed matrix to dynamic matrix
+	 */
+	template<int _Rows, int _Cols,
+		typename _Mty = Matrix_<value_t, _Rows, _Cols>,
+		typename = typename std::enable_if_t<is_static_v<_Rows, _Cols>&&!is_static_v<_M, _N>>>
+	MATRICE_GLOBAL_FINL _Derived& operator= (_Mty& _managed) {
 		m_data = _managed.data();
 		m_rows = _managed.rows(), m_cols = _managed.cols();
 		m_storage.owner() = detail::Storage_<value_t>::Proxy;
@@ -320,25 +387,17 @@ public:
 	}
 
 #pragma region <!-- Lazied Operators for Matrix Arithmetic -->
-	template<typename _Rhs> MATRICE_GLOBAL_INL auto operator+ (const _Rhs& _opd) const 
-	{ return Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_sum>(*this, _opd);}
-	template<typename _Rhs> MATRICE_GLOBAL_INL auto operator- (const _Rhs& _opd) const 
-	{ return Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_min>(*this, _opd); }
-	template<typename _Rhs> MATRICE_GLOBAL_INL auto operator* (const _Rhs& _opd) const 
-	{ return Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_mul>(*this, _opd); }
-	template<typename _Rhs> MATRICE_GLOBAL_INL auto operator/ (const _Rhs& _opd) const 
-	{ return Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_div>(*this, _opd); }
-	template<typename _Rhs> MATRICE_GLOBAL_INL auto mul(const _Rhs& rhs) const 
-	{ return Expr::MatBinaryExpr<_Myt, _Rhs, _Xop_mat_mul>(*this, rhs); }
+	template<typename _Rhs> MATRICE_GLOBAL_INL auto operator+ (const _Rhs& _opd) const { return Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_sum>(*this, _opd);}
+	template<typename _Rhs> MATRICE_GLOBAL_INL auto operator- (const _Rhs& _opd) const { return Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_min>(*this, _opd); }
+	template<typename _Rhs> MATRICE_GLOBAL_INL auto operator* (const _Rhs& _opd) const { return Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_mul>(*this, _opd); }
+	template<typename _Rhs> MATRICE_GLOBAL_INL auto operator/ (const _Rhs& _opd) const { return Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_div>(*this, _opd); }
+
+	template<typename _Rhs> MATRICE_GLOBAL_INL auto mul(const _Rhs& rhs) const { return Expr::MatBinaryExpr<_Myt, _Rhs, _Xop_mat_mul>(*this, rhs); }
 	MATRICE_GLOBAL_FINL auto sqrt() const { return Expr::EwiseUnaryExpr<_Myt, _Xop_ewise_sqrt>(*this); }
-	MATRICE_HOST_FINL auto inv() const 
-	{ return Expr::MatUnaryExpr<_Myt, _Xop_mat_inv>(*this); }
-	MATRICE_HOST_FINL auto inv(_Myt_const_reference _rhs) 
-	{ return Expr::MatUnaryExpr<_Myt, _Xop_mat_inv>(_rhs, *this); }
-	MATRICE_HOST_FINL auto transpose() 
-	{ return Expr::MatUnaryExpr<_Myt, _Xop_mat_trp>(*this); }
-	MATRICE_GLOBAL_FINL auto normalize(value_t _val = inf) 
-	{ return ((abs(_val) < eps ? value_t(1) : value_t(1) / (_val == inf ? max() : _val))*(*this)); }
+	MATRICE_HOST_FINL auto inv() const { return Expr::MatUnaryExpr<_Myt, _Xop_mat_inv>(*this); }
+	MATRICE_HOST_FINL auto inv(_Myt_const_reference _rhs) { return Expr::MatUnaryExpr<_Myt, _Xop_mat_inv>(_rhs, *this); }
+	MATRICE_HOST_FINL auto transpose() { return Expr::MatUnaryExpr<_Myt, _Xop_mat_trp>(*this); }
+	MATRICE_GLOBAL_FINL auto normalize(value_t _val = inf) { return ((abs(_val) < eps ? value_t(1) : value_t(1) / (_val == inf ? max() : _val))*(*this)); }
 	MATRICE_GLOBAL_INL Expr::MatBinaryExpr<_Myt, _Myt, _Xop_mat_mul> spread();
 #pragma endregion
 
