@@ -18,6 +18,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include <array>
 #include "_type_traits.h"
+#include "../util/genalgs.h"
+#include "../util/utils.h"
 
 DGE_MATRICE_BEGIN
 
@@ -104,6 +106,13 @@ template<
 	typename     _Op = Expr::EwiseUnaryExpr<_Rhs, _Exp_op::_Ewise_log<value_t>>>
 MATRICE_GLOBAL_FINL auto log(const _Rhs& _right) { return _Op(_right); }
 
+// element-wise log()
+template<
+	typename _Rhs,
+	typename value_t = typename std::enable_if_t<std::is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>,
+	typename     _Op = Expr::EwiseUnaryExpr<_Rhs, _Exp_op::_Ewise_abs<value_t>>>
+MATRICE_GLOBAL_FINL auto abs(const _Rhs& _right) { return _Op(_right); }
+
 // determinent expression of square matrix
 template<
 	typename _Rhs,
@@ -150,26 +159,40 @@ MATRICE_GLOBAL_FINL auto _Fill_array(const _Valty* _First) {
 }
 
 template<std::size_t _P> struct _Matrix_norm_impl {
-	template<typename _Mty, std::enable_if_t<is_matrix_v<_Mty>>>
+	template<typename _Mty>
 	MATRICE_GLOBAL_FINL static constexpr auto value(const _Mty& _A) {
-		auto _Ret = zero<typename _Mty::value_type>::value;
-		_A.each([&_Ret](const auto& _Val) { _Ret += powers_n_t<_P>::value(_Val); });
-		return (_Ret);
+		static_assert(is_matrix_v<_Mty>, "_Mty is not matrix type.");
+
+		auto _Ret = typename _Mty::value_type(0);
+		for(const auto& _Val : _A){ 
+			_Ret += detail::_Powers_n<_P>::value(_Val); 
+		};
+		return (pow(_Ret, decltype(_Ret)(1)/_P));
 	}
 };
-template<> struct _Matrix_norm_impl<0> {
-	template<typename _Mty, std::enable_if_t<is_matrix_v<_Mty>>>
+template<> struct _Matrix_norm_impl<0> { //infinity norm
+	template<typename _Mty>
 	MATRICE_GLOBAL_FINL static constexpr auto value(const _Mty& _A) {
-		auto _Ret = zero<typename _Mty::value_type>::value;
+		static_assert(is_matrix_v<_Mty>, "_Mty is not matrix type.");
+
+		auto _Ret = typename _Mty::value_type(0);
 		for (std::size_t _Idx = 0; _Idx < _A.rows(); ++_Idx) {
-			_Ret = max(_Ret, abs(_A.cview(_Idx)).sum());
+			_Ret = max(_Ret, abs(_A.rview(_Idx)).sum());
 		}
 		return (_Ret);
 	}
 };
 template<> struct _Matrix_norm_impl<1> {
-	template<typename _Mty, std::enable_if_t<is_matrix_v<_Mty>>>
-	MATRICE_GLOBAL_FINL static constexpr auto value(const _Mty& _A) {}
+	template<typename _Mty>
+	MATRICE_GLOBAL_FINL static constexpr auto value(const _Mty& _A) {
+		static_assert(is_matrix_v<_Mty>, "_Mty is not matrix type.");
+
+		auto _Ret = typename _Mty::value_type(0);
+		for (std::size_t _Idx = 0; _Idx < _A.cols(); ++_Idx) {
+			_Ret = max(_Ret, abs(_A.cview(_Idx)).sum());
+		}
+		return (_Ret);
+	}
 };
 _INTERNAL_END
 

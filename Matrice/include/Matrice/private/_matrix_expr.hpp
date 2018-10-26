@@ -87,7 +87,7 @@ template<typename _Ty> struct _Ewise_##_Name { \
 		template<typename _Ty> using _Ewise_mul = std::multiplies<_Ty>;
 		template<typename _Ty> using _Ewise_div = std::divides<_Ty>;
 
-		EWISE_OP(sqrt); EWISE_OP(exp); 
+		EWISE_OP(sqrt); EWISE_OP(exp); EWISE_OP(abs);
 		EWISE_OP(log); EWISE_OP(log2); EWISE_OP(log10);
 
 		template<typename _Ty> struct _Mat_inv { enum { flag = inv }; MATRICE_GLOBAL _Ty* operator()(int M, _Ty* Out, _Ty* In = nullptr) const; };
@@ -179,7 +179,7 @@ template<typename _Ty> struct _Ewise_##_Name { \
 		}
 		// \summation over all entries
 		MATRICE_GLOBAL_INL auto sum() const {
-			default_type _Ret = 0.0; int _Size = _CDTHIS->size();
+			auto _Ret = value_t(0); int _Size = _CDTHIS->size();
 #pragma omp parallel if(_Size > 100)
 		{
 #pragma omp for reduction(+:_Ret)
@@ -188,12 +188,12 @@ template<typename _Ty> struct _Ewise_##_Name { \
 			return (_Ret);
 		}
 
-		MATRICE_GLOBAL_FINL size_t size() const { return M*N; }
-		MATRICE_GLOBAL_FINL size_t rows() const { return M; }
-		MATRICE_GLOBAL_FINL size_t cols() const { return N; }
+		MATRICE_GLOBAL_FINL std::size_t size() const { return M*N; }
+		MATRICE_GLOBAL_FINL std::size_t rows() const { return M; }
+		MATRICE_GLOBAL_FINL std::size_t cols() const { return N; }
 
 	protected:
-		size_t M, K, N;
+		std::size_t M, K, N;
 
 #undef _CDTHIS
 	};

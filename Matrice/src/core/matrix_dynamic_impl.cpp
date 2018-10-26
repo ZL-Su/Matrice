@@ -6,7 +6,7 @@ void Matrix_<_Ty, 0, 0>::create(int_t rows, int_t cols)
 {
 	base_t::m_storage = std::move(detail::Storage_<value_t>::Allocator<0, 0>(rows, cols));
 	m_rows = rows, m_cols = cols;
-	m_data = _Proxy_checked(base_t::m_storage.data());
+	m_data = internal::_Proxy_checked(base_t::m_storage.data());
 	base_t::base_t::_Flush_view_buf();
 }
 template void Matrix_<int, 0, 0>::create(int_t, int_t);
@@ -21,7 +21,7 @@ void Matrix_<_Ty, 0, 0>::create(int_t rows, int_t cols, value_t _val)
 	base_t::m_storage = std::move(detail::Storage_<value_t>::Allocator<0, 0>(rows, cols));
 	base_t::m_storage = { _val };
 	m_rows = rows, m_cols = cols;
-	m_data = _Proxy_checked(base_t::m_storage.data());
+	m_data = internal::_Proxy_checked(base_t::m_storage.data());
 	base_t::base_t::_Flush_view_buf();
 }
 template void Matrix_<int, 0, 0>::create(int_t, int_t, value_t);

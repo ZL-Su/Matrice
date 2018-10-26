@@ -114,14 +114,15 @@ public:
 	using const_iterator = std::add_const_t<iterator>;
 	using const_init_list = std::add_const_t<std::initializer_list<value_t>>;
 	using shape_t = std::tuple<std::size_t, std::size_t>;
-	template<typename _Xop> using expr_type = Expr::Base_<_Xop>;
 	using base_t = PlaneView_<value_t>;
 	using loctn_t = Location;
+
+	template<typename _Xop> using expr_type = Expr::Base_<_Xop>;
 	
 	enum { options = _Myt_storage_type::location };
 	enum { Size = _M*_N, CompileTimeRows = _M, CompileTimeCols = _N, };
-	constexpr static const value_t inf = std::numeric_limits<value_t>::infinity();
-	constexpr static const value_t eps = std::numeric_limits<value_t>::epsilon();
+	static constexpr auto inf = std::numeric_limits<value_t>::infinity();
+	static constexpr auto eps = std::numeric_limits<value_t>::epsilon();
 
 	MATRICE_GLOBAL_FINL Base_() noexcept
 		:base_t(_M<0?0:_M, _N<0?0:_N), m_storage() _PTRLINK
@@ -205,8 +206,11 @@ public:
 	MATRICE_GLOBAL_FINL constexpr iterator end() { return (m_data + size()); }
 	MATRICE_GLOBAL_FINL constexpr const_iterator begin() const { return (m_data); }
 	MATRICE_GLOBAL_FINL constexpr const_iterator end() const { return (m_data + size()); }
-	MATRICE_GLOBAL_FINL constexpr auto eval() const { return (*static_cast<const _Derived*>(this)); }
 
+	/**
+	 * \eval() expression
+	 */
+	MATRICE_GLOBAL_FINL constexpr auto& eval() const { return (*static_cast<const _Derived*>(this)); }
 
 #pragma region <!-- iterators -->
 	/**
@@ -422,7 +426,7 @@ public:
 	 * Reference: https://en.wikipedia.org/wiki/Matrix_norm
 	 */
 	template<std::size_t _P = 2> MATRICE_GLOBAL_FINL auto norm() const {
-		return internal::_Matrix_norm_impl<_P>::value(*this);
+		return internal::_Matrix_norm_impl<_P>::value(*(this));
 	}
 	/**
 	 * \dot product of this matrix with _Rhs
