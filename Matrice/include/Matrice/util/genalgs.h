@@ -143,7 +143,19 @@ template<> struct _Reduce_n<0> {
 	template<typename _Ty> static
 	MATRICE_GLOBAL_INL auto value(const _Ty* _Data[[]]) { return (_Data[0]); }
 };
-_DETAIL_END
-template<std::size_t _Size = 1> using reduce_n_t = detail::_Reduce_n<_Size - 1>;
 
+template<std::size_t _N>  struct _Powers_n {
+	template<typename _Ty> static
+	MATRICE_GLOBAL_INL auto value(const _Ty _Val) {
+		return (_Powers_n<_N - 1>::value(_Val)*_Val);
+	}
+};
+template<> struct _Powers_n<0> {
+	template<typename _Ty> static
+		MATRICE_GLOBAL_INL auto value(const _Ty _Val) { return _Ty(1); }
+};
+_DETAIL_END
+
+template<std::size_t _Size = 1> using reduce_n_t = detail::_Reduce_n<_Size - 1>;
+template<std::size_t _Expo = 1> using powers_n_t = detail::_Powers_n<_Expo>;
 DGE_MATRICE_END

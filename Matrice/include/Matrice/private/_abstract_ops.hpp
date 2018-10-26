@@ -126,6 +126,7 @@ MATRICE_GLOBAL_FINL auto outer_product(const _Lhs& _left, const _Rhs& _right) {
 	return _Op(_left, _right); 
 }
 
+_INTERNAL_BEGIN
 // helper operators
 template<typename _InIt, typename = std::enable_if_t<std::is_pointer_v<_InIt>>>
 MATRICE_GLOBAL_FINL void _Conformity_check(_InIt _Left, _InIt _Right) {
@@ -147,5 +148,29 @@ MATRICE_GLOBAL_FINL auto _Fill_array(const _Valty* _First) {
 	std::_Copy_unchecked(_First, _First + _N, _Ret.data());
 	return (_Ret);
 }
+
+template<std::size_t _P> struct _Matrix_norm_impl {
+	template<typename _Mty, std::enable_if_t<is_matrix_v<_Mty>>>
+	MATRICE_GLOBAL_FINL static constexpr auto value(const _Mty& _A) {
+		auto _Ret = zero<typename _Mty::value_type>::value;
+		_A.each([&_Ret](const auto& _Val) { _Ret += powers_n_t<_P>::value(_Val); });
+		return (_Ret);
+	}
+};
+template<> struct _Matrix_norm_impl<0> {
+	template<typename _Mty, std::enable_if_t<is_matrix_v<_Mty>>>
+	MATRICE_GLOBAL_FINL static constexpr auto value(const _Mty& _A) {
+		auto _Ret = zero<typename _Mty::value_type>::value;
+		for (std::size_t _Idx = 0; _Idx < _A.rows(); ++_Idx) {
+			_Ret = max(_Ret, abs(_A.cview(_Idx)).sum());
+		}
+		return (_Ret);
+	}
+};
+template<> struct _Matrix_norm_impl<1> {
+	template<typename _Mty, std::enable_if_t<is_matrix_v<_Mty>>>
+	MATRICE_GLOBAL_FINL static constexpr auto value(const _Mty& _A) {}
+};
+_INTERNAL_END
 
 DGE_MATRICE_END

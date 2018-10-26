@@ -143,20 +143,17 @@ public:
 		:base_t(_other.m_rows, _other.m_cols), m_storage(_other.m_storage) _PTRLINK
 	MATRICE_GLOBAL_FINL Base_(_Myt_move_reference _other) noexcept 
 		:base_t(_other.m_rows, _other.m_cols), m_storage(std::move(_other.m_storage)) _PTRLINK
-
 	/**
 	 *\from STD valarray<...>
 	 */
 	MATRICE_GLOBAL_FINL Base_(const std::valarray<value_t>& _other, int _rows = 1) noexcept 
 		:base_t(_rows, _other.size() / _rows), m_storage(_rows, _other.size() / _rows, _other.data()) _PTRLINK
-
 	/**
 	 *\from explicit specified matrix type
 	 */
 	template<int _Rows, int _Cols, typename _Mty = Matrix_<value_t, _Rows, _Cols>>
 	MATRICE_GLOBAL_FINL Base_(const _Mty& _other) noexcept 
 		:base_t(_other.rows(), _other.cols()), m_storage(_other.m_storage) _PTRLINK
-
 	/**
 	 *\from expression
 	 */
@@ -328,7 +325,7 @@ public:
 		assert(size() == m_storage.size());
 #endif
 		m_storage = _list;
-		m_data = _Proxy_checked(m_storage.data());
+		m_data = internal::_Proxy_checked(m_storage.data());
 		return (*static_cast<_Derived*>(this));
 	}
 	/**
@@ -336,7 +333,7 @@ public:
 	 */
 	MATRICE_GLOBAL_FINL _Derived& operator= (const _Myt_rwise_iterator& _It) {
 		std::copy(_It.begin(), _It.end(), m_storage.data());
-		m_data = _Proxy_checked(m_storage.data());
+		m_data = internal::_Proxy_checked(m_storage.data());
 		return (*static_cast<_Derived*>(this));
 	}
 	/**
@@ -344,7 +341,7 @@ public:
 	 */
 	MATRICE_GLOBAL_FINL _Derived& operator= (const _Myt_cwise_iterator& _It) {
 		std::copy(_It.begin(), _It.end(), m_storage.data());
-		m_data = _Proxy_checked(m_storage.data());
+		m_data = internal::_Proxy_checked(m_storage.data());
 		return (*static_cast<_Derived*>(this));
 	}
 	/**
@@ -354,7 +351,7 @@ public:
 		m_cols = _other.m_cols, m_rows = _other.m_rows;
 		m_format = _other.m_format;
 		m_storage = _other.m_storage;
-		m_data = _Proxy_checked(m_storage.data());
+		m_data = internal::_Proxy_checked(m_storage.data());
 		base_t::_Flush_view_buf();
 		return (*static_cast<_Derived*>(this));
 	}
@@ -365,7 +362,7 @@ public:
 		m_cols = _other.m_cols, m_rows = _other.m_rows;
 		m_format = _other.m_format;
 		m_storage = std::forward<_Myt_storage_type>(_other.m_storage);
-		m_data = _Proxy_checked(m_storage.data());
+		m_data = internal::_Proxy_checked(m_storage.data());
 		base_t::_Flush_view_buf();
 		_other.m_storage.free();
 		_other.m_data = nullptr;
@@ -409,17 +406,38 @@ public:
 #pragma endregion
 
 	///<brief> in-time matrix arithmetic </brief>
-	MATRICE_GLOBAL_FINL value_t max() const { return (*std::max_element(m_data, m_data + size())); }
-	MATRICE_GLOBAL_FINL value_t min() const { return (*std::min_element(m_data, m_data + size())); }
-	MATRICE_GLOBAL_FINL value_t sum() const { return (reduce(begin(), end())); }
-	MATRICE_GLOBAL_FINL value_t det() const { return (det_impl(*static_cast<const _Derived*>(this))); }
-	MATRICE_GLOBAL_FINL value_t trace() const { return (reduce(begin(), end(), cols() + 1)); }
-	template<class _Rhs> MATRICE_GLOBAL_FINL value_t dot(const _Rhs& _rhs) const { return (this->operator*(_rhs)).sum(); }
-	MATRICE_GLOBAL_FINL value_t norm_2() const { auto ans = dot(*this); return (ans > eps ? dgelom::sqrt(ans) : inf); }
+	MATRICE_GLOBAL_FINL auto max() const { return (*std::max_element(begin(), end())); }
+	MATRICE_GLOBAL_FINL auto min() const { return (*std::min_element(begin(), end())); }
+	MATRICE_GLOBAL_FINL auto sum() const { return (reduce(begin(), end())); }
+	MATRICE_GLOBAL_FINL auto det() const { return (det_impl(*static_cast<const _Derived*>(this))); }
+	MATRICE_GLOBAL_FINL auto trace() const { return (reduce(begin(), end(), cols() + 1)); }
 
+	/**
+	 * \matrix Frobenius norm
+	 */
+	MATRICE_GLOBAL_FINL auto norm_2() const { auto _Ans = dot(*this); return (_Ans > eps ? dgelom::sqrt(_Ans) : inf); }
+	/**
+	 * \matrix p-norm: $[\sum_{i=1}^{m}\sum_{j=1}^{}|a_{ij}|^p]^{1/p}$
+	 * Sepcial cases: $p = 0$ for $\infty$-norm, $p = 1$ for 1-norm and $p = 2$ for 2-norm
+	 * Reference: https://en.wikipedia.org/wiki/Matrix_norm
+	 */
+	template<std::size_t _P = 2> MATRICE_GLOBAL_FINL auto norm() const {
+		return internal::_Matrix_norm_impl<_P>::value(*this);
+	}
+	/**
+	 * \dot product of this matrix with _Rhs
+	 */
+	template<typename _Rhs, typename = std::enable_if_t<is_matrix_v<_Rhs>>> 
+	MATRICE_GLOBAL_FINL auto dot(const _Rhs& _Rhs) const { return (this->operator*(_Rhs)).sum(); }
+
+	/**
+	 * \operate each entry via _Fn
+	 */
 	template<typename _Fty>
 	MATRICE_GLOBAL_FINL void each(_Fty _Fn) { for (auto& _Val : *this) _Fn(_Val); }
-
+	/**
+	 * \replace entries meets _Cond with _Val
+	 */
 	MATRICE_GLOBAL_FINL void where(std::function<bool(const value_type&)> _Cond, const value_type _Val) {
 		this->each([&](auto& _My_val) {_My_val = _Cond(_My_val) ? _Val : _My_val; });
 	}
@@ -441,6 +459,11 @@ protected:
 
 public:
 	_Myt_storage_type m_storage;
+
+#undef _SHAPE
+#undef _EXPOP
+#undef _PTRLINK
+#undef _PTRLINK_EVAL
 };
 _TYPES_END
 DGE_MATRICE_END
