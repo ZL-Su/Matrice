@@ -39,40 +39,71 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 DGE_MATRICE_BEGIN
-
+_INTERNAL_BEGIN
 // \CLASS TEMPLATE to make plane view for all matrix types
-template<typename _Ty, int _Type = _View_trait<_Ty>::value> class PlaneView_
-{
+template<typename _Ty, int _Type = _View_trait<_Ty>::value> 
+class PlaneView_ {
 	enum { MAGIC_VAL = 0x42FF0000 };
 	struct Step { int buf[2] = { sizeof(_Ty), sizeof(_Ty) }; int* p = buf; };
 	int type = _Type, flags = MAGIC_VAL | _Type, dims = 2; Step step;
 public:
-	constexpr MATRICE_GLOBAL_FINL PlaneView_() = default;
-	constexpr MATRICE_GLOBAL_FINL PlaneView_(int _rows, int _cols, _Ty* _data = nullptr)
-		: m_rows(_rows), m_cols(_cols), m_data(_data) { step.buf[0] = m_cols * step.buf[1]; };
-	constexpr MATRICE_GLOBAL_FINL void update(_Ty* data) { m_data = data; }
+	using plvt_type = std::tuple<int, int, std::add_pointer_t<_Ty>>;
+	MATRICE_GLOBAL_FINL PlaneView_() = default;
+	MATRICE_GLOBAL_FINL PlaneView_(int _rows, int _cols, std::add_pointer_t<_Ty> _data = nullptr)
+		: m_rows(_rows), m_cols(_cols), m_data(_data) { 
+		step.buf[0] = m_cols * step.buf[1]; 
+	};
+
+	/**
+	 * \shape of the matrix
+	 * Example: auto [_Rows, _Cols] = _Matrix.shape();
+	 */
+	MATRICE_GLOBAL_FINL constexpr auto shape() const { 
+		return std::tie(m_rows, m_cols); 
+	}
+
+	/**
+	 * \tuple of plane view of the matrix
+	 * Example: auto [_Rows, _Cols, _Data] = _Matrix.plvt();
+	 */
+	MATRICE_GLOBAL_FINL constexpr plvt_type plvt() {
+		return std::tie(m_rows, m_cols, m_data);
+	}
+	MATRICE_GLOBAL_FINL constexpr plvt_type plvt() const {
+		return std::tie(m_rows, m_cols, m_data);
+	}
+
+	/**
+	 * \raw plane view of the matrix
+	 * Example: auto& _Raw = _Matrix.raw();
+	 */
+	MATRICE_GLOBAL_FINL constexpr auto& raw() {
+		return *this;
+	}
+	MATRICE_GLOBAL_FINL constexpr auto& raw() const {
+		return *this;
+	}
+
 protected:
-	constexpr MATRICE_GLOBAL_FINL void _Flush_view_buf() { step.buf[0] = m_cols * step.buf[1]; }
-protected:
+	MATRICE_GLOBAL_FINL void _Flush_view_buf() { step.buf[0] = m_cols * step.buf[1]; }
+
 	int m_rows, m_cols;
-	_Ty* m_data = nullptr;
+	std::add_pointer_t<_Ty> m_data = nullptr;
 };
+_INTERNAL_END
 
 _TYPES_BEGIN
-
 template<typename _Ty> using nested_initializer_list = std::initializer_list<std::initializer_list<_Ty>>;
 
 /*******************************************************************
 	              Generic Base for Matrix Class
 	    Copyright (c) : Zhilong (Dgelom) Su, since 14/Feb/2018
  ******************************************************************/
-template
-<
+template<
 	typename _Derived, 
 	typename _Traits = matrix_traits<_Derived>, 
-	typename _Type = typename _Traits::type
->
-class Base_ : public PlaneView_<typename _Traits::type>
+	typename _Type = typename _Traits::type>
+class Base_ : public internal::PlaneView_<_Type>
 {
 #define _PTRLINK { m_data = m_storage.data(); }
 #define _PTRLINK_EVAL { m_data = m_storage.data(); expr.assign(*this); }
@@ -114,7 +145,7 @@ public:
 	using const_iterator = std::add_const_t<iterator>;
 	using const_init_list = std::add_const_t<std::initializer_list<value_t>>;
 	using shape_t = std::tuple<std::size_t, std::size_t>;
-	using base_t = PlaneView_<value_t>;
+	using base_t = internal::PlaneView_<value_t>;
 	using loctn_t = Location;
 
 	template<typename _Xop> using expr_type = Expr::Base_<_Xop>;
@@ -173,7 +204,7 @@ public:
 
 	///<brief> opencv interface </brief>
 #ifdef __use_ocv_as_view__
-	//MATRICE_HOST_FINL Base_(const ocv_view_t& mat) : base_t(mat.rows, mat.cols, mat.ptr<value_t>()) {}
+	MATRICE_HOST_FINL Base_(const ocv_view_t& mat) : base_t(mat.rows, mat.cols, mat.ptr<value_t>()) {}
 	MATRICE_HOST_FINL operator ocv_view_t() { return ocv_view_t(m_rows, m_cols, ocv_view_t_cast<value_t>::type, m_data); }
 	MATRICE_HOST_FINL operator ocv_view_t() const { return ocv_view_t(m_rows, m_cols, ocv_view_t_cast<value_t>::type, m_data); }
 #endif
@@ -208,7 +239,7 @@ public:
 	MATRICE_GLOBAL_FINL constexpr const_iterator end() const { return (m_data + size()); }
 
 	/**
-	 * \eval() expression
+	 * \eval() expression, return this reference for the true matrix
 	 */
 	MATRICE_GLOBAL_FINL constexpr auto& eval() const { return (*static_cast<const _Derived*>(this)); }
 
@@ -300,6 +331,10 @@ public:
 	MATRICE_GLOBAL_INL const _Myt_blockview_type block(index_t x0, index_t x1, index_t y0, index_t y1) const {
 		return _Myt_blockview_type(m_data, m_cols, { x0, y0, x1, y1 });
 	}
+	/**
+	 * \View of the matrix data
+	 */
+
 #pragma endregion
 
 #ifdef _HAS_CXX17
@@ -317,7 +352,6 @@ public:
 	MATRICE_GLOBAL_FINL constexpr auto rows() const { return m_rows; }
 	MATRICE_GLOBAL_FINL constexpr auto cols() const { return m_cols; }
 	MATRICE_GLOBAL_FINL constexpr auto size() const { return m_rows*m_cols; }
-	MATRICE_GLOBAL_FINL constexpr auto shape() const { return std::tie(m_rows, m_cols); }
 
 	///<brief> assignment operators </brief>
 
