@@ -358,9 +358,17 @@ public:
 	}
 	// \View of submatrix: x \in [x0, x1) and y \in [y0, y1)
 	MATRICE_GLOBAL_INL _Myt_blockview_type block(index_t x0, index_t x1, index_t y0, index_t y1) {
+#ifdef _DEBUG
+		if (x1 > m_cols) throw std::runtime_error("In _matrix_base.hpp, var x1 for .block(...) must be not greater than m_cols.");
+		if (y1 > m_rows) throw std::runtime_error("In _matrix_base.hpp, var y1 for .block(...) must be not greater than m_rows.");
+#endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, {x0, y0, x1, y1});
 	}
 	MATRICE_GLOBAL_INL const _Myt_blockview_type block(index_t x0, index_t x1, index_t y0, index_t y1) const {
+#ifdef _DEBUG
+		if (x1 > m_cols) throw std::runtime_error("In _matrix_base.hpp, var x1 for .block(...) must be not greater than m_cols.");
+		if (y1 > m_rows) throw std::runtime_error("In _matrix_base.hpp, var y1 for .block(...) must be not greater than m_rows.");
+#endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, { x0, y0, x1, y1 });
 	}
 #pragma endregion
