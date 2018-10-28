@@ -75,12 +75,21 @@ struct Expr {
 	template<int N> struct factorial_t { enum { value = factorial_t<N - 1>::value*N }; };
 	template<> struct factorial_t<0> { enum { value = 1 }; };
 
-#define EWISE_OP(_Name) \
+#define _MATRICE_DEFEXP_EWISEOP(_Name) \
 template<typename _Ty> struct _Ewise_##_Name { \
 	enum {flag = ewise}; \
 	MATRICE_GLOBAL_FINL constexpr auto operator() (const _Ty& _Val) const {\
 		return (std::_Name(_Val)); \
 	}\
+};
+#define _MATRICE_DEFEXP_ARITHOP(OP, NAME) \
+template<typename _Rhs, typename  = std::enable_if_t<std::true_type::value>> \
+MATRICE_GLOBAL_FINL auto operator##OP(const _Rhs& _Right) { \
+	return EwiseBinaryExpr<derived_t, _Rhs, Op::_Ewise_##NAME<value_t>>(*_CDTHIS, _Right); \
+} \
+template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> friend \
+	MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) { \
+	return EwiseBinaryExpr<_Lhs, derived_t, Op::_Ewise_##NAME<value_t>>(_Left, _Right); \
 }
 	struct Op {
 		template<typename _Ty> using _Ewise_sum = std::plus<_Ty>;
@@ -88,23 +97,30 @@ template<typename _Ty> struct _Ewise_##_Name { \
 		template<typename _Ty> using _Ewise_mul = std::multiplies<_Ty>;
 		template<typename _Ty> using _Ewise_div = std::divides<_Ty>;
 
-		EWISE_OP(sqrt); EWISE_OP(exp); EWISE_OP(abs);
-		EWISE_OP(log); EWISE_OP(log2); EWISE_OP(log10);
+		_MATRICE_DEFEXP_EWISEOP(sqrt)
+		_MATRICE_DEFEXP_EWISEOP(exp)
+		_MATRICE_DEFEXP_EWISEOP(abs)
+		_MATRICE_DEFEXP_EWISEOP(log)
+		_MATRICE_DEFEXP_EWISEOP(log2)
+		_MATRICE_DEFEXP_EWISEOP(log10)
 
-		template<typename _Ty> struct _Mat_inv { enum { flag = inv }; MATRICE_GLOBAL _Ty* operator()(int M, _Ty* Out, _Ty* In = nullptr) const; };
-		template<typename _Ty> struct _Mat_trp { enum { flag = trp }; MATRICE_HOST_FINL _Ty operator()(int M, _Ty* Out, _Ty* i) const { return (Out[int(i[1])*M + int(i[0])]); } };
-		// \matrix spread multiply
-		template<typename _Ty> struct _Mat_sprmul
-		{
+		template<typename _Ty> struct _Mat_inv { 
+			enum { flag = inv }; 
+			MATRICE_GLOBAL _Ty* operator()(int M, _Ty* Out, _Ty* In = nullptr) const; 
+		};
+		template<typename _Ty> struct _Mat_trp { 
+			enum { flag = trp }; 
+			MATRICE_HOST_FINL _Ty operator()(int M, _Ty* Out, _Ty* i) const { return (Out[int(i[1])*M + int(i[0])]); } 
+		};
+		// *\matrix spread multiply
+		template<typename _Ty> struct _Mat_sprmul {
 			enum { flag = undef };
 			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
 				_Ty operator() (const _Lhs& lhs, const _Rhs& rhs, int r, int c) const { return (lhs(r) * rhs(c)); }
 		};
-		template<typename _Ty> struct _Mat_mul
-		{
+		template<typename _Ty> struct _Mat_mul {
 			enum { flag = mmul };
-			template<typename _Rhs> MATRICE_GLOBAL_FINL
-				_Ty operator() (const _Ty* lhs, const _Rhs& rhs, int c, int _plh = 0) const
+			template<typename _Rhs> MATRICE_GLOBAL_FINL _Ty operator() (const _Ty* lhs, const _Rhs& rhs, int c, int _plh = 0) const
 			{
 				_Ty val = _Ty(0);
 				const int K = rhs.rows(), N = rhs.cols();
@@ -117,8 +133,7 @@ template<typename _Ty> struct _Ewise_##_Name { \
 #endif
 				return (val);
 			}
-			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
-				_Ty operator() (const _Lhs& lhs, const _Rhs& rhs, int r, int c) const
+			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL _Ty operator() (const _Lhs& lhs, const _Rhs& rhs, int r, int c) const
 			{
 				_Ty _Ret = _Ty(0), val = 0;
 				const int K = rhs.rows(), N = rhs.cols(), _Idx = r * lhs.cols();
@@ -195,38 +210,10 @@ template<typename _Ty> struct _Ewise_##_Name { \
 		MATRICE_GLOBAL_FINL constexpr std::size_t cols() const { return N; }
 		MATRICE_GLOBAL_FINL constexpr auto shape() const { return std::tie(M, N); }
 
-		template<typename _Rhs, typename  = std::enable_if_t<std::true_type::value>>
-		MATRICE_GLOBAL_FINL auto operator+(const _Rhs& _Right) {
-			return EwiseBinaryExpr<derived_t, _Rhs, Op::_Ewise_sum<value_t>>(*_CDTHIS, _Right);
-		}
-		template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> friend
-		MATRICE_GLOBAL_FINL auto operator+(const _Lhs& _Left, const_derived& _Right) {
-			return EwiseBinaryExpr<_Lhs, derived_t, Op::_Ewise_sum<value_t>>(_Left, _Right);
-		}
-		template<typename _Rhs, typename = std::enable_if_t<std::true_type::value>>
-		MATRICE_GLOBAL_FINL auto operator-(const _Rhs& _Right) {
-			return EwiseBinaryExpr<derived_t, _Rhs, Op::_Ewise_min<value_t>>(*_CDTHIS, _Right);
-		}
-		template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> friend
-		MATRICE_GLOBAL_FINL auto operator-(const _Lhs& _Left, const_derived& _Right) {
-			return EwiseBinaryExpr<_Lhs, derived_t, Op::_Ewise_min<value_t>>(_Left, _Right);
-		}
-		template<typename _Rhs, typename = std::enable_if_t<std::true_type::value>>
-		MATRICE_GLOBAL_FINL auto operator*(const _Rhs& _Right) {
-			return EwiseBinaryExpr<derived_t, _Rhs, Op::_Ewise_mul<value_t>>(*_CDTHIS, _Right);
-		}
-		template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> friend
-		MATRICE_GLOBAL_FINL auto operator*(const _Lhs& _Left, const_derived& _Right) {
-			return EwiseBinaryExpr<_Lhs, derived_t, Op::_Ewise_mul<value_t>>(_Left, _Right);
-		}
-		template<typename _Rhs, typename = std::enable_if_t<std::true_type::value>>
-		MATRICE_GLOBAL_FINL auto operator/(const _Rhs& _Right) {
-			return EwiseBinaryExpr<derived_t, _Rhs, Op::_Ewise_div<value_t>>(*_CDTHIS, _Right);
-		}
-		template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> friend
-		MATRICE_GLOBAL_FINL auto operator/(const _Lhs& _Left, const_derived& _Right) {
-			return EwiseBinaryExpr<_Lhs, derived_t, Op::_Ewise_div<value_t>>(_Left, _Right);
-		}
+		_MATRICE_DEFEXP_ARITHOP(+, sum)
+		_MATRICE_DEFEXP_ARITHOP(-, min)
+		_MATRICE_DEFEXP_ARITHOP(*, mul)
+		_MATRICE_DEFEXP_ARITHOP(/, div)
 
 	protected:
 		std::size_t M, K, N;
@@ -462,7 +449,7 @@ template<typename _Ty> struct _Ewise_##_Name { \
 		}
 		MATRICE_GLOBAL_FINL T& ans() { return _ANS; }
 		MATRICE_GLOBAL_FINL const T& ans() const { return _ANS; }
-		template<typename _Rhs, typename _Ret = MatBinaryExpr<MatUnaryExpr, _Rhs, Op::MatMul<value_t>>> 
+		template<typename _Rhs, typename _Ret = MatBinaryExpr<MatUnaryExpr, _Rhs, Op::_Mat_mul<value_t>>> 
 		MATRICE_GLOBAL_INL _Ret mul(const _Rhs& _rhs) {
 			if constexpr (options & inv == inv) this->operator()();
 			if constexpr (options & trp == trp)                   ;
@@ -486,12 +473,11 @@ template<typename _Ty> struct _Ewise_##_Name { \
 		using _Base_type::N;
 		using _Base_type::size;
 	};
+#undef _MATRICE_DEFEXP_ARITHOP
+#undef _MATRICE_DEFEXP_EWISEOP
 };
 
-template<
-	typename _Exp, 
-	typename = std::enable_if_t<is_expression_v<_Exp>>
-	>
+template<typename _Exp, typename = std::enable_if_t<is_expression_v<_Exp>>>
 using _Matrix_exp = typename Expr::Base_<_Exp>;
 
 MATRICE_NAMESPACE_EXPR_END

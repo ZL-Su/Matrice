@@ -108,7 +108,21 @@ class Base_ : public PlaneView_<_Type>
 #define _PTRLINK { m_data = m_storage.data(); }
 #define _PTRLINK_EVAL { m_data = m_storage.data(); expr.assign(*this); }
 #define _SHAPE std::get<0>(_Shape), std::get<1>(_Shape)
-#define _EXPOP(_Desc, _Name) typename _Exp_op::_##_Desc##_##_Name<_Type>
+#define _EXPOP(DESC, NAME) typename _Exp_op::_##DESC##_##NAME<_Type>
+#define _MATRICE_DEF_ARITHOP(OP, NAME) \
+template<typename _Rhs> MATRICE_GLOBAL_INL \
+auto operator##OP (const _Rhs& _Right) const { \
+	return Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_##NAME>(*this, _Right); \
+} \
+template<typename _Lhs, typename = std::enable_if_t<std::is_scalar_v<_Lhs>>> friend \
+MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const _Derived& _Right) { \
+	return Expr::EwiseBinaryExpr<_Lhs, _Derived, _Xop_ewise_##NAME>(_Left, _Right); \
+}
+#define _MATRICE_DEF_EXP_ASSIGNOP(NAME) \
+template<typename... _Args> MATRICE_GLOBAL_INL \
+auto& operator= (const Expr##NAME##Expr<_Args...>& _Ex){ \
+return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
+}
 
 	enum { _M = _Traits::size::rows::value, _N = _Traits::size::cols::value };
 	using _Myt_storage_type = typename detail::Storage_<_Type>::template Allocator<_M, _N>;
@@ -202,9 +216,11 @@ public:
 	MATRICE_GLOBAL_FINL Base_(const Expr::MatUnaryExpr<_Rhs, _Op>& expr) 
 		:base_t(m_rows = expr.rows(), m_cols = expr.cols()), m_storage(m_rows, m_cols) _PTRLINK_EVAL
 
-	///<brief> opencv interface </brief>
+	/**
+	 *\interfaces for opencv if it is enabled
+	 */
 #ifdef __use_ocv_as_view__
-	//MATRICE_HOST_FINL Base_(const ocv_view_t& mat) : base_t(mat.rows, mat.cols, mat.ptr<value_t>()) {}
+	MATRICE_HOST_FINL Base_(const ocv_view_t& mat) : base_t(mat.rows, mat.cols, mat.ptr<value_t>()) {}
 	MATRICE_HOST_FINL ocv_view_t cvmat() { return ocv_view_t(m_rows, m_cols, ocv_view_t_cast<value_t>::type, m_data); }
 	MATRICE_HOST_FINL const ocv_view_t cvmat() const { return ocv_view_t(m_rows, m_cols, ocv_view_t_cast<value_t>::type, m_data); }
 #endif
@@ -365,8 +381,6 @@ public:
 	MATRICE_GLOBAL_FINL constexpr auto cols() const { return m_cols; }
 	MATRICE_GLOBAL_FINL constexpr auto size() const { return m_rows*m_cols; }
 
-	///<brief> assignment operators </brief>
-
 	/**
 	 * \assignment operator, from initializer list
 	 */
@@ -434,34 +448,10 @@ public:
 	}
 
 #pragma region <!-- Lazied Operators for Matrix Arithmetic -->
-	template<typename _Rhs> MATRICE_GLOBAL_INL auto operator+ (const _Rhs& _Right) const {
-		return Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_sum>(*this, _Right);
-	}
-	template<typename _Lhs, typename = std::enable_if_t<std::is_scalar_v<_Lhs>>> friend
-	MATRICE_GLOBAL_FINL auto operator+(const _Lhs& _Left, const _Derived& _Right) {
-		return Expr::EwiseBinaryExpr<_Lhs, _Derived, _Xop_ewise_sum>(_Left, _Right);
-	}
-	template<typename _Rhs> MATRICE_GLOBAL_INL auto operator- (const _Rhs& _Right) const {
-		return Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_min>(*this, _Right);
-	}
-	template<typename _Lhs, typename = std::enable_if_t<std::is_scalar_v<_Lhs>>> friend
-	MATRICE_GLOBAL_FINL auto operator-(const _Lhs& _Left, const _Derived& _Right) {
-		return Expr::EwiseBinaryExpr<_Lhs, _Derived, _Xop_ewise_min>(_Left, _Right);
-	}
-	template<typename _Rhs> MATRICE_GLOBAL_INL auto operator* (const _Rhs& _Right) const {
-		return Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_mul>(*this, _Right); 
-	}
-	template<typename _Lhs, typename = std::enable_if_t<std::is_scalar_v<_Lhs>>> friend
-	MATRICE_GLOBAL_FINL auto operator*(const _Lhs& _Left, const _Derived& _Right) {
-		return Expr::EwiseBinaryExpr<_Lhs, _Derived, _Xop_ewise_mul>(_Left, _Right);
-	}
-	template<typename _Rhs> MATRICE_GLOBAL_INL auto operator/ (const _Rhs& _Right) const {
-		return Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_div>(*this, _Right); 
-	}
-	template<typename _Lhs, typename = std::enable_if_t<std::is_scalar_v<_Lhs>>> friend
-	MATRICE_GLOBAL_FINL auto operator/(const _Lhs& _Left, const _Derived& _Right) {
-		return Expr::EwiseBinaryExpr<_Lhs, _Derived, _Xop_ewise_div>(_Left, _Right);
-	}
+	_MATRICE_DEF_ARITHOP(+, sum)
+	_MATRICE_DEF_ARITHOP(-, min)
+	_MATRICE_DEF_ARITHOP(*, mul)
+	_MATRICE_DEF_ARITHOP(/, div)
 
 	template<typename _Rhs> MATRICE_GLOBAL_INL auto mul(const _Rhs& _Right) const { 
 		return Expr::MatBinaryExpr<_Myt, _Rhs, _Xop_mat_mul>(*this, _Right);
@@ -482,13 +472,11 @@ public:
 		return ((*this)*(abs(_val) < eps ? 1 : 1 / (_val == inf ? max() : _val))); 
 	}
 	MATRICE_GLOBAL_INL Expr::MatBinaryExpr<_Myt, _Myt, _Xop_mat_mul> spread();
-#pragma endregion
 
-#pragma region <!-- Triggers for Suspended Expression -->
-	template<typename... _Args> MATRICE_GLOBAL_INL auto& operator= (const Expr::EwiseBinaryExpr<_Args...>& _Ex){ return (*static_cast<_Derived*>(&_Ex.assign(*this))); }
-	template<typename... _Args> MATRICE_GLOBAL_INL auto& operator= (const Expr::EwiseUnaryExpr<_Args...>& _Ex) { return (*static_cast<_Derived*>(&_Ex.assign(*this))); }
-	template<typename... _Args> MATRICE_GLOBAL_INL auto& operator= (const Expr::MatBinaryExpr<_Args...>& _Ex) { return (*static_cast<_Derived*>(&_Ex.assign(*this))); }
-	template<typename... _Args> MATRICE_GLOBAL_INL auto& operator= (const Expr::MatUnaryExpr<_Args...>& _Ex) { return (*static_cast<_Derived*>(&_Ex.assign(*this))); }
+	_MATRICE_DEF_EXP_ASSIGNOP(::EwiseBinary)
+	_MATRICE_DEF_EXP_ASSIGNOP(::EwiseUnary)
+	_MATRICE_DEF_EXP_ASSIGNOP(::MatBinary)
+	_MATRICE_DEF_EXP_ASSIGNOP(::MatUnary)
 #pragma endregion
 
 	///<brief> in-time matrix arithmetic </brief>
@@ -541,7 +529,7 @@ protected:
 	using base_t::m_cols;
 	using base_t::m_data;
 
-	size_t m_format = rmaj|gene;
+	std::size_t m_format = rmaj|gene;
 
 public:
 	_Myt_storage_type m_storage;
@@ -550,6 +538,8 @@ public:
 #undef _EXPOP
 #undef _PTRLINK
 #undef _PTRLINK_EVAL
+#undef _MATRICE_DEF_ARITHOP
+#undef _MATRICE_DEF_EXP_ASSIGNOP
 };
 _TYPES_END
 DGE_MATRICE_END

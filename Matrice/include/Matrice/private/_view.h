@@ -38,6 +38,13 @@ template<typename _Ty, typename _Derived> class _View_base
 for (std::size_t i = 0; i < size(); ++i) {\
 	static_cast<_Derived*>(this)->operator()(i) = _OPERATION;\
 } return (*this)
+#define _MATRICE_DEFVIEW_ARITHOP(OP, NAME) \
+template<typename _Rhs> MATRICE_GLOBAL_FINL auto operator##OP(const _Rhs& _Right) { \
+	return Expr::EwiseBinaryExpr<_Derived, _Rhs, _Exp_op::_Ewise_##NAME<value_t>>(*static_cast<_Derived*>(this), _Right); \
+} \
+template<typename _Lhs> friend MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const _Derived& _Right) { \
+	return Expr::EwiseBinaryExpr<_Lhs, _Derived, _Exp_op::_Ewise_##NAME<value_t>>(_Left, _Right); \
+}
 
 public:
 	using value_t = _Ty;
@@ -137,38 +144,10 @@ public:
 	template<typename... _Args>
 	MATRICE_GLOBAL_INL auto& operator= (const Expr::MatUnaryExpr<_Args...>& _Ex) { return (*static_cast<_Derived*>(&_Ex.assign(*this))); }*/
 
-	template<typename _Rhs>
-	MATRICE_GLOBAL_FINL auto operator+(const _Rhs& _Right) {
-		return Expr::EwiseBinaryExpr<_Derived, _Rhs, _Exp_op::_Ewise_sum<value_t>>(*static_cast<_Derived*>(this), _Right);
-	}
-	template<typename _Lhs> friend
-	MATRICE_GLOBAL_FINL auto operator+(const _Lhs& _Left, const _Derived& _Right) {
-		return Expr::EwiseBinaryExpr<_Lhs, _Derived, _Exp_op::_Ewise_sum<value_t>>(_Left, _Right);
-	}
-	template<typename _Rhs>
-	MATRICE_GLOBAL_FINL auto operator-(const _Rhs& _Right) {
-		return Expr::EwiseBinaryExpr<_Derived, _Rhs, _Exp_op::_Ewise_min<value_t>>(*static_cast<_Derived*>(this), _Right);
-	}
-	template<typename _Lhs> friend
-	MATRICE_GLOBAL_FINL auto operator-(const _Lhs& _Left, const _Derived& _Right) {
-		return Expr::EwiseBinaryExpr<_Lhs, _Derived, _Exp_op::_Ewise_min<value_t>>(_Left, _Right);
-	}
-	template<typename _Rhs>
-	MATRICE_GLOBAL_FINL auto operator*(const _Rhs& _Right) {
-		return Expr::EwiseBinaryExpr<_Derived, _Rhs, _Exp_op::_Ewise_mul<value_t>>(*static_cast<_Derived*>(this), _Right);
-	}
-	template<typename _Lhs> friend
-	MATRICE_GLOBAL_FINL auto operator*(const _Lhs& _Left, const _Derived& _Right) {
-		return Expr::EwiseBinaryExpr<_Lhs, _Derived, _Exp_op::_Ewise_mul<value_t>>(_Left, _Right);
-	}
-	template<typename _Rhs>
-	MATRICE_GLOBAL_FINL auto operator/(const _Rhs& _Right) {
-		return Expr::EwiseBinaryExpr<_Derived, _Rhs, _Exp_op::_Ewise_div<value_t>>(*static_cast<_Derived*>(this), _Right);
-	}
-	template<typename _Lhs> friend
-	MATRICE_GLOBAL_FINL auto operator/(const _Lhs& _Left, const _Derived& _Right) {
-		return Expr::EwiseBinaryExpr<_Lhs, _Derived, _Exp_op::_Ewise_div<value_t>>(_Left, _Right);
-	}
+	_MATRICE_DEFVIEW_ARITHOP(+, sum)
+	_MATRICE_DEFVIEW_ARITHOP(-, min)
+	_MATRICE_DEFVIEW_ARITHOP(*, mul)
+	_MATRICE_DEFVIEW_ARITHOP(/, div)
 protected:
 	pointer _My_data;
 	size_t  _My_size;
