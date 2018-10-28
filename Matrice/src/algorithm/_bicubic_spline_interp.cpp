@@ -21,7 +21,7 @@ void BicubicSplineInterp<_Ty, _Options>::_Bspline_coeff(const matrix_t& _Data) {
 {
 #pragma omp for
 	for (index_t _Row = 0; _Row < _K0; ++_Row) {
-		_R0 = _R0 + _Data.rview(_Row) * pow(_Z, _Row);
+		_R0 = _R0 + pow(_Z, _Row)*_Data.rview(_Row);
 	}
 }
 
@@ -54,7 +54,7 @@ void BicubicSplineInterp<_Ty, _Options>::_Bspline_coeff(const matrix_t& _Data) {
 
 	m_coeff.cview(_Width - 1) = _A * (_Buff.cview(_Width - 1) + _Buff.cview(_Width - 2)*_Z);
 	for (index_t _Col = _Width - 2; _Col >= 0; --_Col) {
-		m_coeff.cview(_Col) = (m_coeff.cview(_Col + 1) - _Buff.cview(_Col))*_Z;
+		m_coeff.cview(_Col) = _Z*(m_coeff.cview(_Col + 1) - _Buff.cview(_Col));
 	}
 }
 

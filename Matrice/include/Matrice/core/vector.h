@@ -32,11 +32,14 @@ protected:
 	using _Base = Matrix_<_Ty, _Dim, compile_time_size<>::val_1>;
 	using const_init_list = typename _Base::const_init_list;
 public:
+	enum{CompileTimeRows = _Dim, CompileTimeCols = 1};
 	using _Base::data;
-	using value_t = typename _Base::value_t;
+	using typename _Base::value_t;
+	using typename _Base::value_type;
 	using const_value = const value_t;
 	using reference = value_t & ;
 	using const_reference = const reference;
+
 	vec_global_inl Vec_() : _Base({ 0 }) {}
 	vec_global_inl Vec_(const_value _v) : _Base({ _v }) {}
 	vec_global_inl Vec_(const_value _x, const_value _y) : _Base({ _x, _y }) {}
@@ -78,7 +81,10 @@ template<typename _Ty> class Vec3_ final : public Vec_<_Ty, 3>
 	using typename _Base::reference;
 	using typename _Base::const_init_list;
 public:
+	using _Base::CompileTimeRows;
+	using _Base::CompileTimeCols;
 	using typename _Base::value_t;
+	using typename _Base::value_type;
 	using _Base::operator=;
 	using _Base::operator[];
 	using _Base::data;
@@ -115,7 +121,10 @@ template<typename _Ty> class Vec4_ final : public Vec_<_Ty, 4>
 	using typename _Base::reference;
 	using typename _Base::const_init_list;
 public:
+	using _Base::CompileTimeRows;
+	using _Base::CompileTimeCols;
 	using typename _Base::value_t;
+	using typename _Base::value_type;
 	using _Base::operator=;
 	using _Base::operator[];
 	using _Base::data;

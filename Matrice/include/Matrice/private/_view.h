@@ -16,9 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
-#include <type_traits>
 #include <valarray>
-#include "_abstract_ops.hpp"
 #include "../util/utils.h"
 
 DGE_MATRICE_BEGIN
@@ -139,21 +137,37 @@ public:
 	template<typename... _Args>
 	MATRICE_GLOBAL_INL auto& operator= (const Expr::MatUnaryExpr<_Args...>& _Ex) { return (*static_cast<_Derived*>(&_Ex.assign(*this))); }*/
 
-	template<typename _Op = Expr::EwiseBinaryExpr<_Derived, _Derived, _Exp_op::_Ewise_sum<value_t>>>
-	MATRICE_GLOBAL_FINL auto operator+(const value_t _Right) {
-		return _Op(*static_cast<_Derived*>(this), _Right);
+	template<typename _Rhs>
+	MATRICE_GLOBAL_FINL auto operator+(const _Rhs& _Right) {
+		return Expr::EwiseBinaryExpr<_Derived, _Rhs, _Exp_op::_Ewise_sum<value_t>>(*static_cast<_Derived*>(this), _Right);
 	}
-	template<typename _Op = Expr::EwiseBinaryExpr<_Derived, _Derived, _Exp_op::_Ewise_min<value_t>>>
-	MATRICE_GLOBAL_FINL auto operator-(const value_t _Right) {
-		return _Op(*static_cast<_Derived*>(this), _Right);
+	template<typename _Lhs> friend
+	MATRICE_GLOBAL_FINL auto operator+(const _Lhs& _Left, const _Derived& _Right) {
+		return Expr::EwiseBinaryExpr<_Lhs, _Derived, _Exp_op::_Ewise_sum<value_t>>(_Left, _Right);
 	}
-	template<typename _Op = Expr::EwiseBinaryExpr<_Derived, _Derived, _Exp_op::_Ewise_mul<value_t>>>
-	MATRICE_GLOBAL_FINL auto operator*(const value_t _Right) {
-		return _Op(*static_cast<_Derived*>(this), _Right);
+	template<typename _Rhs>
+	MATRICE_GLOBAL_FINL auto operator-(const _Rhs& _Right) {
+		return Expr::EwiseBinaryExpr<_Derived, _Rhs, _Exp_op::_Ewise_min<value_t>>(*static_cast<_Derived*>(this), _Right);
 	}
-	template<typename _Op = Expr::EwiseBinaryExpr<_Derived, _Derived, _Exp_op::_Ewise_div<value_t>>>
-	MATRICE_GLOBAL_FINL auto operator/(const value_t _Right) {
-		return _Op(*static_cast<_Derived*>(this), _Right);
+	template<typename _Lhs> friend
+	MATRICE_GLOBAL_FINL auto operator-(const _Lhs& _Left, const _Derived& _Right) {
+		return Expr::EwiseBinaryExpr<_Lhs, _Derived, _Exp_op::_Ewise_min<value_t>>(_Left, _Right);
+	}
+	template<typename _Rhs>
+	MATRICE_GLOBAL_FINL auto operator*(const _Rhs& _Right) {
+		return Expr::EwiseBinaryExpr<_Derived, _Rhs, _Exp_op::_Ewise_mul<value_t>>(*static_cast<_Derived*>(this), _Right);
+	}
+	template<typename _Lhs> friend
+	MATRICE_GLOBAL_FINL auto operator*(const _Lhs& _Left, const _Derived& _Right) {
+		return Expr::EwiseBinaryExpr<_Lhs, _Derived, _Exp_op::_Ewise_mul<value_t>>(_Left, _Right);
+	}
+	template<typename _Rhs>
+	MATRICE_GLOBAL_FINL auto operator/(const _Rhs& _Right) {
+		return Expr::EwiseBinaryExpr<_Derived, _Rhs, _Exp_op::_Ewise_div<value_t>>(*static_cast<_Derived*>(this), _Right);
+	}
+	template<typename _Lhs> friend
+	MATRICE_GLOBAL_FINL auto operator/(const _Lhs& _Left, const _Derived& _Right) {
+		return Expr::EwiseBinaryExpr<_Lhs, _Derived, _Exp_op::_Ewise_div<value_t>>(_Left, _Right);
 	}
 protected:
 	pointer _My_data;

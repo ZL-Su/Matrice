@@ -5,7 +5,7 @@
 #else
 #include <fkl.h>
 #endif
-#include "../../include/Matrice/private/_matrix_expr.hpp"
+#include "../../include/Matrice/private/_matrix_exp.hpp"
 #include "../../include/Matrice/private/_memory.h"
 #include "../private/generic_fast_math.hpp"
 
@@ -39,6 +39,4 @@ _Ty * Expr::Op::_Mat_inv<_Ty>::operator()(int M, _Ty * Out, _Ty * In) const
 
 _EXPOP_EXPLICIT_INSTANTIATION(float, Mat, inv)
 _EXPOP_EXPLICIT_INSTANTIATION(double, Mat, inv)
-//template float* Expr::Op::_Mat_inv<float>::operator()(int, float*, float*) const;
-//template double* Expr::Op::_Mat_inv<double>::operator()(int, double*, double*) const;
 MATRICE_NAMESPACE_EXPR_END

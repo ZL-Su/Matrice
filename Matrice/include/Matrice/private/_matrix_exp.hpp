@@ -61,6 +61,7 @@ struct matrix_traits<types::Base_<_Derived, _Traits, _Ty>> {
 DGE_MATRICE_END
 
 MATRICE_NAMESPACE_EXPR_BEGIN
+template<typename _T, typename _U, typename _Op> class EwiseBinaryExpr;
 template<typename _T, typename _U, typename _Op> class MatBinaryExpr;
 template<typename _T, typename _Op> class MatUnaryExpr;
 
@@ -141,8 +142,9 @@ template<typename _Ty> struct _Ewise_##_Name { \
 		using myt_traits = expression_traits<_Op>;
 		using value_t = typename myt_traits::value_type;
 		using matrix_type = typename myt_traits::auto_matrix_type;
-		using derived_pointer = std::add_pointer_t<typename myt_traits::type>;
-		using const_derived = std::add_const_t<typename myt_traits::type>;
+		using derived_t = typename myt_traits::type;
+		using derived_pointer = std::add_pointer_t<derived_t>;
+		using const_derived = std::add_const_t<derived_t>;
 		using const_derived_pointer = std::add_pointer_t<const_derived>;
 		enum {options = myt_traits::options,
 			CompileTimeRows = myt_traits::rows, 
@@ -175,7 +177,7 @@ template<typename _Ty> struct _Ewise_##_Name { \
 		}
 		// \formulate matmul expression
 		template<typename _Rhs> MATRICE_GLOBAL_INL auto mul(const _Rhs& _rhs) const {
-			return MatBinaryExpr<typename myt_traits::type, _Rhs, Op::MatMul<typename _Rhs::value_t>>(*_CDTHIS, _rhs);
+			return MatBinaryExpr<derived_t, _Rhs, Op::_Mat_mul<value_t>>(*_CDTHIS, _rhs);
 		}
 		// \summation over all entries
 		MATRICE_GLOBAL_INL auto sum() const {
@@ -188,9 +190,43 @@ template<typename _Ty> struct _Ewise_##_Name { \
 			return (_Ret);
 		}
 
-		MATRICE_GLOBAL_FINL std::size_t size() const { return M*N; }
-		MATRICE_GLOBAL_FINL std::size_t rows() const { return M; }
-		MATRICE_GLOBAL_FINL std::size_t cols() const { return N; }
+		MATRICE_GLOBAL_FINL constexpr std::size_t size() const { return M*N; }
+		MATRICE_GLOBAL_FINL constexpr std::size_t rows() const { return M; }
+		MATRICE_GLOBAL_FINL constexpr std::size_t cols() const { return N; }
+		MATRICE_GLOBAL_FINL constexpr auto shape() const { return std::tie(M, N); }
+
+		template<typename _Rhs, typename  = std::enable_if_t<std::true_type::value>>
+		MATRICE_GLOBAL_FINL auto operator+(const _Rhs& _Right) {
+			return EwiseBinaryExpr<derived_t, _Rhs, Op::_Ewise_sum<value_t>>(*_CDTHIS, _Right);
+		}
+		template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> friend
+		MATRICE_GLOBAL_FINL auto operator+(const _Lhs& _Left, const_derived& _Right) {
+			return EwiseBinaryExpr<_Lhs, derived_t, Op::_Ewise_sum<value_t>>(_Left, _Right);
+		}
+		template<typename _Rhs, typename = std::enable_if_t<std::true_type::value>>
+		MATRICE_GLOBAL_FINL auto operator-(const _Rhs& _Right) {
+			return EwiseBinaryExpr<derived_t, _Rhs, Op::_Ewise_min<value_t>>(*_CDTHIS, _Right);
+		}
+		template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> friend
+		MATRICE_GLOBAL_FINL auto operator-(const _Lhs& _Left, const_derived& _Right) {
+			return EwiseBinaryExpr<_Lhs, derived_t, Op::_Ewise_min<value_t>>(_Left, _Right);
+		}
+		template<typename _Rhs, typename = std::enable_if_t<std::true_type::value>>
+		MATRICE_GLOBAL_FINL auto operator*(const _Rhs& _Right) {
+			return EwiseBinaryExpr<derived_t, _Rhs, Op::_Ewise_mul<value_t>>(*_CDTHIS, _Right);
+		}
+		template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> friend
+		MATRICE_GLOBAL_FINL auto operator*(const _Lhs& _Left, const_derived& _Right) {
+			return EwiseBinaryExpr<_Lhs, derived_t, Op::_Ewise_mul<value_t>>(_Left, _Right);
+		}
+		template<typename _Rhs, typename = std::enable_if_t<std::true_type::value>>
+		MATRICE_GLOBAL_FINL auto operator/(const _Rhs& _Right) {
+			return EwiseBinaryExpr<derived_t, _Rhs, Op::_Ewise_div<value_t>>(*_CDTHIS, _Right);
+		}
+		template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> friend
+		MATRICE_GLOBAL_FINL auto operator/(const _Lhs& _Left, const_derived& _Right) {
+			return EwiseBinaryExpr<_Lhs, derived_t, Op::_Ewise_div<value_t>>(_Left, _Right);
+		}
 
 	protected:
 		std::size_t M, K, N;
@@ -199,45 +235,109 @@ template<typename _Ty> struct _Ewise_##_Name { \
 	};
 
 	// \matrix element-wise binary operation expression: +, -, *, /, ...
-	template<typename T, typename U, typename _BinaryOp> 
-	class EwiseBinaryExpr : public Base_<EwiseBinaryExpr<T, U, _BinaryOp>>
+	template<typename T, typename U, typename _BinaryOp, bool _T = std::is_scalar_v<T>, bool _U = std::is_scalar_v<U>> class EwiseBinaryExpr {};
+	template<typename T, typename U, typename _BinaryOp>
+	class EwiseBinaryExpr<T, U, _BinaryOp, false, false> : public Base_<EwiseBinaryExpr<T, U, _BinaryOp, false, false>>
 	{
-		using _Base_type = Base_<EwiseBinaryExpr<T, U, _BinaryOp>>;
+		using _Base_type = Base_<EwiseBinaryExpr<T, U, _BinaryOp, false, false>>;
 	public:
 		using _Base_type::CompileTimeRows;
 		using _Base_type::CompileTimeCols;
 		using typename _Base_type::value_t;
 		using typename _Base_type::matrix_type;
-		static constexpr value_t inf = std::numeric_limits<value_t>::infinity();
 		enum { options = option<ewise>::value };
 
-		MATRICE_GLOBAL_INL EwiseBinaryExpr(const value_t _scalar, const U& _rhs) noexcept
-			: _Scalar(_scalar), _LHS(_rhs), _RHS(_rhs) { M = _LHS.rows(), N = _RHS.cols(); }
-		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T& _lhs, const value_t _scalar) noexcept
-			: _Scalar(_scalar), _LHS(_lhs), _RHS(_lhs) { M = _LHS.rows(), N = _RHS.cols(); }
 		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T& _lhs, const U& _rhs) noexcept
 			: _LHS(_lhs), _RHS(_rhs) { M = _LHS.rows(), N = _RHS.cols(); }
 
-		MATRICE_GLOBAL_INL value_t operator() (size_t _idx)
-		{
-			if (_Scalar == inf) return _Op(_LHS(_idx), _RHS(_idx));
-			if (_Scalar != inf) return _Op(_Scalar, _RHS(_idx));
+		MATRICE_GLOBAL_INL value_t operator() (std::size_t _idx) { 
+			return _Op(_LHS(_idx), _RHS(_idx));
 		}
-		MATRICE_GLOBAL_INL const value_t operator() (size_t _idx) const
-		{
-			if (_Scalar == inf) return _Op(_LHS(_idx), _RHS(_idx));
-			if (_Scalar != inf) return _Op(_Scalar, _RHS(_idx));
+		MATRICE_GLOBAL_INL const value_t operator() (std::size_t _idx) const {
+			return _Op(_LHS(_idx), _RHS(_idx));
 		}
 
-		template<typename _Mty> MATRICE_GLOBAL_INL void assign_to(_Mty& res) const
-		{
+		template<typename _Mty> 
+		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const {
+#pragma omp parallel for
+			for (index_t i = 0; i < res.size(); ++i) res(i) = this->operator()(i);
+		}
+
+	private:
+		const T& _LHS; const U& _RHS;
+		_BinaryOp _Op;
+		using _Base_type::M;
+		using _Base_type::N;
+	};
+
+	template<typename T, typename U, typename _BinaryOp>
+	class EwiseBinaryExpr<T, U, _BinaryOp, true, false> : public Base_<EwiseBinaryExpr<T, U, _BinaryOp, true, false>>
+	{
+		using _Base_type = Base_<EwiseBinaryExpr<T, U, _BinaryOp, true, false>>;
+	public:
+		using _Base_type::CompileTimeRows;
+		using _Base_type::CompileTimeCols;
+		using typename _Base_type::value_t;
+		using typename _Base_type::matrix_type;
+		enum { options = option<ewise>::value };
+
+		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T _scalar, const U& _rhs) noexcept
+			: _Scalar(_scalar), _RHS(_rhs) {
+			M = _RHS.rows(), N = _RHS.cols();
+		}
+
+		MATRICE_GLOBAL_INL value_t operator() (size_t _idx) {
+			return _Op(_Scalar, _RHS(_idx));
+		}
+		MATRICE_GLOBAL_INL const value_t operator() (size_t _idx) const {
+			return _Op(_Scalar, _RHS(_idx));
+		}
+
+		template<typename _Mty> 
+		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const {
 #pragma omp parallel for
 			for (index_t i = 0; i < res.size(); ++i) res(i) = this->operator()(i);
 		}
 
 	private:
 		const value_t _Scalar = std::numeric_limits<value_t>::infinity();
-		const T& _LHS; const U& _RHS;
+		const U& _RHS;
+		_BinaryOp _Op;
+		using _Base_type::M;
+		using _Base_type::N;
+	};
+	template<typename T, typename U, typename _BinaryOp>
+	class EwiseBinaryExpr<T, U, _BinaryOp, false, true> : public Base_<EwiseBinaryExpr<T, U, _BinaryOp, false, true>>
+	{
+		using _Base_type = Base_<EwiseBinaryExpr<T, U, _BinaryOp, false, true>>;
+	public:
+		using _Base_type::CompileTimeRows;
+		using _Base_type::CompileTimeCols;
+		using typename _Base_type::value_t;
+		using typename _Base_type::matrix_type;
+		enum { options = option<ewise>::value };
+
+		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T& _lhs, const U _scalar) noexcept
+			: _Scalar(_scalar), _LHS(_lhs) {
+			M = _LHS.rows(), N = _LHS.cols();
+		}
+
+		MATRICE_GLOBAL_INL value_t operator() (size_t _idx) {
+			return _Op(_LHS(_idx), _Scalar);
+		}
+		MATRICE_GLOBAL_INL const value_t operator() (size_t _idx) const {
+			return _Op(_LHS(_idx), _Scalar);
+		}
+
+		template<typename _Mty> 
+		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const {
+#pragma omp parallel for
+			for (index_t i = 0; i < res.size(); ++i) res(i) = this->operator()(i);
+		}
+
+	private:
+		const value_t _Scalar = std::numeric_limits<value_t>::infinity();
+		const T& _LHS;
 		_BinaryOp _Op;
 		using _Base_type::M;
 		using _Base_type::N;
@@ -402,27 +502,49 @@ using _Exp_op = exprs::Expr::Op;
 
 template<typename _Derived>
 struct is_expression<exprs::Expr::Base_<_Derived>> :std::true_type {};
-template<typename T, typename U, typename _Op>
-struct is_expression<exprs::Expr::EwiseBinaryExpr<T, U, _Op>> :std::true_type {};
+template<typename T, typename U, typename _Op, bool _T, bool _U>
+struct is_expression<exprs::Expr::EwiseBinaryExpr<T, U, _Op, _T, _U>> :std::true_type {};
 template<typename T, typename _Op>
 struct is_expression<exprs::Expr::EwiseUnaryExpr<T, _Op>> :std::true_type {};
 template<typename T, typename U, typename _Op>
 struct is_expression<exprs::Expr::MatBinaryExpr<T, U, _Op>> :std::true_type {};
 template<typename T, typename _Op>
 struct is_expression<exprs::Expr::MatUnaryExpr<T, _Op>> :std::true_type {};
+
 template<typename T, typename U, typename _Op>
-struct expression_traits<exprs::Expr::EwiseBinaryExpr<T, U, _Op>> {
-	using type = exprs::Expr::EwiseBinaryExpr<T, U, _Op>;
-	using value_type = conditional_t<std::is_scalar_v<T>, T, typename T::value_t>;
+struct expression_traits<exprs::Expr::EwiseBinaryExpr<T, U, _Op, false, false>> {
+	using type = exprs::Expr::EwiseBinaryExpr<T, U, _Op, false, false>;
+	using value_type = std::common_type_t<typename T::value_t, typename U::value_t>;
 	enum {
 		options = exprs::Expr::option<exprs::Expr::OpFlag::ewise>::value,
-		rows = conditional_size_v<!std::is_scalar_v<T> && !std::is_scalar_v<U>, max_integer_v<T::CompileTimeRows, U::CompileTimeRows>, 
-		conditional_size_v<std::is_scalar_v<T>, U::CompileTimeRows, conditional_size_v<std::is_scalar_v<U>, T::CompileTimeRows, 0>>>,
-		cols = conditional_size_v<!std::is_scalar_v<T> && !std::is_scalar_v<U>, max_integer_v<T::CompileTimeCols, U::CompileTimeCols>,
-		conditional_size_v<std::is_scalar_v<T>, U::CompileTimeCols, conditional_size_v<std::is_scalar_v<U>, T::CompileTimeCols, 0>>>,
+		rows = T::CompileTimeRows,
+		cols = U::CompileTimeCols,
 	};
 	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
 };
+template<typename T, typename U, typename _Op>
+struct expression_traits<exprs::Expr::EwiseBinaryExpr<T, U, _Op, true, false>> {
+	using type = exprs::Expr::EwiseBinaryExpr<T, U, _Op, true, false>;
+	using value_type = typename U::value_t;
+	enum {
+		options = exprs::Expr::option<exprs::Expr::OpFlag::ewise>::value,
+		rows = U::CompileTimeRows,
+		cols = U::CompileTimeCols,
+	};
+	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
+};
+template<typename T, typename U, typename _Op>
+struct expression_traits<exprs::Expr::EwiseBinaryExpr<T, U, _Op, false, true>> {
+	using type = exprs::Expr::EwiseBinaryExpr<T, U, _Op, false, true>;
+	using value_type = typename T::value_t;
+	enum {
+		options = exprs::Expr::option<exprs::Expr::OpFlag::ewise>::value,
+		rows = T::CompileTimeRows,
+		cols = T::CompileTimeCols,
+	};
+	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
+};
+
 template<typename T, typename _Op>
 struct expression_traits<exprs::Expr::EwiseUnaryExpr<T, _Op>> {
 	using type = exprs::Expr::EwiseUnaryExpr<T, _Op>;
@@ -456,4 +578,75 @@ struct expression_traits<exprs::Expr::MatUnaryExpr<T, _Op>> {
 	};
 	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
 };
+
+using exprs::Expr;
+// *\element-wise addition
+template<
+	typename _Lhs, typename _Rhs,
+	typename value_t = conditional_t<std::is_scalar_v<_Rhs>, typename _Lhs::value_t, typename _Rhs::value_t>,
+	typename _Op = Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Exp_op::_Ewise_sum<value_t>>>
+	MATRICE_GLOBAL_FINL auto operator+ (const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
+// *\element-wise subtraction
+template<
+	typename _Lhs, class _Rhs,
+	typename value_t = conditional_t<std::is_scalar_v<_Rhs>, typename _Lhs::value_t, typename _Rhs::value_t>,
+	typename     _Op = Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Exp_op::_Ewise_min<value_t>>>
+	MATRICE_GLOBAL_FINL auto operator- (const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
+// *\element-wise multiplication
+template<
+	typename _Lhs, typename _Rhs,
+	typename value_t = conditional_t<std::is_scalar_v<_Rhs>, typename _Lhs::value_t, typename _Rhs::value_t>,
+	typename _Op = Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Exp_op::_Ewise_mul<value_t>>>
+	MATRICE_GLOBAL_FINL auto operator* (const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
+// *\element-wise division
+template<
+	typename _Lhs, typename _Rhs,
+	typename value_t = conditional_t<std::is_scalar_v<_Rhs>, typename _Lhs::value_t, typename _Rhs::value_t>,
+	typename _Op = Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Exp_op::_Ewise_div<value_t>>>
+	MATRICE_GLOBAL_FINL auto operator/ (const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
+
+// *\element-wise sqrt()
+template<
+	typename _Rhs,
+	typename value_t = typename std::enable_if_t<std::is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>,
+	typename     _Op = Expr::EwiseUnaryExpr<_Rhs, _Exp_op::_Ewise_sqrt<value_t>>>
+	MATRICE_GLOBAL_FINL auto sqrt(const _Rhs& _right) { return _Op(_right); }
+
+// *\element-wise exp()
+template<
+	typename _Rhs,
+	typename value_t = typename std::enable_if_t<std::is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>,
+	typename     _Op = Expr::EwiseUnaryExpr<_Rhs, _Exp_op::_Ewise_exp<value_t>>>
+	MATRICE_GLOBAL_FINL auto exp(const _Rhs& _right) { return _Op(_right); }
+
+// *\element-wise log()
+template<
+	typename _Rhs,
+	typename value_t = typename std::enable_if_t<std::is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>,
+	typename     _Op = Expr::EwiseUnaryExpr<_Rhs, _Exp_op::_Ewise_log<value_t>>>
+	MATRICE_GLOBAL_FINL auto log(const _Rhs& _right) { return _Op(_right); }
+
+// *\element-wise abs()
+template<
+	typename _Rhs,
+	typename value_t = typename std::enable_if_t<std::is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>,
+	typename     _Op = Expr::EwiseUnaryExpr<_Rhs, _Exp_op::_Ewise_abs<value_t>>>
+	MATRICE_GLOBAL_FINL auto abs(const _Rhs& _right) { return _Op(_right); }
+
+// *\transpose expression
+template<
+	typename _Rhs,
+	typename value_t = typename std::enable_if_t<std::is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>,
+	typename _Op = Expr::MatUnaryExpr<_Rhs, _Exp_op::_Mat_trp<value_t>>>
+	MATRICE_GLOBAL_FINL auto transpose(const _Rhs& _right) { return _Op(_right); }
+
+// *\outer product expression : xy^T
+template<
+	typename _Lhs, typename _Rhs,
+	typename value_t = std::common_type_t<typename _Lhs::value_t, typename _Rhs::value_t>,
+	typename _Op = Expr::MatBinaryExpr<_Lhs, _Rhs, _Exp_op::_Mat_sprmul<value_t>>>
+	MATRICE_GLOBAL_FINL auto outer_product(const _Lhs& _left, const _Rhs& _right) {
+	return _Op(_left, _right);
+}
+
 DGE_MATRICE_END

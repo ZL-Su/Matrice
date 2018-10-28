@@ -261,12 +261,12 @@
     <ClInclude Include="include\Matrice\private\_function_traits.h" />
     <ClInclude Include="include\Matrice\private\_iterator.h" />
     <ClInclude Include="include\Matrice\private\_matrix_base.hpp" />
-    <ClInclude Include="include\Matrice\private\_matrix_expr.hpp" />
+    <ClInclude Include="include\Matrice\private\_matrix_exp.hpp" />
     <ClInclude Include="include\Matrice\private\_range.h" />
     <ClInclude Include="include\Matrice\private\_size_traits.h" />
     <ClInclude Include="include\Matrice\private\_typelist.h" />
     <ClInclude Include="include\Matrice\private\_type_traits.h" />
-    <ClInclude Include="include\Matrice\private\_abstract_ops.hpp" />
+    <ClInclude Include="include\Matrice\private\_matrix_ops.hpp" />
     <ClInclude Include="include\Matrice\private\_memory.h" />
     <ClInclude Include="include\Matrice\private\_storage.hpp" />
     <ClInclude Include="include\Matrice\private\_unified_memory.h" />

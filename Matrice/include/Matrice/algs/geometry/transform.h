@@ -35,11 +35,10 @@ MATRICE_HOST_INL Vec3_<_Ty> _Rodrigues_impl(const Matrix_<_Ty, 3, 3>& _R) {
 			}
 		}
 		a /= _Ret.norm<2>();
-		return (_Ret = { a*_Ret.x, a*_Ret.y, a*_Ret.z });
+		return (_Ret = a*_Ret);
 	}
 	
-	a = _Half * a / s;
-	return (_Ret = { a*_Ret.x, a*_Ret.y, a*_Ret.z });
+	return (_Ret = (_Half * a / s)*_Ret);
 }
 _DETAIL_END
 

@@ -16,7 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
-#include <type_traits>
 #include <array>
 #include "../private/_matrix_base.hpp"
 #include "../private/_dev_matrix_base.h"
@@ -67,10 +66,6 @@ public:
 	MATRICE_GLOBAL_FINL operator std::array<value_t, Size>() { return internal::_Fill_array<value_t, Size>(base_t::begin()); }
 	MATRICE_GLOBAL_FINL operator Matrix_<value_t, __, __>() const { return Matrix_<value_t, __, __>(m_rows, m_cols, m_data); }
 	MATRICE_GLOBAL_FINL operator Matrix_<value_t, __, __>() { return Matrix_<value_t, __, __>(m_rows, m_cols, m_data); }
-
-#ifdef __use_ocv_as_view__
-	using base_t::operator ocv_view_t;
-#endif
 };
 
 
@@ -246,4 +241,5 @@ template<typename T, size_t _Options = rmaj | gene> using Dmatrix = Matrix_<T,
 	compile_time_size<>::RunTimeDeducedOnDevice,
 	compile_time_size<>::RunTimeDeducedOnDevice,
 	_Options>;
+
 _MATRICE_NAMESPACE_END
