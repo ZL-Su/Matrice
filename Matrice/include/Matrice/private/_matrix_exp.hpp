@@ -75,11 +75,18 @@ struct Expr {
 	template<int N> struct factorial_t { enum { value = factorial_t<N - 1>::value*N }; };
 	template<> struct factorial_t<0> { enum { value = 1 }; };
 
-#define _MATRICE_DEFEXP_EWISEOP(_Name) \
+#define _MATRICE_DEFEXP_EWISEUOP(_Name) \
 template<typename _Ty> struct _Ewise_##_Name { \
 	enum {flag = ewise}; \
 	MATRICE_GLOBAL_FINL constexpr auto operator() (const _Ty& _Val) const {\
 		return (std::_Name(_Val)); \
+	}\
+};
+#define _MATRICE_DEFEXP_EWISEBOP(_Name) \
+template<typename _Ty> struct _Ewise_##_Name { \
+	enum {flag = ewise}; \
+	MATRICE_GLOBAL_FINL constexpr auto operator() (const _Ty& _Left, const _Ty& _Right) const {\
+		return (std::_Name(_Left, _Right)); \
 	}\
 };
 #define _MATRICE_DEFEXP_ARITHOP(OP, NAME) \
@@ -92,17 +99,19 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 	return EwiseBinaryExpr<_Lhs, derived_t, Op::_Ewise_##NAME<value_t>>(_Left, _Right); \
 }
 	struct Op {
-		template<typename _Ty> using _Ewise_sum = std::plus<_Ty>;
-		template<typename _Ty> using _Ewise_min = std::minus<_Ty>;
+		template<typename _Ty> using _Ewise_add = std::plus<_Ty>;
+		template<typename _Ty> using _Ewise_sub = std::minus<_Ty>;
 		template<typename _Ty> using _Ewise_mul = std::multiplies<_Ty>;
 		template<typename _Ty> using _Ewise_div = std::divides<_Ty>;
 
-		_MATRICE_DEFEXP_EWISEOP(sqrt)
-		_MATRICE_DEFEXP_EWISEOP(exp)
-		_MATRICE_DEFEXP_EWISEOP(abs)
-		_MATRICE_DEFEXP_EWISEOP(log)
-		_MATRICE_DEFEXP_EWISEOP(log2)
-		_MATRICE_DEFEXP_EWISEOP(log10)
+		_MATRICE_DEFEXP_EWISEBOP(max)
+		_MATRICE_DEFEXP_EWISEBOP(min)
+		_MATRICE_DEFEXP_EWISEUOP(sqrt)
+		_MATRICE_DEFEXP_EWISEUOP(exp)
+		_MATRICE_DEFEXP_EWISEUOP(abs)
+		_MATRICE_DEFEXP_EWISEUOP(log)
+		_MATRICE_DEFEXP_EWISEUOP(log2)
+		_MATRICE_DEFEXP_EWISEUOP(log10)
 
 		template<typename _Ty> struct _Mat_inv { 
 			enum { flag = inv }; 
@@ -210,8 +219,8 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		MATRICE_GLOBAL_FINL constexpr std::size_t cols() const { return N; }
 		MATRICE_GLOBAL_FINL constexpr auto shape() const { return std::tie(M, N); }
 
-		_MATRICE_DEFEXP_ARITHOP(+, sum)
-		_MATRICE_DEFEXP_ARITHOP(-, min)
+		_MATRICE_DEFEXP_ARITHOP(+, add)
+		_MATRICE_DEFEXP_ARITHOP(-, sub)
 		_MATRICE_DEFEXP_ARITHOP(*, mul)
 		_MATRICE_DEFEXP_ARITHOP(/, div)
 
@@ -474,7 +483,8 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		using _Base_type::size;
 	};
 #undef _MATRICE_DEFEXP_ARITHOP
-#undef _MATRICE_DEFEXP_EWISEOP
+#undef _MATRICE_DEFEXP_EWISEUOP
+#undef _MATRICE_DEFEXP_EWISEBOP
 };
 
 template<typename _Exp, typename = std::enable_if_t<is_expression_v<_Exp>>>
@@ -570,13 +580,13 @@ using exprs::Expr;
 template<
 	typename _Lhs, typename _Rhs,
 	typename value_t = conditional_t<std::is_scalar_v<_Rhs>, typename _Lhs::value_t, typename _Rhs::value_t>,
-	typename _Op = Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Exp_op::_Ewise_sum<value_t>>>
+	typename _Op = Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Exp_op::_Ewise_add<value_t>>>
 	MATRICE_GLOBAL_FINL auto operator+ (const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
 // *\element-wise subtraction
 template<
 	typename _Lhs, class _Rhs,
 	typename value_t = conditional_t<std::is_scalar_v<_Rhs>, typename _Lhs::value_t, typename _Rhs::value_t>,
-	typename     _Op = Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Exp_op::_Ewise_min<value_t>>>
+	typename     _Op = Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Exp_op::_Ewise_sub<value_t>>>
 	MATRICE_GLOBAL_FINL auto operator- (const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
 // *\element-wise multiplication
 template<
@@ -590,6 +600,19 @@ template<
 	typename value_t = conditional_t<std::is_scalar_v<_Rhs>, typename _Lhs::value_t, typename _Rhs::value_t>,
 	typename _Op = Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Exp_op::_Ewise_div<value_t>>>
 	MATRICE_GLOBAL_FINL auto operator/ (const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
+// *\element-wise maximum
+template<
+	typename _Lhs, typename _Rhs,
+	typename value_t = conditional_t<std::is_scalar_v<_Rhs>, typename _Lhs::value_t, typename _Rhs::value_t>,
+	typename _Op = Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Exp_op::_Ewise_max<value_t>>>
+	MATRICE_GLOBAL_FINL auto max(const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
+// *\element-wise minimum
+template<
+	typename _Lhs, typename _Rhs,
+	typename value_t = conditional_t<std::is_scalar_v<_Rhs>, typename _Lhs::value_t, typename _Rhs::value_t>,
+	typename _Op = Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Exp_op::_Ewise_min<value_t>>>
+	MATRICE_GLOBAL_FINL auto min(const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
+
 
 // *\element-wise sqrt()
 template<
