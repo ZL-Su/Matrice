@@ -165,7 +165,8 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 	{
 #define _CDTHIS static_cast<const_derived_pointer>(this)
 		using myt_traits = expression_traits<_Op>;
-		using value_t = typename myt_traits::value_type;
+		using value_type = typename myt_traits::value_type;
+		using value_t = value_type;
 		using matrix_type = typename myt_traits::auto_matrix_type;
 		using derived_t = typename myt_traits::type;
 		using derived_pointer = std::add_pointer_t<derived_t>;
@@ -266,7 +267,6 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		using _Base_type::M;
 		using _Base_type::N;
 	};
-
 	template<typename T, typename U, typename _BinaryOp>
 	class EwiseBinaryExpr<T, U, _BinaryOp, true, false> : public Base_<EwiseBinaryExpr<T, U, _BinaryOp, true, false>>
 	{
