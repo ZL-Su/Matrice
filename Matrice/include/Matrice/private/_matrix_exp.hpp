@@ -85,7 +85,8 @@ template<typename _Ty> struct _Ewise_##_Name { \
 #define _MATRICE_DEFEXP_EWISEBOP(_Name) \
 template<typename _Ty> struct _Ewise_##_Name { \
 	enum {flag = ewise}; \
-	MATRICE_GLOBAL_FINL constexpr auto operator() (const _Ty& _Left, const _Ty& _Right) const {\
+	template<typename _Uy = _Ty> \
+	MATRICE_GLOBAL_FINL constexpr auto operator() (const _Ty& _Left, const _Uy& _Right) const {\
 		return (std::_Name(_Left, _Right)); \
 	}\
 };

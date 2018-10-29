@@ -137,8 +137,8 @@ return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 	using _Myt_rview_type = _Matrix_rview<_Type>;
 	using _Myt_cview_type = _Matrix_cview<_Type>;
 	using _Myt_blockview_type = _Matrix_block<_Type>;
-	using _Xop_ewise_sum   = _EXPOP(Ewise, sum);
-	using _Xop_ewise_min   = _EXPOP(Ewise, min);
+	using _Xop_ewise_add   = _EXPOP(Ewise, add);
+	using _Xop_ewise_sub   = _EXPOP(Ewise, sub);
 	using _Xop_ewise_mul   = _EXPOP(Ewise, mul);
 	using _Xop_ewise_div   = _EXPOP(Ewise, div);
 	using _Xop_ewise_sqrt  = _EXPOP(Ewise, sqrt);
@@ -456,8 +456,8 @@ public:
 	}
 
 #pragma region <!-- Lazied Operators for Matrix Arithmetic -->
-	_MATRICE_DEF_ARITHOP(+, sum)
-	_MATRICE_DEF_ARITHOP(-, min)
+	_MATRICE_DEF_ARITHOP(+, add)
+	_MATRICE_DEF_ARITHOP(-, sub)
 	_MATRICE_DEF_ARITHOP(*, mul)
 	_MATRICE_DEF_ARITHOP(/, div)
 

@@ -10,9 +10,9 @@
 
 DGE_MATRICE_BEGIN
 
-template<typename T1, typename T2, typename _Ret = std::decay_t<decltype(true ? T1():T2())>> 
+template<typename T1, typename T2, typename _Ret = std::common_type_t<T1, T2>, typename = std::enable_if_t<std::is_arithmetic_v<_Ret>>> 
 MATRICE_GLOBAL_FINL constexpr _Ret max(const T1& a, const T2& b) { return a < b ? b : a; }
-template<typename T1, typename T2, typename _Ret = std::decay_t<decltype(true ? T1():T2())>> 
+template<typename T1, typename T2, typename _Ret = std::common_type_t<T1, T2>, typename = std::enable_if_t<std::is_arithmetic_v<_Ret>>>
 MATRICE_GLOBAL_FINL constexpr _Ret min(const T1& a, const T2& b) { return a < b ? a : b; }
 template<typename T, typename _Ret = T, typename = std::enable_if_t<std::is_arithmetic_v<T>>> 
 MATRICE_GLOBAL_FINL constexpr _Ret sqrt(const T& x) { return std::sqrt(x); }
@@ -30,7 +30,7 @@ template<typename T, typename _Ret = T, typename = std::enable_if_t<std::is_arit
 MATRICE_HOST_FINL constexpr _Ret floor(const T& x) { return static_cast<_Ret>(std::floor(x)); }
 template<typename T, typename _Ret = T, typename = std::enable_if_t<std::is_arithmetic_v<T>>> 
 MATRICE_HOST_FINL constexpr _Ret ceil(const T& x) { return static_cast<_Ret>(std::ceil(x)); }
-template<typename T1, typename T2, typename _Ret = typename std::decay<decltype(true ? T1() : T2())>::type, typename = std::enable_if_t<std::is_arithmetic_v<_Ret>>> 
+template<typename T1, typename T2, typename _Ret = std::common_type_t<T1, T2>, typename = std::enable_if_t<std::is_arithmetic_v<_Ret>>>
 MATRICE_GLOBAL_FINL constexpr _Ret pow(const T1& x, const T2& y) { return std::pow(x,y); }
 
 namespace detail {

@@ -144,8 +144,8 @@ public:
 	template<typename... _Args>
 	MATRICE_GLOBAL_INL auto& operator= (const Expr::MatUnaryExpr<_Args...>& _Ex) { return (*static_cast<_Derived*>(&_Ex.assign(*this))); }*/
 
-	_MATRICE_DEFVIEW_ARITHOP(+, sum)
-	_MATRICE_DEFVIEW_ARITHOP(-, min)
+	_MATRICE_DEFVIEW_ARITHOP(+, add)
+	_MATRICE_DEFVIEW_ARITHOP(-, sub)
 	_MATRICE_DEFVIEW_ARITHOP(*, mul)
 	_MATRICE_DEFVIEW_ARITHOP(/, div)
 protected:
