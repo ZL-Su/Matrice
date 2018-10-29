@@ -36,6 +36,12 @@ template<typename T, typename U> struct conditional<true, T, U> { using type = T
 template<typename T, typename U> struct conditional<false, T, U> { using type = U; };
 template<bool _Test, typename T, typename U> using conditional_t = typename conditional<_Test, T, U>::type;
 
+template<typename T> struct value_type { using type = conditional_t<std::is_scalar_v<T>, T, typename T::value_t>; }; 
+template<typename T> using value_type_t = typename value_type<T>::type;
+
+template<typename T, typename U> struct common_value_type { using type = std::common_type_t<value_type_t<T>, value_type_t<U>>; };
+template<typename T, typename U> using common_value_t = typename common_value_type<T, U>::type;
+
 template<int _Val> struct is_zero { enum { value = _Val == 0 }; };
 template<int _Val> MATRICE_GLOBAL_INL constexpr auto is_zero_v = is_zero<_Val>::value;
 
