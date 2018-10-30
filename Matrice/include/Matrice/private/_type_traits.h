@@ -37,9 +37,9 @@ template<typename T, typename U> struct conditional<false, T, U> { using type = 
 template<bool _Test, typename T, typename U> using conditional_t = typename conditional<_Test, T, U>::type;
 
 template<typename T, typename... Ts> struct has_value_t : std::false_type {};
-template<typename T, typename  = std::enable_if_t<has_value_t<T>::value>> struct value_type { using type = conditional_t<std::is_arithmetic_v<T>, remove_reference_t<T>, typename T::value_type>; };
-
 template<typename T> MATRICE_GLOBAL_INL constexpr auto has_value_t_v = has_value_t<T>::value;
+
+template<typename T, typename  = std::enable_if_t<has_value_t_v<T>>> struct value_type { using type = conditional_t<std::is_arithmetic_v<T>, remove_reference_t<T>, typename T::value_t>; };
 template<typename T> using value_type_t = typename value_type<T>::type;
 
 template<typename T, typename U> struct common_value_type { using type = std::common_type_t<value_type_t<T>, value_type_t<U>>; };
@@ -208,5 +208,5 @@ private: \
   * has_value_t<T> is true_type iff T has member value_t
   */
 template<typename T>
-struct has_value_t<T> : std::bool_constant<is_expression_v<T> || is_matrix_v<T> || is_mtxview_v<T>> {};
+struct has_value_t<T> { static constexpr auto value = is_expression_v<T> || is_matrix_v<T> || is_mtxview_v<T>; };
 DGE_MATRICE_END
