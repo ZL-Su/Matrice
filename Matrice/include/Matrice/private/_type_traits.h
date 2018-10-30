@@ -36,7 +36,7 @@ template<typename T, typename U> struct conditional<true, T, U> { using type = T
 template<typename T, typename U> struct conditional<false, T, U> { using type = U; };
 template<bool _Test, typename T, typename U> using conditional_t = typename conditional<_Test, T, U>::type;
 
-template<typename T, typename... Ts> struct has_value_t : std::false_type {};
+template<typename T, typename Enable = void> struct has_value_t : std::false_type {};
 template<typename T> MATRICE_GLOBAL_INL constexpr auto has_value_t_v = has_value_t<T>::value;
 
 template<typename T, typename  = std::enable_if_t<has_value_t_v<T>>> struct value_type { using type = conditional_t<std::is_arithmetic_v<T>, remove_reference_t<T>, typename T::value_t>; };
@@ -52,11 +52,17 @@ template<int _R, int _C> struct is_static {enum {value = _R > 0 && _C >0 }; };
 template<int _R, int _C> MATRICE_GLOBAL_INL constexpr auto is_static_v = is_static<_R, _C>::value;
 
 template<typename T> struct is_common_int64 { enum { value = std::is_integral_v<T> && sizeof(T) == 8 }; };
-template<typename T> struct is_int64 { enum { value = std::is_signed_v<T> && std::is_integral_v<T> && sizeof(T) == 8 }; };
-template<typename T> struct is_uint64 { enum { value = std::is_unsigned_v<T> && std::is_integral_v<T> && sizeof(T) == 8 }; };
+template<typename T> MATRICE_GLOBAL_INL constexpr auto is_common_int64_v = is_common_int64<T>::value;
+template<typename T> struct is_int64 { enum { value = std::is_signed_v<T> && is_common_int64_v<T> }; };
+template<typename T> MATRICE_GLOBAL_INL constexpr auto is_int64_v = is_int64<T>::value;
+template<typename T> struct is_uint64 { enum { value = std::is_unsigned_v<T> && is_common_int64_v<T> }; };
+template<typename T> MATRICE_GLOBAL_INL constexpr auto is_uint64_v = is_uint64<T>::value;
 
 template<typename T> struct is_float32 { enum { value = std::is_floating_point<T>::value && (sizeof(T) == 4) }; };
+template<typename T> MATRICE_GLOBAL_INL constexpr auto is_float32_v = is_float32<T>::value;
 template<typename T> struct is_float64 { enum { value = std::is_floating_point<T>::value && (sizeof(T) == 8) }; };
+template<typename T> MATRICE_GLOBAL_INL constexpr auto is_float64_v = is_float64<T>::value;
+template<typename T> MATRICE_GLOBAL_INL constexpr auto is_float_v = is_float64_v<T> || is_float32_v<T>;
 
 template<typename T> struct add_const_reference {
 	using type = std::add_lvalue_reference_t<std::add_const_t<T>>;
@@ -78,6 +84,7 @@ template<> struct _View_trait<unsigned char> { enum { value = 0x0008 }; };
 template<> struct _View_trait<int> { enum { value = 0x0016 }; };
 template<> struct _View_trait<float> { enum { value = 0x0032 }; };
 template<> struct _View_trait<double> { enum { value = 0x0064 }; };
+template<typename T> MATRICE_GLOBAL_INL constexpr auto plane_view_v = _View_trait<T>::value;
 
 template<typename T, typename = std::enable_if_t<std::is_class_v<T>>>
 struct traits { using type = typename T::value_t; };
@@ -113,6 +120,7 @@ template<int _M, int _N> struct allocator_traits {
 #endif      
 	};
 };
+template<int _M, int _N> MATRICE_GLOBAL_INL constexpr auto allocator_traits_v = allocator_traits<_M, _N>::value;
 
 template<class T, typename = std::enable_if_t<is_matrix_v<T> || is_expression_v<T>>> 
 struct layout_traits : traits<T> {
