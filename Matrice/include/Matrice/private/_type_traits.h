@@ -195,6 +195,7 @@ template<template<typename> typename C, typename Enable = void>
 struct is_type_condition : std::false_type {};
 template<template<typename> typename C>
 struct is_type_condition<C, std::enable_if_t<std::is_same<bool, std::remove_cv_t<decltype(C<int>::value)>>::value>> : std::true_type {};
+template<template<typename> typename C> MATRICE_GLOBAL_FINL constexpr auto is_type_condition_v = is_type_condition<C>::value;
 
 /**
  * retrieve solver traits
