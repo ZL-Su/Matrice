@@ -62,7 +62,7 @@ template<typename T> struct is_float32 { enum { value = std::is_floating_point<T
 template<typename T> MATRICE_GLOBAL_INL constexpr auto is_float32_v = is_float32<T>::value;
 template<typename T> struct is_float64 { enum { value = std::is_floating_point<T>::value && (sizeof(T) == 8) }; };
 template<typename T> MATRICE_GLOBAL_INL constexpr auto is_float64_v = is_float64<T>::value;
-template<typename T> MATRICE_GLOBAL_INL constexpr auto is_float_v = is_float64_v<T> || is_float32_v<T>;
+template<typename T> MATRICE_GLOBAL_INL constexpr auto is_floating_point_v = is_float64_v<T> || is_float32_v<T>;
 
 template<typename T> struct add_const_reference {
 	using type = std::add_lvalue_reference_t<std::add_const_t<T>>;
@@ -195,7 +195,7 @@ template<template<typename> typename C, typename Enable = void>
 struct is_type_condition : std::false_type {};
 template<template<typename> typename C>
 struct is_type_condition<C, std::enable_if_t<std::is_same<bool, std::remove_cv_t<decltype(C<int>::value)>>::value>> : std::true_type {};
-template<template<typename> typename C> MATRICE_GLOBAL_FINL constexpr auto is_type_condition_v = is_type_condition<C>::value;
+template<template<typename> typename C> MATRICE_GLOBAL_INL constexpr auto is_type_condition_v = is_type_condition<C>::value;
 
 /**
  * retrieve solver traits

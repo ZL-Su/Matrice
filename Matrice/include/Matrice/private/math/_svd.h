@@ -48,7 +48,7 @@ public:
 	MATRICE_GLOBAL_INL static auto op(const matrix_type& _A) {
 		types::Matrix_<value_t, CompileTimeCols, 1> S;
 		types::Matrix_<value_t, CompileTimeCols, CompileTimeCols> Vt;
-		detail::_Lnalge_kernel_impl<value_t>::svd(_A.data(), S.data(), Vt.data(), _A.shape());
+		detail::_Lapack_kernel_impl<value_t>::svd(_A.data(), S.data(), Vt.data(), _A.shape());
 
 		return std::make_tuple(std::ref(_A), std::ref(S), std::ref(Vt));
 	}
