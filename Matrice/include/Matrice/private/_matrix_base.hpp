@@ -72,6 +72,12 @@ public:
 	MATRICE_GLOBAL_FINL constexpr plvt_type plvt() const {
 		return std::tie(m_rows, m_cols, m_data);
 	}
+	MATRICE_GLOBAL_FINL constexpr operator plvt_type() {
+		return std::tie(m_rows, m_cols, m_data);
+	}
+	MATRICE_GLOBAL_FINL constexpr operator plvt_type() const {
+		return std::tie(m_rows, m_cols, m_data);
+	}
 
 	/**
 	 * \raw plane view of the matrix
