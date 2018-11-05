@@ -37,7 +37,7 @@ template<> struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 
 	/**
 	 * \computes the cholesky factorization of a symmetric positive-definite matrix
-	 * \Output: _A := the lower triangular part L, so that $_A = LL^T$
+	 * \Output: _A := the lower triangular part L, so that $_A = L*L^T$
 	 */
 	MATRICE_HOST_INL static int spd(pointer _A, const size_type& _Size) {
 		auto[M, N] = _Size;
@@ -53,6 +53,27 @@ template<> struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 	}
 	MATRICE_HOST_INL static int spd(const plview_type& _A) {
 		return spd(std::get<2>(_A), { std::get<0>(_A), std::get<1>(_A) });
+	}
+
+	/**
+	 * \computes the LU factorization of a general m-by-n matrix
+	 * \Output: _A := L*U, _P := partial pivoting info
+	 */
+	MATRICE_HOST_INL static int lud(pointer _A, const size_type& _Size) {
+		auto[M, N] = _Size;
+		auto _P = new int[max(1, min(M, N))];
+
+#ifdef __use_mkl__
+		return LAPACKE_sgetrf(101, M, N, _A, max(1, N), _P);
+#else
+#ifdef _DEBUG
+		if (M != N) throw std::runtime_error("Non-sqaure matrix _A in _Lapack_kernel_impl<float>::lud(...).");
+#endif // _DEBUG
+		return flak::_sLU(_A, _P, N)
+#endif
+	}
+	MATRICE_HOST_INL static int lud(const plview_type& _A) {
+		return lud(std::get<2>(_A), { std::get<0>(_A), std::get<1>(_A) });
 	}
 };
 
@@ -96,6 +117,27 @@ template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double>
 	}
 	MATRICE_HOST_INL static int spd(const plview_type& _A) {
 		return spd(std::get<2>(_A), { std::get<0>(_A), std::get<1>(_A) });
+	}
+
+	/**
+	 * \computes the LU factorization of a general m-by-n matrix
+	 * \Output: _A := L*U, _P := partial pivoting info
+	 */
+	MATRICE_HOST_INL static int lud(pointer _A, const size_type& _Size) {
+		auto[M, N] = _Size;
+		auto _P = new int[max(1, min(M, N))];
+
+#ifdef __use_mkl__
+		return LAPACKE_dgetrf(101, M, N, _A, max(1, N), _P);
+#else
+#ifdef _DEBUG
+		if (M != N) throw std::runtime_error("Non-sqaure matrix _A in _Lapack_kernel_impl<float>::lud(...).");
+#endif // _DEBUG
+		return flak::_dLU(_A, _P, N)
+#endif
+	}
+	MATRICE_HOST_INL static int lud(const plview_type& _A) {
+		return lud(std::get<2>(_A), { std::get<0>(_A), std::get<1>(_A) });
 	}
 };
 _DETAIL_END DGE_MATRICE_END
