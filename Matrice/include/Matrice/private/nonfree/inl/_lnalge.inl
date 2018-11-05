@@ -7,12 +7,18 @@
 #endif
 
 DGE_MATRICE_BEGIN _DETAIL_BEGIN
+template<typename _Ty> struct _Lapack_kernel_impl_base {
+	using pointer = std::add_pointer_t<_Ty>;
+	using size_type = std::tuple<int, int>;
+	using plview_type = std::tuple<int, int, pointer>;
+};
 /**
  *\Specialization for float-type.
  */
-template<> struct _Lapack_kernel_impl<float> {
-	using pointer = std::add_pointer_t<float>;
-	using size_type = std::tuple<int, int>;
+template<> struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
+	//using pointer = std::add_pointer_t<float>;
+	//using size_type = std::tuple<int, int>;
+	//using plview_type = std::tuple<int, int, pointer>;
 
 	/**
 	 * \computes singular value decomposition
@@ -45,14 +51,17 @@ template<> struct _Lapack_kernel_impl<float> {
 		return flapk::_scholy(_A, N);
 #endif
 	}
+	MATRICE_HOST_INL static int spd(const plview_type& _A) {
+		return spd(std::get<2>(_A), { std::get<0>(_A), std::get<1>(_A) });
+	}
 };
 
 /**
  *\Specialization for double-type.
  */
-template<> struct _Lapack_kernel_impl<double> {
-	using pointer = std::add_pointer_t<double>;
-	using size_type = std::tuple<int, int>;
+template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double> {
+	//using pointer = std::add_pointer_t<double>;
+	//using size_type = std::tuple<int, int>;
 
 	/**
 	 * \computes singular value decomposition
@@ -84,6 +93,9 @@ template<> struct _Lapack_kernel_impl<double> {
 #else
 		return flapk::_dcholy(_A, N);
 #endif
+	}
+	MATRICE_HOST_INL static int spd(const plview_type& _A) {
+		return spd(std::get<2>(_A), { std::get<0>(_A), std::get<1>(_A) });
 	}
 };
 _DETAIL_END DGE_MATRICE_END
