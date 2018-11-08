@@ -22,7 +22,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_similarity_traits.h"
 
 MATRICE_ALGS_BEGIN
-template<size_t _Options> struct _Options_similarity
+template<size_t _Options> struct _Iterative_conv_options
 {
 	// \interpolation type
 	enum { options = _Options };
@@ -50,7 +50,7 @@ template<typename _Derived> class _GaussNewton_base
 	using derived_type = _Derived;
 	using value_type = typename internal::gn_solver_traits<derived_type>::type;
 protected:
-	using options_type = _Options_similarity<internal::gn_solver_traits<derived_type>::options>;
+	using options_type = _Iterative_conv_options<internal::gn_solver_traits<derived_type>::options>;
 	enum {dof = internal::static_size<options_type::options>::value}; //DOF
 	using stack_vector = Vec_<value_type, dof>;
 	using stack_matrix = Matrix_<value_type, dof, dof>;
