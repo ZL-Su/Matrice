@@ -64,11 +64,12 @@ public:
 	template<typename... _Args>
 	MATRICE_GLOBAL_FINL InterpBase_(const _Args&... args);
 
+	MATRICE_GLOBAL_FINL auto& operator() () const { return m_coeff; }
+
 protected:
 	template<typename... _Args>
 	MATRICE_GLOBAL_FINL void _Bspline_coeff(const _Args& ...args);
 
-protected:
 	const value_type m_eps = value_type(1.0e-7);
 	matrix_t m_coeff;
 };

@@ -21,14 +21,21 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 MATRICE_ALGS_BEGIN
 
-template<typename _Ty, size_t _Options>
+template<typename _Ty, std::size_t _Options>
 class Interpolation MATRICE_NONHERITABLE
 {
 	using Op_t = interpolation_traits_t<_Ty, _Options>;
 public:
+	using value_type = typename Op_t::value_t;
+	static const auto options = Op_t::Options;
+
 	template<typename... _Args> 
 	MATRICE_GLOBAL_FINL Interpolation(const _Args&... args) 
 		:m_op(std::make_unique<Op_t>(args...)) {}
+
+	MATRICE_GLOBAL_FINL auto& operator()()const {
+		return m_op;
+	}
 
 private:
 	std::unique_ptr<Op_t> m_op;
@@ -39,9 +46,16 @@ class Interpolation<_Ty, INTERP|BICUBIC|BSPLINE> MATRICE_NONHERITABLE
 {
 	using Op_t = interpolation_traits_t<_Ty,INTERP|BICUBIC|BSPLINE>;
 public:
+	using value_type = typename Op_t::value_t;
+	static const auto options = Op_t::Options;
+
 	template<typename... _Args>
 	MATRICE_GLOBAL_FINL Interpolation(const _Args&... args)
 		:m_op(std::make_unique<Op_t>(args...)) {}
+
+	MATRICE_GLOBAL_FINL auto& operator()() {
+		return (*m_op)();
+	}
 
 private:
 	std::unique_ptr<Op_t> m_op;

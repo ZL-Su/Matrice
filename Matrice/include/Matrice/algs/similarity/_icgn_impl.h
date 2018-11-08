@@ -36,7 +36,7 @@ template<size_t _Options> struct _Iterative_conv_options
 	// \maximum iterations, default is 50
 	size_t _My_maxits = 50;
 
-	// \termination tolerance condition of refinement iteration 
+	// \termination tolerance condition of refinement iteration
 	default_type _My_epsilon = 1.0E-6;
 
 	MATRICE_GLOBAL_FINL auto& operator()() { return (_My_radius); }
@@ -48,14 +48,20 @@ namespace detail {
 template<typename _Derived> class _GaussNewton_base
 {
 	using derived_type = _Derived;
-	using value_type = typename internal::gn_solver_traits<derived_type>::type;
+	using myt_traits_t = internal::gn_solver_traits<derived_type>;
+	using value_type = typename myt_traits_t::value_type;
 protected:
-	using options_type = _Iterative_conv_options<internal::gn_solver_traits<derived_type>::options>;
-	enum {dof = internal::static_size<options_type::options>::value}; //DOF
-	using stack_vector = Vec_<value_type, dof>;
-	using stack_matrix = Matrix_<value_type, dof, dof>;
+	using options_type = _Iterative_conv_options<myt_traits_t::interp>;
+	enum {DOF = myt_traits_t::order*6}; //DOF
+	using stack_vector = Vec_<value_type, DOF>;
+	using stack_matrix = Matrix_<value_type, DOF, DOF>;
 	using matrix_type  = Matrix<value_type>;
 	using const_matrix_reference = const std::add_lvalue_reference_t<matrix_type>;
+	struct ref_image_type
+	{
+		ref_image_type(const_matrix_reference _f, const_matrix_reference _dfdx, const_matrix_reference _dfdy) {}
+
+	};
 	struct status_type
 	{
 		bool _Is_success = false;
@@ -103,15 +109,16 @@ protected:
 
 	// \view of reference image: F
 	const_matrix_reference m_reference;
+	const_matrix_reference m_dfdx, m_dfdy;
 
 	// \precomputed interpolation coeff.
 	const_matrix_reference m_coeff;
 };
 
 // TEMPLATE impl class for IC-GN optimization [thread-safe]
-template<typename _Ty, size_t _Options>
+template<typename _Ty, std::size_t _Interp, std::size_t _Order = 1>
 class _GaussNewton_impl_ic MATRICE_NONHERITABLE
-	: public _GaussNewton_base<_GaussNewton_impl_ic<_Ty, _Options>>
+	: public _GaussNewton_base<_GaussNewton_impl_ic<_Ty, _Interp, _Order>>
 {
 	using _Myt = _GaussNewton_impl_ic;
 	using base_type = _GaussNewton_base<_Myt>;

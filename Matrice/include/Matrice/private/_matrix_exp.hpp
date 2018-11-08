@@ -216,6 +216,13 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 			return (_Ret);
 		}
 
+		MATRICE_GLOBAL_INL auto operator() (std::size_t x, std::size_t y) {
+			return _CDTHIS->operator()(x + y * N);
+		}
+		MATRICE_GLOBAL_INL const auto operator() (std::size_t x, std::size_t y) const {
+			return _CDTHIS->operator()(x + y * N);
+		}
+
 		MATRICE_GLOBAL_FINL constexpr std::size_t size() const { return M*N; }
 		MATRICE_GLOBAL_FINL constexpr std::size_t rows() const { return M; }
 		MATRICE_GLOBAL_FINL constexpr std::size_t cols() const { return N; }
@@ -243,6 +250,7 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		using _Base_type::CompileTimeCols;
 		using typename _Base_type::value_t;
 		using typename _Base_type::matrix_type;
+		using _Base_type::operator();
 		enum { options = option<ewise>::value };
 
 		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T& _lhs, const U& _rhs) noexcept
@@ -276,6 +284,7 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		using _Base_type::CompileTimeCols;
 		using typename _Base_type::value_t;
 		using typename _Base_type::matrix_type;
+		using _Base_type::operator();
 		enum { options = option<ewise>::value };
 
 		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T _scalar, const U& _rhs) noexcept
@@ -312,6 +321,7 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		using _Base_type::CompileTimeCols;
 		using typename _Base_type::value_t;
 		using typename _Base_type::matrix_type;
+		using _Base_type::operator();
 		enum { options = option<ewise>::value };
 
 		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T& _lhs, const U _scalar) noexcept
@@ -351,6 +361,7 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		using _Base_type::CompileTimeCols;
 		using typename _Base_type::value_t;
 		using typename _Base_type::matrix_type;
+		using _Base_type::operator();
 		enum { options = expression_options<_UnaryOp>::value };
 
 		EwiseUnaryExpr(const_reference_t _rhs) noexcept
