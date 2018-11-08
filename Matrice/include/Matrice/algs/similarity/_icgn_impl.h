@@ -109,7 +109,7 @@ protected:
 
 	// \view of reference image: F
 	const_matrix_reference m_reference;
-	const_matrix_reference m_dfdx, m_dfdy;
+	//const_matrix_reference m_dfdx, m_dfdy;
 
 	// \precomputed interpolation coeff.
 	const_matrix_reference m_coeff;

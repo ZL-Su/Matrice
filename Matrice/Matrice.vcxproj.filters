@@ -139,6 +139,9 @@
     <Filter Include="Source Files\Details\Memory">
       <UniqueIdentifier>{2742bc85-21e3-4cb4-9738-d0fa0ca1f42e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Detail\tensor">
+      <UniqueIdentifier>{965fcf50-4461-4715-a81a-36f93b4661d6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -608,6 +611,12 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_matrix_exp.hpp">
       <Filter>Header Files\Detail\matrix</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\tensor\_tensor.hpp">
+      <Filter>Header Files\Detail\tensor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\core\tensor.h">
+      <Filter>Header Files\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
