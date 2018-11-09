@@ -20,7 +20,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 MATRICE_ALGS_BEGIN namespace detail {
 // \forward declarations
-template<typename _Ty, std::size_t _Iterp, std::size_t _Order> class _GaussNewton_impl_ic;
+template<typename _Ty, std::size_t _Iterp, std::size_t _Order> class _Invcomp_conv_impl;
 
 namespace internal {
 // \size traits
@@ -31,11 +31,11 @@ template<size_t _Values> struct static_size {
 	};
 };
 
-// \Gaussian-Newton solver traits
-template<typename _Solver_type> struct gn_solver_traits {};
+// \iterative convolutional solver traits
+template<typename _Solver_type> struct conv_solver_traits {};
 
 template<typename _Ty, std::size_t _I, std::size_t _O>
-struct gn_solver_traits<_GaussNewton_impl_ic<_Ty, _I, _O>> {
+struct conv_solver_traits<_Invcomp_conv_impl<_Ty, _I, _O>> {
 	using value_type = _Ty;
 	static const auto interp = _I;
 	static const auto order = _O;
