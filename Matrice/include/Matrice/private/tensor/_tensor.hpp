@@ -45,5 +45,39 @@ private:
 	std::size_t m_rows, m_cols, m_size;
 };
 
+template<typename _Ty, int _M = 0, int _N = _M>
+class _Multi_matrix MATRICE_NONHERITABLE
+	: public std::vector<types::Matrix_<_Ty, _M, _N>>
+{
+	using _Mybase = std::vector<types::Matrix_<_Ty, _M, _N>>;
+	using _Myt = _Multi_matrix;
+public:
+	using matrix_type = typename _Mybase::value_type;
+	using value_type = typename matrix_type::value_type;
+	using value_t = value_type;
+
+	MATRICE_HOST_FINL
+	explicit _Multi_matrix(std::size_t _Count) 
+		: _Mybase(_Count) {
+	}
+	MATRICE_HOST_FINL
+	explicit _Multi_matrix(const matrix_type& _Mat, std::size_t _Count)
+		: _Mybase(_Count, _Mat) {
+	}
+	MATRICE_HOST_FINL
+	_Multi_matrix(const std::initializer_list<matrix_type>& _L)
+		: _Mybase(_L.size()) {
+		for (auto _Idx = 0; _Idx < this->size(); ++_Idx) {
+			this->operator[](_Idx) = *(_L.begin() + _Idx);
+		}
+	}
+	MATRICE_HOST_FINL
+	_Myt& operator= (const std::initializer_list<matrix_type>& _L) {
+		if (this->size() < _L.size()) this->resize(_L.size());
+		for (auto _Idx = 0; _Idx < this->size(); ++_Idx) {
+			this->operator[](_Idx) = *(_L.begin() + _Idx);
+		}
+	}
+};
 
 } DGE_MATRICE_END
