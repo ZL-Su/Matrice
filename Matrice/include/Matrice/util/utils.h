@@ -81,4 +81,31 @@ constexpr auto multiply(_Args const&... args) { return (... * args); }
 template<typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
 struct zero { static const constexpr T value = T(0);};
 
+/**
+ * \append a T-typed element into tuple _Tpl
+ */
+template<typename T, typename... U> MATRICE_HOST_FINL
+std::tuple<U..., T> tuple_append(const std::tuple<U...>& _Tpl, const T& _Val) {
+	return std::tuple_cat(_Tpl, std::make_tuple(_Val));
+}
+
+/**
+ * \pack first _N element from _E into tuple
+ */
+template<std::size_t _N> struct tuple_n {
+	template<typename U> MATRICE_HOST_FINL static auto _(const std::add_pointer_t<U> _E) {
+		return tuple_append(tuple_n<_N-1>::_(_E), _E[_N]);
+	}
+	template<typename U> MATRICE_HOST_FINL static auto _(const U& _E) {
+		return tuple_append(tuple_n<_N - 1>::_(_E), _E);
+	}
+};
+template<> struct tuple_n<0> {
+	template<typename U> MATRICE_HOST_FINL static auto _(const std::add_pointer_t<U> _E) {
+		return std::tuple<U>(_E[0]);
+	}
+	template<typename U> MATRICE_HOST_FINL static auto _(const U& _E) {
+		return std::tuple<U>(_E);
+	}
+};
 DGE_MATRICE_END

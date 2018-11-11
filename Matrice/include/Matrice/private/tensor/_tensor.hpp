@@ -17,6 +17,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 
+#include <tuple>
 #include <valarray>
 #include "../_matrix_base.hpp"
 #include "../_matrix_exp.hpp"
@@ -55,6 +56,25 @@ public:
 	using matrix_type = typename _Mybase::value_type;
 	using value_type = typename matrix_type::value_type;
 	using value_t = value_type;
+	template<std::size_t _N> struct _Tuple_n {};
+	template<> struct _Tuple_n<1> {
+		using type = std::tuple<matrix_type>; 
+		MATRICE_HOST_FINL static auto op(std::add_pointer_t<_Myt> _This) {
+			return type((*_This)[0]);
+		}
+	};
+	template<> struct _Tuple_n<2> {
+		using type = std::tuple<matrix_type, matrix_type>;
+		MATRICE_HOST_FINL static auto op(std::add_pointer_t<_Myt> _This) {
+			return type((*_This)[0], (*_This)[1]);
+		}
+	};
+	template<> struct _Tuple_n<3> {
+		using type = std::tuple<matrix_type, matrix_type, matrix_type>;
+		MATRICE_HOST_FINL static auto op(std::add_pointer_t<_Myt> _This) {
+			return type((*_This)[0], (*_This)[1], (*_This)[2]);
+		}
+	};
 
 	MATRICE_HOST_FINL
 	explicit _Multi_matrix(std::size_t _Count) 
@@ -77,6 +97,13 @@ public:
 		for (auto _Idx = 0; _Idx < this->size(); ++_Idx) {
 			this->operator[](_Idx) = *(_L.begin() + _Idx);
 		}
+	}
+
+	template<std::size_t _N, typename _Ity> MATRICE_HOST_FINL
+	auto operator() (const std::tuple<_Ity, _Ity, _Ity, _Ity>& _R) {
+		const auto[_L, _R, _U, _D] = _R;
+		
+		return std::make_tuple();
 	}
 };
 
