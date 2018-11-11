@@ -78,8 +78,13 @@ constexpr auto minus(_Args const&... args) { return (... - args); }
 template<typename... _Args> MATRICE_GLOBAL_FINL
 constexpr auto multiply(_Args const&... args) { return (... * args); }
 #endif
+
+/**
+ * \get T-typed zero value
+ */
 template<typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
 struct zero { static const constexpr T value = T(0);};
+template<typename T> MATRICE_GLOBAL_FINL constexpr auto zero_v = zero<T>::value;
 
 /**
  * \append a T-typed element into tuple _Tpl
