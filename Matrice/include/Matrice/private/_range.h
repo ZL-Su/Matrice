@@ -69,6 +69,9 @@ public:
 		return (m_end - m_begin) / m_stride; 
 	}
 
+	MATRICE_GLOBAL_INL value_t& front() { return m_begin; }
+	MATRICE_GLOBAL_INL const value_t& front() const { return m_begin; }
+
 	MATRICE_GLOBAL_INL _My_iterator begin() { 
 		return _My_iterator(m_pos, m_stride); 
 	}

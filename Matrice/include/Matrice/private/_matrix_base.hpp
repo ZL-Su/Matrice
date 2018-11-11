@@ -482,6 +482,9 @@ public:
 	MATRICE_HOST_FINL auto transpose() const { 
 		return Expr::MatUnaryExpr<_Myt, _Xop_mat_trp>(*this); 
 	}
+	MATRICE_GLOBAL_INL auto t() const {
+		return Expr::MatUnaryExpr<_Myt, _Xop_mat_trp>(*this);
+	}
 	MATRICE_GLOBAL_FINL auto normalize(value_t _val = inf) const { 
 		return ((*this)*(abs(_val) < eps ? 1 : 1 / (_val == inf ? max() : _val))); 
 	}
