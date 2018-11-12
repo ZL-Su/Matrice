@@ -684,8 +684,8 @@ template<
 template<
 	typename _Rhs, 
 	typename _Op = _Exp_op::_Accum_exp<_Rhs>>
-	MATRICE_GLOBAL_FINL auto sum(const _Rhs& _right) {
-	return _Op(_Rhs);
+	MATRICE_GLOBAL_FINL auto sum(const _Rhs& _right, _Op&& _op = _Op()) {
+	return _op(_right);
 }
 
 DGE_MATRICE_END
