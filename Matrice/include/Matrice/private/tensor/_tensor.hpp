@@ -76,17 +76,17 @@ public:
 		}
 	}
 	/**
-	 * \the first _N block views of the multi-matrix
+	 * \gets the _N block views of the multi-matrix after pos of _Off-set.
 	 */
-	template<std::size_t _N, typename _Ity> 
+	template<std::size_t _N, std::size_t _Off = 0, typename _Ity = std::size_t> 
 	MATRICE_HOST_FINL auto view_n (const std::tuple<_Ity, _Ity, _Ity, _Ity>& _R) {
-		return tuple_n<_N-1>::_(this->data(), [&](const matrix_type& _Mat) {
+		return tuple_n<_N-1>::_(this->data()+ _Off, [&](const matrix_type& _Mat) {
 			return _Mat.block(_R); 
 		});
 	}
-	template<std::size_t _N, typename _Ity>
+	template<std::size_t _N, std::size_t _Off = 0, typename _Ity = std::size_t>
 	MATRICE_HOST_FINL auto view_n(_Ity _L, _Ity _R, _Ity _U, _Ity _D) {
-		return tuple_n<_N - 1>::_(this->data(), [&](const matrix_type& _Mat) {
+		return tuple_n<_N - 1>::_(this->data()+ _Off, [&](const matrix_type& _Mat) {
 			return _Mat.block(_L, _R, _U, _D);
 		});
 	}
