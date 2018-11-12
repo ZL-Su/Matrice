@@ -84,7 +84,7 @@ constexpr auto multiply(_Args const&... args) { return (... * args); }
  */
 template<typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
 struct zero { static const constexpr T value = T(0);};
-template<typename T> MATRICE_GLOBAL_FINL constexpr auto zero_v = zero<T>::value;
+template<typename T> MATRICE_GLOBAL_INL constexpr auto zero_v = zero<T>::value;
 
 /**
  * \append a T-typed element into tuple _Tpl
@@ -95,28 +95,28 @@ std::tuple<U..., T> tuple_append(const std::tuple<U...>& _Tpl, const T& _Val) {
 }
 
 /**
- * \pack first _N element from _E into tuple
+ * \packs the first _N element from _E into a tuple
  */
 template<std::size_t _N> struct tuple_n {
 	template<typename U> MATRICE_HOST_FINL static auto _(const U& _E) {
 		return tuple_append(tuple_n<_N - 1>::_(_E), _E);
 	}
-	template<typename U> MATRICE_HOST_FINL static auto _(const std::add_pointer_t<U> _E) {
+	template<typename U> MATRICE_HOST_FINL static auto _(const U* _E) {
 		return tuple_append(tuple_n<_N - 1>::_(_E), _E[_N]);
 	}
-	template<typename U, typename F> MATRICE_HOST_FINL static auto _(const std::add_pointer_t<U> _E, F _Op) {
-		return tuple_append(tuple_n<_N - 1>::_(_E), _Op(_E[_N]));
+	template<typename U, typename F> MATRICE_HOST_FINL static auto _(const U* _E, F&& _Op) {
+		return tuple_append(tuple_n<_N - 1>::_(_E, _Op), _Op(_E[_N]));
 	}
 };
 template<> struct tuple_n<0> {
 	template<typename U> MATRICE_HOST_FINL static auto _(const U& _E) {
 		return std::make_tuple(_E);
 	}
-	template<typename U> MATRICE_HOST_FINL static auto _(const std::add_pointer_t<U> _E) {
+	template<typename U> MATRICE_HOST_FINL static auto _(const U* _E) {
 		return std::make_tuple(_E[0]);
 	}
-	template<typename U, typename F> MATRICE_HOST_FINL static auto _(const std::add_pointer_t<U> _E, F _Op) {
-		return std::make_tuple(_Op(_E[_N]));
+	template<typename U, typename F> MATRICE_HOST_FINL static auto _(const U* _E, F&& _Op) {
+		return std::make_tuple(_Op(_E[0]));
 	}
 };
 DGE_MATRICE_END

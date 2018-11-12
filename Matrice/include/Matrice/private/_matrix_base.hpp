@@ -377,9 +377,9 @@ public:
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, { x0, y0, x1, y1 });
 	}
-	template<typename... _Ity, typename = std::enable_if_t<std::size<_Ity...> == 4>>
+	template<typename... _Ity, typename = std::enable_if_t<sizeof...(_Ity) == 4>>
 	MATRICE_GLOBAL_INL const _Myt_blockview_type block(const std::tuple<_Ity...>& _R) const {
-		return this->block(std::get<0>(_R), (std::get<1>(_R), (std::get<2>(_R), (std::get<3>(_R));
+		return this->block(std::get<0>(_R), std::get<1>(_R), std::get<2>(_R), std::get<3>(_R));
 	}
 #pragma endregion
 

@@ -75,11 +75,19 @@ public:
 			this->operator[](_Idx) = *(_L.begin() + _Idx);
 		}
 	}
-
+	/**
+	 * \the first _N block views of the multi-matrix
+	 */
 	template<std::size_t _N, typename _Ity> 
-	MATRICE_HOST_FINL auto operator() (const std::tuple<_Ity, _Ity, _Ity, _Ity>& _R) {
-		return tuple_n<_N>::_(this->data(), [&](const matrix_type& _Mat) {
+	MATRICE_HOST_FINL auto view_n (const std::tuple<_Ity, _Ity, _Ity, _Ity>& _R) {
+		return tuple_n<_N-1>::_(this->data(), [&](const matrix_type& _Mat) {
 			return _Mat.block(_R); 
+		});
+	}
+	template<std::size_t _N, typename _Ity>
+	MATRICE_HOST_FINL auto view_n(_Ity _L, _Ity _R, _Ity _U, _Ity _D) {
+		return tuple_n<_N - 1>::_(this->data(), [&](const matrix_type& _Mat) {
+			return _Mat.block(_L, _R, _U, _D);
 		});
 	}
 };
