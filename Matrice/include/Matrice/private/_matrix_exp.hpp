@@ -680,4 +680,12 @@ template<
 	return _Op(_left, _right);
 }
 
+// *\summation of expression
+template<
+	typename _Rhs, 
+	typename _Op = _Exp_op::_Accum_exp<_Rhs>>
+	MATRICE_GLOBAL_FINL auto sum(const _Rhs& _right) {
+	return _Op(_Rhs);
+}
+
 DGE_MATRICE_END
