@@ -56,54 +56,30 @@ public:
 	using matrix_type = typename _Mybase::value_type;
 	using value_type = typename matrix_type::value_type;
 	using value_t = value_type;
-	template<std::size_t _N> struct _Tuple_n {};
-	template<> struct _Tuple_n<1> {
-		using type = std::tuple<matrix_type>; 
-		MATRICE_HOST_FINL static auto op(std::add_pointer_t<_Myt> _This) {
-			return type((*_This)[0]);
-		}
-	};
-	template<> struct _Tuple_n<2> {
-		using type = std::tuple<matrix_type, matrix_type>;
-		MATRICE_HOST_FINL static auto op(std::add_pointer_t<_Myt> _This) {
-			return type((*_This)[0], (*_This)[1]);
-		}
-	};
-	template<> struct _Tuple_n<3> {
-		using type = std::tuple<matrix_type, matrix_type, matrix_type>;
-		MATRICE_HOST_FINL static auto op(std::add_pointer_t<_Myt> _This) {
-			return type((*_This)[0], (*_This)[1], (*_This)[2]);
-		}
-	};
 
-	MATRICE_HOST_FINL
-	explicit _Multi_matrix(std::size_t _Count) 
+	MATRICE_HOST_FINL explicit _Multi_matrix(std::size_t _Count) 
 		: _Mybase(_Count) {
 	}
-	MATRICE_HOST_FINL
-	explicit _Multi_matrix(const matrix_type& _Mat, std::size_t _Count)
+	MATRICE_HOST_FINL explicit _Multi_matrix(const matrix_type& _Mat, std::size_t _Count)
 		: _Mybase(_Count, _Mat) {
 	}
-	MATRICE_HOST_FINL
-	_Multi_matrix(const std::initializer_list<matrix_type>& _L)
+	MATRICE_HOST_FINL _Multi_matrix(const std::initializer_list<matrix_type>& _L)
 		: _Mybase(_L.size()) {
 		for (auto _Idx = 0; _Idx < this->size(); ++_Idx) {
 			this->operator[](_Idx) = *(_L.begin() + _Idx);
 		}
 	}
-	MATRICE_HOST_FINL
-	_Myt& operator= (const std::initializer_list<matrix_type>& _L) {
+	MATRICE_HOST_FINL _Myt& operator= (const std::initializer_list<matrix_type>& _L) {
 		if (this->size() < _L.size()) this->resize(_L.size());
 		for (auto _Idx = 0; _Idx < this->size(); ++_Idx) {
 			this->operator[](_Idx) = *(_L.begin() + _Idx);
 		}
 	}
 
-	template<std::size_t _N, typename _Ity> MATRICE_HOST_FINL
-	auto operator() (const std::tuple<_Ity, _Ity, _Ity, _Ity>& _R) {
-		const auto[_L, _R, _U, _D] = _R;
+	template<std::size_t _N, typename _Ity> 
+	MATRICE_HOST_FINL auto operator() (const std::tuple<_Ity, _Ity, _Ity, _Ity>& _R) {
 		return tuple_n<_N>::_(this->data(), [&](const matrix_type& _Mat) {
-			return _Mat.block(); 
+			return _Mat.block(_R); 
 		});
 	}
 };
