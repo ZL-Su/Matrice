@@ -68,7 +68,7 @@ template<typename _T, typename _Op> class MatUnaryExpr;
 struct Expr {
 	using size_t = std::size_t;
 	using default_type = double;
-	enum OpFlag { ewise = 0, mmul = 1, inv = 2, trp = 3, undef = -1 };
+	enum OpFlag { ewise = 0, mmul = 1, inv = 2, trp = 3, sum = 4, undef = -1 };
 	template<int _Option> struct option { enum { value = _Option | expr }; };
 
 	/*factorial_t<N> = N!*/
@@ -113,6 +113,16 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		_MATRICE_DEFEXP_EWISEUOP(log)
 		_MATRICE_DEFEXP_EWISEUOP(log2)
 		_MATRICE_DEFEXP_EWISEUOP(log10)
+
+		/**
+		 * \accumulates all elements of input expression
+		 */
+		template<typename _Ty> struct _Accum_exp {
+			enum { flag = sum };
+			MATRICE_GLOBAL_INL auto operator()(const _Ty& _Exp) {
+				return _Exp.sum();
+			}
+		};
 
 		template<typename _Ty> struct _Mat_inv { 
 			enum { flag = inv }; 
