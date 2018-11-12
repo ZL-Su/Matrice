@@ -102,8 +102,9 @@ public:
 	template<std::size_t _N, typename _Ity> MATRICE_HOST_FINL
 	auto operator() (const std::tuple<_Ity, _Ity, _Ity, _Ity>& _R) {
 		const auto[_L, _R, _U, _D] = _R;
-		
-		return std::make_tuple();
+		return tuple_n<_N>::_(this->data(), [&](const matrix_type& _Mat) {
+			return _Mat.block(); 
+		});
 	}
 };
 
