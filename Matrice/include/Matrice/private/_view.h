@@ -110,18 +110,10 @@ public:
 		{
 #pragma omp for reduction (+ : _Ret)
 			for (std::ptrdiff_t _Idx = 0; _Idx < size(); ++_Idx) {
-				_Ret += this->operator()(_Idx);
+				_Ret += static_cast<const _Derived*>(this)->operator()(_Idx);
 			}
 		}
 		return (_Ret);
-	}
-	/**
-	 * \Evaluate a view to a true matrix.
-	 */
-	MATRICE_GLOBAL_FINL auto eval() const {
-		Matrix_<value_type, 0, 0> _Ret(rows(), cols());
-		_VIEW_EWISE_COPY_N(_Ret, size())
-		return std::forward<decltype(_Ret)>(_Ret);
 	}
 
 	template<typename _Ty, typename = std::enable_if_t<std::is_fundamental_v<_Ty>>>
@@ -263,7 +255,7 @@ public:
 		: _Base(_Ptr + _Range.begin_x() + _Range.begin_y()*_Cols, 
 			_Range.end_x() - _Range.begin_x(), _Cols, 
 			_Range.begin_x() + _Range.begin_y()*_Cols),
-		_My_range(_Range) {}
+			_My_origin(_Ptr), _My_range(_Range) {}
 
 	//i zero-based local row index
 	MATRICE_GLOBAL_FINL pointer operator[] (difference_type i) {
@@ -286,7 +278,17 @@ public:
 	MATRICE_GLOBAL_FINL auto cols() const { return _My_size; }
 	MATRICE_GLOBAL_FINL auto size() const { return rows()*cols(); }
 
+	/**
+	 * \Evaluate a view to a true matrix.
+	 */
+	template<int _M = 0, int _N = _M>
+	MATRICE_GLOBAL_FINL auto eval() const {
+		Matrix_<value_t, _M, _N> _Ret(rows(), cols());
+		_VIEW_EWISE_COPY_N(_Ret, size());
+		return std::forward<decltype(_Ret)>(_Ret);
+	}
 private:
+	pointer _My_origin;
 	range_type _My_range;
 };
 #undef _VIEW_EWISE_COPY_N
