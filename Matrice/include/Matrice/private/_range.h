@@ -97,13 +97,14 @@ private:
 }; }
 
 // \TEMPLATE CLASS range : [begin, end[, stride])
-template<typename _Ty>
-class range MATRICE_NONHERITABLE : public detail::_Range_base<_Ty> {
-	using _Mybase = detail::_Range_base<_Ty>;
+template<typename _Ty, typename _Uy = _Ty>
+class range MATRICE_NONHERITABLE 
+	: public detail::_Range_base<std::common_type_t<_Ty, _Uy>> {
+	using _Mybase = detail::_Range_base<std::common_type_t<_Ty, _Uy>>;
 public:
-	MATRICE_GLOBAL_INL range(const _Ty& _First, const _Ty& _Last)
+	MATRICE_GLOBAL_INL range(const _Ty& _First, const _Uy& _Last)
 		: _Mybase(_First, _Last) {}
-	MATRICE_GLOBAL_INL range(const _Ty& _First, const _Ty& _Last, const _Ty& _Inc)
+	MATRICE_GLOBAL_INL range(const _Ty& _First, const _Uy& _Last, const typename _Mybase::value_t& _Inc)
 		: _Mybase(_First, _Last, _Inc) {}
 };
 
