@@ -147,4 +147,4 @@ private:
 };
 }
 MATRICE_ALGS_END
-#include "inline\_icgn_impl.inl"
+#include "inline\_iterative_conv_impl.inl"
