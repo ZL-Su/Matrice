@@ -129,7 +129,18 @@ template<typename... _Args> MATRICE_GLOBAL_INL \
 auto& operator= (const Expr##NAME##Expr<_Args...>& _Ex){ \
 return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 }
-
+	struct _My_element {
+		_My_element(_Type& _Val, std::size_t _Idx, std::size_t _Std) 
+			: _Value(_Val), _Index(_Idx), _Stride(_Std) {}
+		MATRICE_GLOBAL_INL operator _Type&() { return _Value; }
+		MATRICE_GLOBAL_INL operator _Type&() const { return _Value; }
+		MATRICE_GLOBAL_INL auto index() const { return _Index; }
+		MATRICE_GLOBAL_INL auto x() const { return (_Index - y()*_Stride); }
+		MATRICE_GLOBAL_INL auto y() const { return (_Index / _Stride); }
+	private:
+		_Type& _Value;
+		std::size_t _Index, _Stride;
+	};
 	enum { _M = _Traits::size::rows::value, _N = _Traits::size::cols::value };
 	using _Myt_storage_type = typename detail::Storage_<_Type>::template Allocator<_M, _N>;
 	using _Myt = Base_;
