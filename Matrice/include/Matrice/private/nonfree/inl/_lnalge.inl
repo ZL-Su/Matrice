@@ -16,10 +16,6 @@ template<typename _Ty> struct _Lapack_kernel_impl_base {
  *\Specialization for float-type.
  */
 template<> struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
-	//using pointer = std::add_pointer_t<float>;
-	//using size_type = std::tuple<int, int>;
-	//using plview_type = std::tuple<int, int, pointer>;
-
 	/**
 	 * \computes singular value decomposition
 	 * \Output: $_A := U, _S := \Sigma, _Vt := V^T$
@@ -99,9 +95,6 @@ template<> struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
  *\Specialization for double-type.
  */
 template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double> {
-	//using pointer = std::add_pointer_t<double>;
-	//using size_type = std::tuple<int, int>;
-
 	/**
 	 * \computes singular value decomposition
 	 * \Output: $_A := U, _S := \Sigma, _Vt := V^T$
