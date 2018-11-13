@@ -29,6 +29,8 @@ public:
 			return _My_pos < (_Other._My_pos);
 		}
 
+		MATRICE_GLOBAL_INL operator value_t() const { return _My_pos; }
+
 	private:
 		value_t _My_pos, _My_inc;
 	};
