@@ -21,6 +21,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <valarray>
 #include "../_matrix_base.hpp"
 #include "../_matrix_exp.hpp"
+#include "../_range.h"
 
 DGE_MATRICE_BEGIN namespace detail {
 
@@ -88,6 +89,12 @@ public:
 	MATRICE_HOST_FINL auto view_n(_Ity _L, _Ity _R, _Ity _U, _Ity _D) {
 		return tuple_n<_N - 1>::_(this->data()+ _Off, [&](const matrix_type& _Mat) {
 			return _Mat.block(_L, _R, _U, _D);
+		});
+	}
+	template<std::size_t _N, std::size_t _Off = 0, typename _Ity = std::size_t>
+	MATRICE_HOST_FINL auto view_n(const range<_Ity>& _Rx, const range<_Ity>& _Ry) {
+		return tuple_n<_N - 1>::_(this->data() + _Off, [&](const matrix_type& _Mat) {
+			return _Mat.block(_Rx.begin(), _Rx.end(), _Ry.begin(), _Ry.end());
 		});
 	}
 };
