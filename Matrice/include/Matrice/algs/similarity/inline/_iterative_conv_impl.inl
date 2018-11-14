@@ -73,15 +73,18 @@ struct _Op<bcspline, 1, _Maty, _Vecty> {
 template<> struct _Op<1, 6> {
 	template<typename _Mulmty, typename _Poty, typename _Rgty>
 	static auto J(const _Mulmty& _Ref, const _Poty& _Pos, const _Rgty& _Rx, const _Rgty& _Ry) {
+		using value_type = typename _Mulmty::value_type;
+
 		auto [_Dfdx, _Dfdy] = _Ref.view_n<2,1>(_Rx, _Ry);
 		const auto _Size = max(_Rx.size(), _Ry.size());
 
-		Matrix_<typename _Poty::value_t, 0, 0> _Ret(_Size, _Size*6);
+		tensor<value_type, 1, 6> _Ret(_Size, _Size);
 		for (auto y : _Ry) { auto _Dy = y - _Pos.y;
-			auto _Dfdp_rv = _Ret.rview(y - _Ry.front());
+			const auto _y = y - _Ry.begin();
 			for (auto x : _Rx) { auto _Dx = x - _Pos.x;
+				const auto _x = x - _Rx.begin();
 				const auto &_Fx = _Dfdx[y][x], &_Fy = _Dfdy[y][x];
-				_Dfdp_rv = { _Fx, _Fy, _Fx*_Dx, _Fx*_Dy, _Fy*_Dx, _Fy*_Dy };
+				_Ret(_y, _x) = { _Fx, _Fy, _Fx*_Dx, _Fx*_Dy, _Fy*_Dx, _Fy*_Dy };
 			}
 		}
 		return std::forward<decltype(_Ret)>(_Ret);
@@ -159,9 +162,8 @@ auto _Invcomp_conv_impl<_Ty, _Intp, _Order>::_Solver_impl(param_type& _Pars) {
 
 	auto _Diff_f_exp = _Ref[0].block(_Rx.begin(), _Rx.end(), _Ry.begin(), _Ry.end()).eval() - m_favg;
 	auto _Diff_g_exp = m_current - _G_mean;
-	auto _Normalized_diff_exp = _Diff_f_exp * (1 / m_fssd) - _Diff_g_exp * (1 / _G_ssd);
+	auto _Ndiff_exp = _Diff_f_exp * (1 / m_fssd) - _Diff_g_exp * (1 / _G_ssd);
 
-	stack_vector _Grad{ 0 };
 	auto _Coef = zero<value_type>::value;
 	/*for (auto y : _Ry) {
 		for (auto x : _Rx) {
@@ -175,14 +177,7 @@ auto _Invcomp_conv_impl<_Ty, _Intp, _Order>::_Solver_impl(param_type& _Pars) {
 		}
 	}*/
 
-	for (auto y : range(0, _Normalized_diff_exp.rows())) {
-		for (auto x : range(0, _Normalized_diff_exp.cols())) {
-			auto _Normalized_diff_val = _Normalized_diff_exp(y, x);
-			_Grad = _Grad + _Normalized_diff_val*_Jaco.block(x, x + 6, y, y + 1);
-			_Coef += _Normalized_diff_val * _Normalized_diff_val;
-		}
-	}
-	_Grad = _Grad * (2 / _G_ssd);
+	stack_vector _Grad = (_Ndiff_exp*_Jaco).sum()*(2/_G_ssd);
 
 #undef _WITHIN_RANGE_OF_REFIMG
 }
