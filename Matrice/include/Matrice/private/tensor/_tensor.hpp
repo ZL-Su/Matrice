@@ -28,23 +28,35 @@ DGE_MATRICE_BEGIN namespace detail {
 template<typename _Ty, int _M = 0, int _N = 0, std::size_t _K = 0,
 	typename matrix_type = types::Matrix_<_Ty, _M, _N>>
 class _Tensor_impl MATRICE_NONHERITABLE : public std::valarray<matrix_type> {
-	using base_t = std::valarray<matrix_type>;
+	using _Mybase = std::valarray<matrix_type>;
 	using _Myt_traits = matrix_traits<matrix_type>;
 public:
 	using type = matrix_type;
 	using value_type = typename _Myt_traits::type;
 	using value_t = value_type;
+	using _Mybase::operator*;
 
 	_Tensor_impl(std::size_t _Rows)
-		: base_t(m_size = _Rows), m_rows(_Rows), m_cols(1) {}
+		: _Mybase(m_size = _Rows), m_rows(_Rows), m_cols(1) {}
 	_Tensor_impl(std::size_t _Rows, const matrix_type& _Mat)
-		: base_t(_Mat, m_size = _Rows), m_rows(_Rows), m_cols(1) {}
+		: _Mybase(_Mat, m_size = _Rows), m_rows(_Rows), m_cols(1) {}
 	_Tensor_impl(std::size_t _Rows, std::size_t _Cols) 
-		: base_t(m_size = _Rows*_Cols), m_rows(_Rows), m_cols(_Cols) {}
-	_Tensor_impl(std::size_t _Rows, std::size_t _Cols, const matrix_type& _Mat) : base_t(_Mat, m_size = _Rows * _Cols), m_rows(_Rows), m_cols(_Cols) {}
+		: _Mybase(m_size = _Rows*_Cols), m_rows(_Rows), m_cols(_Cols) {}
+	_Tensor_impl(std::size_t _Rows, std::size_t _Cols, const matrix_type& _Mat) : _Mybase(_Mat, m_size = _Rows * _Cols), m_rows(_Rows), m_cols(_Cols) {}
+
+	MATRICE_HOST_INL auto rows() const { return m_rows; }
+	MATRICE_HOST_INL auto cols() const { return m_cols; }
 
 private:
 	std::size_t m_rows, m_cols, m_size;
+};
+template<typename _Ty, int _M, int _N, int _K>
+struct is_tensor<_Tensor_impl<_Ty, _M, _N, _K>> : std::true_type {};
+
+template<typename _Ty, int _M, int _N, int _K>
+struct tensor_traits< _Tensor_impl<_Ty, _M, _N, _K>> {
+	using value_type = _Ty;
+	using element_type = Matrix_<value_type, _M, _N>;
 };
 
 template<typename _Ty, int _M = 0, int _N = _M>
