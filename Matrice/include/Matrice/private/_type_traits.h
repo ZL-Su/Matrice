@@ -108,6 +108,11 @@ template<typename T> struct is_mtxview : std::false_type {};
 template<typename T> MATRICE_GLOBAL_INL constexpr bool is_mtxview_v = is_mtxview<T>::value;
 template<typename View> struct mtxview_traits : traits<View> {};
 
+/**
+ * is_matrix_convertible_v<T> is true type iff T is dgelom::Matrix_<...> or related matrix expression or view type.  
+ */
+template<typename T> MATRICE_GLOBAL_INL constexpr bool is_matrix_convertible_v = is_matrix_v<T> || is_expression_v<T> || is_mtxview_v<T>;
+
 template<int _M, int _N> struct allocator_traits {
 	enum {
 		value = _M > 0 && _N > 0 ? LINEAR + COPY :  // stack allocator
