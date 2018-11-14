@@ -218,4 +218,16 @@ private: \
   */
 template<typename T>
 struct has_value_t<T> { static constexpr auto value = is_expression_v<T> || is_matrix_v<T> || is_mtxview_v<T>; };
+
+/**
+ * is_tensor<T> is true_type iff T is dgelom::tensor<...>
+ */
+template<typename T> struct is_tensor : std::false_type {};
+template<typename T>
+MATRICE_GLOBAL_INL constexpr auto is_tensor_v = is_tensor<T>::value;
+
+/**
+ * tensor_traits<T> for accessing tensor members
+ */
+template<typename T> struct tensor_traits {};
 DGE_MATRICE_END
