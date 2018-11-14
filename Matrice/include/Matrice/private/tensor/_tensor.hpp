@@ -19,22 +19,26 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #include <tuple>
 #include <valarray>
-#include "../_matrix_base.hpp"
-#include "../_matrix_exp.hpp"
 #include "../_range.h"
 
-DGE_MATRICE_BEGIN namespace detail {
+DGE_MATRICE_BEGIN
+namespace types {
+template<typename _Ty, int _M, int _N> class Matrix_;
+}
+
+namespace detail {
 
 template<typename _Ty, int _M = 0, int _N = 0, std::size_t _K = 0,
 	typename matrix_type = types::Matrix_<_Ty, _M, _N>>
 class _Tensor_impl MATRICE_NONHERITABLE : public std::valarray<matrix_type> {
+	using _Myt = _Tensor_impl;
 	using _Mybase = std::valarray<matrix_type>;
-	using _Myt_traits = matrix_traits<matrix_type>;
+	using _My_element_traits = matrix_traits<matrix_type>;
 public:
-	using type = matrix_type;
-	using value_type = typename _Myt_traits::type;
+	enum{CompileTimeRows = 0, CompileTimeCols = 0};
+	using element_type = matrix_type;
+	using value_type = typename _My_element_traits::type;
 	using value_t = value_type;
-	using _Mybase::operator*;
 
 	_Tensor_impl(std::size_t _Rows)
 		: _Mybase(m_size = _Rows), m_rows(_Rows), m_cols(1) {}
@@ -46,13 +50,55 @@ public:
 
 	MATRICE_HOST_INL auto rows() const { return m_rows; }
 	MATRICE_HOST_INL auto cols() const { return m_cols; }
+	MATRICE_HOST_INL auto shape() const { return std::tie(m_rows, m_cols); }
+	MATRICE_HOST_INL auto& create(std::size_t _Rows, std::size_t _Cols) {
+		this->resize(m_size = _Rows * _Cols);
+		return (*this);
+	}
 
+	MATRICE_HOST_INL auto& operator()(std::size_t _R, std::size_t _C) {
+		return m_data[_R*m_cols + _C];
+	}
+	MATRICE_HOST_INL const auto& operator()(std::size_t _R, std::size_t _C) const {
+		return m_data[_R*m_cols + _C];
+	}
+	MATRICE_HOST_INL auto& operator()(std::size_t _Idx) {
+		return m_data[_Idx];
+	}
+	MATRICE_HOST_INL const auto& operator()(std::size_t _Idx) const {
+		return m_data[_Idx];
+	}
+
+	/**
+	 * \multiplies each element with the _Left scalar.
+	 */
+	friend MATRICE_HOST_INL _Myt operator*(value_t _Left, const _Myt& _Right) {
+		_Myt _Ret(_Right.rows(), _Right.cols());
+		for (const auto& _Idx : range(0, _Ret.size()))
+			_Ret(_Idx) = _Left*_Right(_Idx);
+		return std::forward<_Myt>(_Ret);
+	}
+	/**
+	 * \element-wise multiplies with the _Left matrix convertible type.
+	 */
+	template<typename _Lhs, typename = std::enable_if_t<is_matrix_convertible_v<_Lhs>>>
+	friend MATRICE_HOST_INL _Myt operator*(const _Lhs& _Left, const _Myt& _Right) {
+#ifdef _DEBUG
+		if (_Left.shape() != _Right.shape()) throw
+			std::runtime_error("_Left and _Right must have a uniform shape.");
+#endif // _DEBUG
+
+		_Myt _Ret(_Right.rows(), _Right.cols());
+		for (const auto& _Idx : range(0, _Ret.size()))
+			_Ret(_Idx) = _Left(_Idx)*_Right(_Idx);
+		return std::forward<_Myt>(_Ret);
+	}
 private:
 	std::size_t m_rows, m_cols, m_size;
+	std::add_pointer_t<element_type> m_data = &(*this)[0];
 };
 template<typename _Ty, int _M, int _N, int _K>
 struct is_tensor<_Tensor_impl<_Ty, _M, _N, _K>> : std::true_type {};
-
 template<typename _Ty, int _M, int _N, int _K>
 struct tensor_traits< _Tensor_impl<_Ty, _M, _N, _K>> {
 	using value_type = _Ty;
@@ -110,5 +156,6 @@ public:
 		});
 	}
 };
+}
 
-} DGE_MATRICE_END
+DGE_MATRICE_END
