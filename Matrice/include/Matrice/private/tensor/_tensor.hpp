@@ -47,10 +47,6 @@ public:
 	_Tensor_impl(std::size_t _Rows, std::size_t _Cols) 
 		: _Mybase(m_size = _Rows*_Cols), m_rows(_Rows), m_cols(_Cols) {}
 	_Tensor_impl(std::size_t _Rows, std::size_t _Cols, const matrix_type& _Mat) : _Mybase(_Mat, m_size = _Rows * _Cols), m_rows(_Rows), m_cols(_Cols) {}
-
-	MATRICE_HOST_INL auto rows() const { return m_rows; }
-	MATRICE_HOST_INL auto cols() const { return m_cols; }
-	MATRICE_HOST_INL auto shape() const { return std::tie(m_rows, m_cols); }
 	MATRICE_HOST_INL auto& create(std::size_t _Rows, std::size_t _Cols) {
 		this->resize(m_size = _Rows * _Cols);
 		return (*this);
@@ -67,6 +63,15 @@ public:
 	}
 	MATRICE_HOST_INL const auto& operator()(std::size_t _Idx) const {
 		return m_data[_Idx];
+	}
+	MATRICE_HOST_INL auto rows() const { return m_rows; }
+	MATRICE_HOST_INL auto cols() const { return m_cols; }
+	MATRICE_HOST_INL auto shape() const { return std::tie(m_rows, m_cols); }
+	MATRICE_HOST_INL auto sum() const {
+		auto _Ret = m_data[0] + m_data[1];
+		if (m_size > 2) for (const auto _Idx : range(2, m_size))
+				_Ret = _Ret + m_data[_Idx];
+		return (_Ret);
 	}
 
 	/**
