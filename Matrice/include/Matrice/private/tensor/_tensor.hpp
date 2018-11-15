@@ -48,9 +48,11 @@ public:
 		: _Mybase(_Mat, m_size = _Rows), m_rows(_Rows), m_cols(1) {}
 	_Tensor_impl(std::size_t _Rows, std::size_t _Cols) 
 		: _Mybase(m_size = _Rows*_Cols), m_rows(_Rows), m_cols(_Cols) {}
-	_Tensor_impl(std::size_t _Rows, std::size_t _Cols, const matrix_type& _Mat) : _Mybase(_Mat, m_size = _Rows * _Cols), m_rows(_Rows), m_cols(_Cols) {}
+	_Tensor_impl(std::size_t _Rows, std::size_t _Cols, const matrix_type& _Mat) : _Mybase(_Mat, m_size=(_Rows * _Cols)), m_rows(_Rows), m_cols(_Cols) {}
 	_Tensor_impl(const _Myt& _Other)
-		: _Mybase(static_cast<_Mybase>(_Other)), m_rows(_Other.m_rows), m_cols(_Other.m_cols) {}
+		: _Mybase(static_cast<_Mybase>(_Other)), m_rows(_Other.m_rows), m_cols(_Other.m_cols), m_size(m_rows*m_cols) {}
+	_Tensor_impl(const _Mybase& _Other)
+		: _Mybase(_Other), m_rows(m_size=(_Other.size())), m_cols(1) {}
 
 	MATRICE_HOST_INL auto& create(std::size_t _Rows, std::size_t _Cols) {
 		this->resize(m_size = _Rows * _Cols);
@@ -69,9 +71,23 @@ public:
 	MATRICE_HOST_INL const auto& operator()(std::size_t _Idx) const {
 		return m_data[_Idx];
 	}
+	MATRICE_HOST_INL auto& operator= (const _Mybase& _Other) {
+		_Mybase::operator= (_Other);
+		m_data = &(*this)[0];
+		return (*this);
+	}
+	MATRICE_HOST_INL auto& operator= (_Mybase&& _Other) {
+		_Mybase::operator= (std::move(_Other));
+		m_data = &(*this)[0];
+		return (*this);
+	}
 	MATRICE_HOST_INL auto rows() const { return m_rows; }
 	MATRICE_HOST_INL auto cols() const { return m_cols; }
 	MATRICE_HOST_INL auto shape() const { return std::tie(m_rows, m_cols); }
+	MATRICE_HOST_INL auto& reshape(std::size_t _Rows) {
+		m_rows = _Rows, m_cols = m_size / _Rows;
+		return (*this);
+	}
 	MATRICE_HOST_INL auto reduce() const {
 		auto _Ret = m_data[0];
 		if (m_size > 1) for (const auto _Idx : range(1, m_size))
@@ -87,6 +103,31 @@ public:
 	MATRICE_HOST_INL auto mul(const _Mytp& _Rhs) const {
 		using _Op = detail::_Tensor_exp_op::_Ewise_mmul<element_type, typename _Mytp::element_type>;
 		return detail::_Tensor_exp<_Myt, _Mytp, _Op>(*this, _Rhs);
+	}
+
+	/**
+	 * \element-wise addition.
+	 */
+	friend MATRICE_HOST_INL _Myt operator+(const _Myt& _Left, const _Myt& _Right) {
+		return ((_Myt)((_Mybase)(_Left)+(_Mybase)(_Right))).reshape(_Left.rows());
+	}
+	/**
+	 * \element-wise subtraction.
+	 */
+	friend MATRICE_HOST_INL _Myt operator-(const _Myt& _Left, const _Myt& _Right) {
+		return ((_Myt)((_Mybase)(_Left)-(_Mybase)(_Right))).reshape(_Left.rows());
+	}
+	/**
+	 * \element-wise multiplication.
+	 */
+	friend MATRICE_HOST_INL _Myt operator*(const _Myt& _Left, const _Myt& _Right) {
+		return ((_Myt)((_Mybase)(_Left)*(_Mybase)(_Right))).reshape(_Left.rows());
+	}
+	/**
+	 * \element-wise division.
+	 */
+	friend MATRICE_HOST_INL _Myt operator/(const _Myt& _Left, const _Myt& _Right) {
+		return ((_Myt)((_Mybase)(_Left)/(_Mybase)(_Right))).reshape(_Left.rows());
 	}
 	/**
 	 * \multiplies each element with the _Left scalar.
@@ -112,6 +153,7 @@ public:
 			_Ret(_Idx) = _Left(_Idx)*_Right(_Idx);
 		return std::forward<_Myt>(_Ret);
 	}
+
 private:
 	std::size_t m_rows, m_cols, m_size;
 	std::add_pointer_t<element_type> m_data = &(*this)[0];
