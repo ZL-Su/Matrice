@@ -31,7 +31,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 MATRICE_ARCH_BEGIN namespace detail{ namespace impl {
 #ifndef MATRICE_HOST_ICEA
-#define HOST_INL_CXPR_T MATRICE_HOST_FINL constexpr auto
+#define HOST_INL_CXPR_T MATRICE_HOST_FINL auto
 #endif
 #ifndef HOST_STATIC_INL_CXPR_T
 #define HOST_STATIC_INL_CXPR_T static MATRICE_HOST_FINL constexpr auto 
