@@ -68,10 +68,16 @@ public:
 	MATRICE_HOST_INL auto cols() const { return m_cols; }
 	MATRICE_HOST_INL auto shape() const { return std::tie(m_rows, m_cols); }
 	MATRICE_HOST_INL auto sum() const {
-		auto _Ret = m_data[0] + m_data[1];
-		if (m_size > 2) for (const auto _Idx : range(2, m_size))
+		auto _Ret = m_data[0];
+		if (m_size > 1) for (const auto _Idx : range(1, m_size))
 				_Ret = _Ret + m_data[_Idx];
 		return (_Ret);
+	}
+	MATRICE_HOST_INL auto t() const {
+		_Tensor_impl<value_type, _N, _M> _Ret(m_cols, m_rows);
+		for (const auto _Idx : range(0, m_size))
+			_Ret[_Idx] = m_data[_Idx].t();
+		return std::forward<decltype(_Ret)>(_Ret);
 	}
 
 	/**
