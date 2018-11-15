@@ -268,3 +268,4 @@ __pycache__/
 /Matrice/My Advisor Results - Matrice
 Matrice/Matrice.vcxproj
 Matrice/Matrice.vcxproj.filters
+*.vcxproj
