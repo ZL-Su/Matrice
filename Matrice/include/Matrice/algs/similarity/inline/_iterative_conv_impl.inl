@@ -158,8 +158,6 @@ auto _Invcomp_conv_impl<_Ty, _Intp, _Order>::_Solver_impl(param_type& _Pars) {
 	// \estimate df/dp
 	const auto _Jaco = conv_internal::_Op<_Order, _Mybase::DOF>::J(_Ref, _Mybase::m_pos, _Rx, _Ry);
 
-	auto _Hess = _Jaco.t().mul(_Jaco).eval();
-
 	auto _Diff_f_exp = _Ref[0].block(_Rx.begin(), _Rx.end(), _Ry.begin(), _Ry.end()).eval() - m_favg;
 	auto _Diff_g_exp = m_current - _G_mean;
 	auto _Ndiff_exp = _Diff_f_exp * (1 / m_fssd) - _Diff_g_exp * (1 / _G_ssd);
@@ -177,7 +175,8 @@ auto _Invcomp_conv_impl<_Ty, _Intp, _Order>::_Solver_impl(param_type& _Pars) {
 		}
 	}*/
 
-	stack_vector _Grad = (_Ndiff_exp*_Jaco).sum()*(2/_G_ssd);
+	stack_vector _Grad = (_Ndiff_exp*_Jaco).reduce()*(2/_G_ssd);
+	auto _Hess = _Jaco.t().mul(_Jaco).reduce();
 
 #undef _WITHIN_RANGE_OF_REFIMG
 }
