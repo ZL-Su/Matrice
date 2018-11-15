@@ -400,6 +400,7 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 	template<class T, class U, typename _BinaryOp> 
 	class MatBinaryExpr : public Base_<MatBinaryExpr<T, U, _BinaryOp>>
 	{
+		using _Myt = MatBinaryExpr;
 		using _Base_type = Base_<MatBinaryExpr<T, U, _BinaryOp>>;
 	public:
 		using _Base_type::CompileTimeRows;
