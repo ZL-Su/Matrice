@@ -20,6 +20,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <tuple>
 #include <valarray>
 #include "../_range.h"
+#include "_tensor_exp.hpp"
 
 DGE_MATRICE_BEGIN
 namespace types {
@@ -34,6 +35,7 @@ class _Tensor_impl MATRICE_NONHERITABLE : public std::valarray<matrix_type> {
 	using _Myt = _Tensor_impl;
 	using _Mybase = std::valarray<matrix_type>;
 	using _My_element_traits = matrix_traits<matrix_type>;
+	using _Mytp = _Tensor_impl<_Ty, (_M > 0 ? _N:_M), (_N > 0 ? _M:_N)> ;
 public:
 	enum{CompileTimeRows = 0, CompileTimeCols = 0};
 	using element_type = matrix_type;
@@ -47,6 +49,9 @@ public:
 	_Tensor_impl(std::size_t _Rows, std::size_t _Cols) 
 		: _Mybase(m_size = _Rows*_Cols), m_rows(_Rows), m_cols(_Cols) {}
 	_Tensor_impl(std::size_t _Rows, std::size_t _Cols, const matrix_type& _Mat) : _Mybase(_Mat, m_size = _Rows * _Cols), m_rows(_Rows), m_cols(_Cols) {}
+	_Tensor_impl(const _Myt& _Other)
+		: _Mybase(static_cast<_Mybase>(_Other)), m_rows(_Other.m_rows), m_cols(_Other.m_cols) {}
+
 	MATRICE_HOST_INL auto& create(std::size_t _Rows, std::size_t _Cols) {
 		this->resize(m_size = _Rows * _Cols);
 		return (*this);
@@ -67,19 +72,22 @@ public:
 	MATRICE_HOST_INL auto rows() const { return m_rows; }
 	MATRICE_HOST_INL auto cols() const { return m_cols; }
 	MATRICE_HOST_INL auto shape() const { return std::tie(m_rows, m_cols); }
-	MATRICE_HOST_INL auto sum() const {
+	MATRICE_HOST_INL auto reduce() const {
 		auto _Ret = m_data[0];
 		if (m_size > 1) for (const auto _Idx : range(1, m_size))
 				_Ret = _Ret + m_data[_Idx];
 		return (_Ret);
 	}
 	MATRICE_HOST_INL auto t() const {
-		_Tensor_impl<value_type, _N, _M> _Ret(m_cols, m_rows);
+		_Mytp _Ret(m_cols, m_rows);
 		for (const auto _Idx : range(0, m_size))
 			_Ret[_Idx] = m_data[_Idx].t();
 		return std::forward<decltype(_Ret)>(_Ret);
 	}
-
+	MATRICE_HOST_INL auto mul(const _Mytp& _Rhs) const {
+		using _Op = detail::_Tensor_exp_op::_Ewise_mmul<element_type, typename _Mytp::element_type>;
+		return detail::_Tensor_exp<_Myt, _Mytp, _Op>(*this, _Rhs);
+	}
 	/**
 	 * \multiplies each element with the _Left scalar.
 	 */
