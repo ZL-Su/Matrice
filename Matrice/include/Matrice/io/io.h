@@ -4,12 +4,15 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <array>
 #include <map>
 #include <functional>
 #include <type_traits>
 #include <experimental\filesystem>
 #include "../core/matrix.h"
 #include "../core/vector.h"
+#include "../private/_range.h"
+
 namespace dgelom {
 namespace fs = std::experimental::filesystem;
 enum is_skip_folder { N = 0, Y = 1 };
@@ -18,20 +21,27 @@ class IO
 public:
 	using FileMap = std::map<std::string, std::string>;
 	using FileInfo = std::vector<FileMap>;
+
+	/**
+	 * \extracts folder(s) for a given absolute path.
+	 */
 	template<size_t _Nsubfolder = 0> struct Dir_ 
 	{
 		Dir_() : m_path(fs::current_path().string()) { _Init(); }
 		Dir_(const std::string& _path) : m_path(_path) { _Init(); }
 
-		MATRICE_HOST_INL const auto operator()(size_t i, size_t j) const {
+		MATRICE_HOST_INL const auto operator()(std::size_t i, std::size_t j) const {
 			return std::string(m_path + m_subpaths[i] + m_names[i][j]);
 		}
-		MATRICE_HOST_INL const auto operator()(size_t i) const {
+		MATRICE_HOST_INL const auto operator()(std::size_t i) const {
 			return std::string(m_path + m_names[0][i]);
 		}
-		MATRICE_HOST_FINL auto& names(size_t i = 0) { return (m_names[i]); }
-		MATRICE_HOST_FINL const auto& names(size_t i = 0) const { return (m_names[i]); }
-		MATRICE_HOST_FINL const auto count() const { return m_names.front().size(); }
+		MATRICE_HOST_FINL auto& names(std::size_t i = 0) { return (m_names[i]); }
+		MATRICE_HOST_FINL const auto& names(std::size_t i = 0) const { return (m_names[i]); }
+		MATRICE_HOST_FINL const auto count(std::size_t _Idx = 0) const { return m_names[_Idx].size(); }
+
+		MATRICE_HOST_FINL auto& path() { return m_path; }
+		MATRICE_HOST_FINL const auto& path() const { return m_path; }
 	private:
 		MATRICE_HOST_INL void _Init() {
 			m_subpaths.clear();
@@ -56,6 +66,37 @@ public:
 		std::string m_path;
 		std::vector<std::string> m_subpaths;
 		std::vector<std::vector<std::string>> m_names;
+	};
+
+	/**
+	 * \csv writer
+	 */
+	class CSV {
+	public:
+		CSV(const std::string& _Fname, const std::string& _Delm = ",")
+			:_My_filename(_Fname), _My_delimeter(_Delm){}
+
+		MATRICE_HOST_FINL void open(int _Mode) {
+			_My_file.open(_My_filename, _Mode);
+		}
+		MATRICE_HOST_FINL void close() { 
+			_My_file.close(); 
+		}
+
+		template<typename _It> 
+		MATRICE_HOST_FINL auto append(_It _First, _It _Last) {
+			for (; _First != _Last;) {
+				_My_file << *_First;
+				if (++_First != _Last) _My_file << _My_delimeter;
+			}
+			_My_file << "\n";
+			return (_My_linecnt++);
+		}
+
+	private:
+		std::string _My_filename, _My_delimeter;
+		std::size_t _My_linecnt = 0;
+		std::fstream _My_file;
 	};
 
 	IO() {};
@@ -84,19 +125,16 @@ public:
 
 		return std::move(_Ret);
 	}
+
 	///<summary>
-	//@brief: Template function to cvt. any value to std::string
+	//@brief: Template function to cvt. any value to std::string 
 	//@author: Zhilong Su - Jan.10.2017 @SEU
 	///</summary>
-	template<typename _Ty>
-	static MATRICE_HOST_FINL std::string strf(_Ty _val)
-	{
+	template<typename _Ty> static MATRICE_HOST_FINL auto strf(_Ty _val) {
 		std::ostringstream strs; strs << _val; return strs.str();
 	}
 	// \TEMPLATE function to cvt. numeric value to std::string
-	template<typename _Ty>
-	static MATRICE_HOST_FINL std::string strfn(_Ty _val)
-	{
+	template<typename _Ty> static MATRICE_HOST_FINL auto strfn(_Ty _val) {
 #ifdef __CXX11__
 		return (std::to_string(_val));
 #elif
@@ -104,9 +142,8 @@ public:
 #endif
 	}
 
-	template<typename _Ty, int _M, int _N = 0> static 
-	MATRICE_HOST_INL auto read(std::string _path)
-	{
+	template<typename _Ty, int _M, int _N = 0> 
+	static MATRICE_HOST_INL auto read(std::string _path) {
 		types::Vec_<_Ty, _M> _Cell;
 		std::vector<decltype(_Cell)> data;
 		std::ifstream fin(_path); assert(fin);
@@ -123,9 +160,8 @@ public:
 		fin.close();
 		return (_Ret);
 	}
-	template<typename _Op> static
-	MATRICE_HOST_INL auto read(std::string _path, _Op _op)
-	{
+	template<typename _Op> 
+	static MATRICE_HOST_INL auto read(std::string _path, _Op _op) {
 		if (!fs::exists(fs::path(_path))) 
 			throw std::runtime_error("'" + _path + "' does not exist!");
 
@@ -134,10 +170,37 @@ public:
 			throw std::runtime_error("Cannot open file.");
 		return _op(_Fin);
 	}
+
+	template<typename _Ty, std::size_t _N0, std::size_t _N1 = _N0>
+	static MATRICE_HOST_INL auto read(const std::string& _Path, std::size_t _Skips = 0) {
+		using value_type = _Ty;
+
+		if (!fs::exists(fs::path(_Path)))
+			throw std::runtime_error("'" + _Path + "' does not exist!");
+		std::ifstream _Fin(_Path);
+		if (!_Fin.is_open())
+			throw std::runtime_error("Cannot open file in " + _Path);
+
+		std::string _Line;
+		for (const auto _Idx : range(0, _Skips)) std::getline(_Fin, _Line);
+
+		std::array<value_type, _N1 - _N0 + 1> _Myline;
+		std::vector<decltype(_Myline)> _Data;
+		while (std::getline(_Fin, _Line)) {
+			auto _Res = split<value_type>(_Line, ',');
+			for (auto _Idx = _N0-1; _Idx < _N1; ++_Idx) {
+				_Myline[_Idx - _N0 + 1] = _Res[_Idx];
+			}
+			_Data.emplace_back(_Myline);
+		}
+
+		return std::forward<decltype(_Data)>(_Data);
+	}
+
+
 	//
-	template<typename _Op> static 
-	MATRICE_HOST_FINL void write(std::string _path, _Op _op)
-	{
+	template<typename _Op> 
+	static MATRICE_HOST_FINL void write(std::string _path, _Op _op) {
 		std::ofstream _Fout(_path);
 		if (!_Fout.is_open()) 
 			throw std::runtime_error("Cannot open file.");
@@ -158,10 +221,12 @@ public:
 		std::vector<_Ty> _Res;
 
 		const auto _String = std::string(1, _token) + _string;
-		auto _Pos = _String.begin();
-		while (_Pos != _String.end()) {
+		auto _Pos = _String.begin(), _End = _String.end();
+		if (_String.back() == _token) --_End;
+
+		while (_Pos != _End) {
 			auto _Pos_last = _Pos+1;
-			_Pos = std::find(_Pos_last, _String.end(), _token);
+			_Pos = std::find(_Pos_last, _End, _token);
 			_Res.push_back(stonv<_Ty>(_String.substr(std::distance(_String.begin(), _Pos_last), std::distance(_Pos_last, _Pos))));
 		}
 
