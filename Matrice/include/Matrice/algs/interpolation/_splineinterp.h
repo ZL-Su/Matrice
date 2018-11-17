@@ -21,7 +21,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 MATRICE_ALGS_BEGIN
 
-template<typename _Ty, std::size_t _Options> class _Spline_interpolation {};
+template<typename _Ty, std::size_t _Opt> class _Spline_interpolation {};
 
 template<typename _Ty>
 class _Spline_interpolation<_Ty, INTERP | BICUBIC | BSPLINE>
@@ -33,16 +33,53 @@ public:
 	using typename _Mybase::matrix_type;
 	using typename _Mybase::value_type;
 	using typename _Mybase::point_type;
+	static constexpr auto _N1 = 4, _N2 = 3;
+
 	_Spline_interpolation(const matrix_type& _Data) : _Mybase(_Data) {}
 
-	MATRICE_HOST_INL auto _Coeff_impl();
+	MATRICE_HOST_INL void _Coeff_impl();
 	
-	MATRICE_HOST_INL auto _Value_impl(const point_type& _Pos, rect<int> _R);
+	MATRICE_HOST_FINL auto _Value_at(const point_type& _Pos) const {
+		const auto _Ix = floor<int>(_Pos.x), _Iy = floor<int>(_Pos.y);
+		const auto _Dx = _Pos.x - _Ix, _Dy = _Pos.y - _Iy;
+
+		Matrix_<value_type, _N1, 1> _Dxs{ 1., _Dx, _Dx*_Dx, _Dx*_Dx*_Dx };
+		Matrix_<value_type, 1, _N1> _Dys{ 1., _Dy, _Dy*_Dy, _Dy*_Dy*_Dy };
+
+		const auto _Coeff = _Mycoeff.block(_Ix-1, _Ix+3, _Iy-1, _Iy+3).eval<4,4>();
+		auto _Temp = _L.t().mul(_Coeff.mul(_L).eval()).eval();
+
+		return (_Dys.mul(_Temp.mul(_Dxs).eval()));
+	}
+	MATRICE_HOST_FINL auto _Gradx_at(const point_type& _Pos) const {
+		const auto _Ix = floor<int>(_Pos.x), _Iy = floor<int>(_Pos.y);
+		const auto _Dx = _Pos.x - _Ix, _Dy = _Pos.y - _Iy;
+
+		Matrix_<value_type, _N2, 1> _Dxs{ 1., _Dx, _Dx*_Dx };
+		Matrix_<value_type, 1, _N1> _Dys{ 1., _Dy, _Dy*_Dy, _Dy*_Dy*_Dy };
+
+		const auto _Coeff = _Mycoeff.block(_Ix-1, _Ix+3, _Iy-1, _Iy+3).eval<4,4>();
+		auto _Temp = _L.t().mul(_Coeff.mul(_R).eval()).eval();
+
+		return (_Dys.mul(_Temp.mul(_Dxs).eval()));
+	}
+	MATRICE_HOST_FINL auto _Grady_at(const point_type& _Pos) const {
+		const auto _Ix = floor<int>(_Pos.x), _Iy = floor<int>(_Pos.y);
+		const auto _Dx = _Pos.x - _Ix, _Dy = _Pos.y - _Iy;
+
+		Matrix_<value_type, _N1, 1> _Dxs{ 1., _Dx, _Dx*_Dx, _Dx*_Dx*_Dx };
+		Matrix_<value_type, 1, _N2> _Dys{ 1., _Dy, _Dy*_Dy };
+
+		const auto _Coeff = _Mycoeff.block(_Ix-1, _Ix+3, _Iy-1, _Iy+3).eval<4,4>();
+		auto _Temp = _R.t().mul(_Coeff.mul(_L)).eval()).eval();
+
+		return (_Dys.mul(_Temp.mul(_Dxs).eval()));
+	}
 
 private:
 	using _Mybase::_Mycoeff;
-	const Matrix_<value_type, 4, 4> _A{ 1, -3, 3, -1, 4, 0, -6, 3, 1, 3, 3, -3, 0, 0, 0, 1 };
-	const Matrix_<value_type, 4, 3> _B{ -3, 6, -3, 0, -12, 9, 3, 6, -9, 0, 0, 3 };
+	const Matrix_<value_type, 4, 4> _L{ 1,-3,3,-1,4,0,-6,3,1,3,3,-3,0,0,0,1 };
+	const Matrix_<value_type, 4, 3> _R{ -3,6,-3,0,-12,9,3,6,-9,0,0,3 };
 };
 
 template<typename _Ty>
@@ -58,9 +95,11 @@ public:
 
 	_Spline_interpolation(const matrix_type& _Data) : _Mybase(_Data) {}
 
-	MATRICE_HOST_INL auto _Coeff_impl();
+	MATRICE_HOST_INL void _Coeff_impl();
 
-	MATRICE_HOST_INL auto _Value_impl(const point_type& _Pos, rect<int> _R);
+	MATRICE_HOST_INL auto _Value_at(const point_type& _Pos) {
+
+	}
 
 private:
 	using _Mybase::_Mycoeff;
@@ -79,11 +118,15 @@ public:
 	using typename _Mybase::value_type;
 	using typename _Mybase::point_type;
 
+
 	_Spline_interpolation(const matrix_type& _Data) : _Mybase(_Data) {}
 
-	MATRICE_HOST_INL auto _Coeff_impl();
+	MATRICE_HOST_INL void _Coeff_impl();
 
-	MATRICE_HOST_INL auto _Value_impl(const point_type& _Pos, rect<int> _R);
+	MATRICE_HOST_FINL auto _Value_at(const point_type& _Pos) const {
+		const auto _Ix = static_cast<int>(_Pos.x), _Iy = static_cast<int>(_Pos.y);
+		const auto _Dx = _Pos.x - _Ix, _Dy = _Pos.y - _Iy;
+	}
 
 private:
 	using _Mybase::_Mycoeff;
@@ -91,7 +134,9 @@ private:
 	const Matrix_<value_type, 4, 3> _B{ -3, 6, -3, 0, -12, 9, 3, 6, -9, 0, 0, 3 };
 };
 
-template<typename _Ty, size_t _Options = INTERP|BICUBIC|BSPLINE>
+
+///<brief> Class BicubicSplineInterp will be deprecated </brief>
+template<typename _Ty, std::size_t _Opt = INTERP|BICUBIC|BSPLINE>
 class BicubicSplineInterp : public InterpBase_<_Ty, BicubicSplineInterp<_Ty, _Options>>
 {
 	using base_t = InterpBase_<_Ty, BicubicSplineInterp<_Ty, _Options>>;

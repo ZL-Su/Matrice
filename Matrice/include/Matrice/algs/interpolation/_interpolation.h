@@ -17,48 +17,33 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #pragma once
 #include <memory>
-#include "_bicubic_spline_interp.h"
+#include "_splineinterp.h"
 
 MATRICE_ALGS_BEGIN
 
-template<typename _Ty, std::size_t _Options>
-class Interpolation MATRICE_NONHERITABLE
-{
-	using Op_t = interpolation_traits_t<_Ty, _Options>;
-public:
-	using value_type = typename Op_t::value_t;
-	static const auto options = Op_t::Options;
-
-	template<typename... _Args> 
-	MATRICE_GLOBAL_FINL Interpolation(const _Args&... args) 
-		:m_op(std::make_unique<Op_t>(args...)) {}
-
-	MATRICE_GLOBAL_FINL auto& operator()()const {
-		return m_op;
-	}
-
-private:
-	std::unique_ptr<Op_t> m_op;
-};
+template<typename _Ty, std::size_t _Opt> class Interpolation MATRICE_NONHERITABLE {};
 
 template<typename _Ty>
 class Interpolation<_Ty, INTERP|BICUBIC|BSPLINE> MATRICE_NONHERITABLE
 {
-	using Op_t = interpolation_traits_t<_Ty,INTERP|BICUBIC|BSPLINE>;
 public:
-	using value_type = typename Op_t::value_t;
-	static const auto options = Op_t::Options;
+	using kernel_type = auto_interp_dispatcher_t<_Ty, INTERP | BICUBIC | BSPLINE>;
+	using value_type = typename kernel_type::value_type;
+	static constexpr auto options = kernel_type::options;
 
 	template<typename... _Args>
 	MATRICE_GLOBAL_FINL Interpolation(const _Args&... args)
-		:m_op(std::make_unique<Op_t>(args...)) {}
+		:m_op(std::make_shared<kernel_type>(args...)) {}
 
 	MATRICE_GLOBAL_FINL auto& operator()() {
-		return (*m_op)();
+		return (*m_op);
+	}
+	MATRICE_GLOBAL_FINL const auto& operator()() const {
+		return (*m_op);
 	}
 
 private:
-	std::unique_ptr<Op_t> m_op;
+	mutable std::shared_ptr<kernel_type> m_op;
 };
 
 MATRICE_ALGS_END

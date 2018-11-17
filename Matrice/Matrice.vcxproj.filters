@@ -638,14 +638,14 @@
     <ClCompile Include="src\core\solver_impl.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\algorithm\_bicubic_spline_interp.cpp">
-      <Filter>Source Files\Algs\Interpolation</Filter>
-    </ClCompile>
     <ClCompile Include="src\private\_memory.cpp">
       <Filter>Source Files\Details\Memory</Filter>
     </ClCompile>
     <ClCompile Include="src\private\_unified_memory.cpp">
       <Filter>Source Files\Details\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="src\algorithm\_splineinterp.cpp">
+      <Filter>Source Files\Algs\Interpolation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
