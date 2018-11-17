@@ -94,7 +94,38 @@ public:
 private:
 	value_t m_begin, m_end, m_stride = value_t(1);
 	mutable value_t m_pos = m_begin;
-}; }
+};
+
+template<typename _Ty> class _Rect_impl MATRICE_NONHERITABLE {
+public:
+	using value_type = _Ty;
+	using point_type = types::Vec_<value_type, 2>;
+
+	template<typename _U1, typename _U2>
+	_Rect_impl(const types::Vec_<_U1, 2>& _X, , const _U2& _W, const _U2& _H)
+		:_Mybegin(_X.x, _X.y), _Mywidth(_W), _Myheight(_H) { _My_end(); }
+	template<typename _U1, typename _U2>
+	_Rect_impl(const _U1& _X, const _U1& _Y, const _U2& _W, const _U2& _H)
+		:_Mybegin(_X, _Y), _Mywidth(_W), _Myheight(_H) { _My_end(); }
+
+	MATRICE_HOST_INL auto& operator()(const point_type& _X) {
+		_Mybegin = _X; _My_end(); return (*this);
+	}
+
+	MATRICE_HOST_INL auto& begin() { return (_Mybegin); }
+	MATRICE_HOST_INL const auto& begin() const { return (_Mybegin); }
+	MATRICE_HOST_INL auto& end() { return (_Myend); }
+	MATRICE_HOST_INL const auto& end() const { return (_Myend); }
+
+private:
+	MATRICE_HOST_INL auto _My_end() {
+		_Myend.x = _Mybegin.x + _Mywidth;
+		_Myend.y = _Mybegin.y + _Myheight;
+	}
+	point_type _Mybegin, _Myend;
+	value_type _Mywidth, _Myheight;
+};
+}
 
 // \TEMPLATE CLASS range : [begin, end[, stride])
 template<typename _Ty, typename _Uy = _Ty>
@@ -107,5 +138,7 @@ public:
 	MATRICE_GLOBAL_INL range(const _Ty& _First, const _Uy& _Last, const typename _Mybase::value_t& _Inc)
 		: _Mybase(_First, _Last, _Inc) {}
 };
+
+template<typename _Ty> using rect = detail::_Rect_impl<_Ty>;
 
 DGE_MATRICE_END
