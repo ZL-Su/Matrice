@@ -236,7 +236,7 @@
     <ClInclude Include="include\Matrice\algs\imageproc.hpp" />
     <ClInclude Include="include\Matrice\algs\interpolation.h" />
     <ClInclude Include="include\Matrice\algs\interpolation\_base.h" />
-    <ClInclude Include="include\Matrice\algs\interpolation\_bicubic_spline_interp.h" />
+    <ClInclude Include="include\Matrice\algs\interpolation\_splineinterp.h" />
     <ClInclude Include="include\Matrice\algs\interpolation\_interpolation.h" />
     <ClInclude Include="include\Matrice\algs\mbspa.h" />
     <ClInclude Include="include\Matrice\algs\similarity.h" />

@@ -246,9 +246,6 @@
     <ClInclude Include="include\Matrice\algs\geometry\normalization.h">
       <Filter>Header Files\Algs\Geometry</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\algs\interpolation\_bicubic_spline_interp.h">
-      <Filter>Header Files\Algs\Interpolation</Filter>
-    </ClInclude>
     <ClInclude Include="include\Matrice\algs\interpolation.h">
       <Filter>Header Files\Algs</Filter>
     </ClInclude>
@@ -620,6 +617,9 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\private\tensor\_tensor_exp.hpp">
       <Filter>Header Files\Detail\tensor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\interpolation\_splineinterp.h">
+      <Filter>Header Files\Algs\Interpolation</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
