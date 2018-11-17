@@ -18,13 +18,17 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #pragma once
 #include <type_traits>
-namespace dgelom {
+#include "../private/_range.h"
+#include "../algs/interpolation.h"
 
-template<typename _Pixty, typename = typename std::enable_if<std::is_arithmetic<_Pixty>::value>::type>
-void _Grayscale_stretch(_Pixty* Img, std::size_t rows, std::size_t cols)
-{
-	typedef _Pixty                         pixel_t;
-	typedef pixel_t*                      iterator;
+DGE_MATRICE_BEGIN
+
+enum class axis {x, y, z};
+
+template<typename _Pixty, typename = std::enable_if_t<std::is_arithmetic_v<_Pixty>>>
+void _Grayscale_stretch(_Pixty* Img, std::size_t rows, std::size_t cols) {
+	using pixel_t = _Pixty;
+	using iterator = std::add_pointer_t<pixel_t>;
 
 	const std::size_t N = rows * cols;
 	iterator _Begin = Img, _End = Img + N;
@@ -52,11 +56,11 @@ template<typename _Ty, int _M, int _N> class _Multi_matrix;
 
 template<typename _Ty> struct gradient_traits {};
 
-template<typename _Ty, std::size_t _Op> class _Gradient_impl;
-template<typename _Ty, std::size_t _Op> 
-struct gradient_traits<_Gradient_impl<_Ty, _Op>> {
+template<typename _Ty, std::size_t _Opt> class _Gradient_impl;
+template<typename _Ty, std::size_t _Opt> 
+struct gradient_traits<_Gradient_impl<_Ty, _Opt>> {
 	using value_type = _Ty;
-	static constexpr auto op_value = _Op;
+	static constexpr auto option = _Opt;
 	using image_type = types::Matrix_<unsigned char, 0, 0>;
 	using matrix_type = types::Matrix_<value_type, 0, 0>;
 };
@@ -70,34 +74,41 @@ public:
 
 	_Gradient_base(const image_type& _Image) : _Myimg(_Image) {}
 
-
-	/**
-	 * \get image gradient with respective to _Axis
-	 * \Template param _Axis: 0 for x axis, 1 for y axis
-	 */
-	template<std::size_t _Axis> auto& get() {
-		return (_Mygrad[_Axis]);
-	}
-	template<std::size_t _Axis> const auto& get() const {
-		return (_Mygrad[_Axis]);
-	}
-
-private:
+protected:
 	const image_type& _Myimg;
-	_Multi_matrix<value_type, 0, 0> _Mygrad;
 };
 
 template<typename _Ty>
-class _Gradient_impl<_Ty, SOBEL> 
-	: public _Gradient_base<_Gradient_impl<_Ty, SOBEL>> {
+class _Gradient_impl<_Ty, SOBEL>  {
 	using _Myt = _Gradient_impl;
 	using _Mybase = _Gradient_base<_Myt>;
 public:
 	using typename _Mybase::image_type;
 	_Gradient_impl(const image_type& _Image) : _Mybase(_Image) {}
 
-
-
 };
+template<typename _Ty>
+class _Gradient_impl<_Ty, BSPL3>
+	: public _Gradient_base<_Gradient_impl<_Ty, BSPL3>> {
+	using _Myt = _Gradient_impl;
+	using _Mybase = _Gradient_base<_Myt>;
+	using _Myitp_type = interpolation<typename _Mybase::value_type, bcspline>;
+public:
+	using typename _Mybase::image_type;
+	using typename _Mybase::value_type;
+	_Gradient_impl(const image_type& _Image) 
+		: _Mybase(_Image), _Myop(_Myitp_type(_Mybase::_Myimg)()) {
+	}
 
+	template<axis _Axis, typename _Valty>
+	MATRICE_HOST_INL auto wrt(_Valty _x, _Valty _y) const {
+		if constexpr (_Axis = axis::x) return _Myop.gradx_at();
+		if constexpr (_Axis = axis::y);
+	}
+
+private:
+	typename _Myitp_type::kernel_type _Myop;
+};
 }
+
+DGE_MATRICE_END
