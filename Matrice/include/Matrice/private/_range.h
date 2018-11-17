@@ -99,10 +99,10 @@ private:
 template<typename _Ty> class _Rect_impl MATRICE_NONHERITABLE {
 public:
 	using value_type = _Ty;
-	using point_type = types::Vec_<value_type, 2>;
+	using point_type = Vec_<value_type, 2>;
 
 	template<typename _U1, typename _U2>
-	_Rect_impl(const types::Vec_<_U1, 2>& _X, , const _U2& _W, const _U2& _H)
+	_Rect_impl(const Vec_<_U1, 2>& _X, const _U2& _W, const _U2& _H)
 		:_Mybegin(_X.x, _X.y), _Mywidth(_W), _Myheight(_H) { _My_end(); }
 	template<typename _U1, typename _U2>
 	_Rect_impl(const _U1& _X, const _U1& _Y, const _U2& _W, const _U2& _H)
