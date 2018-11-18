@@ -34,8 +34,7 @@ _InIt _End(const _InIt _Begin, size_t _Size, size_t _Stride = 1) {
 	    Copyright (c) : Zhilong (Dgelom) Su, since 12/Jul/2018
  **********************************************************************/
 template<typename _Ty, typename = std::enable_if_t<std::is_arithmetic_v<_Ty>>>
-class iterator_base
-{
+class iterator_base {
 public:
 	using iterator_category = std::random_access_iterator_tag;
 	using value_type = _Ty;
@@ -161,6 +160,9 @@ public:
 	template<typename... _Args> 
 	MATRICE_GLOBAL_FINL _Matrix_forward_iterator(_Args... _args)
 		: base_type(_args...) {}
+
+private:
+
 };
 /**********************************************************************
 							Row-wise Forward Range Iterator
