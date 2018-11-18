@@ -36,8 +36,6 @@ public:
 	static constexpr auto _N1 = 4, _N2 = 3;
 
 	_Spline_interpolation(const matrix_type& _Data) : _Mybase(_Data) {}
-
-	MATRICE_HOST_INL void _Coeff_impl();
 	
 	MATRICE_HOST_FINL auto _Value_at(const point_type& _Pos) const {
 		const auto _Ix = floor<int>(_Pos.x), _Iy = floor<int>(_Pos.y);
@@ -75,6 +73,8 @@ public:
 
 		return (_Dys.mul(_Temp.mul(_Dxs).eval()))(0);
 	}
+
+	MATRICE_HOST_INL void _Coeff_impl();
 
 private:
 	using _Mybase::_Mycoeff;

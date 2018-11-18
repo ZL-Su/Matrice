@@ -20,9 +20,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 namespace dgelom 
 {
 	using default_type = double;
-	using index_t = std::ptrdiff_t;
-	enum solver_type
-	{
+	using index_t = long long;
+	enum solver_type {
 		AUTO = 0x0000, LUF = 0x0001, CHD = 0x0002, QRD = 0x0003,
 		SVD = 0x0004, ITER = 0x0005, SPAR = 0x0006, GLS = 0x0007
 	};
@@ -38,5 +37,6 @@ namespace dgelom
 		ltri = 108,
 		spar = 109,
 	};
+	enum { SOBEL = 0, BSPL3 = 3, BSPL5 = 5, BSPL7 = 7 };
 	enum class axis {all = 0x00, x = 0x01, y = 0x02, z = 0x02 };
 }

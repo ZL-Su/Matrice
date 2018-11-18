@@ -42,11 +42,7 @@ void _Grayscale_stretch(_Pixty* Img, std::size_t rows, std::size_t cols) {
 		*_Begin = pixel_t(_Scal * (*_Begin - _Min));
 }
 
-namespace types {
-template<typename _Ty, int _M, int _N> class Matrix_;
-}
-
-enum {SOBEL = 0, BSPL3 = 3, BSPL5 = 5, BSPL7 = 7};
+namespace types { template<typename _Ty, int _M, int _N> class Matrix_; }
 
 namespace detail {
 template<typename _Ty, int _M, int _N> class _Multi_matrix;
