@@ -122,6 +122,23 @@ public:
 		return static_cast<const _Mydt*>(this)->_Value_at(_Pos);
 	}
 
+	/**
+	 * \get the interpolated gradient value at _Pos.
+	 */
+	MATRICE_HOST_INL auto grad(const point_type& _Pos) const {
+		return std::make_tuple(
+			static_cast<const _Mydt*>(this)->_Gradx_at(_Pos),
+			static_cast<const _Mydt*>(this)->_Grady_at(_Pos)
+			);
+	}
+	template<axis _Axis, typename = std::enable_if_t<_Axis==axis::x||_Axis==axis::y>>
+	MATRICE_HOST_INL auto grad(const point_type& _Pos) const {
+		if constexpr (_Axis == axis::x)
+			return static_cast<const _Mydt*>(this)->_Gradx_at(_Pos);
+		if constexpr (_Axis == axis::y)
+			return static_cast<const _Mydt*>(this)->_Grady_at(_Pos);
+	}
+
 protected:
 	const matrix_type& _Mydata;
 	const value_type _Myeps = value_type(1.0e-7);
