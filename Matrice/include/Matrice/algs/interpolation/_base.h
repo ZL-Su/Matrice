@@ -86,7 +86,7 @@ struct interpolation_traits<_Spline_interpolation<_Ty, _Opt>> {
 	using value_type = _Ty;
 	using matrix_type = Matrix<value_type>;
 	using type = _Spline_interpolation<value_type, _Opt>;
-	static constexpr auto options = _Opt;
+	static constexpr auto option = _Opt;
 };
 template<typename _Ty, std::size_t _Opt> struct auto_interp_dispatcher {
 	using type = _Spline_interpolation<_Ty, _Opt>;
@@ -102,7 +102,7 @@ public:
 	using value_type = typename _Mytraits::value_type;
 	using matrix_type = typename _Mytraits::matrix_type;
 	using point_type = Vec2_<value_type>;
-	static constexpr auto options = _Mytraits::options;
+	static constexpr auto option = _Mytraits::option;
 
 	_Interpolation_base(const matrix_type& _Data) : _Mydata(_Data) {
 		static_cast<_Mydt*>(this)->_Coeff_impl();

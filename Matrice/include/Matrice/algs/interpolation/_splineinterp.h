@@ -49,7 +49,7 @@ public:
 		const auto _Coeff = _Mycoeff.block(_Ix-1, _Ix+3, _Iy-1, _Iy+3).eval<4,4>();
 		auto _Temp = _L.t().mul(_Coeff.mul(_L).eval()).eval();
 
-		return (_Dys.mul(_Temp.mul(_Dxs).eval()));
+		return (_Dys.mul(_Temp.mul(_Dxs).eval()))(0);
 	}
 	MATRICE_HOST_FINL auto _Gradx_at(const point_type& _Pos) const {
 		const auto _Ix = floor<int>(_Pos.x), _Iy = floor<int>(_Pos.y);
@@ -61,7 +61,7 @@ public:
 		const auto _Coeff = _Mycoeff.block(_Ix-1, _Ix+3, _Iy-1, _Iy+3).eval<4,4>();
 		auto _Temp = _L.t().mul(_Coeff.mul(_R).eval()).eval();
 
-		return (_Dys.mul(_Temp.mul(_Dxs).eval()));
+		return (_Dys.mul(_Temp.mul(_Dxs).eval()))(0);
 	}
 	MATRICE_HOST_FINL auto _Grady_at(const point_type& _Pos) const {
 		const auto _Ix = floor<int>(_Pos.x), _Iy = floor<int>(_Pos.y);
@@ -73,7 +73,7 @@ public:
 		const auto _Coeff = _Mycoeff.block(_Ix-1, _Ix+3, _Iy-1, _Iy+3).eval<4,4>();
 		auto _Temp = _R.t().mul(_Coeff.mul(_L).eval()).eval();
 
-		return (_Dys.mul(_Temp.mul(_Dxs).eval()));
+		return (_Dys.mul(_Temp.mul(_Dxs).eval()))(0);
 	}
 
 private:

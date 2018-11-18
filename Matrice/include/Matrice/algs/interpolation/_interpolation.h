@@ -29,7 +29,7 @@ class Interpolation<_Ty, INTERP|BICUBIC|BSPLINE> MATRICE_NONHERITABLE
 public:
 	using kernel_type = auto_interp_dispatcher_t<_Ty, INTERP | BICUBIC | BSPLINE>;
 	using value_type = typename kernel_type::value_type;
-	static constexpr auto options = kernel_type::options;
+	static constexpr auto option = kernel_type::option;
 
 	template<typename... _Args>
 	MATRICE_GLOBAL_FINL Interpolation(const _Args&... args)

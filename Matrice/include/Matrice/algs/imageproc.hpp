@@ -32,8 +32,7 @@ void _Grayscale_stretch(_Pixty* Img, std::size_t rows, std::size_t cols) {
 	iterator _Begin = Img, _End = Img + N;
 
 	pixel_t _Max = pixel_t(0), _Min = pixel_t(255);
-	for (; _Begin != _End; ++_Begin)
-	{
+	for (; _Begin != _End; ++_Begin) {
 		_Max = _Max > *_Begin ? _Max : *_Begin;
 		_Min = _Min < *_Begin ? _Min : *_Begin;
 	}
