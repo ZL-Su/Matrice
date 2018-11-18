@@ -19,18 +19,21 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #include "interpolation\_interpolation.h"
 
-MATRICE_NAMESPACE_BEGIN_
+DGE_MATRICE_BEGIN
 enum {
 	bilinear = algs::INTERP | algs::BILINEAR,
-	bcspline = algs::INTERP | algs::BSPLINE | algs::BICUBIC,
-	bqspline = algs::INTERP | algs::BSPLINE | algs::BIQUINTIC,
-	bsspline = algs::INTERP | algs::BSPLINE | algs::BISEPTIC,
+	bcspline = algs::_BICBSPL,
+	bqspline = algs::_BIQNSPL,
+	bsspline = algs::_BISPSPL
 }; //interpolation algorithms
 
 /*******************************************************************
 	              Unified Interpolation Interface
 	    Copyright (c) : Zhilong (Dgelom) Su, since 31/Jul/2018
  ******************************************************************/
-template<typename _Ty, size_t _Options = bcspline, typename = std::enable_if_t<std::is_scalar_v<_Ty>>>
-using interpolation = algs::Interpolation<_Ty, _Options>;
-_MATRICE_NAMESPACE_END
+template<
+	typename _Ty, size_t _Opt = algs::_BICBSPL,
+	typename = std::enable_if_t<std::is_scalar_v<_Ty>>>
+using interpolation = algs::_Interpolation_wrapper<_Ty, _Opt>;
+
+DGE_MATRICE_END

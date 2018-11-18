@@ -24,8 +24,8 @@ MATRICE_ALGS_BEGIN
 template<typename _Ty, std::size_t _Opt> class _Spline_interpolation {};
 
 template<typename _Ty>
-class _Spline_interpolation<_Ty, INTERP | BICUBIC | BSPLINE>
-	: public _Interpolation_base<_Spline_interpolation<_Ty, INTERP | BICUBIC | BSPLINE>>
+class _Spline_interpolation<_Ty, _BICBSPL>
+	: public _Interpolation_base<_Spline_interpolation<_Ty, _BICBSPL>>
 {
 	using _Myt = _Spline_interpolation;
 	using _Mybase = _Interpolation_base<_Myt>;
@@ -83,8 +83,8 @@ private:
 };
 
 template<typename _Ty>
-class _Spline_interpolation<_Ty, INTERP | BIQUINTIC | BSPLINE>
-	: public _Interpolation_base<_Spline_interpolation<_Ty, INTERP | BIQUINTIC | BSPLINE>>
+class _Spline_interpolation<_Ty, _BIQNSPL>
+	: public _Interpolation_base<_Spline_interpolation<_Ty, _BIQNSPL>>
 {
 	using _Myt = _Spline_interpolation;
 	using _Mybase = _Interpolation_base<_Myt>;
@@ -108,8 +108,8 @@ private:
 };
 
 template<typename _Ty>
-class _Spline_interpolation<_Ty, INTERP | BISEPTIC | BSPLINE>
-	: public _Interpolation_base<_Spline_interpolation<_Ty, INTERP | BISEPTIC | BSPLINE>>
+class _Spline_interpolation<_Ty, _BISPSPL>
+	: public _Interpolation_base<_Spline_interpolation<_Ty, _BISPSPL>>
 {
 	using _Myt = _Spline_interpolation;
 	using _Mybase = _Interpolation_base<_Myt>;
@@ -117,7 +117,6 @@ public:
 	using typename _Mybase::matrix_type;
 	using typename _Mybase::value_type;
 	using typename _Mybase::point_type;
-
 
 	_Spline_interpolation(const matrix_type& _Data) : _Mybase(_Data) {}
 
@@ -134,9 +133,8 @@ private:
 	const Matrix_<value_type, 4, 3> _B{ -3, 6, -3, 0, -12, 9, 3, 6, -9, 0, 0, 3 };
 };
 
-
 ///<brief> Class BicubicSplineInterp will be deprecated </brief>
-template<typename _Ty, std::size_t _Opt = INTERP|BICUBIC|BSPLINE>
+template<typename _Ty, std::size_t _Opt = _BICBSPL>
 class BicubicSplineInterp : public InterpBase_<_Ty, BicubicSplineInterp<_Ty, _Opt>>
 {
 	using base_t = InterpBase_<_Ty, BicubicSplineInterp<_Ty, _Opt>>;

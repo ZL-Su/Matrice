@@ -30,7 +30,10 @@ enum {
 	BILINEAR   = 2152,
 	BICUBIC    = 2156,
 	BIQUINTIC  = 2160,
-	BISEPTIC   = 2164
+	BISEPTIC   = 2164,
+	_BICBSPL = INTERP | BICUBIC | BSPLINE,
+	_BIQNSPL = INTERP | BIQUINTIC | BSPLINE,
+	_BISPSPL = INTERP | BISEPTIC | BSPLINE,
 };
 
 #pragma region <!-- Codes in the region will be deprecated -->
