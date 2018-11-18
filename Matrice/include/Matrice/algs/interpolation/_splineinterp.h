@@ -71,7 +71,7 @@ public:
 		Matrix_<value_type, 1, _N2> _Dys{ 1., _Dy, _Dy*_Dy };
 
 		const auto _Coeff = _Mycoeff.block(_Ix-1, _Ix+3, _Iy-1, _Iy+3).eval<4,4>();
-		auto _Temp = _R.t().mul(_Coeff.mul(_L)).eval()).eval();
+		auto _Temp = _R.t().mul(_Coeff.mul(_L).eval()).eval();
 
 		return (_Dys.mul(_Temp.mul(_Dxs).eval()));
 	}
@@ -137,11 +137,11 @@ private:
 
 ///<brief> Class BicubicSplineInterp will be deprecated </brief>
 template<typename _Ty, std::size_t _Opt = INTERP|BICUBIC|BSPLINE>
-class BicubicSplineInterp : public InterpBase_<_Ty, BicubicSplineInterp<_Ty, _Options>>
+class BicubicSplineInterp : public InterpBase_<_Ty, BicubicSplineInterp<_Ty, _Opt>>
 {
-	using base_t = InterpBase_<_Ty, BicubicSplineInterp<_Ty, _Options>>;
+	using base_t = InterpBase_<_Ty, BicubicSplineInterp<_Ty, _Opt>>;
 public:
-	enum { Options = _Options };
+	enum { option = _Opt };
 	using typename base_t::value_t;
 	using typename base_t::matrix_t;
 
