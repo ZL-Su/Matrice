@@ -74,7 +74,7 @@ struct gradient_traits<_Gradient_impl<_Ty, _Opt>> {
 /**
  * \Base class for gradient computation in interpolation way.
  */
-template<typename _Derived> class _Gradient_base {
+template<typename _Derived> class _Interpolated_gradient_base {
 	using _Mytraits = gradient_traits<_Derived>;
 	using _Myitp_type = interpolation<value_type, splineitp_option_v<_Mytraits::option>>;
 public:
@@ -83,8 +83,12 @@ public:
 	using matrix_type = typename _Mytraits::matrix_type;
 	using point_type = typename _Myitp_type::kernel_type::point_type;
 	
-	_Gradient_base(const image_type& _Image) : _Myimg(_Image) {
+	_Interpolated_gradient_base(const image_type& _Image)
+		: _Myimg(_Image) {
 		_Myop = _Myitp_type(_Myimg)();
+	}
+	_Interpolated_gradient_base(const image_type& _Image, const decltype(_Myop)& _Op)
+		: _Myimg(_Image), _Myop(_Op) {
 	}
 
 	/**
@@ -119,25 +123,35 @@ protected:
 	typename _Myitp_type::kernel_type _Myop;
 };
 
-template<typename _Ty>
-class _Gradient_impl<_Ty, SOBEL>  {
+template<typename _Ty> class _Gradient_impl<_Ty, SOBEL>  {
 	using _Myt = _Gradient_impl;
-	using _Mybase = _Gradient_base<_Myt>;
 public:
-	using typename _Mybase::image_type;
-	_Gradient_impl(const image_type& _Image) : _Mybase(_Image) {}
+	using value_type = _Ty;
+	using image_type = Matrix<value_type>;
+	_Gradient_impl(const image_type& _Image) : _Myimg(_Image) {}
 
+private:
+	const image_type& _Myimg;
 };
-template<typename _Ty>
-class _Gradient_impl<_Ty, BSPL3>
-	: public _Gradient_base<_Gradient_impl<_Ty, BSPL3>> {
+
+template<typename _Ty> class _Gradient_impl<_Ty, BSPL3>
+	: public _Interpolated_gradient_base<_Gradient_impl<_Ty, BSPL3>> {
 	using _Myt = _Gradient_impl;
-	using _Mybase = _Gradient_base<_Myt>;
+	using _Mybase = _Interpolated_gradient_base<_Myt>;
 public:
 	using typename _Mybase::image_type;
 	using typename _Mybase::value_type;
-	_Gradient_impl(const image_type& _Image) : _Mybase(_Image) {}
+
+	template<typename... _Args>
+	_Gradient_impl(const _Args&... _Args) : _Mybase(_Args...) {}
 };
 }
+
+/**
+ * \TEMPLATE class for image gradient computation.
+ * \PARAMS : <_Ty> the data type; <_Alg> the gradient operator.
+ */
+template<typename _Ty, std::size_t _Alg = BSPL3>
+using gradient = detail::_Gradient_impl<_Ty, _Alg>;
 
 DGE_MATRICE_END
