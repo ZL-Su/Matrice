@@ -23,8 +23,6 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 DGE_MATRICE_BEGIN
 
-enum class axis {x, y, z};
-
 template<typename _Pixty, typename = std::enable_if_t<std::is_arithmetic_v<_Pixty>>>
 void _Grayscale_stretch(_Pixty* Img, std::size_t rows, std::size_t cols) {
 	using pixel_t = _Pixty;
@@ -83,9 +81,37 @@ public:
 	using value_type = typename _Mytraits::value_type;
 	using image_type = typename _Mytraits::image_type;
 	using matrix_type = typename _Mytraits::matrix_type;
+	using point_type = typename _Myitp_type::kernel_type::point_type;
 	
 	_Gradient_base(const image_type& _Image) : _Myimg(_Image) {
 		_Myop = _Myitp_type(_Myimg)();
+	}
+
+	/**
+	 * \Get image gradient: $\fract{\partial I}{\partial _Axis}(_Pos)$
+	 */
+	MATRICE_HOST_INL auto at(const point_type& _Pos) const {
+		return _Myop.grad(_Pos);
+	}
+	template<axis _Axis>
+	MATRICE_HOST_INL auto at(const point_type& _Pos) const { 
+		return _Myop.grad<_Axis>(_Pos); 
+	}
+	/**
+	 * \Get image gradient w.r.t. _Axis in rect. range [_L, _R) | [_U, _D)
+	 */
+	template<axis _Axis> 
+	MATRICE_HOST_INL auto at(int _L, int _R, int _U, int _D) const { 
+		matrix_type _Grad(_D - _U, _R - _L);
+
+		for (const auto _Idy : range(_U, _D)) {
+			_Row = _Grad.rbegin(_Idy - _U);
+			for (const auto _Idx : range(_L, _R)) {
+				_Row[_Idx - _L] = at<_Axis>({ _Idx, _Idy });
+			}
+		}
+
+		return std::forward<matrix_type>(_Grad);
 	}
 
 protected:
@@ -107,22 +133,10 @@ class _Gradient_impl<_Ty, BSPL3>
 	: public _Gradient_base<_Gradient_impl<_Ty, BSPL3>> {
 	using _Myt = _Gradient_impl;
 	using _Mybase = _Gradient_base<_Myt>;
-	using _Myitp_type = interpolation<typename _Mybase::value_type, bcspline>;
 public:
 	using typename _Mybase::image_type;
 	using typename _Mybase::value_type;
-	_Gradient_impl(const image_type& _Image) 
-		: _Mybase(_Image), _Myop(_Myitp_type(_Mybase::_Myimg)()) {
-	}
-
-	template<axis _Axis, typename _Valty>
-	MATRICE_HOST_INL auto wrt(_Valty _x, _Valty _y) const {
-		if constexpr (_Axis = axis::x) return _Myop.gradx_at();
-		if constexpr (_Axis = axis::y);
-	}
-
-private:
-	typename _Myitp_type::kernel_type _Myop;
+	_Gradient_impl(const image_type& _Image) : _Mybase(_Image) {}
 };
 }
 
