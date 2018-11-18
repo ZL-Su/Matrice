@@ -55,8 +55,16 @@ namespace detail {
 template<typename _Ty, int _M, int _N> class _Multi_matrix;
 
 template<typename _Ty> struct gradient_traits {};
+template<std::size_t _Opt> 
+struct splineitp_option{static constexpr auto value = _Opt;};
+template<std::size_t _Opt>
+MATRICE_HOST_INL constexpr auto splineitp_option_v = splineitp_option<_Opt>::value;
+template<> struct splineitp_option<BSPL3> { static constexpr auto value = bcspline; };
+template<> struct splineitp_option<BSPL5> { static constexpr auto value = bqspline; };
+template<> struct splineitp_option<BSPL7> { static constexpr auto value = bsspline; };
 
 template<typename _Ty, std::size_t _Opt> class _Gradient_impl;
+
 template<typename _Ty, std::size_t _Opt> 
 struct gradient_traits<_Gradient_impl<_Ty, _Opt>> {
 	using value_type = _Ty;
@@ -65,17 +73,24 @@ struct gradient_traits<_Gradient_impl<_Ty, _Opt>> {
 	using matrix_type = types::Matrix_<value_type, 0, 0>;
 };
 
+/**
+ * \Base class for gradient computation in interpolation way.
+ */
 template<typename _Derived> class _Gradient_base {
 	using _Mytraits = gradient_traits<_Derived>;
+	using _Myitp_type = interpolation<value_type, splineitp_option_v<_Mytraits::option>>;
 public:
 	using value_type = typename _Mytraits::value_type;
 	using image_type = typename _Mytraits::image_type;
 	using matrix_type = typename _Mytraits::matrix_type;
-
-	_Gradient_base(const image_type& _Image) : _Myimg(_Image) {}
+	
+	_Gradient_base(const image_type& _Image) : _Myimg(_Image) {
+		_Myop = _Myitp_type(_Myimg)();
+	}
 
 protected:
 	const image_type& _Myimg;
+	typename _Myitp_type::kernel_type _Myop;
 };
 
 template<typename _Ty>

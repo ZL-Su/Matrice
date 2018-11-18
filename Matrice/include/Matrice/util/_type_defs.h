@@ -38,4 +38,5 @@ namespace dgelom
 		ltri = 108,
 		spar = 109,
 	};
+	enum class axis {all = 0x00, x = 0x01, y = 0x02, z = 0x02 };
 }
