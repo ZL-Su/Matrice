@@ -16,7 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #pragma once
-#include <memory>
 #include "_splineinterp.h"
 
 MATRICE_ALGS_BEGIN
@@ -34,7 +33,15 @@ public:
 		:m_op(std::make_shared<kernel_type>(args...)) {}
 
 	/**
-	 * \Get interpolation kernel operator.
+	 * \Get reference of interpolation kernel operator.
+	 * \Example:
+	 *		_Interpolation_wrapper<...> _Myname(...);
+	 *		const auto& _Itp = _Myname(); \\return interpolation kernel.
+	 *    const auto& _Coeff = _Itp(); \\return interpolation coeff.
+	 *    auto _Value = _Itp(_Pos); \\return interpolated value at _Pos.
+	 *    auto[_Gx, _Gy] = _Itp.grad(_Pos); \\return iterpolated grad. at _Pos.
+	 *		_Gx = _Itp.grad<axis::x>(_Pos); \\return interpolated dI/dx.
+	 *		_Gy = _Itp.grad<axis::y>(_Pos); \\return interpolated dI/dy.
 	 */
 	MATRICE_GLOBAL_FINL auto& operator()() {
 		return (*m_op);
