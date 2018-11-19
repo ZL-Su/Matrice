@@ -7,10 +7,76 @@
 #endif
 
 DGE_MATRICE_BEGIN _DETAIL_BEGIN
+
+template<ttag _Tag> struct transp_tag {};
+template<> struct transp_tag<ttag::N> { 
+	static constexpr auto value = CBLAS_TRANSPOSE::CblasNoTrans;
+};
+template<> struct transp_tag<ttag::Y> {
+	static constexpr auto value = CBLAS_TRANSPOSE::CblasTrans;
+};
+template<ttag _Tag> MATRICE_HOST_INL constexpr auto transp_tag_v = transp_tag<_Tag>::value;
+
+template<typename _Ty> struct _Blas_kernel_impl_base {
+	using pointer = std::add_pointer_t<_Ty>;
+	using size_type = std::tuple<int, int>;
+	using plview_type = std::tuple<int, int, pointer>;
+	static constexpr auto layout = CBLAS_LAYOUT::CblasRowMajor;
+};
+/**
+ *\Specialization for float-type.
+ */
+template<> struct _Blas_kernel_impl<float> : _Blas_kernel_impl_base<float> {
+	MATRICE_HOST_INL static auto dot(const pointer _x, const pointer _y, int _N, int _Incx = 1, int _Incy = 1) {
+#ifdef __use_mkl__
+		return cblas_sdot(_N, _x, _Incx, _y, _Incy);
+#else
+		throw std::runtime_error("Undefined kernel in _Blas_kernel_impl<float>::mul(...).");
+#endif
+	}
+	template<ttag Ta = ttag::N, ttag Tb = ttag::N>
+	MATRICE_HOST_INL static auto mul(const pointer _A, const pointer _B, pointer _C, int _M, int _N, int _K) {
+#ifdef __use_mkl__
+		cblas_sgemm(layout, transp_tag_v<Ta>, transp_tag_v<Tb>, _M, _N, _K, 1.f, _A, _K, _B, _N, 0.f, _C, _N);
+#else
+		throw std::runtime_error("Undefined kernel in _Blas_kernel_impl<float>::mul(...).");
+#endif
+	}
+	template<ttag Ta = ttag::N, ttag Tb = ttag::N>
+	MATRICE_HOST_INL static auto mul(const plview_type& _A, const plview_type& _B, const plview_type& _C) {
+		mul<Ta, Tb>(std::get<2>(_A), std::get<2>(_B), std::get<2>(_C), std::get<0>(_A), std::get<1>(_B), std::get<1>(_A));
+	}
+};
+/**
+ *\Specialization for double-type.
+ */
+template<> struct _Blas_kernel_impl<double> : _Blas_kernel_impl_base<double> {
+	MATRICE_HOST_INL static auto dot(const pointer _x, const pointer _y, int _N, int _Incx = 1, int _Incy = 1) {
+#ifdef __use_mkl__
+		return cblas_ddot(_N, _x, _Incx, _y, _Incy);
+#else
+		throw std::runtime_error("Undefined kernel in _Blas_kernel_impl<float>::mul(...).");
+#endif
+	}
+	template<ttag Ta = ttag::N, ttag Tb = ttag::N>
+	MATRICE_HOST_INL static auto mul(const pointer _A, const pointer _B, pointer _C, int _M, int _N, int _K) {
+#ifdef __use_mkl__
+		cblas_dgemm(layout, transp_tag_v<Ta>, transp_tag_v<Tb>, _M, _N, _K, 1., _A, _K, _B, _N, 0., _C, _N);
+#else
+		throw std::runtime_error("Undefined kernel in _Blas_kernel_impl<float>::mul(...).");
+#endif
+	}
+	template<ttag Ta = ttag::N, ttag Tb = ttag::N>
+	MATRICE_HOST_INL static auto mul(const plview_type& _A, const plview_type& _B, const plview_type& _C) {
+		mul<Ta, Tb>(std::get<2>(_A), std::get<2>(_B), std::get<2>(_C), std::get<0>(_A), std::get<1>(_B), std::get<1>(_A));
+	}
+};
+
 template<typename _Ty> struct _Lapack_kernel_impl_base {
 	using pointer = std::add_pointer_t<_Ty>;
 	using size_type = std::tuple<int, int>;
 	using plview_type = std::tuple<int, int, pointer>;
+	static constexpr int layout = MKL_LAYOUT::MKL_ROW_MAJOR;
 };
 /**
  *\Specialization for float-type.
@@ -24,7 +90,7 @@ template<> struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 		auto[M, N] = _Size;
 #ifdef __use_mkl__
 		float* _Superb = new float[(M < N ? M : N) - 1];
-		return LAPACKE_sgesvd(101, 'O', 'A',
+		return LAPACKE_sgesvd(layout, 'O', 'A',
 			M, N, _A, N, _S, nullptr, 1, _Vt, N, _Superb);
 #else
 		return flapk::_sgesvd(_A, _S, _Vt, M, N);
@@ -42,7 +108,7 @@ template<> struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 #endif // _DEBUG
 
 #ifdef __use_mkl__
-		return LAPACKE_spotrf(101, 'L', M, _A, N);
+		return LAPACKE_spotrf(layout, 'L', M, _A, N);
 #else
 		return flapk::_scholy(_A, N);
 #endif
@@ -60,7 +126,7 @@ template<> struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 		auto _P = new int[max(1, min(M, N))];
 
 #ifdef __use_mkl__
-		return LAPACKE_sgetrf(101, M, N, _A, max(1, N), _P);
+		return LAPACKE_sgetrf(layout, M, N, _A, max(1, N), _P);
 #else
 #ifdef _DEBUG
 		if (M != N) throw std::runtime_error("Non-sqaure matrix _A in _Lapack_kernel_impl<float>::lud(...).");
@@ -84,7 +150,7 @@ template<> struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 #ifdef __use_mkl__
 		const auto N = std::get<0>(_A), M = std::get<1>(_B);
 		auto _Ipiv = new int[max(1, N)];
-		return LAPACKE_sgesv(101, N, M, std::get<2>(_A), N, _Ipiv, std::get<2>(_B), M);
+		return LAPACKE_sgesv(layout, N, M, std::get<2>(_A), N, _Ipiv, std::get<2>(_B), M);
 #else
 		throw std::runtime_error("Oops, no implementation is found.");
 #endif
@@ -103,7 +169,7 @@ template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double>
 		auto[M, N] = _Size;
 #ifdef __use_mkl__
 		double* _Superb = new double[M < N ? M : N - 1];
-		return LAPACKE_dgesvd(MKL_LAYOUT::MKL_ROW_MAJOR, 'O', 'A',
+		return LAPACKE_dgesvd(layout, 'O', 'A',
 			M, N, _A, N, _S, nullptr, 1, _Vt, N, _Superb);
 #else
 		return flapk::_dgesvd(_A, _S, _Vt, M, N);
@@ -139,7 +205,7 @@ template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double>
 		auto _P = new int[max(1, min(M, N))];
 
 #ifdef __use_mkl__
-		return LAPACKE_dgetrf(101, M, N, _A, max(1, N), _P);
+		return LAPACKE_dgetrf(layout, M, N, _A, max(1, N), _P);
 #else
 #ifdef _DEBUG
 		if (M != N) throw std::runtime_error("Non-sqaure matrix _A in _Lapack_kernel_impl<float>::lud(...).");
@@ -163,7 +229,7 @@ template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double>
 #ifdef __use_mkl__
 		const auto N = std::get<0>(_A), M = std::get<1>(_B);
 		auto _Ipiv = new int[max(1, N)];
-		return LAPACKE_dgesv(101, N, M, std::get<2>(_A), N, _Ipiv, std::get<2>(_B), M);
+		return LAPACKE_dgesv(layout, N, M, std::get<2>(_A), N, _Ipiv, std::get<2>(_B), M);
 #else
 		throw std::runtime_error("Oops, no implementation is found.");
 #endif
