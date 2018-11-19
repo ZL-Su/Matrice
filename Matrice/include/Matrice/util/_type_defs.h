@@ -39,4 +39,9 @@ namespace dgelom
 	};
 	enum { SOBEL = 0, BSPL3 = 3, BSPL5 = 5, BSPL7 = 7 };
 	enum class axis {all = 0x00, x = 0x01, y = 0x02, z = 0x02 };
+
+	/**
+	 * \enum type for matrix transpose tag
+	 */
+	enum class ttag { Y = 111, N = 112};
 }
