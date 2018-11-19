@@ -161,7 +161,7 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 			auto operator() (const _Lhs& lhs, const _Rhs& rhs, int r, int c) const
 			{
 				value_type _Ret = value_type(0);
-				const auto K = rhs.rows(), N = rhs.cols(), _Idx = r * lhs.cols();
+				const int K = rhs.rows(), N = rhs.cols(), _Idx = r * lhs.cols();
 #ifdef __disable_simd__
 				for (auto k = 0; k < K; ++k) _Ret += lhs(_Idx + k) * rhs(k*N + c);
 #else
@@ -173,13 +173,12 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 			}
 			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
 			auto operator() (const _Lhs& _L, const _Rhs& _R, int r, int c, tag::_Matrix_tag, tag::_Matrix_tag) {
-				const auto K = _R.rows(), N = _R.cols(), _Idx = r * _L.cols();
-				const auto x = _L(_Idx), y = _R(c);
-				return detail::_Blas_kernel_impl<value_type>::dot(x, y, K, 1, N);
+				const int K = _R.rows(), N = _R.cols(), _Idx = r * _L.cols();
+				return detail::template _Blas_kernel_impl<value_type>::dot(_L(_Idx), _R(c), K, 1, N);
 			}
 			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
 			auto operator() (const _Lhs& _L, const _Rhs& _R, int r, int c, tag::_Matrix_tag, tag::_Matrix_view_tag) {
-				const auto K = _R.rows(), N = _R.cols(), _Idx = r * _L.cols();
+				const int K = _R.rows(), N = _R.cols(), _Idx = r * _L.cols();
 				value_type _Ret = value_type(0);
 				for (auto k = 0; k < K; ++k) _Ret += _L(_Idx + k) * _R(k*N + c);
 				return (_Ret);
