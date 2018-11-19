@@ -20,10 +20,12 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../util/_macros.h"
 
 DGE_MATRICE_BEGIN namespace tag {
+	struct _Matrix_tag {};
 
 	struct _Matrix_iterator_tag {};
 	struct _Matrix_rwise_iterator_tag {};
 	struct _Matrix_cwise_iterator_tag {};
+
 	struct _Matrix_view_tag {};
 	struct _Matrix_row_view_tag : _Matrix_view_tag {};
 	struct _Matrix_col_view_tag : _Matrix_view_tag {};
