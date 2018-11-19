@@ -155,14 +155,14 @@ MATRICE_GLOBAL_FINL iterator_base<_Ty> operator+ (typename iterator_base<_Ty>::d
 template<typename _Ty, typename = std::enable_if_t<std::is_arithmetic_v<_Ty>>>
 class _Matrix_forward_iterator : public iterator_base<_Ty>
 {
-	using base_type = iterator_base<_Ty>;
+	using _Mybase = iterator_base<_Ty>;
 public:
 	template<typename... _Args> 
 	MATRICE_GLOBAL_FINL _Matrix_forward_iterator(_Args... _args)
-		: base_type(_args...) {}
+		: _Mybase(_args...) {}
 
 private:
-
+	typename _Mybase::difference_type _Myidx, _Myidy;
 };
 /**********************************************************************
 							Row-wise Forward Range Iterator
