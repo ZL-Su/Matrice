@@ -210,7 +210,7 @@ public:
 	 *\from STD valarray<...>
 	 */
 	MATRICE_GLOBAL_FINL Base_(const std::valarray<value_t>& _other, int _rows = 1) noexcept 
-		:base_t(_rows, _other.size() / _rows), m_storage(_rows, _other.size() / _rows, _other.data()) _PTRLINK
+		:base_t(_rows, _other.size() / _rows), m_storage(_rows, _other.size() / _rows, (pointer)std::addressof(_other[0])) _PTRLINK
 	/**
 	 *\from explicit specified matrix type
 	 */
@@ -246,10 +246,12 @@ public:
 	 *\dynamic matrix creation
 	 */
 	MATRICE_HOST_ONLY void create(std::size_t rows, std::size_t cols) { 
-		if constexpr (_M <= 0 && _N <= 0) static_cast<_Derived*>(this)->create(rows, cols); 
+		if constexpr (_M <= 0 && _N <= 0) 
+			static_cast<_Derived*>(this)->create(rows, cols); 
 	};
 	MATRICE_HOST_ONLY void create(const shape_t& _Shape) {
-		if constexpr (_M <= 0 && _N <= 0) static_cast<_Derived*>(this)->create(_SHAPE);
+		if constexpr (_M <= 0 && _N <= 0) 
+			static_cast<_Derived*>(this)->create(_SHAPE);
 	};
 
 	/**
@@ -276,8 +278,12 @@ public:
 	/**
 	 *\the first address for y-th row
 	 */
-	MATRICE_GLOBAL_FINL pointer ptr(int y = 0) { return (m_data + m_cols * y); }
-	MATRICE_GLOBAL_FINL const pointer ptr(int y = 0) const { return (m_data + m_cols * y); }
+	MATRICE_GLOBAL_FINL pointer ptr(int y = 0) { 
+		return (m_data + (m_cols) * (y));
+	}
+	MATRICE_GLOBAL_FINL const pointer ptr(int y = 0) const { 
+		return (m_data + (m_cols) * (y));
+	}
 
 	/**
 	 *\STL-stype iterators
@@ -535,12 +541,34 @@ public:
 	 */
 	template<typename _Rhs, typename = std::enable_if_t<is_matrix_v<_Rhs>>> 
 	MATRICE_GLOBAL_FINL auto dot(const _Rhs& _Rhs) const { return (this->operator*(_Rhs)).sum(); }
-
+	/**
+	 * \in-place maxmul with _Rhs. 
+	 */
+	template<ttag _Ltag = ttag::N, ttag _Rtag = ttag::N, typename _Rhs = _Derived, typename = std::enable_if_t<is_matrix_v<_Rhs>>>
+	MATRICE_GLOBAL_FINL auto inplace_mul(const _Rhs& _Right) {
+		Matrix_<value_type, CompileTimeRows, _Rhs::CompileTimeCols> _Ret(rows(), _Right.cols());
+		detail::_Blas_kernel_impl<value_type>::mul<_Ltag, _Rtag>(this->plvt(), _Right.plvt(), _Ret.plvt());
+		return std::forward<decltype(_Ret)>(_Ret);
+	}
 	/**
 	 * \operate each entry via _Fn
 	 */
-	template<typename _Fty>
-	MATRICE_GLOBAL_FINL void each(_Fty _Fn) { for (auto& _Val : *this) _Fn(_Val); }
+	template<typename _Op>
+	MATRICE_GLOBAL_FINL void each(_Op&& _Fn) { 
+		for (auto& _Val : *this) _Fn(_Val); 
+	}
+
+	/**
+	 * \convert from another data block by function _Fn
+	 */
+	template<typename _It, typename _Op>
+	MATRICE_GLOBAL_FINL _Myt& from(const _It _Data, _Op&& _Fn) {
+#ifdef _DEBUG
+		if (!(_Data + this->size() - 1)) throw std::runtime_error("Input length of _Data must be greater or equal to this->size().");
+#endif // _DEBUG
+		for(auto _Idx = 0; _Idx < size(); ++_Idx)
+			m_data[_Idx] = _Fn(static_cast<value_type>(_Data[_Idx]));
+	}
 	/**
 	 * \replace entries meets _Cond with _Val
 	 */
