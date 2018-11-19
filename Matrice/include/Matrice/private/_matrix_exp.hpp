@@ -24,6 +24,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../util/_macros.h"
 #include "_type_traits.h"
 #include "_size_traits.h"
+#include "_tag_defs.h"
 
 #pragma warning(disable: 4715)
 
@@ -140,9 +141,12 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		};
 		template<typename _Ty> struct _Mat_mul {
 			enum { flag = mmul };
-			template<typename _Rhs> MATRICE_GLOBAL_FINL _Ty operator() (const _Ty* lhs, const _Rhs& rhs, int c, int _plh = 0) const
+			using value_type = _Ty;
+
+			template<typename _Rhs> MATRICE_GLOBAL_FINL
+			auto operator() (const _Ty* lhs, const _Rhs& rhs, int c, int _plh = 0) const
 			{
-				_Ty val = _Ty(0);
+				value_type val = value_type(0);
 				const int K = rhs.rows(), N = rhs.cols();
 #ifdef __disable_simd__
 				for (int k = 0; k < K; ++k) val += lhs[k] * rhs(k*N + c);
@@ -153,19 +157,31 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 #endif
 				return (val);
 			}
-			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL _Ty operator() (const _Lhs& lhs, const _Rhs& rhs, int r, int c) const
+			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
+			auto operator() (const _Lhs& lhs, const _Rhs& rhs, int r, int c) const
 			{
-				_Ty _Ret = _Ty(0), val = 0;
-				const int K = rhs.rows(), N = rhs.cols(), _Idx = r * lhs.cols();
+				value_type _Ret = value_type(0);
+				const auto K = rhs.rows(), N = rhs.cols(), _Idx = r * lhs.cols();
 #ifdef __disable_simd__
-				for (int k = 0; k < K; ++k) {
-					_Ret += lhs(_Idx + k) * rhs(k*N + c);
-				}
+				for (auto k = 0; k < K; ++k) _Ret += lhs(_Idx + k) * rhs(k*N + c);
 #else
 #ifdef __AVX__
-				for (int k = 0; k < K; ++k) _Ret += lhs(_Idx + k) * rhs(k*N + c);
+				for (auto k = 0; k < K; ++k) _Ret += lhs(_Idx + k) * rhs(k*N + c);
 #endif
 #endif
+				return (_Ret);
+			}
+			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
+			auto operator() (const _Lhs& _L, const _Rhs& _R, int r, int c, tag::_Matrix_tag, tag::_Matrix_tag) {
+				const auto K = _R.rows(), N = _R.cols(), _Idx = r * _L.cols();
+				const auto x = _L(_Idx), y = _R(c);
+				return detail::_Blas_kernel_impl<value_type>::dot(x, y, K, 1, N);
+			}
+			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
+			auto operator() (const _Lhs& _L, const _Rhs& _R, int r, int c, tag::_Matrix_tag, tag::_Matrix_view_tag) {
+				const auto K = _R.rows(), N = _R.cols(), _Idx = r * _L.cols();
+				value_type _Ret = value_type(0);
+				for (auto k = 0; k < K; ++k) _Ret += _L(_Idx + k) * _R(k*N + c);
 				return (_Ret);
 			}
 		};
