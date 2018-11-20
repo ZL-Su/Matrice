@@ -1,6 +1,7 @@
 #include "../../include/Matrice/algs/interpolation/_splineinterp.h"
 
 MATRICE_ALGS_BEGIN
+#pragma region <!-- These codes will be deprecated -->
 template<typename _Ty, size_t _Options>
 void BicubicSplineInterp<_Ty, _Options>::_Bspline_coeff(const matrix_t& _Data) {
 	const auto _Width = _Data.cols(), _Height = _Data.rows();
@@ -59,9 +60,10 @@ void BicubicSplineInterp<_Ty, _Options>::_Bspline_coeff(const matrix_t& _Data) {
 }
 template class BicubicSplineInterp<float, INTERP | BSPLINE | BICUBIC>;
 template class BicubicSplineInterp<double, INTERP | BSPLINE | BICUBIC>;
+#pragma endregion
 
 template<typename _Ty>
-void _Spline_interpolation<_Ty, INTERP | BICUBIC | BSPLINE>::_Coeff_impl() {
+void _Spline_interpolation<_Ty, _BICBSPL>::_Coeff_impl() {
 	const auto& _Data = _Mybase::_Mydata;
 	const auto _Width = _Data.cols(), _Height = _Data.rows();
 	_Mycoeff.create(_Height, _Width, zero<value_type>::value);
@@ -118,16 +120,16 @@ void _Spline_interpolation<_Ty, INTERP | BICUBIC | BSPLINE>::_Coeff_impl() {
 	}
 }
 template<typename _Ty>
-void _Spline_interpolation<_Ty, INTERP | BIQUINTIC | BSPLINE>::_Coeff_impl() {
+void _Spline_interpolation<_Ty, _BIQNSPL>::_Coeff_impl() {
 }
 template<typename _Ty>
-void _Spline_interpolation<_Ty, INTERP | BISEPTIC | BSPLINE>::_Coeff_impl() {
+void _Spline_interpolation<_Ty, _BISPSPL>::_Coeff_impl() {
 }
 
-template class _Spline_interpolation<float, INTERP | BICUBIC | BSPLINE>;
-template class _Spline_interpolation<double, INTERP | BICUBIC | BSPLINE>;
-template class _Spline_interpolation<float, INTERP | BIQUINTIC | BSPLINE>;
-template class _Spline_interpolation<double, INTERP | BIQUINTIC | BSPLINE>;
-template class _Spline_interpolation<float, INTERP | BISEPTIC | BSPLINE>;
-template class _Spline_interpolation<double, INTERP | BISEPTIC | BSPLINE>;
+template class _Spline_interpolation<float, _BICBSPL>;
+template class _Spline_interpolation<double, _BICBSPL>;
+template class _Spline_interpolation<float, _BIQNSPL>;
+template class _Spline_interpolation<double, _BIQNSPL>;
+template class _Spline_interpolation<float, _BISPSPL>;
+template class _Spline_interpolation<double, _BISPSPL>;
 MATRICE_ALGS_END
