@@ -33,53 +33,34 @@ public:
 	using typename _Mybase::matrix_type;
 	using typename _Mybase::value_type;
 	using typename _Mybase::point_type;
-	static constexpr auto _N1 = 4, _N2 = 3;
+	static constexpr auto Ldv = 4; // \leading dimension of value kernel
+	static constexpr auto Ldg = 3; // \leading dimension of gradient kernel
 
 	_Spline_interpolation(const matrix_type& _Data) : _Mybase(_Data) {}
-	
-	MATRICE_HOST_FINL auto _Value_at(const point_type& _Pos) const {
-		const auto _Ix = floor<int>(_Pos.x), _Iy = floor<int>(_Pos.y);
-		const auto _Dx = _Pos.x - _Ix, _Dy = _Pos.y - _Iy;
-
-		Matrix_<value_type, _N1, 1> _Dxs{ 1., _Dx, _Dx*_Dx, _Dx*_Dx*_Dx };
-		Matrix_<value_type, 1, _N1> _Dys{ 1., _Dy, _Dy*_Dy, _Dy*_Dy*_Dy };
-
-		const auto _Coeff = _Mycoeff.block(_Ix-1, _Ix+3, _Iy-1, _Iy+3).eval<4,4>();
-		auto _Temp = _L.t().mul(_Coeff.mul(_L).eval()).eval();
-
-		return (_Dys.mul(_Temp.mul(_Dxs).eval()))(0);
-	}
-	MATRICE_HOST_FINL auto _Gradx_at(const point_type& _Pos) const {
-		const auto _Ix = floor<int>(_Pos.x), _Iy = floor<int>(_Pos.y);
-		const auto _Dx = _Pos.x - _Ix, _Dy = _Pos.y - _Iy;
-
-		Matrix_<value_type, _N2, 1> _Dxs{ 1., _Dx, _Dx*_Dx };
-		Matrix_<value_type, 1, _N1> _Dys{ 1., _Dy, _Dy*_Dy, _Dy*_Dy*_Dy };
-
-		const auto _Coeff = _Mycoeff.block(_Ix-1, _Ix+3, _Iy-1, _Iy+3).eval<4,4>();
-		auto _Temp = _L.t().mul(_Coeff.mul(_R).eval()).eval();
-
-		return (_Dys.mul(_Temp.mul(_Dxs).eval()))(0);
-	}
-	MATRICE_HOST_FINL auto _Grady_at(const point_type& _Pos) const {
-		const auto _Ix = floor<int>(_Pos.x), _Iy = floor<int>(_Pos.y);
-		const auto _Dx = _Pos.x - _Ix, _Dy = _Pos.y - _Iy;
-
-		Matrix_<value_type, _N1, 1> _Dxs{ 1., _Dx, _Dx*_Dx, _Dx*_Dx*_Dx };
-		Matrix_<value_type, 1, _N2> _Dys{ 1., _Dy, _Dy*_Dy };
-
-		const auto _Coeff = _Mycoeff.block(_Ix-1, _Ix+3, _Iy-1, _Iy+3).eval<4,4>();
-		auto _Temp = _R.t().mul(_Coeff.mul(_L).eval()).eval();
-
-		return (_Dys.mul(_Temp.mul(_Dxs).eval()))(0);
-	}
 
 	MATRICE_HOST_INL void _Coeff_impl();
+	MATRICE_HOST_INL auto _Val_dx_n(const value_type& _) const {
+		return Matrix_<value_type, Ldv, 1>{1, _, _*_, _*_*_};
+	}
+	MATRICE_HOST_INL auto _Val_dy_n(const value_type& _) const {
+		return Matrix_<value_type, 1, Ldv>{1, _, _*_, _*_*_};
+	}
+	MATRICE_HOST_INL auto _Grad_dx_n(const value_type& _) const {
+		return Matrix_<value_type, Ldg, 1>{1, _, _*_};
+	}
+	MATRICE_HOST_INL auto _Grad_dy_n(const value_type& _) const {
+		return Matrix_<value_type, 1, Ldg>{1, _, _*_};
+	}
+	MATRICE_HOST_INL auto& _Kernel_of_value() const { return (_Kov); }
+	MATRICE_HOST_INL auto& _Kernel_of_grad() const { return (_Kog); }
 
 private:
-	using _Mybase::_Mycoeff;
-	const Matrix_<value_type, 4, 4> _L{ 1,-3,3,-1,4,0,-6,3,1,3,3,-3,0,0,0,1 };
-	const Matrix_<value_type, 4, 3> _R{ -3,6,-3,0,-12,9,3,6,-9,0,0,3 };
+	const Matrix_<value_type, 4, 4> _Kov { // \Kernel of value interpolation
+		1., -3., 3., -1., 4., 0., -6., 3., 
+		1., 3., 3., -3., 0., 0., 0., 1. };
+	const Matrix_<value_type, 4, 3> _Kog { // \Kernel of gradient interpolation
+		-3., 6., -3., 0., -12., 9., 
+		3., 6., -9., 0., 0., 3. };
 };
 
 template<typename _Ty>
@@ -92,19 +73,35 @@ public:
 	using typename _Mybase::matrix_type;
 	using typename _Mybase::value_type;
 	using typename _Mybase::point_type;
+	static constexpr auto Ldv = 6; // \leading dimension of value kernel
+	static constexpr auto Ldg = 5; // \leading dimension of gradient kernel
 
 	_Spline_interpolation(const matrix_type& _Data) : _Mybase(_Data) {}
 
 	MATRICE_HOST_INL void _Coeff_impl();
-
-	MATRICE_HOST_INL auto _Value_at(const point_type& _Pos) {
-
+	MATRICE_HOST_INL auto _Val_dx_n(const value_type& _) const {
+		return Matrix_<value_type, Ldv, 1>{1, _, _*_, _*_*_, _*_*_*_, _*_*_*_*_};
 	}
-
+	MATRICE_HOST_INL auto _Val_dy_n(const value_type& _) const {
+		return Matrix_<value_type, 1, Ldv>{1, _, _*_, _*_*_, _*_*_*_, _*_*_*_*_};
+	}
+	MATRICE_HOST_INL auto _Grad_dx_n(const value_type& _) const {
+		return Matrix_<value_type, Ldg, 1>{1, _, _*_, _*_*_, _*_*_*_};
+	}
+	MATRICE_HOST_INL auto _Grad_dy_n(const value_type& _) const {
+		return Matrix_<value_type, 1, Ldg>{1, _, _*_, _*_*_, _*_*_*_};
+	}
+	MATRICE_HOST_INL auto& _Kernel_of_value() const { return (_Kov); }
+	MATRICE_HOST_INL auto& _Kernel_of_grad() const { return (_Kog); }
 private:
-	using _Mybase::_Mycoeff;
-	const Matrix_<value_type, 4, 4> _A{ 1, -3, 3, -1, 4, 0, -6, 3, 1, 3, 3, -3, 0, 0, 0, 1 };
-	const Matrix_<value_type, 4, 3> _B{ -3, 6, -3, 0, -12, 9, 3, 6, -9, 0, 0, 3 };
+	const Matrix_<value_type, Ldv, Ldv> _Kov { // \Kernel of value interpolation
+		1., -5., 10., -10., 5., -1.,  26., -50., 20., 20., -20., 5.,
+		66., 0., -60., 0., 30., -10., 26.,50.,20.,-20.,-20.,10.,
+		1.,  5., 10., 10., 5.,  -5.,  0., 0., 0., 0., 0., 1. };
+	const Matrix_<value_type, Ldv, Ldg> _Kog { // \Kernel of gradient interpolation
+		-5., 20., 30., 20., -5.,  -50., 40., 60., -80., 25.,
+		0., -120., 0., 120., -50., 50., 40., -60., -80., 10.,
+		5.,  20., 30., 20., -25.,  0.,  0.,   0.,  0.,  5. };
 };
 
 template<typename _Ty>
@@ -117,20 +114,46 @@ public:
 	using typename _Mybase::matrix_type;
 	using typename _Mybase::value_type;
 	using typename _Mybase::point_type;
+	static constexpr auto Ldv = 8; // \leading dimension of value kernel
+	static constexpr auto Ldg = 7; // \leading dimension of gradient kernel
 
 	_Spline_interpolation(const matrix_type& _Data) : _Mybase(_Data) {}
 
 	MATRICE_HOST_INL void _Coeff_impl();
-
-	MATRICE_HOST_FINL auto _Value_at(const point_type& _Pos) const {
-		const auto _Ix = static_cast<int>(_Pos.x), _Iy = static_cast<int>(_Pos.y);
-		const auto _Dx = _Pos.x - _Ix, _Dy = _Pos.y - _Iy;
+	MATRICE_HOST_INL auto _Val_dx_n(const value_type& _) const {
+		return Matrix_<value_type, Ldv, 1>{1, _, _*_, _*_*_, _*_*_*_, _*_*_*_*_, _*_*_*_*_*_, _*_*_*_*_*_*_};
 	}
+	MATRICE_HOST_INL auto _Val_dy_n(const value_type& _) const {
+		return Matrix_<value_type, 1, Ldv>{1, _, _*_, _*_*_, _*_*_*_, _*_*_*_*_, _*_*_*_*_*_, _*_*_*_*_*_*_};
+	}
+	MATRICE_HOST_INL auto _Grad_dx_n(const value_type& _) const {
+		return Matrix_<value_type, Ldg, 1>{1, _, _*_, _*_*_, _*_*_*_, _*_*_*_*_, _*_*_*_*_*_};
+	}
+	MATRICE_HOST_INL auto _Grad_dy_n(const value_type& _) const {
+		return Matrix_<value_type, 1, Ldg>{1, _, _*_, _*_*_, _*_*_*_, _*_*_*_*_, _*_*_*_*_*_};
+	}
+	MATRICE_HOST_INL auto& _Kernel_of_value() const { return (_Kov);}
+	MATRICE_HOST_INL auto& _Kernel_of_grad() const { return (_Kog); }
 
 private:
-	using _Mybase::_Mycoeff;
-	const Matrix_<value_type, 4, 4> _A{ 1, -3, 3, -1, 4, 0, -6, 3, 1, 3, 3, -3, 0, 0, 0, 1 };
-	const Matrix_<value_type, 4, 3> _B{ -3, 6, -3, 0, -12, 9, 3, 6, -9, 0, 0, 3 };
+	const Matrix_<value_type, Ldv, Ldv> _Kov { // \Kernel of value interpolation
+		1., -7., 21., -35., 35., -21., 7., -1.,
+		120., -392., 504., -280., 0., 84., -42., 7.,
+		1191., -1715., 315., 665., -315., -105., 105., -21.,
+		2416., 0., -1680., 0., 560., 0., -140., 35.,
+		1191., 1715., 315., -665., -315., 105., 105., -35.,
+		120., 392., 504., 280., 0., -84., -42., 21.,
+		1., 7., 21., 35., 35., 21., 7., -7.,
+		0., 0., 0., 0., 0., 0., 0., 1. };
+	const Matrix_<value_type, Ldv, Ldg> _Kog { // \Kernel of gradient interpolation
+		-7., 42., -105., 140., -105., 42., -7.,
+		-392., 1008., -840., 0., 420., -252., 49.,
+		-1715., 630., 1995., -1260., -525., 630., -147.,
+		0., -3360., 0., 2240., 0., -840., 245.,
+		1715., 630., -1995., -1260., 525., 630., -245.,
+		392., 1008., 840., 0., -420., -252., 147.,
+		7., 42., 105., 140., 105., 42., -49.,
+		0., 0., 0., 0., 0., 0., 7. };
 };
 
 ///<brief> Class BicubicSplineInterp will be deprecated </brief>
