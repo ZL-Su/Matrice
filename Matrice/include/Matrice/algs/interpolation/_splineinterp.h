@@ -155,25 +155,4 @@ private:
 		7., 42., 105., 140., 105., 42., -49.,
 		0., 0., 0., 0., 0., 0., 7. };
 };
-
-///<brief> Class BicubicSplineInterp will be deprecated </brief>
-template<typename _Ty, std::size_t _Opt = _BICBSPL>
-class BicubicSplineInterp : public InterpBase_<_Ty, BicubicSplineInterp<_Ty, _Opt>>
-{
-	using base_t = InterpBase_<_Ty, BicubicSplineInterp<_Ty, _Opt>>;
-public:
-	enum { option = _Opt };
-	using typename base_t::value_t;
-	using typename base_t::matrix_t;
-
-	MATRICE_GLOBAL_FINL BicubicSplineInterp(const matrix_t& _Data)
-		:base_t(_Data) {}
-
-	MATRICE_HOST_INL void _Bspline_coeff(const matrix_t& _Data);
-
-private:
-	using base_t::m_coeff;
-	const types::Matrix_<value_t, 4, 4> m_icoef{1, -3, 3, -1, 4, 0, -6, 3, 1, 3, 3, -3, 0, 0, 0, 1};
-	const types::Matrix_<value_t, 4, 3> m_gcoef{-3, 6, -3, 0, -12, 9, 3, 6, -9, 0, 0, 3};
-};
 MATRICE_ALGS_END

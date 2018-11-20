@@ -18,15 +18,6 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 MATRICE_ALGS_BEGIN
-template<typename _Ty, typename _Derived> template<typename... _Args>
-MATRICE_GLOBAL_FINL InterpBase_<_Ty, _Derived>::InterpBase_(const _Args&... args) {
-	this->_Bspline_coeff(args...);
-}
-
-template<typename _Ty, typename _Derived> template<typename... _Args>
-MATRICE_GLOBAL_FINL void InterpBase_<_Ty, _Derived>::_Bspline_coeff(const _Args&... args) {
-	static_cast<derived_t*>(this)->_Bspline_coeff(args...);
-}
 
 template<typename _Derived> MATRICE_HOST_INL
 auto _Interpolation_base<_Derived>::_Value_at(const point_type& _Pos) const {

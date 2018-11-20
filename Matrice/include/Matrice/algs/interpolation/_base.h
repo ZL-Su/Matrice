@@ -36,54 +36,11 @@ enum {
 	_BISPSPL = INTERP | BISEPTIC | BSPLINE,
 };
 
-#pragma region <!-- Codes in the region will be deprecated -->
-
-template<typename _Ty, size_t _Opt> class BilinearInterp;
-template<typename _Ty, size_t _Opt> class BicubicSplineInterp;
-template<typename _Ty, size_t _Opt> class BiquinticSplineInterp;
-template<typename _Ty, size_t _Opt> class BisepticSplineInterp;
-
-template<typename _Ty, size_t _Opt = INTERP|BILINEAR>
-struct interpolation_traits
-{ using type = BilinearInterp<_Ty, _Opt>; };
-template<typename _Ty> 
-struct interpolation_traits<_Ty, INTERP|BICUBIC|BSPLINE>
-{ using type = BicubicSplineInterp<_Ty, INTERP|BICUBIC|BSPLINE>; };
-template<typename _Ty>
-struct interpolation_traits<_Ty, INTERP|BIQUINTIC|BSPLINE>
-{ using type = BiquinticSplineInterp<_Ty, INTERP|BIQUINTIC|BSPLINE>; };
-template<typename _Ty>
-struct interpolation_traits<_Ty, INTERP|BISEPTIC|BSPLINE>
-{ using type = BisepticSplineInterp<_Ty, INTERP|BISEPTIC|BSPLINE>; };
-
-template<typename _Ty, size_t _Opt>
-using interpolation_traits_t = typename interpolation_traits<_Ty, _Opt>::type;
-
-template<typename _Ty, typename _Derived> class InterpBase_
-{
-	using derived_t = _Derived;
-public:
-	using value_t = _Ty;
-	using value_type = value_t;
-	using matrix_t = Matrix<value_type>;
-
-	template<typename... _Args>
-	MATRICE_GLOBAL_FINL InterpBase_(const _Args&... args);
-
-	MATRICE_GLOBAL_FINL auto& operator() () const { return m_coeff; }
-
-protected:
-	template<typename... _Args>
-	MATRICE_GLOBAL_FINL void _Bspline_coeff(const _Args& ...args);
-
-	const value_type m_eps = value_type(1.0e-7);
-	matrix_t m_coeff;
-};
-
-#pragma endregion
-
+// \Forward declaration
 template<typename _Ty, std::size_t _Opt> class _Spline_interpolation;
 
+// \Interpolation traits definition
+template<typename _Ty> struct interpolation_traits {};
 template<typename _Ty, std::size_t _Opt>
 struct interpolation_traits<_Spline_interpolation<_Ty, _Opt>> {
 	using value_type = _Ty;
@@ -91,6 +48,10 @@ struct interpolation_traits<_Spline_interpolation<_Ty, _Opt>> {
 	using type = _Spline_interpolation<value_type, _Opt>;
 	static constexpr auto option = _Opt;
 };
+template<typename _Ty>
+using interpolation_traits_t = typename interpolation_traits<_Ty>::type;
+
+// \Interpolation auto dispatching
 template<typename _Ty, std::size_t _Opt> struct auto_interp_dispatcher {
 	using type = _Spline_interpolation<_Ty, _Opt>;
 };
@@ -113,9 +74,7 @@ public:
 	/**
 	 * \get interpolation coeff. matrix.
 	 */
-	MATRICE_HOST_INL auto& operator()() const {
-		return (_Mycoeff);
-	}
+	MATRICE_HOST_INL auto& operator()() const { return (_Mycoeff); }
 
 	/**
 	 * \get the interpolated value at _Pos. 
@@ -140,6 +99,7 @@ private:
 	MATRICE_HOST_INL auto _Value_at(const point_type& _Pos) const;
 	MATRICE_HOST_INL auto _Gradx_at(const point_type& _Pos) const;
 	MATRICE_HOST_INL auto _Grady_at(const point_type& _Pos) const;
+
 	std::add_pointer_t<_Mydt> _Mydt_this = static_cast<_Mydt*>(this);
 
 protected:
