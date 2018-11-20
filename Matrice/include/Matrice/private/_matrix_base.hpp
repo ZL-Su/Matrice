@@ -398,6 +398,24 @@ public:
 	MATRICE_GLOBAL_INL const _Myt_blockview_type block(const std::tuple<_Ity...>& _R) const {
 		return this->block(std::get<0>(_R), std::get<1>(_R), std::get<2>(_R), std::get<3>(_R));
 	}
+	/**
+	 * \operator to get a block view of this matrix from a given range.
+	 */
+	template<typename _Ity, typename = std::enable_if_t<std::is_integral_v<_Ity>>>
+	MATRICE_GLOBAL_INL auto operator()(_Ity _L, _Ity _R, _Ity _U, _Ity _D)const{
+#ifdef _DEBUG
+		if (_R > m_cols) throw std::runtime_error("In _matrix_base.hpp, var x1 for .block(...) must be not greater than m_cols.");
+		if (_D > m_rows) throw std::runtime_error("In _matrix_base.hpp, var y1 for .block(...) must be not greater than m_rows.");
+#endif // _DEBUG
+		return _Myt_blockview_type(m_data, m_cols, { _L, _U, _R, _D });
+	}
+	/**
+	 * \operator to get a block view of this matrix from a given tupled range.
+	 */
+	template<typename... _Ity, typename = std::enable_if_t<sizeof...(_Ity) == 4>>
+	MATRICE_GLOBAL_INL auto operator()(const std::tuple<_Ity...>& _R) const {
+		return this->operator()(std::get<0>(_R), std::get<1>(_R), std::get<2>(_R), std::get<3>(_R));
+	}
 #pragma endregion
 
 #ifdef _HAS_CXX17
