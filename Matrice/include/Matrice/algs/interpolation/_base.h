@@ -107,9 +107,8 @@ public:
 	using point_type = Vec2_<value_type>;
 	static constexpr auto option = _Mytraits::option;
 
-	_Interpolation_base(const matrix_type& _Data) : _Mydata(_Data) {
-		static_cast<_Mydt*>(this)->_Coeff_impl();
-	}
+	_Interpolation_base(const matrix_type& _Data) noexcept
+		: _Mydata(_Data) { static_cast<_Mydt*>(this)->_Coeff_impl(); }
 
 	/**
 	 * \get interpolation coeff. matrix.
@@ -122,25 +121,26 @@ public:
 	 * \get the interpolated value at _Pos. 
 	 */
 	MATRICE_HOST_INL auto operator()(const point_type& _Pos) const {
-		return static_cast<const _Mydt*>(this)->_Value_at(_Pos);
+		return (this)->_Value_at(_Pos);
 	}
 
 	/**
 	 * \get the interpolated gradient value at _Pos.
 	 */
 	MATRICE_HOST_INL auto grad(const point_type& _Pos) const {
-		return std::make_tuple(
-			static_cast<const _Mydt*>(this)->_Gradx_at(_Pos),
-			static_cast<const _Mydt*>(this)->_Grady_at(_Pos)
-			);
+		return std::make_tuple((this)->_Gradx_at(_Pos), (this)->_Grady_at(_Pos));
 	}
 	template<axis _Axis, typename = std::enable_if_t<_Axis==axis::x||_Axis==axis::y>>
 	MATRICE_HOST_INL auto grad(const point_type& _Pos) const {
-		if constexpr (_Axis == axis::x)
-			return static_cast<const _Mydt*>(this)->_Gradx_at(_Pos);
-		if constexpr (_Axis == axis::y)
-			return static_cast<const _Mydt*>(this)->_Grady_at(_Pos);
+		if constexpr (_Axis == axis::x) return (this)->_Gradx_at(_Pos);
+		if constexpr (_Axis == axis::y) return (this)->_Grady_at(_Pos);
 	}
+
+private:
+	MATRICE_HOST_INL auto _Value_at(const point_type& _Pos) const;
+	MATRICE_HOST_INL auto _Gradx_at(const point_type& _Pos) const;
+	MATRICE_HOST_INL auto _Grady_at(const point_type& _Pos) const;
+	std::add_pointer_t<_Mydt> _Mydt_this = static_cast<_Mydt*>(this);
 
 protected:
 	const matrix_type& _Mydata;
