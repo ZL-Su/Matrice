@@ -65,7 +65,9 @@ template class BicubicSplineInterp<double, INTERP | BSPLINE | BICUBIC>;
 template<typename _Ty>
 void _Spline_interpolation<_Ty, _BICBSPL>::_Coeff_impl() {
 	const auto& _Data = _Mybase::_Mydata;
-	const auto _Width = _Data.cols(), _Height = _Data.rows();
+	auto& _Mycoeff = _Mybase::_Mycoeff;
+
+	auto[_Width, _Height] = _Data.shape();
 	_Mycoeff.create(_Height, _Width, zero<value_type>::value);
 
 	//initialization
