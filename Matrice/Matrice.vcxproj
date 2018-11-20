@@ -268,6 +268,7 @@
     <ClInclude Include="include\Matrice\private\_matrix_exp.hpp" />
     <ClInclude Include="include\Matrice\private\_range.h" />
     <ClInclude Include="include\Matrice\private\_size_traits.h" />
+    <ClInclude Include="include\Matrice\private\_tag_defs.h" />
     <ClInclude Include="include\Matrice\private\_typelist.h" />
     <ClInclude Include="include\Matrice\private\_type_traits.h" />
     <ClInclude Include="include\Matrice\private\_matrix_ops.hpp" />

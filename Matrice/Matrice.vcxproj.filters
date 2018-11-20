@@ -621,6 +621,9 @@
     <ClInclude Include="include\Matrice\algs\interpolation\_splineinterp.h">
       <Filter>Header Files\Algs\Interpolation</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\private\_tag_defs.h">
+      <Filter>Header Files\Detail\traits</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
