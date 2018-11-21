@@ -42,6 +42,8 @@ public:
 	using value_type = typename _My_element_traits::type;
 	using value_t = value_type;
 
+	_Tensor_impl() 
+		: _Mybase(), m_rows(0), m_cols(0) {}
 	_Tensor_impl(std::size_t _Rows)
 		: _Mybase(m_size = _Rows), m_rows(_Rows), m_cols(1) {}
 	_Tensor_impl(std::size_t _Rows, const matrix_type& _Mat)
