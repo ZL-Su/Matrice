@@ -79,8 +79,7 @@ public:
 		:m_reference(_F), m_coeff(_Q), 
 		m_pos(_Initpos), m_options(_Opts),
 		m_ksize(_Opts() << 1 | 1),
-		m_current(matrix_type(m_ksize, m_ksize, 0.)),
-		_Mylnop(_Myhess){
+		m_current(matrix_type(m_ksize, m_ksize, 0.)) {
 		_Myhess.format = symm;
 	}
 
@@ -153,8 +152,9 @@ public:
 
 private:
 	MATRICE_HOST_FINL auto _Init();
+	MATRICE_HOST_FINL auto _Update();
 
-	value_type m_favg, m_fssd;
+	value_type m_favg = 0, m_fssd = 0;
 	using _Mybase::m_coeff;
 	using _Mybase::m_ksize;
 	using _Mybase::m_current;
