@@ -26,15 +26,18 @@ struct Solver MATRICE_NONHERITABLE
 	template<typename _Op = detail::LinearOp::Auto<Matrix_<default_type, __, __>>> 
 	class Linear_ : public detail::SolverBase<Linear_<_Op>>
 	{
-		using Base = detail::SolverBase<Linear_<_Op>>;
+		using _Mybase = detail::SolverBase<Linear_<_Op>>;
 		using value_t = typename _Op::value_t;
-		using typename Base::Options;
+		using typename _Mybase::Options;
 	public:
 		_Op m_op;
 		template<typename... _Args> MATRICE_GLOBAL_FINL
 		constexpr Linear_(const _Args&... args) : m_op(args...) {};
 		template<typename... _Args> MATRICE_GLOBAL_FINL
-		constexpr auto solve(const _Args&... args) { return Base::_Impl(args...); }
+		constexpr auto solve(const _Args&... args) { return _Mybase::_Impl(args...); }
+
+		template<typename _Rhs>
+		MATRICE_GLOBAL_INL auto& operator()(_Rhs& _X) { return m_op(_X); }
 	};
 };
 _TYPES_END

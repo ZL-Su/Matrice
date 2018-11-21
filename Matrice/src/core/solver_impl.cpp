@@ -83,7 +83,7 @@ template<typename _T> void LinearOp::OpBase<_T>::_Impl(view_t& A, view_t& X)
 	};
 	
 	if (this->_Info.alg == solver_type::CHD) {
-		auto L = A.transpose();
+		auto L = A.t();
 		for (int_t c = 0; c < inc; ++c) {
 			auto b = _fn(X.begin() + c);
 			for (int_t i = n - 1; i >= 0; --i) {
