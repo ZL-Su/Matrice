@@ -23,6 +23,9 @@ MATRICE_ALGS_BEGIN
 
 template<typename _Ty, std::size_t _Opt> class _Spline_interpolation {};
 
+/**
+ * \Partial specialization for Bi-Cubic B-Spline interpolation.
+ */
 template<typename _Ty>
 class _Spline_interpolation<_Ty, _BICBSPL>
 	: public _Interpolation_base<_Spline_interpolation<_Ty, _BICBSPL>>
@@ -63,6 +66,9 @@ private:
 		3., 6., -9., 0., 0., 3. };
 };
 
+/**
+ * \Partial specialization for Bi-Quintic B-Spline interpolation.
+ */
 template<typename _Ty>
 class _Spline_interpolation<_Ty, _BIQNSPL>
 	: public _Interpolation_base<_Spline_interpolation<_Ty, _BIQNSPL>>
@@ -104,6 +110,9 @@ private:
 		5.,  20., 30., 20., -25.,  0.,  0.,   0.,  0.,  5. };
 };
 
+/**
+ * \Partial specialization for Bi-septic B-Spline interpolation.
+ */
 template<typename _Ty>
 class _Spline_interpolation<_Ty, _BISPSPL>
 	: public _Interpolation_base<_Spline_interpolation<_Ty, _BISPSPL>>
