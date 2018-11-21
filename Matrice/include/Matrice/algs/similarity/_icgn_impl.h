@@ -59,6 +59,7 @@ protected:
 	using matrix_type  = Matrix<value_type>;
 	using const_matrix_reference = const std::add_lvalue_reference_t<matrix_type>;
 	using param_type = stack_vector;
+	using linear_op = linear_alg_op::Auto<matrix_type>;
 	struct status_type
 	{
 		bool _Is_success = false;
@@ -78,7 +79,10 @@ public:
 		:m_reference(_F), m_coeff(_Q), 
 		m_pos(_Initpos), m_options(_Opts),
 		m_ksize(_Opts() << 1 | 1),
-		m_current(matrix_type(m_ksize, m_ksize, zero<value_type>::value)) {}
+		m_current(matrix_type(m_ksize, m_ksize, 0.)),
+		_Mylnop(_Myhess){
+		_Myhess.format = symm;
+	}
 
 	// \set initial pos
 	MATRICE_HOST_FINL auto& pos() { return (m_pos); }
@@ -111,12 +115,20 @@ protected:
 
 	// \precomputed interpolation coeff.
 	const_matrix_reference m_coeff;
+
+	// \Jacobian
+	tensor<value_type, 1, DOF> _Myjaco;
+	// \Hessian
+	stack_matrix _Myhess;
+
+	// \linear solver
+	linear_solver<linear_op> _Mylnop;
 };
 
 // TEMPLATE impl class for IC-GN optimization [thread-safe]
-template<typename _Ty, std::size_t _Interp, std::size_t _Order = 1>
+template<typename _Ty = float, std::size_t _Itp = bcspline, std::size_t _Ord = 1>
 class _Invcomp_conv_impl MATRICE_NONHERITABLE
-	: public _Iterative_conv_base<_Invcomp_conv_impl<_Ty, _Interp, _Order>>
+	: public _Iterative_conv_base<_Invcomp_conv_impl<_Ty, _Itp, _Ord>>
 {
 	using _Myt = _Invcomp_conv_impl;
 	using _Mybase = _Iterative_conv_base<_Myt>;
@@ -132,14 +144,16 @@ public:
 	using param_t = param_type;
 	using typename _Mybase::point_t;
 
-	MATRICE_HOST_FINL _Invcomp_conv_impl(const _Myt& _other) = default;
-	MATRICE_HOST_FINL _Invcomp_conv_impl(_Myt&& _other) = default;
 	MATRICE_HOST_FINL _Invcomp_conv_impl(const multi_matrix<value_t>& _Ref, const_matrix_reference _Q, point_t _Initp = { 0 }, options_t _Opts = options_t()) noexcept
-		: _Mybase(_Ref, _Q, _Initp, _Opts) {}
+		: _Mybase(_Ref, _Q, _Initp, _Opts) {
+		_Init();
+	}
 
-	MATRICE_HOST_FINL auto _Solver_impl(param_type& _Params);
+	MATRICE_HOST_FINL auto _Impl(param_type& _Params);
 
 private:
+	MATRICE_HOST_FINL auto _Init();
+
 	value_type m_favg, m_fssd;
 	using _Mybase::m_coeff;
 	using _Mybase::m_ksize;
