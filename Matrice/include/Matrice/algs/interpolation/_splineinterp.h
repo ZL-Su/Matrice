@@ -40,6 +40,7 @@ public:
 	static constexpr auto Ldg = 3; // \leading dimension of gradient kernel
 
 	_Spline_interpolation(const matrix_type& _Data) : _Mybase(_Data) {}
+	_Spline_interpolation(const _Myt& _Other) : _Mybase(_Other) {}
 
 	MATRICE_HOST_INL void _Coeff_impl();
 	MATRICE_HOST_INL auto _Val_dx_n(const value_type& _) const {

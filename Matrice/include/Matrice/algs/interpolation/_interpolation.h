@@ -24,13 +24,13 @@ template<typename _Ty, std::size_t _Opt>
 class _Interpolation_wrapper MATRICE_NONHERITABLE
 {
 public:
-	using kernel_type = auto_interp_dispatcher_t<_Ty, _Opt>;
-	using value_type = typename kernel_type::value_type;
-	static constexpr auto option = kernel_type::option;
+	using type = auto_interp_dispatcher_t<_Ty, _Opt>;
+	using value_type = typename type::value_type;
+	static constexpr auto option = type::option;
 
 	template<typename... _Args>
 	MATRICE_GLOBAL_FINL _Interpolation_wrapper(const _Args&... args)
-		:m_op(std::make_shared<kernel_type>(args...)) {}
+		:m_op(std::make_shared<type>(args...)) {}
 
 	/**
 	 * \Get reference of interpolation kernel operator.
@@ -44,14 +44,17 @@ public:
 	 *		_Gy = _Itp.grad<axis::y>(_Pos); \\return interpolated dI/dy.
 	 */
 	MATRICE_GLOBAL_FINL auto& operator()() {
-		return (*m_op);
+		return (m_op);
 	}
 	MATRICE_GLOBAL_FINL const auto& operator()() const {
+		return (m_op);
+	}
+	MATRICE_GLOBAL_INL operator type() const {
 		return (*m_op);
 	}
 
 private:
-	mutable std::shared_ptr<kernel_type> m_op;
+	mutable std::shared_ptr<type> m_op;
 };
 
 MATRICE_ALGS_END

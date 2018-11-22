@@ -70,6 +70,8 @@ public:
 
 	_Interpolation_base(const matrix_type& _Data) noexcept
 		: _Mydata(_Data) { static_cast<_Mydt*>(this)->_Coeff_impl(); }
+	_Interpolation_base(const _Myt& _Other) noexcept
+		: _Mydata(_Other._Mydata), _Mycoeff(_Other._Mycoeff) {}
 
 	/**
 	 * \get interpolation coeff. matrix.
@@ -81,6 +83,9 @@ public:
 	 */
 	MATRICE_HOST_INL auto operator()(const point_type& _Pos) const {
 		return (this)->_Value_at(_Pos);
+	}
+	MATRICE_HOST_INL auto operator()(value_type _X, value_type _Y) const {
+		return (this)->_Value_at(point_type(_X, _Y));
 	}
 
 	/**

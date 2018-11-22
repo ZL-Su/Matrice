@@ -62,27 +62,45 @@ template<typename _Ty, std::size_t _Opt>
 struct gradient_traits<_Gradient_impl<_Ty, _Opt>> {
 	using value_type = _Ty;
 	static constexpr auto option = _Opt;
-	using image_type = types::Matrix_<unsigned char, 0, 0>;
+	using image_type = types::Matrix_<value_type, 0, 0>;
 	using matrix_type = types::Matrix_<value_type, 0, 0>;
 };
 
+template<std::size_t _Opt> struct _Grad_range_clip {};
+template<> struct _Grad_range_clip<BSPL3> {
+	template<typename _Ity>
+	MATRICE_GLOBAL_INL static auto value(const _Ity _L, const _Ity _U) {
+		return range(_L + 1, _U - 3);
+	}
+};
+template<> struct _Grad_range_clip<BSPL5> {
+	template<typename _Ity>
+	MATRICE_GLOBAL_INL static auto value(const _Ity _L, const _Ity _U) {
+		return range(_L + 2, _U - 4);
+	}
+};
+template<> struct _Grad_range_clip<BSPL7> {
+	template<typename _Ity>
+	MATRICE_GLOBAL_INL static auto value(const _Ity _L, const _Ity _U) {
+		return range(_L + 3, _U - 5);
+	}
+};
 /**
  * \Base class for gradient computation in interpolation way.
  */
 template<typename _Derived> class _Interpolated_gradient_base {
 	using _Mytraits = gradient_traits<_Derived>;
-	using _Myitp_type = interpolation<value_type, splineitp_option_v<_Mytraits::option>>;
+	using _Myitp = interpolation<typename _Mytraits::value_type, splineitp_option_v<_Mytraits::option>>;
 public:
 	using value_type = typename _Mytraits::value_type;
 	using image_type = typename _Mytraits::image_type;
 	using matrix_type = typename _Mytraits::matrix_type;
-	using point_type = typename _Myitp_type::kernel_type::point_type;
+	using point_type = typename _Myitp::type::point_type;
 	
 	_Interpolated_gradient_base(const image_type& _Image)
-		: _Myimg(_Image) {
-		_Myop = _Myitp_type(_Myimg)();
+		: _Myimg(_Image), _Myop(_Myitp(_Myimg)) {
 	}
-	_Interpolated_gradient_base(const image_type& _Image, const decltype(_Myop)& _Op)
+	_Interpolated_gradient_base(const image_type& _Image, const typename _Myitp::type& _Op)
 		: _Myimg(_Image), _Myop(_Op) {
 	}
 
@@ -101,12 +119,12 @@ public:
 	 */
 	template<axis _Axis> 
 	MATRICE_HOST_INL auto at(int _L, int _R, int _U, int _D) const { 
+		using _My_range = _Grad_range_clip<_Mytraits::option>;
 		matrix_type _Grad(_D - _U, _R - _L);
-
-		for (const auto _Idy : range(_U, _D)) {
-			_Row = _Grad.rbegin(_Idy - _U);
-			for (const auto _Idx : range(_L, _R)) {
-				_Row[_Idx - _L] = at<_Axis>({ _Idx, _Idy });
+		for (const auto _Idy : _My_range::value(_U,_D)) {
+			auto _Row = _Grad.rbegin(_Idy - _U);
+			for (const auto _Idx : _My_range::value(_L, _R)) {
+				_Row[_Idx - _L] = at<_Axis>(point_type(_Idx, _Idy));
 			}
 		}
 
@@ -115,7 +133,7 @@ public:
 
 protected:
 	const image_type& _Myimg;
-	typename _Myitp_type::kernel_type _Myop;
+	typename _Myitp::type _Myop;
 };
 
 template<typename _Ty> class _Gradient_impl<_Ty, SOBEL>  {
@@ -137,8 +155,7 @@ public:
 	using typename _Mybase::image_type;
 	using typename _Mybase::value_type;
 
-	template<typename... _Args>
-	_Gradient_impl(const _Args&... _Args) : _Mybase(_Args...) {}
+	_Gradient_impl(const image_type& _Img) : _Mybase(_Img) {}
 };
 }
 
