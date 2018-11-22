@@ -53,6 +53,8 @@ public:
 	_Tensor_impl(std::size_t _Rows, std::size_t _Cols, const matrix_type& _Mat) : _Mybase(_Mat, m_size=(_Rows * _Cols)), m_rows(_Rows), m_cols(_Cols) {}
 	_Tensor_impl(const _Myt& _Other)
 		: _Mybase(static_cast<_Mybase>(_Other)), m_rows(_Other.m_rows), m_cols(_Other.m_cols), m_size(m_rows*m_cols) {}
+	_Tensor_impl(_Myt&& _Other)
+		: _Mybase(std::move(static_cast<_Mybase>(_Other))), m_rows(_Other.m_rows), m_cols(_Other.m_cols), m_size(m_rows*m_cols) {}
 	_Tensor_impl(const _Mybase& _Other)
 		: _Mybase(_Other), m_rows(m_size=(_Other.size())), m_cols(1) {}
 
@@ -80,6 +82,20 @@ public:
 	}
 	MATRICE_HOST_INL auto& operator= (_Mybase&& _Other) {
 		_Mybase::operator= (std::move(_Other));
+		m_data = &(*this)[0];
+		return (*this);
+	}
+	MATRICE_HOST_INL auto& operator= (const _Myt& _Other) {
+		m_rows = _Other.m_rows, m_cols = _Other.m_cols;
+		m_size = _Other.m_size;
+		_Mybase::operator= (static_cast<_Mybase>(_Other));
+		m_data = &(*this)[0];
+		return (*this);
+	}
+	MATRICE_HOST_INL auto& operator= (_Myt&& _Other) {
+		m_rows = _Other.m_rows, m_cols = _Other.m_cols;
+		m_size = _Other.m_size;
+		_Mybase::operator= (std::move(static_cast<_Mybase>(_Other)));
 		m_data = &(*this)[0];
 		return (*this);
 	}
