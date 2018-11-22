@@ -1,3 +1,20 @@
+/*  *************************************************************************
+This file is part of Matrice, an effcient and elegant C++ library.
+Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+
+This program is free software : you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.If not, see <http://www.gnu.org/licenses/>.
+*	*************************************************************************/
 #pragma once
 #include <tuple>
 #include "../_type_traits.h"
@@ -24,6 +41,15 @@ struct _Lapack_kernel_impl {
 	template<typename... _Args> static constexpr auto slv(const _Args&...) {}
 };
 
-_DETAIL_END DGE_MATRICE_END
+template<solver_type _Tag> struct _Lapack_backward_impl {
+	template<typename... _Args> static constexpr auto _(const _Args&...) {}
+};
+
+_DETAIL_END
+template<typename _Ty>
+using blas_kernel = detail::_Blas_kernel_impl<_Ty>;
+template<typename _Ty>
+using lapack_kernel = detail::_Lapack_kernel_impl<_Ty>;
+DGE_MATRICE_END
 
 #include "inl\_lnalge.inl"

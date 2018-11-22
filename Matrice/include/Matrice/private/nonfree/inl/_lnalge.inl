@@ -1,4 +1,5 @@
 #pragma once
+#include <stdexcept>
 #include "../_lnalge.h"
 #ifdef __use_mkl__
 #include <mkl.h>
@@ -233,6 +234,44 @@ template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double>
 #else
 		throw std::runtime_error("Oops, no implementation is found.");
 #endif
+	}
+};
+
+/**
+ *\Specialization for the Chalosky factorization.
+ */
+template<> struct _Lapack_backward_impl<solver_type::CHD> {
+	template<typename _Lhs, typename _Rhs>
+	MATRICE_GLOBAL_INL static constexpr auto& _(const _Lhs& _A, _Rhs& _X) {
+		static_assert(is_matrix_v<_Lhs>, "_A in _Lapack_backward_impl<solver_type::CHD> must be a matrix type.");
+
+		using iterator = typename _Lhs::iterator;
+		using value_type = typename _Lhs::value_type;
+		const auto M = _A.rows(), N = _A.cols();
+		const auto NRhs = _X.cols();
+
+		for (auto k = 0; k < NRhs; ++k) {
+			auto _B = _X.cview(k);
+			// \solve: L*y = b
+			for (auto j = 1; j < M; ++j) {
+				const auto _A_row = _A[j];
+				auto _Sum_j = _B(j);
+				for (auto i = 0; i < j; ++i) {
+					_Sum_j -= _A_row[i] * _B(i);
+				}
+				_B(j) = _Sum_j / _A_row[j];
+			}
+			// \solve: U*x = y, where U = L^T
+			for (auto j = M - 2; j >= 0; --j) {
+				const auto _A_row = _A[j];
+				auto _Sum_j = _B(j);
+				for (auto i = j + 1; j < N; ++j) {
+					_Sum_j -= _A_row[i] * _B(i);
+				}
+				_B(j) = _Sum_j / _A_row[j];
+			}
+		}
+		return (_X);
 	}
 };
 _DETAIL_END DGE_MATRICE_END
