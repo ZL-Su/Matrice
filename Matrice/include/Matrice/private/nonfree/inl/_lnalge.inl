@@ -77,7 +77,7 @@ template<typename _Ty> struct _Lapack_kernel_impl_base {
 	using pointer = std::add_pointer_t<_Ty>;
 	using size_type = std::tuple<int, int>;
 	using plview_type = std::tuple<int, int, pointer>;
-	static constexpr int layout = MKL_LAYOUT::MKL_ROW_MAJOR;
+	static constexpr int layout = LAPACK_ROW_MAJOR;
 };
 /**
  *\Specialization for float-type.
