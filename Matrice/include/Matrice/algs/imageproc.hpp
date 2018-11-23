@@ -69,19 +69,19 @@ struct gradient_traits<_Gradient_impl<_Ty, _Opt>> {
 template<std::size_t _Opt> struct _Grad_range_clip {};
 template<> struct _Grad_range_clip<BSPL3> {
 	template<typename _Ity>
-	MATRICE_GLOBAL_INL static auto value(const _Ity _L, const _Ity _U) {
+	MATRICE_GLOBAL_INL static auto _(const _Ity _L, const _Ity _U) {
 		return range(_L + 1, _U - 3);
 	}
 };
 template<> struct _Grad_range_clip<BSPL5> {
 	template<typename _Ity>
-	MATRICE_GLOBAL_INL static auto value(const _Ity _L, const _Ity _U) {
+	MATRICE_GLOBAL_INL static auto _(const _Ity _L, const _Ity _U) {
 		return range(_L + 2, _U - 4);
 	}
 };
 template<> struct _Grad_range_clip<BSPL7> {
 	template<typename _Ity>
-	MATRICE_GLOBAL_INL static auto value(const _Ity _L, const _Ity _U) {
+	MATRICE_GLOBAL_INL static auto _(const _Ity _L, const _Ity _U) {
 		return range(_L + 3, _U - 5);
 	}
 };
@@ -120,10 +120,13 @@ public:
 	template<axis _Axis> 
 	MATRICE_HOST_INL auto at(int _L, int _R, int _U, int _D) const { 
 		using _My_range = _Grad_range_clip<_Mytraits::option>;
-		matrix_type _Grad(_D - _U, _R - _L);
-		for (const auto _Idy : _My_range::value(_U,_D)) {
+		const auto _Ry = _My_range::_(_U, _D);
+		const auto _Rx = _My_range::_(_L, _R);
+
+		matrix_type _Grad(_D - _U, _R - _L, zero_v<value_type>);
+		for (const auto _Idy : _Ry) {
 			auto _Row = _Grad.rbegin(_Idy - _U);
-			for (const auto _Idx : _My_range::value(_L, _R)) {
+			for (const auto _Idx : _Rx) {
 				_Row[_Idx - _L] = at<_Axis>(point_type(_Idx, _Idy));
 			}
 		}
