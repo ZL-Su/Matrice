@@ -30,7 +30,6 @@ struct Solver MATRICE_NONHERITABLE
 		using value_t = typename _Op::value_t;
 		using typename _Mybase::Options;
 	public:
-		_Op m_op;
 		template<typename... _Args> MATRICE_GLOBAL_FINL
 		constexpr Linear_(const _Args&... args) : m_op(args...) {};
 		template<typename... _Args> MATRICE_GLOBAL_FINL
@@ -38,6 +37,8 @@ struct Solver MATRICE_NONHERITABLE
 
 		template<typename _Rhs>
 		MATRICE_GLOBAL_INL auto& operator()(_Rhs& _X) { return m_op(_X); }
+
+		_Op m_op;
 	};
 };
 _TYPES_END

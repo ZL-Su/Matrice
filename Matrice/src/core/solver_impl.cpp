@@ -67,7 +67,7 @@ template LinearOp::info_t LinearOp::OpBase<double>::_Impl(Matrix_<value_t, __, _
  */
 template<typename _T> void LinearOp::OpBase<_T>::_Impl(view_t& A, view_t& X)
 {
-	const int_t n = A.cols() - 1;
+	const auto n = A.cols() - 1;
 	const int_t inc = X.cols();
 
 	if (this->_Info.alg == solver_type::GLS) return;

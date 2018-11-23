@@ -50,6 +50,8 @@ template<typename _Ty>
 using blas_kernel = detail::_Blas_kernel_impl<_Ty>;
 template<typename _Ty>
 using lapack_kernel = detail::_Lapack_kernel_impl<_Ty>;
+template<solver_type _Tag>
+using lapack_backward = detail::_Lapack_backward_impl<_Tag>;
 DGE_MATRICE_END
 
 #include "inl\_lnalge.inl"

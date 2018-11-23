@@ -90,7 +90,7 @@ struct LinearOp MATRICE_NONHERITABLE
 		enum { N = _Mty::CompileTimeCols };
 		enum { option = solver_type::AUTO };
 
-		constexpr Auto(const _Mty& arg) : A(arg) {
+		MATRICE_HOST_INL constexpr Auto(const _Mty& arg) : A(arg) {
 			OpBase<value_t>::_Future = std::async(std::launch::async, [&]()->info_t { 
 				return OpBase<value_t>::_Impl(OpBase<value_t>::_Aview = A); });
 		}
