@@ -17,6 +17,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #include "../_icgn_impl.h"
 #include "../../../private/_range.h"
+#include "../../../private/nonfree/_lnalge.h"
 
 MATRICE_ALGS_BEGIN namespace detail {
 namespace conv_internal {
@@ -125,16 +126,13 @@ auto _Iterative_conv_base<_Derived>::_Update_subset(const param_type& _P) {
 #define _WITHIN_RANGE_OF_REFIMG \
 	if (_Bu>=0&&_Bl>=0 && _Bd<m_reference[0].rows()&&_Br<m_reference[0].cols())
 
-	using _Interp_t = conv_internal::_Op<myt_traits_t::interp, 1, decltype(m_coeff), stack_vector>;
-
 	const auto _Radius = static_cast<int>(m_options());
 	const auto& _Center = m_pos;
 	const auto[_L, _R, _U, _D] = conv_internal::_Square_range(_Center, _Radius);
 
 	stack_vector _Buf_x{ 1. }, _Buf_y{ 1. };
-	_Interp_t _Op(m_coeff, _Buf_x, _Buf_y);
 
-	auto _Mean = zero<value_type>::value;
+	auto _Mean = zero_v<value_type>;
 	for (auto y = _U; y < _D; ++y) {
 		auto _Dy = static_cast<value_type>(y - _Center.y);
 		auto _Y = y + _P[3] + _P[5] * _Dy;
@@ -155,9 +153,9 @@ auto _Iterative_conv_base<_Derived>::_Update_subset(const param_type& _P) {
 
 				_Ix = _Bl * param_type::Size;
 				_Iy = _Bu * param_type::Size;
-				_Mean += m_current[y - _U][x - _L] = _Op(_Ix, _Iy);
+				_Mean += m_current[y - _U][x - _L] = (*_Myitp)(_Ix, _Iy);
 			}
-			else m_current[y - _U][x - _L] = zero<value_type>::value;
+			else m_current[y - _U][x - _L] = zero_v<value_type>;
 		}
 	}
 	_Mean /= static_cast<value_type>(multiply(_R - _L, _D - _U));
@@ -181,7 +179,7 @@ MATRICE_HOST_FINL auto _Invcomp_conv_impl<_Ty, _Itp, _Ord>::_Init() {
 	_Mybase::_Myjaco = conv_internal::_Op<_Ord, _Mybase::DOF>::J(_Ref, _Pos, _Rx, _Ry);
 	_Mybase::_Myhess = _Mybase::_Myjaco.t().mul(_Mybase::_Myjaco).reduce();
 
-	_Mybase::_Mylnop = linear_solver<_Mybase::linear_op>(_Mybase::_Myhess);
+	lapack_kernel<value_type>::spd(_Mybase::_Myhess.plvt());
 }
 /**
  * \IC-GN solver: _Pars={u, ux, uy, v, vx, vy} will be overwritten by the updated solution.
@@ -201,7 +199,7 @@ MATRICE_HOST_FINL auto _Invcomp_conv_impl<_Ty, _Itp, _Ord>::_Impl(param_type& _P
 	stack_vector _Grad = (_Ndiff_exp*_Mybase::_Myjaco).reduce()*(2 / _G_ssd);
 
 	// solve $\Delta \mathbf{p}$
-	_Grad = _Mybase::_Mylnop(_Grad);
+	_Grad = lapack_backward<CHD>::_(_Mybase::_Myhess, _Grad);
 	_Grad = zero_v<value_type> -_Grad;
 
 	// inverse-compositional update warp parameters $\mathbf{p}$
