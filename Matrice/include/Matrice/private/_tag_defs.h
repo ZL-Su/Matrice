@@ -21,6 +21,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 DGE_MATRICE_BEGIN namespace tag {
 	struct _Matrix_tag {};
+	struct _Managed_matrix_tag : _Matrix_tag {};
+	struct _Dynamic_matrix_tag : _Matrix_tag {};
+	struct _Device_matrix_tag : _Matrix_tag {};
+	struct _Unify_matrix_tag : _Matrix_tag {};
 
 	struct _Matrix_iterator_tag {};
 	struct _Matrix_rwise_iterator_tag {};
