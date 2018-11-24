@@ -194,6 +194,16 @@ template<typename _Ty> void _Spline_interpolation<_Ty, _BIQNSPL>::_Coeff_impl() 
 	}
 }
 template<typename _Ty> void _Spline_interpolation<_Ty, _BISPSPL>::_Coeff_impl() {
+	const auto& _Data = _Mybase::_Mydata;
+	auto& _Mycoeff = _Mybase::_Mycoeff;
+
+	auto[_Width, _Height] = _Data.shape();
+	_Mycoeff.create(_Height, _Width, zero<value_type>::value);
+
+	//initialization
+	const auto[_Z1, _Z2, _Z3, _A1, _A2, _A3, _K1, _K2, _K3] = internal::_It_hypar<value_type, _Mybase::option>::value();
+
+	matrix_type _Buff(_Height, _Width);
 }
 
 template class _Spline_interpolation<float, _BICBSPL>;
