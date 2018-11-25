@@ -243,11 +243,21 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		}
 			return (_Ret);
 		}
-
-		MATRICE_GLOBAL_INL auto operator() (std::size_t x, std::size_t y) {
+		/**
+		 * \operator for expression evaluation
+		 */
+		MATRICE_GLOBAL_INL auto operator()() const {
+			matrix_type _Ret(M, N);
+			_CDTHIS->assign_to(_Ret);
+			return std::forward<matrix_type>(_Ret);
+		}
+		/**
+		 * \2-d ewise evaluation operator
+		 */
+		MATRICE_GLOBAL_INL auto operator()(std::size_t x, std::size_t y) {
 			return _CDTHIS->operator()(x + y * N);
 		}
-		MATRICE_GLOBAL_INL const auto operator() (std::size_t x, std::size_t y) const {
+		MATRICE_GLOBAL_INL const auto operator()(std::size_t x, std::size_t y) const {
 			return _CDTHIS->operator()(x + y * N);
 		}
 
@@ -293,9 +303,9 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		}
 
 		template<typename _Mty> 
-		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const {
-#pragma omp parallel for
-			for (index_t i = 0; i < res.size(); ++i) res(i) = this->operator()(i);
+		MATRICE_GLOBAL_INL void assign_to(_Mty& _Res) const {
+#pragma omp parallel for if(_Res.size() > 100)
+			for (index_t i = 0; i < _Res.size(); ++i) _Res(i) = this->operator()(i);
 		}
 
 	private:
