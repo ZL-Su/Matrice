@@ -54,6 +54,11 @@ namespace tag {
 	struct _Ewise_cos_tag : _Expression_tag {}; // $ cos(x_i)$
 	struct _Ewise_sqr_tag : _Expression_tag {}; // $ {x_i}^2 $
 	struct _Ewise_sqrt_tag : _Expression_tag {}; // $ \sqrt{x_i} $
+	struct _Ewise_max_tag : _Expression_tag {};
+	struct _Ewise_min_tag : _Expression_tag {};
+	struct _Ewise_abs_tag : _Expression_tag {};
+	struct _Ewise_log2_tag : _Expression_tag {};
+	struct _Ewise_log10_tag : _Expression_tag {};
 	struct _Matrix_mul_tag : _Expression_tag {};// matrix mul.
 	struct _Matrix_inv_tag : _Expression_tag {};// matrix inverse
 	struct _Matrix_trp_tag : _Expression_tag {};// matrix transpose
