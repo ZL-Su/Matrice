@@ -235,4 +235,11 @@ MATRICE_GLOBAL_INL constexpr auto is_tensor_v = is_tensor<T>::value;
  * tensor_traits<T> for accessing tensor members
  */
 template<typename T> struct tensor_traits {};
+
+/**
+ * category_type<T> for accessing category member of T
+ */
+template<typename T> struct category_type { using type = typename T::category; };
+template<typename T> using category_type_t = typename category_type<T>::type;
+
 DGE_MATRICE_END
