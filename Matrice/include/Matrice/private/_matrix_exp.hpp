@@ -21,13 +21,12 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #ifdef __AVX__
 #include <immintrin.h>
 #endif
-#include "../util/_macros.h"
+#include "../util/utils.h"
 #include "_type_traits.h"
 #include "_size_traits.h"
 #include "_tag_defs.h"
 
 #pragma warning(disable: 4715)
-
 DGE_MATRICE_BEGIN
 #pragma region <!-- Forward declarations and matrix traits supplements -->
 // \forward declarations 
@@ -76,19 +75,21 @@ struct Expr {
 	template<int N> struct factorial_t { enum { value = factorial_t<N - 1>::value*N }; };
 	template<> struct factorial_t<0> { enum { value = 1 }; };
 
-#define _MATRICE_DEFEXP_EWISEUOP(_Name) \
-template<typename _Ty> struct _Ewise_##_Name { \
+#define _MATRICE_DEFEXP_EWISEUOP(NAME) \
+template<typename _Ty> struct _Ewise_##NAME { \
 	enum {flag = ewise}; \
+	using category = tag::_Ewise_##NAME##_tag; \
 	MATRICE_GLOBAL_FINL constexpr auto operator() (const _Ty& _Val) const {\
-		return (std::_Name(_Val)); \
+		return (NAME(_Val)); \
 	}\
 };
-#define _MATRICE_DEFEXP_EWISEBOP(_Name) \
-template<typename _Ty> struct _Ewise_##_Name { \
+#define _MATRICE_DEFEXP_EWISEBOP(NAME) \
+template<typename _Ty> struct _Ewise_##NAME { \
 	enum {flag = ewise}; \
+	using category = tag::_Ewise_##NAME##_tag; \
 	template<typename _Uy = _Ty> \
 	MATRICE_GLOBAL_FINL constexpr auto operator() (const _Ty& _Left, const _Uy& _Right) const {\
-		return (std::_Name(_Left, _Right)); \
+		return (NAME(_Left, _Right)); \
 	}\
 };
 #define _MATRICE_DEFEXP_ARITHOP(OP, NAME) \
@@ -101,11 +102,10 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 	return EwiseBinaryExpr<_Lhs, derived_t, Op::_Ewise_##NAME<value_t>>(_Left, _Right); \
 }
 	struct Op {
-		template<typename _Ty> using _Ewise_add = std::plus<_Ty>;
-		template<typename _Ty> using _Ewise_sub = std::minus<_Ty>;
-		template<typename _Ty> using _Ewise_mul = std::multiplies<_Ty>;
-		template<typename _Ty> using _Ewise_div = std::divides<_Ty>;
-
+		_MATRICE_DEFEXP_EWISEBOP(add)
+		_MATRICE_DEFEXP_EWISEBOP(sub)
+		_MATRICE_DEFEXP_EWISEBOP(mul)
+		_MATRICE_DEFEXP_EWISEBOP(div)
 		_MATRICE_DEFEXP_EWISEBOP(max)
 		_MATRICE_DEFEXP_EWISEBOP(min)
 		_MATRICE_DEFEXP_EWISEUOP(sqrt)
@@ -127,10 +127,12 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 
 		template<typename _Ty> struct _Mat_inv { 
 			enum { flag = inv }; 
+			using category = tag::_Matrix_inv_tag;
 			MATRICE_GLOBAL _Ty* operator()(int M, _Ty* Out, _Ty* In = nullptr) const; 
 		};
 		template<typename _Ty> struct _Mat_trp { 
 			enum { flag = trp }; 
+			using category = tag::_Matrix_trp_tag;
 			MATRICE_HOST_FINL _Ty operator()(int M, _Ty* Out, _Ty* i) const { return (Out[int(i[1])*M + int(i[0])]); } 
 		};
 		// *\matrix spread multiply
@@ -141,6 +143,7 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		};
 		template<typename _Ty> struct _Mat_mul {
 			enum { flag = mmul };
+			using category = tag::_Matrix_mul_tag;
 			using value_type = _Ty;
 
 			template<typename _Rhs> MATRICE_GLOBAL_FINL
@@ -269,13 +272,14 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 	template<typename T, typename U, typename _BinaryOp>
 	class EwiseBinaryExpr<T, U, _BinaryOp, false, false> : public Base_<EwiseBinaryExpr<T, U, _BinaryOp, false, false>>
 	{
-		using _Base_type = Base_<EwiseBinaryExpr<T, U, _BinaryOp, false, false>>;
+		using _Mybase = Base_<EwiseBinaryExpr<T, U, _BinaryOp, false, false>>;
 	public:
-		using _Base_type::CompileTimeRows;
-		using _Base_type::CompileTimeCols;
-		using typename _Base_type::value_t;
-		using typename _Base_type::matrix_type;
-		using _Base_type::operator();
+		using _Mybase::CompileTimeRows;
+		using _Mybase::CompileTimeCols;
+		using typename _Mybase::value_t;
+		using typename _Mybase::matrix_type;
+		using _Mybase::operator();
+		using category = category_type_t<_BinaryOp>;
 		enum { options = option<ewise>::value };
 
 		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T& _lhs, const U& _rhs) noexcept
@@ -297,19 +301,20 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 	private:
 		const T& _LHS; const U& _RHS;
 		_BinaryOp _Op;
-		using _Base_type::M;
-		using _Base_type::N;
+		using _Mybase::M;
+		using _Mybase::N;
 	};
 	template<typename T, typename U, typename _BinaryOp>
 	class EwiseBinaryExpr<T, U, _BinaryOp, true, false> : public Base_<EwiseBinaryExpr<T, U, _BinaryOp, true, false>>
 	{
-		using _Base_type = Base_<EwiseBinaryExpr<T, U, _BinaryOp, true, false>>;
+		using _Mybase = Base_<EwiseBinaryExpr<T, U, _BinaryOp, true, false>>;
 	public:
-		using _Base_type::CompileTimeRows;
-		using _Base_type::CompileTimeCols;
-		using typename _Base_type::value_t;
-		using typename _Base_type::matrix_type;
-		using _Base_type::operator();
+		using _Mybase::CompileTimeRows;
+		using _Mybase::CompileTimeCols;
+		using typename _Mybase::value_t;
+		using typename _Mybase::matrix_type;
+		using _Mybase::operator();
+		using category = category_type_t<_BinaryOp>;
 		enum { options = option<ewise>::value };
 
 		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T _scalar, const U& _rhs) noexcept
@@ -334,19 +339,20 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		const value_t _Scalar = std::numeric_limits<value_t>::infinity();
 		const U& _RHS;
 		_BinaryOp _Op;
-		using _Base_type::M;
-		using _Base_type::N;
+		using _Mybase::M;
+		using _Mybase::N;
 	};
 	template<typename T, typename U, typename _BinaryOp>
 	class EwiseBinaryExpr<T, U, _BinaryOp, false, true> : public Base_<EwiseBinaryExpr<T, U, _BinaryOp, false, true>>
 	{
-		using _Base_type = Base_<EwiseBinaryExpr<T, U, _BinaryOp, false, true>>;
+		using _Mybase = Base_<EwiseBinaryExpr<T, U, _BinaryOp, false, true>>;
 	public:
-		using _Base_type::CompileTimeRows;
-		using _Base_type::CompileTimeCols;
-		using typename _Base_type::value_t;
-		using typename _Base_type::matrix_type;
-		using _Base_type::operator();
+		using _Mybase::CompileTimeRows;
+		using _Mybase::CompileTimeCols;
+		using typename _Mybase::value_t;
+		using typename _Mybase::matrix_type;
+		using _Mybase::operator();
+		using category = category_type_t<_BinaryOp>;
 		enum { options = option<ewise>::value };
 
 		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T& _lhs, const U _scalar) noexcept
@@ -371,8 +377,8 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		const value_t _Scalar = std::numeric_limits<value_t>::infinity();
 		const T& _LHS;
 		_BinaryOp _Op;
-		using _Base_type::M;
-		using _Base_type::N;
+		using _Mybase::M;
+		using _Mybase::N;
 	};
 
 	// \matrix element-wise unary operation expression: abs(), log(), sqrt() ....
@@ -380,13 +386,14 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 	class EwiseUnaryExpr : public Base_<EwiseUnaryExpr<T, _UnaryOp>>
 	{
 		using const_reference_t = add_const_reference_t<T>;
-		using _Base_type = Base_<EwiseUnaryExpr<T, _UnaryOp>>;
+		using _Mybase = Base_<EwiseUnaryExpr<T, _UnaryOp>>;
 	public:
-		using _Base_type::CompileTimeRows;
-		using _Base_type::CompileTimeCols;
-		using typename _Base_type::value_t;
-		using typename _Base_type::matrix_type;
-		using _Base_type::operator();
+		using _Mybase::CompileTimeRows;
+		using _Mybase::CompileTimeCols;
+		using typename _Mybase::value_t;
+		using typename _Mybase::matrix_type;
+		using _Mybase::operator();
+		using category = category_type_t<_UnaryOp>;
 		enum { options = expression_options<_UnaryOp>::value };
 
 		EwiseUnaryExpr(const_reference_t _rhs) noexcept
@@ -407,8 +414,8 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 	private:
 		_UnaryOp _Op;
 		const_reference_t _RHS;
-		using _Base_type::M;
-		using _Base_type::N;
+		using _Mybase::M;
+		using _Mybase::N;
 	};
 
 	// \matrix binary operation expression: matmul(), ...
@@ -416,12 +423,13 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 	class MatBinaryExpr : public Base_<MatBinaryExpr<T, U, _BinaryOp>>
 	{
 		using _Myt = MatBinaryExpr;
-		using _Base_type = Base_<MatBinaryExpr<T, U, _BinaryOp>>;
+		using _Mybase = Base_<MatBinaryExpr<T, U, _BinaryOp>>;
 	public:
-		using _Base_type::CompileTimeRows;
-		using _Base_type::CompileTimeCols;
-		using typename _Base_type::value_t;
-		using typename _Base_type::matrix_type;
+		using _Mybase::CompileTimeRows;
+		using _Mybase::CompileTimeCols;
+		using typename _Mybase::value_t;
+		using typename _Mybase::matrix_type;
+		using category = category_type_t<_BinaryOp>;
 		enum{options = option<_BinaryOp::flag>::value};
 
 		MATRICE_GLOBAL_INL MatBinaryExpr(const T& _lhs, const U& _rhs) noexcept 
@@ -450,21 +458,22 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		const T& _LHS; 
 		const U& _RHS;
 		_BinaryOp _Op;
-		using _Base_type::M;
-		using _Base_type::K;
-		using _Base_type::N;
+		using _Mybase::M;
+		using _Mybase::K;
+		using _Mybase::N;
 	};
 
 	// \matrix unary operation expression: inverse(), transpose(), ...
 	template<class T, typename _UnaryOp> 
 	class MatUnaryExpr : public Base_<MatUnaryExpr<T, _UnaryOp>>
 	{
-		using _Base_type = Base_<MatUnaryExpr<T, _UnaryOp>>;
+		using _Mybase = Base_<MatUnaryExpr<T, _UnaryOp>>;
 	public:
-		using _Base_type::CompileTimeRows;
-		using _Base_type::CompileTimeCols;
-		using typename _Base_type::value_t;
-		using typename _Base_type::matrix_type;
+		using _Mybase::CompileTimeRows;
+		using _Mybase::CompileTimeCols;
+		using typename _Mybase::value_t;
+		using typename _Mybase::matrix_type;
+		using category = category_type_t<_UnaryOp>;
 		enum {options = option<_UnaryOp::flag>::value};
 
 		MATRICE_GLOBAL_FINL MatUnaryExpr(const T& inout) noexcept
@@ -516,9 +525,9 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		const T& _RHS;
 		const T& _ANS;
 		_UnaryOp _Op;
-		using _Base_type::M;
-		using _Base_type::N;
-		using _Base_type::size;
+		using _Mybase::M;
+		using _Mybase::N;
+		using _Mybase::size;
 	};
 #undef _MATRICE_DEFEXP_ARITHOP
 #undef _MATRICE_DEFEXP_EWISEUOP
