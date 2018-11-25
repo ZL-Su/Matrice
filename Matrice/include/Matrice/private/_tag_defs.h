@@ -24,7 +24,6 @@ DGE_MATRICE_BEGIN namespace tag {
 	struct _Managed_matrix_tag : _Matrix_tag {};
 	struct _Dynamic_matrix_tag : _Matrix_tag {};
 	struct _Device_matrix_tag : _Matrix_tag {};
-	struct _Unify_matrix_tag : _Matrix_tag {};
 
 	struct _Matrix_iterator_tag {};
 	struct _Matrix_rwise_iterator_tag {};
@@ -35,4 +34,15 @@ DGE_MATRICE_BEGIN namespace tag {
 	struct _Matrix_col_view_tag : _Matrix_view_tag {};
 	struct _Matrix_block_view_tag : _Matrix_view_tag {};
 
+	struct _Expression_tag {};
+	struct _Ewise_add_tag : _Expression_tag {};
+	struct _Ewise_sub_tag : _Expression_tag {};
+	struct _Ewise_mul_tag : _Expression_tag {};
+	struct _Ewise_div_tag : _Expression_tag {};
+	struct _Ewise_exp_tag : _Expression_tag {};
+	struct _Ewise_log_tag : _Expression_tag {};
+	struct _Ewise_sin_tag : _Expression_tag {};
+	struct _Ewise_cos_tag : _Expression_tag {};
+	struct _Ewise_sqr_tag : _Expression_tag {};
+	struct _Ewise_sqt_tag : _Expression_tag {};
 } DGE_MATRICE_END
