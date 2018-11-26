@@ -169,8 +169,8 @@ auto _Iterative_conv_base<_Derived>::_Update_subset(const param_type& _P) {
 /**
  * \For each point refinement, this method aims to compute the Jacobian and the Hessian before stepping into the iterative solver _Impl().
  */
-template<typename _Ty, std::size_t _Itp, std::size_t _Ord>
-MATRICE_HOST_FINL auto _Invcomp_conv_impl<_Ty, _Itp, _Ord>::_Init() {
+template<typename _Ty, typename _Tag, std::size_t _Ord>
+MATRICE_HOST_FINL auto _Invcomp_conv_impl<_Ty, _Tag, _Ord>::_Init() {
 	const auto& _Pos = _Mybase::m_pos;
 	const auto& _Ref = _Mybase::m_reference;
 	auto[_L, _R, _U, _D] = conv_internal::_Square_range(_Pos, m_ksize>>1);
@@ -184,8 +184,8 @@ MATRICE_HOST_FINL auto _Invcomp_conv_impl<_Ty, _Itp, _Ord>::_Init() {
 /**
  * \IC-GN solver: _Pars={u, ux, uy, v, vx, vy} will be overwritten by the updated solution.
  */
-template<typename _Ty, std::size_t _Itp, std::size_t _Ord> 
-MATRICE_HOST_FINL auto _Invcomp_conv_impl<_Ty, _Itp, _Ord>::_Impl(param_type& _Pars) {
+template<typename _Ty, typename _Tag, std::size_t _Ord>
+MATRICE_HOST_FINL auto _Invcomp_conv_impl<_Ty, _Tag, _Ord>::_Impl(param_type& _Pars) {
 	const auto& _Ref  = _Mybase::m_reference;
 
 	const auto[_Rx, _Ry, _G_mean, _G_ssd] = _Mybase::_Update_subset(_Pars);

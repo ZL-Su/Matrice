@@ -48,38 +48,43 @@ namespace detail {
 template<typename _Ty, int _M, int _N> class _Multi_matrix;
 
 template<typename _Ty> struct gradient_traits {};
-template<std::size_t _Opt> 
-struct splineitp_option{static constexpr auto value = _Opt;};
-template<std::size_t _Opt>
-MATRICE_HOST_INL constexpr auto splineitp_option_v = splineitp_option<_Opt>::value;
-template<> struct splineitp_option<BSPL3> { static constexpr auto value = bcspline; };
-template<> struct splineitp_option<BSPL5> { static constexpr auto value = bqspline; };
-template<> struct splineitp_option<BSPL7> { static constexpr auto value = bsspline; };
-
-template<typename _Ty, std::size_t _Opt> class _Gradient_impl;
-
-template<typename _Ty, std::size_t _Opt> 
-struct gradient_traits<_Gradient_impl<_Ty, _Opt>> {
-	using value_type = _Ty;
-	static constexpr auto option = _Opt;
-	using image_type = types::Matrix_<value_type, 0, 0>;
-	using matrix_type = types::Matrix_<value_type, 0, 0>;
+template<typename _Tag> struct splineitp_option {using tag = _Tag;};
+template<typename _Tag>
+using splineitp_option_t = typename splineitp_option<_Tag>::tag;
+template<> struct splineitp_option<_TAG _Itped_grad_tag::bicspl> { 
+	using tag = _TAG _Bspline_itp_tag::bicubic; 
+};
+template<> struct splineitp_option<_TAG _Itped_grad_tag::biqspl> {
+	using tag = _TAG _Bspline_itp_tag::biquintic;
+};
+template<> struct splineitp_option<_TAG _Itped_grad_tag::bisspl> {
+	using tag = _TAG _Bspline_itp_tag::biseptic;
 };
 
-template<std::size_t _Opt> struct _Grad_range_clip {};
-template<> struct _Grad_range_clip<BSPL3> {
+template<typename _Ty, typename _Tag> class _Gradient_impl;
+
+template<typename _Ty, typename _Tag>
+struct gradient_traits<_Gradient_impl<_Ty, _Tag>> {
+	using value_type = _Ty;
+	using image_type = types::Matrix_<value_type, 0, 0>;
+	using matrix_type = types::Matrix_<value_type, 0, 0>;
+	using category = _Tag;
+};
+
+template<typename _Tag> struct _Grad_range_clip {};
+template<> struct _Grad_range_clip<_TAG _Itped_grad_tag::bicspl> {
 	template<typename _Ity>
 	MATRICE_GLOBAL_INL static auto _(const _Ity _L, const _Ity _U) {
 		return range(_L + 1, _U - 3);
 	}
 };
-template<> struct _Grad_range_clip<BSPL5> {
+template<> struct _Grad_range_clip<_TAG _Itped_grad_tag::biqspl> {
 	template<typename _Ity>
 	MATRICE_GLOBAL_INL static auto _(const _Ity _L, const _Ity _U) {
 		return range(_L + 2, _U - 4);
 	}
 };
-template<> struct _Grad_range_clip<BSPL7> {
+template<> struct _Grad_range_clip<_TAG _Itped_grad_tag::bisspl> {
 	template<typename _Ity>
 	MATRICE_GLOBAL_INL static auto _(const _Ity _L, const _Ity _U) {
 		return range(_L + 3, _U - 5);
@@ -90,8 +95,9 @@ template<> struct _Grad_range_clip<BSPL7> {
  */
 template<typename _Derived> class _Interpolated_gradient_base {
 	using _Mytraits = gradient_traits<_Derived>;
-	using _Myitp = interpolation<typename _Mytraits::value_type, splineitp_option_v<_Mytraits::option>>;
+	using _Myitp = interpolation<typename _Mytraits::value_type, category_type_t<_Mytraits>>;
 public:
+	using category = category_type_t<_Mytraits>;
 	using value_type = typename _Mytraits::value_type;
 	using image_type = typename _Mytraits::image_type;
 	using matrix_type = typename _Mytraits::matrix_type;
@@ -119,7 +125,7 @@ public:
 	 */
 	template<axis _Axis> 
 	MATRICE_HOST_INL auto at(int _L, int _R, int _U, int _D) const { 
-		using _My_range = _Grad_range_clip<_Mytraits::option>;
+		using _My_range = _Grad_range_clip<category>;
 		const auto _Ry = _My_range::_(_U, _D);
 		const auto _Rx = _My_range::_(_L, _R);
 
@@ -139,7 +145,7 @@ protected:
 	typename _Myitp::type _Myop;
 };
 
-template<typename _Ty> class _Gradient_impl<_Ty, SOBEL>  {
+template<typename _Ty> class _Gradient_impl<_Ty, _TAG _Sobel_grad_tag> {
 	using _Myt = _Gradient_impl;
 public:
 	using value_type = _Ty;
@@ -150,8 +156,9 @@ private:
 	const image_type& _Myimg;
 };
 
-template<typename _Ty> class _Gradient_impl<_Ty, BSPL3>
-	: public _Interpolated_gradient_base<_Gradient_impl<_Ty, BSPL3>> {
+template<typename _Ty> 
+class _Gradient_impl<_Ty, _TAG _Itped_grad_tag::bicspl>
+	: public _Interpolated_gradient_base<_Gradient_impl<_Ty, _TAG _Itped_grad_tag::bicspl>> {
 	using _Myt = _Gradient_impl;
 	using _Mybase = _Interpolated_gradient_base<_Myt>;
 public:
@@ -166,7 +173,7 @@ public:
  * \TEMPLATE class for image gradient computation.
  * \PARAMS : <_Ty> the data type; <_Alg> the gradient operator.
  */
-template<typename _Ty, std::size_t _Alg = BSPL3>
-using gradient = detail::_Gradient_impl<_Ty, _Alg>;
+template<typename _Ty, typename _Tag = _TAG _Itped_grad_tag::bicspl>
+using gradient = detail::_Gradient_impl<_Ty, _Tag>;
 
 DGE_MATRICE_END

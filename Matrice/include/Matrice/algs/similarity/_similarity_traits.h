@@ -20,7 +20,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 MATRICE_ALGS_BEGIN namespace detail {
 // \forward declarations
-template<typename _Ty, std::size_t _Iterp, std::size_t _Order> class _Invcomp_conv_impl;
+template<
+	typename _Data_type, 
+	typename _Interpolation_tag, 
+	std::size_t _Warp_fn_order     //can be 1 or 2
+>  class _Invcomp_conv_impl;
 
 namespace internal {
 // \size traits
@@ -34,10 +38,11 @@ template<size_t _Values> struct static_size {
 // \iterative convolutional solver traits
 template<typename _Solver_type> struct conv_solver_traits {};
 
-template<typename _Ty, std::size_t _I, std::size_t _O>
-struct conv_solver_traits<_Invcomp_conv_impl<_Ty, _I, _O>> {
+template<typename _Ty, typename _Itag, std::size_t _O>
+struct conv_solver_traits<_Invcomp_conv_impl<_Ty, _Itag, _O>> {
+	using interp_category = _Itag;
 	using value_type = _Ty;
-	static const auto interp = _I;
+	static const auto interp = INTERP|BSPLINE;
 	static const auto order = _O;
 };
 }}
