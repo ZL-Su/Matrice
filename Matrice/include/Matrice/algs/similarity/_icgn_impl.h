@@ -45,14 +45,25 @@ template<size_t _Options> struct _Iterative_conv_options
 	MATRICE_GLOBAL_FINL operator default_type() { return _My_epsilon; }
 };
 namespace detail {
+template<typename _Itptag> struct _Conv_border_size {};
+template<> struct _Conv_border_size<_TAG bicspl_tag> {
+	static constexpr auto lower = 1, upper = 2;
+};
+template<> struct _Conv_border_size<_TAG biqspl_tag> {
+	static constexpr auto lower = 2, upper = 3;
+};
+template<> struct _Conv_border_size<_TAG bisspl_tag> {
+	static constexpr auto lower = 3, upper = 4;
+};
+
 // \TEMPLATE base class for Gaussian-Newton algorithm [thread-safe]
 template<typename _Derived> class _Iterative_conv_base
 {
 	using _Mydt = _Derived;
 	using _Mytraits = internal::conv_solver_traits<_Mydt>;
-	using value_type = typename _Mytraits::value_type;
 protected:
 	enum {DOF = _Mytraits::order*6}; //DOF
+	using value_type = typename _Mytraits::value_type;
 	using stack_vector = Vec_<value_type, DOF>;
 	using stack_matrix = Matrix_<value_type, DOF, DOF>;
 	using matrix_type  = Matrix<value_type>;
@@ -60,7 +71,8 @@ protected:
 	using param_type = stack_vector;
 	using linear_op = linear_alg_op::Auto<matrix_type>;
 	using options_type = _Iterative_conv_options<_Mytraits::interp>;
-	using interp_type = typename interpolation<value_type, _Mytraits::interp>::type;
+	using interp_category = typename _Mytraits::interp_category;
+	using interp_type = typename interpolation<value_type, interp_category>::type;
 	struct status_type
 	{
 		bool _Is_success = false;
@@ -124,9 +136,9 @@ protected:
 
 // TEMPLATE impl class for IC-GN optimization [thread-safe]
 template<typename _Ty = float, 
-	std::size_t _Itp = bcspline, std::size_t _Ord = 1>
+	typename _Tag = _TAG bicspl_tag, std::size_t _Ord = 1>
 class _Invcomp_conv_impl MATRICE_NONHERITABLE
-	: public _Iterative_conv_base<_Invcomp_conv_impl<_Ty, _Itp, _Ord>>
+	: public _Iterative_conv_base<_Invcomp_conv_impl<_Ty, _Tag, _Ord>>
 {
 	using _Myt = _Invcomp_conv_impl;
 	using _Mybase = _Iterative_conv_base<_Myt>;
@@ -146,6 +158,8 @@ public:
 	MATRICE_HOST_FINL _Invcomp_conv_impl(const multi_matrix<value_t>& _Ref, const std::shared_ptr<interp_type>& _Itp, point_t _Initp, options_t _Opts = options_t()) noexcept
 		: _Mybase(_Ref, _Itp, _Initp, _Opts) {
 		_Init();
+		m_favg = _Ref[0].sum() / _Ref[0].size();
+		m_fssd = sqrt(((_Ref[0] - m_favg)*(_Ref[0] - m_favg)).sum());
 	}
 
 	MATRICE_HOST_FINL auto _Impl(param_type& _Params);
@@ -154,7 +168,7 @@ private:
 	MATRICE_HOST_FINL auto _Init();
 	MATRICE_HOST_FINL auto _Update();
 
-	value_type m_favg = 0, m_fssd = 0;
+	value_type m_favg = 0, m_fssd = 1;
 	using _Mybase::m_ksize;
 	using _Mybase::m_current;
 };

@@ -126,6 +126,8 @@ auto _Iterative_conv_base<_Derived>::_Update_subset(const param_type& _P) {
 #define _WITHIN_RANGE_OF_REFIMG \
 	if (_Bu>=0&&_Bl>=0 && _Bd<m_reference[0].rows()&&_Br<m_reference[0].cols())
 
+	constexpr auto _Cbl = _Conv_border_size<interp_category>::lower;
+	constexpr auto _Cbu = _Conv_border_size<interp_category>::upper;
 	const auto _Radius = static_cast<int>(m_options());
 	const auto& _Center = m_pos;
 	const auto[_L, _R, _U, _D] = conv_internal::_Square_range(_Center, _Radius);
@@ -142,8 +144,8 @@ auto _Iterative_conv_base<_Derived>::_Update_subset(const param_type& _P) {
 			_X += x + _P[1] * _Dx; _Y += _P[4] * _Dx;
 
 			auto _Ix = floor<int>(_X), _Iy = floor<int>(_Y);
-			auto _Bu = _Iy - 2, _Bd = _Iy + 3;
-			auto _Bl = _Ix - 2, _Br = _Ix + 3;
+			auto _Bu = _Iy - _Cbl, _Bd = _Iy + _Cbu;
+			auto _Bl = _Ix - _Cbl, _Br = _Ix + _Cbu;
 			_WITHIN_RANGE_OF_REFIMG{
 				auto _Delta_x = _X - static_cast<value_type>(_Ix);
 				auto _Delta_y = _Y - static_cast<value_type>(_Iy);
