@@ -21,14 +21,14 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 MATRICE_ALGS_BEGIN
 
-template<typename _Ty, std::size_t _Opt> class _Spline_interpolation {};
+template<typename _Ty, typename _Tag> class _Spline_interpolation {};
 
 /**
  * \Partial specialization for Bi-Cubic B-Spline interpolation.
  */
 template<typename _Ty>
-class _Spline_interpolation<_Ty, _BICBSPL>
-	: public _Interpolation_base<_Spline_interpolation<_Ty, _BICBSPL>>
+class _Spline_interpolation<_Ty, _TAG _Bspline_itp_tag::bicubic>
+	: public _Interpolation_base<_Spline_interpolation<_Ty, _TAG bicspl_tag>>
 {
 	using _Myt = _Spline_interpolation;
 	using _Mybase = _Interpolation_base<_Myt>;
@@ -71,8 +71,8 @@ private:
  * \Partial specialization for Bi-Quintic B-Spline interpolation.
  */
 template<typename _Ty>
-class _Spline_interpolation<_Ty, _BIQNSPL>
-	: public _Interpolation_base<_Spline_interpolation<_Ty, _BIQNSPL>>
+class _Spline_interpolation<_Ty, _TAG _Bspline_itp_tag::biquintic>
+	: public _Interpolation_base<_Spline_interpolation<_Ty, _TAG biqspl_tag>>
 {
 	using _Myt = _Spline_interpolation;
 	using _Mybase = _Interpolation_base<_Myt>;
@@ -115,8 +115,8 @@ private:
  * \Partial specialization for Bi-septic B-Spline interpolation.
  */
 template<typename _Ty>
-class _Spline_interpolation<_Ty, _BISPSPL>
-	: public _Interpolation_base<_Spline_interpolation<_Ty, _BISPSPL>>
+class _Spline_interpolation<_Ty, _TAG _Bspline_itp_tag::biseptic>
+	: public _Interpolation_base<_Spline_interpolation<_Ty, _TAG bisspl_tag>>
 {
 	using _Myt = _Spline_interpolation;
 	using _Mybase = _Interpolation_base<_Myt>;

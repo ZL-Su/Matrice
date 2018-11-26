@@ -6,9 +6,9 @@ namespace internal {
 	template<typename _Ty> struct _Itpar_base {
 		static constexpr auto _Myeps = std::numeric_limits<_Ty>::epsilon();
 	};
-	template<typename _Ty, std::size_t _Opt> struct _It_hypar {};
+	template<typename _Ty, typename _Tag> struct _It_hypar {};
 
-	template<typename _Ty> struct _It_hypar<_Ty, _BICBSPL> : _Itpar_base<_Ty> {
+	template<typename _Ty> struct _It_hypar<_Ty, _TAG bicspl_tag> : _Itpar_base<_Ty> {
 		MATRICE_HOST_INL static auto value() {
 			constexpr auto _Myeps = _Itpar_base<_Ty>::_Myeps;
 
@@ -19,7 +19,7 @@ namespace internal {
 			return std::make_tuple(_Z, _A, _K);
 		}
 	};
-	template<typename _Ty> struct _It_hypar<_Ty, _BIQNSPL> : _Itpar_base<_Ty> {
+	template<typename _Ty> struct _It_hypar<_Ty, _TAG biqspl_tag> : _Itpar_base<_Ty> {
 		MATRICE_HOST_INL static auto value() {
 			constexpr auto _Myeps = _Itpar_base<_Ty>::_Myeps;
 
@@ -31,7 +31,7 @@ namespace internal {
 			return std::make_tuple(_Z1, _Z2, _A1, _A2, _K1, _K2);
 		}
 	};
-	template<typename _Ty> struct _It_hypar<_Ty, _BISPSPL> : _Itpar_base<_Ty> {
+	template<typename _Ty> struct _It_hypar<_Ty, _TAG bisspl_tag> : _Itpar_base<_Ty> {
 		MATRICE_HOST_INL static auto value() {
 			constexpr auto _Myeps = _Itpar_base<_Ty>::_Myeps;
 
@@ -50,7 +50,8 @@ namespace internal {
 	};
 }
 
-template<typename _Ty> void _Spline_interpolation<_Ty, _BICBSPL>::_Coeff_impl() {
+template<typename _Ty> 
+void _Spline_interpolation<_Ty, _TAG bicspl_tag>::_Coeff_impl() {
 	const auto& _Data = _Mybase::_Mydata;
 	auto& _Mycoeff = _Mybase::_Mycoeff;
 
@@ -58,7 +59,7 @@ template<typename _Ty> void _Spline_interpolation<_Ty, _BICBSPL>::_Coeff_impl() 
 	_Mycoeff.create(_Height, _Width, zero<value_type>::value);
 
 	//initialization
-	const auto[_Z, _A, _K] = internal::_It_hypar<value_type, _Mybase::option>::value();
+	const auto[_Z, _A, _K] = internal::_It_hypar<value_type, _Mybase::category>::value();
 
 	matrix_type _Buff(_Height, _Width);
 
@@ -106,7 +107,8 @@ template<typename _Ty> void _Spline_interpolation<_Ty, _BICBSPL>::_Coeff_impl() 
 		_Mycoeff.cview(_Col) = _Z * (_Mycoeff.cview(_Col + 1) - _Buff.cview(_Col));
 	}
 }
-template<typename _Ty> void _Spline_interpolation<_Ty, _BIQNSPL>::_Coeff_impl() {
+template<typename _Ty> 
+void _Spline_interpolation<_Ty, _TAG biqspl_tag>::_Coeff_impl() {
 	const auto& _Data = _Mybase::_Mydata;
 	auto& _Mycoeff = _Mybase::_Mycoeff;
 
@@ -114,7 +116,7 @@ template<typename _Ty> void _Spline_interpolation<_Ty, _BIQNSPL>::_Coeff_impl() 
 	_Mycoeff.create(_Height, _Width, zero<value_type>::value);
 
 	//initialization
-	const auto[_Z1, _Z2, _A1, _A2, _K1, _K2] = internal::_It_hypar<value_type, _Mybase::option>::value();
+	const auto[_Z1, _Z2, _A1, _A2, _K1, _K2] = internal::_It_hypar<value_type, _Mybase::category>::value();
 
 	matrix_type _Buff(_Height, _Width);
 
@@ -193,7 +195,8 @@ template<typename _Ty> void _Spline_interpolation<_Ty, _BIQNSPL>::_Coeff_impl() 
 		_Mycoeff.cview(_Col) = _Z2*(_Mycoeff.cview(_Col+1) - _Buff.cview(_Col));
 	}
 }
-template<typename _Ty> void _Spline_interpolation<_Ty, _BISPSPL>::_Coeff_impl() {
+template<typename _Ty> 
+void _Spline_interpolation<_Ty, _TAG bisspl_tag>::_Coeff_impl() {
 	const auto& _Data = _Mybase::_Mydata;
 	auto& _Mycoeff = _Mybase::_Mycoeff;
 
@@ -201,15 +204,15 @@ template<typename _Ty> void _Spline_interpolation<_Ty, _BISPSPL>::_Coeff_impl() 
 	_Mycoeff.create(_Height, _Width, zero<value_type>::value);
 
 	//initialization
-	const auto[_Z1, _Z2, _Z3, _A1, _A2, _A3, _K1, _K2, _K3] = internal::_It_hypar<value_type, _Mybase::option>::value();
+	const auto[_Z1, _Z2, _Z3, _A1, _A2, _A3, _K1, _K2, _K3] = internal::_It_hypar<value_type, _Mybase::category>::value();
 
 	matrix_type _Buff(_Height, _Width);
 }
 
-template class _Spline_interpolation<float, _BICBSPL>;
-template class _Spline_interpolation<double, _BICBSPL>;
-template class _Spline_interpolation<float, _BIQNSPL>;
-template class _Spline_interpolation<double, _BIQNSPL>;
-template class _Spline_interpolation<float, _BISPSPL>;
-template class _Spline_interpolation<double, _BISPSPL>;
+template class _Spline_interpolation<float,  _TAG bicspl_tag>;
+template class _Spline_interpolation<double, _TAG bicspl_tag>;
+template class _Spline_interpolation<float,  _TAG biqspl_tag>;
+template class _Spline_interpolation<double, _TAG biqspl_tag>;
+template class _Spline_interpolation<float,  _TAG bisspl_tag>;
+template class _Spline_interpolation<double, _TAG bisspl_tag>;
 MATRICE_ALGS_END
