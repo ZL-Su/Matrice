@@ -66,5 +66,31 @@ namespace tag {
 	///<brief> variable tag definitions for function </brief>
 	struct _Var_tag {};
 	struct _Expression_eval_tag : _Var_tag {};
+
+	///<brief> tag definitions for interpolation </brief>
+	struct _Interpolation_tag {};
+	struct _Bspline_itp_tag : _Interpolation_tag {
+		struct bicubic : _Interpolation_tag {};
+		struct biquintic : _Interpolation_tag {};
+		struct biseptic : _Interpolation_tag {};
+	};
+	using bicspl_tag = _Bspline_itp_tag::bicubic;
+	using biqspl_tag = _Bspline_itp_tag::biquintic;
+	using bisspl_tag = _Bspline_itp_tag::biseptic;
+
+	///<brief> tag definitions for gradient computation </brief>
+	struct _Gradient_tag {};
+	struct _Sobel_grad_tag : _Gradient_tag {};
+	struct _Ctrdiff_grad_tag : _Gradient_tag {};
+	struct _Fwddiff_grad_tag : _Gradient_tag {};
+	struct _Bwddiff_grad_tag : _Gradient_tag {};
+	struct _Itped_grad_tag : _Gradient_tag, _Bspline_itp_tag {
+		using bicspl = bicubic;
+		using biqspl = biquintic;
+		using bisspl = biseptic;
+	};
 } 
+#ifndef _TAG
+#define _TAG tag::
+#endif
 DGE_MATRICE_END
