@@ -62,5 +62,9 @@ namespace tag {
 	struct _Matrix_mul_tag : _Expression_tag {};// matrix mul.
 	struct _Matrix_inv_tag : _Expression_tag {};// matrix inverse
 	struct _Matrix_trp_tag : _Expression_tag {};// matrix transpose
+
+	///<brief> variable tag definitions for function </brief>
+	struct _Var_tag {};
+	struct _Expression_eval_tag : _Var_tag {};
 } 
 DGE_MATRICE_END

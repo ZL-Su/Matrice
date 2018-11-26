@@ -246,7 +246,7 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		/**
 		 * \operator for expression evaluation
 		 */
-		MATRICE_GLOBAL_INL auto operator()() const {
+		MATRICE_GLOBAL_INL auto operator()(tag::_Var_tag = tag::_Expression_eval_tag()) const {
 			matrix_type _Ret(M, N);
 			_CDTHIS->assign_to(_Ret);
 			return std::forward<matrix_type>(_Ret);
