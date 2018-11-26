@@ -254,6 +254,8 @@
     <ClInclude Include="include\Matrice\funcs\_functions.h" />
     <ClInclude Include="include\Matrice\io\hrc.h" />
     <ClInclude Include="include\Matrice\io\io.h" />
+    <ClInclude Include="include\Matrice\private\autograd\_grad_ops.h" />
+    <ClInclude Include="include\Matrice\private\autograd\_grad_utils.h" />
     <ClInclude Include="include\Matrice\private\math\_linear.h" />
     <ClInclude Include="include\Matrice\private\math\_linear_solver.h" />
     <ClInclude Include="include\Matrice\private\math\_svd.h" />

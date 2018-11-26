@@ -142,6 +142,12 @@
     <Filter Include="Header Files\Detail\tensor">
       <UniqueIdentifier>{965fcf50-4461-4715-a81a-36f93b4661d6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Detail\autograd">
+      <UniqueIdentifier>{e808d49f-e70a-4c9c-9d73-a5dd24ff2b50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Detail\autograd\inline">
+      <UniqueIdentifier>{d3d722b3-ca0e-4472-81a9-001adf8cfbc6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -626,6 +632,12 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\private\math\_linear.h">
       <Filter>Header Files\Detail\math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\autograd\_grad_ops.h">
+      <Filter>Header Files\Detail\autograd</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\autograd\_grad_utils.h">
+      <Filter>Header Files\Detail\autograd</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
