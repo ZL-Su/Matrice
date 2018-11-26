@@ -20,11 +20,12 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 MATRICE_ALGS_BEGIN
 
-template<typename _Ty, std::size_t _Opt>
+template<typename _Ty, typename _Tag>
 class _Interpolation_wrapper MATRICE_NONHERITABLE
 {
 public:
-	using type = auto_interp_dispatcher_t<_Ty, _Opt>;
+	using type = auto_interp_dispatcher_t<_Ty, _Tag>;
+	using category = category_type_t<interpolation_traits<type>>;
 	using value_type = typename type::value_type;
 	static constexpr auto option = type::option;
 

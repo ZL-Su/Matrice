@@ -32,8 +32,9 @@ enum {
 	    Copyright (c) : Zhilong (Dgelom) Su, since 31/Jul/2018
  ******************************************************************/
 template<
-	typename _Ty, size_t _Opt = algs::_BICBSPL,
+	typename _Ty, 
+	typename _Tag = _TAG bicspl_tag,
 	typename = std::enable_if_t<std::is_scalar_v<_Ty>>>
-using interpolation = algs::_Interpolation_wrapper<_Ty, _Opt>;
+using interpolation = algs::_Interpolation_wrapper<_Ty, _Tag>;
 
 DGE_MATRICE_END

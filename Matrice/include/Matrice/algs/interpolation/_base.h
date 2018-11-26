@@ -21,6 +21,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../../core/vector.h"
 #include "../../core/solver.h"
 #include "../../private/_range.h"
+#include "../../private/_tag_defs.h"
 
 MATRICE_ALGS_BEGIN
 enum {
@@ -37,32 +38,35 @@ enum {
 };
 
 // \Forward declaration
-template<typename _Ty, std::size_t _Opt> class _Spline_interpolation;
+//template<typename _Ty, typename _Tag> class _Spline_interpolation;
+template<typename _Ty, typename _Tag> class _Spline_interpolation;
 
 // \Interpolation traits definition
 template<typename _Ty> struct interpolation_traits {};
-template<typename _Ty, std::size_t _Opt>
-struct interpolation_traits<_Spline_interpolation<_Ty, _Opt>> {
+template<typename _Ty, typename _Tag>
+struct interpolation_traits<_Spline_interpolation<_Ty, _Tag>> {
 	using value_type = _Ty;
 	using matrix_type = Matrix<value_type>;
-	using type = _Spline_interpolation<value_type, _Opt>;
-	static constexpr auto option = _Opt;
+	using category = _Tag;
+	using type = _Spline_interpolation<value_type, category>;
+	static constexpr auto option = INTERP|BSPLINE;
 };
 template<typename _Ty>
 using interpolation_traits_t = typename interpolation_traits<_Ty>::type;
 
 // \Interpolation auto dispatching
-template<typename _Ty, std::size_t _Opt> struct auto_interp_dispatcher {
-	using type = _Spline_interpolation<_Ty, _Opt>;
+template<typename _Ty, typename _Tag> struct auto_interp_dispatcher {
+	using type = _Spline_interpolation<_Ty, _Tag>;
 };
-template<typename _Ty, std::size_t _Opt>
-using auto_interp_dispatcher_t = typename auto_interp_dispatcher<_Ty, _Opt>::type;
+template<typename _Ty = float, typename _Tag = _TAG bicspl_tag>
+using auto_interp_dispatcher_t = typename auto_interp_dispatcher<_Ty, _Tag>::type;
 
 template<typename _Derived> class _Interpolation_base {
 	using _Myt = _Interpolation_base;
 	using _Mydt = _Derived;
 	using _Mytraits = interpolation_traits<_Mydt>;
 public:
+	using category = category_type_t<_Mytraits>;
 	using value_type = typename _Mytraits::value_type;
 	using matrix_type = typename _Mytraits::matrix_type;
 	using point_type = Vec2_<value_type>;
