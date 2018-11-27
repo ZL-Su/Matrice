@@ -89,6 +89,13 @@ namespace tag {
 		using biqspl = biquintic;
 		using bisspl = biseptic;
 	};
+
+	///<brief> solver tag definitions </brief>
+	struct _Solver_tag  {};
+	struct _Linear_spd_tag : _Solver_tag {/*symmetric positive decomp.*/};
+	struct _Linear_lud_tag : _Solver_tag {/*LU decomp.*/ };
+	struct _Linear_svd_tag : _Solver_tag {/*SVD decomp.*/ };
+	struct _Linear_evd_tag : _Solver_tag {/*Eigen decomp.*/ };
 } 
 #ifndef _TAG
 #define _TAG tag::
