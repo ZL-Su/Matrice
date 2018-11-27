@@ -16,9 +16,35 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 *	*************************************************************************/
 #pragma once
+#include "../_tag_defs.h"
 #include "../nonfree/_lnalge.h"
 
 DGE_MATRICE_BEGIN _DETAIL_BEGIN
+
+template<typename _Mty, typename _Tag> class _Matrix_decomposition {};
+template<typename _Mty> 
+class _Matrix_decomposition<_Mty, _TAG _Linear_spd_tag> {
+public:
+	using category = _TAG _Linear_spd_tag;
+	MATRICE_HOST_INL _Matrix_decomposition(const _Mty& _A) 
+		: _Mycoef(_A) {
+		try {
+			_Lapack_kernel_impl<typename _Mty::value_type>::spd(_Mycoef);
+		} catch (std::exception& e) { 
+			std::cout << e.what() << std::endl;
+		}
+	}
+	MATRICE_HOST_INL auto& forward() {
+		return (_Mycoef);
+	}
+	template<typename _Rhs>
+	MATRICE_HOST_INL auto& backward(const _Rhs& _X) const {
+		return _Lapack_backward_impl<CHD>::eval(_Mycoef, _X);
+	}
+
+private:
+	const _Mty& _Mycoef;
+};
 
 struct _Linear {
 
