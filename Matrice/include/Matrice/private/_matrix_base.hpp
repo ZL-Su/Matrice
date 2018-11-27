@@ -402,6 +402,14 @@ public:
 	 * \operator to get a block view of this matrix from a given range.
 	 */
 	template<typename _Ity, typename = std::enable_if_t<std::is_integral_v<_Ity>>>
+	MATRICE_GLOBAL_INL auto operator()(_Ity _L, _Ity _R, _Ity _U, _Ity _D) {
+#ifdef _DEBUG
+		if (_R > m_cols) throw std::runtime_error("In _matrix_base.hpp, _R for block operator(...) must be not greater than m_cols.");
+		if (_D > m_rows) throw std::runtime_error("In _matrix_base.hpp, _D for block operator(...) must be not greater than m_rows.");
+#endif // _DEBUG
+		return _Myt_blockview_type(m_data, m_cols, { _L, _U, _R, _D });
+	}
+	template<typename _Ity, typename = std::enable_if_t<std::is_integral_v<_Ity>>>
 	MATRICE_GLOBAL_INL auto operator()(_Ity _L, _Ity _R, _Ity _U, _Ity _D)const{
 #ifdef _DEBUG
 		if (_R > m_cols) throw std::runtime_error("In _matrix_base.hpp, _R for block operator(...) must be not greater than m_cols.");
