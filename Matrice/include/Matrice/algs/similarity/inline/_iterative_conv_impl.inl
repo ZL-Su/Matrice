@@ -124,10 +124,11 @@ template<> struct _Warp_update<1> {
 template<typename _Derived> MATRICE_HOST_FINL 
 auto _Iterative_conv_base<_Derived>::_Update_subset(const param_type& _P) {
 #define _WITHIN_RANGE_OF_REFIMG \
-	if (_Bu>=0&&_Bl>=0 && _Bd<m_reference[0].rows()&&_Br<m_reference[0].cols())
+	if (_Iy - _Bl >= 0 && _Ix - _Bl >= 0 && \
+		 _Iy + _Bu < m_reference[0].rows() && _Ix + _Bu < m_reference[0].cols())
 
-	constexpr auto _Cbl = _Conv_border_size<interp_category>::lower;
-	constexpr auto _Cbu = _Conv_border_size<interp_category>::upper;
+	constexpr auto _Bl = _Conv_border_size<interp_category>::lower;
+	constexpr auto _Bu = _Conv_border_size<interp_category>::upper;
 	const auto _Radius = static_cast<int>(m_options());
 	const auto& _Center = m_pos;
 	const auto[_L, _R, _U, _D] = conv_internal::_Square_range(_Center, _Radius);
@@ -144,8 +145,6 @@ auto _Iterative_conv_base<_Derived>::_Update_subset(const param_type& _P) {
 			_X += x + _P[1] * _Dx; _Y += _P[4] * _Dx;
 
 			auto _Ix = floor<int>(_X), _Iy = floor<int>(_Y);
-			auto _Bu = _Iy - _Cbl, _Bd = _Iy + _Cbu;
-			auto _Bl = _Ix - _Cbl, _Br = _Ix + _Cbu;
 			_WITHIN_RANGE_OF_REFIMG{
 				auto _Delta_x = _X - static_cast<value_type>(_Ix);
 				auto _Delta_y = _Y - static_cast<value_type>(_Iy);
@@ -153,11 +152,9 @@ auto _Iterative_conv_base<_Derived>::_Update_subset(const param_type& _P) {
 				conv_internal::_Delta_pow_n(_Buf_x, _Delta_x);
 				conv_internal::_Delta_pow_n(_Buf_y, _Delta_y);
 
-				_Ix = _Bl * param_type::Size;
-				_Iy = _Bu * param_type::Size;
-				_Mean += m_current[y - _U][x - _L] = (*_Myitp)(_Ix, _Iy);
+				_Mean += m_current(y - _U, x - _L) = (*_Myitp)(_Ix, _Iy);
 			}
-			else m_current[y - _U][x - _L] = zero_v<value_type>;
+			else m_current(y - _U, x - _L) = zero_v<value_type>;
 		}
 	}
 	_Mean /= static_cast<value_type>(multiply(_R - _L, _D - _U));
@@ -194,14 +191,15 @@ MATRICE_HOST_FINL auto _Invcomp_conv_impl<_Ty, _Tag, _Ord>::_Impl(param_type& _P
 	if (_G_ssd < _Mybase::m_options) 
 		throw std::runtime_error("Bad value of variable _G_ssd in _Invcomp_conv_impl<_Ty, _Intp, _Order>::_Solver_impl(...).");
 
-	auto _Diff_f_exp = _Ref[0].block(_Rx.begin(), _Rx.end(), _Ry.begin(), _Ry.end()).eval() - m_favg;
+	auto _Ref_subset = _Ref[0].block(_Rx.begin(), _Rx.end(), _Ry.begin(), _Ry.end()).eval();
+	auto _Diff_f_exp = _Ref_subset - m_favg;
 	auto _Diff_g_exp = m_current - _G_mean;
 	auto _Ndiff_exp = _Diff_f_exp * (1 / m_fssd) - _Diff_g_exp * (1 / _G_ssd);
 
-	stack_vector _Grad = (_Ndiff_exp*_Mybase::_Myjaco).reduce()*(2 / _G_ssd);
+	stack_vector _Grad = (_Ndiff_exp*_Mybase::_Myjaco).reduce().t()*(2 / _G_ssd);
 
 	// solve $\Delta \mathbf{p}$
-	_Grad = lapack_backward<CHD>::_(_Mybase::_Myhess, _Grad);
+	_Grad = lapack_backward<CHD>::eval(_Mybase::_Myhess, _Grad);
 	_Grad = zero_v<value_type> -_Grad;
 
 	// inverse-compositional update warp parameters $\mathbf{p}$

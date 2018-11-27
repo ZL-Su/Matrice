@@ -155,7 +155,10 @@ public:
 	using param_t = param_type;
 	using typename _Mybase::point_t;
 
-	MATRICE_HOST_FINL _Invcomp_conv_impl(const multi_matrix<value_t>& _Ref, const std::shared_ptr<interp_type>& _Itp, point_t _Initp, options_t _Opts = options_t()) noexcept
+	MATRICE_HOST_FINL _Invcomp_conv_impl(
+		const multi_matrix<value_t>& _Ref, 
+		const std::shared_ptr<interp_type>& _Itp, 
+		point_t _Initp, options_t _Opts = options_t()) noexcept
 		: _Mybase(_Ref, _Itp, _Initp, _Opts) {
 		_Init();
 		m_favg = _Ref[0].sum() / _Ref[0].size();
