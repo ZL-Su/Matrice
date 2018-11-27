@@ -178,7 +178,7 @@ MATRICE_HOST_FINL auto _Invcomp_conv_impl<_Ty, _Tag, _Ord>::_Init() {
 	_Mybase::_Myjaco = conv_internal::_Op<_Ord, _Mybase::DOF>::J(_Ref, _Pos, _Rx, _Ry);
 	_Mybase::_Myhess = _Mybase::_Myjaco.t().mul(_Mybase::_Myjaco).reduce();
 
-	lapack_kernel<value_type>::spd(_Mybase::_Myhess.plvt());
+	_Mybase::_Myhess = _Mybase::_Mysolver.forward();
 }
 /**
  * \IC-GN solver: _Pars={u, ux, uy, v, vx, vy} will be overwritten by the updated solution.

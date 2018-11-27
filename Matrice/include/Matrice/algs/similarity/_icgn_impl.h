@@ -20,6 +20,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../../core/vector.h"
 #include "../../core/solver.h"
 #include "../../core/tensor.h"
+#include "../../private/math/_linear.h"
 #include "_similarity_traits.h"
 
 MATRICE_ALGS_BEGIN
@@ -69,12 +70,12 @@ protected:
 	using matrix_type  = Matrix<value_type>;
 	using const_matrix_reference = const std::add_lvalue_reference_t<matrix_type>;
 	using param_type = stack_vector;
-	using linear_op = linear_alg_op::Auto<matrix_type>;
+	using linear_solver_type = dgelom::detail::_Matrix_decomposition<stack_matrix, _TAG _Linear_spd_tag>;
 	using options_type = _Iterative_conv_options<_Mytraits::interp>;
 	using interp_category = typename _Mytraits::interp_category;
 	using interp_type = typename interpolation<value_type, interp_category>::type;
-	struct status_type
-	{
+
+	struct status_type {
 		bool _Is_success = false;
 		value_type _Value_1 = std::numeric_limits<value_type>::quiet_NaN();
 		value_type _Value_2 = std::numeric_limits<value_type>::quiet_NaN();
@@ -91,7 +92,7 @@ public:
 		const options_type& _Opts)
 		:m_reference(_F), _Myitp(_Itp), 
 		m_pos(_Initpos), m_options(_Opts),
-		m_ksize(_Opts() << 1 | 1),
+		m_ksize(_Opts() << 1 | 1), _Mysolver(_Myhess),
 		m_current(matrix_type(m_ksize, m_ksize, 0.)) {
 		_Myhess.format = symm;
 	}
@@ -132,6 +133,8 @@ protected:
 	tensor<value_type, 1, DOF> _Myjaco;
 	// \Hessian
 	stack_matrix _Myhess;
+
+	linear_solver_type _Mysolver;
 };
 
 // TEMPLATE impl class for IC-GN optimization [thread-safe]
