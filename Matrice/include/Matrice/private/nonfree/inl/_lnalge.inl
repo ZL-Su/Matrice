@@ -117,6 +117,10 @@ template<> struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 	MATRICE_HOST_INL static int spd(const plview_type& _A) {
 		return spd(std::get<2>(_A), { std::get<0>(_A), std::get<1>(_A) });
 	}
+	template<typename _Mty, typename = std::enable_if_t<is_matrix_v<_Mty>>>
+	MATRICE_HOST_INL static int spd(const _Mty& _A) {
+		return spd(_A.data(), _A.shape());
+	}
 
 	/**
 	 * \computes the LU factorization of a general m-by-n matrix
@@ -242,18 +246,21 @@ template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double>
  */
 template<> struct _Lapack_backward_impl<solver_type::CHD> {
 	template<typename _Lhs, typename _Rhs>
-	MATRICE_GLOBAL_INL static constexpr auto& _(const _Lhs& _A, _Rhs& _X) {
+	MATRICE_GLOBAL_INL static auto& eval(const _Lhs& _A, _Rhs& _X) {
 		static_assert(is_matrix_v<_Lhs>, "_A in _Lapack_backward_impl<solver_type::CHD> must be a matrix type.");
 
 		using iterator = typename _Lhs::iterator;
 		using value_type = typename _Lhs::value_type;
 		const auto M = _A.rows(), N = _A.cols();
 		const auto NRhs = _X.cols();
+#ifdef _DEBUG
+		if (M != N) throw std::runtime_error("The coeff. _A in _Lapack_backward_impl<solver_type::CHD> must be a square matrix.");
+#endif
 
 		for (auto k = 0; k < NRhs; ++k) {
 			auto _B = _X.cview(k);
 			// \solve: L*y = b
-			for (auto j = 1; j < M; ++j) {
+			for (auto j = 0; j < M; ++j) {
 				const auto _A_row = _A[j];
 				auto _Sum_j = _B(j);
 				for (auto i = 0; i < j; ++i) {
@@ -262,10 +269,10 @@ template<> struct _Lapack_backward_impl<solver_type::CHD> {
 				_B(j) = _Sum_j / _A_row[j];
 			}
 			// \solve: U*x = y, where U = L^T
-			for (auto j = M - 2; j >= 0; --j) {
+			for (auto j = M - 1; j >= 0; --j) {
 				const auto _A_row = _A[j];
 				auto _Sum_j = _B(j);
-				for (auto i = j + 1; j < N; ++j) {
+				for (auto i = j + 1; i < N; ++i) {
 					_Sum_j -= _A_row[i] * _B(i);
 				}
 				_B(j) = _Sum_j / _A_row[j];
