@@ -22,19 +22,23 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 DGE_MATRICE_BEGIN _DETAIL_BEGIN
 
 template<typename _Mty, typename _Tag> class _Matrix_decomposition {};
+
 template<typename _Mty> 
 class _Matrix_decomposition<_Mty, _TAG _Linear_spd_tag> {
+	static_assert(is_matrix_v<_Mty>, "_Mty in _Matrix_decomposition must be a matrix type.");
 public:
 	using category = _TAG _Linear_spd_tag;
+
 	MATRICE_HOST_INL _Matrix_decomposition(const _Mty& _A) 
-		: _Mycoef(_A) {
+		: _Mycoef(_A) {}
+
+	MATRICE_HOST_INL auto& forward() {
 		try {
 			_Lapack_kernel_impl<typename _Mty::value_type>::spd(_Mycoef);
-		} catch (std::exception& e) { 
+		}
+		catch (std::exception& e) {
 			std::cout << e.what() << std::endl;
 		}
-	}
-	MATRICE_HOST_INL auto& forward() {
 		return (_Mycoef);
 	}
 	template<typename _Rhs>
@@ -71,7 +75,8 @@ struct _Linear {
 		using _Mybase = _Base<_Maty>;
 	public:
 		using typename _Mybase::matrix_type;
-		static constexpr auto solver_tag = _Tag;
+		using typename _Mybase::value_type;
+		static constexpr auto solver_tag = solver_type::CHD;
 
 		MATRICE_HOST_INL _Decomp(matrix_type& _Data) : _Mybase(_Data) {
 			this->operator();
@@ -84,4 +89,7 @@ struct _Linear {
 	};
 };
 
-_DETAIL_END DGE_MATRICE_END
+_DETAIL_END 
+template<typename... _Args>
+using matrix_decomp = detail::_Matrix_decomposition<_Args...>;
+DGE_MATRICE_END
