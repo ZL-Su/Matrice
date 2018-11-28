@@ -26,41 +26,46 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 namespace dgelom { namespace privt {
-template<typename _Ty> __global_inl__ int _inv2x2m(_Ty* A, _Ty* Ainv)
-{
-	double det = A[0] * A[3] - A[1] * A[2];
+template<typename _It, typename = std::enable_if_t<std::is_pointer_v<_It>>> 
+__global_inl__ int _inv2x2m(const _It A, _It Ainv) {
+	using value_type = typename std::pointer_traits<_It>::element_type;
 
-	if ((det < 0 ? -det : det) < 1.E-6) return 0;
+	value_type _Det = A[0] * A[3] - A[1] * A[2];
 
-	det = 1. / det; 
-	volatile _Ty A0 = A[0];
-	Ainv[0] =  A[3] * det, Ainv[1] = -A[1] * det;
-	Ainv[2] = -A[2] * det, Ainv[3] =    A0 * det;
+	if ((_Det < 0 ? -_Det : _Det) < 1.E-6) return -1;
 
-	return 1;
+	_Det = 1. / _Det;
+	Ainv[0] =  A[3] * _Det, Ainv[1] = -A[1] * _Det;
+	Ainv[2] = -A[2] * _Det, Ainv[3] =  A[0] * _Det;
+
+	return 0;
 }
 
-template<typename _Ty> __global_inl__ int _inv3x3m(_Ty* A, _Ty* Ainv)
-{
-	double det = A[0] * A[4] * A[8] + A[1] * A[5] * A[6] + A[2] * A[3] * A[7]
+template<typename _It, typename = std::enable_if_t<std::is_pointer_v<_It>>>
+__global_inl__ int _inv3x3m(const _It A, _It Ainv) {
+	using value_type = typename std::pointer_traits<_It>::element_type;
+
+	value_type _Det = A[0] * A[4] * A[8] + A[1] * A[5] * A[6] + A[2] * A[3] * A[7]
 		- A[6] * A[4] * A[2] - A[7] * A[5] * A[0] - A[8] * A[3] * A[1];
 
-	if ((det < 0 ? -det : det) < std::numeric_limits<double>::epsilon()) return 0;
+	if ((_Det < 0 ? -_Det : _Det) < 1.E-6) return -1;
 
-	det = 1. / det;
-	volatile _Ty A0 = A[0], A1 = A[1], A2 = A[2], A3 = A[3], A4 = A[4], A6 = A[6];
-	Ainv[0] =  (A[4] * A[8] - A[7] * A[5]) * det;
-	Ainv[1] = -(A[1] * A[8] - A[7] * A[2]) * det;
-	Ainv[2] =  (A1   * A[5] - A[4] * A[2]) * det;
+	_Det = 1. / _Det;
+	volatile value_type A0 = A[0], A1 = A[1], A2 = A[2];
+	volatile value_type A3 = A[3], A4 = A[4], A6 = A[6];
 
-	Ainv[3] = -(A[3] * A[8] - A[6] * A[5]) * det;
-	Ainv[4] =  (A0   * A[8] - A[6] * A2  ) * det;
-	Ainv[5] = -(A0   * A[5] - A3   * A2  ) * det;
+	Ainv[0] =  (A[4] * A[8] - A[7] * A[5]) * _Det;
+	Ainv[1] = -(A[1] * A[8] - A[7] * A[2]) * _Det;
+	Ainv[2] =  (A1   * A[5] - A[4] * A[2]) * _Det;
 
-	Ainv[6] =  (A3 * A[7] - A[6] * A4) * det;
-	Ainv[7] = -(A0 * A[7] - A6   * A1) * det;
-	Ainv[8] =  (A0 * A4 -   A3   * A1) * det;
+	Ainv[3] = -(A[3] * A[8] - A[6] * A[5]) * _Det;
+	Ainv[4] =  (A0   * A[8] - A[6] * A2  ) * _Det;
+	Ainv[5] = -(A0   * A[5] - A3   * A2  ) * _Det;
 
-	return 1;
+	Ainv[6] =  (A3 * A[7] - A[6] * A4) * _Det;
+	Ainv[7] = -(A0 * A[7] - A6   * A1) * _Det;
+	Ainv[8] =  (A0 * A4 -   A3   * A1) * _Det;
+
+	return 0;
 }
 } }
