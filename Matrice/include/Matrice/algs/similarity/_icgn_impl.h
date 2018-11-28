@@ -70,7 +70,7 @@ protected:
 	using matrix_type  = Matrix<value_type>;
 	using const_matrix_reference = const std::add_lvalue_reference_t<matrix_type>;
 	using param_type = stack_vector;
-	using linear_solver_type = dgelom::detail::_Matrix_decomposition<stack_matrix, _TAG _Linear_spd_tag>;
+	using linear_solver_type = matrix_decomp<stack_matrix, _TAG _Linear_spd_tag>;
 	using options_type = _Iterative_conv_options<_Mytraits::interp>;
 	using interp_category = typename _Mytraits::interp_category;
 	using interp_type = typename interpolation<value_type, interp_category>::type;
