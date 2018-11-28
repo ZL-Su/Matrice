@@ -136,25 +136,26 @@ auto _Iterative_conv_base<_Derived>::_Update_subset(const param_type& _P) {
 	stack_vector _Buf_x{ 1. }, _Buf_y{ 1. };
 
 	auto _Mean = zero_v<value_type>;
-	for (auto y = _U; y < _D; ++y) {
+	for (auto y = _U, _Off_y = 0; y < _D; ++y, ++_Off_y) {
 		auto _Dy = static_cast<value_type>(y - _Center.y);
-		auto _Y = y + _P[3] + _P[5] * _Dy;
-		auto _X = _P[0] + _P[2] * _Dy;
-		for (auto x = _L; x < _R; ++x) {
+
+		auto _X = _L + _P[0] + _P[2] * _Dy;
+		auto _Y =  y + _P[3] + _P[5] * _Dy;
+		for (auto x = _L, _Off_x = 0; x < _R; ++x, ++_Off_x) {
 			auto _Dx = static_cast<value_type>(x - _Center.x);
-			_X += x + _P[1] * _Dx; _Y += _P[4] * _Dx;
+			_X += 1 + _P[1] * _Dx; _Y += _P[4] * _Dx;
 
 			auto _Ix = floor<int>(_X), _Iy = floor<int>(_Y);
-			_WITHIN_RANGE_OF_REFIMG{
+			_WITHIN_RANGE_OF_REFIMG {
 				auto _Delta_x = _X - static_cast<value_type>(_Ix);
 				auto _Delta_y = _Y - static_cast<value_type>(_Iy);
 
 				conv_internal::_Delta_pow_n(_Buf_x, _Delta_x);
 				conv_internal::_Delta_pow_n(_Buf_y, _Delta_y);
 
-				_Mean += m_current(y - _U, x - _L) = (*_Myitp)(_Ix, _Iy);
+				_Mean += m_current(_Off_y, _Off_x) = (*_Myitp)(_Ix, _Iy);
 			}
-			else m_current(y - _U, x - _L) = zero_v<value_type>;
+			else m_current(_Off_y, _Off_x) = zero_v<value_type>;
 		}
 	}
 	_Mean /= static_cast<value_type>(multiply(_R - _L, _D - _U));
@@ -163,6 +164,8 @@ auto _Iterative_conv_base<_Derived>::_Update_subset(const param_type& _P) {
 	auto _SSD = sqrt((_Diff_exp*_Diff_exp).sum());
 
 	return std::make_tuple(range(_L, _R), range(_U, _D), _Mean, _SSD);
+
+#undef _WITHIN_RANGE_OF_REFIMG
 }
 
 /**
@@ -199,28 +202,13 @@ MATRICE_HOST_FINL auto _Invcomp_conv_impl<_Ty, _Tag, _Ord>::_Impl(param_type& _P
 	stack_vector _Grad = (_Ndiff_exp*_Mybase::_Myjaco).reduce().t()*(2 / _G_ssd);
 
 	// solve $\Delta \mathbf{p}$
-	_Grad = lapack_backward<CHD>::eval(_Mybase::_Myhess, _Grad);
-	_Grad = zero_v<value_type> -_Grad;
+	//_Grad = lapack_backward<CHD>::eval(_Mybase::_Myhess, _Grad);
+	_Grad = zero_v<value_type> - _Mybase::_Mysolver.backward(_Grad);
 
 	// inverse-compositional update warp parameters $\mathbf{p}$
 	_Pars = conv_internal::_Warp_update<_Ord>::inv(_Pars, _Grad);
 
-	return (_Grad.norm<2>());
-
-	auto _Coef = zero<value_type>::value;
-	/*for (auto y : _Ry) {
-		for (auto x : _Rx) {
-			auto _Diff_f = _Diff_f_exp(x, y);
-			_Diff_f /= m_fssd;
-			auto _Diff_g = _Diff_g_exp(x - _Rx.front(), y - _Ry.front());
-			_Diff_g /= _G_ssd;
-
-			auto _Diff = _Diff_f - _Diff_g;
-
-		}
-	}*/
-
-#undef _WITHIN_RANGE_OF_REFIMG
+	return std::make_tuple((_Ndiff_exp*_Ndiff_exp).sum(), _Grad.norm<2>());
 }
 
 
