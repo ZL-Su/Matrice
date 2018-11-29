@@ -240,7 +240,7 @@
     <ClInclude Include="include\Matrice\algs\interpolation\_interpolation.h" />
     <ClInclude Include="include\Matrice\algs\mbspa.h" />
     <ClInclude Include="include\Matrice\algs\similarity.h" />
-    <ClInclude Include="include\Matrice\algs\similarity\_icgn_impl.h" />
+    <ClInclude Include="include\Matrice\algs\similarity\_iterative_conv_impl.h" />
     <ClInclude Include="include\Matrice\algs\similarity\_similarity_traits.h" />
     <ClInclude Include="include\Matrice\arch\inl\_ixops.hpp" />
     <ClInclude Include="include\Matrice\arch\inl\_ixop_impls.hpp" />

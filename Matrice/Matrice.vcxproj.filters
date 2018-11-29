@@ -276,9 +276,6 @@
     <ClInclude Include="include\Matrice\algs\similarity.h">
       <Filter>Header Files\Algs\Similarity</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\algs\similarity\_icgn_impl.h">
-      <Filter>Header Files\Algs\Similarity</Filter>
-    </ClInclude>
     <ClInclude Include="include\Matrice\algs\similarity\_similarity_traits.h">
       <Filter>Header Files\Algs\Similarity</Filter>
     </ClInclude>
@@ -638,6 +635,9 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\private\autograd\_grad_utils.h">
       <Filter>Header Files\Detail\autograd</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\similarity\_iterative_conv_impl.h">
+      <Filter>Header Files\Algs\Similarity</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
