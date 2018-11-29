@@ -14,7 +14,7 @@ namespace internal {
 
 			const auto _Z = -2. + sqrt(3.);
 			const auto _A = _Z / (_Z*_Z - 1);
-			const auto _K = static_cast<index_t>(log(_Myeps) / log(abs(_Z))) + 1;
+			const auto _K = static_cast<index_t>(log(_Myeps) / log(abs(_Z))) + 2;
 
 			return std::make_tuple(_Z, _A, _K);
 		}
@@ -25,8 +25,8 @@ namespace internal {
 
 			const auto _Z1 = -0.4305753470999737919, _Z2 = -0.04309628820326465382;
 			const auto _A1 = _Z1 / (_Z1*_Z1 - 1), _A2 = _Z2 / (_Z2*_Z2 - 1);
-			const auto _K1 = static_cast<index_t>(log(_Myeps) / log(abs(_Z1))) + 1;
-			const auto _K2 = static_cast<index_t>(log(_Myeps) / log(abs(_Z2))) + 1;
+			const auto _K1 = static_cast<index_t>(log(_Myeps) / log(abs(_Z1))) + 2;
+			const auto _K2 = static_cast<index_t>(log(_Myeps) / log(abs(_Z2))) + 2;
 
 			return std::make_tuple(_Z1, _Z2, _A1, _A2, _K1, _K2);
 		}
@@ -41,13 +41,35 @@ namespace internal {
 			const auto _A1 = _Z1 / (_Z1*_Z1 - 1);
 			const auto _A2 = _Z2 / (_Z2*_Z2 - 1);
 			const auto _A3 = _Z3 / (_Z3*_Z3 - 1);
-			const auto _K1 = static_cast<index_t>(log(_Myeps) / log(abs(_Z1))) + 1;
-			const auto _K2 = static_cast<index_t>(log(_Myeps) / log(abs(_Z2))) + 1;
-			const auto _K3 = static_cast<index_t>(log(_Myeps) / log(abs(_Z3))) + 1;
+			const auto _K1 = static_cast<index_t>(log(_Myeps) / log(abs(_Z1))) + 2;
+			const auto _K2 = static_cast<index_t>(log(_Myeps) / log(abs(_Z2))) + 2;
+			const auto _K3 = static_cast<index_t>(log(_Myeps) / log(abs(_Z3))) + 2;
 
 			return std::make_tuple(_Z1, _Z2, _Z3, _A1, _A2, _A3, _K1, _K2, _K3);
 		}
 	};
+}
+
+#define _SPLCOEFF_CWISE_RECURSION(_A, _Z) \
+_Buff.rview(0) = _R0; \
+for (std::size_t _Row = 1; _Row < _Height; ++_Row) { \
+	_Buff.rview(_Row) = _Data.rview(_Row) + _Buff.rview(_Row - 1)*_Z; \
+} \
+\
+_Mycoeff.rview(_Height - 1) = _A * (_Buff.rview(_Height - 1) + _Buff.rview(_Height - 2)*_Z); \
+for (index_t _Row = _Height - 2; _Row >= 0; --_Row) { \
+	_Mycoeff.rview(_Row) = _Z * (_Mycoeff.rview(_Row + 1) - _Buff.rview(_Row)); \
+}
+
+#define _SPLCOEFF_RWISE_RECURSION(_A, _Z) \
+_Buff.cview(0) = _C0; \
+for (std::size_t _Col = 1; _Col < _Width; ++_Col) { \
+	_Buff.cview(_Col) = _Mycoeff.cview(_Col) + _Buff.cview(_Col - 1)*_Z; \
+} \
+\
+_Mycoeff.cview(_Width - 1) = _A * (_Buff.cview(_Width - 1) + _Buff.cview(_Width - 2)*_Z); \
+for (index_t _Col = _Width - 2; _Col >= 0; --_Col) { \
+	_Mycoeff.cview(_Col) = _Z * (_Mycoeff.cview(_Col + 1) - _Buff.cview(_Col)); \
 }
 
 template<typename _Ty> 
@@ -56,7 +78,7 @@ void _Spline_interpolation<_Ty, _TAG bicspl_tag>::_Coeff_impl() {
 	auto& _Mycoeff = _Mybase::_Mycoeff;
 
 	auto[_Width, _Height] = _Data.shape();
-	_Mycoeff.create(_Height, _Width, zero<value_type>::value);
+	_Mycoeff.create(_Height, _Width, zero_v<value_type>);
 
 	//initialization
 	const auto[_Z, _A, _K] = internal::_It_hypar<value_type, _Mybase::category>::value();
@@ -66,7 +88,8 @@ void _Spline_interpolation<_Ty, _TAG bicspl_tag>::_Coeff_impl() {
 	//Recursion over each column
 
 	//pre-calculate the initial value for the first recursion
-	matrix_type _R0(1, _Width, zero<value_type>::value);
+	matrix_type _R0(1, _Width, zero_v<value_type>);
+	
 #pragma omp parallel if(_K > 100)
 	{
 #pragma omp for
@@ -74,21 +97,12 @@ void _Spline_interpolation<_Ty, _TAG bicspl_tag>::_Coeff_impl() {
 			_R0 = _R0 + pow(_Z, _Row)*_Data.rview(_Row);
 		}
 	}
-
-	_Buff.rview(0) = _R0;
-	for (std::size_t _Row = 1; _Row < _Height; ++_Row) {
-		_Buff.rview(_Row) = _Data.rview(_Row) + _Buff.rview(_Row - 1)*_Z;
-	}
-
-	_Mycoeff.rview(_Height - 1) = _A * (_Buff.rview(_Height - 1) + _Buff.rview(_Height - 2)*_Z);
-	for (index_t _Row = _Height - 2; _Row >= 0; --_Row) {
-		_Mycoeff.rview(_Row) = _Z * (_Mycoeff.rview(_Row + 1) - _Buff.rview(_Row));
-	}
+	_SPLCOEFF_CWISE_RECURSION(_A, _Z);
 
 	//Recursion over each row
 
 	//pre-calculate the initial value for the first recursion
-	matrix_type _C0(_Height, 1, zero<value_type>::value);
+	matrix_type _C0(_Height, 1, zero_v<value_type>);
 #pragma omp parallel if(_K > 100)
 	{
 #pragma omp for
@@ -96,16 +110,7 @@ void _Spline_interpolation<_Ty, _TAG bicspl_tag>::_Coeff_impl() {
 			_C0 = _C0 + _Mycoeff.cview(_Col) * pow(_Z, _Col);
 		}
 	}
-
-	_Buff.cview(0) = _C0;
-	for (std::size_t _Col = 1; _Col < _Width; ++_Col) {
-		_Buff.cview(_Col) = _Mycoeff.cview(_Col) + _Buff.cview(_Col - 1)*_Z;
-	}
-
-	_Mycoeff.cview(_Width - 1) = _A * (_Buff.cview(_Width - 1) + _Buff.cview(_Width - 2)*_Z);
-	for (index_t _Col = _Width - 2; _Col >= 0; --_Col) {
-		_Mycoeff.cview(_Col) = _Z * (_Mycoeff.cview(_Col + 1) - _Buff.cview(_Col));
-	}
+	_SPLCOEFF_RWISE_RECURSION(_A, _Z);
 }
 template<typename _Ty> 
 void _Spline_interpolation<_Ty, _TAG biqspl_tag>::_Coeff_impl() {
@@ -113,7 +118,7 @@ void _Spline_interpolation<_Ty, _TAG biqspl_tag>::_Coeff_impl() {
 	auto& _Mycoeff = _Mybase::_Mycoeff;
 
 	auto[_Width, _Height] = _Data.shape();
-	_Mycoeff.create(_Height, _Width, zero<value_type>::value);
+	_Mycoeff.create(_Height, _Width, zero_v<value_type>);
 
 	//initialization
 	const auto[_Z1, _Z2, _A1, _A2, _K1, _K2] = internal::_It_hypar<value_type, _Mybase::category>::value();
@@ -123,7 +128,7 @@ void _Spline_interpolation<_Ty, _TAG biqspl_tag>::_Coeff_impl() {
 	// \Recursion over each column...
 
 	//pre-calculate the initial value for the first recursion
-	matrix_type _R0(1, _Width, zero<value_type>::value);
+	matrix_type _R0(1, _Width, zero_v<value_type>);
 #pragma omp parallel if(_K1 > 100)
 	{
 #pragma omp for
@@ -131,16 +136,17 @@ void _Spline_interpolation<_Ty, _TAG biqspl_tag>::_Coeff_impl() {
 			_R0 = _R0 + pow(_Z1, _Row)*_Data.rview(_Row);
 		}
 	}
-	_Buff.rview(0) = _R0;
+	_SPLCOEFF_CWISE_RECURSION(_A1, _Z1);
+	/*_Buff.rview(0) = _R0;
 	for (std::size_t _Row = 1; _Row < _Height; ++_Row) {
 		_Buff.rview(_Row) = _Data.rview(_Row) + _Buff.rview(_Row - 1)*_Z1;
 	}
 	_Mycoeff.rview(_Height-1) = _A1*(_Buff.rview(_Height-1) + _Buff.rview(_Height-2)*_Z1);
 	for (index_t _Row = _Height - 2; _Row >= 0; --_Row) {
 		_Mycoeff.rview(_Row) = _Z1 * (_Mycoeff.rview(_Row + 1) - _Buff.rview(_Row));
-	}
+	}*/
 
-	_R0 = { zero<value_type>::value };
+	_R0 = { zero_v<value_type> };
 #pragma omp parallel if(_K2 > 100)
 	{
 #pragma omp for
@@ -148,20 +154,20 @@ void _Spline_interpolation<_Ty, _TAG biqspl_tag>::_Coeff_impl() {
 			_R0 = _R0 + pow(_Z2, _Row)*_Mycoeff.rview(_Row);
 		}
 	}
-	_Buff.rview(0) = _R0;
+	_SPLCOEFF_CWISE_RECURSION(_A2, _Z2);
+	/*_Buff.rview(0) = _R0;
 	for (std::size_t _Row = 1; _Row < _Height; ++_Row) {
 		_Buff.rview(_Row) = _Mycoeff.rview(_Row) + _Buff.rview(_Row - 1)*_Z2;
 	}
 	_Mycoeff.rview(_Height-1) = _A2*(_Buff.rview(_Height-1)+_Buff.rview(_Height-2)*_Z2);
 	for (index_t _Row = _Height - 2; _Row >= 0; --_Row) {
 		_Mycoeff.rview(_Row) = _Z2 * (_Mycoeff.rview(_Row + 1) - _Buff.rview(_Row));
-	}
-
+	}*/
 
 	// \Recursion over each row...
 
 	//pre-calculate the initial value for the first recursion
-	matrix_type _C0(_Height, 1, zero<value_type>::value);
+	matrix_type _C0(_Height, 1, zero_v<value_type>);
 #pragma omp parallel if(_K1 > 100)
 	{
 #pragma omp for
@@ -169,16 +175,17 @@ void _Spline_interpolation<_Ty, _TAG biqspl_tag>::_Coeff_impl() {
 			_C0 = _C0 + _Mycoeff.cview(_Col) * pow(_Z1, _Col);
 		}
 	}
-	_Buff.cview(0) = _C0;
+	_SPLCOEFF_RWISE_RECURSION(_A1, _Z1);
+	/*_Buff.cview(0) = _C0;
 	for (std::size_t _Col = 1; _Col < _Width; ++_Col) {
 		_Buff.cview(_Col) = _Mycoeff.cview(_Col) + _Buff.cview(_Col - 1)*_Z1;
 	}
 	_Mycoeff.cview(_Width-1) = _A1*(_Buff.cview(_Width-1) + _Buff.cview(_Width-2)*_Z1);
 	for (index_t _Col = _Width - 2; _Col >= 0; --_Col) {
 		_Mycoeff.cview(_Col) = _Z1 * (_Mycoeff.cview(_Col + 1) - _Buff.cview(_Col));
-	}
+	}*/
 
-	_C0 = { zero<value_type>::value };
+	_C0 = { zero_v<value_type> };
 #pragma omp parallel if(_K2 > 100)
 	{
 #pragma omp for
@@ -186,14 +193,15 @@ void _Spline_interpolation<_Ty, _TAG biqspl_tag>::_Coeff_impl() {
 			_C0 = _C0 + _Mycoeff.cview(_Col) * pow(_Z2, _Col);
 		}
 	}
-	_Buff.cview(0) = _C0;
+	_SPLCOEFF_RWISE_RECURSION(_A2, _Z2);
+	/*_Buff.cview(0) = _C0;
 	for (std::size_t _Col = 1; _Col < _Width; ++_Col) {
 		_Buff.cview(_Col) = _Mycoeff.cview(_Col) + _Buff.cview(_Col - 1)*_Z2;
 	}
 	_Mycoeff.cview(_Width-1) = _A2*(_Buff.cview(_Width-1) + _Buff.cview(_Width-2)*_Z2);
 	for (index_t _Col = _Width - 2; _Col >= 0; --_Col) {
 		_Mycoeff.cview(_Col) = _Z2*(_Mycoeff.cview(_Col+1) - _Buff.cview(_Col));
-	}
+	}*/
 }
 template<typename _Ty> 
 void _Spline_interpolation<_Ty, _TAG bisspl_tag>::_Coeff_impl() {
@@ -201,12 +209,72 @@ void _Spline_interpolation<_Ty, _TAG bisspl_tag>::_Coeff_impl() {
 	auto& _Mycoeff = _Mybase::_Mycoeff;
 
 	auto[_Width, _Height] = _Data.shape();
-	_Mycoeff.create(_Height, _Width, zero<value_type>::value);
+	_Mycoeff.create(_Height, _Width, zero_v<value_type>);
 
 	//initialization
 	const auto[_Z1, _Z2, _Z3, _A1, _A2, _A3, _K1, _K2, _K3] = internal::_It_hypar<value_type, _Mybase::category>::value();
 
 	matrix_type _Buff(_Height, _Width);
+
+	matrix_type _R0(1, _Width, zero_v<value_type>);
+#pragma omp parallel if(_K1 > 100)
+	{
+#pragma omp for
+		for (index_t _Row = 0; _Row < _K1; ++_Row) {
+			_R0 = _R0 + pow(_Z1, _Row)*_Data.rview(_Row);
+		}
+	}
+	_SPLCOEFF_CWISE_RECURSION(_A1, _Z1);
+
+	_R0 = { zero_v<value_type> };
+#pragma omp parallel if(_K2 > 100)
+	{
+#pragma omp for
+		for (index_t _Row = 0; _Row < _K2; ++_Row) {
+			_R0 = _R0 + pow(_Z2, _Row)*_Data.rview(_Row);
+		}
+	}
+	_SPLCOEFF_CWISE_RECURSION(_A2, _Z2);
+
+	_R0 = { zero_v<value_type> };
+#pragma omp parallel if(_K3 > 100)
+	{
+#pragma omp for
+		for (index_t _Row = 0; _Row < _K3; ++_Row) {
+			_R0 = _R0 + pow(_Z3, _Row)*_Data.rview(_Row);
+		}
+	}
+	_SPLCOEFF_CWISE_RECURSION(_A3, _Z3);
+
+	matrix_type _C0(_Height, 1, zero_v<value_type>);
+#pragma omp parallel if(_K1 > 100)
+	{
+#pragma omp for
+		for (index_t _Col = 0; _Col < _K1; ++_Col) {
+			_C0 = _C0 + _Mycoeff.cview(_Col) * pow(_Z1, _Col);
+		}
+	}
+	_SPLCOEFF_RWISE_RECURSION(_A1, _Z1);
+
+	_C0 = { zero_v<value_type> };
+#pragma omp parallel if(_K2 > 100)
+	{
+#pragma omp for
+		for (index_t _Col = 0; _Col < _K2; ++_Col) {
+			_C0 = _C0 + _Mycoeff.cview(_Col) * pow(_Z2, _Col);
+		}
+	}
+	_SPLCOEFF_RWISE_RECURSION(_A2, _Z2);
+
+	_C0 = { zero_v<value_type> };
+#pragma omp parallel if(_K3 > 100)
+	{
+#pragma omp for
+		for (index_t _Col = 0; _Col < _K3; ++_Col) {
+			_C0 = _C0 + _Mycoeff.cview(_Col) * pow(_Z3, _Col);
+		}
+	}
+	_SPLCOEFF_RWISE_RECURSION(_A3, _Z3);
 }
 
 template class _Spline_interpolation<float,  _TAG bicspl_tag>;
@@ -215,4 +283,8 @@ template class _Spline_interpolation<float,  _TAG biqspl_tag>;
 template class _Spline_interpolation<double, _TAG biqspl_tag>;
 template class _Spline_interpolation<float,  _TAG bisspl_tag>;
 template class _Spline_interpolation<double, _TAG bisspl_tag>;
+
+#undef _SPLCOEFF_CWISE_RECURSION
+#undef _SPLCOEFF_RWISE_RECURSION
+
 MATRICE_ALGS_END
