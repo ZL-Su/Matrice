@@ -616,8 +616,6 @@ protected:
 	using base_t::m_data;
 
 	std::size_t m_format = rmaj|gene;
-
-public:
 	_Myt_storage_type m_storage;
 
 #undef _SHAPE

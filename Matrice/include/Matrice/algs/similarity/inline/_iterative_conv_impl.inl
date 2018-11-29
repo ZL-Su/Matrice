@@ -15,7 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
-#include "../_icgn_impl.h"
+#include "../_iterative_conv_impl.h"
 #include "../../../private/_range.h"
 #include "../../../private/nonfree/_lnalge.h"
 
@@ -202,7 +202,6 @@ MATRICE_HOST_FINL auto _Invcomp_conv_impl<_Ty, _Tag, _Ord>::_Impl(param_type& _P
 	stack_vector _Grad = (_Ndiff_exp*_Mybase::_Myjaco).reduce().t()*(2 / _G_ssd);
 
 	// solve $\Delta \mathbf{p}$
-	//_Grad = lapack_backward<CHD>::eval(_Mybase::_Myhess, _Grad);
 	_Grad = zero_v<value_type> - _Mybase::_Mysolver.backward(_Grad);
 
 	// inverse-compositional update warp parameters $\mathbf{p}$
