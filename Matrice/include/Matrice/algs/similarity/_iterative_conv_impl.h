@@ -87,11 +87,22 @@ public:
 
 	_Iterative_conv_base(
 		const multi_matrix<value_type>& _F,
+		const interp_type& _Itp,
+		const point_t& _Pos,
+		const options_type& _Opts)
+		:m_reference(_F), _Myitp(std::make_shared<interp_type>(_Itp)),
+		m_pos(_Pos), m_options(_Opts),
+		m_ksize(_Opts() << 1 | 1), _Mysolver(_Myhess),
+		m_current(matrix_type(m_ksize, m_ksize, 0.)) {
+		_Myhess.format = symm;
+	}
+	_Iterative_conv_base(
+		const multi_matrix<value_type>& _F,
 		const std::shared_ptr<interp_type>& _Itp,
-		const point_t& _Initpos,
+		const point_t& _Pos,
 		const options_type& _Opts)
 		:m_reference(_F), _Myitp(_Itp), 
-		m_pos(_Initpos), m_options(_Opts),
+		m_pos(_Pos), m_options(_Opts),
 		m_ksize(_Opts() << 1 | 1), _Mysolver(_Myhess),
 		m_current(matrix_type(m_ksize, m_ksize, 0.)) {
 		_Myhess.format = symm;
@@ -158,11 +169,26 @@ public:
 	using param_t = param_type;
 	using typename _Mybase::point_t;
 
+	/**
+	 * _Ref : reference image package, includes reference image and its gradients w.r.t. x and y
+	 * _Itp : interpolator of current image
+	 * _Pos : the initial estimation
+	 * _Opts: solver settings
+	 */
 	MATRICE_HOST_FINL _Invcomp_conv_impl(
 		const multi_matrix<value_t>& _Ref, 
 		const std::shared_ptr<interp_type>& _Itp, 
-		point_t _Initp, options_t _Opts = options_t()) noexcept
-		: _Mybase(_Ref, _Itp, _Initp, _Opts) {
+		point_t _Pos, options_t _Opts = options_t()) noexcept
+		: _Mybase(_Ref, _Itp, _Pos, _Opts) {
+		_Init();
+		m_favg = _Ref[0].sum() / _Ref[0].size();
+		m_fssd = sqrt(((_Ref[0] - m_favg)*(_Ref[0] - m_favg)).sum());
+	}
+	MATRICE_HOST_FINL _Invcomp_conv_impl(
+		const multi_matrix<value_t>& _Ref,
+		const interp_type& _Itp,
+		point_t _Pos, options_t _Opts = options_t()) noexcept
+		: _Mybase(_Ref, _Itp, _Pos, _Opts) {
 		_Init();
 		m_favg = _Ref[0].sum() / _Ref[0].size();
 		m_fssd = sqrt(((_Ref[0] - m_favg)*(_Ref[0] - m_favg)).sum());
