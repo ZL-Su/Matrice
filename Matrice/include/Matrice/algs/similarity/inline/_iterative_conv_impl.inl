@@ -85,7 +85,7 @@ template<> struct _Op<1, 6> {
 			for (auto x : _Rx) { auto _Dx = x - _Pos.x;
 				const auto _x = x - _Rx.begin();
 				const auto &_Fx = _Dfdx[y][x], &_Fy = _Dfdy[y][x];
-				_Ret(_y, _x) = { _Fx, _Fy, _Fx*_Dx, _Fx*_Dy, _Fy*_Dx, _Fy*_Dy };
+				_Ret(_y, _x) = { _Fx, _Fx*_Dx, _Fx*_Dy, _Fy, _Fy*_Dx, _Fy*_Dy };
 			}
 		}
 		return std::forward<decltype(_Ret)>(_Ret);
@@ -171,23 +171,23 @@ auto _Iterative_conv_base<_Derived>::_Update_subset(const param_type& _P) {
 /**
  * \For each point refinement, this method aims to compute the Jacobian and the Hessian before stepping into the iterative solver _Impl().
  */
-template<typename _Ty, typename _Tag, std::size_t _Ord>
-MATRICE_HOST_FINL auto _Invcomp_conv_impl<_Ty, _Tag, _Ord>::_Init() {
+template<typename _Ty, typename _Tag, std::size_t _ORD>
+MATRICE_HOST_FINL auto _Invcomp_conv_impl<_Ty, _Tag, _ORD>::_Init() {
 	const auto& _Pos = _Mybase::m_pos;
 	const auto& _Ref = _Mybase::m_reference;
 	auto[_L, _R, _U, _D] = conv_internal::_Square_range(_Pos, m_ksize>>1);
 
 	range<decltype(_L)> _Rx(_L, _R), _Ry(_U, _D);
-	_Mybase::_Myjaco = conv_internal::_Op<_Ord, _Mybase::DOF>::J(_Ref, _Pos, _Rx, _Ry);
-	_Mybase::_Myhess = _Mybase::_Myjaco.t().mul(_Mybase::_Myjaco).reduce();
+	_Mybase::_Myjaco = conv_internal::_Op<_ORD, _Mybase::DOF>::J(_Ref, _Pos, _Rx, _Ry);
+	_Mybase::_Myhess = _Mybase::_Myjaco.t().mul(_Mybase::_Myjaco).reduce()*2/m_fssd;
 
 	_Mybase::_Myhess = _Mybase::_Mysolver.forward();
 }
 /**
  * \IC-GN solver: _Pars={u, ux, uy, v, vx, vy} will be overwritten by the updated solution.
  */
-template<typename _Ty, typename _Tag, std::size_t _Ord>
-MATRICE_HOST_FINL auto _Invcomp_conv_impl<_Ty, _Tag, _Ord>::_Impl(param_type& _Pars) {
+template<typename _Ty, typename _Tag, std::size_t _ORD>
+MATRICE_HOST_FINL auto _Invcomp_conv_impl<_Ty, _Tag, _ORD>::_Impl(param_type& _Pars) {
 	const auto& _Ref  = _Mybase::m_reference;
 
 	const auto[_Rx, _Ry, _G_mean, _G_ssd] = _Mybase::_Update_subset(_Pars);
@@ -195,19 +195,22 @@ MATRICE_HOST_FINL auto _Invcomp_conv_impl<_Ty, _Tag, _Ord>::_Impl(param_type& _P
 		throw std::runtime_error("Bad value of variable _G_ssd in _Invcomp_conv_impl<_Ty, _Intp, _Order>::_Solver_impl(...).");
 
 	auto _Ref_subset = _Ref[0].block(_Rx.begin(), _Rx.end(), _Ry.begin(), _Ry.end()).eval();
-	auto _Diff_f_exp = _Ref_subset - m_favg;
-	auto _Diff_g_exp = m_current - _G_mean;
-	auto _Ndiff_exp = _Diff_f_exp * (1 / m_fssd) - _Diff_g_exp * (1 / _G_ssd);
+	auto _Diff_f = _Ref_subset - m_favg;
+	auto _Diff_g = m_current - _G_mean;
+	auto _Diff_n = _Diff_f*(1/m_fssd) - _Diff_g*(1/_G_ssd);
 
-	stack_vector _Grad = (_Ndiff_exp*_Mybase::_Myjaco).reduce().t()*(2 / _G_ssd);
+	stack_vector _Grad = (_Diff_n*_Mybase::_Myjaco).reduce().t()*(2 / _G_ssd);
 
 	// solve $\Delta \mathbf{p}$
-	_Grad = zero_v<value_type> - _Mybase::_Mysolver.backward(_Grad);
+	_Grad = -1.*_Mybase::_Mysolver.backward(_Grad);
 
 	// inverse-compositional update warp parameters $\mathbf{p}$
-	_Pars = conv_internal::_Warp_update<_Ord>::inv(_Pars, _Grad);
+	_Pars = conv_internal::_Warp_update<_ORD>::inv(_Pars, _Grad);
 
-	return std::make_tuple((_Ndiff_exp*_Ndiff_exp).sum(), _Grad.norm<2>());
+	// update anchor position
+	_Mybase::m_pos.x += _Pars[0], _Mybase::m_pos.y += _Pars[3];
+
+	return std::make_tuple((_Diff_n*_Diff_n).sum(), (_Grad*_Grad).sum());
 }
 
 
