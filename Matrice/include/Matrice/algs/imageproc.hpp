@@ -139,6 +139,11 @@ public:
 
 		return std::forward<matrix_type>(_Grad);
 	}
+	/**
+	 * \Get image interpolator
+	 */
+	MATRICE_HOST_INL auto& itp() { return (_Myop); }
+	MATRICE_HOST_INL const auto& itp() const { return (_Myop); }
 
 protected:
 	const image_type& _Myimg;
@@ -159,6 +164,30 @@ private:
 template<typename _Ty> 
 class _Gradient_impl<_Ty, _TAG _Itped_grad_tag::bicspl>
 	: public _Interpolated_gradient_base<_Gradient_impl<_Ty, _TAG _Itped_grad_tag::bicspl>> {
+	using _Myt = _Gradient_impl;
+	using _Mybase = _Interpolated_gradient_base<_Myt>;
+public:
+	using typename _Mybase::image_type;
+	using typename _Mybase::value_type;
+
+	_Gradient_impl(const image_type& _Img) : _Mybase(_Img) {}
+};
+
+template<typename _Ty>
+class _Gradient_impl<_Ty, _TAG _Itped_grad_tag::biqspl>
+	: public _Interpolated_gradient_base<_Gradient_impl<_Ty, _TAG _Itped_grad_tag::biqspl>> {
+	using _Myt = _Gradient_impl;
+	using _Mybase = _Interpolated_gradient_base<_Myt>;
+public:
+	using typename _Mybase::image_type;
+	using typename _Mybase::value_type;
+
+	_Gradient_impl(const image_type& _Img) : _Mybase(_Img) {}
+};
+
+template<typename _Ty>
+class _Gradient_impl<_Ty, _TAG _Itped_grad_tag::bisspl>
+	: public _Interpolated_gradient_base<_Gradient_impl<_Ty, _TAG _Itped_grad_tag::bisspl>> {
 	using _Myt = _Gradient_impl;
 	using _Mybase = _Interpolated_gradient_base<_Myt>;
 public:
