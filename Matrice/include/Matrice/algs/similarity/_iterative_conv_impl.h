@@ -92,9 +92,10 @@ public:
 		const options_type& _Opts)
 		:m_reference(_F), _Myitp(std::make_shared<interp_type>(_Itp)),
 		m_pos(_Pos), m_options(_Opts),
-		m_ksize(_Opts() << 1 | 1), _Mysolver(_Myhess),
-		m_current(matrix_type(m_ksize, m_ksize, 0.)) {
+		m_ksize(_Opts() << 1 | 1), _Mysolver(_Myhess) {
 		_Myhess.format = symm;
+		_Myref.create(m_ksize, m_ksize);
+		_Mycur.create(m_ksize, m_ksize);
 	}
 	_Iterative_conv_base(
 		const multi_matrix<value_type>& _F,
@@ -103,9 +104,10 @@ public:
 		const options_type& _Opts)
 		:m_reference(_F), _Myitp(_Itp), 
 		m_pos(_Pos), m_options(_Opts),
-		m_ksize(_Opts() << 1 | 1), _Mysolver(_Myhess),
-		m_current(matrix_type(m_ksize, m_ksize, 0.)) {
+		m_ksize(_Opts() << 1 | 1), _Mysolver(_Myhess) {
 		_Myhess.format = symm;
+		_Myref.create(m_ksize, m_ksize);
+		_Mycur.create(m_ksize, m_ksize);
 	}
 
 	// \set initial pos
@@ -131,8 +133,8 @@ protected:
 	// \kernel size
 	std::size_t m_ksize;
 
-	// \current image buffer: G
-	matrix_type m_current;
+	// \reference and current image patch buffers: f and g
+	matrix_type _Myref, _Mycur;
 
 	// \view of reference image and its gradients: F, dFdx, dFdy
 	const multi_matrix<value_type>& m_reference;
@@ -180,18 +182,18 @@ public:
 		const std::shared_ptr<interp_type>& _Itp, 
 		point_t _Pos, options_t _Opts = options_t()) noexcept
 		: _Mybase(_Ref, _Itp, _Pos, _Opts) {
+		/*m_favg = _Ref[0].sum() / _Ref[0].size();
+		m_fssd = sqrt(((_Ref[0] - m_favg)*(_Ref[0] - m_favg)).sum());*/
 		_Init();
-		m_favg = _Ref[0].sum() / _Ref[0].size();
-		m_fssd = sqrt(((_Ref[0] - m_favg)*(_Ref[0] - m_favg)).sum());
 	}
 	MATRICE_HOST_FINL _Invcomp_conv_impl(
 		const multi_matrix<value_t>& _Ref,
 		const interp_type& _Itp,
 		point_t _Pos, options_t _Opts = options_t()) noexcept
 		: _Mybase(_Ref, _Itp, _Pos, _Opts) {
+		/*m_favg = _Ref[0].sum() / _Ref[0].size();
+		m_fssd = sqrt(((_Ref[0] - m_favg)*(_Ref[0] - m_favg)).sum());*/
 		_Init();
-		m_favg = _Ref[0].sum() / _Ref[0].size();
-		m_fssd = sqrt(((_Ref[0] - m_favg)*(_Ref[0] - m_favg)).sum());
 	}
 
 	MATRICE_HOST_FINL auto _Impl(param_type& _Params);
@@ -201,8 +203,6 @@ private:
 	MATRICE_HOST_FINL auto _Update();
 
 	value_type m_favg = 0, m_fssd = 1;
-	using _Mybase::m_ksize;
-	using _Mybase::m_current;
 };
 }
 MATRICE_ALGS_END

@@ -69,7 +69,7 @@ struct _Op<bcspline, 1, _Maty, _Vecty> {
 };
 
 /**
- * \estimate Jacobian: df/d\mathbf{p} = $\partial f / \partial p_i$
+ *\estimate Jacobian: df/d\mathbf{p} = $\partial f / \partial p_i$
  */
 template<> struct _Op<1, 6> {
 	template<typename _Mulmty, typename _Poty, typename _Rgty>
@@ -92,34 +92,39 @@ template<> struct _Op<1, 6> {
 	};
 };
 
-template<std::size_t _Ord> struct _Warp_update {};
+template<std::size_t _ORD> struct _Warp_update {};
+
 template<> struct _Warp_update<1> {
 	template<typename _Vecty> 
-	static MATRICE_HOST_INL auto& fwd(_Vecty& x, const _Vecty& y) {
+	static MATRICE_HOST_INL auto& fwd(_Vecty& x, const _Vecty& y) {}
 
-	}
+	/**
+	 * \inverse compositional warp parameter update.
+	 * \ x := p(u, dudx, dudy, v, dvdx, dvdy)
+	 * \ y := update of parameter vector p, overwritten by the updated p
+	 */
 	template<typename _Vecty>
-	static MATRICE_HOST_INL auto& inv(_Vecty& x, const _Vecty& y) {
-		Matrix_<typename _Vecty::value_type, 3, 3> _P{
-			1 + x[1],     x[2], x[0],
-				 x[4], 1 + x[5], x[3],
-					0.,       0.,   1. };
-		Matrix_<typename _Vecty::value_type, 3, 3> _Dp{
-			1 + y[1],     y[2], y[0],
-				 y[4], 1 + y[5], y[3],
-					0.,       0.,   1. };
-		auto _Exp = _P.mul(_Dp.inv().eval());
+	static MATRICE_HOST_INL auto& inv(const _Vecty& x, _Vecty& y) {
+		auto _Inv_det = 1/((1 + y[1])*(1 + y[5]) - y[2] * y[4]);
+		auto _Val_0 = y[0] * (1 + y[5]) - y[3] * y[2];
+		auto _Val_1 = y[3] * (1 + y[1]) - y[0] * y[4];
+		auto _Val_2 = y[5] + 1, _Val_3 = y[4];
+		auto _Val_4 = y[3] + 1, _Val_5 = y[2];
 
-		x[0] = _Exp(2), x[1] = _Exp(0) - 1, x[2] = _Exp(1); // $u, u_x, u_y$
-		x[3] = _Exp(5), x[4] = _Exp(3), x[5] = _Exp(4) - 1; // $v, v_x, v_y$
+		y[0] = x[0] - ((1 + x[1])*_Val_0 - x[2] * _Val_1)*_Inv_det;
+		y[1] = ((1 + x[1])*_Val_2 - x[2] * _Val_3)*_Inv_det - 1;
+		y[2] = (x[2] * _Val_4 + (1 + x[1])*_Val_5)*_Inv_det;
+		y[3] = x[3] - ((1 + x[5])*_Val_1 - x[4] * _Val_0)*_Inv_det;
+		y[4] = (x[4] * _Val_2 - (1 + x[5])*_Val_3)*_Inv_det;
+		y[5] = ((1 + x[5])*_Val_4 - x[4] * _Val_5)*_Inv_det - 1;
 
-		return (x);
+		return (y);
 	}
 };
 }
 
 /**
- * \update deformed subset for each interation
+ * \update deformed subset for each interation, return 2/\sqrt{\sum{(g-\bar{g})^2}}
  */
 template<typename _Derived> MATRICE_HOST_FINL 
 auto _Iterative_conv_base<_Derived>::_Update_subset(const param_type& _P) {
@@ -153,17 +158,21 @@ auto _Iterative_conv_base<_Derived>::_Update_subset(const param_type& _P) {
 				conv_internal::_Delta_pow_n(_Buf_x, _Delta_x);
 				conv_internal::_Delta_pow_n(_Buf_y, _Delta_y);
 
-				_Mean += m_current(_Off_y, _Off_x) = (*_Myitp)(_Ix, _Iy);
+				_Mean += _Mycur(_Off_y, _Off_x) = (*_Myitp)(_Ix-_Bl, _Iy);
 			}
-			else m_current(_Off_y, _Off_x) = zero_v<value_type>;
+			else _Mycur(_Off_y, _Off_x) = zero_v<value_type>;
 		}
 	}
 	_Mean /= static_cast<value_type>(multiply(_R - _L, _D - _U));
 
-	auto _Diff_exp = m_current - _Mean;
-	auto _SSD = sqrt((_Diff_exp*_Diff_exp).sum());
+	_Mycur = _Mycur - _Mean;
+	auto _SSD = sqrt((_Mycur*_Mycur).sum());
+	if (_SSD < m_options)
+		throw std::runtime_error("Bad value of variable _SSD in _Invcomp_conv_base<...>::_Update_subset(_P).");
 
-	return std::make_tuple(range(_L, _R), range(_U, _D), _Mean, _SSD);
+	_Mycur = _Mycur / _SSD;
+
+	return (2./_SSD);
 
 #undef _WITHIN_RANGE_OF_REFIMG
 }
@@ -175,31 +184,36 @@ template<typename _Ty, typename _Tag, std::size_t _ORD>
 MATRICE_HOST_FINL auto _Invcomp_conv_impl<_Ty, _Tag, _ORD>::_Init() {
 	const auto& _Pos = _Mybase::m_pos;
 	const auto& _Ref = _Mybase::m_reference;
-	auto[_L, _R, _U, _D] = conv_internal::_Square_range(_Pos, m_ksize>>1);
+	auto[_L, _R, _U, _D] = conv_internal::_Square_range(_Pos, _Mybase::m_ksize>>1);
+
+	_Mybase::_Myref = _Ref[0].block(_L, _R, _U, _D).eval();
+	auto _Mean = _Mybase::_Myref.sum() / _Mybase::_Myref.size();
+	_Mybase::_Myref = _Mybase::_Myref - _Mean;
+	auto _SSD = sqrt((_Mybase::_Myref*_Mybase::_Myref).sum());
+	if (_SSD < _Mybase::m_options)
+		throw std::runtime_error("Bad value of variable _SSD in _Invcomp_conv_impl<...>::_Init().");
+	_Mybase::_Myref = _Mybase::_Myref / _SSD;
 
 	range<decltype(_L)> _Rx(_L, _R), _Ry(_U, _D);
 	_Mybase::_Myjaco = conv_internal::_Op<_ORD, _Mybase::DOF>::J(_Ref, _Pos, _Rx, _Ry);
-	_Mybase::_Myhess = _Mybase::_Myjaco.t().mul(_Mybase::_Myjaco).reduce()*2/m_fssd;
+	_Mybase::_Myhess = _Mybase::_Myjaco.t().mul(_Mybase::_Myjaco).reduce() * 2 / _SSD;
 
 	_Mybase::_Myhess = _Mybase::_Mysolver.forward();
 }
 /**
- * \IC-GN solver: _Pars={u, ux, uy, v, vx, vy} will be overwritten by the updated solution.
+ * \IC-GN solver kernel, includes computation of SDIs (Steepest Descent Images) and its dot-production with Error Image, backward substitution for solving dp and IC-update for warp parameters, which should be looped to convergence. 
+ * \_Pars = {u, ux, uy, v, vx, vy} will be overwritten by the updated solution.
  */
 template<typename _Ty, typename _Tag, std::size_t _ORD>
 MATRICE_HOST_FINL auto _Invcomp_conv_impl<_Ty, _Tag, _ORD>::_Impl(param_type& _Pars) {
-	const auto& _Ref  = _Mybase::m_reference;
+	// warp current image patch
+	const auto _C = _Mybase::_Update_subset(_Pars);
 
-	const auto[_Rx, _Ry, _G_mean, _G_ssd] = _Mybase::_Update_subset(_Pars);
-	if (_G_ssd < _Mybase::m_options) 
-		throw std::runtime_error("Bad value of variable _G_ssd in _Invcomp_conv_impl<_Ty, _Intp, _Order>::_Solver_impl(...).");
+	// error image expression
+	auto _Diff_n = (_Mybase::_Myref - _Mybase::_Mycur)*_C;
 
-	auto _Ref_subset = _Ref[0].block(_Rx.begin(), _Rx.end(), _Ry.begin(), _Ry.end()).eval();
-	auto _Diff_f = _Ref_subset - m_favg;
-	auto _Diff_g = m_current - _G_mean;
-	auto _Diff_n = _Diff_f*(1/m_fssd) - _Diff_g*(1/_G_ssd);
-
-	stack_vector _Grad = (_Diff_n*_Mybase::_Myjaco).reduce().t()*(2 / _G_ssd);
+	// computation of SDIs and its dot-production with error image
+	stack_vector _Grad = (_Diff_n*_Mybase::_Myjaco).reduce().t();
 
 	// solve $\Delta \mathbf{p}$
 	_Grad = -1.*_Mybase::_Mysolver.backward(_Grad);
@@ -212,6 +226,5 @@ MATRICE_HOST_FINL auto _Invcomp_conv_impl<_Ty, _Tag, _ORD>::_Impl(param_type& _P
 
 	return std::make_tuple((_Diff_n*_Diff_n).sum(), (_Grad*_Grad).sum());
 }
-
 
 } MATRICE_ALGS_END
