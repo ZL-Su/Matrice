@@ -169,7 +169,6 @@ auto _Iterative_conv_base<_Derived>::_Update_subset(const param_type& _P) {
 	auto _SSD = sqrt((_Mycur*_Mycur).sum());
 	if (_SSD < m_options)
 		throw std::runtime_error("Bad value of variable _SSD in _Invcomp_conv_base<...>::_Update_subset(_P).");
-
 	_Mycur = _Mycur / _SSD;
 
 	return (2./_SSD);

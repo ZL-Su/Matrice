@@ -182,8 +182,6 @@ public:
 		const std::shared_ptr<interp_type>& _Itp, 
 		point_t _Pos, options_t _Opts = options_t()) noexcept
 		: _Mybase(_Ref, _Itp, _Pos, _Opts) {
-		/*m_favg = _Ref[0].sum() / _Ref[0].size();
-		m_fssd = sqrt(((_Ref[0] - m_favg)*(_Ref[0] - m_favg)).sum());*/
 		_Init();
 	}
 	MATRICE_HOST_FINL _Invcomp_conv_impl(
@@ -191,8 +189,6 @@ public:
 		const interp_type& _Itp,
 		point_t _Pos, options_t _Opts = options_t()) noexcept
 		: _Mybase(_Ref, _Itp, _Pos, _Opts) {
-		/*m_favg = _Ref[0].sum() / _Ref[0].size();
-		m_fssd = sqrt(((_Ref[0] - m_favg)*(_Ref[0] - m_favg)).sum());*/
 		_Init();
 	}
 
@@ -201,8 +197,6 @@ public:
 private:
 	MATRICE_HOST_FINL auto _Init();
 	MATRICE_HOST_FINL auto _Update();
-
-	value_type m_favg = 0, m_fssd = 1;
 };
 }
 MATRICE_ALGS_END
