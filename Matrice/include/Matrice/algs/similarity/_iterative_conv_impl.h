@@ -174,7 +174,7 @@ public:
 	/**
 	 * _Ref : reference image package, includes reference image and its gradients w.r.t. x and y
 	 * _Itp : interpolator of current image
-	 * _Pos : the initial estimation
+	 * _Pos : the anchor position of the reference patch
 	 * _Opts: solver settings
 	 */
 	MATRICE_HOST_FINL _Invcomp_conv_impl(

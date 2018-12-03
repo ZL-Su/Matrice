@@ -135,19 +135,18 @@ auto _Iterative_conv_base<_Derived>::_Update_subset(const param_type& _P) {
 	constexpr auto _Bl = _Conv_border_size<interp_category>::lower;
 	constexpr auto _Bu = _Conv_border_size<interp_category>::upper;
 	const auto _Radius = static_cast<int>(m_options());
-	const auto& _Center = m_pos;
-	const auto[_L, _R, _U, _D] = conv_internal::_Square_range(_Center, _Radius);
+	const auto [_L, _R, _U, _D] = conv_internal::_Square_range(m_pos, _Radius);
 
 	stack_vector _Buf_x{ 1. }, _Buf_y{ 1. };
 
 	auto _Mean = zero_v<value_type>;
 	for (auto y = _U, _Off_y = 0; y < _D; ++y, ++_Off_y) {
-		auto _Dy = static_cast<value_type>(y - _Center.y);
+		auto _Dy = static_cast<value_type>(y - m_pos.y);
 
 		auto _X = _L + _P[0] + _P[2] * _Dy;
 		auto _Y =  y + _P[3] + _P[5] * _Dy;
 		for (auto x = _L, _Off_x = 0; x < _R; ++x, ++_Off_x) {
-			auto _Dx = static_cast<value_type>(x - _Center.x);
+			auto _Dx = static_cast<value_type>(x - m_pos.x);
 			_X += 1 + _P[1] * _Dx; _Y += _P[4] * _Dx;
 
 			auto _Ix = floor<int>(_X), _Iy = floor<int>(_Y);
@@ -180,7 +179,7 @@ auto _Iterative_conv_base<_Derived>::_Update_subset(const param_type& _P) {
  * \For each point refinement, this method aims to compute the Jacobian and the Hessian before stepping into the iterative solver _Impl().
  */
 template<typename _Ty, typename _Tag, std::size_t _ORD>
-MATRICE_HOST_FINL auto _Invcomp_conv_impl<_Ty, _Tag, _ORD>::_Init() {
+MATRICE_HOST_FINL auto _Invcomp_conv_impl<_Ty, _Tag, _ORD>::_Init(){
 	const auto& _Pos = _Mybase::m_pos;
 	const auto& _Ref = _Mybase::m_reference;
 	auto[_L, _R, _U, _D] = conv_internal::_Square_range(_Pos, _Mybase::m_ksize>>1);
