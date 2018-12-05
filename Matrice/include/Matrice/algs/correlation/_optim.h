@@ -55,10 +55,19 @@ struct _Correlation_options {
 	}
 };
 
+template<typename _Ty, typename _Itag, std::size_t _Order>
+class _Corr_invcomp_optim {};
+template<typename _Ty, typename _Itag, std::size_t _Order>
+struct _Corr_solver_traits<_Corr_invcomp_optim<_Ty, _Itag, _Order>> {
+	using value_type = _Ty;
+	using itp_catogery = _Itag;
+	static constexpr auto order = _Order;
+};
+
 template<typename _Derived> class _Corr_optim_base {
 	using _Myt = _Corr_optim_base;
 	using _Mydt = _Derived;
-	using _Mytraits = _Corr_solver_traits<_Derived>;
+	using _Mytraits = _Corr_solver_traits<_Mydt>;
 public:
 	static constexpr auto DOF = _Mytraits::order*6;
 	using value_type = typename _Mytraits::value_type;
@@ -79,7 +88,7 @@ public:
 
 protected:
 	MATRICE_HOST_INL auto _Init();
-	MATRICE_HOST_INL auto _Warp_patch(const param_type& _Pars);
+	MATRICE_HOST_INL auto _Warp(const param_type& _Pars);
 
 	const interp_type& _Myref_itp;
 	const interp_type& _Mycur_itp;
@@ -92,16 +101,6 @@ protected:
 	linear_solver _Mysolver;
 };
 
-template<typename _Ty, typename _Itag, std::size_t _Order>
-class _Corr_invcomp_optim {};
-template<typename _Ty, typename _Itag, std::size_t _Order>
-struct _Corr_solver_traits<_Corr_invcomp_optim<_Ty, _Itag, _Order>> {
-	using value_type = _Ty;
-	using itp_catogery = _Itag;
-	static constexpr auto order = _Order;
-};
-
-
 template<typename _Ty, typename _Itag>
 class _Corr_invcomp_optim<_Ty, _Itag, 1> 
 	: public _Corr_optim_base<_Corr_invcomp_optim<_Ty, _Itag, 1>>
@@ -110,12 +109,17 @@ class _Corr_invcomp_optim<_Ty, _Itag, 1>
 	using _Mybase = _Corr_optim_base<_Myt>;
 public:
 	using typename _Mybase:: param_type;
+
 	template<typename... _Args>
 	MATRICE_HOST_INL _Corr_invcomp_optim(const _Args&... _Args)
 		: _Mybase(_Args...) {}
 
 private:
-	MATRICE_HOST_INL auto& operator()(param_type& _Pars);
+	/**
+	 * \IC-GN inner update step for warp parameters: _P = {u, dudx, dudy, v, dvdx, dvdy}
+	 */
+	MATRICE_HOST_INL auto& operator()(param_type& _P);
 };
 
 _DETAIL_END } MATRICE_ALGS_END
+#include "inline\_optim.inl"
