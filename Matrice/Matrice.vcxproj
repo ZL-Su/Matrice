@@ -141,6 +141,8 @@
     <ClInclude Include="addin\Eigen\src\Geometry\Umeyama.h" />
     <ClInclude Include="addin\interface.h" />
     <ClInclude Include="examples\basic_matrix_usage.h" />
+    <ClInclude Include="include\Matrice\algs\correlation\_correlation_traits.h" />
+    <ClInclude Include="include\Matrice\algs\correlation\_optim.h" />
     <ClInclude Include="include\Matrice\algs\deeplearning\caffe2\core\allocator.h" />
     <ClInclude Include="include\Matrice\algs\deeplearning\caffe2\core\asan.h" />
     <ClInclude Include="include\Matrice\algs\deeplearning\caffe2\core\blob.h" />

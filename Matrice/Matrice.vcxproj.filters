@@ -148,6 +148,12 @@
     <Filter Include="Header Files\Detail\autograd\inline">
       <UniqueIdentifier>{d3d722b3-ca0e-4472-81a9-001adf8cfbc6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Algs\Correlation">
+      <UniqueIdentifier>{093b07b7-b2a6-42a4-8f4e-bca1a59f8fe9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Algs\Correlation\inline">
+      <UniqueIdentifier>{26dca00c-c104-46a1-b0fb-db8d20abfbc6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -638,6 +644,12 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\similarity\_iterative_conv_impl.h">
       <Filter>Header Files\Algs\Similarity</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\correlation\_optim.h">
+      <Filter>Header Files\Algs\Correlation</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\correlation\_correlation_traits.h">
+      <Filter>Header Files\Algs\Correlation</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
