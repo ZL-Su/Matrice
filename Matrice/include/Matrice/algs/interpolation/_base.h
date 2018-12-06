@@ -73,9 +73,18 @@ public:
 	static constexpr auto option = _Mytraits::option;
 
 	_Interpolation_base(const matrix_type& _Data) noexcept
-		: _Mydata(_Data) { static_cast<_Mydt*>(this)->_Coeff_impl(); }
+		: _Mydata(_Data) { 
+		static_cast<_Mydt*>(this)->_Coeff_impl(); 
+	}
 	_Interpolation_base(const _Myt& _Other) noexcept
-		: _Mydata(_Other._Mydata), _Mycoeff(_Other._Mycoeff) {}
+		: _Mydata(_Other._Mydata), _Mycoeff(_Other._Mycoeff) {
+	}
+	_Interpolation_base(_Myt&& _Other) noexcept
+		: _Mydata(_Other._Mydata), _Mycoeff(std::move(_Other._Mycoeff)) {
+		this->~_Interpolation_base();
+	}
+	~_Interpolation_base() {
+	}
 
 	/**
 	 * \get interpolation coeff. matrix.

@@ -41,6 +41,7 @@ public:
 
 	_Spline_interpolation(const matrix_type& _Data) : _Mybase(_Data) {}
 	_Spline_interpolation(const _Myt& _Other) : _Mybase(_Other) {}
+	_Spline_interpolation(_Myt&& _Other) : _Mybase(std::move(_Other)) {}
 
 	MATRICE_HOST_INL void _Coeff_impl();
 	MATRICE_HOST_INL auto _Val_dx_n(const value_type& _) const {
@@ -84,6 +85,8 @@ public:
 	static constexpr auto Ldg = 5; // \leading dimension of gradient kernel
 
 	_Spline_interpolation(const matrix_type& _Data) : _Mybase(_Data) {}
+	_Spline_interpolation(const _Myt& _Other) : _Mybase(_Other) {}
+	_Spline_interpolation(_Myt&& _Other) : _Mybase(std::move(_Other)) {}
 
 	MATRICE_HOST_INL void _Coeff_impl();
 	MATRICE_HOST_INL auto _Val_dx_n(const value_type& _) const {
@@ -128,6 +131,8 @@ public:
 	static constexpr auto Ldg = 7; // \leading dimension of gradient kernel
 
 	_Spline_interpolation(const matrix_type& _Data) : _Mybase(_Data) {}
+	_Spline_interpolation(const _Myt& _Other) : _Mybase(_Other) {}
+	_Spline_interpolation(_Myt&& _Other) : _Mybase(std::move(_Other)) {}
 
 	MATRICE_HOST_INL void _Coeff_impl();
 	MATRICE_HOST_INL auto _Val_dx_n(const value_type& _) const {
