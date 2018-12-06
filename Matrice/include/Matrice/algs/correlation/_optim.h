@@ -26,17 +26,6 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 MATRICE_ALGS_BEGIN _DETAIL_BEGIN namespace corr {
 
-template<typename _Itptag> struct _Corr_border_size {};
-template<> struct _Corr_border_size<_TAG bicspl_tag> {
-	static constexpr auto lower = 1, upper = 2;
-};
-template<> struct _Corr_border_size<_TAG biqspl_tag> {
-	static constexpr auto lower = 2, upper = 3;
-};
-template<> struct _Corr_border_size<_TAG bisspl_tag> {
-	static constexpr auto lower = 3, upper = 4;
-};
-
 struct _Correlation_options {
 	std::size_t _Stride =  7; //node spacing
 	std::size_t _Radius = 10; //patch radius
@@ -48,10 +37,13 @@ struct _Correlation_options {
 	/**
 	 * \retrieve the range of patch centered on point _Pos
 	 */
-	template<typename _Ty>
+	template<typename _Ty, bool _Is_cutoff = false>
 	MATRICE_GLOBAL_INL auto range(const _Ty& _Pos) {
-		const auto x = floor<int>(_Pos.x), y = floor<int>(_Pos.y);
-		return std::make_tuple(x - _Radius, x + _Radius, y - _Radius, y + _Radius);
+		if constexpr (_Is_cutoff) {
+			const auto x = floor<int>(_Pos.x), y = floor<int>(_Pos.y);
+			return std::make_tuple(x - _Radius, x + _Radius + 1, y - _Radius, y + _Radius + 1);
+		}
+		return std::make_tuple(_Pos.x-_Radius, _Pos.x+_Radius+1, _Pos.y - _Radius, _Pos.y + _Radius + 1);
 	}
 };
 
@@ -60,7 +52,7 @@ class _Corr_invcomp_optim {};
 template<typename _Ty, typename _Itag, std::size_t _Order>
 struct _Corr_solver_traits<_Corr_invcomp_optim<_Ty, _Itag, _Order>> {
 	using value_type = _Ty;
-	using itp_catogery = _Itag;
+	using itp_category = _Itag;
 	static constexpr auto order = _Order;
 };
 
@@ -80,11 +72,8 @@ public:
 	using linear_solver = matrix_decomp<matrix_fixed, _TAG _Linear_spd_tag>;
 
 	_Corr_optim_base(const interp_type& _Ref, const interp_type& _Cur, const point_type& _Pos, const option_type& _Opt) 
-		: _Myref_itp(_Ref), _Mycur_itp(_Cur), _Mypos(_Pos), _Myopt(_Opt) {
-		const auto _Ksize = _Myopt._Radius << 1 | 1;
-		_Myref.create(_Ksize, _Ksize);
-		_Mycur.create(_Ksize, _Ksize);
-	}
+		:_Myref_itp(_Ref), _Mycur_itp(_Cur), _Mypos(_Pos), 
+		 _Myopt(_Opt), _Mysolver(_Myhess) { this->_Init(); }
 
 protected:
 	MATRICE_HOST_INL auto _Init();
@@ -108,17 +97,21 @@ class _Corr_invcomp_optim<_Ty, _Itag, 1>
 	using _Myt = _Corr_invcomp_optim;
 	using _Mybase = _Corr_optim_base<_Myt>;
 public:
-	using typename _Mybase:: param_type;
+	using typename _Mybase::param_type;
+	using typename _Mybase::option_type;
 
+	_Corr_invcomp_optim(const _Myt& _Other) = delete;
+	_Corr_invcomp_optim(_Myt&& _Other) = delete;
 	template<typename... _Args>
-	MATRICE_HOST_INL _Corr_invcomp_optim(const _Args&... _Args)
-		: _Mybase(_Args...) {}
+	_Corr_invcomp_optim(const _Args&..._args)
+		: _Mybase(_args...) {}
 
-private:
+//private:
+	MATRICE_HOST_INL auto& _Diff();
 	/**
 	 * \IC-GN inner update step for warp parameters: _P = {u, dudx, dudy, v, dvdx, dvdy}
 	 */
-	MATRICE_HOST_INL auto& operator()(param_type& _P);
+	MATRICE_HOST_INL auto& _Update(param_type& _P);
 };
 
 _DETAIL_END } MATRICE_ALGS_END
