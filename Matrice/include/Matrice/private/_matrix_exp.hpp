@@ -120,26 +120,30 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		 */
 		template<typename _Ty> struct _Accum_exp {
 			enum { flag = sum };
-			MATRICE_GLOBAL_INL auto operator()(const _Ty& _Exp) {
+			using value_type = _Ty;
+			MATRICE_GLOBAL_INL auto operator()(const value_type& _Exp) {
 				return _Exp.sum();
 			}
 		};
 
 		template<typename _Ty> struct _Mat_inv { 
-			enum { flag = inv }; 
+			enum { flag = inv };
+			using value_type = _Ty;
 			using category = tag::_Matrix_inv_tag;
-			MATRICE_GLOBAL _Ty* operator()(int M, _Ty* Out, _Ty* In = nullptr) const; 
+			MATRICE_GLOBAL _Ty* operator()(int M, value_type* Out, value_type* In = nullptr) const;
 		};
 		template<typename _Ty> struct _Mat_trp { 
-			enum { flag = trp }; 
+			enum { flag = trp };
+			using value_type = _Ty;
 			using category = tag::_Matrix_trp_tag;
-			MATRICE_HOST_FINL _Ty operator()(int M, _Ty* Out, _Ty* i) const { return (Out[int(i[1])*M + int(i[0])]); } 
+			MATRICE_HOST_FINL value_type operator()(int M, value_type* Out, value_type* i) const { return (Out[int(i[1])*M + int(i[0])]); }
 		};
 		// *\matrix spread multiply
 		template<typename _Ty> struct _Mat_sprmul {
 			enum { flag = undef };
+			using value_type = _Ty;
 			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
-				_Ty operator() (const _Lhs& lhs, const _Rhs& rhs, int r, int c) const { return (lhs(r) * rhs(c)); }
+			value_type operator() (const _Lhs& lhs, const _Rhs& rhs, int r, int c) const { return (lhs(r) * rhs(c)); }
 		};
 		template<typename _Ty> struct _Mat_mul {
 			enum { flag = mmul };
@@ -254,10 +258,10 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		/**
 		 * \2-d ewise evaluation operator
 		 */
-		MATRICE_GLOBAL_INL auto operator()(std::size_t x, std::size_t y) {
+		MATRICE_GLOBAL_FINL auto operator()(std::size_t x, std::size_t y) {
 			return _CDTHIS->operator()(x + y * N);
 		}
-		MATRICE_GLOBAL_INL const auto operator()(std::size_t x, std::size_t y) const {
+		MATRICE_GLOBAL_FINL const auto operator()(std::size_t x, std::size_t y) const {
 			return _CDTHIS->operator()(x + y * N);
 		}
 
@@ -295,10 +299,10 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T& _lhs, const U& _rhs) noexcept
 			: _LHS(_lhs), _RHS(_rhs) { M = _LHS.rows(), N = _RHS.cols(); }
 
-		MATRICE_GLOBAL_INL value_t operator() (std::size_t _idx) { 
+		MATRICE_GLOBAL_FINL value_t operator() (std::size_t _idx) { 
 			return _Op(_LHS(_idx), _RHS(_idx));
 		}
-		MATRICE_GLOBAL_INL const value_t operator() (std::size_t _idx) const {
+		MATRICE_GLOBAL_FINL const value_t operator() (std::size_t _idx) const {
 			return _Op(_LHS(_idx), _RHS(_idx));
 		}
 
@@ -332,10 +336,10 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 			M = _RHS.rows(), N = _RHS.cols();
 		}
 
-		MATRICE_GLOBAL_INL value_t operator() (size_t _idx) {
+		MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) {
 			return _Op(_Scalar, _RHS(_idx));
 		}
-		MATRICE_GLOBAL_INL const value_t operator() (size_t _idx) const {
+		MATRICE_GLOBAL_FINL const value_t operator() (size_t _idx) const {
 			return _Op(_Scalar, _RHS(_idx));
 		}
 
@@ -370,10 +374,10 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 			M = _LHS.rows(), N = _LHS.cols();
 		}
 
-		MATRICE_GLOBAL_INL value_t operator() (size_t _idx) {
+		MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) {
 			return _Op(_LHS(_idx), _Scalar);
 		}
-		MATRICE_GLOBAL_INL const value_t operator() (size_t _idx) const {
+		MATRICE_GLOBAL_FINL const value_t operator() (size_t _idx) const {
 			return _Op(_LHS(_idx), _Scalar);
 		}
 
@@ -409,10 +413,10 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		EwiseUnaryExpr(const_reference_t _rhs) noexcept
 			:_RHS(_rhs) { M = _rhs.rows(), N = _rhs.cols(); }
 
-		MATRICE_GLOBAL_INL value_t operator() (size_t _idx) {
+		MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) {
 			return _Op(_RHS(_idx));
 		}
-		MATRICE_GLOBAL_INL const value_t operator() (size_t _idx) const {
+		MATRICE_GLOBAL_FINL const value_t operator() (size_t _idx) const {
 			return _Op(_RHS(_idx));
 		}
 
@@ -448,13 +452,13 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 			if (K != _RHS.rows() && K == N) N = _RHS.rows();
 		}
 
-		MATRICE_HOST_INL value_t* operator() (value_t* res) const {
+		MATRICE_HOST_FINL value_t* operator() (value_t* res) const {
 			return _Op(_LHS.data(), _RHS.data(), res, M, K, N);
 		}
-		MATRICE_GLOBAL_INL value_t operator() (int r, int c) const {
+		MATRICE_GLOBAL_FINL value_t operator() (int r, int c) const {
 			return _Op(_LHS, _RHS, r, c);
 		}
-		MATRICE_GLOBAL_INL value_t operator() (int _idx) const {
+		MATRICE_GLOBAL_FINL value_t operator() (int _idx) const {
 			int r = _idx / N, c = _idx - r * N;
 			return _Op(_LHS, _RHS, r, c);
 		}
@@ -486,17 +490,17 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		using category = category_type_t<_UnaryOp>;
 		enum {options = option<_UnaryOp::flag>::value};
 
-		MATRICE_GLOBAL_FINL MatUnaryExpr(const T& inout) noexcept
+		MATRICE_GLOBAL_INL MatUnaryExpr(const T& inout) noexcept
 			: _RHS(inout), _ANS(inout) {
 			M = _RHS.rows(), N = _RHS.cols();
 			if constexpr (options & trp == trp) std::swap(M, N);
 		}
-		MATRICE_GLOBAL_FINL MatUnaryExpr(const T& _rhs, T& _ans)
+		MATRICE_GLOBAL_INL MatUnaryExpr(const T& _rhs, T& _ans)
 			: _RHS(_rhs), _ANS(_ans) {
 			M = _RHS.rows(), N = _RHS.cols();
 			if constexpr (options & trp == trp) std::swap(M, N);
 		}
-		MATRICE_GLOBAL_FINL MatUnaryExpr(MatUnaryExpr&& _other)
+		MATRICE_GLOBAL_INL MatUnaryExpr(MatUnaryExpr&& _other)
 			: options(_other.options) {
 			*this = std::move(_other);
 		}
