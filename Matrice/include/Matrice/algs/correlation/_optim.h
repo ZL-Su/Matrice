@@ -37,13 +37,14 @@ struct _Correlation_options {
 	/**
 	 * \retrieve the range of patch centered on point _Pos
 	 */
-	template<typename _Ty, bool _Is_cutoff = false>
+	template<bool _Is_cutoff, typename _Ty, typename _Ret = conditional_t<_Is_cutoff, index_t, typename _Ty::value_t>>
 	MATRICE_GLOBAL_INL auto range(const _Ty& _Pos) {
+		using tuple_type = std::tuple<_Ret, _Ret, _Ret, _Ret>;
 		if constexpr (_Is_cutoff) {
-			const auto x = floor<int>(_Pos.x), y = floor<int>(_Pos.y);
-			return std::make_tuple(x - _Radius, x + _Radius + 1, y - _Radius, y + _Radius + 1);
+			const auto x = floor<_Ret>(_Pos.x), y = floor<_Ret>(_Pos.y);
+			return tuple_type(x - _Radius, x + _Radius + 1, y - _Radius, y + _Radius + 1);
 		}
-		return std::make_tuple(_Pos.x-_Radius, _Pos.x+_Radius+1, _Pos.y - _Radius, _Pos.y + _Radius + 1);
+		return tuple_type(_Pos.x-_Radius, _Pos.x+_Radius+1, _Pos.y - _Radius, _Pos.y + _Radius + 1);
 	}
 };
 
