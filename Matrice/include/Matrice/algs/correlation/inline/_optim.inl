@@ -20,16 +20,16 @@ template<> struct _Corr_border_size<_TAG bisspl_tag> {
 
 template<typename _Derived> MATRICE_HOST_INL 
 auto _Corr_optim_base<_Derived>::_Init() {
-
 	auto _J = std::async(std::launch::async, [&] {
-		return static_cast<_Derived*>(this)->_Diff();
+		static_cast<_Derived*>(this)->_Diff();
+		_Myhess = _Myjaco.t().mul(_Myjaco).reduce();
 	});
 
 	const auto _Ksize = _Myopt._Radius << 1 | 1;
 	_Myref.create(_Ksize, _Ksize);
 	_Mycur.create(_Ksize, _Ksize);
 
-	auto[_L, _R, _U, _D] = _Myopt.range(_Mypos);
+	auto[_L, _R, _U, _D] = _Myopt.range<false>(_Mypos);
 	for (auto y = _U; y < _D; ++y) {
 		for (auto x = _L; x < _R; ++x) {
 			_Myref(y - _U, x - _L) = _Myref_itp(x, y);
@@ -38,9 +38,14 @@ auto _Corr_optim_base<_Derived>::_Init() {
 
 	auto _Mean = _Myref.sum() / _Myref.size();
 	auto _Diff = _Myref - _Mean;
-	_Myref = (_Myref - _Mean)*(1/sqrt((_Diff*_Diff).sum()));
+	auto _Issd = 1 / sqrt((_Diff*_Diff).sum());
+	_Myref = (_Myref - _Mean)*_Issd;
 
 	if (_J.valid()) _J.get();
+
+	_Myhess = _Myhess * (2 * _Issd);
+
+	_Mysolver.forward();
 }
 
 template<typename _Derived> MATRICE_HOST_INL 
@@ -52,8 +57,22 @@ auto _Corr_optim_base<_Derived>::_Warp(const param_type& _Pars) {
 
 template<typename _Ty, typename _Itag> MATRICE_HOST_INL
 auto& _Corr_invcomp_optim<_Ty, _Itag, 1>::_Diff() {
-	const auto _Size = _Mybase::_Myopt._Radius << 1 | 1;
+	const auto _Size = _Mybase::_Myopt._Radius<<1|1;
 	_Mybase::_Myjaco.create(_Size, _Size);
+
+	auto[_L, _R, _U, _D] = _Mybase::_Myopt.range<true>(_Mybase::_Mypos);
+	auto _Off = -static_cast<value_type>(_Mybase::_Myopt._Radius);
+	for (index_t iy = _U, j = 0; iy < _D; ++iy, ++j) {
+		auto dy = _Off + j, y = _Mybase::_Mypos.y + dy;
+		for (index_t ix = _L, i = 0; ix < _R; ++ix, ++i) {
+			auto dx = _Off + i, x = _Mybase::_Mypos.x + dx;
+
+			auto[dfdx, dfdy] = _Mybase::_Myref_itp.grad({ x, y });
+			_Mybase::_Myjaco(j, i) = {
+				dfdx, dfdx*dx, dfdx*dy, dfdy, dfdy*dx, dfdy*dy
+			};
+		}
+	}
 
 	return (_Mybase::_Myjaco);
 }
