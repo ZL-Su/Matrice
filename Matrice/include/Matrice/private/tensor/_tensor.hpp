@@ -59,7 +59,9 @@ public:
 		: _Mybase(_Other), m_rows(m_size=(_Other.size())), m_cols(1) {}
 
 	MATRICE_HOST_INL auto& create(std::size_t _Rows, std::size_t _Cols) {
-		this->resize(m_size = _Rows * _Cols);
+		m_rows = _Rows, m_cols = _Cols;
+		_Mybase::resize(m_size = m_rows * m_cols);
+		m_data = &(*this)[0];
 		return (*this);
 	}
 
