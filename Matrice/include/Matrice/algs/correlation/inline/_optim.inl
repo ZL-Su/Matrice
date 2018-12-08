@@ -16,6 +16,29 @@ template<> struct _Corr_border_size<_TAG bisspl_tag> {
 	static constexpr auto lower = 3, upper = 4;
 };
 
+// \update on warp parameters
+template<std::size_t _Order> struct _Compositional_warp_update{};
+
+template<> struct _Compositional_warp_update<compile_time_size<>::val_1> {
+	template<typename _Vecty>
+	static MATRICE_GLOBAL_FINL auto& inv(const _Vecty& x, _Vecty y) {
+		auto _Inv_det = 1 / ((1 + y[1])*(1 + y[5]) - y[2] * y[4]);
+		auto _Val_0 = y[0] * (1 + y[5]) - y[3] * y[2];
+		auto _Val_1 = y[3] * (1 + y[1]) - y[0] * y[4];
+		auto _Val_2 = y[5] + 1, _Val_3 = y[4];
+		auto _Val_4 = y[3] + 1, _Val_5 = y[2];
+
+		y[0] = x[0] - ((1 + x[1])*_Val_0 - x[2] * _Val_1)*_Inv_det;
+		y[1] = ((1 + x[1])*_Val_2 - x[2] * _Val_3)*_Inv_det - 1;
+		y[2] = (x[2] * _Val_4 + (1 + x[1])*_Val_5)*_Inv_det;
+		y[3] = x[3] - ((1 + x[5])*_Val_1 - x[4] * _Val_0)*_Inv_det;
+		y[4] = (x[4] * _Val_2 - (1 + x[5])*_Val_3)*_Inv_det;
+		y[5] = ((1 + x[5])*_Val_4 - x[4] * _Val_5)*_Inv_det - 1;
+
+		return (y);
+	}
+};
+
 // \base class implementation
 
 template<typename _Derived> MATRICE_HOST_INL 
@@ -39,7 +62,7 @@ auto _Corr_optim_base<_Derived>::_Init() {
 	auto _Mean = _Myref.sum() / _Myref.size();
 	auto _Diff = _Myref - _Mean;
 	auto _Issd = 1 / sqrt((_Diff*_Diff).sum());
-	_Myref = (_Myref - _Mean)*_Issd;
+	_Myref = _Diff * _Issd;
 
 	if (_J.valid()) _J.get();
 
@@ -50,7 +73,36 @@ auto _Corr_optim_base<_Derived>::_Init() {
 
 template<typename _Derived> MATRICE_HOST_INL 
 auto _Corr_optim_base<_Derived>::_Warp(const param_type& _Pars) {
+#define _WITHIN_RANGE_OF_REFIMG(_OP) \
+	if (x - _Bl >= 0 && x - _Bl >= 0 && y + _Bu < _Rows && x + _Bu < _Cols) \
+		_OP; \
+   else _Mycur(r,c) = zero_v<value_type>;
 
+	using category = category_type_t<interp_type>;
+	constexpr auto _Bl = _Corr_border_size<category>::lower;
+	constexpr auto _Bu = _Corr_border_size<category>::upper;
+	const auto [_Rows, _Cols] = _Mycur_itp().shape();
+	const auto _Radius = static_cast<index_t>(_Myopt._Radius);
+	auto _Cur_x = _Mypos.x + _Pars[0], _Cur_y = _Mypos.y + _Pars[3];
+
+	auto _Mean = zero_v<value_type>;
+	for (index_t j = -_Radius, r = 0; j <= _Radius; ++j, ++r) {
+		auto dy = static_cast<value_type>(j);
+		auto tx = _Cur_x + _Pars[2] * dy;
+		auto ty = _Cur_y + _Pars[5] * dy + j;
+		for (index_t i = -_Radius, c = 0; i <= _Radius; ++i, ++c) {
+			auto dx = static_cast<value_type>(i);
+			auto x = _Pars[1] * dx + tx + i, y = _Pars[4] * dx + ty;
+			_WITHIN_RANGE_OF_REFIMG(_Mean += _Mycur(r, c) = _Mycur_itp(x,y));
+		}
+	}
+	_Mean /= _Mycur.size();
+
+	_Mycur = _Mycur - _Mean;
+	auto _Issd = 1./sqrt((_Mycur*_Mycur).sum());
+	_Mycur = _Mycur * _Issd;
+
+	return (2 * _Issd);
 }
 
 // \derived class implementation
@@ -78,11 +130,19 @@ auto& _Corr_invcomp_optim<_Ty, _Itag, 1>::_Diff() {
 }
 
 template<typename _Ty, typename _Itag> MATRICE_HOST_INL
-auto& _Corr_invcomp_optim<_Ty, _Itag, 1>::_Update(param_type& _P) {
+auto _Corr_invcomp_optim<_Ty, _Itag, 1>::_Update(param_type& _P) {
 
+	const auto _Scal = _Mybase::_Warp(_P);
 
+	auto _Diff_n = (_Mybase::_Myref - _Mybase::_Mycur)*_Scal;
 
-	return (_P);
+	param_type _SDE = (_Diff_n*_Mybase::_Myjaco).reduce().t();
+
+	_SDE = -1.*_Mybase::_Mysolver.backward(_SDE);
+
+	_P = _Compositional_warp_update<order>::inv(_P, _SDE);
+
+	return std::tuple((_Diff_n*_Diff_n).sum(), (_SDE*_SDE).sum());
 }
 
 _DETAIL_END } MATRICE_ALGS_END
