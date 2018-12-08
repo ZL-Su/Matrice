@@ -31,8 +31,8 @@ struct _Correlation_options {
 	std::size_t _Radius = 10; //patch radius
 	std::size_t _Maxits = 20; //maximum iterations
 
-	template<typename _Ty>
-	static constexpr _Ty _Mytol = _Ty(1.0e-6); //iteration tolerance
+	template<typename _Ty, typename = std::enable_if_t<is_floating_point_v<_Ty>>>
+	static constexpr _Ty _Mytol = _Ty(1.0E-6); //iteration tolerance
 
 	/**
 	 * \retrieve the range of patch centered on point _Pos
@@ -45,6 +45,15 @@ struct _Correlation_options {
 			return tuple_type(x - _Radius, x + _Radius + 1, y - _Radius, y + _Radius + 1);
 		}
 		return tuple_type(_Pos.x-_Radius, _Pos.x+_Radius+1, _Pos.y - _Radius, _Pos.y + _Radius + 1);
+	}
+
+	template<typename _Pty, typename _Sty>
+	MATRICE_HOST_INL auto range_check(const _Pty& _Pos, const _Sty& _Shape) {
+		auto _TL = _Pos - _Radius; auto _RB = _Pos + _Radius;
+		if (floor(_TL(0)) < 0 || floor(_TL(1)) < 0 ||
+			_RB(0)>=std::get<0>(_Shape) || _RB(1)>=std::get<1>(_Shape))
+			return false;
+		return true;
 	}
 };
 
@@ -98,8 +107,11 @@ class _Corr_invcomp_optim<_Ty, _Itag, 1>
 	using _Myt = _Corr_invcomp_optim;
 	using _Mybase = _Corr_optim_base<_Myt>;
 public:
-	using typename _Mybase::param_type;
+	static constexpr auto order = compile_time_size<>::val_1;
 	using typename _Mybase::option_type;
+	using typename _Mybase::param_type;
+	using typename _Mybase::point_type;
+	using typename _Mybase::value_type;
 
 	_Corr_invcomp_optim(const _Myt& _Other) = delete;
 	_Corr_invcomp_optim(_Myt&& _Other) = delete;
@@ -112,7 +124,7 @@ public:
 	/**
 	 * \IC-GN inner update step for warp parameters: _P = {u, dudx, dudy, v, dvdx, dvdy}
 	 */
-	MATRICE_HOST_INL auto& _Update(param_type& _P);
+	MATRICE_HOST_INL auto _Update(param_type& _P);
 };
 
 _DETAIL_END } MATRICE_ALGS_END
