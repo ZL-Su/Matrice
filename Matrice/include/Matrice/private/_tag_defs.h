@@ -67,6 +67,14 @@ namespace tag {
 	struct _Var_tag {};
 	struct _Expression_eval_tag : _Var_tag {};
 
+	///<brief> tag definitions for memory copy </brief>
+	struct _Memory_tag : _Var_tag {};
+	struct _Memory_cpy_tag : _Memory_tag {};
+	struct _Memcpy_hth_tag : _Memory_cpy_tag {};
+	struct _Memcpy_htd_tag : _Memory_cpy_tag {};
+	struct _Memcpy_dth_tag : _Memory_cpy_tag {};
+	struct _Memcpy_dtd_tag : _Memory_cpy_tag {};
+
 	///<brief> tag definitions for interpolation </brief>
 	struct _Interpolation_tag {};
 	struct _Bspline_itp_tag : _Interpolation_tag {
