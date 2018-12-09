@@ -19,6 +19,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #include <xutility>
 #include "..\util\_macros.h"
+#include "_tag_defs.h"
 
 #ifdef __AVX__
 #define MATRICE_ALIGN_BYTES   0x0020
@@ -30,14 +31,17 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #endif
 #endif // __AVX__
 
-namespace dgelom {
+DGE_MATRICE_BEGIN
 #ifdef MATRICE_ALIGN_BYTES
 #define MATRICE_ALIGNED(type) alignas(MATRICE_ALIGN_BYTES)##type
 #endif
-	enum Location { UnSpecified = -1, OnStack = 0, OnHeap = 1, OnDevice = 2, OnGlobal = 3 };
-	using loctn_t = Location; using memloc_t = Location;
-	enum { COPY = 1001, MOVE = 1002, SHARED = 1000 };
-	enum { LINEAR = 8000, PITCHED = 8001, ARRTARR = 8002, FROMARR = 8003, TOARRAY = 8004, };
+
+enum Location { UnSpecified = -1, OnStack = 0, OnHeap = 1, OnDevice = 2, OnGlobal = 3 };
+using loctn_t = Location; using memloc_t = Location;
+
+enum { COPY = 1001, MOVE = 1002, SHARED = 1000 };
+enum { LINEAR = 8000, PITCHED = 8001, ARRTARR = 8002, FROMARR = 8003, TOARRAY = 8004, };
+
 namespace privt {
 template<typename ValueType, typename IntegerType> ValueType* aligned_malloc(IntegerType size);
 template<typename ValueType> void aligned_free(ValueType* aligned_ptr) noexcept;
@@ -64,7 +68,12 @@ ValueType* fill_mem(const ValueType* src, ValueType* dst, Integer size)
 #undef _RET
 }
 
+template<typename _Ty> struct _Memory {
+	using value_type = _Ty;
+	using pointer = std::add_pointer_t<value_type>;
+
+};
 
 
 }
-}
+DGE_MATRICE_END
