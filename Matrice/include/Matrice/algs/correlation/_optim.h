@@ -29,7 +29,7 @@ MATRICE_ALGS_BEGIN _DETAIL_BEGIN namespace corr {
 struct _Correlation_options {
 	std::size_t _Stride =  7; //node spacing
 	std::size_t _Radius = 10; //patch radius
-	std::size_t _Maxits = 20; //maximum iterations
+	std::size_t _Maxits = 10; //maximum iterations
 
 	template<typename _Ty, typename = std::enable_if_t<is_floating_point_v<_Ty>>>
 	static constexpr _Ty _Mytol = _Ty(1.0E-6); //iteration tolerance
@@ -85,6 +85,10 @@ public:
 		:_Myref_itp(_Ref), _Mycur_itp(_Cur), _Mypos(_Pos), 
 		 _Myopt(_Opt), _Mysolver(_Myhess) { this->_Init(); }
 
+	MATRICE_HOST_INL auto operator()(param_type& _p) {
+		return static_cast<_Mydt*>(this)->_Update(_p);
+	}
+
 protected:
 	MATRICE_HOST_INL auto _Init();
 	MATRICE_HOST_INL auto _Warp(const param_type& _Pars);
@@ -119,13 +123,22 @@ public:
 	_Corr_invcomp_optim(const _Args&..._args)
 		: _Mybase(_args...) {}
 
-//private:
-	MATRICE_HOST_INL auto& _Diff();
 	/**
 	 * \IC-GN inner update step for warp parameters: _P = {u, dudx, dudy, v, dvdx, dvdy}
 	 */
 	MATRICE_HOST_INL auto _Update(param_type& _P);
+
+	MATRICE_HOST_INL auto& _Diff();
 };
 
 _DETAIL_END } MATRICE_ALGS_END
+
+DGE_MATRICE_BEGIN
+struct xcorr_optim {
+	using option = algs::detail::corr::_Correlation_options;
+	template<typename _Ty, typename _Itag, std::size_t _Order>
+	using ic = algs::detail::corr::_Corr_invcomp_optim<_Ty, _Itag, _Order>;
+};
+DGE_MATRICE_END
+
 #include "inline\_optim.inl"
