@@ -140,9 +140,12 @@ auto _Corr_invcomp_optim<_Ty, _Itag, 1>::_Update(param_type& _P) {
 
 	_SDE = -1.*_Mybase::_Mysolver.backward(_SDE);
 
-	_P = _Compositional_warp_update<order>::inv(_P, _SDE);
+	auto _Error = (_SDE*_SDE).sum();
 
-	return std::tuple((_Diff_n*_Diff_n).sum(), (_SDE*_SDE).sum());
+	if(_Error < 0.001)
+		_P = _Compositional_warp_update<order>::inv(_P, _SDE);
+
+	return std::tuple((_Diff_n*_Diff_n).sum(), _Error);
 }
 
 _DETAIL_END } MATRICE_ALGS_END
