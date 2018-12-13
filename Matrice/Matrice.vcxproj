@@ -256,6 +256,7 @@
     <ClInclude Include="include\Matrice\funcs\_functions.h" />
     <ClInclude Include="include\Matrice\io\hrc.h" />
     <ClInclude Include="include\Matrice\io\io.h" />
+    <ClInclude Include="include\Matrice\private\autograd\_expression.h" />
     <ClInclude Include="include\Matrice\private\autograd\_grad_ops.h" />
     <ClInclude Include="include\Matrice\private\autograd\_grad_utils.h" />
     <ClInclude Include="include\Matrice\private\math\_linear.h" />
@@ -332,6 +333,7 @@
     <None Include="addin\Eigen\SVD" />
     <None Include="addin\Eigen\UmfPackSupport" />
     <None Include="cpp.hint" />
+    <None Include="include\Matrice\algs\correlation\inline\_optim.inl" />
     <None Include="include\Matrice\algs\interpolation\_base.inl" />
     <None Include="include\Matrice\algs\similarity\inline\_iterative_conv_impl.inl" />
     <None Include="include\Matrice\arch\inl\_ixpacket.inl" />

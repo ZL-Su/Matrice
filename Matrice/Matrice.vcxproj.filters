@@ -651,6 +651,9 @@
     <ClInclude Include="include\Matrice\algs\correlation\_correlation_traits.h">
       <Filter>Header Files\Algs\Correlation</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\private\autograd\_expression.h">
+      <Filter>Header Files\Detail\autograd</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
@@ -790,6 +793,9 @@
     </None>
     <None Include="include\Matrice\algs\similarity\inline\_iterative_conv_impl.inl">
       <Filter>Header Files\Algs\Similarity\inl</Filter>
+    </None>
+    <None Include="include\Matrice\algs\correlation\inline\_optim.inl">
+      <Filter>Header Files\Algs\Correlation\inline</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
