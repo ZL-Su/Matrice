@@ -69,6 +69,7 @@ namespace tag {
 
 	///<brief> tag definitions for memory copy </brief>
 	struct _Memory_tag : _Var_tag {};
+	struct _Memory_aligned_tag : _Memory_tag {};
 	struct _Memory_cpy_tag : _Memory_tag {};
 	struct _Memcpy_hth_tag : _Memory_cpy_tag {};
 	struct _Memcpy_htd_tag : _Memory_cpy_tag {};
