@@ -27,13 +27,21 @@ _DETAIL_BEGIN
 
 template<typename _Derived> class _Expression_base
 {
+	using _Myt = _Expression_base;
+	using _Mydt = _Derived;
 public:
 	_Expression_base() {};
 	~_Expression_base() {};
 
+	/**
+	 * \return value of an expresstion
+	 */
 	MATRICE_GLOBAL_INL auto forward() const {
-
+		return (static_cast<const _Mydt*>(this)->operator());
 	}
+	/**
+	 * \return gradient of an expresstion
+	 */
 	MATRICE_GLOBAL_INL auto backward() const {
 
 	}
