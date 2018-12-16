@@ -3,7 +3,7 @@
 #include "_macros.h"
 #include <type_traits>
 
-#ifdef __enable_cuda__
+#if (defined __enable_cuda__ && !defined __disable_cuda__)
 #include <device_functions.h>
 #include <thrust\complex.h>
 #endif
@@ -125,5 +125,18 @@ template<> struct tuple_n<0> {
 	template<typename U, typename F> MATRICE_HOST_FINL static auto _(const U* _E, F&& _Op) {
 		return std::make_tuple(_Op(_E[0]));
 	}
+};
+
+/**
+ * \is _Value satisfies anyone of given _Conditions: x == _Cond1 || ... || x = _Condn
+ */
+static auto _Is_eqto_one_in = [](auto&& _Value, auto&&... _Conditions)->bool{
+	return ((_Conditions == _Value) || ...);
+};
+/**
+ * \is _Value satisfies all of given _Conditions: x == _Cond1 && ... && x = _Condn
+ */
+static auto _Is_eqto_all_in = [](auto&& _Value, auto&&... _Conditions)->bool {
+	return ((_Conditions == _Value) && ...);
 };
 DGE_MATRICE_END
