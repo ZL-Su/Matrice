@@ -60,29 +60,21 @@ _Scalar* global_malloc(size_t N)
 template<typename _Scalar, int _Opt, typename = typename std::enable_if<std::is_scalar<_Scalar>::value>::type>
 void device_memcpy(_Scalar* hptr, _Scalar* dptr, size_t w, size_t h = 1, size_t p = 1)
 {
-	if (w == 1) std::swap(w, h);
-	size_t hpitch = w * sizeof(_Scalar);
-	cudaError_t sts;
+	cudaError_t sts; size_t hpitch = w * h * sizeof(_Scalar);
 	if (_Opt == ::cudaMemcpyHostToDevice) {
-		switch (p)
-		{
-		case 1:
-			sts = cudaMemcpy(dptr, hptr, hpitch*h, cudaMemcpyHostToDevice);
-			break;
-		default:
-			sts = cudaMemcpy2D(dptr, p, hptr, hpitch, hpitch, h, cudaMemcpyHostToDevice);
-			break;
+		if (p == 1) {
+			sts = cudaMemcpy(dptr, hptr, hpitch, cudaMemcpyHostToDevice);
+		}
+		else {
+			sts = cudaMemcpy2D(dptr, p, hptr, hpitch, hpitch, 1, cudaMemcpyHostToDevice);
 		}
 	}
 	if (_Opt == ::cudaMemcpyDeviceToHost) {
-		switch (p)
-		{
-		case 1:
-			sts = cudaMemcpy(hptr, dptr, hpitch*h, ::cudaMemcpyDeviceToHost);
-			break;
-		default:
-			sts = cudaMemcpy2D(hptr, hpitch, dptr, p, hpitch, h, ::cudaMemcpyDeviceToHost);
-			break;
+		if (p == 1) {
+			sts = cudaMemcpy(hptr, dptr, hpitch, ::cudaMemcpyDeviceToHost);
+		}
+		else {
+			sts = cudaMemcpy2D(hptr, hpitch, dptr, p, hpitch, 1, ::cudaMemcpyDeviceToHost);
 		}
 	}
 	if (sts != cudaSuccess) throw std::runtime_error(cudaGetErrorString(sts));
