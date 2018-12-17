@@ -18,6 +18,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include <future>
 #include "../util/_macros.h"
+#include "../util/utils.h"
 #if (defined __enable_cuda__ && !defined __disable_cuda__)
 #include "_decl_dev_funcs.h"
 #include "_devops.h"
@@ -33,13 +34,14 @@ MATRICE_DEVICE_BEGIN
 template<typename _Ty> class Base_
 {
 	using size_t = std::size_t;
-	using intp_t = std::add_pointer_t<int>;
+	using int_ptr_t = std::add_pointer_t<int>;
 	using value_t = _Ty;
 	using pointer = std::add_pointer_t<value_t>;
 	using derived_t = types::Matrix_<_Ty, -1, -1>;
 public:
 	MATRICE_GLOBAL_INL Base_() = default;
-	MATRICE_GLOBAL_INL Base_(pointer pdev, size_t* p, intp_t w, intp_t h):_Ptr(pdev), _P(p), _W(w), _H(h) {};
+	MATRICE_GLOBAL_INL Base_(pointer pdev, size_t* p, int_ptr_t w, int_ptr_t h)
+		:_Ptr(pdev), _P(p), _W(w), _H(h) {};
 
 	//<brief> synchronize all device threads </brief>
 	MATRICE_HOST_INL void sync() { 
@@ -53,6 +55,19 @@ public:
 	template<typename _Arg, typename = std::enable_if_t<std::is_class_v<_Arg>>>
 	MATRICE_HOST_INL void fetch(_Arg& dst) { 
 		if (_Future.valid()) _Future.get(); _Dnload_impl(dst.data()); 
+	}
+	/**
+	 * \sync data from device to host deglom::Matrix_ type
+ 	 */
+	template<int _M = 0, int _N = _M>
+	MATRICE_HOST_INL auto fetch() {
+		using _Rety = types::Matrix_<value_t, _M, _N>;
+		_Rety _Ret(*_H, *_W);
+
+		if (_Future.valid()) _Future.get();
+		_Dnload_impl(_Ret.data());
+
+		return std::forward<_Rety>(_Ret);
 	}
 
 	//<brief> copy data from host to device memory </brief>
@@ -75,7 +90,7 @@ private:
 	std::future<void> _Future; 
 	pointer _Ptr;
 	size_t* _P = nullptr; 
-	intp_t  _W = nullptr, _H = nullptr;
+	int_ptr_t  _W = nullptr, _H = nullptr;
 };
 MATRICE_DEVICE_END
 
