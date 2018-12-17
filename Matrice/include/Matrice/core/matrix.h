@@ -190,7 +190,8 @@ public:
 		return _Mydevbase::operator=(std::move(_other)); 
 	}
 	MATRICE_GLOBAL_INL Myt_reference operator= (const_init_list _list) { 
-		return _Mydevbase::operator=(_list.begin()); 
+		_Mydevbase::operator=(const_cast<pointer>(_list.begin()));
+		return (*this);
 	}
 
 	MATRICE_GLOBAL_INL Myt_reference operator+(Myt_const_reference _other) {
