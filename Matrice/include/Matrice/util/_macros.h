@@ -29,7 +29,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #define __CXX11_SHARED__
 #endif //enable shared memory allocator
 
-#ifndef __enable_cuda__
+#ifndef __enable_cuda__ 
 #define __enable_cuda__
 #endif // !__enable_cuda__ defined for CUDA support
 

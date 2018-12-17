@@ -78,12 +78,26 @@ template<typename T = std::string> MATRICE_HOST_FINL
 constexpr T stonv(const std::string& _Str) { return detail::string_to_numval<T>::value(_Str); }
 
 #ifdef _HAS_CXX17
-template<typename... _Args> MATRICE_GLOBAL_FINL
-constexpr auto plus(_Args const&... args) { return (... + args); }
-template<typename... _Args> MATRICE_GLOBAL_FINL
-constexpr auto minus(_Args const&... args) { return (... - args); }
-template<typename... _Args> MATRICE_GLOBAL_FINL
-constexpr auto multiply(_Args const&... args) { return (... * args); }
+//template<typename... _Args> MATRICE_GLOBAL_FINL
+//constexpr auto plus(_Args const&... args) { return (... + args); }
+//template<typename... _Args> MATRICE_GLOBAL_FINL
+//constexpr auto minus(_Args const&... args) { return (... - args); }
+//template<typename... _Args> MATRICE_GLOBAL_FINL
+//constexpr auto multiply(_Args const&... args) { return (... * args); }
+///**
+// * \is _Value satisfies anyone of given _Conditions: x == _Cond1 || ... || x = _Condn
+// */
+//template<typename T, typename... Ts>
+//MATRICE_GLOBAL_INL constexpr bool is_eqto_one_in(T&& _Value, Ts&&... _Conditions) {
+//	return ((_Conditions == _Value) || ...);
+//}
+///**
+// * \is _Value satisfies all of given _Conditions: x == _Cond1 && ... && x = _Condn
+// */
+//template<typename T, typename... Ts>
+//MATRICE_GLOBAL_INL constexpr bool is_eqto_all_in(T&& _Value, Ts&&... _Conditions) {
+//	return ((_Conditions == _Value) && ...);
+//}
 #endif
 
 /**
@@ -127,16 +141,4 @@ template<> struct tuple_n<0> {
 	}
 };
 
-/**
- * \is _Value satisfies anyone of given _Conditions: x == _Cond1 || ... || x = _Condn
- */
-static auto _Is_eqto_one_in = [](auto&& _Value, auto&&... _Conditions)->bool{
-	return ((_Conditions == _Value) || ...);
-};
-/**
- * \is _Value satisfies all of given _Conditions: x == _Cond1 && ... && x = _Condn
- */
-static auto _Is_eqto_all_in = [](auto&& _Value, auto&&... _Conditions)->bool {
-	return ((_Conditions == _Value) && ...);
-};
 DGE_MATRICE_END
