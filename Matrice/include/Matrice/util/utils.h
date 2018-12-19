@@ -105,7 +105,7 @@ constexpr T stonv(const std::string& _Str) { return detail::string_to_numval<T>:
  */
 template<typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
 struct zero { static const constexpr T value = T(0);};
-template<typename T> MATRICE_GLOBAL_INL constexpr auto zero_v = zero<T>::value;
+template<typename T> MATRICE_HOST_INL constexpr auto zero_v = zero<T>::value;
 
 /**
  * \append a T-typed element into tuple _Tpl
