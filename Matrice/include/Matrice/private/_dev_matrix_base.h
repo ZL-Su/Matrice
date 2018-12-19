@@ -40,6 +40,8 @@ template<typename _Ty> class Base_
 	using int_ptr_t = std::add_pointer_t<int>;
 	using pointer = std::add_pointer_t<value_t>;
 public:
+	static constexpr size_t threads_per_block = 128;
+
 	MATRICE_GLOBAL_INL Base_() = default;
 	MATRICE_GLOBAL_INL Base_(pointer pdev, size_t* p, int_ptr_t w, int_ptr_t h)
 		:_Ptr(pdev), _P(p), _W(w), _H(h) {};
@@ -88,6 +90,7 @@ public:
 	MATRICE_HOST_INL pointer operator*(const _Myt& _other);
 	MATRICE_HOST_INL pointer operator/(const _Myt& _other);
 
+	MATRICE_HOST_INL auto reduce() const;
 private:
 	MATRICE_HOST_INL void _Sync_impl() { privt::_Device_sync<0>(); }
 	template<typename... Args>
