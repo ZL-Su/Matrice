@@ -32,6 +32,9 @@ template<int _Opt> void _Device_sync()
 	case 0: sts = cudaDeviceSynchronize(); break;
 	default: break;
 	}
+
+	if(sts != cudaError_t::success) 
+		throw std::runtime_error("Fail to device thread synchronization.");
 }
 
 template void _Device_sync<0>();
