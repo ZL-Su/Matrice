@@ -33,7 +33,7 @@ template<int _Opt> void _Device_sync()
 	default: break;
 	}
 
-	if(sts != cudaError_t::success) 
+	if(sts != cudaError_t::cudaSuccess) 
 		throw std::runtime_error("Fail to device thread synchronization.");
 }
 

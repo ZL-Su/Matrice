@@ -48,12 +48,13 @@ Base_<_Ty>::pointer Base_<_Ty>::operator/(const _Myt& _other) {
 }
 
 template<typename _Ty>
-auto Base_<_Ty>::reduce() const {
+Base_<_Ty>::value_t Base_<_Ty>::reduce() const {
 	auto _Ret = value_t(0);
 
 	const auto N = *_H**_W;
 	dim3 _Blocks((N + threads_per_block - 1) / threads_per_block);
 	kernels::_Ewise_reduce<_KERNEL_CONFIG>(_Ret, _Ptr, N);
+	_Sync_impl();
 
 	return (_Ret);
 }

@@ -14,7 +14,7 @@ MATRICE_DEVICE_BEGIN namespace kernels {
 template<typename _Ty> __global__ 
 void _Ewise_reduce(_Ty& _Ret, const _Ty* _Data, std::size_t _Size) {
 	const auto _Idx = blockIdx.x*blockDim.x + threadIdx.x;
-	if (_Idx < _Size) _Ret += _Data[_Idx];
+	if (_Idx < _Size) _Ret = _Ret + _Data[_Idx];
 }
 
 /**
