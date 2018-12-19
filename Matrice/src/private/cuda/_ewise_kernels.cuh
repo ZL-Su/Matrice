@@ -14,11 +14,44 @@ __global__ void _Ewise_reduce(const _Scalar* _Data, std::size_t _Size, _Scalar& 
 	if (_Idx < _Size) _Ret += _Data[_Idx];
 }
 
+/**
+ * $Z_i = X_i + Y_i$
+ */
 template<typename _Scalar> __global__ void
-_Ewise_plus(const _Scalar* _X, const _Scalar* _Y, _Scalar* _Z, std::size_t _Size) {
+_Ewise_add(const _Scalar* _X, const _Scalar* _Y, _Scalar* _Z, std::size_t _Size) {
 	const auto _Idx = blockIdx.x*blockDim.x + threadIdx.x;
 	if (_Idx < _Size) {
 		_Z[_Idx] = _X[_Idx] + _Y[_Idx];
+	}
+}
+/**
+ * $Z_i = X_i - Y_i$
+ */
+template<typename _Scalar> __global__ void
+_Ewise_sub(const _Scalar* _X, const _Scalar* _Y, _Scalar* _Z, std::size_t _Size) {
+	const auto _Idx = blockIdx.x*blockDim.x + threadIdx.x;
+	if (_Idx < _Size) {
+		_Z[_Idx] = _X[_Idx] - _Y[_Idx];
+	}
+}
+/**
+ * $Z_i = X_i * Y_i$
+ */
+template<typename _Scalar> __global__ void
+_Ewise_mul(const _Scalar* _X, const _Scalar* _Y, _Scalar* _Z, std::size_t _Size) {
+	const auto _Idx = blockIdx.x*blockDim.x + threadIdx.x;
+	if (_Idx < _Size) {
+		_Z[_Idx] = _X[_Idx] * _Y[_Idx];
+	}
+}
+/**
+ * $Z_i = X_i / Y_i$
+ */
+template<typename _Scalar> __global__ void
+_Ewise_div(const _Scalar* _X, const _Scalar* _Y, _Scalar* _Z, std::size_t _Size) {
+	const auto _Idx = blockIdx.x*blockDim.x + threadIdx.x;
+	if (_Idx < _Size) {
+		_Z[_Idx] = _X[_Idx] / _Y[_Idx];
 	}
 }
 }MATRICE_DEVICE_END
