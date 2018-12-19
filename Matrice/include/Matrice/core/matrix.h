@@ -150,10 +150,10 @@ public:
 template<typename _Ty>
 class Matrix_<_Ty, -1, -1> : public Base_<Matrix_<_Ty, -1, -1>>, public device::Base_<_Ty>
 {
-	using Myt = Matrix_<_Ty, -1, -1>;
-	using Myt_reference = std::add_lvalue_reference_t<Myt>;
-	using Myt_const_reference = add_const_reference_t<Myt>;
-	using Myt_move_reference = std::add_rvalue_reference_t<Myt>;
+	using _Myt = Matrix_;
+	using Myt_reference = std::add_lvalue_reference_t<_Myt>;
+	using Myt_const_reference = add_const_reference_t<_Myt>;
+	using Myt_move_reference = std::add_rvalue_reference_t<_Myt>;
 	using _Mydevbase = device::Base_<_Ty>;
 	using _Mybase = Base_<Matrix_<_Ty, -1, -1>>;
 	using _Mybase::m_data;
@@ -163,9 +163,9 @@ class Matrix_<_Ty, -1, -1> : public Base_<Matrix_<_Ty, -1, -1>>, public device::
 public:
 	enum { Size = -1, CompileTimeRows = -1, CompileTimeCols = -1, };
 	using typename _Mybase::value_t;
+	using typename _Mybase::value_type;
 	using typename _Mybase::pointer;
 	using typename _Mybase::const_init_list;
-	using _Mydevbase::operator+;
 
 	MATRICE_GLOBAL_INL Matrix_(int _rows) noexcept : _Mybase(_rows, 1),
 		_Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
@@ -174,10 +174,12 @@ public:
 	MATRICE_GLOBAL_INL Matrix_(Myt_move_reference _other) noexcept : _Mybase(_other), 
 		_Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
 	template<int _M = 0, int _N = _M>
-	MATRICE_HOST_INL Matrix_(add_const_reference_t<Matrix_<_Ty, _M, _N>> _other) noexcept: _Mybase(_other),
+	MATRICE_HOST_INL Matrix_(add_const_reference_t<Matrix_<value_t, _M, _N>> _other) noexcept: _Mybase(_other),
 		_Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
 	template<typename... _Args> MATRICE_GLOBAL_INL Matrix_(const _Args&... args) noexcept : _Mybase(args...), 
 		_Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
+
+	MATRICE_GLOBAL void create(int_t rows, int_t cols = 1);
 
 	template<typename _Arg> 
 	MATRICE_GLOBAL_INL Myt_reference operator= (add_const_reference_t<_Arg> _arg) { 
@@ -194,17 +196,30 @@ public:
 		return (*this);
 	}
 
+	/**
+	 * \in-place element-wise addition
+	 */
 	MATRICE_GLOBAL_INL Myt_reference operator+(Myt_const_reference _other) {
-		m_data = (*this) + _other.data();
-		return (*this);
+		m_data = (*this)._Mydevbase::operator+(_other); return (*this);
 	}
-	/*template<int _M, int _N>
-	MATRICE_GLOBAL_INL operator Matrix_<value_t, _M, _N>() const {
-		Matrix_<value_t, _M, _N> _Ret(m_rows, m_cols);
-		privt::unified_sync<value_t, _Mybase::m_storage.location, _Ret.location, _Mybase::m_storage.option>::op(_Ret.data(), m_data, m_rows, m_cols, m_pitch);
-		return std::move(_Ret);
-	}*/
-	MATRICE_GLOBAL void create(int_t rows, int_t cols = 1);
+	/**
+	 * \in-place element-wise subtraction
+	 */
+	MATRICE_GLOBAL_INL Myt_reference operator-(Myt_const_reference _other) {
+		m_data = (*this)._Mydevbase::operator-(_other); return (*this);
+	}
+	/**
+	 * \in-place element-wise multiplication
+	 */
+	MATRICE_GLOBAL_INL Myt_reference operator*(Myt_const_reference _other) {
+		m_data = (*this)._Mydevbase::operator*(_other); return (*this);
+	}
+	/**
+	 * \in-place element-wise division
+	 */
+	MATRICE_GLOBAL_INL Myt_reference operator/(Myt_const_reference _other) {
+		m_data = (*this)._Mydevbase::operator/(_other); return (*this);
+	}
 
 };
 

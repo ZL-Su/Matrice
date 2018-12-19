@@ -4,12 +4,43 @@
 
 MATRICE_DEVICE_BEGIN
 
-template<typename arith_type>
-Base_<arith_type>::pointer Base_<arith_type>::operator+(const pointer _other) {
+template<typename _Ty>
+Base_<_Ty>::pointer Base_<_Ty>::operator+(const _Myt& _other) {
+	static_assert(std::is_scalar_v<_Ty>, "Template parameter _Ty must be a scalar type.");
 	const int _M = *_H, _N = *_W;
 
 	dim3 _Blocks(std::max((size_t)1, (size_t)std::ceil(_M*_N / 32.)));
-	kernels::_Ewise_plus<<<_Blocks, 32>>>(_Ptr, _other, _Ptr, _M*_N);
+	kernels::_Ewise_add<<<_Blocks, 32>>>(_Ptr, _other._Ptr, _Ptr, _M*_N);
+
+	return (_Ptr);
+}
+template<typename _Ty>
+Base_<_Ty>::pointer Base_<_Ty>::operator-(const _Myt& _other) {
+	static_assert(std::is_scalar_v<_Ty>, "Template parameter _Ty must be a scalar type.");
+	const int _M = *_H, _N = *_W;
+
+	dim3 _Blocks(std::max((size_t)1, (size_t)std::ceil(_M*_N / 32.)));
+	kernels::_Ewise_sub<<<_Blocks, 32 >>> (_Ptr, _other._Ptr, _Ptr, _M*_N);
+
+	return (_Ptr);
+}
+template<typename _Ty>
+Base_<_Ty>::pointer Base_<_Ty>::operator*(const _Myt& _other) {
+	static_assert(std::is_scalar_v<_Ty>, "Template parameter _Ty must be a scalar type.");
+	const int _M = *_H, _N = *_W;
+
+	dim3 _Blocks(std::max((size_t)1, (size_t)std::ceil(_M*_N / 32.)));
+	kernels::_Ewise_mul<<<_Blocks, 32>>> (_Ptr, _other._Ptr, _Ptr, _M*_N);
+
+	return (_Ptr);
+}
+template<typename _Ty>
+Base_<_Ty>::pointer Base_<_Ty>::operator/(const _Myt& _other) {
+	static_assert(std::is_scalar_v<_Ty>, "Template parameter _Ty must be a scalar type.");
+	const int _M = *_H, _N = *_W;
+
+	dim3 _Blocks(std::max((size_t)1, (size_t)std::ceil(_M*_N / 32.)));
+	kernels::_Ewise_div<<<_Blocks, 32>>> (_Ptr, _other._Ptr, _Ptr, _M*_N);
 
 	return (_Ptr);
 }

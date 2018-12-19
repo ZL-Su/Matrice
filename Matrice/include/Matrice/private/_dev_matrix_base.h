@@ -33,11 +33,12 @@ MATRICE_DEVICE_BEGIN
 // \CLASS TEMPLATE to make base class for device matrix
 template<typename _Ty> class Base_
 {
+	using _Myt = Base_;
+	using value_t = _Ty;
+	using _Mydt = types::Matrix_<value_t, -1, -1>;
 	using size_t = std::size_t;
 	using int_ptr_t = std::add_pointer_t<int>;
-	using value_t = _Ty;
 	using pointer = std::add_pointer_t<value_t>;
-	using derived_t = types::Matrix_<_Ty, -1, -1>;
 public:
 	MATRICE_GLOBAL_INL Base_() = default;
 	MATRICE_GLOBAL_INL Base_(pointer pdev, size_t* p, int_ptr_t w, int_ptr_t h)
@@ -74,12 +75,19 @@ public:
 	MATRICE_GLOBAL_INL pointer operator= (const pointer _src) {
 		_Upload_impl(_src); return (_Ptr);
 	}
-	template<typename _Arg, typename = std::enable_if_t<std::is_class_v<_Arg>>>
-	MATRICE_GLOBAL_INL derived_t& operator= (const _Arg& _src) { 
-		_Upload_impl(_src.data()); return *static_cast<derived_t*>(this); 
+	template<typename _Rhs, typename = std::enable_if_t<std::is_class_v<_Rhs>>>
+	MATRICE_GLOBAL_INL _Mydt& operator= (const _Rhs& _src) {
+		_Upload_impl(_src.data()); return *static_cast<_Mydt*>(this);
 	}
 
-	MATRICE_HOST_INL pointer operator+(const pointer _other);
+	/**
+	 * if the device has the compute_35 architecture or above, using MATRICE_GLOBAL_INL
+	 */
+	MATRICE_HOST_INL pointer operator+(const _Myt& _other);
+	MATRICE_HOST_INL pointer operator-(const _Myt& _other);
+	MATRICE_HOST_INL pointer operator*(const _Myt& _other);
+	MATRICE_HOST_INL pointer operator/(const _Myt& _other);
+
 private:
 	MATRICE_HOST_INL void _Sync_impl() { privt::_Device_sync<0>(); }
 	template<typename... Args>
