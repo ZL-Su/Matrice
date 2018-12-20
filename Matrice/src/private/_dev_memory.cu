@@ -83,71 +83,57 @@ template<typename _Scalar, typename = typename std::enable_if<std::is_scalar<_Sc
 void device_free(_Scalar* dptr) { if (dptr) cudaFree(dptr); }
 
 #pragma region <!-- explicit intantiation -->
-template int* device_malloc(size_t&, size_t);
-template char* device_malloc(size_t&, size_t);
-template bool* device_malloc(size_t&, size_t);
-template float* device_malloc(size_t&, size_t);
-template double* device_malloc(size_t&, size_t);
-template unsigned char* device_malloc(size_t&, size_t);
-template int* global_malloc(size_t);
-template char* global_malloc(size_t);
-template bool* global_malloc(size_t);
-template float* global_malloc(size_t);
-template double* global_malloc(size_t);
-template unsigned char* global_malloc(size_t);
-template void device_memcpy<int, 1>(int*, int*, size_t, size_t, size_t);
-template void device_memcpy<int, 2>(int*, int*, size_t, size_t, size_t);
-template void device_memcpy<char, 1>(char*, char*, size_t, size_t, size_t);
-template void device_memcpy<char, 2>(char*, char*, size_t, size_t, size_t);
-template void device_memcpy<bool, 1>(bool*, bool*, size_t, size_t, size_t);
-template void device_memcpy<bool, 2>(bool*, bool*, size_t, size_t, size_t);
-template void device_memcpy<float, 1>(float*, float*, size_t, size_t, size_t);
-template void device_memcpy<float, 2>(float*, float*, size_t, size_t, size_t);
-template void device_memcpy<double, 1>(double*, double*, size_t, size_t, size_t);
-template void device_memcpy<double, 2>(double*, double*, size_t, size_t, size_t);
-template void device_memcpy<unsigned char, 1>(unsigned char*, unsigned char*, size_t, size_t, size_t);
-template void device_memcpy<unsigned char, 2>(unsigned char*, unsigned char*, size_t, size_t, size_t);
-template void device_free(int*);
-template void device_free(char*);
-template void device_free(bool*);
-template void device_free(float*);
-template void device_free(double*);
-template void device_free(unsigned char*);
+#define _DEVMALLOC(type) \
+template type* device_malloc(size_t&, size_t); \
+template type* global_malloc(size_t); \
+template void device_free(type*);
+#define _DEVMEMCPY(type, op) \
+template void device_memcpy<type, op>(type*, type*, size_t, size_t, size_t);
+
+_DEVMALLOC(int)        _DEVMALLOC(char)
+_DEVMALLOC(uchar)      _DEVMALLOC(bool)
+_DEVMALLOC(float)      _DEVMALLOC(double)
+_DEVMEMCPY(int, 1)     _DEVMEMCPY(int, 2)
+_DEVMEMCPY(char, 1)    _DEVMEMCPY(char, 2)
+_DEVMEMCPY(bool, 1)    _DEVMEMCPY(bool, 2)
+_DEVMEMCPY(uchar, 1)   _DEVMEMCPY(uchar, 2)
+_DEVMEMCPY(float, 1)   _DEVMEMCPY(float, 2)
+_DEVMEMCPY(double, 1)  _DEVMEMCPY(double, 2)
+
 #pragma endregion
 
 MATRICE_PRIVATE_END
 
 #pragma region <!-- Impl. for device_memcpy -->
+#define _DEVMEMCPY_IMPL(type, option) \
+template void dgelom::device::device_memcpy<type, option> \
+			::impl(pointer, pointer, size_t, size_t, size_t);
+
 template<typename T>
 template<typename... _Args> MATRICE_GLOBAL
-void dgelom::device::device_memcpy<T, 0>::impl(_Args ...args)
-{
+void dgelom::device::device_memcpy<T, 0>::impl(_Args ...args) {
 	return;
 }
 template<typename T>
 template<typename... _Args> MATRICE_GLOBAL
-void dgelom::device::device_memcpy<T, 1>::impl(_Args ...args)
-{
+void dgelom::device::device_memcpy<T, 1>::impl(_Args ...args) {
 	dgelom::privt::device_memcpy<T, option>(args...);
 }
-template void dgelom::device::device_memcpy<uchar, 1>
-::impl(pointer, pointer, size_t, size_t, size_t);
-template void dgelom::device::device_memcpy<float, 1>
-::impl(pointer, pointer, size_t, size_t, size_t);
-template void dgelom::device::device_memcpy<double, 1>
-::impl(pointer, pointer, size_t, size_t, size_t);
 template<typename T>
 template<typename... _Args> MATRICE_GLOBAL
-void dgelom::device::device_memcpy<T, 2>::impl(_Args ...args)
-{
+void dgelom::device::device_memcpy<T, 2>::impl(_Args ...args) {
 	dgelom::privt::device_memcpy<T, option>(args...);
 }
-template void dgelom::device::device_memcpy<uchar, 2>
-::impl(pointer, pointer, size_t, size_t, size_t);
-template void dgelom::device::device_memcpy<float, 2>
-::impl(pointer, pointer, size_t, size_t, size_t);
-template void dgelom::device::device_memcpy<double, 2>
-::impl(pointer, pointer, size_t, size_t, size_t);
+
+_DEVMEMCPY_IMPL(uchar, 1)
+_DEVMEMCPY_IMPL(float, 1)
+_DEVMEMCPY_IMPL(double, 1)
+_DEVMEMCPY_IMPL(uchar,  2)
+_DEVMEMCPY_IMPL(float,  2)
+_DEVMEMCPY_IMPL(double, 2)
 #pragma endregion
 
+#undef _DEVMALLOC
+#undef _DEVMEMCPY
+#undef _DEVMEMCPY_IMPL
 #endif
