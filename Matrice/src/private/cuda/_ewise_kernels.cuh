@@ -27,6 +27,13 @@ void _Ewise_add(const _Ty* _X, const _Ty* _Y, _Ty* _Z, std::size_t _Size) {
 		_Z[_Idx] = _X[_Idx] + _Y[_Idx];
 	}
 }
+template<typename _Ty> __global__
+void _Ewise_add(const _Ty* _X, const _Ty _Y, _Ty* _Z, std::size_t _Size) {
+	const auto _Idx = blockIdx.x*blockDim.x + threadIdx.x;
+	if (_Idx < _Size) {
+		_Z[_Idx] = _X[_Idx] + _Y;
+	}
+}
 /**
  * $Z_i = X_i - Y_i$
  */
@@ -45,6 +52,13 @@ void _Ewise_mul(const _Ty* _X, const _Ty* _Y, _Ty* _Z, std::size_t _Size) {
 	const auto _Idx = blockIdx.x*blockDim.x + threadIdx.x;
 	if (_Idx < _Size) {
 		_Z[_Idx] = _X[_Idx] * _Y[_Idx];
+	}
+}
+template<typename _Ty> __global__
+void _Ewise_mul(const _Ty* _X, const _Ty _Y, _Ty* _Z, std::size_t _Size) {
+	const auto _Idx = blockIdx.x*blockDim.x + threadIdx.x;
+	if (_Idx < _Size) {
+		_Z[_Idx] = _X[_Idx] * _Y;
 	}
 }
 /**
