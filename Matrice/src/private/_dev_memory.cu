@@ -30,37 +30,34 @@ using std::complex;
 using uchar = unsigned char;
 MATRICE_PRIVATE_BEGIN
 //<note> w is the columns, h is the rows </note>
-template<typename _Scalar, typename = typename std::enable_if<std::is_scalar<_Scalar>::value>::type>
-_Scalar* device_malloc(size_t& w, size_t h)
-{
-	cudaError_t sts; _Scalar* dptr;
+template<typename _Ty, typename = std::enable_if_t<std::is_scalar_v<_Ty>>>
+_Ty* device_malloc(size_t& w, size_t h) {
+	cudaError_t sts; _Ty* dptr;
 	switch (h)
 	{
 	case 1:
-		sts = cudaMalloc(&dptr, w * sizeof(_Scalar));
+		sts = cudaMalloc(&dptr, w * sizeof(_Ty));
 		break;
 	default:
 		size_t pitch = 0;
-		sts = cudaMallocPitch(&dptr, &pitch, w * sizeof(_Scalar), h);
+		sts = cudaMallocPitch(&dptr, &pitch, w * sizeof(_Ty), h);
 		w = pitch;
 		break;
 	}
 	if (sts != cudaSuccess) throw std::runtime_error(cudaGetErrorString(sts));
 	return dptr;
 }
-template<typename _Scalar, typename = typename std::enable_if<std::is_scalar<_Scalar>::value>::type>
-_Scalar* global_malloc(size_t N)
-{
-	_Scalar* dptr;
-	auto sts = cudaMallocManaged(&dptr, N * sizeof(_Scalar));
-	if (sts != cudaSuccess) throw std::runtime_error(cudaGetErrorString(sts));
+template<typename _Ty, typename = std::enable_if_t<std::is_scalar_v<_Ty>>>
+_Ty* global_malloc(size_t N) {
+	_Ty* dptr; auto sts = cudaMallocManaged(&dptr, N * sizeof(_Ty));
+	if (sts != cudaSuccess)
+		throw std::runtime_error(cudaGetErrorString(sts));
 	return dptr;
 }
 //<note> w is the columns, h is the rows, p is the pitch size if pitched memory is used </note>
-template<typename _Scalar, int _Opt, typename = typename std::enable_if<std::is_scalar<_Scalar>::value>::type>
-void device_memcpy(_Scalar* hptr, _Scalar* dptr, size_t w, size_t h = 1, size_t p = 1)
-{
-	cudaError_t sts; size_t hpitch = w * h * sizeof(_Scalar);
+template<typename _Ty, int _Opt, typename = std::enable_if_t<std::is_scalar_v<_Ty>>>
+void device_memcpy(_Ty* hptr, _Ty* dptr, size_t w, size_t h = 1, size_t p = 1) {
+	cudaError_t sts; size_t hpitch = w * h * sizeof(_Ty);
 	if (_Opt == ::cudaMemcpyHostToDevice) {
 		if (p == 1) {
 			sts = cudaMemcpy(dptr, hptr, hpitch, cudaMemcpyHostToDevice);
@@ -79,8 +76,14 @@ void device_memcpy(_Scalar* hptr, _Scalar* dptr, size_t w, size_t h = 1, size_t 
 	}
 	if (sts != cudaSuccess) throw std::runtime_error(cudaGetErrorString(sts));
 }
-template<typename _Scalar, typename = typename std::enable_if<std::is_scalar<_Scalar>::value>::type>
-void device_free(_Scalar* dptr) { if (dptr) cudaFree(dptr); }
+template<typename _Ty, typename = std::enable_if_t<std::is_scalar_v<_Ty>>>
+void device_free(_Ty* dptr) { 
+	if (dptr) {
+		auto sts = cudaFree(dptr);
+		if(sts != cudaSuccess)
+			throw std::runtime_error(cudaGetErrorString(sts));
+	}
+}
 
 #pragma region <!-- explicit intantiation -->
 #define _DEVMALLOC(type) \
