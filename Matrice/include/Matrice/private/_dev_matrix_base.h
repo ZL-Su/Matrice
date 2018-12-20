@@ -90,7 +90,13 @@ public:
 	MATRICE_HOST_INL pointer operator*(const _Myt& _other);
 	MATRICE_HOST_INL pointer operator/(const _Myt& _other);
 
-	MATRICE_HOST_INL auto reduce() const;
+	MATRICE_HOST_INL value_t reduce();
+	
+	friend _Mydt operator+(const value_t _Left, const _Mydt& _Right);
+	friend _Mydt operator-(const value_t _Left, const _Mydt& _Right);
+	friend _Mydt operator*(const value_t _Left, const _Mydt& _Right);
+	friend _Mydt operator/(const value_t _Left, const _Mydt& _Right);
+
 private:
 	MATRICE_HOST_INL void _Sync_impl() { privt::_Device_sync<0>(); }
 	template<typename... Args>
