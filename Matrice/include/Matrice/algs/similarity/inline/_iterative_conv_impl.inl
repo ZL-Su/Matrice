@@ -76,7 +76,8 @@ template<> struct _Op<1, 6> {
 	static auto J(const _Mulmty& _Ref, const _Poty& _Pos, const _Rgty& _Rx, const _Rgty& _Ry) {
 		using value_type = typename _Mulmty::value_type;
 
-		auto [_Dfdx, _Dfdy] = _Ref.view_n<2,1>(_Rx, _Ry);
+		//auto [_Dfdx, _Dfdy] = _Ref.view_n<2,1>(_Rx, _Ry);
+		const auto &_Dfdx = _Ref[1], &_Dfdy = _Ref[2];
 		const auto _Size = max(_Rx.size(), _Ry.size());
 
 		tensor<value_type, 1, 6> _Ret(_Size, _Size);
@@ -84,7 +85,7 @@ template<> struct _Op<1, 6> {
 			const auto _y = y - _Ry.begin();
 			for (auto x : _Rx) { auto _Dx = x - _Pos.x;
 				const auto _x = x - _Rx.begin();
-				const auto &_Fx = _Dfdx[y][x], &_Fy = _Dfdy[y][x];
+				const auto _Fx = _Dfdx[y][x], _Fy = _Dfdy[y][x];
 				_Ret(_y, _x) = { _Fx, _Fx*_Dx, _Fx*_Dy, _Fy, _Fy*_Dx, _Fy*_Dy };
 			}
 		}
@@ -92,9 +93,36 @@ template<> struct _Op<1, 6> {
 	};
 };
 
-template<std::size_t _ORD> struct _Warp_update {};
+template<std::size_t _ORDER> struct _Jacobian {
+	static_assert(_ORDER > 2, "Oops, unsupported warp order: _ORDER.");
+};
 
-template<> struct _Warp_update<1> {
+template<> struct _Jacobian<1> {
+	template<typename _Mty, typename _Pty, typename _Rty>
+	MATRICE_HOST_INL static auto eval(const _Mty& _Ref, const _Pty& _Pos, const _Rty& _Rx, const _Rty& _Ry) {
+		using value_type = typename _Mty::value_type;
+		const auto _Size = max(_Rx.size(), _Ry.size());
+		auto[_dfdx, _dfdy] = _Ref.view_n<2, 1>(_Rx, _Ry);
+
+		tensor<value_type, 1, 6> _Ret(_Size, _Size);
+		for (auto y : _Ry) {
+			const auto _Dy = y - _Pos.y;
+			const auto _y = y - _Ry.begin();
+			auto _Fx = _dfdx[y], _Fy = _dfdy[y];
+			for (auto x : _Rx) {
+				const auto _Dx = x - _Pos.x;
+				const auto _x = x - _Rx.begin();
+				_Ret(_y, _x) = { _Fx[x], _Fx[x]*_Dx, _Fx[x]*_Dy, 
+					_Fy, _Fy[x]*_Dx, _Fy[x]*_Dy };
+			}
+		}
+		return std::forward<decltype(_Ret)>(_Ret);
+	};
+};
+
+template<std::size_t _ORDER> struct _Warp_update {};
+
+template<> struct _Warp_update<compile_time_size<>::val_1> {
 	template<typename _Vecty> 
 	static MATRICE_HOST_INL auto& fwd(_Vecty& x, const _Vecty& y) {}
 
@@ -151,11 +179,10 @@ auto _Iterative_conv_base<_Derived>::_Update_subset(const param_type& _P) {
 
 			auto _Ix = floor<int>(_X), _Iy = floor<int>(_Y);
 			_WITHIN_RANGE_OF_REFIMG {
-				auto _Delta_x = _X - static_cast<value_type>(_Ix);
-				auto _Delta_y = _Y - static_cast<value_type>(_Iy);
-
-				conv_internal::_Delta_pow_n(_Buf_x, _Delta_x);
-				conv_internal::_Delta_pow_n(_Buf_y, _Delta_y);
+				//auto _Delta_x = _X - static_cast<value_type>(_Ix);
+				//auto _Delta_y = _Y - static_cast<value_type>(_Iy);
+				//conv_internal::_Delta_pow_n(_Buf_x, _Delta_x);
+				//conv_internal::_Delta_pow_n(_Buf_y, _Delta_y);
 
 				_Mean += _Mycur(_Off_y, _Off_x) = (*_Myitp)(_Ix-_Bl, _Iy);
 			}
@@ -193,7 +220,7 @@ MATRICE_HOST_FINL auto _Invcomp_conv_impl<_Ty, _Tag, _ORD>::_Init(){
 	_Mybase::_Myref = _Mybase::_Myref / _SSD;
 
 	range<decltype(_L)> _Rx(_L, _R), _Ry(_U, _D);
-	_Mybase::_Myjaco = conv_internal::_Op<_ORD, _Mybase::DOF>::J(_Ref, _Pos, _Rx, _Ry);
+	_Mybase::_Myjaco = conv_internal::_Op<1,6>::J(_Ref, _Pos, _Rx, _Ry);
 	_Mybase::_Myhess = _Mybase::_Myjaco.t().mul(_Mybase::_Myjaco).reduce() * 2 / _SSD;
 
 	_Mybase::_Myhess = _Mybase::_Mysolver.forward();

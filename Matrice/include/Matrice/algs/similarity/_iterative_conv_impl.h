@@ -21,6 +21,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../../core/solver.h"
 #include "../../core/tensor.h"
 #include "../../private/math/_linear.h"
+#include "../imageproc.hpp"
 #include "_similarity_traits.h"
 
 MATRICE_ALGS_BEGIN
@@ -45,6 +46,7 @@ template<size_t _Options> struct _Iterative_conv_options
 	MATRICE_GLOBAL_FINL const auto& operator()() const { return (_My_radius); }
 	MATRICE_GLOBAL_FINL operator default_type() { return _My_epsilon; }
 };
+
 namespace detail {
 template<typename _Itptag> struct _Conv_border_size {};
 template<> struct _Conv_border_size<_TAG bicspl_tag> {

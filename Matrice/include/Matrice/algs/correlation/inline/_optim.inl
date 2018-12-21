@@ -131,19 +131,19 @@ auto& _Corr_invcomp_optim<_Ty, _Itag, 1>::_Diff() {
 
 template<typename _Ty, typename _Itag> MATRICE_HOST_INL
 auto _Corr_invcomp_optim<_Ty, _Itag, 1>::_Update(param_type& _P) {
+	// \warp
+	const auto _Scal = _Mybase::_Warp(_P); 
+	// \error image exp.
+	auto _Diff_n = (_Mybase::_Myref - _Mybase::_Mycur)*_Scal; 
+	// \steepest descent param. update
+	param_type _Sdp = (_Diff_n*_Mybase::_Myjaco).reduce().t();
+	// \solve warp param update
+	_Sdp = -1.*_Mybase::_Mysolver.backward(_Sdp);
 
-	const auto _Scal = _Mybase::_Warp(_P);
-
-	auto _Diff_n = (_Mybase::_Myref - _Mybase::_Mycur)*_Scal;
-
-	param_type _SDE = (_Diff_n*_Mybase::_Myjaco).reduce().t();
-
-	_SDE = -1.*_Mybase::_Mysolver.backward(_SDE);
-
-	auto _Error = (_SDE*_SDE).sum();
-
-	if(_Error < 0.001)
-		_P = _Compositional_warp_update<order>::inv(_P, _SDE);
+	auto _Error = (_Sdp*_Sdp).sum();
+	if(_Error < 1.0E-3)
+		// \inverse composition to update param.
+		_P = _Compositional_warp_update<order>::inv(_P, _Sdp);
 
 	return std::tuple((_Diff_n*_Diff_n).sum(), _Error);
 }
