@@ -596,6 +596,28 @@ public:
 			m_data[_Idx] = _Fn(static_cast<value_type>(_Data[_Idx]));
 	}
 	/**
+	 * \stack from a sequence of vectors with same size, _Vecty can be any type that has members .size() and .data()
+	 */
+	template<typename _Vecty>
+	MATRICE_HOST_INL _Myt& stack_from(const std::initializer_list<_Vecty>& _L, std::size_t _Dim = 0) {
+		const auto _Rows = _Dim == 0 ? _L.size() : _L.begin()->size();
+		const auto _Cols = _Dim == 0 ? _L.begin()->size() : _L.size();
+
+		if (this->empty) this->create(_Rows, _Cols);
+
+		if (_Dim == 0) {
+			for (auto _Idx = 0; _Idx < _Rows; ++_Idx)
+				this->rview(_Idx) = (_L.begin() + _Idx)->data();
+		}
+		else if (_Dim == 1) {
+			for (auto _Idx = 0; _Idx < _Cols; ++_Idx)
+				this->cview(_Idx) = (_L.begin() + _Idx)->data();
+		}
+		else throw std::exception("Unsupported _Dim value in dgelom::types::Base_<...>::stack_from(_L, _Dim).");
+
+		return (*this);
+	}
+	/**
 	 * \replace entries meets _Cond with _Val
 	 */
 	MATRICE_GLOBAL_FINL void where(std::function<bool(const value_type&)> _Cond, const value_type _Val) {
