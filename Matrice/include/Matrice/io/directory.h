@@ -70,7 +70,7 @@ public:
 	/**
 	 * \return size of current directory
 	 */
-	MATRICE_HOST_INL constexpr auto size() const {
+	MATRICE_HOST_INL const auto size() const {
 		return (_Mysubfolders.size());
 	}
 
