@@ -230,5 +230,7 @@ _DETAIL_END
 
 using directory = detail::_Dir_impl<detail::folder_tag>;
 using data_loader = detail::_Data_loader_impl<detail::loader_tag>;
+using folder_collector = detail::_Collector<detail::folder_tag>;
+using file_collector = detail::_Collector<detail::file_tag>;
 
 } DGE_MATRICE_END
