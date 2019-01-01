@@ -30,14 +30,16 @@ namespace fs = std::experimental::filesystem;
 _DETAIL_BEGIN
 
 struct folder_tag {};
+struct loader_tag {};
 
 template<typename _Tag = folder_tag> class _Dir_impl {};
 
 template<> class _Dir_impl<folder_tag> {
+public:
+	using category = folder_tag;
 	using value_type = std::string;
 	using path_type = fs::path;
 	using container = std::vector<value_type>;
-public:
 	/**
 	 * \_Root must has form "./folder_name" or "/folder_name" 
 	 */
@@ -91,8 +93,47 @@ private:
 	path_type _Mypath;
 	container _Mysubfolders;
 };
+
+template<typename _Tag = loader_tag> class _Data_loader_impl{};
+
+template<> class _Data_loader_impl<loader_tag> {
+	using _Mydir_type = _Dir_impl<folder_tag>;
+	using _Myt = _Data_loader_impl;
+	struct _Loader_iterator {
+	public:
+		_Loader_iterator(const std::add_pointer_t<_Myt> _This)
+			:_Myptr(_This){
+		}
+
+
+	private:
+		std::size_t _Mypos = 0;
+		std::add_pointer_t<_Myt> _Myptr = nullptr;
+	};
+public:
+	using category = loader_tag;
+	using dir_type = _Mydir_type;
+	using iterator = _Loader_iterator;
+
+	_Data_loader_impl(const _Mydir_type& _Dir) 
+		: _Mydir(_Dir) {
+		_Mynames.resize(_Mydir.size());
+	}
+
+	MATRICE_HOST_INL auto begin() const {
+
+	}
+	MATRICE_HOST_INL auto end() const {
+
+	}
+private:
+	_Mydir_type _Mydir;
+	std::vector<_Mydir_type::container> _Mynames;
+};
+
 _DETAIL_END
 
 using directory = detail::_Dir_impl<detail::folder_tag>;
+using data_loader = detail::_Data_loader_impl<detail::loader_tag>;
 
 } DGE_MATRICE_END
