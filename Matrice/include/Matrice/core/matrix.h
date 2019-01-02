@@ -85,12 +85,13 @@ public:
 	using typename _Mybase::pointer;
 	using typename _Mybase::const_init_list;
 	enum { Size = __, CompileTimeRows = __, CompileTimeCols = __, };
-
+	
 	MATRICE_GLOBAL_FINL Matrix_(int _rows) noexcept : _Mybase(_rows, 1) {};
 	MATRICE_GLOBAL_FINL Matrix_(Myt&& _other) noexcept : _Mybase(_other) {};
-	MATRICE_GLOBAL_FINL Matrix_(Myt_const_reference _other) noexcept : _Mybase(_other) {};
+	MATRICE_GLOBAL_FINL Matrix_(const Myt& _other) noexcept : _Mybase(_other) {};
 	template<typename... _Args> 
 	MATRICE_GLOBAL_FINL Matrix_(const _Args&... args) noexcept : _Mybase(args...) {};
+
 	//MATRICE_GLOBAL_INL Matrix_() noexcept : _Mybase() {};
 	//MATRICE_GLOBAL_INL Matrix_(int _rows, int _cols) noexcept : _Mybase(_rows, _cols) {};
 	//MATRICE_GLOBAL_INL Matrix_(int _rows, int _cols, pointer _data) noexcept : _Mybase(_rows, _cols, _data) {};
