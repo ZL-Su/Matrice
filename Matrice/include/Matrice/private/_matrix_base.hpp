@@ -186,36 +186,36 @@ public:
 	static constexpr auto inf = std::numeric_limits<value_t>::infinity();
 	static constexpr auto eps = std::numeric_limits<value_t>::epsilon();
 
-	MATRICE_GLOBAL_FINL Base_() noexcept
+	MATRICE_GLOBAL_INL Base_() noexcept
 		:base_t(_M<0?0:_M, _N<0?0:_N), m_storage() _PTRLINK
-	MATRICE_GLOBAL_FINL Base_(int _rows, int _cols) noexcept 
+	MATRICE_GLOBAL_INL Base_(int _rows, int _cols) noexcept 
 		:base_t(_rows, _cols), m_storage(_rows, _cols) _PTRLINK
-	MATRICE_GLOBAL_FINL Base_(const shape_t& _Shape) noexcept
-		:base_t(_SHAPE), m_storage(m_rows, m_cols) _PTRLINK
-	MATRICE_GLOBAL_FINL Base_(int _rows, int _cols, pointer data) noexcept 
+	MATRICE_GLOBAL_INL Base_(const shape_t& _Shape) noexcept
+		: Base_(_SHAPE) {}//base_t(_SHAPE), m_storage(m_rows, m_cols) _PTRLINK
+	MATRICE_GLOBAL_INL Base_(int _rows, int _cols, pointer data) noexcept 
 		:base_t(_rows, _cols, data), m_storage(_rows, _cols, data) {}
-	MATRICE_GLOBAL_FINL Base_(const shape_t& _Shape, pointer _Data) noexcept
-		:base_t(_SHAPE), m_storage(m_rows, m_cols, _Data) _PTRLINK
-	MATRICE_GLOBAL_FINL Base_(int _rows, int _cols, value_t _val) noexcept 
+	MATRICE_GLOBAL_INL Base_(const shape_t& _Shape, pointer _Data) noexcept
+		: Base_(_SHAPE, _Data) {}//base_t(_SHAPE), m_storage(m_rows, m_cols, _Data) _PTRLINK
+	MATRICE_GLOBAL_INL Base_(int _rows, int _cols, value_t _val) noexcept 
 		:base_t(_rows, _cols), m_storage(_rows, _cols, _val) _PTRLINK
-	MATRICE_GLOBAL_FINL Base_(const shape_t& _Shape, value_t _Val) noexcept
-		:base_t(_SHAPE), m_storage(m_rows, m_cols, _Val) _PTRLINK
-	MATRICE_GLOBAL_FINL Base_(const_init_list _list) noexcept 
+	MATRICE_GLOBAL_INL Base_(const shape_t& _Shape, value_t _Val) noexcept
+		:Base_(_SHAPE, _Val) {} //, m_storage(m_rows, m_cols, _Val) _PTRLINK
+	MATRICE_GLOBAL_INL Base_(const_init_list _list) noexcept 
 		:base_t(_M, _N), m_storage(_list) _PTRLINK
-	MATRICE_GLOBAL_FINL Base_(_Myt_const_reference _other) noexcept 
+	MATRICE_GLOBAL_INL Base_(_Myt_const_reference _other) noexcept 
 		:base_t(_other.m_rows, _other.m_cols), m_storage(_other.m_storage) _PTRLINK
-	MATRICE_GLOBAL_FINL Base_(_Myt_move_reference _other) noexcept 
+	MATRICE_GLOBAL_INL Base_(_Myt_move_reference _other) noexcept 
 		:base_t(_other.m_rows, _other.m_cols), m_storage(std::move(_other.m_storage)) _PTRLINK
 	/**
 	 *\from STD valarray<...>
 	 */
-	MATRICE_GLOBAL_FINL Base_(const std::valarray<value_t>& _other, int _rows = 1) noexcept 
+	MATRICE_GLOBAL_INL Base_(const std::valarray<value_t>& _other, int _rows = 1) noexcept 
 		:base_t(_rows, _other.size() / _rows), m_storage(_rows, _other.size() / _rows, (pointer)std::addressof(_other[0])) _PTRLINK
 	/**
 	 *\from explicit specified matrix type
 	 */
 	template<int _Rows, int _Cols, typename _Mty = Matrix_<value_t, _Rows, _Cols>>
-	MATRICE_GLOBAL_FINL Base_(const _Mty& _other) noexcept 
+	MATRICE_GLOBAL_INL Base_(const _Mty& _other) noexcept 
 		:base_t(_other.rows(), _other.cols()), m_storage(_other.m_storage) _PTRLINK
 	/**
 	 *\from expression
@@ -237,9 +237,11 @@ public:
 	 *\interfaces for opencv if it is enabled
 	 */
 #ifdef __use_ocv_as_view__
-	MATRICE_HOST_FINL Base_(const ocv_view_t& mat) : base_t(mat.rows, mat.cols, mat.ptr<value_t>()) {}
-	MATRICE_HOST_FINL ocv_view_t cvmat() { return ocv_view_t(m_rows, m_cols, ocv_view_t_cast<value_t>::type, m_data); }
-	MATRICE_HOST_FINL const ocv_view_t cvmat() const { return ocv_view_t(m_rows, m_cols, ocv_view_t_cast<value_t>::type, m_data); }
+	MATRICE_HOST_INL Base_(const ocv_view_t& mat) : base_t(mat.rows, mat.cols, mat.ptr<value_t>()) {}
+	template<typename _Fn>
+	MATRICE_HOST_INL Base_(const ocv_view_t& mat, _Fn&& _Op) : Base_(mat) { each(_Op); }
+	MATRICE_HOST_INL ocv_view_t cvmat() { return ocv_view_t(m_rows, m_cols, ocv_view_t_cast<value_t>::type, m_data); }
+	MATRICE_HOST_INL const ocv_view_t cvmat() const { return ocv_view_t(m_rows, m_cols, ocv_view_t_cast<value_t>::type, m_data); }
 #endif
 public:
 	/**
