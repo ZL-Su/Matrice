@@ -116,16 +116,17 @@ private:
 	container _Mysubfolders;
 };
 
-template<typename _Tag = loader_tag> class _Data_loader_impl{};
+template<typename _Ty, typename _Tag = loader_tag> 
+class _Data_loader_impl{};
 
-template<> class _Data_loader_impl<loader_tag> {
+template<typename _Ty> class _Data_loader_impl<_Ty, loader_tag> {
 	using _Mydir_type = _Dir_impl<folder_tag>;
 	using _Myt = _Data_loader_impl;
 
 	struct _Loader_iterator {
 		_Loader_iterator(const std::add_pointer_t<_Myt> _This)
-			:_Mythis(_This), _Mybatchs(_Mythis->batch_size()){
-		}
+			:_Mythis(_This), _Mybatchs(_Mythis->batch_size()),
+			_Mypos(_Mythis->pos()){}
 
 		MATRICE_HOST_FINL auto operator*() const {
 			_Mydir_type::container _Ret;
@@ -134,9 +135,17 @@ template<> class _Data_loader_impl<loader_tag> {
 			}
 			return std::forward<decltype(_Ret)>(_Ret);
 		}
-
+		MATRICE_HOST_FINL _Loader_iterator operator++() {
+			_Mythis->pos() += 1; 
+			return (*this);
+		}
+		MATRICE_HOST_FINL _Loader_iterator operator++(int) {
+			auto _Tmp = *this;
+			_Mythis->pos() += 1;
+			return (_Tmp);
+		}
 	private:
-		std::size_t _Mypos = 0;
+		std::size_t& _Mypos;
 		std::size_t _Mybatchs = 0;
 		std::add_pointer_t<_Myt> _Mythis = nullptr;
 		_Mydir_type::container::iterator _Myitr;
@@ -145,6 +154,7 @@ public:
 	using category = loader_tag;
 	using dir_type = _Mydir_type;
 	using iterator = _Loader_iterator;
+	using data_type = Matrix<_Ty>;
 
 	_Data_loader_impl(const _Mydir_type& _Dir)
 		: _Mydir(_Dir) {
@@ -161,12 +171,17 @@ public:
 	MATRICE_HOST_INL auto end() const {
 
 	}
+
 	/**
 	 * \forward iterate to retrieve data paths
 	 */
-	MATRICE_HOST_INL auto forward() const {
-		_Mypos++;
-		return std::make_tuple();
+	template<typename _Fn>
+	MATRICE_HOST_INL auto forward(_Fn&& _Loader) const {
+		std::vector<data_type> _Data;
+		for (const auto& _Idx : range(0, _Mydir.size())) {
+			_Data.emplace_back(_Loader(_Mydir[_Idx]+_Mynames[_Idx][_Mypos++]));
+		}
+		return std::forward<decltype(_Data)>(_Data);
 	}
 	/**
 	 * \reverse iterate to retrieve data paths
@@ -175,6 +190,9 @@ public:
 		_Mypos--;
 		return std::make_tuple();
 	}
+
+	MATRICE_HOST_FINL auto& pos() { return (_Mypos); }
+	MATRICE_HOST_FINL const auto& pos() const { return (_Mypos); }
 
 	MATRICE_HOST_FINL dir_type& directory() {
 		return (_Mydir);
@@ -229,8 +247,9 @@ private:
 _DETAIL_END
 
 using directory = detail::_Dir_impl<detail::folder_tag>;
-using data_loader = detail::_Data_loader_impl<detail::loader_tag>;
 using folder_collector = detail::_Collector<detail::folder_tag>;
 using file_collector = detail::_Collector<detail::file_tag>;
+template<typename _Ty = std::float_t>
+using data_loader = detail::_Data_loader_impl<_Ty>;
 
 } DGE_MATRICE_END
