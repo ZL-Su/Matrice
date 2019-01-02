@@ -165,11 +165,11 @@ public:
 		_Collect_fnames();
 	}
 
-	MATRICE_HOST_INL auto begin() const {
-
+	MATRICE_HOST_INL bool begin() const {
+		return (_Mypos = 0);
 	}
-	MATRICE_HOST_INL auto end() const {
-
+	MATRICE_HOST_INL bool end() const {
+		return (_Mypos >= _Mydepth);
 	}
 
 	/**
@@ -179,8 +179,9 @@ public:
 	MATRICE_HOST_INL auto forward(_Fn&& _Loader) const {
 		std::vector<data_type> _Data;
 		for (const auto& _Idx : range(0, _Mydir.size())) {
-			_Data.emplace_back(_Loader(_Mydir[_Idx]+_Mynames[_Idx][_Mypos++]));
+			_Data.emplace_back(_Loader(_Mydir[_Idx]+_Mynames[_Idx][_Mypos]));
 		}
+		_Mypos++;
 		return std::forward<decltype(_Data)>(_Data);
 	}
 	/**
@@ -233,15 +234,23 @@ public:
 		return (_Mynames)[_Idx];
 	}
 
+	MATRICE_HOST_FINL auto depth() const {
+		return (_Mydepth);
+	}
+
 private:
 	MATRICE_HOST_INL void _Collect_fnames() {
 		_Mynames.resize(_Mydir.size());
-		for (const auto _Idx : range(0, _Mynames.size()))
+		for (const auto _Idx : range(0, _Mynames.size())) {
 			_Mynames[_Idx] = _Collector<file_tag>::get(_Mydir[_Idx]);
+			if (auto _Cnt = _Mynames[_Idx].size(); _Cnt < _Mydepth)
+				std::swap(_Mydepth, _Cnt);
+		}
 	}
 	_Mydir_type _Mydir;
 	mutable std::size_t _Mypos = 0;
 	std::vector<_Mydir_type::container> _Mynames;
+	std::size_t _Mydepth = std::numeric_limits<std::size_t>::max();
 };
 
 _DETAIL_END
