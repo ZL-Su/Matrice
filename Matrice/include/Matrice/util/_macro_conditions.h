@@ -47,6 +47,10 @@ _CONDITIONS_BEGIN
 #define _COND_GQ(_Test_val) _COND_VAL(>=_Test_val) //\greater than or equal to _Test_val
 #endif
 
+#ifndef _COND_EXCEPTION(_Test, _Msg)
+#define _COND_EXCEPTION(_Test, _Msg) if(_Test)throw std::exception(_Msg);
+#endif
+
 _CONDITIONS_END
 DGE_MATRICE_END
 
