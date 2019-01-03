@@ -119,7 +119,8 @@ private:
 template<typename _Ty, typename _Tag = loader_tag> 
 class _Data_loader_impl{};
 
-template<typename _Ty> class _Data_loader_impl<_Ty, loader_tag> {
+template<typename _Ty> 
+class _Data_loader_impl<_Ty, loader_tag> {
 	using _Mydir_type = _Dir_impl<folder_tag>;
 	using _Myt = _Data_loader_impl;
 
@@ -160,20 +161,64 @@ public:
 		: _Mydir(_Dir) {
 		_Collect_fnames();
 	}
+	template<typename _Fn>
+	_Data_loader_impl(const _Mydir_type& _Dir, _Fn&& _Op)
+		: _Data_loader_impl(_Dir), _Myloader(std::forward<_Fn>(_Op)) {
+	}
 	_Data_loader_impl(_Mydir_type&& _Dir)
-		: _Mydir(std::forward<_Mydir_type>(_Dir)) {
+		: _Mydir(std::forward<_Mydir_type>(_Dir)) { 
 		_Collect_fnames();
 	}
+	template<typename _Fn>
+	_Data_loader_impl(_Mydir_type&& _Dir, _Fn&& _Op)
+		: _Data_loader_impl(std::forward<_Mydir_type>(_Dir)),
+		  _Myloader(std::forward<_Fn>(_Op)) {
+	}
 
+	/**
+	 * \set loader iterator to begin (zero) pos
+	 */
 	MATRICE_HOST_INL bool begin() const {
 		return (_Mypos = 0);
 	}
+	/**
+	 * \set loader iterator to reverse begin (_Mydepth-1) pos
+	 */
+	MATRICE_HOST_INL bool rbegin() const {
+		return (_Mypos = _Mydepth - 1);
+	}
+	/**
+	 * \check if loader iterator meets the upper bound
+	 */
 	MATRICE_HOST_INL bool end() const {
 		return (_Mypos >= _Mydepth);
+	}
+	/**
+	 * \check if loader iterator meets the lower bound
+	 */
+	MATRICE_HOST_INL bool rend() const {
+		return (_Mypos < 0);
+	}
+	/**
+	 * \move loader iterator _Off steps
+	 */
+	MATRICE_HOST_INL auto shift(index_t _Off) const {
+		return (_Mypos += _Off);
 	}
 
 	/**
 	 * \forward iterate to retrieve data paths
+	 */
+	MATRICE_HOST_INL auto forward() const {
+		std::vector<data_type> _Data;
+		for (const auto& _Idx : range(0, _Mydir.size())) {
+			_Data.emplace_back(_Myloader(_Mydir[_Idx] + _Mynames[_Idx][_Mypos]));
+		}
+		_Mypos++;
+		return std::forward<decltype(_Data)>(_Data);
+	}
+	/**
+	 * \forward iterate to retrieve data paths with given _Loader
 	 */
 	template<typename _Fn>
 	MATRICE_HOST_INL auto forward(_Fn&& _Loader) const {
@@ -192,6 +237,9 @@ public:
 		return std::make_tuple();
 	}
 
+	/**
+	 * \return iterator pos
+	 */
 	MATRICE_HOST_FINL auto& pos() { return (_Mypos); }
 	MATRICE_HOST_FINL const auto& pos() const { return (_Mypos); }
 
@@ -234,6 +282,9 @@ public:
 		return (_Mynames)[_Idx];
 	}
 
+	/**
+	 * \return depth (the number of files) of the loader
+	 */
 	MATRICE_HOST_FINL auto depth() const {
 		return (_Mydepth);
 	}
@@ -247,9 +298,12 @@ private:
 				std::swap(_Mydepth, _Cnt);
 		}
 	}
+
 	_Mydir_type _Mydir;
-	mutable std::size_t _Mypos = 0;
+
+	mutable index_t _Mypos = 0;
 	std::vector<_Mydir_type::container> _Mynames;
+	std::function<data_type(_Mydir_type::value_type&&)> _Myloader;
 	std::size_t _Mydepth = std::numeric_limits<std::size_t>::max();
 };
 
