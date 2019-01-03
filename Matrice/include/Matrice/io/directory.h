@@ -18,10 +18,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include<experimental/filesystem>
 #include <unordered_map>
+#include <type_traits>
 #include <vector>
 #include "../util/utils.h"
 #include "../util/genalgs.h"
-#include "io.h"
+#include "../util/_macro_conditions.h"
 
 DGE_MATRICE_BEGIN namespace io {
 /**
@@ -158,12 +159,13 @@ public:
 	using data_type = Matrix<_Ty>;
 
 	_Data_loader_impl(const _Mydir_type& _Dir)
-		: _Mydir(_Dir) {
+		: _Mydir(_Dir) { 
 		_Collect_fnames();
 	}
 	template<typename _Fn>
 	_Data_loader_impl(const _Mydir_type& _Dir, _Fn&& _Op)
-		: _Data_loader_impl(_Dir), _Myloader(std::forward<_Fn>(_Op)) {
+		: _Mydir(_Dir), _Myloader(std::forward<_Fn>(_Op)) {
+		_Collect_fnames();
 	}
 	_Data_loader_impl(_Mydir_type&& _Dir)
 		: _Mydir(std::forward<_Mydir_type>(_Dir)) { 
@@ -171,21 +173,22 @@ public:
 	}
 	template<typename _Fn>
 	_Data_loader_impl(_Mydir_type&& _Dir, _Fn&& _Op)
-		: _Data_loader_impl(std::forward<_Mydir_type>(_Dir)),
-		  _Myloader(std::forward<_Fn>(_Op)) {
+		: _Mydir(std::forward<_Mydir_type>(_Dir)), 
+		_Myloader(std::forward<_Fn>(_Op)) {
+		_Collect_fnames();
 	}
 
 	/**
 	 * \set loader iterator to begin (zero) pos
 	 */
 	MATRICE_HOST_INL bool begin() const {
-		return (_Mypos = 0);
+		return (_Mypos = -1);
 	}
 	/**
-	 * \set loader iterator to reverse begin (_Mydepth-1) pos
+	 * \set loader iterator to reverse begin (_Mydepth) pos
 	 */
 	MATRICE_HOST_INL bool rbegin() const {
-		return (_Mypos = _Mydepth - 1);
+		return (_Mypos = _Mydepth);
 	}
 	/**
 	 * \check if loader iterator meets the upper bound
@@ -203,18 +206,22 @@ public:
 	 * \move loader iterator _Off steps
 	 */
 	MATRICE_HOST_INL auto shift(index_t _Off) const {
-		return (_Mypos += _Off);
+		_Mypos += _Off;
+#ifdef _DEBUG
+		_COND_EXCEPTION(end()||rend(), "_Off over range of loader depth")
+#endif
+		return (_Mypos);
 	}
 
 	/**
 	 * \forward iterate to retrieve data paths
 	 */
 	MATRICE_HOST_INL auto forward() const {
+		_Mypos++;
 		std::vector<data_type> _Data;
 		for (const auto& _Idx : range(0, _Mydir.size())) {
 			_Data.emplace_back(_Myloader(_Mydir[_Idx] + _Mynames[_Idx][_Mypos]));
 		}
-		_Mypos++;
 		return std::forward<decltype(_Data)>(_Data);
 	}
 	/**
@@ -222,11 +229,11 @@ public:
 	 */
 	template<typename _Fn>
 	MATRICE_HOST_INL auto forward(_Fn&& _Loader) const {
+		_Mypos++;
 		std::vector<data_type> _Data;
 		for (const auto& _Idx : range(0, _Mydir.size())) {
 			_Data.emplace_back(_Loader(_Mydir[_Idx]+_Mynames[_Idx][_Mypos]));
 		}
-		_Mypos++;
 		return std::forward<decltype(_Data)>(_Data);
 	}
 	/**
@@ -234,7 +241,9 @@ public:
 	 */
 	MATRICE_HOST_INL auto reverse() const {
 		_Mypos--;
-		return std::make_tuple();
+		std::vector<data_type> _Data;
+
+		return std::forward<decltype(_Data)>(_Data);
 	}
 
 	/**
@@ -243,10 +252,10 @@ public:
 	MATRICE_HOST_FINL auto& pos() { return (_Mypos); }
 	MATRICE_HOST_FINL const auto& pos() const { return (_Mypos); }
 
-	MATRICE_HOST_FINL dir_type& directory() {
+	MATRICE_HOST_INL dir_type& directory() {
 		return (_Mydir);
 	}
-	MATRICE_HOST_FINL const dir_type& directory() const {
+	MATRICE_HOST_INL const dir_type& directory() const {
 		return (_Mydir);
 	}
 	MATRICE_HOST_FINL std::size_t batch_size() const {
@@ -256,10 +265,10 @@ public:
 	/**
 	 * \return all file names in currenct work path
 	 */
-	MATRICE_HOST_FINL std::vector<_Mydir_type::container>& file_names() {
+	MATRICE_HOST_INL std::vector<_Mydir_type::container>& file_names() {
 		return (_Mynames);
 	}
-	MATRICE_HOST_FINL const std::vector<_Mydir_type::container>& file_names() const {
+	MATRICE_HOST_INL const std::vector<_Mydir_type::container>& file_names() const {
 		return (_Mynames);
 	}
 
@@ -300,8 +309,7 @@ private:
 	}
 
 	_Mydir_type _Mydir;
-
-	mutable index_t _Mypos = 0;
+	mutable index_t _Mypos = -1;
 	std::vector<_Mydir_type::container> _Mynames;
 	std::function<data_type(_Mydir_type::value_type&&)> _Myloader;
 	std::size_t _Mydepth = std::numeric_limits<std::size_t>::max();
@@ -314,5 +322,10 @@ using folder_collector = detail::_Collector<detail::folder_tag>;
 using file_collector = detail::_Collector<detail::file_tag>;
 template<typename _Ty = std::float_t>
 using data_loader = detail::_Data_loader_impl<_Ty>;
+
+template<std::size_t _N, typename _Cont>
+MATRICE_HOST_FINL auto serial(const _Cont& _L) {
+	return tuple_n<_N-1>::_(_L.data());
+}
 
 } DGE_MATRICE_END
