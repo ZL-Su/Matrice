@@ -61,6 +61,14 @@ public:
 	MATRICE_GLOBAL_FINL constexpr auto shape() const { 
 		return std::tie(m_rows, m_cols); 
 	}
+	template<typename _T, typename = std::enable_if_t<std::is_scalar_v<_T>>>
+	MATRICE_GLOBAL_FINL constexpr auto shape(_T _Scale) const {
+		return std::make_tuple(m_rows*_Scale, m_cols*_Scale);
+	}
+	template<typename _T1, typename _T2 = _T1, typename = std::enable_if_t<std::is_scalar_v<_T1>&&std::is_scalar_v<_T2>>>
+	MATRICE_GLOBAL_FINL constexpr auto shape(_T1 _Rsf, _T2 _Csf) const {
+		return std::make_tuple(m_rows*_Rsf, m_cols*_Csf);
+	}
 
 	/**
 	 * \tuple of plane view of the matrix
