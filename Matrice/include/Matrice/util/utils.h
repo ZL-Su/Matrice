@@ -141,4 +141,16 @@ template<> struct tuple_n<0> {
 	}
 };
 
+/**
+ * \transform functor definitions
+ */
+struct transforms {
+	template<typename _Ty> struct scale {
+		using value_type = _Ty;
+		template<typename _Uy>
+		MATRICE_GLOBAL_INL scale(const _Uy& _Scale = _Uy(1)) : _Myscale(_Scale) {}
+		MATRICE_GLOBAL_INL auto operator()(const value_type& _Val)const { return (_Myscale*_Val); }
+		value_type _Myscale = 1.;
+	};
+};
 DGE_MATRICE_END
