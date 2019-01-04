@@ -157,6 +157,9 @@
     <Filter Include="Header Files\IO\inline">
       <UniqueIdentifier>{f9b7e13e-ae7f-44c6-9d7a-592d56368d91}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\License">
+      <UniqueIdentifier>{eb718910-3547-41f8-9d4b-8134cbd0af07}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -657,8 +660,8 @@
     <ClInclude Include="include\Matrice\private\autograd\_expression.h">
       <Filter>Header Files\Detail\autograd</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\io\directory.h">
-      <Filter>Header Files\IO</Filter>
+    <ClInclude Include="include\Matrice\lic\license.h">
+      <Filter>Header Files\License</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -802,6 +805,12 @@
     </None>
     <None Include="include\Matrice\algs\correlation\inline\_optim.inl">
       <Filter>Header Files\Algs\Correlation\inline</Filter>
+    </None>
+    <None Include="include\Matrice\io\inline\_directory.inl">
+      <Filter>Header Files\IO\inline</Filter>
+    </None>
+    <None Include="include\Matrice\io\inline\_data_loader.inl">
+      <Filter>Header Files\IO\inline</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
