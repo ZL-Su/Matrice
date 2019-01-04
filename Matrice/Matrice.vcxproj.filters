@@ -154,6 +154,9 @@
     <Filter Include="Header Files\Algs\Correlation\inline">
       <UniqueIdentifier>{26dca00c-c104-46a1-b0fb-db8d20abfbc6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\IO\inline">
+      <UniqueIdentifier>{f9b7e13e-ae7f-44c6-9d7a-592d56368d91}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">

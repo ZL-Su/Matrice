@@ -83,7 +83,7 @@ public:
 		difference_type _My_end_x, _My_end_y;
 	};
 
-	MATRICE_GLOBAL_FINL _View_base(pointer _Ptr, size_t _Size, size_t _Stride, size_t _Offset)
+	MATRICE_GLOBAL_INL _View_base(pointer _Ptr, size_t _Size, size_t _Stride, size_t _Offset)
 		:_My_data(_Ptr), _My_size(_Size), _My_stride(_Stride), _My_offset(_Offset) {}
 
 	MATRICE_GLOBAL_FINL reference operator[] (size_t i) {
