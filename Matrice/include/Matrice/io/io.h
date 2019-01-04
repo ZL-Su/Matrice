@@ -1,3 +1,6 @@
+/*********************************************************************
+	  About License Agreement of this file, see "../lic/license.h"
+*********************************************************************/
 #pragma once
 #include <iosfwd>
 #include <fstream>
@@ -582,6 +585,7 @@ template<std::size_t _N, typename _Cont>
 MATRICE_HOST_FINL auto serial(const _Cont& _L) {
 	return tuple_n<_N-1>::_(_L.data());
 }
-}
 
+#include "inline\_directory.inl"
+}
 DGE_MATRICE_END
