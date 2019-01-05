@@ -5,6 +5,9 @@
 
 DGE_MATRICE_BEGIN namespace io { _DETAIL_BEGIN
 
+/**
+ * \Specified to load data from a given directory
+ */
 template<typename _Ty>
 class _Data_loader_impl<_Ty, loader_tag> {
 	using _Mydir_type = _Dir_impl<folder_tag>;

@@ -3,9 +3,10 @@
 *********************************************************************/
 #include "../io.h"
 
-DGE_MATRICE_BEGIN namespace io {
-_DETAIL_BEGIN
-
+DGE_MATRICE_BEGIN namespace io { _DETAIL_BEGIN
+/**
+ * \Specified to collect folder(s) in a given path 
+ */
 template<> struct _Collector<folder_tag> {
 	MATRICE_HOST_FINL static auto get(std::string&& path) {
 		std::vector<std::string> _Ret;
@@ -21,6 +22,9 @@ template<> struct _Collector<folder_tag> {
 		return std::forward<decltype(_Ret)>(_Ret);
 	}
 };
+/**
+ * \Specified to collect file name(s) in a given path
+ */
 template<> struct _Collector<file_tag> {
 	MATRICE_HOST_FINL static auto get(std::string&& path) {
 		std::vector<std::string> _Ret;
@@ -37,6 +41,9 @@ template<> struct _Collector<file_tag> {
 	}
 };
 
+/**
+ * \Specified to construct directory for a given _Root
+ */
 template<> class _Dir_impl<folder_tag> {
 public:
 	using category = folder_tag;
@@ -44,7 +51,7 @@ public:
 	using path_type = fs::path;
 	using container = std::vector<value_type>;
 	/**
-	 * \_Root must has form "./folder_name" or "/folder_name"
+	 * \_Root must has form "./folder_name/.../folder_name" or "/folder_name/.../folder_name"
 	 */
 	_Dir_impl(value_type _Root, path_type&& _Workdir = fs::current_path())
 		:_Mypath(_Workdir) {
@@ -84,5 +91,4 @@ private:
 	container _Mysubfolders;
 };
 
-_DETAIL_END
-} DGE_MATRICE_END
+_DETAIL_END } DGE_MATRICE_END
