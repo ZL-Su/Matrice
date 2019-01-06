@@ -663,6 +663,9 @@
     <ClInclude Include="include\Matrice\lic\license.h">
       <Filter>Header Files\License</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\util\_exception.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
