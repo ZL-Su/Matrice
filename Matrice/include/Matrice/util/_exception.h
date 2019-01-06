@@ -21,6 +21,7 @@ struct _Source_location {
 	const char* _File = nullptr;
 	long        _Line;
 };
+#define MATRICE_EXCLOC {__func__, __FILE__, __LINE__}
 
 /**
  * \exception process
@@ -35,7 +36,8 @@ struct _Exception_wrapper
 		using msg_type = std::string;
 		using msg_list = std::vector<msg_type>;
 
-		error(const _Myloc_type& _Loc, const msg_type& _Msg);
+		error(const _Myloc_type& _Loc, const msg_type& _Msg="None")
+			:_Mymsg(_Msg), _Myloc(_Loc) {}
 
 		MATRICE_HOST_INL auto message() const {
 
@@ -43,6 +45,11 @@ struct _Exception_wrapper
 
 	private:
 		const void* _Mycaller = nullptr;
+		msg_type _Mymsg;
+		msg_list _Mymsgstack;
+		_Myloc_type _Myloc;
 	};
 };
-_DETAIL_END DGE_MATRICE_END
+_DETAIL_END
+using exception = detail::_Exception_wrapper;
+DGE_MATRICE_END
