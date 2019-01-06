@@ -3,7 +3,13 @@
 *********************************************************************/
 #pragma once
 #include <exception>
+#include <string>
+#include <vector>
 #include "_macros.h"
+
+#if defined(_MSC_VER) && _MSC_VER <= 1900
+#define __func__ __FUNCTION__
+#endif
 
 DGE_MATRICE_BEGIN _DETAIL_BEGIN
 /**
@@ -14,5 +20,29 @@ struct _Source_location {
 	const char* _Func = nullptr;
 	const char* _File = nullptr;
 	long        _Line;
+};
+
+/**
+ * \exception process
+ */
+struct _Exception_wrapper
+{
+	class error : public std::exception {
+		using _Myt = error;
+		using _Mybase = std::exception;
+		using _Myloc_type = _Source_location;
+	public:
+		using msg_type = std::string;
+		using msg_list = std::vector<msg_type>;
+
+		error(const _Myloc_type& _Loc, const msg_type& _Msg);
+
+		MATRICE_HOST_INL auto message() const {
+
+		}
+
+	private:
+		const void* _Mycaller = nullptr;
+	};
 };
 _DETAIL_END DGE_MATRICE_END
