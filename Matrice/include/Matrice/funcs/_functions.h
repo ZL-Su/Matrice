@@ -80,4 +80,21 @@ MATRICE_HOST_INL constexpr value_t dot(const _T& _x, const _U& _y) {
 	return (_Ret);
 }
 
+/**
+ * 1D gaussian kernel function: 
+ *		g(x;\mu,\sigma) = \frac{1}{\sigma \sqrt{2\pi}} e^{-\frac{(x-\mu)^2}{2\sigma^2}}
+ */
+template<typename _Ty, typename = std::enable_if_t<std::is_scalar_v<_Ty>>>
+MATRICE_HOST_INL constexpr auto gaussian(_Ty x, _Ty _M = 0, _Ty _S = 1) {
+	return (0.3989422804*exp(-0.5*pow((x - _M) / _S, 2)) / _S);
+}
+
+/**
+ * 2D gaussian kernel function with uniform Mean and STD for both directions
+ */
+template<typename _Ty, typename = std::enable_if_t<std::is_scalar_v<_Ty>>>
+MATRICE_HOST_INL constexpr auto gaussian(_Ty x, _Ty y, _Ty _M = 0, _Ty _S = 1) {
+	const auto _S2 = pow(_S, 2);
+	return (0.1591549431*exp(-0.5*(pow(x - _M, 2) + pow(y - _M, 2)) / _S2)/ _S2);
+}
 DGE_MATRICE_END
