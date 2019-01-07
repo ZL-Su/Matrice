@@ -2,6 +2,7 @@
 	  About License Agreement of this file, see "../lic/license.h"
 *********************************************************************/
 #include "../io.h"
+#include "../../util/_exception.h"
 
 DGE_MATRICE_BEGIN namespace io { _DETAIL_BEGIN
 
@@ -164,16 +165,14 @@ public:
 	 */
 	MATRICE_HOST_FINL _Mydir_type::container& file_names(std::size_t _Idx) {
 #ifdef _DEBUG
-		if (_Idx >= _Mynames.size()) throw
-			std::exception("_Idx over range of _Data_loader_impl<>::_Mynames.");
+		DGELOM_CHECK(_Idx < _Mynames.size(), "_Idx over range of field ::_Mynames.");
 #endif // _DEBUG
 
 		return (_Mynames)[_Idx];
 	}
 	MATRICE_HOST_FINL const _Mydir_type::container& file_names(std::size_t _Idx) const {
 #ifdef _DEBUG
-		if (_Idx >= _Mynames.size()) throw
-			std::exception("_Idx over range of _Data_loader_impl<>::_Mynames.");
+		DGELOM_CHECK(_Idx < _Mynames.size(), "_Idx over range of field ::_Mynames.");
 #endif // _DEBUG
 		return (_Mynames)[_Idx];
 	}
