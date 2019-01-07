@@ -2,6 +2,7 @@
 	  About License Agreement of this file, see "../lic/license.h"
 *********************************************************************/
 #pragma once
+#include <functional>
 #include <exception>
 #include <string>
 #include <vector>
@@ -21,35 +22,51 @@ struct _Source_location {
 	const char* _File = nullptr;
 	long        _Line;
 };
-#define MATRICE_EXCLOC {__func__, __FILE__, __LINE__}
+#define __exceploc__ {__func__, __FILE__, __LINE__}
 
 /**
  * \exception process
  */
 struct _Exception_wrapper
 {
+	using msg_type = std::string;
+	using msg_list = std::vector<msg_type>;
+	using loc_type = _Source_location;
+
 	class error : public std::exception {
 		using _Myt = error;
 		using _Mybase = std::exception;
-		using _Myloc_type = _Source_location;
 	public:
-		using msg_type = std::string;
-		using msg_list = std::vector<msg_type>;
+		using _Mybase::exception;
+		error(const loc_type& _Loc, const msg_type& _Msg="None")
+			:_Myloc(_Loc), _Mybase(_Msg.c_str()) {}
 
-		error(const _Myloc_type& _Loc, const msg_type& _Msg="None")
-			:_Mymsg(_Msg), _Myloc(_Loc) {}
-
-		MATRICE_HOST_INL auto message() const {
-
+		/**
+		 * \return exception location
+		 */
+		MATRICE_HOST_INL auto location() const {
+			return (_Myloc);
 		}
 
 	private:
 		const void* _Mycaller = nullptr;
-		msg_type _Mymsg;
+		msg_type _Mymsg = this->what();
 		msg_list _Mymsgstack;
-		_Myloc_type _Myloc;
+		loc_type _Myloc;
 	};
+
+	using handler = std::function<void(const msg_type&, const char*)>;
+	static MATRICE_HOST_INL auto warning(loc_type _Loc, msg_type _Msg);
 };
 _DETAIL_END
 using exception = detail::_Exception_wrapper;
 DGE_MATRICE_END
+
+#define DGELOM_ERROR(...) \
+	throw ::dgelom::exception::error(__exceploc__, \
+			::dgelom::exception::msg_type(__VA_ARGS__))
+
+#define DGELOM_CHECK(_Cond, ...) \
+	if(!_Cond) { \
+		DGELOM_ERROR(::dgelom::exception::msg_type(__VA_ARGS__)); \
+	}
