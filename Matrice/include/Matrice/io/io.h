@@ -17,6 +17,7 @@
 #include "../util/utils.h"
 #include "../util/genalgs.h"
 #include "../util/_macro_conditions.h"
+#include "../util/_exception.h"
 #include "../private/_range.h"
 
 DGE_MATRICE_BEGIN
@@ -206,15 +207,32 @@ public:
 		return std::forward<decltype(_Data)>(_Data);
 	}
 
-	//
+	// \single-stream output
 	template<typename _Op> 
-	static MATRICE_HOST_FINL void write(std::string _path, _Op _op) {
+	static MATRICE_HOST_FINL void write(const std::string& _path, _Op _op) {
 		std::ofstream _Fout(_path);
-		if (!_Fout.is_open()) 
-			throw std::runtime_error("Cannot open file.");
-
+		DGELOM_CHECK(_Fout.is_open(), "Fail to open file: " + _path);
+		_Fout.setf(std::ios::fixed, std::ios::floatfield);
 		_op(std::forward<std::ofstream>(_Fout));
 		_Fout.close();
+	}
+	/**
+	 * \double-stream output, where _op should be a functor accepts a pair of std::ofstream instances.
+	 * \Example:
+			write("C:/data/", {"f1.txt", "f2.txt"}, [&](auto&& fs1, auto&& fs2){ ... })
+	 */
+	template<typename _Op>
+	static MATRICE_HOST_FINL void write(const std::string& _path, std::initializer_list<std::string> _fnames, _Op _op) {
+		const auto _N = _fnames.begin();
+		std::ofstream _O1(_path + _N[0]), _O2(_path + _N[1]);
+		DGELOM_CHECK(_O1.is_open(), "Fail to open file: " + _path + _N[0]);
+		DGELOM_CHECK(_O2.is_open(), "Fail to open file: " + _path + _N[1]);
+		_O1.setf(std::ios::fixed, std::ios::floatfield);
+		_O2.setf(std::ios::fixed, std::ios::floatfield);
+
+		_op(std::forward<std::ofstream>(_O1), std::forward<std::ofstream>(_O2));
+
+		_O1.close(), _O2.close();
 	}
 	// \multi-path write
 	template<typename _Op> static
