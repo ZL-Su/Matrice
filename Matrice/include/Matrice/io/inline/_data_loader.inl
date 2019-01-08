@@ -113,15 +113,20 @@ public:
 		return std::forward<decltype(_Data)>(_Data);
 	}
 	/**
-	 * \forward iterate to retrieve data paths with given _Loader
+	 * \forward iterate to retrieve data paths with given _Loader. The data type depends on the return-type of _Loader.
 	 */
 	template<typename _Fn>
 	MATRICE_HOST_INL auto forward(_Fn&& _Loader) const {
 		_Mypos++;
-		std::vector<data_type> _Data;
-		for (const auto& _Idx : range(0, _Mydir.size())) {
-			_Data.emplace_back(_Loader(_Mydir[_Idx] + _Mynames[_Idx][_Mypos]));
+		auto _Op = [&](auto i) {return _Loader(_Mydir[i] + _Mynames[i][_Mypos]); };
+
+		auto _First = _Op(0);
+		std::vector<remove_reference_t<decltype(_First)>> _Data;
+		_Data.emplace_back(_First);
+		for (const auto& _Idx : range(1, _Mydir.size())) {
+			_Data.emplace_back(_Op(_Idx));
 		}
+
 		return std::forward<decltype(_Data)>(_Data);
 	}
 	/**
