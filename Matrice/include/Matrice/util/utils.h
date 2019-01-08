@@ -7,8 +7,11 @@
 #include <device_functions.h>
 #include <thrust\complex.h>
 #endif
-
 DGE_MATRICE_BEGIN
+
+template<typename _Ty = long double>
+MATRICE_GLOBAL_INL constexpr _Ty ¦Ð = static_cast<_Ty>(3.1415926535897932384626433832795028841971693993751058209749445923078164062862);
+
 template<typename T1, typename T2, typename _Ret = std::common_type_t<T1, T2>, typename = std::enable_if_t<std::is_arithmetic_v<_Ret>>>
 MATRICE_GLOBAL_FINL constexpr _Ret add(const T1& a, const T2& b) { return a + b; }
 template<typename T1, typename T2, typename _Ret = std::common_type_t<T1, T2>, typename = std::enable_if_t<std::is_arithmetic_v<_Ret>>>
@@ -153,4 +156,5 @@ struct transforms {
 		value_type _Myscale = 1.;
 	};
 };
+
 DGE_MATRICE_END
