@@ -102,7 +102,7 @@ public:
 	}
 
 	/**
-	 * \forward iterate to retrieve data paths
+	 * \forward iterate to retrieve data paths with common loader.
 	 */
 	MATRICE_HOST_INL auto forward() const {
 		_Mypos++;
