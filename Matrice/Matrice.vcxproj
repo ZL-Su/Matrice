@@ -292,6 +292,7 @@
     <ClInclude Include="include\Matrice\util\_exception.h" />
     <ClInclude Include="include\Matrice\util\_macro_conditions.h" />
     <ClInclude Include="include\Matrice\util\_macros.h" />
+    <ClInclude Include="include\Matrice\util\_std_wrapper.h" />
     <ClInclude Include="include\Matrice\util\_type_defs.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\private\cuda\_ewise_kernels.cuh" />
