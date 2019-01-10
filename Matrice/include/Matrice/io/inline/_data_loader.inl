@@ -91,14 +91,14 @@ public:
 		return (_Mypos < 0);
 	}
 	/**
-	 * \move loader iterator _Off steps
+	 * \brief Move loader iterator _Off steps and return the loader
 	 */
-	MATRICE_HOST_INL auto shift(index_t _Off) const {
+	MATRICE_HOST_INL auto& shift(index_t _Off) const {
 		_Mypos += _Off;
 #ifdef _DEBUG
 		_COND_EXCEPTION(end() || rend(), "_Off over range of loader depth")
 #endif
-			return (_Mypos);
+			return (*this);
 	}
 
 	/**
