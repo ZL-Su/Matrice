@@ -409,15 +409,15 @@ public:
 	// \View of submatrix: x \in [x0, x1) and y \in [y0, y1)
 	MATRICE_GLOBAL_INL _Myt_blockview_type block(index_t x0, index_t x1, index_t y0, index_t y1) {
 #ifdef _DEBUG
-		if (x1 > m_cols) throw std::runtime_error("In _matrix_base.hpp, var x1 for .block(...) must be not greater than m_cols.");
-		if (y1 > m_rows) throw std::runtime_error("In _matrix_base.hpp, var y1 for .block(...) must be not greater than m_rows.");
+		DGELOM_CHECK(x1 <= m_cols, "Input var. x1 must be no greater than m_cols.")
+		DGELOM_CHECK(y1 <= m_rows, "Input var. y1 must be no greater than m_rows.")
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, {x0, y0, x1, y1});
 	}
 	MATRICE_GLOBAL_INL const _Myt_blockview_type block(index_t x0, index_t x1, index_t y0, index_t y1) const {
 #ifdef _DEBUG
-		if (x1 > m_cols) throw std::runtime_error("In _matrix_base.hpp, var x1 for .block(...) must be not greater than m_cols.");
-		if (y1 > m_rows) throw std::runtime_error("In _matrix_base.hpp, var y1 for .block(...) must be not greater than m_rows.");
+		DGELOM_CHECK(x1 <= m_cols, "Input var. x1 must be no greater than m_cols.")
+		DGELOM_CHECK(y1 <= m_rows, "Input var. y1 must be no greater than m_rows.")
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, { x0, y0, x1, y1 });
 	}
@@ -425,22 +425,31 @@ public:
 	MATRICE_GLOBAL_INL const _Myt_blockview_type block(const std::tuple<_Ity...>& _R) const {
 		return this->block(std::get<0>(_R), std::get<1>(_R), std::get<2>(_R), std::get<3>(_R));
 	}
+
+	/** 
+	 * \brief View of a square submatrix.
+	 * \param [_Cx, _Cy]: central pos, _Rs: radius size 
+	 */
+	template<typename _Ity>
+	MATRICE_GLOBAL_INL const _Myt_blockview_type block(_Ity _Cx, _Ity _Cy, size_t _Rs = 0) const {
+		return this->block(_Cx - _Rs, _Cx + _Rs + 1, _Cy - _Rs, _Cy + _Rs + 1);
+	}
 	/**
 	 * \operator to get a block view of this matrix from a given range.
 	 */
 	template<typename _Ity, typename = std::enable_if_t<std::is_integral_v<_Ity>>>
 	MATRICE_GLOBAL_INL auto operator()(_Ity _L, _Ity _R, _Ity _U, _Ity _D) {
 #ifdef _DEBUG
-		if (_R > m_cols) throw std::runtime_error("In _matrix_base.hpp, _R for block operator(...) must be not greater than m_cols.");
-		if (_D > m_rows) throw std::runtime_error("In _matrix_base.hpp, _D for block operator(...) must be not greater than m_rows.");
+		DGELOM_CHECK(_R <= m_cols, "Input var. _R must be no greater than m_cols.")
+		DGELOM_CHECK(_D <= m_rows, "Input var. _D must be no greater than m_rows.")
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, { _L, _U, _R, _D });
 	}
 	template<typename _Ity, typename = std::enable_if_t<std::is_integral_v<_Ity>>>
 	MATRICE_GLOBAL_INL auto operator()(_Ity _L, _Ity _R, _Ity _U, _Ity _D)const{
 #ifdef _DEBUG
-		if (_R > m_cols) throw std::runtime_error("In _matrix_base.hpp, _R for block operator(...) must be not greater than m_cols.");
-		if (_D > m_rows) throw std::runtime_error("In _matrix_base.hpp, _D for block operator(...) must be not greater than m_rows.");
+		DGELOM_CHECK(_R <= m_cols, "Input var. _R must be no greater than m_cols.")
+		DGELOM_CHECK(_D <= m_rows, "Input var. _D must be no greater than m_rows.")
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, { _L, _U, _R, _D });
 	}
