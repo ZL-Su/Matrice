@@ -22,6 +22,9 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 MATRICE_NAMESPACE_BEGIN_TYPES
 
+#define MATRICE_MAKE_METHOD_CREATE MATRICE_GLOBAL \
+        void __create_impl(diff_t _Rows, diff_t _Cols = 1);
+
 /*******************************************************************
 	Generic Matrix Class with Aligned Static Memory Allocation
 	          Copyright (c) : Zhilong Su 14/Feb/2018
@@ -78,7 +81,6 @@ class Matrix_<_Ty, __, __> : public Base_<Matrix_<_Ty, __, __>>
 	using Myt_reference = std::add_lvalue_reference_t<Myt>;
 	using Myt_move_reference = std::add_rvalue_reference_t<Myt>;
 	using Myt_const_reference = std::add_lvalue_reference_t<Myt_const>;
-	template<typename _Xop> using Myt_xpr_type = Expr::Base_<_Xop>;
 	using _Mybase = Base_<Myt>;
 public:
 	using typename _Mybase::value_t;
@@ -92,14 +94,6 @@ public:
 	template<typename... _Args> 
 	MATRICE_GLOBAL_FINL Matrix_(const _Args&... args) noexcept : _Mybase(args...) {};
 
-	//MATRICE_GLOBAL_INL Matrix_() noexcept : _Mybase() {};
-	//MATRICE_GLOBAL_INL Matrix_(int _rows, int _cols) noexcept : _Mybase(_rows, _cols) {};
-	//MATRICE_GLOBAL_INL Matrix_(int _rows, int _cols, pointer _data) noexcept : _Mybase(_rows, _cols, _data) {};
-	//MATRICE_GLOBAL_INL Matrix_(int _rows, int _cols, const value_t _val) noexcept : _Mybase(_rows, _cols, _val) {};
-	//template<int _M, int _N>
-	//MATRICE_GLOBAL_INL Matrix_(const Matrix_<value_t, _M, _N>& _other) noexcept : _Mybase(_other.rows(), _other.cols(), _other.data()) {};
-	//template<typename _Expr> MATRICE_GLOBAL_INL Matrix_(const _Expr& _other) noexcept : _Mybase(_other) {};
-
 	MATRICE_GLOBAL_INL Myt_reference operator= (Myt_const_reference _other) { 
 		return _Mybase::operator=(_other); 
 	}
@@ -110,8 +104,7 @@ public:
 	template<typename _Arg> 
 	MATRICE_GLOBAL_FINL Myt_reference operator= (add_const_reference_t<_Arg> _arg) { return _Mybase::operator=(_arg); }
 
-	MATRICE_GLOBAL void create(int_t rows, int_t cols = 1);
-	MATRICE_GLOBAL void create(int_t rows, int_t cols, value_t _val);
+	MATRICE_MAKE_METHOD_CREATE
 };
 
 
@@ -140,7 +133,8 @@ public:
 	template<typename _Arg> MATRICE_GLOBAL_INL Myt_reference operator= (add_const_reference<_Arg> _arg) { return _Mybase::operator=(_arg); }
 	MATRICE_GLOBAL_INL Myt_reference operator= (Myt_move_reference _other) { return _Mybase::operator=(std::move(_other)); }
 	MATRICE_HOST_INL Myt_reference operator= (const_init_list _list) { return _Mybase::operator=(_list); }
-	MATRICE_GLOBAL void create(int_t rows, int_t cols = 1);
+
+	MATRICE_MAKE_METHOD_CREATE
 };
 
 
@@ -174,13 +168,14 @@ public:
 		_Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
 	MATRICE_GLOBAL_INL Matrix_(Myt_move_reference _other) noexcept : _Mybase(_other), 
 		_Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
-	template<int _M = 0, int _N = _M>
-	MATRICE_HOST_INL Matrix_(add_const_reference_t<Matrix_<value_t, _M, _N>> _other) noexcept: _Mybase(_other),
+	template<int _M = 0, int _N = _M, typename _Mty = Matrix_<value_t, _M, _N>>
+	MATRICE_HOST_INL Matrix_(add_const_reference_t<_Mty> _other) noexcept: _Mybase(_other),
 		_Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
-	template<typename... _Args> MATRICE_GLOBAL_INL Matrix_(const _Args&... args) noexcept : _Mybase(args...), 
+	template<typename... _Args> 
+	MATRICE_GLOBAL_INL Matrix_(const _Args&... args) noexcept : _Mybase(args...), 
 		_Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
 
-	MATRICE_GLOBAL void create(int_t rows, int_t cols = 1);
+	MATRICE_MAKE_METHOD_CREATE
 
 	template<typename _Arg> 
 	MATRICE_GLOBAL_INL Myt_reference operator= (add_const_reference_t<_Arg> _arg) { 
@@ -225,9 +220,10 @@ public:
 };
 
 #endif
+#undef MATRICE_MAKE_METHOD_CREATE
 MATRICE_NAMESPACE_END_TYPES
 
-MATRICE_NAMESPACE_BEGIN_
+DGE_MATRICE_BEGIN
 //\matrix type with host managed memory allocator
 template<typename T, int _M, int _N, size_t _Options = rmaj|gene, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
 using Matrix_ = types::Matrix_<T, _M, _N>;
@@ -250,4 +246,4 @@ template<typename T, size_t _Options = rmaj | gene> using Dmatrix = Matrix_<T,
 	compile_time_size<>::RunTimeDeducedOnDevice,
 	_Options>;
 
-_MATRICE_NAMESPACE_END
+DGE_MATRICE_END
