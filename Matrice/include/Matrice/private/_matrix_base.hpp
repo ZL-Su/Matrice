@@ -253,15 +253,27 @@ public:
 #endif
 public:
 	/**
-	 *\dynamic matrix creation
+	 *\create a matrix with dynamic (host or device) memory allocation
 	 */
-	MATRICE_HOST_ONLY void create(std::size_t rows, std::size_t cols) { 
+	MATRICE_HOST_ONLY auto& create(diff_t _Rows, diff_t _Cols = (1)) {
 		if constexpr (_M <= 0 && _N <= 0) 
-			static_cast<_Derived*>(this)->create(rows, cols); 
+			static_cast<_Derived*>(this)->__create_impl(_Rows, _Cols);
+		return (*static_cast<_Derived*>(this));
 	};
-	MATRICE_HOST_ONLY void create(const shape_t& _Shape) {
+	template<typename _Uy, typename = std::enable_if_t<std::is_scalar_v<_Uy>>>
+	MATRICE_HOST_ONLY auto& create(diff_t _Rows, diff_t _Cols, _Uy _Val) {
+		this->create(_Rows, _Cols);
+		return (*(this) = { value_type(_Val) });
+	};
+	MATRICE_HOST_ONLY auto& create(const shape_t& _Shape) {
 		if constexpr (_M <= 0 && _N <= 0) 
-			static_cast<_Derived*>(this)->create(_SHAPE);
+			static_cast<_Derived*>(this)->__create_impl(_SHAPE);
+		return (*static_cast<_Derived*>(this));
+	};
+	template<typename _Uy, typename = std::enable_if_t<std::is_scalar_v<_Uy>>>
+	MATRICE_HOST_ONLY auto& create(const shape_t& _Shape, _Uy _Val) {
+		this->create(_Shape);
+		return (*(this) = { value_type(_Val) });
 	};
 
 	/**
@@ -658,4 +670,30 @@ protected:
 #undef _MATRICE_DEF_EXP_ASSIGNOP
 };
 _TYPES_END
+
+_DETAIL_BEGIN
+struct _Matrix_padding {
+	template<typename _Ty, int _M, int _N>
+	using _Matrix_t = types::Matrix_<_Ty, _M, _N>;
+
+	template<typename _Mty, size_t _S = 0, typename _Ty = typename _Mty::value_t>
+	MATRICE_GLOBAL_INL static auto zero(_Mty _In, size_t _Size = _S) {
+		// _Size <- max(_Size, _S)
+		static_assert(is_matrix_v<_Mty>, "_Mty must be a matrix type.");
+		
+		constexpr auto _M = _Mty::CompileTimeRows;
+		constexpr auto _N = _Mty::CompileTimeCols;
+		_Matrix_t<_Ty, _M + (_S << 1), _N + (_S << 1)> _Ret;
+		if constexpr (_S > 0) {
+			_Ret = zero_v<_Ty>;
+		}
+		else {
+			_Ret.create(_In.rows()+(_Size<<1), _In.cols()+(_Size << 1)) = zero_v<_Ty>;
+		}
+		_Ret.block(_Size, _Size+_In.cols(), _Size, _Size+_In.rows()) = _In;
+
+		return std::forward<decltype(_Ret)>(_Ret);
+	}
+};
+_DETAIL_END
 DGE_MATRICE_END
