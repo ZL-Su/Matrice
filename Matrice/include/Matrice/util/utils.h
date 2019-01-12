@@ -1,6 +1,7 @@
 #pragma once
 
 #include "_macros.h"
+#include "_std_wrapper.h"
 #include <type_traits>
 
 #if (defined __enable_cuda__ && !defined __disable_cuda__)
@@ -121,7 +122,7 @@ std::tuple<U..., T> tuple_append(const std::tuple<U...>& _Tpl, const T& _Val) {
 /**
  * \packs the first _N element from _E into a tuple
  */
-template<std::size_t _N> struct tuple_n {
+template<size_t _N> struct tuple_n {
 	template<typename U> MATRICE_HOST_FINL static auto _(const U& _E) {
 		return tuple_append(tuple_n<_N - 1>::_(_E), _E);
 	}
@@ -147,7 +148,7 @@ template<> struct tuple_n<0> {
 /**
  * \2D shape type, auto [width, height] = shape(width, height)
  */
-using shape = std::tuple<std::size_t, std::size_t>;
+using shape = std::tuple<size_t, size_t>;
 
 /**
  * \transform functor definitions
