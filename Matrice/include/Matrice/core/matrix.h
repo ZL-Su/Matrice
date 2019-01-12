@@ -46,7 +46,7 @@ public:
 	MATRICE_GLOBAL_FINL Matrix_(const value_t _val) noexcept : _Mybase({_val}) {};
 	MATRICE_GLOBAL_FINL Matrix_(pointer data) noexcept : _Mybase(_M, _N, data) {};
 	MATRICE_HOST_FINL   Matrix_(const_init_list _list) noexcept : _Mybase(_list) {}
-	MATRICE_GLOBAL_FINL Matrix_(Myt_move_reference _other) noexcept : _Mybase(_other) {}
+	MATRICE_GLOBAL_FINL Matrix_(Myt_move_reference _other) noexcept : _Mybase((_other)) {}
 	MATRICE_GLOBAL_FINL Matrix_(Myt_const_reference _other) noexcept : _Mybase(_other) {};
 	MATRICE_GLOBAL_FINL Matrix_(int _pld1=0, int _pld2=0) noexcept : _Mybase() {};
 	template<typename... _Arg> 
@@ -89,8 +89,8 @@ public:
 	enum { Size = __, CompileTimeRows = __, CompileTimeCols = __, };
 	
 	MATRICE_GLOBAL_FINL Matrix_(int _rows) noexcept : _Mybase(_rows, 1) {};
-	MATRICE_GLOBAL_FINL Matrix_(Myt&& _other) noexcept : _Mybase(_other) {};
 	MATRICE_GLOBAL_FINL Matrix_(const Myt& _other) noexcept : _Mybase(_other) {};
+	MATRICE_GLOBAL_FINL Matrix_(Myt&& _other) noexcept : _Mybase(std::move(_other)) {};
 	template<typename... _Args> 
 	MATRICE_GLOBAL_FINL Matrix_(const _Args&... args) noexcept : _Mybase(args...) {};
 
@@ -127,7 +127,7 @@ public:
 	using typename _Mybase::const_init_list;
 	enum { Size = __, CompileTimeRows = -1, CompileTimeCols = __, };
 	MATRICE_GLOBAL_INL Matrix_(int _rows) noexcept : _Mybase(_rows, 1) {};
-	MATRICE_GLOBAL_INL Matrix_(Myt_move_reference _other) noexcept : _Mybase(_other) {};
+	MATRICE_GLOBAL_INL Matrix_(Myt_move_reference _other) noexcept : _Mybase(std::move(_other)) {};
 	template<typename... _Args> MATRICE_GLOBAL_INL Matrix_(_Args... args) noexcept : _Mybase(args...) {};
 
 	template<typename _Arg> MATRICE_GLOBAL_INL Myt_reference operator= (add_const_reference<_Arg> _arg) { return _Mybase::operator=(_arg); }
@@ -166,7 +166,7 @@ public:
 		_Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
 	MATRICE_GLOBAL_INL Matrix_(Myt_const_reference _other) noexcept : _Mybase(_other),
 		_Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
-	MATRICE_GLOBAL_INL Matrix_(Myt_move_reference _other) noexcept : _Mybase(_other), 
+	MATRICE_GLOBAL_INL Matrix_(Myt_move_reference _other) noexcept : _Mybase(std::move(_other)), 
 		_Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
 	template<int _M = 0, int _N = _M, typename _Mty = Matrix_<value_t, _M, _N>>
 	MATRICE_HOST_INL Matrix_(add_const_reference_t<_Mty> _other) noexcept: _Mybase(_other),
