@@ -305,12 +305,8 @@ public:
 	/**
 	 *\the first address for y-th row
 	 */
-	MATRICE_GLOBAL_FINL pointer ptr(int y = 0) { 
-		return (m_data + (m_cols) * (y));
-	}
-	MATRICE_GLOBAL_FINL const pointer ptr(int y = 0) const { 
-		return (m_data + (m_cols) * (y));
-	}
+	MATRICE_GLOBAL_FINL pointer ptr(int y = 0) { return (m_data + (m_cols) * (y)); }
+	MATRICE_GLOBAL_FINL const pointer ptr(int y = 0) const { return (m_data + (m_cols) * (y)); }
 
 	/**
 	 *\STL-stype iterators
@@ -407,22 +403,22 @@ public:
 		return _Myt_cview_type(m_data + i, m_rows, m_cols, i);
 	}
 	// \View of submatrix: x \in [x0, x1) and y \in [y0, y1)
-	MATRICE_GLOBAL_INL _Myt_blockview_type block(index_t x0, index_t x1, index_t y0, index_t y1) {
+	MATRICE_GLOBAL_INL auto block(index_t x0, index_t x1, index_t y0, index_t y1) {
 #ifdef _DEBUG
-		DGELOM_CHECK(x1 <= m_cols, "Input var. x1 must be no greater than m_cols.")
-		DGELOM_CHECK(y1 <= m_rows, "Input var. y1 must be no greater than m_rows.")
+		DGELOM_CHECK(x1 > m_cols, "Input var. x1 must be no greater than m_cols.")
+		DGELOM_CHECK(y1 > m_rows, "Input var. y1 must be no greater than m_rows.")
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, {x0, y0, x1, y1});
 	}
-	MATRICE_GLOBAL_INL const _Myt_blockview_type block(index_t x0, index_t x1, index_t y0, index_t y1) const {
+	MATRICE_GLOBAL_INL const auto block(index_t x0, index_t x1, index_t y0, index_t y1) const {
 #ifdef _DEBUG
-		DGELOM_CHECK(x1 <= m_cols, "Input var. x1 must be no greater than m_cols.")
-		DGELOM_CHECK(y1 <= m_rows, "Input var. y1 must be no greater than m_rows.")
+		DGELOM_CHECK(x1 > m_cols, "Input var. x1 must be no greater than m_cols.")
+		DGELOM_CHECK(y1 > m_rows, "Input var. y1 must be no greater than m_rows.")
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, { x0, y0, x1, y1 });
 	}
 	template<typename... _Ity, typename = std::enable_if_t<sizeof...(_Ity) == 4>>
-	MATRICE_GLOBAL_INL const _Myt_blockview_type block(const std::tuple<_Ity...>& _R) const {
+	MATRICE_GLOBAL_INL const auto block(const std::tuple<_Ity...>& _R) const {
 		return this->block(std::get<0>(_R), std::get<1>(_R), std::get<2>(_R), std::get<3>(_R));
 	}
 
@@ -431,7 +427,7 @@ public:
 	 * \param [_Cx, _Cy]: central pos, _Rs: radius size 
 	 */
 	template<typename _Ity>
-	MATRICE_GLOBAL_INL const _Myt_blockview_type block(_Ity _Cx, _Ity _Cy, size_t _Rs = 0) const {
+	MATRICE_GLOBAL_INL const auto block(_Ity _Cx, _Ity _Cy, size_t _Rs = 0) const {
 		return this->block(_Cx - _Rs, _Cx + _Rs + 1, _Cy - _Rs, _Cy + _Rs + 1);
 	}
 	/**
@@ -440,16 +436,16 @@ public:
 	template<typename _Ity, typename = std::enable_if_t<std::is_integral_v<_Ity>>>
 	MATRICE_GLOBAL_INL auto operator()(_Ity _L, _Ity _R, _Ity _U, _Ity _D) {
 #ifdef _DEBUG
-		DGELOM_CHECK(_R <= m_cols, "Input var. _R must be no greater than m_cols.")
-		DGELOM_CHECK(_D <= m_rows, "Input var. _D must be no greater than m_rows.")
+		DGELOM_CHECK(_R > m_cols, "Input var. _R must be no greater than m_cols.")
+		DGELOM_CHECK(_D > m_rows, "Input var. _D must be no greater than m_rows.")
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, { _L, _U, _R, _D });
 	}
 	template<typename _Ity, typename = std::enable_if_t<std::is_integral_v<_Ity>>>
 	MATRICE_GLOBAL_INL auto operator()(_Ity _L, _Ity _R, _Ity _U, _Ity _D)const{
 #ifdef _DEBUG
-		DGELOM_CHECK(_R <= m_cols, "Input var. _R must be no greater than m_cols.")
-		DGELOM_CHECK(_D <= m_rows, "Input var. _D must be no greater than m_rows.")
+		DGELOM_CHECK(_R > m_cols, "Input var. _R must be no greater than m_cols.")
+		DGELOM_CHECK(_D > m_rows, "Input var. _D must be no greater than m_rows.")
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, { _L, _U, _R, _D });
 	}
@@ -616,8 +612,8 @@ public:
 	 * \operate each entry via _Fn
 	 */
 	template<typename _Op>
-	MATRICE_GLOBAL_FINL void each(_Op&& _Fn) { 
-		for (auto& _Val : *this) _Fn(_Val); 
+	MATRICE_GLOBAL_FINL auto& each(_Op&& _Fn) { 
+		for (auto& _Val : *this) _Fn(_Val); return(*static_cast<_Derived*>(this));
 	}
 
 	/**
@@ -660,6 +656,37 @@ public:
 		this->each([&](auto& _My_val) {_My_val = _Cond(_My_val) ? _Val : _My_val; });
 	}
 
+
+	/**
+	 *\brief Create a zero-value filled matrix
+	 *\param _Rows, Cols: height and width of matrix, only specified for dynamic created matrix 
+	 */
+	static MATRICE_GLOBAL_INL auto zero(diff_t _Rows = 0, diff_t _Cols = 0) {
+		_Derived _Ret;
+		return std::forward<_Derived>(_Ret.create(_Rows, _Cols, 0));
+	}
+	/**
+	 *\brief Create a diagonal square matrix
+	 *\param _Val: diagonal element value, 
+	 *\param _Size: matrix size, only specified for dynamic case
+	 */
+	template<typename _Uy, typename = std::enable_if_t<std::is_scalar_v<_Uy>>>
+	static MATRICE_GLOBAL_INL auto diag(_Uy _Val = 1, diff_t _Size = 0) {
+		_Derived _Ret; _Ret.create(_Size, _Size, 0);
+		const auto _Value = value_type(_Val);
+		for (auto _Idx = 0; _Idx < _Ret.rows(); ++_Idx) _Ret[_Idx][_Idx] = _Value;
+		return std::forward<_Derived>(_Ret);
+	}
+	/**
+	 *\brief Create random value filled matrix
+	 *\param _Rows, Cols: height and width of matrix, only specified for dynamic case
+	 */
+	static MATRICE_GLOBAL_INL auto rand(diff_t _Rows = 0, diff_t _Cols = 0) {
+		_Derived _Ret; _Ret.create(_Rows, _Cols);
+		uniform_real<value_type> _Rand; mt19937 _Eng;
+		return std::forward<_Derived>(_Ret.each([&](auto& _Val) {_Val = _Rand(_Eng); }));
+	}
+
 	///<brief> properties </brief>
 	__declspec(property(get=_Format_getter, put=_Format_setter))size_t format;
 	MATRICE_HOST_FINL size_t _Format_getter() const { return m_format; }
@@ -691,7 +718,7 @@ struct _Matrix_padding {
 	using _Matrix_t = types::Matrix_<_Ty, _M, _N>;
 
 	template<typename _Mty, size_t _S = 0, typename _Ty = typename _Mty::value_t>
-	MATRICE_GLOBAL_INL static auto zero(_Mty _In, size_t _Size = _S) {
+	MATRICE_GLOBAL_INL static auto zero(const _Mty& _In, size_t _Size = _S) {
 		// _Size <- max(_Size, _S)
 		static_assert(is_matrix_v<_Mty>, "_Mty must be a matrix type.");
 		
@@ -699,10 +726,10 @@ struct _Matrix_padding {
 		constexpr auto _N = _Mty::CompileTimeCols;
 		_Matrix_t<_Ty, _M + (_S << 1), _N + (_S << 1)> _Ret;
 		if constexpr (_S > 0) {
-			_Ret = zero_v<_Ty>;
+			_Ret = { zero_v<_Ty> };
 		}
 		else {
-			_Ret.create(_In.rows()+(_Size<<1), _In.cols()+(_Size << 1)) = zero_v<_Ty>;
+			_Ret.create(_In.rows()+(_Size<<1), _In.cols()+(_Size << 1), zero_v<_Ty>);
 		}
 		_Ret.block(_Size, _Size+_In.cols(), _Size, _Size+_In.rows()) = _In;
 
@@ -710,4 +737,5 @@ struct _Matrix_padding {
 	}
 };
 _DETAIL_END
+using padding =  detail::_Matrix_padding;
 DGE_MATRICE_END
