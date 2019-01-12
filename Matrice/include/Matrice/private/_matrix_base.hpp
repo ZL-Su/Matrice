@@ -30,6 +30,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../../../addin/interface.h"
 #include "../util/_type_defs.h"
 #include "../util/_macro_conditions.h"
+#include "../util/_exception.h"
 #include "../core/solver.h"
 
 #pragma warning(disable: 4715 4661 4224 4267 4244 4819 4199)
@@ -119,11 +120,11 @@ template<
 	typename _Type = typename _Traits::type>
 class Base_ : public PlaneView_<_Type>
 {
-#define _PTRLINK { m_data = m_storage.data(); }
-#define _PTRLINK_EVAL { m_data = m_storage.data(); expr.assign(*this); }
-#define _SHAPE std::get<0>(_Shape), std::get<1>(_Shape)
-#define _EXPOP(DESC, NAME) typename _Exp_op::_##DESC##_##NAME<_Type>
-#define _MATRICE_DEF_ARITHOP(OP, NAME) \
+#define MATRICE_LINK_PTR { m_data = m_storage.data(); }
+#define MATRICE_EVALEXP_TOTHIS { m_data = m_storage.data(); expr.assign(*this); }
+#define MATRICE_EXPAND_SHAPE std::get<0>(_Shape), std::get<1>(_Shape)
+#define MATRICE_MAKE_EXPOP_TYPE(DESC, NAME) typename _Exp_op::_##DESC##_##NAME<_Type>
+#define MATRICE_MAKE_ARITHOP(OP, NAME) \
 template<typename _Rhs> MATRICE_GLOBAL_INL \
 auto operator##OP (const _Rhs& _Right) const { \
 	return Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_##NAME>(*this, _Right); \
@@ -132,7 +133,7 @@ template<typename _Lhs, typename = std::enable_if_t<std::is_scalar_v<_Lhs>>> fri
 MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const _Derived& _Right) { \
 	return Expr::EwiseBinaryExpr<_Lhs, _Derived, _Xop_ewise_##NAME>(_Left, _Right); \
 }
-#define _MATRICE_DEF_EXP_ASSIGNOP(NAME) \
+#define MATRICE_MAKE_EXP_ASSIGNOP(NAME) \
 template<typename... _Args> MATRICE_GLOBAL_INL \
 auto& operator= (const Expr##NAME##Expr<_Args...>& _Ex){ \
 return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
@@ -162,18 +163,18 @@ return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 	using _Myt_rview_type = _Matrix_rview<_Type>;
 	using _Myt_cview_type = _Matrix_cview<_Type>;
 	using _Myt_blockview_type = _Matrix_block<_Type>;
-	using _Xop_ewise_add   = _EXPOP(Ewise, add);
-	using _Xop_ewise_sub   = _EXPOP(Ewise, sub);
-	using _Xop_ewise_mul   = _EXPOP(Ewise, mul);
-	using _Xop_ewise_div   = _EXPOP(Ewise, div);
-	using _Xop_ewise_sqrt  = _EXPOP(Ewise, sqrt);
-	using _Xop_ewise_exp   = _EXPOP(Ewise, exp);
-	using _Xop_ewise_log   = _EXPOP(Ewise, log);
-	using _Xop_ewise_log2  = _EXPOP(Ewise, log2);
-	using _Xop_ewise_log10 = _EXPOP(Ewise, log10);
-	using _Xop_mat_mul     = _EXPOP(Mat, mul);
-	using _Xop_mat_inv     = _EXPOP(Mat, inv);
-	using _Xop_mat_trp     = _EXPOP(Mat, trp);
+	using _Xop_ewise_add   = MATRICE_MAKE_EXPOP_TYPE(Ewise, add);
+	using _Xop_ewise_sub   = MATRICE_MAKE_EXPOP_TYPE(Ewise, sub);
+	using _Xop_ewise_mul   = MATRICE_MAKE_EXPOP_TYPE(Ewise, mul);
+	using _Xop_ewise_div   = MATRICE_MAKE_EXPOP_TYPE(Ewise, div);
+	using _Xop_ewise_sqrt  = MATRICE_MAKE_EXPOP_TYPE(Ewise, sqrt);
+	using _Xop_ewise_exp   = MATRICE_MAKE_EXPOP_TYPE(Ewise, exp);
+	using _Xop_ewise_log   = MATRICE_MAKE_EXPOP_TYPE(Ewise, log);
+	using _Xop_ewise_log2  = MATRICE_MAKE_EXPOP_TYPE(Ewise, log2);
+	using _Xop_ewise_log10 = MATRICE_MAKE_EXPOP_TYPE(Ewise, log10);
+	using _Xop_mat_mul     = MATRICE_MAKE_EXPOP_TYPE(Mat, mul);
+	using _Xop_mat_inv     = MATRICE_MAKE_EXPOP_TYPE(Mat, inv);
+	using _Xop_mat_trp     = MATRICE_MAKE_EXPOP_TYPE(Mat, trp);
 public:
 	using value_t = _Type;
 	using value_type = value_t;
@@ -195,51 +196,55 @@ public:
 	static constexpr auto eps = std::numeric_limits<value_t>::epsilon();
 
 	MATRICE_GLOBAL_INL Base_() noexcept
-		:base_t(_M<0?0:_M, _N<0?0:_N), m_storage() _PTRLINK
+		:base_t(_M<0?0:_M, _N<0?0:_N), m_storage() MATRICE_LINK_PTR
 	MATRICE_GLOBAL_INL Base_(int _rows, int _cols) noexcept 
-		:base_t(_rows, _cols), m_storage(_rows, _cols) _PTRLINK
+		:base_t(_rows, _cols), m_storage(_rows, _cols) MATRICE_LINK_PTR
 	MATRICE_GLOBAL_INL Base_(const shape_t& _Shape) noexcept
-		: Base_(_SHAPE) {}//base_t(_SHAPE), m_storage(m_rows, m_cols) _PTRLINK
+		: Base_(MATRICE_EXPAND_SHAPE) {}
 	MATRICE_GLOBAL_INL Base_(int _rows, int _cols, pointer data) noexcept 
 		:base_t(_rows, _cols, data), m_storage(_rows, _cols, data) {}
 	MATRICE_GLOBAL_INL Base_(const shape_t& _Shape, pointer _Data) noexcept
-		: Base_(_SHAPE, _Data) {}//base_t(_SHAPE), m_storage(m_rows, m_cols, _Data) _PTRLINK
+		: Base_(MATRICE_EXPAND_SHAPE, _Data) {}
 	MATRICE_GLOBAL_INL Base_(int _rows, int _cols, value_t _val) noexcept 
-		:base_t(_rows, _cols), m_storage(_rows, _cols, _val) _PTRLINK
+		:base_t(_rows, _cols), m_storage(_rows, _cols, _val) MATRICE_LINK_PTR
 	MATRICE_GLOBAL_INL Base_(const shape_t& _Shape, value_t _Val) noexcept
-		:Base_(_SHAPE, _Val) {} //, m_storage(m_rows, m_cols, _Val) _PTRLINK
+		:Base_(MATRICE_EXPAND_SHAPE, _Val) {}
 	MATRICE_GLOBAL_INL Base_(const_init_list _list) noexcept 
-		:base_t(_M, _N), m_storage(_list) _PTRLINK
+		:base_t(_M, _N), m_storage(_list) MATRICE_LINK_PTR
 	MATRICE_GLOBAL_INL Base_(_Myt_const_reference _other) noexcept 
-		:base_t(_other.m_rows, _other.m_cols), m_storage(_other.m_storage) _PTRLINK
+		:base_t(_other.m_rows, _other.m_cols), m_storage(_other.m_storage) MATRICE_LINK_PTR
 	MATRICE_GLOBAL_INL Base_(_Myt_move_reference _other) noexcept 
-		:base_t(_other.m_rows, _other.m_cols), m_storage(std::move(_other.m_storage)) _PTRLINK
+		:base_t(_other.m_rows, _other.m_cols), m_storage(std::move(_other.m_storage)) MATRICE_LINK_PTR
 	/**
 	 *\from STD valarray<...>
 	 */
 	MATRICE_GLOBAL_INL Base_(const std::valarray<value_t>& _other, int _rows = 1) noexcept 
-		:base_t(_rows, _other.size() / _rows), m_storage(_rows, _other.size() / _rows, (pointer)std::addressof(_other[0])) _PTRLINK
+		:base_t(_rows, _other.size() / _rows), m_storage(_rows, _other.size() / _rows, (pointer)std::addressof(_other[0])) MATRICE_LINK_PTR
 	/**
 	 *\from explicit specified matrix type
 	 */
 	template<int _Rows, int _Cols, typename _Mty = Matrix_<value_t, _Rows, _Cols>>
 	MATRICE_GLOBAL_INL Base_(const _Mty& _other) noexcept 
-		:base_t(_other.rows(), _other.cols()), m_storage(_other.m_storage) _PTRLINK
+		:base_t(_other.rows(), _other.cols()), m_storage(_other.m_storage) MATRICE_LINK_PTR
 	/**
 	 *\from expression
 	 */
 	template<typename _Exp>
 	MATRICE_GLOBAL_FINL Base_(const exprs::_Matrix_exp<_Exp>& expr)
-		: base_t(m_rows = expr.rows(), m_cols = expr.cols()), m_storage(m_rows, m_cols) _PTRLINK_EVAL
+		: base_t(m_rows = expr.rows(), m_cols = expr.cols()), 
+		m_storage(m_rows, m_cols) MATRICE_EVALEXP_TOTHIS
 	template<typename _Lhs, typename _Rhs, typename _Op>
 	MATRICE_GLOBAL_FINL Base_(const Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Op>& expr)
-		:base_t(m_rows = expr.rows(), m_cols = expr.cols()), m_storage(m_rows, m_cols) _PTRLINK_EVAL
+		:base_t(m_rows = expr.rows(), m_cols = expr.cols()), 
+		m_storage(m_rows, m_cols) MATRICE_EVALEXP_TOTHIS
 	template<typename _Lhs, typename _Rhs, typename _Op>
 	MATRICE_GLOBAL_FINL Base_(const Expr::MatBinaryExpr<_Lhs, _Rhs, _Op>& expr) 
-		:base_t(m_rows = expr.rows(), m_cols = expr.cols()), m_storage(m_rows, m_cols) _PTRLINK_EVAL
+		:base_t(m_rows = expr.rows(), m_cols = expr.cols()), 
+		m_storage(m_rows, m_cols) MATRICE_EVALEXP_TOTHIS
 	template<typename _Rhs, typename _Op>
 	MATRICE_GLOBAL_FINL Base_(const Expr::MatUnaryExpr<_Rhs, _Op>& expr) 
-		:base_t(m_rows = expr.rows(), m_cols = expr.cols()), m_storage(m_rows, m_cols) _PTRLINK_EVAL
+		:base_t(m_rows = expr.rows(), m_cols = expr.cols()), 
+		m_storage(m_rows, m_cols) MATRICE_EVALEXP_TOTHIS
 
 	/**
 	 *\interfaces for opencv if it is enabled
@@ -267,7 +272,7 @@ public:
 	};
 	MATRICE_HOST_ONLY auto& create(const shape_t& _Shape) {
 		if constexpr (_M <= 0 && _N <= 0) 
-			static_cast<_Derived*>(this)->__create_impl(_SHAPE);
+			static_cast<_Derived*>(this)->__create_impl(MATRICE_EXPAND_SHAPE);
 		return (*static_cast<_Derived*>(this));
 	};
 	template<typename _Uy, typename = std::enable_if_t<std::is_scalar_v<_Uy>>>
@@ -531,10 +536,10 @@ public:
 	}
 
 #pragma region <!-- Lazied Operators for Matrix Arithmetic -->
-	_MATRICE_DEF_ARITHOP(+, add)
-	_MATRICE_DEF_ARITHOP(-, sub)
-	_MATRICE_DEF_ARITHOP(*, mul)
-	_MATRICE_DEF_ARITHOP(/, div)
+	MATRICE_MAKE_ARITHOP(+, add)
+	MATRICE_MAKE_ARITHOP(-, sub)
+	MATRICE_MAKE_ARITHOP(*, mul)
+	MATRICE_MAKE_ARITHOP(/, div)
 
 	template<typename _Rhs> MATRICE_GLOBAL_INL auto mul(const _Rhs& _Right) const { 
 		return Expr::MatBinaryExpr<_Myt, _Rhs, _Xop_mat_mul>(*this, _Right);
@@ -559,10 +564,10 @@ public:
 	}
 	MATRICE_GLOBAL_INL Expr::MatBinaryExpr<_Myt, _Myt, _Xop_mat_mul> spread();
 
-	_MATRICE_DEF_EXP_ASSIGNOP(::EwiseBinary)
-	_MATRICE_DEF_EXP_ASSIGNOP(::EwiseUnary)
-	_MATRICE_DEF_EXP_ASSIGNOP(::MatBinary)
-	_MATRICE_DEF_EXP_ASSIGNOP(::MatUnary)
+	MATRICE_MAKE_EXP_ASSIGNOP(::EwiseBinary)
+	MATRICE_MAKE_EXP_ASSIGNOP(::EwiseUnary)
+	MATRICE_MAKE_EXP_ASSIGNOP(::MatBinary)
+	MATRICE_MAKE_EXP_ASSIGNOP(::MatUnary)
 #pragma endregion
 
 	///<brief> in-time matrix arithmetic </brief>
@@ -662,12 +667,12 @@ protected:
 	std::size_t m_format = rmaj|gene;
 	_Myt_storage_type m_storage;
 
-#undef _SHAPE
-#undef _EXPOP
-#undef _PTRLINK
-#undef _PTRLINK_EVAL
-#undef _MATRICE_DEF_ARITHOP
-#undef _MATRICE_DEF_EXP_ASSIGNOP
+#undef MATRICE_EXPAND_SHAPE
+#undef MATRICE_MAKE_EXPOP_TYPE
+#undef MATRICE_LINK_PTR
+#undef MATRICE_EVALEXP_TOTHIS
+#undef MATRICE_MAKE_ARITHOP
+#undef MATRICE_MAKE_EXP_ASSIGNOP
 };
 _TYPES_END
 
