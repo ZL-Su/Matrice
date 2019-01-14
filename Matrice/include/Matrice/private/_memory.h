@@ -33,7 +33,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 DGE_MATRICE_BEGIN
 #ifdef MATRICE_ALIGN_BYTES
-#define MATRICE_ALIGNED(type) alignas(MATRICE_ALIGN_BYTES)##type
+#define MATRICE_ALIGNED(TYPE) alignas(MATRICE_ALIGN_BYTES)##TYPE
 #endif
 
 enum Location { UnSpecified = -1, OnStack = 0, OnHeap = 1, OnDevice = 2, OnGlobal = 3 };
@@ -67,13 +67,33 @@ ValueType* fill_mem(const ValueType* src, ValueType* dst, Integer size)
 #undef _FILOP
 #undef _RET
 }
+}
+namespace internal {
+struct _Memory {
 
-template<typename _Ty> struct _Memory {
-	using value_type = _Ty;
-	using pointer = std::add_pointer_t<value_type>;
+	/**
+	 *\brief Check if a given memory is aligned or not
+	 *\param [_Ptr] the pointer to memory block to be checked
+	 *\param [_Aligns] align bytes for checking
+	 */
+	template<typename _It>
+	static bool is_aligned(const _It _Ptr, size_t _Aligns = MATRICE_ALIGN_BYTES) {
+		return !(reinterpret_cast<size_t>(reinterpret_cast<void*>(_Ptr)) % _Aligns);
+	}
 
+	/**
+	 *\brief Memory release
+	 *\param [_Ptr] memory pointer
+	 */
+	template<typename _It, 
+		typename = std::enable_if_t<std::is_pointer_v<_It>>>
+	static void free(_It _Ptr) {
+		try {
+			if (is_aligned(_Ptr)) privt::aligned_free(_Ptr);
+			else std::free(_Ptr);
+		}
+		catch (std::exception e) {}
+	}
 };
-
-
 }
 DGE_MATRICE_END
