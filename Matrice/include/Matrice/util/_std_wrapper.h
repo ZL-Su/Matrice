@@ -4,6 +4,7 @@
 #pragma once
 #include <cstdint>
 #include <queue>
+#include <random>
 
 namespace dgelom {
 	using std::uint8_t;
@@ -11,11 +12,13 @@ namespace dgelom {
 	using std::uint32_t;
 	using std::uint64_t;
 	using std::size_t;
+	
+	using std::tuple;
+	using std::priority_queue;
+
+	using std::mt19937;
+	using std::uniform_int;
+	using std::uniform_real;
+
 	using diff_t = std::ptrdiff_t;
-
-	template<typename... _Ts>
-	using tuple = std::tuple<_Ts...>;
-	template<typename... _Ts>
-	using priority_queue = std::priority_queue<_Ts...>;
-
 }

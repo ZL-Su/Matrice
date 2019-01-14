@@ -628,10 +628,12 @@ public:
 			m_data[_Idx] = _Fn(static_cast<value_type>(_Data[_Idx]));
 	}
 	/**
-	 * \stack from a sequence of vectors with same size, _Vecty can be any type that has members .size() and .data()
+	 * \brief Stack from a sequence of vectors with same size, _Vecty can be any type that has members .size() and .data()
+	 * \param [_L] the input _Vecty-typed vector list
+	 * \param [_Dim] = 0 for row-wise stacking, = 1 for column-wise stacking 
 	 */
 	template<typename _Vecty>
-	MATRICE_HOST_INL _Myt& stack_from(const std::initializer_list<_Vecty>& _L, std::size_t _Dim = 0) {
+	MATRICE_HOST_INL _Myt& stack_from(const std::initializer_list<_Vecty>& _L, size_t _Dim = 0) {
 		const auto _Rows = _Dim == 0 ? _L.size() : _L.begin()->size();
 		const auto _Cols = _Dim == 0 ? _L.begin()->size() : _L.size();
 
@@ -645,21 +647,22 @@ public:
 			for (auto _Idx = 0; _Idx < _Cols; ++_Idx)
 				this->cview(_Idx) = (_L.begin() + _Idx)->data();
 		}
-		else throw std::exception("Unsupported _Dim value in dgelom::types::Base_<...>::stack_from(_L, _Dim).");
+		else DGELOM_ERROR("The _Dim value should be 0 or 1.");
 
 		return (*this);
 	}
 	/**
-	 * \replace entries meets _Cond with _Val
+	 *\brief Replace entries meets _Cond with _Val
+	 *\param [_Cond] the condition function
+	 *\param [_Val] the value for replacement
 	 */
-	MATRICE_GLOBAL_FINL void where(std::function<bool(const value_type&)> _Cond, const value_type _Val) {
+	MATRICE_GLOBAL_INL void where(std::function<bool(const value_type&)> _Cond, const value_type _Val) {
 		this->each([&](auto& _My_val) {_My_val = _Cond(_My_val) ? _Val : _My_val; });
 	}
 
-
 	/**
 	 *\brief Create a zero-value filled matrix
-	 *\param _Rows, Cols: height and width of matrix, only specified for dynamic created matrix 
+	 *\param [_Rows, Cols] height and width of matrix, only specified for dynamic created matrix 
 	 */
 	static MATRICE_GLOBAL_INL auto zero(diff_t _Rows = 0, diff_t _Cols = 0) {
 		_Derived _Ret;
@@ -667,8 +670,8 @@ public:
 	}
 	/**
 	 *\brief Create a diagonal square matrix
-	 *\param _Val: diagonal element value, 
-	 *\param _Size: matrix size, only specified for dynamic case
+	 *\param [_Val] diagonal element value, 
+	 *\param [_Size] matrix size, only specified for dynamic case
 	 */
 	template<typename _Uy, typename = std::enable_if_t<std::is_scalar_v<_Uy>>>
 	static MATRICE_GLOBAL_INL auto diag(_Uy _Val = 1, diff_t _Size = 0) {
@@ -717,6 +720,11 @@ struct _Matrix_padding {
 	template<typename _Ty, int _M, int _N>
 	using _Matrix_t = types::Matrix_<_Ty, _M, _N>;
 
+	/**
+	 *\brief Make zero padding
+	 *\param <_S> templated padding size, which should be specified for managed matrix type
+	 *\param [_In] input matrix; [_Size] run-time specified padding size
+	 */
 	template<typename _Mty, size_t _S = 0, typename _Ty = typename _Mty::value_t>
 	MATRICE_GLOBAL_INL static auto zero(const _Mty& _In, size_t _Size = _S) {
 		// _Size <- max(_Size, _S)
@@ -725,9 +733,7 @@ struct _Matrix_padding {
 		constexpr auto _M = _Mty::CompileTimeRows;
 		constexpr auto _N = _Mty::CompileTimeCols;
 		_Matrix_t<_Ty, _M + (_S << 1), _N + (_S << 1)> _Ret;
-		if constexpr (_S > 0) {
-			_Ret = { zero_v<_Ty> };
-		}
+		if constexpr (_S > 0) _Ret = { zero_v<_Ty> };
 		else {
 			_Ret.create(_In.rows()+(_Size<<1), _In.cols()+(_Size << 1), zero_v<_Ty>);
 		}
