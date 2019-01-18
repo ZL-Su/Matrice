@@ -1,4 +1,4 @@
-![Optinal Text](../master/ivm_logo_hori.png)
+![v2019 001](../master/ivm.svg)
 
 # IVM(R) Matrice Library
 
