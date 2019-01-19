@@ -160,6 +160,12 @@
     <Filter Include="Header Files\License">
       <UniqueIdentifier>{eb718910-3547-41f8-9d4b-8134cbd0af07}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Thread">
+      <UniqueIdentifier>{2fece094-723c-4d20-8dc5-3d479be2f418}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Thread\inl">
+      <UniqueIdentifier>{b683a9c5-1a80-4376-a1d6-580f60db8a58}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -669,6 +675,12 @@
     <ClInclude Include="include\Matrice\util\_std_wrapper.h">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\thread\inline\_thread_parallel_nd.inl">
+      <Filter>Header Files\Thread\inl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\thread\_thread.h">
+      <Filter>Header Files\Thread</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
@@ -817,6 +829,12 @@
     </None>
     <None Include="include\Matrice\io\inline\_data_loader.inl">
       <Filter>Header Files\IO\inline</Filter>
+    </None>
+    <None Include="include\core">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\algs">
+      <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

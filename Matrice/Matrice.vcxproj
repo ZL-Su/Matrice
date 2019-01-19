@@ -70,7 +70,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;_SCL_SECURE_NO_WARNINGS;_ENABLE_EXTENDED_ALIGNED_STORAGE;__use_mkl__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_LIB;_SCL_SECURE_NO_WARNINGS;_ENABLE_EXTENDED_ALIGNED_STORAGE;__use_mkl__;MATRICE_THR=MATRICE_THR_OMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <DisableSpecificWarnings>4006;4221;</DisableSpecificWarnings>
@@ -287,6 +287,8 @@
     <ClInclude Include="include\Matrice\private\_storage.hpp" />
     <ClInclude Include="include\Matrice\private\_unified_memory.h" />
     <ClInclude Include="include\Matrice\private\_view.h" />
+    <ClInclude Include="include\Matrice\thread\_thread.h" />
+    <ClInclude Include="include\Matrice\thread\inline\_thread_parallel_nd.inl" />
     <ClInclude Include="include\Matrice\util\genalgs.h" />
     <ClInclude Include="include\Matrice\util\utils.h" />
     <ClInclude Include="include\Matrice\util\_exception.h" />
@@ -340,6 +342,7 @@
     <None Include="addin\Eigen\SVD" />
     <None Include="addin\Eigen\UmfPackSupport" />
     <None Include="cpp.hint" />
+    <None Include="include\algs" />
     <None Include="include\Matrice\algs\correlation\inline\_optim.inl" />
     <None Include="include\Matrice\algs\interpolation\_base.inl" />
     <None Include="include\Matrice\algs\similarity\inline\_iterative_conv_impl.inl" />
@@ -350,6 +353,7 @@
     <None Include="include\Matrice\private\inl\_storage_base.inl" />
     <None Include="include\Matrice\private\nonfree\inl\_lnalge.inl" />
     <None Include="include\Matrice\private\_similarity.inl" />
+    <None Include="include\core" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="src\private\cuda\_dev_matrix_base.cu" />
