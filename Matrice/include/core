@@ -1,0 +1,8 @@
+/*********************************************************************
+	  About License Agreement of this file, see "../lic/license.h"
+*********************************************************************/
+
+#include "Matrice/core/matrix.h"
+#include "Matrice/core/solver.h"
+#include "Matrice/core/tensor.h"
+#include "Matrice/core/vector.h"

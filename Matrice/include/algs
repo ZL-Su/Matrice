@@ -1,0 +1,7 @@
+/*********************************************************************
+	  About License Agreement of this file, see "../lic/license.h"
+*********************************************************************/
+
+#include "Matrice/algs/interpolation.h"
+#include "Matrice/algs/imageproc.hpp"
+#include "Matrice/algs/correlation/_optim.h"
