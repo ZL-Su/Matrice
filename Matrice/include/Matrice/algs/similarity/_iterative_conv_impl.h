@@ -145,7 +145,7 @@ protected:
 	std::shared_ptr<interp_type> _Myitp;
 
 	// \Jacobian
-	tensor<value_type, 1, DOF> _Myjaco;
+	tensor_<value_type, 1, DOF> _Myjaco;
 	// \Hessian
 	stack_matrix _Myhess;
 

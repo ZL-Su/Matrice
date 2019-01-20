@@ -100,7 +100,7 @@ protected:
 
 	matrix_type  _Myref, _Mycur;
 	matrix_fixed _Myhess;
-	tensor<value_type, 1, DOF> _Myjaco;
+	tensor_<value_type, 1, DOF> _Myjaco;
 	linear_solver _Mysolver;
 };
 

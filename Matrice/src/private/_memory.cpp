@@ -5,34 +5,29 @@
 
 namespace dgelom { namespace privt {
 
-template<typename ValueType, typename IntegerType>
-ValueType * aligned_malloc(IntegerType size)
-{
-	try 
-	{
-		void* raw_ptr = std::malloc(size * sizeof(ValueType) + MATRICE_ALIGN_BYTES);
-		std::size_t space = reinterpret_cast<std::size_t>(raw_ptr);
-		space = space &~(std::size_t(MATRICE_ALIGN_BYTES - 1));
-		void* aligned_ptr = reinterpret_cast<void*>(space + MATRICE_ALIGN_BYTES);
+template<typename _Ty, typename _Ity>
+_Ty* aligned_malloc(_Ity size) {
+	try {
+		auto raw_ptr = std::malloc(size*sizeof(_Ty)+MATRICE_ALIGN_BYTES);
+		auto space = reinterpret_cast<size_t>(raw_ptr);
+		space = space &~(size_t(MATRICE_ALIGN_BYTES - 1));
+		auto aligned_ptr = reinterpret_cast<void*>(space + MATRICE_ALIGN_BYTES);
 		*(reinterpret_cast<void**>(aligned_ptr) - 1) = raw_ptr;
 
-		return (reinterpret_cast<ValueType*>(aligned_ptr));
+		return (reinterpret_cast<_Ty*>(aligned_ptr));
 	}
-	catch (std::bad_alloc)
-	{
+	catch (std::bad_alloc) {
 		std::exception("Bad memory allocation.");
 	};
 }
-template<typename ValueType>
-void aligned_free(ValueType * aligned_ptr) noexcept
-{
+template<typename _Ty>
+void aligned_free(_Ty* aligned_ptr) noexcept {
 	if (aligned_ptr)
 		std::free(*(reinterpret_cast<void**>(reinterpret_cast<void*>(aligned_ptr)) - 1));
 }
-template<typename ValueType> 
-bool is_aligned(ValueType * aligned_ptr) noexcept
-{
-	return !(reinterpret_cast<std::size_t>(reinterpret_cast<void*>(aligned_ptr)) % MATRICE_ALIGN_BYTES);
+template<typename _Ty>
+bool is_aligned(_Ty* aligned_ptr) noexcept {
+	return !(reinterpret_cast<size_t>(reinterpret_cast<void*>(aligned_ptr)) % MATRICE_ALIGN_BYTES);
 }
 
 template int* aligned_malloc<int>(int);

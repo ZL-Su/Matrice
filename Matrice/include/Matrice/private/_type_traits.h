@@ -91,7 +91,7 @@ struct traits { using type = typename T::value_t; };
 
 template<typename T> struct is_matrix : std::false_type {};
 template<typename T> MATRICE_GLOBAL_INL constexpr bool is_matrix_v = is_matrix<T>::value;
-template<typename Mty, typename = std::enable_if_t<is_matrix_v<Mty>>>
+template<typename Mty>
 struct matrix_traits : traits<Mty> {};
 
 template<typename Exp> struct expression_options { enum { value = Exp::flag | expr }; };

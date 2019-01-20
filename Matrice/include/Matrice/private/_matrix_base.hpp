@@ -682,7 +682,7 @@ public:
 	}
 	/**
 	 *\brief Create random value filled matrix
-	 *\param _Rows, Cols: height and width of matrix, only specified for dynamic case
+	 *\param [_Rows, Cols] height and width of matrix, only specified for dynamic case
 	 */
 	static MATRICE_GLOBAL_INL auto rand(diff_t _Rows = 0, diff_t _Cols = 0) {
 		_Derived _Ret; _Ret.create(_Rows, _Cols);
@@ -706,7 +706,6 @@ protected:
 	std::size_t m_format = rmaj|gene;
 	_Myt_storage_type m_storage;
 
-#undef MATRICE_EXPAND_SHAPE
 #undef MATRICE_MAKE_EXPOP_TYPE
 #undef MATRICE_LINK_PTR
 #undef MATRICE_EVALEXP_TOTHIS
