@@ -51,7 +51,7 @@ public:
 	using plvt_type = std::tuple<int, int, std::add_pointer_t<_Ty>>;
 	MATRICE_GLOBAL_FINL PlaneView_() = default;
 	MATRICE_GLOBAL_FINL PlaneView_(int _rows, int _cols, _Ty* _data = nullptr)
-		: m_rows(_rows), m_cols(_cols), m_data(_data) { 
+		: m_rows(_rows), m_cols(_cols), m_data(_data), _Myshape{1,1,_rows,_cols} { 
 		step.buf[0] = m_cols * step.buf[1]; 
 	};
 
@@ -104,6 +104,7 @@ protected:
 
 	int m_rows, m_cols;
 	_Ty* m_data = nullptr;
+	basic_shape<size_t> _Myshape;
 };
 //_INTERNAL_END
 
@@ -153,6 +154,7 @@ return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 	enum { _M = _Traits::size::rows::value, _N = _Traits::size::cols::value };
 	using _Myt_storage_type = typename detail::Storage_<_Type>::template Allocator<_M, _N>;
 	using _Myt = Base_;
+	using _Mybase = PlaneView_<_Type>;
 	using _Myt_const = std::add_const_t<_Myt>;
 	using _Myt_reference = std::add_lvalue_reference_t<_Myt>;
 	using _Myt_const_reference = std::add_lvalue_reference_t<_Myt_const>;
@@ -178,14 +180,13 @@ return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 public:
 	using value_t = _Type;
 	using value_type = value_t;
-	using matrix_type = _Derived;
+	using derived_t = _Derived;
+	using base_t = _Mybase;
 	using pointer = std::add_pointer_t<value_t>;
 	using reference = std::add_lvalue_reference_t<value_t>;
 	using iterator = pointer;
 	using const_iterator = std::add_const_t<iterator>;
 	using const_init_list = std::add_const_t<std::initializer_list<value_t>>;
-	using shape_t = std::tuple<std::size_t, std::size_t>;
-	using base_t = PlaneView_<value_t>;
 	using loctn_t = Location;
 
 	template<typename _Xop> using expr_type = Expr::Base_<_Xop>;
@@ -196,61 +197,61 @@ public:
 	static constexpr auto eps = std::numeric_limits<value_t>::epsilon();
 
 	MATRICE_GLOBAL_INL Base_() noexcept
-		:base_t(_M<0?0:_M, _N<0?0:_N), m_storage() MATRICE_LINK_PTR
+		:_Mybase(_M<0?0:_M, _N<0?0:_N), m_storage() MATRICE_LINK_PTR
 	MATRICE_GLOBAL_INL Base_(int _rows, int _cols) noexcept 
-		:base_t(_rows, _cols), m_storage(_rows, _cols) MATRICE_LINK_PTR
-	MATRICE_GLOBAL_INL Base_(const shape_t& _Shape) noexcept
+		:_Mybase(_rows, _cols), m_storage(_rows, _cols) MATRICE_LINK_PTR
+	MATRICE_GLOBAL_INL Base_(const shape_t<size_t>& _Shape) noexcept
 		: Base_(MATRICE_EXPAND_SHAPE) {}
 	MATRICE_GLOBAL_INL Base_(int _rows, int _cols, pointer data) noexcept 
-		:base_t(_rows, _cols, data), m_storage(_rows, _cols, data) {}
-	MATRICE_GLOBAL_INL Base_(const shape_t& _Shape, pointer _Data) noexcept
+		:_Mybase(_rows, _cols, data), m_storage(_rows, _cols, data) {}
+	MATRICE_GLOBAL_INL Base_(const shape_t<size_t>& _Shape, pointer _Data) noexcept
 		: Base_(MATRICE_EXPAND_SHAPE, _Data) {}
 	MATRICE_GLOBAL_INL Base_(int _rows, int _cols, value_t _val) noexcept 
-		:base_t(_rows, _cols), m_storage(_rows, _cols, _val) MATRICE_LINK_PTR
-	MATRICE_GLOBAL_INL Base_(const shape_t& _Shape, value_t _Val) noexcept
+		:_Mybase(_rows, _cols), m_storage(_rows, _cols, _val) MATRICE_LINK_PTR
+	MATRICE_GLOBAL_INL Base_(const shape_t<size_t>& _Shape, value_t _Val) noexcept
 		:Base_(MATRICE_EXPAND_SHAPE, _Val) {}
 	MATRICE_GLOBAL_INL Base_(const_init_list _list) noexcept 
-		:base_t(_M, _N), m_storage(_list) MATRICE_LINK_PTR
+		:_Mybase(_M, _N), m_storage(_list) MATRICE_LINK_PTR
 	MATRICE_GLOBAL_INL Base_(_Myt_const_reference _other) noexcept 
-		:base_t(_other.m_rows, _other.m_cols), m_storage(_other.m_storage) MATRICE_LINK_PTR
+		:_Mybase(_other.m_rows, _other.m_cols), m_storage(_other.m_storage) MATRICE_LINK_PTR
 	MATRICE_GLOBAL_INL Base_(_Myt_move_reference _other) noexcept 
-		:base_t(_other.m_rows, _other.m_cols), m_storage(std::move(_other.m_storage)) MATRICE_LINK_PTR
+		:_Mybase(_other.m_rows, _other.m_cols), m_storage(std::move(_other.m_storage)) MATRICE_LINK_PTR
 	/**
 	 *\from STD valarray<...>
 	 */
 	MATRICE_GLOBAL_INL Base_(const std::valarray<value_t>& _other, int _rows = 1) noexcept 
-		:base_t(_rows, _other.size() / _rows), m_storage(_rows, _other.size() / _rows, (pointer)std::addressof(_other[0])) MATRICE_LINK_PTR
+		:_Mybase(_rows, _other.size() / _rows), m_storage(_rows, _other.size() / _rows, (pointer)std::addressof(_other[0])) MATRICE_LINK_PTR
 	/**
 	 *\from explicit specified matrix type
 	 */
 	template<int _Rows, int _Cols, typename _Mty = Matrix_<value_t, _Rows, _Cols>>
 	MATRICE_GLOBAL_INL Base_(const _Mty& _other) noexcept 
-		:base_t(_other.rows(), _other.cols()), m_storage(_other.m_storage) MATRICE_LINK_PTR
+		:_Mybase(_other.rows(), _other.cols()), m_storage(_other.m_storage) MATRICE_LINK_PTR
 	/**
 	 *\from expression
 	 */
 	template<typename _Exp>
 	MATRICE_GLOBAL_FINL Base_(const exprs::_Matrix_exp<_Exp>& expr)
-		: base_t(m_rows = expr.rows(), m_cols = expr.cols()), 
+		: _Mybase(m_rows = expr.rows(), m_cols = expr.cols()), 
 		m_storage(m_rows, m_cols) MATRICE_EVALEXP_TOTHIS
 	template<typename _Lhs, typename _Rhs, typename _Op>
 	MATRICE_GLOBAL_FINL Base_(const Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Op>& expr)
-		:base_t(m_rows = expr.rows(), m_cols = expr.cols()), 
+		:_Mybase(m_rows = expr.rows(), m_cols = expr.cols()), 
 		m_storage(m_rows, m_cols) MATRICE_EVALEXP_TOTHIS
 	template<typename _Lhs, typename _Rhs, typename _Op>
 	MATRICE_GLOBAL_FINL Base_(const Expr::MatBinaryExpr<_Lhs, _Rhs, _Op>& expr) 
-		:base_t(m_rows = expr.rows(), m_cols = expr.cols()), 
+		:_Mybase(m_rows = expr.rows(), m_cols = expr.cols()), 
 		m_storage(m_rows, m_cols) MATRICE_EVALEXP_TOTHIS
 	template<typename _Rhs, typename _Op>
 	MATRICE_GLOBAL_FINL Base_(const Expr::MatUnaryExpr<_Rhs, _Op>& expr) 
-		:base_t(m_rows = expr.rows(), m_cols = expr.cols()), 
+		:_Mybase(m_rows = expr.rows(), m_cols = expr.cols()), 
 		m_storage(m_rows, m_cols) MATRICE_EVALEXP_TOTHIS
 
 	/**
 	 *\interfaces for opencv if it is enabled
 	 */
 #ifdef __use_ocv_as_view__
-	MATRICE_HOST_INL Base_(const ocv_view_t& mat) : base_t(mat.rows, mat.cols, mat.ptr<value_t>()) {}
+	MATRICE_HOST_INL Base_(const ocv_view_t& mat) : _Mybase(mat.rows, mat.cols, mat.ptr<value_t>()) {}
 	template<typename _Fn>
 	MATRICE_HOST_INL Base_(const ocv_view_t& mat, _Fn&& _Op) : Base_(mat) { each(_Op); }
 	MATRICE_HOST_INL ocv_view_t cvmat() { return ocv_view_t(m_rows, m_cols, ocv_view_t_cast<value_t>::type, m_data); }
@@ -265,18 +266,18 @@ public:
 			static_cast<_Derived*>(this)->__create_impl(_Rows, _Cols);
 		return (*static_cast<_Derived*>(this));
 	};
-	template<typename _Uy, typename = std::enable_if_t<std::is_scalar_v<_Uy>>>
+	template<typename _Uy, typename = enable_if_t<is_scalar_v<_Uy>>>
 	MATRICE_HOST_ONLY auto& create(diff_t _Rows, diff_t _Cols, _Uy _Val) {
 		this->create(_Rows, _Cols);
 		return (*(this) = { value_type(_Val) });
 	};
-	MATRICE_HOST_ONLY auto& create(const shape_t& _Shape) {
+	MATRICE_HOST_ONLY auto& create(const shape_t<size_t>& _Shape) {
 		if constexpr (_M <= 0 && _N <= 0) 
 			static_cast<_Derived*>(this)->__create_impl(MATRICE_EXPAND_SHAPE);
 		return (*static_cast<_Derived*>(this));
 	};
-	template<typename _Uy, typename = std::enable_if_t<std::is_scalar_v<_Uy>>>
-	MATRICE_HOST_ONLY auto& create(const shape_t& _Shape, _Uy _Val) {
+	template<typename _Uy, typename = enable_if_t<is_scalar_v<_Uy>>>
+	MATRICE_HOST_ONLY auto& create(const shape_t<size_t>& _Shape, _Uy _Val) {
 		this->create(_Shape);
 		return (*(this) = { value_type(_Val) });
 	};
@@ -509,7 +510,7 @@ public:
 		m_format = _other.m_format;
 		m_storage = _other.m_storage;
 		m_data = internal::_Proxy_checked(m_storage.data());
-		base_t::_Flush_view_buf();
+		_Mybase::_Flush_view_buf();
 		return (*static_cast<_Derived*>(this));
 	}
 	/**
@@ -520,7 +521,7 @@ public:
 		m_format = _other.m_format;
 		m_storage = std::forward<_Myt_storage_type>(_other.m_storage);
 		m_data = internal::_Proxy_checked(m_storage.data());
-		base_t::_Flush_view_buf();
+		_Mybase::_Flush_view_buf();
 		_other.m_storage.free();
 		_other.m_data = nullptr;
 		_other.m_cols = _other.m_rows = 0;
@@ -531,12 +532,12 @@ public:
 	 */
 	template<int _Rows, int _Cols,
 		typename _Mty = Matrix_<value_t, _Rows, _Cols>,
-		typename = typename std::enable_if_t<is_static_v<_Rows, _Cols>&&!is_static_v<_M, _N>>>
+		typename = enable_if_t<is_static_v<_Rows, _Cols>&&!is_static_v<_M, _N>>>
 	MATRICE_GLOBAL_FINL _Derived& operator= (_Mty& _managed) {
 		m_data = _managed.data();
 		m_rows = _managed.rows(), m_cols = _managed.cols();
 		m_storage.owner() = detail::Storage_<value_t>::Proxy;
-		base_t::_Flush_view_buf();
+		_Mybase::_Flush_view_buf();
 		return (*static_cast<_Derived*>(this));
 	}
 
@@ -673,7 +674,7 @@ public:
 	 *\param [_Val] diagonal element value, 
 	 *\param [_Size] matrix size, only specified for dynamic case
 	 */
-	template<typename _Uy, typename = std::enable_if_t<std::is_scalar_v<_Uy>>>
+	template<typename _Uy, typename = enable_if_t<is_scalar_v<_Uy>>>
 	static MATRICE_GLOBAL_INL auto diag(_Uy _Val = 1, diff_t _Size = 0) {
 		_Derived _Ret; _Ret.create(_Size, _Size, 0);
 		const auto _Value = value_type(_Val);
@@ -699,11 +700,12 @@ public:
 	MATRICE_HOST_FINL bool _Empty_getter() const { return (size() == 0); }
 
 protected:
-	using base_t::m_rows;
-	using base_t::m_cols;
-	using base_t::m_data;
+	using _Mybase::m_rows;
+	using _Mybase::m_cols;
+	using _Mybase::m_data;
+	using _Mybase::_Myshape;
 
-	std::size_t m_format = rmaj|gene;
+	size_t m_format = rmaj|gene;
 	_Myt_storage_type m_storage;
 
 #undef MATRICE_MAKE_EXPOP_TYPE
