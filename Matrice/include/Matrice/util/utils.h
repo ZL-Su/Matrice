@@ -131,11 +131,11 @@ template<> struct tuple_n<0> {
  */
 using shape = tuple<size_t, size_t>;
 
-template<typename _Ity>
+template<typename _Ity = size_t>
 using shape_t = tuple<_Ity,_Ity>;
-template<typename _Ity>
+template<typename _Ity = size_t>
 using shape3_t = tuple<_Ity, _Ity, _Ity>;
-template<typename _Ity>
+template<typename _Ity = size_t>
 using shape4_t = tuple<_Ity, _Ity, _Ity, _Ity>;
 
 /**
@@ -170,7 +170,7 @@ struct transforms {
  *\brief CLASS TEMPLATE basic shape type
  *\param <_Ity> an integral template type
  */
-template<typename _Ity,
+template<typename _Ity = size_t,
 	typename = enable_if_t<is_integral_v<_Ity>>>
 class basic_shape {
 	using _Myt = basic_shape;
@@ -180,14 +180,14 @@ public:
 	using hist_shape = tuple<value_type,view_shape>;
 	using full_shape = tuple<value_type,hist_shape>;
 
-	MATRICE_GLOBAL_INL basic_shape(shape_t<value_type>&& _Shape)
+	MATRICE_GLOBAL_INL basic_shape(shape_t<value_type>&& _Shape) noexcept
 		: _Data{ 1,{1,_Shape} } {}
-	MATRICE_GLOBAL_INL basic_shape(shape3_t<value_type>&& _Shape)
+	MATRICE_GLOBAL_INL basic_shape(shape3_t<value_type>&& _Shape) noexcept
 		: _Data{ 1,{std::get<0>(_Shape), {std::get<1>(_Shape),std::get<2>(_Shape)}} } {}
-	MATRICE_GLOBAL_INL basic_shape(shape4_t<value_type>&& _Shape)
+	MATRICE_GLOBAL_INL basic_shape(shape4_t<value_type>&& _Shape) noexcept
 		: _Data{ std::get<0>(_Shape), {std::get<1>(_Shape), {std::get<2>(_Shape),std::get<3>(_Shape)}} } {}
 	template<typename _Jty>
-	MATRICE_GLOBAL_INL basic_shape(std::initializer_list<_Jty> _Shape) {
+	MATRICE_GLOBAL_INL basic_shape(std::initializer_list<_Jty> _Shape) noexcept {
 		if (_Shape.size() == 2) {
 			_Data = { 1,{1,{(value_type)*_Shape.begin(), (value_type)*(_Shape.begin() + 1)}} };
 		}
@@ -198,6 +198,11 @@ public:
 			_Data = { (value_type)*_Shape.begin(),{(value_type)*(_Shape.begin() + 1),{(value_type)*(_Shape.begin() + 2), (value_type)*(_Shape.begin() + 3)}} };
 		}
 	}
+	MATRICE_GLOBAL_INL basic_shape(const _Myt& _Other) noexcept
+		: _Data(_Other._Data) {}
+	MATRICE_GLOBAL_INL basic_shape(_Myt&& _Other) noexcept
+		: _Data(std::move(_Other._Data)) {}
+
 	MATRICE_GLOBAL_INL auto& operator= (const _Myt& _Oth) {
 		_Data = (_Oth._Data); return (*this);
 	}
@@ -234,6 +239,8 @@ public:
 	}
 
 private:
-	full_shape _Data;
+	full_shape _Data = { value_type(0),{value_type(0),{value_type(0),value_type(0)}} };
 };
+
+using basic_shape_t = basic_shape<>;
 DGE_MATRICE_END
