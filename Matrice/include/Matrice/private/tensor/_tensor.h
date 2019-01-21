@@ -24,22 +24,22 @@ public:
 	 *\brief Empty constructor
 	 */
 	_Tensor()
-		: _Mybase(),_Myshape({0, 0, 0, 0}) {}
+		: _Mybase() {}
 	/**
 	 *\brief Construct a tensor with shape [1,[1,_Shape]]
 	 */
 	_Tensor(shape_t<size_t>&& _Shape)
-		: _Mybase(_Shape), _Myshape(std::move(_Shape)) {}
+		: _Mybase(_Shape) { _Myshape=std::move(_Shape); }
 	/**
 	 *\brief Construct a tensor with shape [1,[1,_Shape]] and fill with _Val
 	 */
 	_Tensor(shape_t<size_t>&& _Shape, value_t _Val)
-		: _Mybase(_Shape, _Val), _Myshape(std::move(_Shape)) {}
+		: _Tensor(std::move(_Shape)) { _Mybase::operator= ({ _Val }); }
 	/**
 	 *\brief Construct a tensor with shape [1,[_Shape]]
 	 */
 	_Tensor(shape3_t<size_t>&& _Shape)
-		: _Mybase(std::get<2>(_Shape), std::get<1>(_Shape)*std::get<0>(_Shape)), _Myshape(std::move(_Shape)) {}
+		: _Mybase(std::get<2>(_Shape), std::get<1>(_Shape)*std::get<0>(_Shape)) { _Myshape=std::move(_Shape); }
 	/**
 	 *\brief Construct a tensor with shape [1,[_Shape]] and fill with _Val
 	 */
@@ -49,7 +49,7 @@ public:
 	 *\brief Construct a tensor with shape _Shape
 	 */
 	_Tensor(shape4_t<size_t>&& _Shape) 
-		: _Mybase(std::get<0>(_Shape)*std::get<2>(_Shape), std::get<1>(_Shape)*std::get<3>(_Shape)), _Myshape(std::move(_Shape)) {}
+		: _Mybase(std::get<0>(_Shape)*std::get<2>(_Shape), std::get<1>(_Shape)*std::get<3>(_Shape)) { _Myshape=std::move(_Shape); }
 	/**
 	 *\brief Construct a tensor with shape _Shape and fill with _Val
 	 */
@@ -59,7 +59,7 @@ public:
 	 *\brief Move constructor
 	 */
 	_Tensor(_Myt&& _Other) noexcept
-		: _Mybase(std::move(_Other)), _Myshape(std::move(_Other.shape()())) {}
+		: _Mybase(std::move(_Other)) {}
 
 	/**
 	 *\brief Create a tensor
@@ -97,8 +97,9 @@ public:
 	MATRICE_HOST_INL void create(size_t _1, size_t _2) {
 		_Mybase::operator= (std::move(_Mybase(_1, _2)));
 	}
+
 private:
-	tensor_shape _Myshape; //[batchs, [channels, [height, width]]]
+	using _Mybase::_Myshape; //[batchs, [channels, [height, width]]]
 };
 
 template<typename _Ty>
