@@ -29,7 +29,9 @@ public:
 	 *\brief Construct a tensor with shape [1,[1,_Shape]]
 	 */
 	_Tensor(shape_t<size_t>&& _Shape)
-		: _Mybase(_Shape) { _Myshape=std::move(_Shape); }
+		: _Mybase(_Shape) {
+		_Myshape = std::move(_Shape); _Mybase::_Flush_view_buf();
+	}
 	/**
 	 *\brief Construct a tensor with shape [1,[1,_Shape]] and fill with _Val
 	 */
@@ -39,7 +41,9 @@ public:
 	 *\brief Construct a tensor with shape [1,[_Shape]]
 	 */
 	_Tensor(shape3_t<size_t>&& _Shape)
-		: _Mybase(std::get<2>(_Shape), std::get<1>(_Shape)*std::get<0>(_Shape)) { _Myshape=std::move(_Shape); }
+		: _Mybase(std::get<2>(_Shape), std::get<1>(_Shape)*std::get<0>(_Shape)) { 
+		_Myshape=std::move(_Shape); _Mybase::_Flush_view_buf();
+	}
 	/**
 	 *\brief Construct a tensor with shape [1,[_Shape]] and fill with _Val
 	 */
@@ -49,7 +53,9 @@ public:
 	 *\brief Construct a tensor with shape _Shape
 	 */
 	_Tensor(shape4_t<size_t>&& _Shape) 
-		: _Mybase(std::get<0>(_Shape)*std::get<2>(_Shape), std::get<1>(_Shape)*std::get<3>(_Shape)) { _Myshape=std::move(_Shape); }
+		: _Mybase(std::get<0>(_Shape)*std::get<2>(_Shape), std::get<1>(_Shape)*std::get<3>(_Shape)) { 
+		_Myshape=std::move(_Shape); _Mybase::_Flush_view_buf();
+	}
 	/**
 	 *\brief Construct a tensor with shape _Shape and fill with _Val
 	 */
@@ -96,6 +102,7 @@ public:
 	 */
 	MATRICE_HOST_INL void create(size_t _1, size_t _2) {
 		_Mybase::operator= (std::move(_Mybase(_1, _2)));
+		_Mybase::_Flush_view_buf();
 	}
 
 private:
