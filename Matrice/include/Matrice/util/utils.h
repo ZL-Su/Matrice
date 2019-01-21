@@ -1,49 +1,51 @@
 #pragma once
 
+#include <type_traits>
 #include "_macros.h"
 #include "_std_wrapper.h"
-#include <type_traits>
+#include "_exception.h"
 
 #if (defined __enable_cuda__ && !defined __disable_cuda__)
 #include <device_functions.h>
 #include <thrust\complex.h>
 #endif
+
 DGE_MATRICE_BEGIN
 
 static_assert(sizeof(void *) == 8, "MATRICE supports 64 bit only");
 
 template<typename _Ty = long double>
-MATRICE_GLOBAL_INL constexpr _Ty ¦Ð = static_cast<_Ty>(3.1415926535897932384626433832795028841971693993751058209749445923078164062862);
+MATRICE_GLOBAL_INL constexpr _Ty ¦Ð = static_cast<_Ty>(3.14159265358979323846264338327950288419716939937510582097494459);
 
-template<typename T1, typename T2, typename _Ret = std::common_type_t<T1, T2>, typename = std::enable_if_t<std::is_arithmetic_v<_Ret>>>
+template<typename T1, typename T2, typename _Ret = common_type_t<T1, T2>, typename = enable_if_t<is_arithmetic_v<_Ret>>>
 MATRICE_GLOBAL_FINL constexpr _Ret add(const T1& a, const T2& b) { return a + b; }
-template<typename T1, typename T2, typename _Ret = std::common_type_t<T1, T2>, typename = std::enable_if_t<std::is_arithmetic_v<_Ret>>>
+template<typename T1, typename T2, typename _Ret = common_type_t<T1, T2>, typename = enable_if_t<is_arithmetic_v<_Ret>>>
 MATRICE_GLOBAL_FINL constexpr _Ret sub(const T1& a, const T2& b) { return a - b; }
-template<typename T1, typename T2, typename _Ret = std::common_type_t<T1, T2>, typename = std::enable_if_t<std::is_arithmetic_v<_Ret>>>
+template<typename T1, typename T2, typename _Ret = common_type_t<T1, T2>, typename = enable_if_t<is_arithmetic_v<_Ret>>>
 MATRICE_GLOBAL_FINL constexpr _Ret mul(const T1& a, const T2& b) { return a * b; }
-template<typename T1, typename T2, typename _Ret = std::common_type_t<T1, T2>, typename = std::enable_if_t<std::is_arithmetic_v<_Ret>>>
+template<typename T1, typename T2, typename _Ret = common_type_t<T1, T2>, typename = enable_if_t<is_arithmetic_v<_Ret>>>
 MATRICE_GLOBAL_FINL constexpr _Ret div(const T1& a, const T2& b) { return a / b; }
-template<typename T1, typename T2, typename _Ret = std::common_type_t<T1, T2>, typename = std::enable_if_t<std::is_arithmetic_v<_Ret>>> 
+template<typename T1, typename T2, typename _Ret = common_type_t<T1, T2>, typename = enable_if_t<is_arithmetic_v<_Ret>>> 
 MATRICE_GLOBAL_FINL constexpr _Ret max(const T1& a, const T2& b) { return a < b ? b : a; }
-template<typename T1, typename T2, typename _Ret = std::common_type_t<T1, T2>, typename = std::enable_if_t<std::is_arithmetic_v<_Ret>>>
+template<typename T1, typename T2, typename _Ret = common_type_t<T1, T2>, typename = enable_if_t<is_arithmetic_v<_Ret>>>
 MATRICE_GLOBAL_FINL constexpr _Ret min(const T1& a, const T2& b) { return a < b ? a : b; }
-template<typename T, typename _Ret = T, typename = std::enable_if_t<std::is_arithmetic_v<T>>> 
+template<typename T, typename _Ret = T, typename = enable_if_t<is_arithmetic_v<T>>> 
 MATRICE_GLOBAL_FINL constexpr _Ret sqrt(const T& x) { return std::sqrt(x); }
-template<typename T, typename _Ret = T, typename = std::enable_if_t<std::is_arithmetic_v<T>>> 
+template<typename T, typename _Ret = T, typename = enable_if_t<is_arithmetic_v<T>>> 
 MATRICE_HOST_FINL constexpr _Ret abs(const T& x) { return std::abs(x); }
-template<typename T, typename _Ret = T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+template<typename T, typename _Ret = T, typename = enable_if_t<is_arithmetic_v<T>>>
 MATRICE_HOST_FINL constexpr _Ret exp(const T& x) { return std::exp(x); }
-template<typename T, typename _Ret = T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+template<typename T, typename _Ret = T, typename = enable_if_t<is_arithmetic_v<T>>>
 MATRICE_HOST_FINL constexpr _Ret log(const T& x) { return std::log(x); }
-template<typename T, typename _Ret = T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+template<typename T, typename _Ret = T, typename = enable_if_t<is_arithmetic_v<T>>>
 MATRICE_HOST_FINL constexpr _Ret log2(const T& x) { return std::log2(x); }
-template<typename T, typename _Ret = T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+template<typename T, typename _Ret = T, typename = enable_if_t<is_arithmetic_v<T>>>
 MATRICE_HOST_FINL constexpr _Ret log10(const T& x) { return std::log10(x); }
-template<typename T, typename _Ret = T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+template<typename T, typename _Ret = T, typename = enable_if_t<is_arithmetic_v<T>>>
 MATRICE_HOST_FINL constexpr _Ret floor(const T& x) { return static_cast<_Ret>(std::floor(x)); }
-template<typename T, typename _Ret = T, typename = std::enable_if_t<std::is_arithmetic_v<T>>> 
+template<typename T, typename _Ret = T, typename = enable_if_t<is_arithmetic_v<T>>> 
 MATRICE_HOST_FINL constexpr _Ret ceil(const T& x) { return static_cast<_Ret>(std::ceil(x)); }
-template<typename T1, typename T2, typename _Ret = std::common_type_t<T1, T2>, typename = std::enable_if_t<std::is_arithmetic_v<_Ret>>>
+template<typename T1, typename T2, typename _Ret = common_type_t<T1, T2>, typename = enable_if_t<is_arithmetic_v<_Ret>>>
 MATRICE_GLOBAL_FINL constexpr _Ret pow(const T1& x, const T2& y) { return std::pow(x,y); }
 
 namespace detail {
@@ -83,33 +85,10 @@ namespace detail {
 template<typename T = std::string> MATRICE_HOST_FINL
 constexpr T stonv(const std::string& _Str) { return detail::string_to_numval<T>::value(_Str); }
 
-#ifdef _HAS_CXX17
-//template<typename... _Args> MATRICE_GLOBAL_FINL
-//constexpr auto plus(_Args const&... args) { return (... + args); }
-//template<typename... _Args> MATRICE_GLOBAL_FINL
-//constexpr auto minus(_Args const&... args) { return (... - args); }
-//template<typename... _Args> MATRICE_GLOBAL_FINL
-//constexpr auto multiply(_Args const&... args) { return (... * args); }
-///**
-// * \is _Value satisfies anyone of given _Conditions: x == _Cond1 || ... || x = _Condn
-// */
-//template<typename T, typename... Ts>
-//MATRICE_GLOBAL_INL constexpr bool is_eqto_one_in(T&& _Value, Ts&&... _Conditions) {
-//	return ((_Conditions == _Value) || ...);
-//}
-///**
-// * \is _Value satisfies all of given _Conditions: x == _Cond1 && ... && x = _Condn
-// */
-//template<typename T, typename... Ts>
-//MATRICE_GLOBAL_INL constexpr bool is_eqto_all_in(T&& _Value, Ts&&... _Conditions) {
-//	return ((_Conditions == _Value) && ...);
-//}
-#endif
-
 /**
  * \get T-typed zero value
  */
-template<typename T, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+template<typename T, typename = enable_if_t<is_arithmetic_v<T>>>
 struct zero { static const constexpr T value = T(0);};
 template<typename T> MATRICE_HOST_INL constexpr auto zero_v = zero<T>::value;
 
@@ -150,7 +129,14 @@ template<> struct tuple_n<0> {
 /**
  * \2D shape type, auto [width, height] = shape(width, height)
  */
-using shape = std::tuple<size_t, size_t>;
+using shape = tuple<size_t, size_t>;
+
+template<typename _Ity>
+using shape_t = tuple<_Ity,_Ity>;
+template<typename _Ity>
+using shape3_t = tuple<_Ity, _Ity, _Ity>;
+template<typename _Ity>
+using shape4_t = tuple<_Ity, _Ity, _Ity, _Ity>;
 
 /**
  * \transform functor definitions
@@ -179,4 +165,75 @@ struct transforms {
 	};
 };
 
+
+/**
+ *\brief CLASS TEMPLATE basic shape type
+ *\param <_Ity> an integral template type
+ */
+template<typename _Ity,
+	typename = enable_if_t<is_integral_v<_Ity>>>
+class basic_shape {
+	using _Myt = basic_shape;
+public:
+	using value_type = _Ity;
+	using view_shape = tuple<value_type,value_type>;
+	using hist_shape = tuple<value_type,view_shape>;
+	using full_shape = tuple<value_type,hist_shape>;
+
+	MATRICE_GLOBAL_INL basic_shape(shape_t<value_type>&& _Shape)
+		: _Data{ 1,{1,_Shape} } {}
+	MATRICE_GLOBAL_INL basic_shape(shape3_t<value_type>&& _Shape)
+		: _Data{ 1,{std::get<0>(_Shape), {std::get<1>(_Shape),std::get<2>(_Shape)}} } {}
+	MATRICE_GLOBAL_INL basic_shape(shape4_t<value_type>&& _Shape)
+		: _Data{ std::get<0>(_Shape), {std::get<1>(_Shape), {std::get<2>(_Shape),std::get<3>(_Shape)}} } {}
+	template<typename _Jty>
+	MATRICE_GLOBAL_INL basic_shape(std::initializer_list<_Jty> _Shape) {
+		if (_Shape.size() == 2) {
+			_Data = { 1,{1,{(value_type)*_Shape.begin(), (value_type)*(_Shape.begin() + 1)}} };
+		}
+		if (_Shape.size() == 3) {
+			_Data = { 1,{(value_type)*_Shape.begin(),{(value_type)*(_Shape.begin() + 1), (value_type)*(_Shape.begin() + 2)}} };
+		}
+		if (_Shape.size() == 4) {
+			_Data = { (value_type)*_Shape.begin(),{(value_type)*(_Shape.begin() + 1),{(value_type)*(_Shape.begin() + 2), (value_type)*(_Shape.begin() + 3)}} };
+		}
+	}
+	MATRICE_GLOBAL_INL auto& operator= (const _Myt& _Oth) {
+		_Data = (_Oth._Data); return (*this);
+	}
+	MATRICE_GLOBAL_INL auto& operator= (_Myt&& _Oth) {
+		_Data = std::move(_Oth._Data); return (*this);
+	}
+	/**
+	 *\brief Get unrolled shape data
+	 */
+	MATRICE_GLOBAL_INL constexpr auto&& operator()() const {
+		return shape4_t<value_type>{ get(0), get(1), get(2), get(3) };
+	}
+	/**
+	 *\brief Get dim value at _Dim
+	 */
+	MATRICE_GLOBAL_INL constexpr auto get(uint8_t _Dim) const {
+		if (_Dim == 0) return std::get<0>(_Data);
+		if (_Dim == 1) return std::get<0>(std::get<1>(_Data));
+		if (_Dim == 2) return std::get<0>(std::get<1>(std::get<1>(_Data)));
+		if (_Dim == 3) return std::get<1>(std::get<1>(std::get<1>(_Data)));
+		DGELOM_CHECK(_Dim > 3, "_Dim over range of _Data.");
+	}
+	/**
+	 *\brief Get full rows
+	 */
+	MATRICE_GLOBAL_INL constexpr auto rows() const {
+		return get(0) * get(2);
+	}
+	/**
+	 *\brief Get full cols
+	 */
+	MATRICE_GLOBAL_INL constexpr auto cols() const {
+		return get(1) * get(3);
+	}
+
+private:
+	full_shape _Data;
+};
 DGE_MATRICE_END
