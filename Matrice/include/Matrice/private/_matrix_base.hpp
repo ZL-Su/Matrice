@@ -40,19 +40,27 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 DGE_MATRICE_BEGIN
-//_INTERNAL_BEGIN
 // \CLASS TEMPLATE to make plane view for all matrix types
 template<typename _Ty, int _Type = _View_trait<_Ty>::value> 
-class PlaneView_ {
+class _Basic_plane_view_base {
 	enum { MAGIC_VAL = 0x42FF0000 };
 	struct Step { int buf[2] = { sizeof(_Ty), sizeof(_Ty) }; int* p = buf; };
 	int type = _Type, flags = MAGIC_VAL | _Type, dims = 2; Step step;
+	int nval, cval, hval, wval;
 public:
 	using plvt_type = std::tuple<int, int, std::add_pointer_t<_Ty>>;
-	MATRICE_GLOBAL_FINL PlaneView_() = default;
-	MATRICE_GLOBAL_FINL PlaneView_(int _rows, int _cols, _Ty* _data = nullptr)
-		: m_rows(_rows), m_cols(_cols), m_data(_data), _Myshape{1,1,_rows,_cols} { 
-		step.buf[0] = m_cols * step.buf[1]; 
+	MATRICE_GLOBAL_FINL _Basic_plane_view_base() = default;
+	MATRICE_GLOBAL_FINL _Basic_plane_view_base(int _rows, int _cols, _Ty* _data = nullptr)
+		: m_rows(_rows), m_cols(_cols), m_data(_data), _Myshape{1,1,_rows,_cols} {
+		_Flush_view_buf();
+	};
+	MATRICE_GLOBAL_FINL _Basic_plane_view_base(const basic_shape_t& _Shape, _Ty* _data)
+		: m_rows(_Shape.rows()), m_cols(_Shape.cols()), m_data(_data), _Myshape(_Shape) {
+		_Flush_view_buf();
+	};
+	MATRICE_GLOBAL_FINL _Basic_plane_view_base(const basic_shape_t& _Shape)
+		: m_rows(_Shape.rows()), m_cols(_Shape.cols()), _Myshape(_Shape) {
+		_Flush_view_buf();
 	};
 
 	/**
@@ -66,7 +74,8 @@ public:
 	MATRICE_GLOBAL_FINL constexpr auto shape(_T _Scale) const {
 		return std::make_tuple(m_rows*_Scale, m_cols*_Scale);
 	}
-	template<typename _T1, typename _T2 = _T1, typename = std::enable_if_t<std::is_scalar_v<_T1>&&std::is_scalar_v<_T2>>>
+	template<typename _T1, typename _T2 = _T1, 
+		typename = std::enable_if_t<std::is_scalar_v<_T1>&&std::is_scalar_v<_T2>>>
 	MATRICE_GLOBAL_FINL constexpr auto shape(_T1 _Rsf, _T2 _Csf) const {
 		return std::make_tuple(m_rows*_Rsf, m_cols*_Csf);
 	}
@@ -100,13 +109,20 @@ public:
 	}
 
 protected:
-	MATRICE_GLOBAL_FINL void _Flush_view_buf() { step.buf[0] = m_cols * step.buf[1]; }
+	MATRICE_GLOBAL_FINL void _Flush_view_buf() { 
+#ifdef _DEBUG
+		step.buf[0] = m_cols * step.buf[1]; 
+		nval = _Myshape.get(0);
+		cval = _Myshape.get(1);
+		hval = _Myshape.get(2);
+		wval = _Myshape.get(3);
+#endif
+	}
 
 	int m_rows, m_cols;
 	_Ty* m_data = nullptr;
-	basic_shape<size_t> _Myshape;
+	basic_shape_t _Myshape;
 };
-//_INTERNAL_END
 
 _TYPES_BEGIN
 template<typename _Ty> using nested_initializer_list = std::initializer_list<std::initializer_list<_Ty>>;
@@ -119,7 +135,7 @@ template<
 	typename _Derived, 
 	typename _Traits = matrix_traits<_Derived>, 
 	typename _Type = typename _Traits::type>
-class Base_ : public PlaneView_<_Type>
+class Base_ : public _Basic_plane_view_base<_Type>
 {
 #define MATRICE_LINK_PTR { m_data = m_storage.data(); }
 #define MATRICE_EVALEXP_TOTHIS { m_data = m_storage.data(); expr.assign(*this); }
@@ -154,7 +170,7 @@ return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 	enum { _M = _Traits::size::rows::value, _N = _Traits::size::cols::value };
 	using _Myt_storage_type = typename detail::Storage_<_Type>::template Allocator<_M, _N>;
 	using _Myt = Base_;
-	using _Mybase = PlaneView_<_Type>;
+	using _Mybase = _Basic_plane_view_base<_Type>;
 	using _Myt_const = std::add_const_t<_Myt>;
 	using _Myt_reference = std::add_lvalue_reference_t<_Myt>;
 	using _Myt_const_reference = std::add_lvalue_reference_t<_Myt_const>;
@@ -213,9 +229,9 @@ public:
 	MATRICE_GLOBAL_INL Base_(const_init_list _list) noexcept 
 		:_Mybase(_M, _N), m_storage(_list) MATRICE_LINK_PTR
 	MATRICE_GLOBAL_INL Base_(_Myt_const_reference _other) noexcept 
-		:_Mybase(_other.m_rows, _other.m_cols), m_storage(_other.m_storage) MATRICE_LINK_PTR
+		:_Mybase(_other._Myshape), m_storage(_other.m_storage) MATRICE_LINK_PTR
 	MATRICE_GLOBAL_INL Base_(_Myt_move_reference _other) noexcept 
-		:_Mybase(_other.m_rows, _other.m_cols), m_storage(std::move(_other.m_storage)) MATRICE_LINK_PTR
+		:_Mybase(_other._Myshape), m_storage(std::move(_other.m_storage)) MATRICE_LINK_PTR
 	/**
 	 *\from STD valarray<...>
 	 */
