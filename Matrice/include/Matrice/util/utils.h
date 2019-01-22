@@ -165,7 +165,6 @@ struct transforms {
 	};
 };
 
-
 /**
  *\brief CLASS TEMPLATE basic shape type
  *\param <_Ity> an integral template type
@@ -212,8 +211,18 @@ public:
 	/**
 	 *\brief Get unrolled shape data
 	 */
-	MATRICE_GLOBAL_INL constexpr auto&& operator()() const {
-		return shape4_t<value_type>{ get(0), get(1), get(2), get(3) };
+	MATRICE_GLOBAL_INL auto operator()() const {
+		return std::make_tuple(get(0), get(1), get(2), get(3));
+	}
+	/**
+	 *\brief Comparation operators
+	 */
+	MATRICE_GLOBAL_INL friend auto operator== (const _Myt& _lhs, const _Myt& _rhs) {
+		return (_lhs._Data == _rhs._Data);
+	}
+	template<typename _Rhs>
+	MATRICE_GLOBAL_INL friend auto operator== (const _Myt& _lhs, const _Rhs& _rhs) {
+		return (_lhs._Data == _Myt(_rhs)._Data);
 	}
 	/**
 	 *\brief Get dim value at _Dim
