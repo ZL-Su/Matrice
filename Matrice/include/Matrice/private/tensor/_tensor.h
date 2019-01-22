@@ -86,6 +86,43 @@ public:
 	MATRICE_HOST_INL const auto& shape() const {
 		return (_Myshape);
 	}
+
+	/**
+	 *\brief Get a sub-tensor at this[n,:,:,:]
+	 *\param [n] the index of the first dim
+	 */
+	MATRICE_HOST_INL auto at(size_t n) const {
+		_Myt _Ret({ 1,shape().get(1),shape().get(2),shape().get(3) });
+		auto _Begin = this->begin()+n*_Ret.size();
+		std::copy(_Begin, _Begin + _Ret.size(), _Ret.begin());
+		return std::forward<_Myt>(_Ret);
+	}
+	/**
+	 *\brief Get a sub-tensor at this[n,c,:,:]
+	 *\param [n,c] the indices of the first and sencond dim
+	 */
+	MATRICE_HOST_INL auto at(size_t n, size_t c) const {
+		_Myt _Ret({ 1, 1, _Myshape.get(2), _Myshape.get(3) });
+		auto _Begin = this->begin()+n*_Ret.size()*_Myshape.get(1)+c*_Ret.size();
+		std::copy(_Begin, _Begin + _Ret.size(), _Ret.begin());
+		return std::forward<_Myt>(_Ret);
+	}
+	/**
+	 *\brief Get the view at this[n,c,:,:]
+	 *\param [n, c] the indices of the first and sencond dim
+	 */
+	MATRICE_HOST_INL auto view(size_t n, size_t c) const {
+		auto _Off_y = n * shape().get(2), _Off_x = c * shape().get(3);
+		return (this->block(_Off_x, _Off_x+ shape().get(3), _Off_y, _Off_y+shape().get(2)));
+	}
+
+	/**
+	 *\brief Generate a zero-value filled tensor
+	 *\param [_Shape] any shape type compatible with tensor_shape
+	 */
+	static MATRICE_HOST_INL auto zero(tensor_shape&& _Shape) {
+		return (std::move(_Myt({_Shape.get(0),_Shape.get(1),_Shape.get(2),_Shape.get(3)}, 0)));
+	}
 	/**
 	 *\brief Generate a random filled tensor
 	 *\param [_Shape] any shape type compatible with tensor_shape
@@ -105,6 +142,11 @@ public:
 		_Mybase::_Flush_view_buf();
 	}
 
+	/**
+	 *\brief Deleted methods
+	 */
+	template<ttag _Ltag = ttag::N, ttag _Rtag = ttag::N, typename _Rhs = _Myt>
+	MATRICE_GLOBAL_FINL auto inplace_mul(const _Rhs& _Right) = delete;
 private:
 	using _Mybase::_Myshape; //[batchs, [channels, [height, width]]]
 };
