@@ -129,8 +129,6 @@ template<> struct tuple_n<0> {
 /**
  * \2D shape type, auto [width, height] = shape(width, height)
  */
-using shape = tuple<size_t, size_t>;
-
 template<typename _Ity = size_t>
 using shape_t = tuple<_Ity,_Ity>;
 template<typename _Ity = size_t>
@@ -213,6 +211,12 @@ public:
 	 */
 	MATRICE_GLOBAL_INL auto operator()() const {
 		return std::make_tuple(get(0), get(1), get(2), get(3));
+	}
+	/**
+	 *\brief Get full rows and cols to a shape_t
+	 */
+	MATRICE_GLOBAL_INL operator shape_t<size_t>() const {
+		return shape_t<size_t>(rows(), cols());
 	}
 	/**
 	 *\brief Comparation operators

@@ -32,7 +32,7 @@ template<> struct _Blas_kernel_impl<float> : _Blas_kernel_impl_base<float> {
 #ifdef __use_mkl__
 		return cblas_sdot(_N, _x, _Incx, _y, _Incy);
 #else
-		throw std::runtime_error("Undefined kernel in _Blas_kernel_impl<float>::mul(...).");
+		throw std::runtime_error("Undefined kernel in _Blas_kernel_impl<float>::dot(...).");
 #endif
 	}
 	template<ttag Ta = ttag::N, ttag Tb = ttag::N>

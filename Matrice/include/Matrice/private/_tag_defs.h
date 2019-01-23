@@ -25,11 +25,13 @@ DGE_MATRICE_BEGIN
 	template specialization and function overloading.
  **********************************************************************/
 namespace tag {
-	///<brief> tag definitions for categorizing matrix instance </brief>
+	///<brief> tag definitions for categorizing matrix/tensor instance </brief>
 	struct _Matrix_tag {};
 	struct _Managed_matrix_tag : _Matrix_tag {};
 	struct _Dynamic_matrix_tag : _Matrix_tag {};
-	struct _Device_matrix_tag : _Matrix_tag {};
+	struct _Device_matrix_tag  : _Matrix_tag {};
+	struct _Tensor_tag {};
+
 
 	///<brief> tag definitions for categorizing matrix iterator </brief>
 	struct _Matrix_iterator_tag {};

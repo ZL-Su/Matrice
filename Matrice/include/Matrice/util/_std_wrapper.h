@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <queue>
 #include <random>
+#include <tuple>
 #include <type_traits>
 
 namespace dgelom {

@@ -15,10 +15,12 @@ class _Tensor : public common::Base_<_Tensor<_Ty>>
 	using _Mybase = common::Base_<_Myt>;
 	using _Mytraits = matrix_traits<_Myt>;
 public:
+	enum { Size = 0, CompileTimeRows = 0, CompileTimeCols = 0, };
 	using typename _Mybase::value_t;
 	using typename _Mybase::value_type;
 	using typename _Mybase::const_init_list;
 	using tensor_shape = basic_shape<size_t>;
+	using _Mybase::dims;
 
 	/**
 	 *\brief Empty constructor
@@ -78,21 +80,11 @@ public:
 	}
 
 	/**
-	 *\brief Get and set tensor shape
-	 */
-	MATRICE_HOST_INL auto& shape() {
-		return (_Myshape);
-	}
-	MATRICE_HOST_INL const auto& shape() const {
-		return (_Myshape);
-	}
-
-	/**
 	 *\brief Get a sub-tensor at this[n,:,:,:]
 	 *\param [n] the index of the first dim
 	 */
 	MATRICE_HOST_INL auto at(size_t n) const {
-		_Myt _Ret({ 1,shape().get(1),shape().get(2),shape().get(3) });
+		_Myt _Ret({ 1,dims().get(1),dims().get(2),dims().get(3) });
 		auto _Begin = this->begin()+n*_Ret.size();
 		std::copy(_Begin, _Begin + _Ret.size(), _Ret.begin());
 		return std::forward<_Myt>(_Ret);
@@ -107,13 +99,14 @@ public:
 		std::copy(_Begin, _Begin + _Ret.size(), _Ret.begin());
 		return std::forward<_Myt>(_Ret);
 	}
+
 	/**
 	 *\brief Get the view at this[n,c,:,:]
 	 *\param [n, c] the indices of the first and sencond dim
 	 */
 	MATRICE_HOST_INL auto view(size_t n, size_t c) const {
-		auto _Off_y = n * shape().get(2), _Off_x = c * shape().get(3);
-		return (this->block(_Off_x, _Off_x+ shape().get(3), _Off_y, _Off_y+shape().get(2)));
+		auto _Off_y = n * dims().get(2), _Off_x = c * dims().get(3);
+		return (this->block(_Off_x, _Off_x+ dims().get(3), _Off_y, _Off_y+ dims().get(2)));
 	}
 
 	/**
@@ -149,19 +142,6 @@ public:
 	MATRICE_GLOBAL_FINL auto inplace_mul(const _Rhs& _Right) = delete;
 private:
 	using _Mybase::_Myshape; //[batchs, [channels, [height, width]]]
-};
-
-template<typename _Ty>
-struct matrix_traits<_Tensor<_Ty>> {
-	using type = _Ty;
-	static constexpr auto _M = 0, _N = 0;
-	static constexpr auto Is_base = std::true_type::value;
-	struct size {
-		struct rows { static constexpr auto value = _M; };
-		struct cols { static constexpr auto value = _N; };
-		static constexpr auto rows_v = rows::value;
-		static constexpr auto cols_v = cols::value;
-	};
 };
 #undef MATRICE_EXPAND_SHAPE
 _DETAIL_END
