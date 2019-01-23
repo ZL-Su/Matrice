@@ -35,6 +35,9 @@ template<typename _Ty> class Matrix;
 template<typename _Ty, int _Rows, int _cols> class Matrix_;
 template<typename _Derived, typename _Traits, typename _Ty> class Base_;
 _TYPES_END
+_DETAIL_BEGIN
+template<typename _Ty> class _Tensor;
+_DETAIL_END
 
 template<typename _Ty, int _M, int _N> 
 struct is_matrix <types::Matrix_<_Ty, _M, _N>> : std::true_type {};
@@ -42,21 +45,45 @@ struct is_matrix <types::Matrix_<_Ty, _M, _N>> : std::true_type {};
 template<typename _Derived, typename _Traits, typename _Ty> 
 struct is_matrix<types::Base_<_Derived, _Traits, _Ty>> : std::true_type {};
 
-template<typename _Ty, int _Rows, int _Cols> 
-struct matrix_traits<types::Matrix_<_Ty, _Rows, _Cols>> {
-	using type = _Ty;
-	enum { _M = _Rows, _N = _Cols };
-	struct size { struct rows { enum { value = _M }; }; struct cols { enum { value = _N }; }; };
-	static constexpr bool Is_base = std::false_type::value;
-};
-
 template<typename _Derived, typename _Traits, typename _Ty>
 struct matrix_traits<types::Base_<_Derived, _Traits, _Ty>> {
 	using type = _Ty;
-	enum {_M = _Traits::_M, _N = _Traits::_N};
-	struct size { struct rows { enum { value = _M }; }; struct cols { enum { value = _N }; }; };
+	enum { _M = _Traits::_M, _N = _Traits::_N };
 	static constexpr bool Is_base = std::true_type::value;
+	struct size {
+		struct rows { static constexpr auto value = _M; };
+		struct cols { static constexpr auto value = _N; };
+		static constexpr auto rows_v = rows::value;
+		static constexpr auto cols_v = cols::value;
+	};
 };
+template<typename _Ty, int _Rows, int _Cols> 
+struct matrix_traits<types::Matrix_<_Ty, _Rows, _Cols>> {
+	using type = _Ty;
+	using category = tag::_Matrix_tag;
+	enum { _M = _Rows, _N = _Cols };
+	static constexpr bool Is_base = std::false_type::value;
+	struct size {
+		struct rows { static constexpr auto value = _M; };
+		struct cols { static constexpr auto value = _N; };
+		static constexpr auto rows_v = rows::value;
+		static constexpr auto cols_v = cols::value;
+	};
+};
+template<typename _Ty>
+struct matrix_traits<detail::_Tensor<_Ty>> {
+	using type = _Ty;
+	using category = tag::_Tensor_tag;
+	static constexpr auto _M = 0, _N = 0;
+	static constexpr auto Is_base = std::false_type::value;
+	struct size {
+		struct rows { static constexpr auto value = _M; };
+		struct cols { static constexpr auto value = _N; };
+		static constexpr auto rows_v = rows::value;
+		static constexpr auto cols_v = cols::value;
+	};
+};
+
 #pragma endregion
 DGE_MATRICE_END
 
@@ -208,6 +235,9 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 			CompileTimeRows = myt_traits::rows, 
 			CompileTimeCols = myt_traits::cols};
 
+		MATRICE_GLOBAL_FINL Base_() {}
+		MATRICE_GLOBAL_FINL Base_(const basic_shape_t& _Shape) : Shape(_Shape) {}
+
 		// \evaluate the matrix expression
 		MATRICE_GLOBAL_INL auto eval() const { 
 			matrix_type _Ret(M, N);
@@ -269,6 +299,12 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		MATRICE_GLOBAL_FINL constexpr std::size_t rows() const { return M; }
 		MATRICE_GLOBAL_FINL constexpr std::size_t cols() const { return N; }
 		MATRICE_GLOBAL_FINL constexpr auto shape() const { return std::tie(M, N); }
+		/**
+		 *\brief Get full dims {N,{C,{H,W}}}
+		 */
+		MATRICE_GLOBAL_FINL constexpr auto& dims() const {
+			return (Shape);
+		}
 
 		_MATRICE_DEFEXP_ARITHOP(+, add)
 		_MATRICE_DEFEXP_ARITHOP(-, sub)
@@ -277,7 +313,7 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 
 	protected:
 		std::size_t M, K, N;
-
+		const basic_shape_t& Shape;
 #undef _CDTHIS
 	};
 
@@ -297,7 +333,7 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		enum { options = option<ewise>::value };
 
 		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T& _lhs, const U& _rhs) noexcept
-			: _LHS(_lhs), _RHS(_rhs) { M = _LHS.rows(), N = _RHS.cols(); }
+			:_Mybase(_lhs.dims()), _LHS(_lhs), _RHS(_rhs) { M = _LHS.rows(), N = _RHS.cols(); }
 
 		MATRICE_GLOBAL_FINL value_t operator() (std::size_t _idx) { 
 			return _Op(_LHS(_idx), _RHS(_idx));
@@ -332,7 +368,7 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		enum { options = option<ewise>::value };
 
 		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T _scalar, const U& _rhs) noexcept
-			: _Scalar(_scalar), _RHS(_rhs) {
+			:_Mybase(_rhs.dims()), _Scalar(_scalar), _RHS(_rhs) {
 			M = _RHS.rows(), N = _RHS.cols();
 		}
 
@@ -370,7 +406,7 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		enum { options = option<ewise>::value };
 
 		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T& _lhs, const U _scalar) noexcept
-			: _Scalar(_scalar), _LHS(_lhs) {
+			:_Mybase(_lhs.dims()), _Scalar(_scalar), _LHS(_lhs) {
 			M = _LHS.rows(), N = _LHS.cols();
 		}
 
@@ -411,7 +447,7 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		enum { options = expression_options<_UnaryOp>::value };
 
 		EwiseUnaryExpr(const_reference_t _rhs) noexcept
-			:_RHS(_rhs) { M = _rhs.rows(), N = _rhs.cols(); }
+			:_Mybase(_rhs.dims()), _RHS(_rhs) { M = _rhs.rows(), N = _rhs.cols(); }
 
 		MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) {
 			return _Op(_RHS(_idx));
@@ -447,7 +483,7 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		enum{options = option<_BinaryOp::flag>::value};
 
 		MATRICE_GLOBAL_INL MatBinaryExpr(const T& _lhs, const U& _rhs) noexcept 
-			: _LHS(_lhs), _RHS(_rhs) {
+			:_Mybase(_lhs.dims()), _LHS(_lhs), _RHS(_rhs) {
 			M = _LHS.rows(), K = _LHS.cols(), N = _RHS.cols();
 			if (K != _RHS.rows() && K == N) N = _RHS.rows();
 		}
@@ -491,17 +527,17 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		enum {options = option<_UnaryOp::flag>::value};
 
 		MATRICE_GLOBAL_INL MatUnaryExpr(const T& inout) noexcept
-			: _RHS(inout), _ANS(inout) {
+			:_Mybase(inout.dims()), _RHS(inout), _ANS(inout) {
 			M = _RHS.rows(), N = _RHS.cols();
 			if constexpr (options & trp == trp) std::swap(M, N);
 		}
 		MATRICE_GLOBAL_INL MatUnaryExpr(const T& _rhs, T& _ans)
-			: _RHS(_rhs), _ANS(_ans) {
+			: _Mybase(_rhs.dims()), _RHS(_rhs), _ANS(_ans) {
 			M = _RHS.rows(), N = _RHS.cols();
 			if constexpr (options & trp == trp) std::swap(M, N);
 		}
 		MATRICE_GLOBAL_INL MatUnaryExpr(MatUnaryExpr&& _other)
-			: options(_other.options) {
+			: _Mybase(_other.dims()), options(_other.options) {
 			*this = std::move(_other);
 		}
 
