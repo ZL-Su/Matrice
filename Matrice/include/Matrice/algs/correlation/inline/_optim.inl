@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../_optim.h"
+#include "../../../arch/ixpacket.h"
 
 MATRICE_ALGS_BEGIN _DETAIL_BEGIN namespace corr {
 
@@ -120,9 +121,17 @@ auto& _Corr_invcomp_optim<_Ty, _Itag, 1>::_Diff() {
 			auto dx = _Off + i, x = _Mybase::_Mypos.x + dx;
 
 			auto[dfdx, dfdy] = _Mybase::_Myref_itp.grad({ x, y });
-			_Mybase::_Myjaco(j, i) = {
+			if constexpr (is_float32_v<value_type>) {
+				using packet_t = simd::Packet_<value_type, 4>;
+				auto a = packet_t{ dfdx, dfdx, dfdy, dfdy };
+				auto b = (a * packet_t{ dx, dy, dx, dy }).begin();
+				_Mybase::_Myjaco(j, i) = { dfdx, b[0], b[1], dfdy, b[2], b[3] };
+			}
+			else {
+				_Mybase::_Myjaco(j, i) = {
 				dfdx, dfdx*dx, dfdx*dy, dfdy, dfdy*dx, dfdy*dy
-			};
+				};
+			}
 		}
 	}
 

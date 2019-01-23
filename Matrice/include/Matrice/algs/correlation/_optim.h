@@ -124,10 +124,14 @@ public:
 		: _Mybase(_args...) {}
 
 	/**
-	 * \IC-GN inner update step for warp parameters: _P = {u, dudx, dudy, v, dvdx, dvdy}
+	 *\brief Solve normal equations to update parameters
+	 *\param [_P] warp parameter vector
 	 */
 	MATRICE_HOST_INL auto _Update(param_type& _P);
 
+	/**
+	 *\brief Compute steepest descent image terms
+	 */
 	MATRICE_HOST_INL auto& _Diff();
 };
 
