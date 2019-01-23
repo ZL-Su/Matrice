@@ -45,7 +45,7 @@ template<typename _Ty, int _Type = _View_trait<_Ty>::value>
 class _Basic_plane_view_base {
 	enum { MAGIC_VAL = 0x42FF0000 };
 	struct Step { int buf[2] = { sizeof(_Ty), sizeof(_Ty) }; int* p = buf; };
-	int type = _Type, flags = MAGIC_VAL | _Type, dims = 2; Step step;
+	int type = _Type, flags = MAGIC_VAL | _Type; Step step;
 	int nval, cval, hval, wval;
 public:
 	using plvt_type = std::tuple<int, int, std::add_pointer_t<_Ty>>;
@@ -68,7 +68,7 @@ public:
 	 * Example: auto [_Rows, _Cols] = _Matrix.shape();
 	 */
 	MATRICE_GLOBAL_FINL constexpr auto shape() const { 
-		return std::tie(m_rows, m_cols); 
+		return std::tie(m_rows, m_cols);
 	}
 	template<typename _T, typename = std::enable_if_t<std::is_scalar_v<_T>>>
 	MATRICE_GLOBAL_FINL constexpr auto shape(_T _Scale) const {
@@ -78,6 +78,13 @@ public:
 		typename = std::enable_if_t<std::is_scalar_v<_T1>&&std::is_scalar_v<_T2>>>
 	MATRICE_GLOBAL_FINL constexpr auto shape(_T1 _Rsf, _T2 _Csf) const {
 		return std::make_tuple(m_rows*_Rsf, m_cols*_Csf);
+	}
+
+	/**
+	 *\brief Get full dims {N,{C,{H,W}}}
+	 */
+	MATRICE_GLOBAL_FINL constexpr auto& dims() const {
+		return (_Myshape);
 	}
 
 	/**
@@ -204,6 +211,7 @@ public:
 	using const_iterator = std::add_const_t<iterator>;
 	using const_init_list = std::add_const_t<std::initializer_list<value_t>>;
 	using loctn_t = Location;
+	using category = typename _Traits::category;
 
 	template<typename _Xop> using expr_type = Expr::Base_<_Xop>;
 	
