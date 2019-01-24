@@ -206,6 +206,18 @@ public:
 	MATRICE_GLOBAL_INL auto& operator= (_Myt&& _Oth) {
 		_Data = std::move(_Oth._Data); return (*this);
 	}
+	MATRICE_GLOBAL_INL auto& operator= (const std::initializer_list<size_t> _Shape) {
+		if (_Shape.size() == 2) {
+			_Data = { 1,{1,{(value_type)*_Shape.begin(), (value_type)*(_Shape.begin() + 1)}} };
+		}
+		if (_Shape.size() == 3) {
+			_Data = { 1,{(value_type)*_Shape.begin(),{(value_type)*(_Shape.begin() + 1), (value_type)*(_Shape.begin() + 2)}} };
+		}
+		if (_Shape.size() == 4) {
+			_Data = { (value_type)*_Shape.begin(),{(value_type)*(_Shape.begin() + 1),{(value_type)*(_Shape.begin() + 2), (value_type)*(_Shape.begin() + 3)}} };
+		}
+		return (*this);
+	}
 	/**
 	 *\brief Get unrolled shape data
 	 */
