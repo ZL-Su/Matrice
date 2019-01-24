@@ -292,7 +292,50 @@ private:
 	pointer _My_origin;
 	range_type _My_range;
 };
-#undef _VIEW_EWISE_COPY_N
 
+/**********************************************************************
+								    Tensor CHW view
+		 Copyright (c) : Zhilong (Dgelom) Su, since 24/Jan/2019
+ **********************************************************************/
+template<typename _Ty, typename = enable_if_t<is_arithmetic_v<_Ty>>>
+class _Chw_view MATRICE_NONHERITABLE : public _View_base<_Ty, _Chw_view<_Ty>>
+{
+	using _Myt = _Tensor_view;
+	using _Mybase = _View_base<_Ty, _Tensor_view>;
+	using _Mybase::_My_data;   //begin of this block data
+	using _Mybase::_My_size;   //cols of this block
+	using _Mybase::_My_stride; //cols of source matrix
+	using _Mybase::_My_offset; //offset relative to original matrix data
+public:
+	using typename _Mybase::range_type;
+	using typename _Mybase::difference_type;
+	using typename _Mybase::reference;
+	using typename _Mybase::pointer;
+	using typename _Mybase::value_t;
+
+	MATRICE_GLOBAL_FINL _Chw_view() noexcept {}
+
+	/**
+	 *\brief Get the view for matrix at (_Myidx, _C)
+	 *\param [_C] channel index
+	 */
+	MATRICE_GLOBAL_FINL auto operator()(size_t _C) const {
+		range_type _Range(_C*_Mywsize, 0, (_C +1)*_Mywsize, _Myhsize);
+		return _Matrix_block<value_t>(_My_data, _My_stride, _Range);
+	}
+
+	/**
+	 *\brief Evaluate to a tensor
+	 */
+	MATRICE_GLOBAL_FINL auto eval() const {
+		detail::_Tensor<value_t> _Ret{ 1, _Mycsize, _Myhsize, _Mywsize };
+		return std::move(_Ret);
+	}
+private:
+	size_t _Myidx, _Mycsize;
+	size_t _Myhsize, _Mywsize;
+};
+
+#undef _VIEW_EWISE_COPY_N
 _TYPES_END
 DGE_MATRICE_END
