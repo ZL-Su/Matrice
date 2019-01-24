@@ -137,14 +137,6 @@ void _Spline_interpolation<_Ty, _TAG biqspl_tag>::_Coeff_impl() {
 		}
 	}
 	_SPLCOEFF_CWISE_RECURSION(_A1, _Z1);
-	/*_Buff.rview(0) = _R0;
-	for (std::size_t _Row = 1; _Row < _Height; ++_Row) {
-		_Buff.rview(_Row) = _Data.rview(_Row) + _Buff.rview(_Row - 1)*_Z1;
-	}
-	_Mycoeff.rview(_Height-1) = _A1*(_Buff.rview(_Height-1) + _Buff.rview(_Height-2)*_Z1);
-	for (index_t _Row = _Height - 2; _Row >= 0; --_Row) {
-		_Mycoeff.rview(_Row) = _Z1 * (_Mycoeff.rview(_Row + 1) - _Buff.rview(_Row));
-	}*/
 
 	_R0 = { zero_v<value_type> };
 #pragma omp parallel if(_K2 > 100)
@@ -155,14 +147,6 @@ void _Spline_interpolation<_Ty, _TAG biqspl_tag>::_Coeff_impl() {
 		}
 	}
 	_SPLCOEFF_CWISE_RECURSION(_A2, _Z2);
-	/*_Buff.rview(0) = _R0;
-	for (std::size_t _Row = 1; _Row < _Height; ++_Row) {
-		_Buff.rview(_Row) = _Mycoeff.rview(_Row) + _Buff.rview(_Row - 1)*_Z2;
-	}
-	_Mycoeff.rview(_Height-1) = _A2*(_Buff.rview(_Height-1)+_Buff.rview(_Height-2)*_Z2);
-	for (index_t _Row = _Height - 2; _Row >= 0; --_Row) {
-		_Mycoeff.rview(_Row) = _Z2 * (_Mycoeff.rview(_Row + 1) - _Buff.rview(_Row));
-	}*/
 
 	// \Recursion over each row...
 
@@ -176,14 +160,6 @@ void _Spline_interpolation<_Ty, _TAG biqspl_tag>::_Coeff_impl() {
 		}
 	}
 	_SPLCOEFF_RWISE_RECURSION(_A1, _Z1);
-	/*_Buff.cview(0) = _C0;
-	for (std::size_t _Col = 1; _Col < _Width; ++_Col) {
-		_Buff.cview(_Col) = _Mycoeff.cview(_Col) + _Buff.cview(_Col - 1)*_Z1;
-	}
-	_Mycoeff.cview(_Width-1) = _A1*(_Buff.cview(_Width-1) + _Buff.cview(_Width-2)*_Z1);
-	for (index_t _Col = _Width - 2; _Col >= 0; --_Col) {
-		_Mycoeff.cview(_Col) = _Z1 * (_Mycoeff.cview(_Col + 1) - _Buff.cview(_Col));
-	}*/
 
 	_C0 = { zero_v<value_type> };
 #pragma omp parallel if(_K2 > 100)
@@ -194,14 +170,6 @@ void _Spline_interpolation<_Ty, _TAG biqspl_tag>::_Coeff_impl() {
 		}
 	}
 	_SPLCOEFF_RWISE_RECURSION(_A2, _Z2);
-	/*_Buff.cview(0) = _C0;
-	for (std::size_t _Col = 1; _Col < _Width; ++_Col) {
-		_Buff.cview(_Col) = _Mycoeff.cview(_Col) + _Buff.cview(_Col - 1)*_Z2;
-	}
-	_Mycoeff.cview(_Width-1) = _A2*(_Buff.cview(_Width-1) + _Buff.cview(_Width-2)*_Z2);
-	for (index_t _Col = _Width - 2; _Col >= 0; --_Col) {
-		_Mycoeff.cview(_Col) = _Z2*(_Mycoeff.cview(_Col+1) - _Buff.cview(_Col));
-	}*/
 }
 template<typename _Ty> 
 void _Spline_interpolation<_Ty, _TAG bisspl_tag>::_Coeff_impl() {
