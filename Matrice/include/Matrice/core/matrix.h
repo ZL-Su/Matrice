@@ -23,7 +23,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 MATRICE_NAMESPACE_BEGIN_TYPES
 
 #define MATRICE_MAKE_METHOD_CREATE MATRICE_GLOBAL \
-        void __create_impl(diff_t _Rows, diff_t _Cols = 1);
+        void __create_impl(size_t _Rows, size_t _Cols = 1);
 
 /*******************************************************************
 	Generic Matrix Class with Aligned Static Memory Allocation
@@ -225,7 +225,7 @@ MATRICE_NAMESPACE_END_TYPES
 
 DGE_MATRICE_BEGIN
 //\matrix type with host managed memory allocator
-template<typename T, int _M, int _N, size_t _Options = rmaj|gene, typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+template<typename T, int _M, int _N, size_t _Options = rmaj|gene, typename = enable_if_t<is_arithmetic_v<T>>>
 using Matrix_ = types::Matrix_<T, _M, _N>;
 
 //\matrix type with host dynamic memory allocator

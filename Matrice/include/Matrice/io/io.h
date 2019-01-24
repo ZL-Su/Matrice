@@ -340,6 +340,7 @@ using default_data_loader = data_loader<std::float_t>;
 
 template<std::size_t _N, typename _Cont>
 MATRICE_HOST_FINL auto serial(const _Cont& _L) {
+	DGELOM_CHECK(_N > _L.size(), "The size _N being serialized over range of _L.");
 	return tuple_n<_N - 1>::_(_L.data());
 }
 
