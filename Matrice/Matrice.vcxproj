@@ -351,6 +351,7 @@
     <None Include="include\Matrice\core\cpp.hint" />
     <None Include="include\Matrice\io\inline\_data_loader.inl" />
     <None Include="include\Matrice\io\inline\_directory.inl" />
+    <None Include="include\Matrice\private\inl\_base.inl" />
     <None Include="include\Matrice\private\inl\_storage_base.inl" />
     <None Include="include\Matrice\private\nonfree\inl\_lnalge.inl" />
     <None Include="include\Matrice\private\_similarity.inl" />

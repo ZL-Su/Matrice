@@ -262,8 +262,33 @@ public:
 	MATRICE_GLOBAL_INL constexpr auto cols() const {
 		return get(1) * get(3);
 	}
+	/**
+	 *\brief return C*H*W
+	 */
+	MATRICE_GLOBAL_INL constexpr auto chw() const {
+		return (get(1)*hw());
+	}
+	/**
+	 *\brief return H*W
+	 */
+	MATRICE_GLOBAL_INL constexpr auto hw() const {
+		return (get(2)*get(3));
+	}
+	/**
+	 *\brief Parse the index for each dimension from a linear index
+	 *\param [_Idx] input linear index
+	 */
+	MATRICE_GLOBAL_INL constexpr auto parse(size_t _Idx) const {
+		auto n = _Idx / chw();  _Idx -= n * chw();
+		auto c = _Idx / hw();   _Idx -= c * hw();
+		auto h = _Idx / get(3); _Idx -= h * get(3);
+		return shape4_t<>(n, c, h, _Idx);
+	}
 
 private:
+	/**
+	 *\brief formatted shape data: {N, {C, {H, W}}}
+	 */
 	full_shape _Data = { value_type(0),{value_type(0),{value_type(0),value_type(0)}} };
 };
 

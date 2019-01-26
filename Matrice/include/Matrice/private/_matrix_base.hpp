@@ -624,6 +624,19 @@ public:
 	 */
 	template<typename _Rhs, typename = std::enable_if_t<is_matrix_v<_Rhs>>> 
 	MATRICE_GLOBAL_FINL auto dot(const _Rhs& _Rhs) const { return (this->operator*(_Rhs)).sum(); }
+
+	/**
+	 *\brief in-place instant subtraction
+	 *\param [_Right] can be scalar or any compatible types
+	 */
+	template<typename _Rhs>
+	MATRICE_HOST_INL auto& inplace_sub(const _Rhs& _Right);
+	/**
+	 *\brief instant subtraction
+	 *\param [_Right] can be scalar or any compatible types
+	 */
+	template<typename _Rhs>
+	MATRICE_HOST_INL auto sub_(const _Rhs& _Right);
 	/**
 	 * \in-place maxmul with _Rhs. 
 	 */
@@ -770,3 +783,4 @@ struct _Matrix_padding {
 _DETAIL_END
 using padding =  detail::_Matrix_padding;
 DGE_MATRICE_END
+#include "inl\_base.inl"
