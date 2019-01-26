@@ -1,6 +1,7 @@
 #pragma once
 #include "../private/_type_traits.h"
 #include "../util/_macros.h"
+#define MATRICE_SIMD_ARCH
 #ifdef __AVX__
 #include <mmintrin.h>    //_m64
 #include <emmintrin.h>   //_m128
@@ -26,6 +27,21 @@ template<typename T> struct conditional<T, 16>
 	using type = typename dgelom::conditional<dgelom::is_float32<T>::value, __m512, typename dgelom::conditional<dgelom::is_float64<T>::value, __m512d, void>::type>::type;
 };
 template<typename T, int _Elems> using conditional_t = typename conditional<T, _Elems>::type;
+
+template<typename T> struct packet_size {};
+template<> struct packet_size<float> {
+	static constexpr int value =
+#if MATRICE_SIMD_ARCH == MATRICE_SIMD_AVX
+		4
+#elif MATRICE_SIMD_ARCH == __AVX2__
+		8
+#elif MATRICE_SIMD_ARCH == __AVX512__
+		16
+#else
+		2
+#endif
+		;
+};
 
 template<typename T, int _Elems> struct simd_traits
 {
