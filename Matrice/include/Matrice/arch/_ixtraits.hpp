@@ -32,20 +32,32 @@ template<typename T> struct conditional<T, 16>
 };
 template<typename T, int _Elems> using conditional_t = typename conditional<T, _Elems>::type;
 
-template<typename T> struct packet_size {};
+template<typename T> struct packet_size {
+	static_assert(true, "Unsupported data type.");
+};
 template<> struct packet_size<float> {
 	static constexpr int value =
 #if MATRICE_SIMD_ARCH == MATRICE_SIMD_AVX
-		1<<MATRICE_SIMD_AVX
-#elif MATRICE_SIMD_ARCH == MATRICE_SIMD_AVX2
-		1<<MATRICE_SIMD_AVX2
+		1 << MATRICE_SIMD_AVX
 #elif MATRICE_SIMD_ARCH == MATRICE_SIMD_AVX512
-		1<< MATRICE_SIMD_AVX512
+		1 << MATRICE_SIMD_AVX512
 #else
-		1<< MATRICE_SIMD_SSE
+		1 << MATRICE_SIMD_SSE
 #endif
 		;
 };
+template<> struct packet_size<double> {
+	static constexpr int value =
+#if MATRICE_SIMD_ARCH == MATRICE_SIMD_AVX
+		1 << MATRICE_SIMD_AVX >> 1
+#elif MATRICE_SIMD_ARCH == MATRICE_SIMD_AVX512
+		1 << MATRICE_SIMD_AVX512 >> 1
+#else
+		1 << MATRICE_SIMD_SSE >>1
+#endif
+		;
+};
+
 template<typename T>
 MATRICE_HOST_INL constexpr auto packet_size_v = packet_size<T>::value;
 
