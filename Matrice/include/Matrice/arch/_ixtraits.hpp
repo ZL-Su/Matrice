@@ -1,7 +1,11 @@
 #pragma once
 #include "../private/_type_traits.h"
 #include "../util/_macros.h"
-#define MATRICE_SIMD_ARCH
+
+#if !defined MATRICE_SIMD_ARCH
+#define MATRICE_SIMD_ARCH MATRICE_SIMD_SSE
+#endif
+
 #ifdef __AVX__
 #include <mmintrin.h>    //_m64
 #include <emmintrin.h>   //_m128
@@ -32,16 +36,18 @@ template<typename T> struct packet_size {};
 template<> struct packet_size<float> {
 	static constexpr int value =
 #if MATRICE_SIMD_ARCH == MATRICE_SIMD_AVX
-		4
-#elif MATRICE_SIMD_ARCH == __AVX2__
-		8
-#elif MATRICE_SIMD_ARCH == __AVX512__
-		16
+		1<<MATRICE_SIMD_AVX
+#elif MATRICE_SIMD_ARCH == MATRICE_SIMD_AVX2
+		1<<MATRICE_SIMD_AVX2
+#elif MATRICE_SIMD_ARCH == MATRICE_SIMD_AVX512
+		1<< MATRICE_SIMD_AVX512
 #else
-		2
+		1<< MATRICE_SIMD_SSE
 #endif
 		;
 };
+template<typename T>
+MATRICE_HOST_INL constexpr auto packet_size_v = packet_size<T>::value;
 
 template<typename T, int _Elems> struct simd_traits
 {

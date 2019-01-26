@@ -24,7 +24,7 @@ MATRICE_ARCH_BEGIN
 ///<brief>
 // \template param: T is a scalar type, _Elems is the number of packed elements
 ///</brief>
-template<typename T, int _Elems>
+template<typename T, int _Elems = packet_size_v<T>>
 class Packet_ MATRICE_NONHERITABLE : public simd::simd_base_<T, _Elems>
 {
 	using Myt = Packet_;
