@@ -49,11 +49,11 @@ template<> struct packet_size<float> {
 template<> struct packet_size<double> {
 	static constexpr int value =
 #if MATRICE_SIMD_ARCH == MATRICE_SIMD_AVX
-		1 << MATRICE_SIMD_AVX >> 1
+		1 << ~-MATRICE_SIMD_AVX
 #elif MATRICE_SIMD_ARCH == MATRICE_SIMD_AVX512
-		1 << MATRICE_SIMD_AVX512 >> 1
+		1 << ~-MATRICE_SIMD_AVX512
 #else
-		1 << MATRICE_SIMD_SSE >>1
+		1 << ~-MATRICE_SIMD_SSE
 #endif
 		;
 };

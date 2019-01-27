@@ -21,9 +21,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #ifdef __AVX__
 MATRICE_ARCH_BEGIN
 
-///<brief>
-// \template param: T is a scalar type, _Elems is the number of packed elements
-///</brief>
+/*<brief>
+ *\class template for SIMD vectorization 
+ *\param <T> must be a scalar type
+ *\param <_Elems> the number of packet elements, which default value is auto-deduced
+</brief>*/
 template<typename T, int _Elems = packet_size_v<T>>
 class Packet_ MATRICE_NONHERITABLE : public simd::simd_base_<T, _Elems>
 {
