@@ -212,12 +212,26 @@ public:
 	using const_init_list = std::add_const_t<std::initializer_list<value_t>>;
 	using loctn_t = Location;
 	using category = typename _Traits::category;
-
-	template<typename _Xop> using expr_type = Expr::Base_<_Xop>;
+	template<typename _Xop> 
+	using expr_type = Expr::Base_<_Xop>;
 	
 	enum { options = _Myt_storage_type::location };
 	enum { Size = _M*_N, CompileTimeRows = _M, CompileTimeCols = _N, };
+	/**
+	 *\brief for static querying memory block rows
+	 */
+	static constexpr auto _ctrs_ = CompileTimeRows;
+	/**
+	 *\brief for static querying memory block cols
+	 */
+	static constexpr auto _ctcs_ = CompileTimeCols;
+	/**
+	 *\brief for querying infinity attribute of the value type
+	 */
 	static constexpr auto inf = std::numeric_limits<value_t>::infinity();
+	/**
+	 *\brief for querying round error attribute of the value type
+	 */
 	static constexpr auto eps = std::numeric_limits<value_t>::epsilon();
 
 	MATRICE_GLOBAL_INL Base_() noexcept
@@ -274,8 +288,14 @@ public:
 	/**
 	 *\interfaces for opencv if it is enabled
 	 */
-#ifdef __use_ocv_as_view__
-	MATRICE_HOST_INL Base_(const ocv_view_t& mat) : _Mybase(mat.rows, mat.cols, mat.ptr<value_t>()) {}
+#ifdef MATRICE_USE_OPENCV
+	//MATRICE_HOST_INL Base_(const ocv_view_t& mat) : _Mybase(mat.rows, mat.cols, mat.ptr<value_t>()) {}
+	MATRICE_HOST_INL Base_(ocv_view_t&& mat):Base_(mat.rows, mat.cols, mat.ptr<value_t>()){
+		mat.flags = 0x42FF0000; mat.dims = mat.rows = mat.cols = 0;
+		mat.data = nullptr; mat.datastart = nullptr; mat.dataend = nullptr; mat.datalimit = nullptr;
+		mat.allocator = nullptr;
+		mat.u = nullptr;
+	}
 	template<typename _Fn>
 	MATRICE_HOST_INL Base_(const ocv_view_t& mat, _Fn&& _Op) : Base_(mat) { each(_Op); }
 	MATRICE_HOST_INL ocv_view_t cvmat() { return ocv_view_t(m_rows, m_cols, ocv_view_t_cast<value_t>::type, m_data); }
