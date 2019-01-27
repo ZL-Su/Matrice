@@ -90,6 +90,9 @@ public:
 		MATRICE_GLOBAL_FINL size_t pitch() const { return (my_pitch); }
 		MATRICE_GLOBAL_FINL pointer data() const { return (my_data); }
 		MATRICE_GLOBAL_FINL Ownership& owner() const { return my_owner; }
+		MATRICE_GLOBAL_FINL void reset(int_t rows, int_t cols, pointer data) {
+			my_rows = rows, my_cols = cols, my_data = data;
+		}
 		MATRICE_GLOBAL_FINL bool shared() const {
 #ifdef __CXX11_SHARED__
 			return (my_shared.get());

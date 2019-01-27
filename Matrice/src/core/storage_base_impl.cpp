@@ -175,6 +175,7 @@ Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(DenseBase && _other)
 #endif
 {
 #ifdef __CXX11_SHARED__
+	if (!my_shared) my_shared.reset(my_data);
 	_other.my_shared = nullptr;
 #endif
 	_other.my_rows = 0, _other.my_cols = 0, _other.my_size = 0;
