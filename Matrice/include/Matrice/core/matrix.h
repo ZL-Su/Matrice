@@ -90,7 +90,8 @@ public:
 	
 	MATRICE_GLOBAL_FINL Matrix_(int _rows) noexcept : _Mybase(_rows, 1) {};
 	MATRICE_GLOBAL_FINL Matrix_(const Myt& _other) noexcept : _Mybase(_other) {};
-	MATRICE_GLOBAL_FINL Matrix_(Myt&& _other) noexcept : _Mybase(std::move(_other)) {};
+	template<typename _Arg>
+	MATRICE_GLOBAL_FINL Matrix_(_Arg&& _other) noexcept : _Mybase(std::move(_other)) {};
 	template<typename... _Args> 
 	MATRICE_GLOBAL_FINL Matrix_(const _Args&... args) noexcept : _Mybase(args...) {};
 
