@@ -152,24 +152,6 @@ public:
 #endif
 	}
 
-	template<typename _Ty, int _M, int _N = 0> 
-	static MATRICE_HOST_INL auto read(std::string _path) {
-		types::Vec_<_Ty, _M> _Cell;
-		std::vector<decltype(_Cell)> data;
-		std::ifstream fin(_path); assert(fin);
-		if constexpr (_M == 3)
-			while (fin >> _Cell(0) >> _Cell(1) >> _Cell(2))
-				data.push_back(std::move(_Cell));
-		types::Matrix_<_Ty, _N == 0 ? 0 : _M, _N> _Ret(_M, data.size());
-		std::size_t i = 0;
-		for (const auto& p : data) {
-			for (int j = 0; j < _M; ++j)
-				_Ret[j][i] = p(j);
-			i++;
-		}
-		fin.close();
-		return (_Ret);
-	}
 	template<typename _Op> 
 	static MATRICE_HOST_INL auto read(std::string _path, _Op _op) {
 		if (!fs::exists(fs::path(_path))) 
@@ -181,25 +163,24 @@ public:
 		return _op(_Fin);
 	}
 
-	template<typename _Ty, std::size_t _N0, std::size_t _N1 = _N0>
-	static MATRICE_HOST_INL auto read(const std::string& _Path, std::size_t _Skips = 0) {
+	template<typename _Ty, size_t _N0, size_t _N1 = _N0>
+	static MATRICE_HOST_INL auto read(const std::string& _Path, size_t _Skips = 0) {
 		using value_type = _Ty;
-
-		if (!fs::exists(fs::path(_Path)))
-			throw std::runtime_error("'" + _Path + "' does not exist!");
+		DGELOM_CHECK(!fs::exists(fs::path(_Path)),"'"+_Path+"' does not exist!");
 		std::ifstream _Fin(_Path);
-		if (!_Fin.is_open())
-			throw std::runtime_error("Cannot open file in " + _Path);
+		DGELOM_CHECK(!_Fin.is_open(),"Cannot open file in "+_Path);
 
 		std::string _Line;
-		for (const auto _Idx : range(0, _Skips)) std::getline(_Fin, _Line);
+		for (const auto _Idx : range(0, _Skips)) {
+			std::getline(_Fin, _Line);
+		}
 
-		std::array<value_type, _N1 - _N0 + 1> _Myline;
+		std::array<value_type, -~(_N1-_N0)> _Myline;
 		std::vector<decltype(_Myline)> _Data;
 		while (std::getline(_Fin, _Line)) {
 			auto _Res = split<value_type>(_Line, ',');
-			for (auto _Idx = _N0-1; _Idx < _N1; ++_Idx) {
-				_Myline[_Idx - _N0 + 1] = _Res[_Idx];
+			for (auto _Idx = ~-_N0; _Idx < _N1; ++_Idx) {
+				_Myline[-~(_Idx -_N0)] = _Res[_Idx];
 			}
 			_Data.emplace_back(_Myline);
 		}
@@ -211,7 +192,7 @@ public:
 	template<typename _Op> 
 	static MATRICE_HOST_FINL void write(const std::string& _path, _Op _op) {
 		std::ofstream _Fout(_path);
-		DGELOM_CHECK(_Fout.is_open(), "Fail to open file: " + _path);
+		DGELOM_CHECK(!_Fout.is_open(), "Fail to open file: " + _path);
 		_Fout.setf(std::ios::fixed, std::ios::floatfield);
 		_op(std::forward<std::ofstream>(_Fout));
 		_Fout.close();
@@ -225,8 +206,8 @@ public:
 	static MATRICE_HOST_FINL void write(const std::string& _path, std::initializer_list<std::string> _fnames, _Op _op) {
 		const auto _N = _fnames.begin();
 		std::ofstream _O1(_path + _N[0]), _O2(_path + _N[1]);
-		DGELOM_CHECK(_O1.is_open(), "Fail to open file: " + _path + _N[0]);
-		DGELOM_CHECK(_O2.is_open(), "Fail to open file: " + _path + _N[1]);
+		DGELOM_CHECK(!_O1.is_open(), "Fail to open file: " + _path + _N[0]);
+		DGELOM_CHECK(!_O2.is_open(), "Fail to open file: " + _path + _N[1]);
 		_O1.setf(std::ios::fixed, std::ios::floatfield);
 		_O2.setf(std::ios::fixed, std::ios::floatfield);
 
