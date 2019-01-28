@@ -20,126 +20,78 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../../include/Matrice/private/_type_traits.h"
 #include "../../include/Matrice/private/_unified_memory.h"
 #include "../../include/Matrice/private/_decl_dev_funcs.h"
+#include "../../include/Matrice/util/_exception.h"
 
 #pragma warning(disable: 4715 4661 4224 4267 4244 4819 4199)
 
+#define MATRICE_DENSEBASE_SIG \
+template<typename _Ty> \
+template<Location _Loc, size_t _Opt> \
+Storage_<_Ty>::DenseBase<_Loc, _Opt>
+
 namespace dgelom { namespace detail{
 
-template<typename _Ty> template<Location _Loc, size_t _Opt>
-Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(int_t _rows, int_t _cols)
-	: my_rows(_rows), my_cols(_cols), my_size(my_rows*my_cols)
-{
-	if constexpr (location == Location::OnStack) return;
+MATRICE_DENSEBASE_SIG::DenseBase(int_t _Rows, int_t _Cols)
+	: my_rows(_Rows), my_cols(_Cols), my_size(_Rows*_Cols) {
 #ifdef __CXX11_SHARED__
-	switch (location)
-	{
-	case OnHeap:
-	{
-		my_shared = SharedPtr(privt::aligned_malloc<value_t>(my_size), [=](pointer ptr) { privt::aligned_free(ptr); });
+	if constexpr (location == Location::OnStack) {
+		// donot use shared pointer for managed memory
+	}
+	else if constexpr (location == Location::OnHeap) {
+		my_shared = SharedPtr(privt::aligned_malloc<value_t>(my_size), 
+			[=](pointer ptr) { privt::aligned_free(ptr); });
 		my_data = my_shared.get();
-	} break;
+	}
 #if (defined __enable_cuda__ && !defined __disable_cuda__)
-	case OnGlobal:
-	{
+	else if constexpr (location == Location::OnGlobal) {
 		my_data = privt::global_malloc<value_t>(std::size_t(my_size));
-		my_shared = SharedPtr(my_data, [=](pointer ptr) { privt::device_free(ptr); });
-	} break;
-	case OnDevice:
-	{
+		my_shared = SharedPtr(my_data, 
+			[=](pointer ptr) { privt::device_free(ptr); });
+	}
+	else if constexpr (location == Location::OnDevice) {
 		std::size_t w = my_cols, h = my_rows;
 		if (w == 1) std::swap(w, h);
 		my_pitch = w;
 		my_data = privt::device_malloc<value_t>(my_pitch, h);
-		my_shared = SharedPtr(my_data, [=](pointer ptr) { privt::device_free(ptr); });
+		my_shared = SharedPtr(my_data, 
+			[=](pointer ptr) { privt::device_free(ptr); });
 		my_pitch = my_pitch == w ? 1 : my_pitch;
-	} break;
-#endif
-	default: throw("Oops, you are attempting to go outside of the earth!"); break;
 	}
+#endif
+	else DGELOM_ERROR("Oops, unknown device is used.");
 #else
-	switch (_Loc)
-	{
-	case OnHeap:
-	{
+	if constexpr (location == Location::OnStack) {
+		// donot do anything
+	}
+	if constexpr (location == Location::OnHeap) {
 		my_data = privt::aligned_malloc<value_t>(_size);
-	} break;
+	} 
 #if (defined __enable_cuda__ && !defined __disable_cuda__)
-	case OnGlobal:
-	{
+	if constexpr (location == Location::OnGlobal) {
 		my_data = privt::global_malloc<value_t>(std::size_t(my_size));
-	} break;
-	case OnDevice:
-	{
+	}
+	if constexpr (location == Location::OnDevice) {
 		std::size_t w = my_cols, h = my_rows;
 		if (w == 1) std::swap(w, h);
 		my_pitch = w;
 		my_data = privt::device_malloc<value_t>(my_pitch, h);
 		my_pitch = my_pitch == w ? 1 : my_pitch;
-	} break;
-#endif
-	default: throw("Oops, you are attempting to go outside of the earth!"); break;
 	}
+#endif
+	else DGELOM_ERROR("Oops, unknown device is used.");
 #endif
 }
-template<typename _Ty> template<Location _Loc, size_t _Opt>
-Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(int_t _rows, int_t _cols, const value_t _val)
-	: my_rows(_rows), my_cols(_cols), my_size(my_rows*my_cols)
-{
-#ifdef __CXX11_SHARED__
-	switch (_Loc)
-	{
-	case OnHeap:
-	{
-		my_shared = SharedPtr(privt::aligned_malloc<value_t>(my_size), [=](pointer ptr) { privt::aligned_free(ptr); });
-		my_data = my_shared.get();
-	} break;
-#if (defined __enable_cuda__ && !defined __disable_cuda__)
-	case OnGlobal:
-	{
-		my_data = privt::global_malloc<value_t>(std::size_t(my_size));
-		my_shared = SharedPtr(my_data, [=](pointer ptr) { privt::device_free(ptr); });
-	} break;
-	case OnDevice:
-	{
-		std::size_t w = my_cols, h = my_rows;
-		if (w == 1) std::swap(w, h);
-		my_pitch = w;
-		my_data = privt::device_malloc<value_t>(my_pitch, h);
-		my_shared = SharedPtr(my_data, [=](pointer ptr) { privt::device_free(ptr); });
-		my_pitch = my_pitch == w ? 1 : my_pitch;
-	} break;
-#endif
-	default: throw("Oops, you are attempting to go outside of the earth!"); break;
+
+MATRICE_DENSEBASE_SIG::DenseBase(int_t rows, int_t cols, const value_t val)
+	: DenseBase(rows, cols) {
+	if constexpr (_Loc != OnDevice) {
+		for (int_t i = 0; i < my_size; ++i) {
+			my_data[i] = val;
+		}
 	}
-#else
-	switch (_Loc)
-	{
-	case OnHeap:
-	{
-		my_data = privt::aligned_malloc(_size);
-	} break;
-#if (defined __enable_cuda__ && !defined __disable_cuda__)
-	case OnGlobal:
-	{
-		my_data = privt::global_malloc<value_t>(std::size_t(my_size));
-	} break;
-	case OnDevice:
-	{
-		std::size_t w = my_cols, h = my_rows;
-		if (w == 1) std::swap(w, h);
-		my_pitch = w;
-		my_data = privt::device_malloc<value_t>(my_pitch, h);
-		my_pitch = my_pitch == w ? 1 : my_pitch;
-	} break;
-#endif
-	default: throw("Oops, you are attempting to go outside of the earth!"); break;
-	}
-#endif
-	if constexpr (_Loc != OnDevice) for (std::size_t i = 0; i < my_size; ++i) my_data[i] = _val;
 }	
 
-template<typename _Ty> template<Location _Loc, size_t _Opt>
-Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(const DenseBase & _other)
+MATRICE_DENSEBASE_SIG::DenseBase(const DenseBase & _other)
 	: my_rows(_other.my_rows), my_cols(_other.my_cols), my_size(_other.my_size), my_pitch(_other.my_pitch)
 {
 #ifdef __CXX11_SHARED__
@@ -149,24 +101,12 @@ Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(const DenseBase & _other)
 	}
 	else my_shared = _other.my_shared, my_data = _other.my_data, my_owner = Refer;
 #else
-	/*switch (_Loc)
-	{
-	case OnGlobal:
-	{
-		for (std::size_t i = 0; i < my_size; ++i) my_data[i] = _other.my_data[i];
-	} break;
-	case OnDevice:
-	{
-		throw("Oops, undefined allocator is invoked!");
-	} break;
-	default: privt::fill_mem(_other.my_data, my_data, my_size); break;
-	}*/
 	privt::unified_sync<value_t, _other.location, location, option>::op(my_data, _other.my_data, my_rows, my_cols, my_pitch);
 	my_owner = _other.my_owner;
 #endif
 }
-template<typename _Ty> template<Location _Loc, size_t _Opt>
-Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(DenseBase && _other)
+
+MATRICE_DENSEBASE_SIG::DenseBase(DenseBase && _other)
 	: my_rows(_other.my_rows), my_cols(_other.my_cols), my_size(_other.my_size), my_owner(_other.my_owner), my_pitch(_other.my_pitch),
 #ifdef __CXX11_SHARED__
 	my_shared(std::move(_other.my_shared)), my_data(_other.my_data)
@@ -175,15 +115,13 @@ Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(DenseBase && _other)
 #endif
 {
 #ifdef __CXX11_SHARED__
-	if (!my_shared) my_shared.reset(my_data);
 	_other.my_shared = nullptr;
 #endif
 	_other.my_rows = 0, _other.my_cols = 0, _other.my_size = 0;
 	_other.my_data = 0, _other.my_owner = Dummy;
 }
 
-template<typename _Ty> template<Location _Loc, size_t _Opt>
-Storage_<_Ty>::DenseBase<_Loc, _Opt>& 
+MATRICE_DENSEBASE_SIG&
 Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(const DenseBase& _other)
 {
 	my_rows = _other.my_rows, my_cols = _other.my_cols, my_size = _other.my_size;
@@ -194,25 +132,14 @@ Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(const DenseBase& _other)
 	}
 	else my_shared = _other.my_shared, my_data = _other.my_data, my_owner = Refer;
 #else
-	/*switch (_Loc)
-	{
-	case OnGlobal:
-	{
-		for (std::size_t i = 0; i < my_size; ++i) my_data[i] = _other.my_data[i];
-	} break;
-	case OnDevice:
-	{
-		throw("Oops, undefined allocator is invoked!");
-	} break;
-	default: privt::fill_mem(_other.my_data, my_data, my_size); break;
-	}*/
 	privt::unified_sync<value_t, _other.location, location, option>::op(my_data, _other.my_data, my_rows, my_cols, my_pitch);
 	my_owner = _other.my_owner;
 #endif
 	return (*this);
 }
-template<typename _Ty> template<Location _Loc, size_t _Opt>
-Storage_<_Ty>::DenseBase<_Loc, _Opt>& Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(DenseBase && _other)
+
+MATRICE_DENSEBASE_SIG& 
+Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(DenseBase && _other)
 {
 	my_owner = _other.my_owner, my_size = _other.my_size;
 	my_rows = _other.my_rows, my_cols = _other.my_cols;
@@ -284,3 +211,4 @@ template class Storage_<double>::DenseBase<OnDevice, PITCHED>;
 template class Storage_<unsigned char>::DenseBase<OnDevice, PITCHED>;
 }
 }
+#undef MATRICE_DENSEBASE_SIG
