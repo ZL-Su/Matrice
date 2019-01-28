@@ -105,11 +105,20 @@ template<typename T> MATRICE_GLOBAL_INL constexpr bool is_iterator_v = is_iterat
 template<typename Itr> struct iterator_traits : traits<Itr> {};
 
 template<typename T> struct is_mtxview : std::false_type {};
+/**
+ *\brief is_mtxview_v<T> is true iff T is dgelom::detail::_Matrix_view or its derived type.
+ */
 template<typename T> MATRICE_GLOBAL_INL constexpr bool is_mtxview_v = is_mtxview<T>::value;
 template<typename View> struct mtxview_traits : traits<View> {};
 
+template<typename T> struct is_fxdvector : std::false_type {};
 /**
- * is_matrix_convertible_v<T> is true type iff T is dgelom::Matrix_<...> or related matrix expression or view type.  
+ *\brief is_fxdvector_v<T> is true iff T is dgelom::Vec_ or its derived type.
+ */
+template<typename T> MATRICE_GLOBAL_INL constexpr bool is_fxdvector_v = is_fxdvector<T>::value;
+
+/**
+ *\brief is_matrix_convertible_v<T> is true type iff T is dgelom::Matrix_<...> or related matrix expression or view type.  
  */
 template<typename T> MATRICE_GLOBAL_INL constexpr bool is_matrix_convertible_v = is_matrix_v<T> || is_expression_v<T> || is_mtxview_v<T>;
 
@@ -165,21 +174,21 @@ struct layout_traits : traits<T> {
 };
 
 /**
- * is_equality_comparable<T> is true_type iff the equality operator is defined for T.
+ *\brief is_equality_comparable<T> is true_type iff the equality operator is defined for T.
  */
 template<typename T, typename Enable = void> struct is_equality_comparable : std::false_type {};
 template<typename T> struct is_equality_comparable<T, std::void_t<decltype(std::declval<T&>() == std::declval<T&>())>> : std::true_type {};
 template<typename T> using is_equality_comparable_t = typename is_equality_comparable<T>::type;
 
 /**
- * is_hashable<T> is true_type iff std::hash is defined for T
+ *\brief is_hashable<T> is true_type iff std::hash is defined for T
  */
 template<typename T, typename Enable = void> struct is_hashable : std::false_type {};
 template<typename T> struct is_hashable<T, std::void_t<decltype(std::hash<T>()(std::declval<T&>()))>> : std::true_type {};
 template<typename T> using is_hashable_t = typename is_hashable<T>::type;
 
 /**
- * is_instantiation_of<T, I> is true_type iff I is a template instantiation of T (e.g. vector<int> is an instantiation of vector)
+ *\brief is_instantiation_of<T, I> is true_type iff I is a template instantiation of T (e.g. vector<int> is an instantiation of vector)
  *  Example:
  *    is_instantiation_of_t<vector, vector<int>> // true
  *    is_instantiation_of_t<pair, pair<int, string>> // true
@@ -192,7 +201,7 @@ struct is_instantiation_of<Template, Template<Args...>> : std::true_type {};
 template<template<class...> class Template, class T> using is_instantiation_of_t = typename is_instantiation_of<Template, T>::type;
 
 /**
- * is_type_condition<C> is true_type iff C<...> is a type trait representing a condition (i.e. has a constexpr static bool ::value member)
+ *\brief is_type_condition<C> is true_type iff C<...> is a type trait representing a condition (i.e. has a constexpr static bool ::value member)
  * Example:
  *   is_type_condition<std::is_reference>  // true
  */
@@ -203,12 +212,12 @@ struct is_type_condition<C, std::enable_if_t<std::is_same<bool, std::remove_cv_t
 template<template<typename> typename C> MATRICE_GLOBAL_INL constexpr auto is_type_condition_v = is_type_condition<C>::value;
 
 /**
- * retrieve solver traits
+ *\brief retrieve solver traits
  */
 template<typename _Ty> struct solver_traits {};
 
 /**
- * has_method_Fn<T, _Args> is true_type iff T has method T.Fn(_Args...)
+ *\brief has_method_Fn<T, _Args> is true_type iff T has method T.Fn(_Args...)
  */
 #define _HAS_METHOD(_Name) \
 template<typename T, typename... _Args> struct has_method_##_Name { \
@@ -219,25 +228,25 @@ private: \
 };
 
  /**
-  * has_value_t<T> is true_type iff T has member value_t
+  *\brief has_value_t<T> is true_type iff T has member value_t
   */
 template<typename T>
 struct has_value_t<T> { static constexpr auto value = is_expression_v<T> || is_matrix_v<T> || is_mtxview_v<T>; };
 
 /**
- * is_tensor<T> is true_type iff T is dgelom::tensor<...>
+ *\brief is_tensor<T> is true_type iff T is dgelom::tensor<...>
  */
 template<typename T> struct is_tensor : std::false_type {};
 template<typename T>
 MATRICE_GLOBAL_INL constexpr auto is_tensor_v = is_tensor<T>::value;
 
 /**
- * tensor_traits<T> for accessing tensor members
+ *\brief tensor_traits<T> for accessing tensor members
  */
 template<typename T> struct tensor_traits {};
 
 /**
- * category_type<T> for accessing category member of T
+ *\brief category_type<T> for accessing category member of T
  */
 template<typename T> struct category_type { using type = typename T::category; };
 template<typename T> using category_type_t = typename category_type<T>::type;
