@@ -233,12 +233,19 @@ public:
 	/**
 	 *\brief Comparation operators
 	 */
-	MATRICE_GLOBAL_INL friend auto operator== (const _Myt& _lhs, const _Myt& _rhs) {
+	MATRICE_GLOBAL_INL friend bool operator== (const _Myt& _lhs, const _Myt& _rhs) {
 		return (_lhs._Data == _rhs._Data);
 	}
 	template<typename _Rhs>
-	MATRICE_GLOBAL_INL friend auto operator== (const _Myt& _lhs, const _Rhs& _rhs) {
+	MATRICE_GLOBAL_INL friend bool operator== (const _Myt& _lhs, const _Rhs& _rhs) {
 		return (_lhs._Data == _Myt(_rhs)._Data);
+	}
+	MATRICE_GLOBAL_INL friend bool operator!= (const _Myt& _lhs, const _Myt& _rhs) {
+		return (_lhs._Data != _rhs._Data);
+	}
+	template<typename _Rhs>
+	MATRICE_GLOBAL_INL friend bool operator!= (const _Myt& _lhs, const _Rhs& _rhs) {
+		return (_lhs._Data != _Myt(_rhs)._Data);
 	}
 	/**
 	 *\brief Get dim value at _Dim
