@@ -67,6 +67,6 @@ DGE_MATRICE_END
 			::dgelom::exception::msg_type(__VA_ARGS__))
 
 #define DGELOM_CHECK(_Cond, ...) \
-	if(!_Cond) { \
+	if((_Cond)) { \
 		DGELOM_ERROR(::dgelom::exception::msg_type(__VA_ARGS__)); \
 	}
