@@ -17,7 +17,9 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 
+#include <array>
 #include "matrix.h"
+
 #ifndef vec_global_inl
 #define vec_global_inl MATRICE_GLOBAL_FINL
 #endif
@@ -181,4 +183,10 @@ template<typename _Ty,
 using Vec4_ = types::Vec4_<_Ty>;
 template<typename _Ty>
 struct is_fxdvector<Vec4_<_Ty>> : std::true_type {};
+
+/**
+ *\brief Matrice regards the std::array is also a fixed vector type
+ */
+template<typename _Ty, int _Dim>
+struct is_fxdvector<std::array<_Ty,_Dim>> : std::true_type {};
 DGE_MATRICE_END
