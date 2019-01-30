@@ -40,7 +40,10 @@ template<typename _Ty> class _Tensor;
 _DETAIL_END
 
 template<typename _Ty, int _M, int _N> 
-struct is_matrix <types::Matrix_<_Ty, _M, _N>> : std::true_type {};
+struct is_matrix<types::Matrix_<_Ty, _M, _N>> : std::true_type {};
+
+template<typename _Ty, int _M>
+struct is_fxdvector<types::Matrix_<_Ty, _M, 1>> : std::true_type {};
 
 template<typename _Derived, typename _Traits, typename _Ty> 
 struct is_matrix<types::Base_<_Derived, _Traits, _Ty>> : std::true_type {};
@@ -333,7 +336,7 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 		enum { options = option<ewise>::value };
 
 		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T& _lhs, const U& _rhs) noexcept
-			:_Mybase(_lhs.dims()), _LHS(_lhs), _RHS(_rhs) { M = _LHS.rows(), N = _RHS.cols(); }
+			:_Mybase(_lhs.dims()), _LHS(_lhs), _RHS(_rhs) { M = _LHS.rows(), N = _LHS.cols(); }
 
 		MATRICE_GLOBAL_FINL value_t operator() (std::size_t _idx) { 
 			return _Op(_LHS(_idx), _RHS(_idx));
@@ -762,5 +765,4 @@ template<
 	MATRICE_GLOBAL_FINL auto accum(const _Rhs& _right, _Op&& _op = _Op()) {
 	return _op(_right);
 }
-
 DGE_MATRICE_END

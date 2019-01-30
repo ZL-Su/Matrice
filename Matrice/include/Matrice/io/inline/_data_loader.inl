@@ -170,14 +170,14 @@ public:
 	 */
 	MATRICE_HOST_FINL _Mydir_type::container& file_names(std::size_t _Idx) {
 #ifdef _DEBUG
-		DGELOM_CHECK(_Idx < _Mynames.size(), "_Idx over range of field ::_Mynames.");
+		DGELOM_CHECK(_Idx >= _Mynames.size(), "_Idx over range of field ::_Mynames.");
 #endif // _DEBUG
 
 		return (_Mynames)[_Idx];
 	}
 	MATRICE_HOST_FINL const _Mydir_type::container& file_names(std::size_t _Idx) const {
 #ifdef _DEBUG
-		DGELOM_CHECK(_Idx < _Mynames.size(), "_Idx over range of field ::_Mynames.");
+		DGELOM_CHECK(_Idx >= _Mynames.size(), "_Idx over range of field ::_Mynames.");
 #endif // _DEBUG
 		return (_Mynames)[_Idx];
 	}
@@ -191,6 +191,11 @@ public:
 
 private:
 	MATRICE_HOST_INL void _Collect_fnames() {
+		if (_Mydir.size() == 0) {//no subfolder(s)
+			_Mynames.emplace_back(_Collector<file_tag>::get(_Mydir[0]));
+			_Mydepth = _Mynames.front().size();
+			return;
+		}
 		_Mynames.resize(_Mydir.size());
 		for (const auto _Idx : range(0, _Mynames.size())) {
 			_Mynames[_Idx] = _Collector<file_tag>::get(_Mydir[_Idx]);

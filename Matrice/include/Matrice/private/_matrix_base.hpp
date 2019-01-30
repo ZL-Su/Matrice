@@ -642,7 +642,7 @@ public:
 	/**
 	 * \dot product of this matrix with _Rhs
 	 */
-	template<typename _Rhs, typename = std::enable_if_t<is_matrix_v<_Rhs>>> 
+	template<typename _Rhs> 
 	MATRICE_GLOBAL_FINL auto dot(const _Rhs& _Rhs) const { return (this->operator*(_Rhs)).sum(); }
 
 	/**
@@ -658,14 +658,16 @@ public:
 	template<typename _Rhs>
 	MATRICE_HOST_INL auto sub_(const _Rhs& _Right);
 	/**
+	 *\brief in-place instant matrix-vector multiplication
+	 *\param [_Right] can be a matrix or a vector types
+	 */
+	template<typename _Rhs, typename = enable_if_t<is_fxdvector_v<_Rhs>>>
+	MATRICE_HOST_INL auto& mul_(const _Rhs& _Right);
+	/**
 	 * \in-place maxmul with _Rhs. 
 	 */
-	template<ttag _Ltag = ttag::N, ttag _Rtag = ttag::N, typename _Rhs = _Derived, typename = std::enable_if_t<is_matrix_v<_Rhs>>>
-	MATRICE_GLOBAL_FINL auto inplace_mul(const _Rhs& _Right) {
-		Matrix_<value_type, CompileTimeRows, _Rhs::CompileTimeCols> _Ret(rows(), _Right.cols());
-		detail::_Blas_kernel_impl<value_type>::mul<_Ltag, _Rtag>(this->plvt(), _Right.plvt(), _Ret.plvt());
-		return std::forward<decltype(_Ret)>(_Ret);
-	}
+	template<ttag _Ltag = ttag::N, ttag _Rtag = ttag::N, typename _Rhs = _Derived, typename = enable_if_t<is_matrix_v<_Rhs>>>
+	MATRICE_HOST_FINL auto inplace_mul(const _Rhs& _Right);
 	/**
 	 * \operate each entry via _Fn
 	 */
