@@ -117,30 +117,50 @@ public:
 		return (_Ret);
 	}
 
-	template<typename _Ty, typename = std::enable_if_t<std::is_fundamental_v<_Ty>>>
+	/**
+	 *\brief Copy a scalar value to memory that the view maps to
+	 *\param [_Val] an input scalar
+	 */
+	template<typename _Ty, typename = enable_if_t<is_scalar_v<_Ty>>>
 	MATRICE_GLOBAL_INL auto& operator= (const _Ty _Val) {
 		_VIEW_EWISE_OP(static_cast<value_type>(_Val));
 	}
+	/**
+	 *\brief Fill view memory from a given pointer
+	 *\param [_Data] an input pointer, the size of the pointer pointed memory should not less than the size of the view 
+	 */
+	MATRICE_GLOBAL_FINL auto& operator= (const pointer _Data) {
+		_VIEW_EWISE_OP(_Data[i]);
+	}
+	/**
+	 *\brief Fill view memory from a initializer_list
+	 *\param [_L] the size of the list should not less than the size of the view
+	 */
 	MATRICE_GLOBAL_FINL auto& operator= (const std::initializer_list<value_type> _L) {
 		_VIEW_EWISE_OP(*(_L.begin() + i));
 	}
+	/**
+	 *\brief Fill view memory from a customer class type
+	 *\param [_M] _Mty should have element accessor ::operator(i)
+	 */
 	template<typename _Mty, typename = std::enable_if_t<std::is_class_v<_Mty>>>
 	MATRICE_GLOBAL_INL auto& operator= (const _Mty& _M) {
 		_VIEW_EWISE_OP(_M(i));
 	}
+	/**
+	 *\brief Evaluation from an expression
+	 *\param [_Ex] input expression
+	 */
 	template<typename _Arg> 
 	MATRICE_GLOBAL_INL auto& operator= (const Expr::Base_<_Arg>& _Ex) { 
 		return (_Ex.assign(*static_cast<_Derived*>(this))); 
 	}
-	/*template<typename... _Args>
-	MATRICE_GLOBAL_INL auto& operator= (const Expr::MatBinaryExpr<_Args...>& _Ex) { return (*static_cast<_Derived*>(&_Ex.assign(*this))); }
-	template<typename... _Args>
-	MATRICE_GLOBAL_INL auto& operator= (const Expr::MatUnaryExpr<_Args...>& _Ex) { return (*static_cast<_Derived*>(&_Ex.assign(*this))); }*/
 
 	_MATRICE_DEFVIEW_ARITHOP(+, add)
 	_MATRICE_DEFVIEW_ARITHOP(-, sub)
 	_MATRICE_DEFVIEW_ARITHOP(*, mul)
 	_MATRICE_DEFVIEW_ARITHOP(/, div)
+
 protected:
 	pointer _My_data;
 	size_t  _My_size;
@@ -300,8 +320,8 @@ private:
 template<typename _Ty, typename = enable_if_t<is_arithmetic_v<_Ty>>>
 class _Chw_view MATRICE_NONHERITABLE : public _View_base<_Ty, _Chw_view<_Ty>>
 {
-	using _Myt = _Tensor_view;
-	using _Mybase = _View_base<_Ty, _Tensor_view>;
+	using _Myt = _Chw_view;
+	using _Mybase = _View_base<_Ty, _Chw_view>;
 	using _Mybase::_My_data;   //begin of this block data
 	using _Mybase::_My_size;   //cols of this block
 	using _Mybase::_My_stride; //cols of source matrix
