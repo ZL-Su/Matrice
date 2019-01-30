@@ -84,10 +84,5 @@ MATRICE_HOST_FINL std::size_t vsize(std::size_t _Len) {
 	return (_Len - _Len % _Elems);
 }
 
-template<typename T, int _Elems> MATRICE_HOST_FINL 
-T reduce(const simd_base_<T, _Elems>& _Packed) {
-	return dgelom::reduce<T>(_Packed.begin(), _Packed.end());
-}
-
 MATRICE_ARCH_END
 #endif

@@ -43,7 +43,7 @@ template<typename T, int _Elems> struct simd_hop_base
 	using pointer = std::add_pointer_t<value_t>;
 	using raw_type = conditional_t<value_t, _Elems>;
 
-	template<std::size_t _N = _Elems - 1>  struct _Reduce_n {
+	template<size_t _N = _Elems - 1>  struct _Reduce_n {
 		HOST_STATIC_INL_CXPR_T value(const pointer _Data[[_N]]) {
 			return (_Reduce_n<_N - 1>::value(_Data) + _Data[_N]);
 		}
