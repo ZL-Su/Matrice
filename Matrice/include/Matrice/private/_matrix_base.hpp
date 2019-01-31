@@ -327,48 +327,61 @@ public:
 	};
 
 	/**
-	 *\the first address of y-th row
+	 *\returns pointer to y-th row
+	 *\sa ptr()
 	 */
 	MATRICE_GLOBAL_FINL pointer operator[](index_t y) { return (m_data + y * m_cols); }
-	MATRICE_GLOBAL_FINL const pointer operator[](index_t y) const { return (m_data + y * m_cols); }
+	MATRICE_GLOBAL_FINL constexpr pointer operator[](index_t y) const { return (m_data + y * m_cols); }
 	/**
-	 *\1D index random accessors
+	 *\1D index random accessor to get i-th element reference
 	 */
 	MATRICE_GLOBAL_FINL reference operator()(index_t i) { return m_data[i]; }
-	MATRICE_GLOBAL_FINL const reference operator()(index_t i) const { return m_data[i]; }
+	MATRICE_GLOBAL_FINL constexpr reference operator()(index_t i) const { return m_data[i]; }
 	/**
-	 *\2D index random accessors
+	 *\2D index random accessor to get element reference at pos:(r,c)
 	 */
 	MATRICE_GLOBAL_INL reference operator()(index_t r, index_t c) { return (*this)[r][c]; }
-	MATRICE_GLOBAL_INL const reference operator()(index_t r, index_t c) const { return (*this)[r][c]; }
+	MATRICE_GLOBAL_INL constexpr reference operator()(index_t r, index_t c) const { return (*this)[r][c]; }
 
 	/**
-	 *\the first raw address
+	 *\returns pointer to object memory
 	 */
 	MATRICE_GLOBAL_FINL pointer data() { return (m_data); }
-	MATRICE_GLOBAL_FINL const pointer data() const { return (m_data); }
+	MATRICE_GLOBAL_FINL constexpr pointer data() const { return (m_data); }
 	/**
-	 *\the first address for y-th row
+	 *\returns pointer to y-th row
+	 *\sa operator[]
 	 */
 	MATRICE_GLOBAL_FINL pointer ptr(int y = 0) { return (m_data + (m_cols) * (y)); }
-	MATRICE_GLOBAL_FINL const pointer ptr(int y = 0) const { return (m_data + (m_cols) * (y)); }
+	MATRICE_GLOBAL_FINL constexpr pointer ptr(int y = 0) const { return (m_data + (m_cols) * (y)); }
 
 	/**
-	 *\STL-stype iterators
+	 * \returns reference to the derived object
+	 */
+	MATRICE_GLOBAL_FINL auto& eval() {
+		return (*static_cast<_Derived*>(this));
+	}
+	/**
+	 * \returns const reference to the derived object
+	 */
+	MATRICE_GLOBAL_FINL constexpr auto& eval() const { 
+		return (*static_cast<const _Derived*>(this)); 
+	}
+
+#pragma region <!-- iterators -->
+	/**
+	 *\returns STL-stype iterator
 	 */
 	MATRICE_GLOBAL_FINL constexpr iterator begin() { return (m_data); }
 	MATRICE_GLOBAL_FINL constexpr iterator end() { return (m_data + size()); }
 	MATRICE_GLOBAL_FINL constexpr const_iterator begin() const { return (m_data); }
 	MATRICE_GLOBAL_FINL constexpr const_iterator end() const { return (m_data + size()); }
-
-	/**
-	 * \eval() expression, return this reference for the true matrix
-	 */
-	MATRICE_GLOBAL_FINL constexpr auto& eval() const { return (*static_cast<const _Derived*>(this)); }
-
-#pragma region <!-- iterators -->
 	/**
 	 *\column iterator for accessing elements in i-th column
+	 *\example:
+	 *		auto _A = Matrix_<float,3,3>::rand();
+	 *		auto _Fwd_col = _A.cbegin(1); //get 1-th column iterator
+	 *		for(auto& _It : _Fwd_col) _It = float(0); //set this column to zero
 	 */
 	MATRICE_GLOBAL_FINL _Myt_fwd_iterator cbegin(size_t i) {
 		return _Myt_fwd_iterator(m_data + i, m_rows, m_cols);
