@@ -29,7 +29,7 @@ template<typename _Ty, int _Dim = 2>
 class Vec_ : public Matrix_<_Ty, _Dim, compile_time_size<>::val_1>
 {
 	using const_my = const Vec_;
-	using const_my_ref = const_my&;
+	using my_const_ref = const_my&;
 protected:
 	using _Base = Matrix_<_Ty, _Dim, compile_time_size<>::val_1>;
 	using const_init_list = typename _Base::const_init_list;
@@ -45,16 +45,16 @@ public:
 	vec_global_inl Vec_() : _Base({ 0 }) {}
 	vec_global_inl Vec_(const_value _v) : _Base({ _v }) {}
 	vec_global_inl Vec_(const_value _x, const_value _y) : _Base({ _x, _y }) {}
-	vec_global_inl Vec_(const_my_ref _other) : _Base(_other) {}
+	vec_global_inl Vec_(my_const_ref _other) : _Base(_other) {}
 	vec_global_inl Vec_(const_init_list _list) : _Base(_list) {}
-	template<typename _Expr>
-	vec_global_inl Vec_(const _Expr& _xpr) : _Base(_xpr) {}
+	template<typename _Exp, MATRICE_ENABLE_IF(is_expression_v<_Exp>)>
+	vec_global_inl Vec_(const _Exp& _xpr) : _Base(_xpr) {}
 
 	vec_global_inl reference operator[] (size_t i) { return data()[i]; }
 	vec_global_inl const_reference operator[](size_t i)const { return data()[i]; }
 	vec_global_inl Vec_& operator= (const_init_list _list)
 	{ return static_cast<Vec_&>(_Base::operator= (_list)); }
-	vec_global_inl Vec_& operator= (const_my_ref _other)
+	vec_global_inl Vec_& operator= (my_const_ref _other)
 	{ return static_cast<Vec_&>(_Base::operator=(_other)); }
 	template<typename _Rval>
 	vec_global_inl Vec_& operator= (const _Rval& _rval)
@@ -63,7 +63,7 @@ public:
 
 	vec_global_inl Vec_& normalize(const value_t _val = _Base::inf)
 	{ return static_cast<Vec_&>(_Base::operator = (_Base::normalize(_val))); }
-	vec_global_inl value_t dot(const_my_ref _other) const
+	vec_global_inl value_t dot(my_const_ref _other) const
 	{ return _Base::dot(_other); }
 	
 	///<brief> properties </brief>
@@ -78,7 +78,7 @@ public:
 template<typename _Ty> class Vec3_ final : public Vec_<_Ty, 3>
 {
 	using _Base = Vec_<_Ty, 3>;
-	using const_my_ref = const Vec3_&;
+	using my_const_ref = const Vec3_&;
 	using typename _Base::const_value;
 	using typename _Base::reference;
 	using typename _Base::const_init_list;
@@ -92,15 +92,15 @@ public:
 	using _Base::data;
 	using _Base::x;
 	using _Base::y;
-	vec_global_inl Vec3_() : _Base() {}
-	vec_global_inl Vec3_(const_value _v) : _Base(_v) {}
-	vec_global_inl Vec3_(const_value _x, const_value _y) : _Base({ _x, _y, value_t(1) }) {}
-	vec_global_inl Vec3_(const_value _x, const_value _y, const_value _z) : _Base({_x, _y, _z}) {}
-	vec_global_inl Vec3_(const_init_list _list) : _Base(_list) {}
-	template<typename _Type>
-	vec_global_inl Vec3_(const _Type& _other) : _Base(_other) {}
+	using _Base::Vec_;
 
-	vec_global_inl Vec3_& operator= (const_my_ref _other)
+	vec_global_inl Vec3_(const_value _x, const_value _y, const_value _z) 
+		: _Base({_x, _y, _z}) {}
+	template<typename _Uy>
+	vec_global_inl Vec3_(const Vec3_<_Uy>& _other) 
+		: Vec3_(_other.x, _other.y, _other.z) {}
+
+	vec_global_inl Vec3_& operator= (my_const_ref _other)
 	{ return static_cast<Vec3_&>(_Base::operator=(_other)); }
 	template<typename _Rval>
 	vec_global_inl Vec3_& operator= (const _Rval& _rval)
@@ -108,14 +108,15 @@ public:
 
 	vec_global_inl Vec3_& normalize(const value_t _val = _Base::inf)
 	{ return static_cast<Vec3_&>(_Base::normalize(_val)); }
-	vec_global_inl value_t dot(const_my_ref _other) const
+	vec_global_inl value_t dot(my_const_ref _other) const
 	{ return _Base::dot(_other); }
-	vec_global_inl Vec3_ cross(const_my_ref _rhs) const
+	vec_global_inl Vec3_ cross(my_const_ref _rhs) const
 	{ return Vec3_(y*_rhs[2] - z*_rhs[1], z*_rhs[0] - x * _rhs[2], x*_rhs[1] - y * _rhs[0]); }
 	__declspec(property(get = _z_getter, put = _z_setter)) reference z;
 	vec_global_inl reference _z_getter() const { return data()[2]; }
 	vec_global_inl void _z_setter(value_t _z) { data()[2] = _z; }
 };
+
 template<typename _Ty> class Vec4_ final : public Vec_<_Ty, 4>
 {
 	using _Base = Vec_<_Ty, 4>;
@@ -132,13 +133,15 @@ public:
 	using _Base::data;
 	using _Base::x;
 	using _Base::y;
-	vec_global_inl Vec4_() : _Base() {}
-	vec_global_inl Vec4_(const_value _v) : _Base(_v) {}
-	vec_global_inl Vec4_(const_value _x, const_value _y, const_value _z) : _Base({ _x, _y, _z, 1}) {}
-	vec_global_inl Vec4_(const_value _x, const_value _y, const_value _z, const_value _w) : _Base({ _x, _y, _z, _w }) {}
-	vec_global_inl Vec4_(const_init_list _list) : _Base(_list) {}
-	template<typename _Expr>
-	vec_global_inl Vec4_(const _Expr& _xpr) : _Base(_xpr) {}
+	using _Base::Vec_;
+
+	vec_global_inl Vec4_(const_value _x, const_value _y, const_value _z) 
+		: _Base({ _x, _y, _z, 1}) {}
+	vec_global_inl Vec4_(const_value _x,const_value _y,const_value _z,const_value _w) 
+		: _Base({ _x, _y, _z, _w }) {}
+	template<typename _Uy>
+	vec_global_inl Vec4_(const Vec4_<_Uy>& _other)
+		: Vec4_(_other.x, _other.y, _other.z, _other.w) {}
 
 	template<typename _Rval>
 	vec_global_inl Vec4_& operator= (const _Rval& _rval)
@@ -146,6 +149,7 @@ public:
 
 	vec_global_inl Vec4_& normalize(const value_t _val = _Base::inf)
 	{ return static_cast<Vec4_&>(_Base::normalize(_val)); }
+
 	__declspec(property(get = _z_getter, put = _z_setter)) reference z;
 	vec_global_inl reference _z_getter() const { return data()[2]; }
 	vec_global_inl void _z_setter(value_t _z) { data()[2] = _z; }
@@ -153,6 +157,7 @@ public:
 	vec_global_inl reference _w_getter() const { return data()[3]; }
 	vec_global_inl void _w_setter(value_t _w) { data()[3] = _w; }
 };
+
 MATRICE_NAMESPACE_END_TYPES
 
 DGE_MATRICE_BEGIN
@@ -189,4 +194,14 @@ struct is_fxdvector<Vec4_<_Ty>> : std::true_type {};
  */
 template<typename _Ty, int _Dim>
 struct is_fxdvector<std::array<_Ty,_Dim>> : std::true_type {};
+
+template<size_t _Dim, typename _Ty>
+vec_global_inl types::Matrix_<_Ty, _Dim, _Dim> cross_prod_matrix(const Vec3_<_Ty>& v) {
+	using return_t = types::Matrix_<_Ty, _Dim, _Dim>;
+	MATRICE_CONSTEXPR_IF(_Dim == 3)
+	return return_t{ 0, -v.z, v.y, v.z, 0, -v.x, -v.y, v.x, 0 };
+	else
+	return return_t{ 0, -v.z, v.y, 0, v.z, 0, -v.x, 0, -v.y, v.x, 0, 0, 0, 0, 0, 0 };
+	static_assert(_Dim != 3 || _Dim != 4, "The _Dim in function cross_prod_matrix<_Dim> must be 3 or 4.");
+}
 DGE_MATRICE_END
