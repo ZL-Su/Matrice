@@ -345,6 +345,7 @@
     <None Include="cpp.hint" />
     <None Include="include\algs" />
     <None Include="include\Matrice\algs\correlation\inline\_optim.inl" />
+    <None Include="include\Matrice\algs\geometry\inline\_transform.inl" />
     <None Include="include\Matrice\algs\interpolation\_base.inl" />
     <None Include="include\Matrice\algs\similarity\inline\_iterative_conv_impl.inl" />
     <None Include="include\Matrice\arch\inl\_ixpacket.inl" />

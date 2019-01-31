@@ -166,6 +166,9 @@
     <Filter Include="Header Files\Thread\inl">
       <UniqueIdentifier>{b683a9c5-1a80-4376-a1d6-580f60db8a58}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Detail\matrix\inline">
+      <UniqueIdentifier>{b88d248b-30ee-4f19-8369-13b6e621a9d0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -838,6 +841,12 @@
     </None>
     <None Include="include\algs">
       <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\Matrice\private\inl\_base.inl">
+      <Filter>Header Files\Detail\matrix\inline</Filter>
+    </None>
+    <None Include="include\Matrice\algs\geometry\inline\_transform.inl">
+      <Filter>Header Files\Algs\Geometry</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
