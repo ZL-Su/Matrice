@@ -123,3 +123,14 @@ typedef int                                             int_t;
 #define _DETAIL_END }
 #define _INTERNAL_BEGIN namespace internal {
 #define _INTERNAL_END }
+
+#ifndef MATRICE_CONSTEXPR_IF(_COND)
+#if defined (_HAS_CXX17)
+#define MATRICE_CONSTEXPR_IF(_COND) if constexpr (_COND)
+#else
+#define MATRICE_CONSTEXPR_IF(_COND) if           (_COND)
+#endif
+#endif
+#ifndef MATRICE_ENABLE_IF(_COND)
+#define MATRICE_ENABLE_IF(_COND) typename = enable_if_t<_COND>
+#endif
