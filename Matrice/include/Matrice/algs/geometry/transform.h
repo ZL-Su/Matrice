@@ -6,7 +6,8 @@
 
 DGE_MATRICE_BEGIN 
 _DETAIL_BEGIN
-template<typename _Ty, typename = std::enable_if_t<std::is_arithmetic_v<_Ty>>>
+
+template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 MATRICE_HOST_INL Vec3_<_Ty> _Rodrigues_impl(const Matrix_<_Ty, 3, 3>& _R) {
 	using value_t = _Ty;
 	constexpr const auto _Unit = value_t(1.0);
@@ -21,7 +22,7 @@ MATRICE_HOST_INL Vec3_<_Ty> _Rodrigues_impl(const Matrix_<_Ty, 3, 3>& _R) {
 	auto a = std::acos(c);
 
 	if (s < 1e-5) {
-		if (c > _Zero) return (_Ret = { _Zero });
+		if (c > _Zero) return (Vec3_<value_t>(_Zero));
 
 		auto t = (_R[0][0] + _Unit)*_Half;
 		_Ret.x = sqrt(max(t, _Zero));
@@ -55,6 +56,14 @@ MATRICE_HOST_INL Matrix_<_Ty, 3, 3> _Rot_from(const Vec3_<_Ty>& _V1, const Vec3_
 	return decltype(_R)::diag(1) + _R + (_R*_R)*(1-_V1.dot(_V2)) / pow(_A.norm(), 2);
 }
 
+template<uint8_t, uint8_t> struct _Axis_type {};
+
+/**
+ *\brief TEMPLATE CLASS for axis-angle representation
+ *\cite{https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation}
+ */
+template<typename, size_t> class _Axis_angle_rep {};
+
 /**
  *\brief TEMPLATE CLASS for rigid transformation
  */
@@ -75,10 +84,15 @@ MATRICE_HOST_INL auto rodrigues(const Matrix_<_Ty, 3, _Cols>& _Left, _Outty _Rig
 	}
 }
 
-template<typename _Ty, typename = enable_if_t<is_floating_point_v<_Ty>>>
+using AxisX = detail::_Axis_type<0, 3>;
+using AxisY = detail::_Axis_type<1, 3>;
+using AxisZ = detail::_Axis_type<2, 3>;
+template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
 // *\brief TEMPLATE CLASS for rigid transformation
 using isometry_t = detail::_GeoTransform_isometry<_Ty>;
-
+template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
+// *\brief TEMPLATE CLASS for axis-angle representation
+using axisangle_t = detail::_Axis_angle_rep<_Ty, 3>;
 DGE_MATRICE_END
 
 #include "inline\_transform.inl"
