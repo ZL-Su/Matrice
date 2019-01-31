@@ -19,7 +19,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #include "..\include\Matrice\util\_macros.h"
 
-#ifdef __use_ocv_as_view__
+#if defined __use_ocv_as_view__|| MATRICE_USE_OPENCV
 #include <opencv2\core.hpp>
 #define VIEW_BASE_OCV cv::Mat
 #ifdef __CXX11__
