@@ -91,7 +91,7 @@ MATRICE_DENSEBASE_SIG::DenseBase(int_t rows, int_t cols, const value_t val)
 	}
 }	
 
-MATRICE_DENSEBASE_SIG::DenseBase(const DenseBase & _other)
+MATRICE_DENSEBASE_SIG::DenseBase(const DenseBase& _other)
 	: my_rows(_other.my_rows), my_cols(_other.my_cols), my_size(_other.my_size), my_pitch(_other.my_pitch)
 {
 #ifdef __CXX11_SHARED__
@@ -139,7 +139,7 @@ Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(const DenseBase& _other)
 }
 
 MATRICE_DENSEBASE_SIG& 
-Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(DenseBase && _other)
+Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(DenseBase&& _other)
 {
 	my_owner = _other.my_owner, my_size = _other.my_size;
 	my_rows = _other.my_rows, my_cols = _other.my_cols;
