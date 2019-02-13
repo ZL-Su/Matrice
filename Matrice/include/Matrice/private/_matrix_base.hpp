@@ -576,7 +576,7 @@ public:
 	MATRICE_GLOBAL_INL _Derived& operator= (_Myt_move_reference _other) {
 		m_cols = _other.m_cols, m_rows = _other.m_rows;
 		m_format = _other.m_format;
-		m_storage = std::forward<_Myt_storage_type>(_other.m_storage);
+		m_storage = std::move(_other.m_storage);
 		m_data = internal::_Proxy_checked(m_storage.data());
 		_Mybase::_Flush_view_buf();
 		_other.m_storage.free();
@@ -690,12 +690,23 @@ public:
 	}
 
 	/**
+	 * \copy from another data block
+	 */
+	template<typename _It>
+	MATRICE_GLOBAL_FINL _Myt& from(const _It _Data) {
+#ifdef _DEBUG
+		DGELOM_CHECK(!(_Data + this->size() - 1), "Input length of _Data must be greater or equal to this->size().");
+#endif // _DEBUG
+		for (auto _Idx = 0; _Idx < size(); ++_Idx)
+			m_data[_Idx] = static_cast<value_type>(_Data[_Idx]);
+	}
+	/**
 	 * \convert from another data block by function _Fn
 	 */
 	template<typename _It, typename _Op>
 	MATRICE_GLOBAL_FINL _Myt& from(const _It _Data, _Op&& _Fn) {
 #ifdef _DEBUG
-		if (!(_Data + this->size() - 1)) throw std::runtime_error("Input length of _Data must be greater or equal to this->size().");
+		DGELOM_CHECK(!(_Data + this->size() - 1), "Input length of _Data must be greater or equal to this->size().");
 #endif // _DEBUG
 		for(auto _Idx = 0; _Idx < size(); ++_Idx)
 			m_data[_Idx] = _Fn(static_cast<value_type>(_Data[_Idx]));
