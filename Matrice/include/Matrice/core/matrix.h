@@ -99,7 +99,7 @@ public:
 		return _Mybase::operator=(_other); 
 	}
 	MATRICE_GLOBAL_INL Myt_reference operator= (Myt_move_reference _other) { 
-		return _Mybase::operator= (std::forward<Myt>(_other)); 
+		return _Mybase::operator=(std::move(_other)); 
 	}
 	MATRICE_GLOBAL_FINL Myt_reference operator= (const_init_list _list) { return _Mybase::operator=(_list); }
 	template<typename _Arg> 
