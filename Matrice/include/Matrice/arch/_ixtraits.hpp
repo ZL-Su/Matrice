@@ -2,10 +2,6 @@
 #include "../private/_type_traits.h"
 #include "../util/_macros.h"
 
-#if !defined MATRICE_SIMD_ARCH
-#define MATRICE_SIMD_ARCH MATRICE_SIMD_SSE
-#endif
-
 #ifdef __AVX__
 #include <mmintrin.h>    //_m64
 #include <emmintrin.h>   //_m128
