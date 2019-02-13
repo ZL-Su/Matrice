@@ -104,8 +104,10 @@ public:
 			my_cols = 0, my_rows = 0, my_size = 0;
 			my_owner = Dummy, my_pitch = 0;
 			my_location = UnSpecified;
-			my_shared = nullptr;
-			my_data = nullptr;
+			if (my_shared) {
+				my_shared = nullptr;
+				my_data = nullptr;
+			}
 		}
 
 	protected:
