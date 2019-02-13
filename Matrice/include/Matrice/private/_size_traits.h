@@ -34,6 +34,12 @@ template<int _Rows = 0, int _Cols = 0> struct compile_time_size {
 	enum { val_1 = 0x0001, val_2 = 0x0002, val_3 = 0x0003, val_4 = 0x0004 };
 	enum { CompileTimeRows = _Rows,  CompileTimeCols = _Cols,
 			 RunTimeDeducedOnHost = 0, RunTimeDeducedOnDevice = -1 };
+	static constexpr auto _1 = 0x0001;
+	static constexpr auto _2 = 0x0002;
+	static constexpr auto _3 = 0x0003;
+	static constexpr auto _4 = 0x0004;
+	static constexpr auto _5 = 0x0005;
+	static constexpr auto _6 = 0x0006;
 };
 // \compile-time size of row value
 template<int _M, int _N> MATRICE_GLOBAL_INL constexpr int ct_size_rv = compile_time_size<_M, _N>::CompileTimeRows;
