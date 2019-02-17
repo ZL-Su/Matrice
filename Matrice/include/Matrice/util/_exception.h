@@ -18,9 +18,9 @@ DGE_MATRICE_BEGIN _DETAIL_BEGIN
  * \Example: _Source_location _Loc{__func__, __FILE__, __LINE__}
  */
 struct _Source_location {
-	const char* _Func = nullptr;
-	const char* _File = nullptr;
-	long        _Line;
+	const char* _func = nullptr;
+	const char* _file = nullptr;
+	long        _line;
 };
 #define __exceploc__ {__func__, __FILE__, __LINE__}
 
