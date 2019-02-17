@@ -27,10 +27,12 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #if (defined __CXX11__ || defined __CXX17__)
 #define __CXX11_SHARED__
+#define MATRICE_ENABLE_SHARED
 #endif //enable shared memory allocator
 
 #ifndef __enable_cuda__ 
 #define __enable_cuda__
+#define MATRICE_ENABLE_CUDA
 #endif // !__enable_cuda__ defined for CUDA support
 
 #ifdef _OPENMP
@@ -50,11 +52,15 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #define MATRICE_SIMD_AVX    3 //*\SIMD-256
 #define MATRICE_SIMD_AVX512 4 //*\SIMD-512
 
-#if !defined MATRICE_SIMD_ARCH
+#ifndef MATRICE_SIMD_ARCH
 #define MATRICE_SIMD_ARCH MATRICE_SIMD_SSE
 #endif
 
-#ifdef __enable_ocv__
+#define MATRICE_USE_NAT     0 //*\use native kernel code
+#define MATRICE_USE_FKL     1 //*\use fortran kernel lib
+#define MATRICE_USE_MKL     2 //*\use intel mkl lib
+
+#ifdef MATRICE_USE_OPENCV
 #ifndef __use_ocv_as_view__
 #define __use_ocv_as_view__
 #endif
