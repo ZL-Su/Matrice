@@ -19,6 +19,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #include <xutility>
 #include<algorithm>
 #include "_macros.h"
+#include "_std_wrapper.h"
 #include "../arch/ixpacket.h"
 
 MATRICE_NAMESPACE_BEGIN_
@@ -77,7 +78,7 @@ auto transform(const _Fwd1& _Src, _Fwd2& _Dst)->_Fwd2& {
  *\param [_Func] a unary functor to be applied to every dereferenced iterator
  */
 template<typename _Fwdty, typename _Fn, 
-	typename = std::enable_if_t<std::is_class_v<_Fwdty>>>
+	MATRICE_ENABLE_IF(is_class_v<_Fwdty>)>
 MATRICE_HOST_FINL void for_each(_Fwdty& _Cont, _Fn&& _Func) {
 	std::for_each(_Cont.begin(), _Cont.end(), _Func);
 }
@@ -88,7 +89,7 @@ MATRICE_HOST_FINL void for_each(_Fwdty& _Cont, _Fn&& _Func) {
  *\param [_Val] value to be filled into _Cont
  */
 template<typename _Fwdty, typename _T, 
-	typename = std::enable_if_t<std::is_class_v<_Fwdty>>>
+	MATRICE_ENABLE_IF(is_class_v<_Fwdty>&&is_scalar_v<_T>)>
 MATRICE_HOST_FINL void fill(_Fwdty& _Cont, const _T& _Val) { 
 	std::fill(_Cont.begin(), _Cont.end(), _Val); 
 }
@@ -99,14 +100,25 @@ MATRICE_HOST_FINL void fill(_Fwdty& _Cont, const _T& _Val) {
  *\param [_Val] value to be filled into _Cont
  */
 template<typename _FwdIt, typename _T, 
-	typename = std::enable_if_t<std::is_scalar_v<_T>>>
-MATRICE_HOST_FINL void fill(_FwdIt _First, _FwdIt _Last, size_t _Stride, const _T& _Val) {
+	MATRICE_ENABLE_IF(is_scalar_v<_T>)>
+MATRICE_GLOBAL_FINL void fill(_FwdIt _First, _FwdIt _Last, size_t _Stride, const _T& _Val) {
 	auto _UFirst = (_First);
 	const auto _ULast = (_Last);
 	for (; _UFirst < _ULast; _UFirst += _Stride) *_UFirst = _Val;
 }
+/**
+ *\brief Fill a container with the return of a given functor
+ *\param [_Cont] container with forward iterator
+ *\param [_Func] a given functor with signature ~~~_Ty _Func()~~~
+ */
+template<typename _Fwdty, typename _Fn>
+MATRICE_GLOBAL_FINL void fill(_Fwdty& _Cont, _Fn&& _Func) {
+	auto _UFirst = (_Cont.begin());
+	const auto _ULast = (_Cont.end());
+	for (; _UFirst < _ULast; ++_UFirst) *_UFirst = _Func();
+}
 
-// \return: sum of the range [_First, _Last)
+// \return summation of the range [_First, _Last) with SIMD
 template<typename _InIt>
 MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last) {
 	static_cast<void>(_First == _Last);
@@ -136,33 +148,32 @@ MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, index_t _Stride) {
 	for (; _First < _Last; _First += _Stride) _Ret += *(_First);
 	return (_Ret);
 }
-template<typename _Ty, typename _Op,  typename _InIt = _Ty*>
-MATRICE_GLOBAL_INL _Ty reduce(_InIt _First, _InIt _Last, _Op _op)
-{
+template<typename _InIt, typename _Op, 
+	typename _Ty = typename std::pointer_traits<_InIt>::element_type>
+MATRICE_GLOBAL_INL _Ty reduce(_InIt _First, _InIt _Last, _Op _op) {
 	static_cast<void>(_First == _Last);
 	_Ty _Ret = 0;
 	for (; _First != _Last; ++_First) _Ret += _op(*_First);
 	return (_Ret);
 }
 template<typename _InIt, typename _Op, typename = std::enable_if_t<std::is_pointer_v<_InIt>&&std::is_function_v<_Op>>>
-MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, _Op _op)
-{
+MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, _Op _op) {
 	static_cast<void>(_First == _Last);
-	typename remove_reference<decltype(_First[0])>::type _Ret = 0;
+	remove_reference_t<decltype(_First[0])> _Ret = 0;
 	for (; _First != _Last; ++_First) _Ret += _op(*_First);
 	return (_Ret);
 }
-template<template<typename> class _Op, typename _InIt, typename _Scalar, typename _Func>
-MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, _Scalar _Value, _Func _Fn, _Op<_Scalar> _op = _Op<_Scalar>())
-{
+template<template<typename> class _Op, 
+	typename _InIt, typename _Scalar, typename _Func>
+MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, _Scalar _Value, _Func _Fn, _Op<_Scalar> _op = _Op<_Scalar>()) {
 	static_assert(std::is_arithmetic_v<_Scalar>, "Oops, template parameter '_Scalar' is illegal!");
 	static_cast<void>(_First == _Last);
-	typename remove_reference<decltype(_First[0])>::type _Ret = 0;
+	remove_reference_t<decltype(_First[0])> _Ret = 0;
 	for (; _First != _Last; ++_First) _Ret += _Fn(_op(*_First, _Value));
 	return (_Ret);
 }
 _DETAIL_BEGIN
-template<std::size_t _N>  struct _Reduce_n {
+template<size_t _N>  struct _Reduce_n {
 	template<typename _Ty> static
 	MATRICE_GLOBAL_INL auto value(const _Ty* _Data[[_N]]) {
 		return (_Reduce_n<_N - 1>::value(_Data) + _Data[_N]);
@@ -170,10 +181,12 @@ template<std::size_t _N>  struct _Reduce_n {
 };
 template<> struct _Reduce_n<0> {
 	template<typename _Ty> static
-	MATRICE_GLOBAL_INL auto value(const _Ty* _Data[[]]) { return (_Data[0]); }
+	MATRICE_GLOBAL_INL auto value(const _Ty* _Data[[]]) { 
+		return (_Data[0]); 
+	}
 };
 
-template<std::size_t _N>  struct _Powers_n {
+template<size_t _N>  struct _Powers_n {
 	template<typename _Ty> static
 	MATRICE_GLOBAL_INL auto value(const _Ty _Val) {
 		return (_Powers_n<_N - 1>::value(_Val)*_Val);
@@ -185,6 +198,8 @@ template<> struct _Powers_n<0> {
 };
 _DETAIL_END
 
-template<std::size_t _Size = 1> using reduce_n_t = detail::_Reduce_n<_Size - 1>;
-template<std::size_t _Expo = 1> using powers_n_t = detail::_Powers_n<_Expo>;
+template<size_t _Size = 1> 
+using reduce_n_t = detail::_Reduce_n<_Size - 1>;
+template<size_t _Expo = 1> 
+using powers_n_t = detail::_Powers_n<_Expo>;
 DGE_MATRICE_END
