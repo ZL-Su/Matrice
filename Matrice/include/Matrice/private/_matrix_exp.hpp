@@ -18,13 +18,13 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include <functional>
 #include <cassert>
-#ifdef __AVX__
-#include <immintrin.h>
-#endif
 #include "../util/utils.h"
 #include "_type_traits.h"
 #include "_size_traits.h"
 #include "_tag_defs.h"
+#if defined(MATRICE_SIMD_ARCH)
+#include "../arch/ixpacket.h"
+#endif
 
 #pragma warning(disable: 4715)
 DGE_MATRICE_BEGIN
@@ -179,12 +179,14 @@ template<typename _Lhs, typename = std::enable_if_t<std::true_type::value>> frie
 			enum { flag = mmul };
 			using category = tag::_Matrix_mul_tag;
 			using value_type = _Ty;
+			using packet_type = simd::Packet_<value_type, packet_size_v>;
 
 			template<typename _Rhs> MATRICE_GLOBAL_FINL
 			auto operator() (const _Ty* lhs, const _Rhs& rhs, int c, int _plh = 0) const
 			{
 				value_type val = value_type(0);
 				const int K = rhs.rows(), N = rhs.cols();
+				
 #ifdef __disable_simd__
 				for (int k = 0; k < K; ++k) val += lhs[k] * rhs(k*N + c);
 #else
