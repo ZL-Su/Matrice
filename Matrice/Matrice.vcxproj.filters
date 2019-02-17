@@ -687,6 +687,9 @@
     <ClInclude Include="include\Matrice\private\tensor\_tensor.h">
       <Filter>Header Files\Detail\tensor</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\private\math\_config.h">
+      <Filter>Header Files\Detail\math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
