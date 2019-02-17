@@ -50,6 +50,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #define MATRICE_SIMD_AVX    3 //*\SIMD-256
 #define MATRICE_SIMD_AVX512 4 //*\SIMD-512
 
+#if !defined MATRICE_SIMD_ARCH
+#define MATRICE_SIMD_ARCH MATRICE_SIMD_SSE
+#endif
+
 #ifdef __enable_ocv__
 #ifndef __use_ocv_as_view__
 #define __use_ocv_as_view__
