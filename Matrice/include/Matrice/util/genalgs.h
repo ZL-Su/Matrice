@@ -23,15 +23,13 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 MATRICE_NAMESPACE_BEGIN_
 template<class _InIt, class _OutIt> MATRICE_HOST_FINL
-void transform(const _InIt _First, const _InIt _Last, _OutIt _Dest)
-{
+void transform(const _InIt _First, const _InIt _Last, _OutIt _Dest) {
 	static_cast<void>(_First == _Last);
 	auto _UFirst = _First; size_t i = 0;
 	for (; _UFirst != _Last; ++_UFirst, ++i) _Dest[i] = *_UFirst;
 }
 template<class _InIt, class _OutIt> MATRICE_HOST_FINL
-void transform(const _InIt _First, const _InIt _Last, _OutIt _Dest, size_t _Dstep)
-{
+void transform(const _InIt _First, const _InIt _Last, _OutIt _Dest, size_t _Dstep) {
 	using namespace std;
 	auto _UFirst = (_First);
 	const auto _ULast = (_Last);
@@ -40,8 +38,7 @@ void transform(const _InIt _First, const _InIt _Last, _OutIt _Dest, size_t _Dste
 		*_UDest = *_UFirst;
 }
 template<class _Fn, class _InIt, class _OutIt> MATRICE_HOST_INL
-void transform(_Fn _Func, const _InIt _First, const _InIt _Last, size_t _Stride, _OutIt _Dest, size_t _Invpos = 1)
-{
+void transform(_Fn _Func, const _InIt _First, const _InIt _Last, size_t _Stride, _OutIt _Dest, size_t _Invpos = 1) {
 	using namespace std;
 	auto _UFirst = (_First + _Stride - _Invpos);
 	const auto _ULast = (_Last);
@@ -53,8 +50,7 @@ void transform(_Fn _Func, const _InIt _First, const _InIt _Last, size_t _Stride,
 	*(_UDest) = _Func(*_UFirst);
 }
 template<class _Fn, class _InIt, class _OutIt> MATRICE_HOST_INL
-void transform(_Fn _Func, const _InIt _First, const _InIt _Last, _OutIt _Dest, size_t _Stride)
-{
+void transform(_Fn _Func, const _InIt _First, const _InIt _Last, _OutIt _Dest, size_t _Stride) {
 	using namespace std;
 	auto _UFirst = (_First);
 	const auto _ULast = (_Last);
@@ -64,33 +60,66 @@ void transform(_Fn _Func, const _InIt _First, const _InIt _Last, _OutIt _Dest, s
 		*_UDest = _Func(*_UFirst);
 	}
 }
-template<typename _Fwdty, typename _Fn, typename = std::enable_if_t<std::is_class_v<_Fwdty>>>
-MATRICE_HOST_FINL auto for_each(_Fwdty& _Cont, _Fn _Func) { std::for_each(_Cont.begin(), _Cont.end(), _Func);}
 
-template<typename _Fwdty, typename _T, typename = std::enable_if_t<std::is_class_v<_Fwdty>>>
-MATRICE_HOST_FINL auto fill(_Fwdty& _Cont, _T _val) { std::fill(_Cont.begin(), _Cont.end(), _val); }
-template<typename _FwdIt, typename _T, typename = std::enable_if_t<std::is_scalar_v<_T>>>
-MATRICE_HOST_FINL auto fill(_FwdIt _First, _FwdIt _Last, size_t _Stride, const _T& _Val)
-{
+/**
+ *\brief transform a forward container to another
+ *\param [_Src, _Dst] containers with forward iterator
+ */
+template<typename _Fwd1, typename _Fwd2> MATRICE_HOST_INL 
+auto transform(const _Fwd1& _Src, _Fwd2& _Dst)->_Fwd2& {
+	transform(_Src.begin(), _Src.end(), _Dst.begin());
+	return (_Dst);
+}
+
+/**
+ *\brief Process container entry with a unary functor.
+ *\param [_Cont] a container with forward iterator
+ *\param [_Func] a unary functor to be applied to every dereferenced iterator
+ */
+template<typename _Fwdty, typename _Fn, 
+	typename = std::enable_if_t<std::is_class_v<_Fwdty>>>
+MATRICE_HOST_FINL void for_each(_Fwdty& _Cont, _Fn&& _Func) {
+	std::for_each(_Cont.begin(), _Cont.end(), _Func);
+}
+
+/**
+ *\brief Fill a container
+ *\param [_Cont] container with forward iterator
+ *\param [_Val] value to be filled into _Cont
+ */
+template<typename _Fwdty, typename _T, 
+	typename = std::enable_if_t<std::is_class_v<_Fwdty>>>
+MATRICE_HOST_FINL void fill(_Fwdty& _Cont, const _T& _Val) { 
+	std::fill(_Cont.begin(), _Cont.end(), _Val); 
+}
+/**
+ *\brief Fill a range [_First, _Last) with a fixed interval step
+ *\param [_First, _Last] the first and last iterator
+ *\param [_Stride] interval step
+ *\param [_Val] value to be filled into _Cont
+ */
+template<typename _FwdIt, typename _T, 
+	typename = std::enable_if_t<std::is_scalar_v<_T>>>
+MATRICE_HOST_FINL void fill(_FwdIt _First, _FwdIt _Last, size_t _Stride, const _T& _Val) {
 	auto _UFirst = (_First);
 	const auto _ULast = (_Last);
 	for (; _UFirst < _ULast; _UFirst += _Stride) *_UFirst = _Val;
 }
 
-// \return: sum of range [_First, _Last)
-template<typename _InIt, typename value_type = typename std::pointer_traits<_InIt>::element_type>
-MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last)
-{
+// \return: sum of the range [_First, _Last)
+template<typename _InIt>
+MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last) {
 	static_cast<void>(_First == _Last);
-
-	value_type _Ret = 0;
-#ifdef __AVX__
-	using packed_type = simd::Packet_<value_type, 4>;
+	typename std::pointer_traits<_InIt>::element_type _Ret = 0;
+#if MATRICE_SIMD_ARCH==MATRICE_SIMD_AVX
+	using packed_t = typename simd::template Packet_<decltype(_Ret)>;
 	decltype(auto) _Size = std::distance(_First, _Last);
-	decltype(auto) _Step = packed_type::size << 1;
+	decltype(auto) _Step = packed_t::size << 1;
 	decltype(auto) _N = _Size / _Step;
-	for (auto i = 0, j = 0; i < _N; j = (++i)*_Step)
-		_Ret += (packed_type(_First + j) + packed_type(_First + j + packed_type::size)).reduce();
+	for (auto i = 0, j = 0; i < _N; j = (++i)*_Step) {
+		const auto _Pos = _First + j;
+		_Ret += (packed_t(_Pos)+packed_t(_Pos+packed_t::size)).reduce();
+	}
 	for (_First += _N * _Step; _First != _Last; ++_First) _Ret += *_First;
 #else
 	for (; _First != _Last; ++_First) _Ret += *_First;
@@ -99,11 +128,11 @@ MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last)
 }
 
 // \return: sum of range [_First, _Last) with step := _Stride
-template<typename _InIt, typename = std::enable_if_t<std::is_pointer_v<_InIt>>>
-MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, index_t _Stride)
-{
+template<typename _InIt, 
+	typename = std::enable_if_t<std::is_pointer_v<_InIt>>>
+MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, index_t _Stride) {
 	static_cast<void>(_First == _Last);
-	typename remove_reference<decltype(*_First)>::type _Ret = 0;
+	remove_reference_t<decltype(*_First)> _Ret = 0;
 	for (; _First < _Last; _First += _Stride) _Ret += *(_First);
 	return (_Ret);
 }
