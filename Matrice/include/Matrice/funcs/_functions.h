@@ -19,6 +19,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <type_traits>
 #include <exception>
 #include "../util/_macros.h"
+#include "../util/_std_wrapper.h"
 #include "../util/utils.h"
 #include "../private/_type_traits.h"
 #include "../private/_size_traits.h"
@@ -32,11 +33,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
 template<typename _Ty> MATRICE_HOST_INL constexpr
-_Ty _Det(const _Ty* data, int n, typename std::enable_if<is_float32<_Ty>::value>::type* = 0) { 
+_Ty _Det(const _Ty* data, int n, enable_if_t<is_float32_v<_Ty>>* = 0) {
 	return fblas::_sdetm(static_cast<float*>(data), n);
 }
 template<typename _Ty> MATRICE_HOST_INL constexpr
-_Ty _Det(_Ty* data, int n, typename std::enable_if<is_float64<_Ty>::value>::type* = 0) {
+_Ty _Det(const _Ty* data, int n, enable_if_t<is_float64_v<_Ty>>* = 0) {
 	return fblas::_ddetm(static_cast<double*>(data), n);
 }
 _DETAIL_END
@@ -44,8 +45,7 @@ _DETAIL_END
 /**
  * \SIMD supported determinant of a matrix or its derivatives.
  */
-template<typename _T, 
-	typename = std::enable_if_t<is_matrix_v<_T>||is_expression_v<_T>||is_mtxview_v<_T>>>
+template<typename _T, MATRICE_ENABLE_IF(is_matrix_convertible_v<_T>)>
 MATRICE_HOST_INL constexpr typename _T::value_t det(const _T& _x) {
 	return detail::_Det(_x.eval().data(), _x.rows());
 }
@@ -53,27 +53,26 @@ MATRICE_HOST_INL constexpr typename _T::value_t det(const _T& _x) {
 /**
  * \SIMD supported dot-product of two vectors.
  */
-template<typename _T, typename _U, typename value_t = std::common_type_t<typename _T::value_t, typename _U::value_t>>
-MATRICE_HOST_INL constexpr value_t dot(const _T& _x, const _U& _y) {
+template<typename _T, typename _U, 
+	typename _Vty = common_type_t<typename _T::value_t, typename _U::value_t>>
+MATRICE_HOST_INL constexpr _Vty dot(const _T& _x, const _U& _y) {
 #ifdef _DEBUG
-	if (_x.size() != _y.size())
-		throw std::runtime_error("Oops, non-consistent size error.");
+	DGELOM_CHECK(_x.size() != _y.size(), "Oops, non-consistent size error.");
 #endif
+	using packet_type = simd::Packet_<_Vty>;
+
 	const auto _Left = _x.eval();
 	const auto _Right = _y.eval();
 	const auto _Size = min(_Left.size(), _Right.size());
+	const auto _Vsize = simd::vsize<packet_type::size>(_Size);
 
-	constexpr std::size_t _Stride = packet_size_v;
-	const auto _Vsize = simd::vsize<_Stride>(_Size);
-
-	using packet_type = simd::Packet_<float, _Stride>;
-	auto _Ret = zero<value_t>::value;
-	for (std::size_t _Idx = 0; _Idx < _Vsize; _Idx += _Stride) {
+	auto _Ret = zero_v<_Vty>;
+	for (auto _Idx = 0; _Idx < _Vsize; _Idx += packet_type::size) {
 		_Ret += (
 			packet_type(_Left.data() + _Idx)*
-			packet_type(_Right.data() + _Idx) ).reduce();
+			packet_type(_Right.data() + _Idx)).reduce();
 	}
-	for (std::size_t _Idx = _Vsize; _Idx < _Size; ++_Idx) {
+	for (auto _Idx = _Vsize; _Idx < _Size; ++_Idx) {
 		_Ret += _Left(_Idx)*_Right(_Idx);
 	}
 
@@ -84,7 +83,7 @@ MATRICE_HOST_INL constexpr value_t dot(const _T& _x, const _U& _y) {
  * 1D gaussian kernel function: 
  *		g(x;\mu,\sigma) = \frac{1}{\sigma \sqrt{2\pi}} e^{-\frac{(x-\mu)^2}{2\sigma^2}}
  */
-template<typename _Ty, typename = std::enable_if_t<std::is_scalar_v<_Ty>>>
+template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 MATRICE_HOST_INL constexpr auto gaussian(_Ty x, _Ty _M, _Ty _S) {
 	return (0.3989422804*exp(-0.5*pow((x - _M) / _S, 2)) / _S);
 }
@@ -92,7 +91,7 @@ MATRICE_HOST_INL constexpr auto gaussian(_Ty x, _Ty _M, _Ty _S) {
 /**
  * 2D gaussian kernel function with uniform Mean and STD for both directions
  */
-template<typename _Ty, typename = std::enable_if_t<std::is_scalar_v<_Ty>>>
+template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 MATRICE_HOST_INL constexpr auto gaussian(_Ty x, _Ty y, _Ty _M, _Ty _S) {
 	const auto _S2 = pow(_S, 2);
 	return (0.1591549431*exp(-0.5*(pow(x - _M, 2) + pow(y - _M, 2)) / _S2)/ _S2);
