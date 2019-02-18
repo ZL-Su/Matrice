@@ -2,7 +2,12 @@
 
 # IVM(R) Matrice Library
 
-A libary for numerical computation, includes basic linear algebra (vector, matrix, linear system) operations, auto-differential, and non-linear optimization, etc. The library contains two parts, the first part is a Fortran kernel library which supplies the basic linear arithmatic operations; the second part is a modern C++ library which aims to implement efficient and elegant numeric computation.
+A libary for numerical computation, includes basic linear algebra (vector, matrix, linear system) operations, auto-differentiation, and non-linear optimization, etc. The library contains two parts, the first part is a Fortran kernel library which supplies the basic linear arithmatic operations; the second part is a modern C++ library which aims to implement efficient and elegant numeric computation.
+
+## Features
+* Unified memory and basic type management.
+* Automatic inference of optimal type according to the context.
+* Expression system enhanced lazy evaluation.
 
 ## System Requirements
 Matrice supports Intel 64 architecture and compatible architectures.
