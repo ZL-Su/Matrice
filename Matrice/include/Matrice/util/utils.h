@@ -255,7 +255,7 @@ public:
 		if (_Dim == 1) return std::get<0>(std::get<1>(_Data));
 		if (_Dim == 2) return std::get<0>(std::get<1>(std::get<1>(_Data)));
 		if (_Dim == 3) return std::get<1>(std::get<1>(std::get<1>(_Data)));
-		DGELOM_CHECK(_Dim > 3, "_Dim over range of _Data.");
+		DGELOM_CHECK(_Dim<3, "_Dim over range of _Data.");
 	}
 	/**
 	 *\brief Get full rows

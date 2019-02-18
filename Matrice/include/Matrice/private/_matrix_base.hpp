@@ -463,15 +463,15 @@ public:
 	// \View of submatrix: x \in [x0, x1) and y \in [y0, y1)
 	MATRICE_GLOBAL_INL auto block(index_t x0, index_t x1, index_t y0, index_t y1) {
 #ifdef _DEBUG
-		DGELOM_CHECK(x1 > m_cols, "Input var. x1 must be no greater than m_cols.")
-		DGELOM_CHECK(y1 > m_rows, "Input var. y1 must be no greater than m_rows.")
+		DGELOM_CHECK(x1<m_cols, "Input var. x1 must be no greater than m_cols.")
+		DGELOM_CHECK(y1<m_rows, "Input var. y1 must be no greater than m_rows.")
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, {x0, y0, x1, y1});
 	}
 	MATRICE_GLOBAL_INL const auto block(index_t x0, index_t x1, index_t y0, index_t y1) const {
 #ifdef _DEBUG
-		DGELOM_CHECK(x1 > m_cols, "Input var. x1 must be no greater than m_cols.")
-		DGELOM_CHECK(y1 > m_rows, "Input var. y1 must be no greater than m_rows.")
+		DGELOM_CHECK(x1<m_cols, "Input var. x1 must be no greater than m_cols.")
+		DGELOM_CHECK(y1<m_rows, "Input var. y1 must be no greater than m_rows.")
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, { x0, y0, x1, y1 });
 	}
@@ -494,16 +494,16 @@ public:
 	template<typename _Ity, typename = std::enable_if_t<std::is_integral_v<_Ity>>>
 	MATRICE_GLOBAL_INL auto operator()(_Ity _L, _Ity _R, _Ity _U, _Ity _D) {
 #ifdef _DEBUG
-		DGELOM_CHECK(_R > m_cols, "Input var. _R must be no greater than m_cols.")
-		DGELOM_CHECK(_D > m_rows, "Input var. _D must be no greater than m_rows.")
+		DGELOM_CHECK(_R<m_cols, "Input var. _R must be no greater than m_cols.")
+		DGELOM_CHECK(_D<m_rows, "Input var. _D must be no greater than m_rows.")
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, { _L, _U, _R, _D });
 	}
 	template<typename _Ity, typename = std::enable_if_t<std::is_integral_v<_Ity>>>
 	MATRICE_GLOBAL_INL auto operator()(_Ity _L, _Ity _R, _Ity _U, _Ity _D)const{
 #ifdef _DEBUG
-		DGELOM_CHECK(_R > m_cols, "Input var. _R must be no greater than m_cols.")
-		DGELOM_CHECK(_D > m_rows, "Input var. _D must be no greater than m_rows.")
+		DGELOM_CHECK(_R<m_cols, "Input var. _R must be no greater than m_cols.")
+		DGELOM_CHECK(_D<m_rows, "Input var. _D must be no greater than m_rows.")
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, { _L, _U, _R, _D });
 	}
@@ -695,7 +695,7 @@ public:
 	template<typename _It>
 	MATRICE_GLOBAL_FINL _Myt& from(const _It _Data) {
 #ifdef _DEBUG
-		DGELOM_CHECK(!(_Data + this->size() - 1), "Input length of _Data must be greater or equal to this->size().");
+		DGELOM_CHECK(_Data + this->size() - 1, "Input length of _Data must be greater or equal to this->size().");
 #endif // _DEBUG
 		for (auto _Idx = 0; _Idx < size(); ++_Idx)
 			m_data[_Idx] = static_cast<value_type>(_Data[_Idx]);
@@ -706,7 +706,7 @@ public:
 	template<typename _It, typename _Op>
 	MATRICE_GLOBAL_FINL _Myt& from(const _It _Data, _Op&& _Fn) {
 #ifdef _DEBUG
-		DGELOM_CHECK(!(_Data + this->size() - 1), "Input length of _Data must be greater or equal to this->size().");
+		DGELOM_CHECK(_Data + this->size() - 1, "Input length of _Data must be greater or equal to this->size().");
 #endif // _DEBUG
 		for(auto _Idx = 0; _Idx < size(); ++_Idx)
 			m_data[_Idx] = _Fn(static_cast<value_type>(_Data[_Idx]));

@@ -166,9 +166,9 @@ public:
 	template<typename _Ty, size_t _N0, size_t _N1 = _N0>
 	static MATRICE_HOST_INL auto read(const std::string& _Path, size_t _Skips = 0) {
 		using value_type = _Ty;
-		DGELOM_CHECK(!fs::exists(fs::path(_Path)),"'"+_Path+"' does not exist!");
+		DGELOM_CHECK(fs::exists(fs::path(_Path)),"'"+_Path+"' does not exist!");
 		std::ifstream _Fin(_Path);
-		DGELOM_CHECK(!_Fin.is_open(),"Cannot open file in "+_Path);
+		DGELOM_CHECK(_Fin.is_open(),"Cannot open file in "+_Path);
 
 		std::string _Line;
 		for (const auto _Idx : range(0, _Skips)) {
@@ -192,7 +192,7 @@ public:
 	template<typename _Op> 
 	static MATRICE_HOST_FINL void write(const std::string& _path, _Op _op) {
 		std::ofstream _Fout(_path);
-		DGELOM_CHECK(!_Fout.is_open(), "Fail to open file: " + _path);
+		DGELOM_CHECK(_Fout.is_open(), "Fail to open file: " + _path);
 		_Fout.setf(std::ios::fixed, std::ios::floatfield);
 		_op(std::forward<std::ofstream>(_Fout));
 		_Fout.close();
@@ -206,8 +206,8 @@ public:
 	static MATRICE_HOST_FINL void write(const std::string& _path, std::initializer_list<std::string> _fnames, _Op _op) {
 		const auto _N = _fnames.begin();
 		std::ofstream _O1(_path + _N[0]), _O2(_path + _N[1]);
-		DGELOM_CHECK(!_O1.is_open(), "Fail to open file: " + _path + _N[0]);
-		DGELOM_CHECK(!_O2.is_open(), "Fail to open file: " + _path + _N[1]);
+		DGELOM_CHECK(_O1.is_open(), "Fail to open file: " + _path + _N[0]);
+		DGELOM_CHECK(_O2.is_open(), "Fail to open file: " + _path + _N[1]);
 		_O1.setf(std::ios::fixed, std::ios::floatfield);
 		_O2.setf(std::ios::fixed, std::ios::floatfield);
 
@@ -321,7 +321,7 @@ using default_data_loader = data_loader<std::float_t>;
 
 template<std::size_t _N, typename _Cont>
 MATRICE_HOST_FINL auto serial(const _Cont& _L) {
-	DGELOM_CHECK(_N > _L.size(), "The size _N being serialized over range of _L.");
+	DGELOM_CHECK(_N<_L.size(), "The size _N being serialized over range of _L.");
 	return tuple_n<_N - 1>::_(_L.data());
 }
 

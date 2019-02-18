@@ -143,6 +143,10 @@ public:
 		: _Mybase(_First, _Last) {}
 	MATRICE_GLOBAL_INL range(const _Ty& _First, const _Uy& _Last, typename _Mybase::const_step_t& _Inc)
 		: _Mybase(_First, _Last, _Inc) {}
+	MATRICE_GLOBAL_INL range(const _Ty& _First, const size_t& _Size)
+		: _Mybase(_First, _First+_Size) {}
+	MATRICE_GLOBAL_INL range(const _Ty& _First, const size_t& _Size, typename _Mybase::const_step_t& _Inc)
+		: _Mybase(_First, _First+_Size, _Inc) {}
 };
 
 template<typename _Ty> using rect = detail::_Rect_impl<_Ty>;
