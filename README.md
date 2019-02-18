@@ -18,7 +18,7 @@ The library is optimized for the systems based on
 and compatible processors.
 
 The software dependencies are:
-* C++ compiler with C++11 standart support
+* C++ compiler with C++11 standart support (at least)
 * Optinal dependencies:
   * Intel OpenMP
   * CUDA 8.0 or later
