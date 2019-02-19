@@ -27,28 +27,31 @@ DGE_MATRICE_BEGIN
 namespace fs = std::experimental::filesystem;
 enum is_skip_folder { N = 0, Y = 1 };
 
-class IO {
+class IO : std::ios {
+	using _Mybase = std::ios;
 public:
 	using FileMap = std::map<std::string, std::string>;
 	using FileInfo = std::vector<FileMap>;
-
+	using _Mybase::in;
+	using _Mybase::out;
+	using _Mybase::app;
+	using _Mybase::ate;
 	/**
 	 * \extracts folder(s) for a given absolute path.
 	 */
-	template<size_t _Nsubfolder = 0> struct Dir_ 
-	{
+	template<size_t _Nsubfolder = 0> struct Dir_  {
 		Dir_() : m_path(fs::current_path().string()) { _Init(); }
 		Dir_(const std::string& _path) : m_path(_path) { _Init(); }
 
-		MATRICE_HOST_INL const auto operator()(std::size_t i, std::size_t j) const {
+		MATRICE_HOST_INL const auto operator()(size_t i, size_t j) const {
 			return std::string(m_path + m_subpaths[i] + m_names[i][j]);
 		}
-		MATRICE_HOST_INL const auto operator()(std::size_t i) const {
+		MATRICE_HOST_INL const auto operator()(size_t i) const {
 			return std::string(m_path + m_names[0][i]);
 		}
-		MATRICE_HOST_FINL auto& names(std::size_t i = 0) { return (m_names[i]); }
-		MATRICE_HOST_FINL const auto& names(std::size_t i = 0) const { return (m_names[i]); }
-		MATRICE_HOST_FINL const auto count(std::size_t _Idx = 0) const { return m_names[_Idx].size(); }
+		MATRICE_HOST_FINL auto& names(size_t i = 0) { return (m_names[i]); }
+		MATRICE_HOST_FINL const auto& names(size_t i = 0) const { return (m_names[i]); }
+		MATRICE_HOST_FINL const auto count(size_t _Idx = 0) const { return m_names[_Idx].size(); }
 
 		MATRICE_HOST_FINL auto& path() { return m_path; }
 		MATRICE_HOST_FINL const auto& path() const { return m_path; }
