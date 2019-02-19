@@ -315,9 +315,13 @@ DGE_MATRICE_BEGIN namespace io {
 using directory = detail::_Dir_impl<detail::folder_tag>;
 using folder_collector = detail::_Collector<detail::folder_tag>;
 using file_collector = detail::_Collector<detail::file_tag>;
+
 template<typename _Ty = std::float_t>
 using data_loader = detail::_Data_loader_impl<_Ty, detail::loader_tag>;
-using default_data_loader = data_loader<std::float_t>;
+
+using data_loader_uint8 = data_loader<uint8_t>;
+using data_loader_uint32 = data_loader<uint32_t>;
+using data_loader_f32 = data_loader<float_t>;
 
 template<std::size_t _N, typename _Cont>
 MATRICE_HOST_FINL auto serial(const _Cont& _L) {
