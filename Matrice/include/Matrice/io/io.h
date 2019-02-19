@@ -326,9 +326,10 @@ using data_loader_uint8 = data_loader<uint8_t>;
 using data_loader_uint32 = data_loader<uint32_t>;
 using data_loader_f32 = data_loader<float_t>;
 
-template<std::size_t _N, typename _Cont>
+template<size_t _N, typename _Cont>
 MATRICE_HOST_FINL auto serial(const _Cont& _L) {
-	DGELOM_CHECK(_N<_L.size(), "The size _N being serialized over range of _L.");
+	static_assert(_N >= 1, "_N must be no less than 1.");
+	DGELOM_CHECK(_N<=_L.size(), "The size _N being serialized over range of _L.");
 	return tuple_n<_N - 1>::_(_L.data());
 }
 
