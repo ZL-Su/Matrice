@@ -105,11 +105,15 @@ public:
 	 * \forward iterate to retrieve data paths with common loader.
 	 */
 	MATRICE_HOST_INL auto forward() const {
-		_Mypos++;
 		std::vector<data_type> _Data;
 		for (const auto& _Idx : range(0, _Mydir.size())) {
-			_Data.emplace_back(_Myloader(_Mydir[_Idx] + _Mynames[_Idx][_Mypos]));
+			const auto& _Names = _Mynames[_Idx];
+#ifdef _DEBUG
+			DGELOM_CHECK(_Mypos<_Names.size(), "file list subscript out of range.");
+#endif
+			_Data.emplace_back(_Myloader(_Mydir[_Idx]+_Names[_Mypos]));
 		}
+		_Mypos++;
 		return std::forward<decltype(_Data)>(_Data);
 	}
 	/**
@@ -117,16 +121,14 @@ public:
 	 */
 	template<typename _Fn>
 	MATRICE_HOST_INL auto forward(_Fn&& _Loader) const {
-		_Mypos++;
-		auto _Op = [&](auto i) {return _Loader(_Mydir[i] + _Mynames[i][_Mypos]); };
-
+		auto _Op = [&](auto i){return _Loader(_Mydir[i]+_Mynames[i][_Mypos]); };
 		auto _First = _Op(0);
 		std::vector<remove_reference_t<decltype(_First)>> _Data;
 		_Data.emplace_back(_First);
 		for (const auto& _Idx : range(1, _Mydir.size())) {
 			_Data.emplace_back(_Op(_Idx));
 		}
-
+		_Mypos++;
 		return std::forward<decltype(_Data)>(_Data);
 	}
 	/**
@@ -170,14 +172,14 @@ public:
 	 */
 	MATRICE_HOST_FINL _Mydir_type::container& file_names(std::size_t _Idx) {
 #ifdef _DEBUG
-		DGELOM_CHECK(_Idx >= _Mynames.size(), "_Idx over range of field ::_Mynames.");
+		DGELOM_CHECK(_Idx<_Mynames.size(), "_Idx over range of field ::_Mynames.");
 #endif // _DEBUG
 
 		return (_Mynames)[_Idx];
 	}
 	MATRICE_HOST_FINL const _Mydir_type::container& file_names(std::size_t _Idx) const {
 #ifdef _DEBUG
-		DGELOM_CHECK(_Idx >= _Mynames.size(), "_Idx over range of field ::_Mynames.");
+		DGELOM_CHECK(_Idx<_Mynames.size(), "_Idx over range of field ::_Mynames.");
 #endif // _DEBUG
 		return (_Mynames)[_Idx];
 	}
@@ -189,26 +191,34 @@ public:
 		return (_Mydepth);
 	}
 
+	/**
+	 *\brief Operator to check if all files are loaded
+	 */
+	MATRICE_HOST_INL operator bool() const {
+		return (_Mypos < _Mydepth);
+	}
+
 private:
 	MATRICE_HOST_INL void _Collect_fnames() {
+		using collector_t = _Collector<file_tag>;
 		if (_Mydir.size() == 0) {//no subfolder(s)
-			_Mynames.emplace_back(_Collector<file_tag>::get(_Mydir[0]));
+			_Mynames.emplace_back(collector_t::get(_Mydir[0]));
 			_Mydepth = _Mynames.front().size();
 			return;
 		}
 		_Mynames.resize(_Mydir.size());
 		for (const auto _Idx : range(0, _Mynames.size())) {
-			_Mynames[_Idx] = _Collector<file_tag>::get(_Mydir[_Idx]);
+			_Mynames[_Idx] = collector_t::get(_Mydir[_Idx]);
 			if (auto _Cnt = _Mynames[_Idx].size(); _Cnt < _Mydepth)
-				std::swap(_Mydepth, _Cnt);
+				_Mydepth = _Cnt;
 		}
 	}
 
 	_Mydir_type _Mydir;
-	mutable index_t _Mypos = -1;
+	mutable index_t _Mypos = 0;
+	index_t _Mydepth = std::numeric_limits<index_t>::max();
 	std::vector<_Mydir_type::container> _Mynames;
 	std::function<data_type(_Mydir_type::value_type&&)> _Myloader;
-	std::size_t _Mydepth = std::numeric_limits<std::size_t>::max();
 };
 
 _DETAIL_END } DGE_MATRICE_END
