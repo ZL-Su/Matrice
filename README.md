@@ -1,6 +1,7 @@
-![v2019 001](../master/ivm.svg)
+<img src="../master/ivm.svg" width="800">
 
-# IVM(R) Matrice Library
+# IVM(R) Matrice Library 
+<img src="../master/version.svg" width="80"/>
 
 A libary for numerical computation, includes basic linear algebra (vector, matrix, linear system) operations, auto-differentiation, and non-linear optimization, etc. The library contains two parts, the first part is a Fortran kernel library which supplies the basic linear arithmatic operations; the second part is a modern C++ library which aims to implement efficient and elegant numeric computation.
 
