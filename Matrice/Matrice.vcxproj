@@ -237,6 +237,7 @@
     <ClInclude Include="include\Matrice\algs\deeplearning\caffe2\utils\TypeTraits.h" />
     <ClInclude Include="include\Matrice\algs\deeplearning\caffe2\utils\zmq_helper.h" />
     <ClInclude Include="include\Matrice\algs\deeplearning\_kernels.h" />
+    <ClInclude Include="include\Matrice\algs\erroranalysis\_common.h" />
     <ClInclude Include="include\Matrice\algs\geometry\normalization.h" />
     <ClInclude Include="include\Matrice\algs\geometry\transform.h" />
     <ClInclude Include="include\Matrice\algs\imageproc.hpp" />

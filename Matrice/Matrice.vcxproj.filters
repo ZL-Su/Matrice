@@ -82,9 +82,6 @@
     <Filter Include="Header Files\Detail">
       <UniqueIdentifier>{fafe41e5-0b0e-4975-b5ca-72bd98101be4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Detail\inl">
-      <UniqueIdentifier>{09339ca4-a7f2-41af-9dce-ed8962478bb9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Detail\range">
       <UniqueIdentifier>{165383fa-e670-4f08-8f52-f59cf41de1d4}</UniqueIdentifier>
     </Filter>
@@ -168,6 +165,12 @@
     </Filter>
     <Filter Include="Header Files\Detail\matrix\inline">
       <UniqueIdentifier>{b88d248b-30ee-4f19-8369-13b6e621a9d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Detail\inline">
+      <UniqueIdentifier>{09339ca4-a7f2-41af-9dce-ed8962478bb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Algs\ErrorAnalysis">
+      <UniqueIdentifier>{bc759b18-c791-4c6d-9888-7e0b7e7e079b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -690,6 +693,9 @@
     <ClInclude Include="include\Matrice\private\math\_config.h">
       <Filter>Header Files\Detail\math</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\algs\erroranalysis\_common.h">
+      <Filter>Header Files\Algs\ErrorAnalysis</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
@@ -819,10 +825,10 @@
     </None>
     <None Include="cpp.hint" />
     <None Include="include\Matrice\private\_similarity.inl">
-      <Filter>Header Files\Detail\inl</Filter>
+      <Filter>Header Files\Detail\inline</Filter>
     </None>
     <None Include="include\Matrice\private\inl\_storage_base.inl">
-      <Filter>Header Files\Detail\inl</Filter>
+      <Filter>Header Files\Detail\inline</Filter>
     </None>
     <None Include="include\Matrice\private\nonfree\inl\_lnalge.inl">
       <Filter>Header Files\Detail\nonfree\inl</Filter>

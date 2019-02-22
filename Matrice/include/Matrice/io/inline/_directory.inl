@@ -80,6 +80,13 @@ public:
 	}
 
 	/**
+	 * \return path of current directory
+	 */
+	MATRICE_HOST_INL value_type path() const {
+		return std::forward<value_type>(_Mypath.string());
+	}
+
+	/**
 	 * \return size (number of subfolders) of current directory
 	 */
 	MATRICE_HOST_INL const auto size() const {
