@@ -166,8 +166,13 @@ public:
 		return _op(_Fin);
 	}
 
+	/**
+	 *\brief read data from a file
+	 *\param <_N0, _N1> are the 1-based indices of the begin and end columns to be read. 
+	 */
 	template<typename _Ty, size_t _N0, size_t _N1 = _N0>
 	static MATRICE_HOST_INL auto read(const std::string& _Path, size_t _Skips = 0) {
+		static_assert(_N0 <= _N1, "_N1 must be greater than or equal to _N0");
 		using value_type = _Ty;
 		DGELOM_CHECK(fs::exists(fs::path(_Path)),"'"+_Path+"' does not exist!");
 		std::ifstream _Fin(_Path);
@@ -177,18 +182,27 @@ public:
 		for (const auto _Idx : range(0, _Skips)) {
 			std::getline(_Fin, _Line);
 		}
-
-		std::array<value_type, -~(_N1-_N0)> _Myline;
-		std::vector<decltype(_Myline)> _Data;
-		while (std::getline(_Fin, _Line)) {
-			auto _Res = split<value_type>(_Line, ',');
-			for (auto _Idx = ~-_N0; _Idx < _N1; ++_Idx) {
-				_Myline[-~(_Idx -_N0)] = _Res[_Idx];
+		
+		if constexpr (_N1 - _N0 > 1) {
+			std::array<value_type, -~(_N1 - _N0)> _Myline;
+			std::vector<decltype(_Myline)> _Data;
+			while (std::getline(_Fin, _Line)) {
+				auto _Res = split<value_type>(_Line, ',');
+				for (auto _Idx = ~- _N0; _Idx < _N1; ++_Idx) {
+					_Myline[-~(_Idx - _N0)] = _Res[_Idx];
+				}
+				_Data.emplace_back(_Myline);
 			}
-			_Data.emplace_back(_Myline);
+			return std::forward<decltype(_Data)>(_Data);
 		}
-
-		return std::forward<decltype(_Data)>(_Data);
+		else {
+			std::vector<value_type> _Data;
+			while (std::getline(_Fin, _Line)) {
+				auto _Res = split<value_type>(_Line, ',');
+				_Data.emplace_back(_Res[_N0-1]);
+			}
+			return std::forward<decltype(_Data)>(_Data);
+		}
 	}
 
 	// \single-stream output
@@ -328,7 +342,7 @@ using data_loader_f32 = data_loader<float_t>;
 
 template<size_t _N, typename _Cont>
 MATRICE_HOST_FINL auto serial(const _Cont& _L) {
-	static_assert(_N >= 1, "_N must be no less than 1.");
+	static_assert(_N>=1, "_N must be no less than 1.");
 	DGELOM_CHECK(_N<=_L.size(), "The size _N being serialized over range of _L.");
 	return tuple_n<_N - 1>::_(_L.data());
 }
