@@ -693,23 +693,27 @@ public:
 	 * \copy from another data block
 	 */
 	template<typename _It>
-	MATRICE_GLOBAL_FINL _Myt& from(const _It _Data) {
+	MATRICE_GLOBAL_FINL _Derived& from(const _It _Data) {
 #ifdef _DEBUG
 		DGELOM_CHECK(_Data + this->size() - 1, "Input length of _Data must be greater or equal to this->size().");
 #endif // _DEBUG
 		for (auto _Idx = 0; _Idx < size(); ++_Idx)
 			m_data[_Idx] = static_cast<value_type>(_Data[_Idx]);
+
+		return (*static_cast<_Derived*>(this));
 	}
 	/**
 	 * \convert from another data block by function _Fn
 	 */
 	template<typename _It, typename _Op>
-	MATRICE_GLOBAL_FINL _Myt& from(const _It _Data, _Op&& _Fn) {
+	MATRICE_GLOBAL_FINL _Derived& from(const _It _Data, _Op&& _Fn) {
 #ifdef _DEBUG
 		DGELOM_CHECK(_Data + this->size() - 1, "Input length of _Data must be greater or equal to this->size().");
 #endif // _DEBUG
 		for(auto _Idx = 0; _Idx < size(); ++_Idx)
 			m_data[_Idx] = _Fn(static_cast<value_type>(_Data[_Idx]));
+
+		return (*static_cast<_Derived*>(this));
 	}
 	/**
 	 * \brief Stack from a sequence of vectors with same size, _Vecty can be any type that has members .size() and .data()
@@ -717,7 +721,7 @@ public:
 	 * \param [_Dim] = 0 for row-wise stacking, = 1 for column-wise stacking 
 	 */
 	template<typename _Vecty>
-	MATRICE_HOST_INL _Myt& stack_from(const std::initializer_list<_Vecty>& _L, size_t _Dim = 0) {
+	MATRICE_HOST_INL _Derived& stack_from(const std::initializer_list<_Vecty>& _L, size_t _Dim = 0) {
 		const auto _Rows = _Dim == 0 ? _L.size() : _L.begin()->size();
 		const auto _Cols = _Dim == 0 ? _L.begin()->size() : _L.size();
 
@@ -733,7 +737,7 @@ public:
 		}
 		else DGELOM_ERROR("The _Dim value should be 0 or 1.");
 
-		return (*this);
+		return (*static_cast<_Derived*>(this));
 	}
 	/**
 	 *\brief Replace entries meets _Cond with _Val
