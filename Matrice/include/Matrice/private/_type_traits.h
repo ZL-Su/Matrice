@@ -124,10 +124,9 @@ template<typename T> MATRICE_GLOBAL_INL constexpr bool is_matrix_convertible_v =
 
 template<int _M, int _N> struct allocator_traits {
 	enum {
-		value = _M > 0 && _N > 0 ? LINEAR + COPY :  // stack allocator
-		_M == 0 && _N == -1 ? LINEAR :  // linear device allocator
-		_M == -1 && _N == -1 ? PITCHED :  // pitched device allocator
-#ifdef __CXX11_SHARED__
+		value = (_M==0&&_N==-1) ? LINEAR :  // linear device allocator
+		       (_M==-1&&_N==-1)? PITCHED :  // pitched device allocator
+#if MATRICE_SHARED_STORAGE == 1
 		LINEAR + SHARED  // smart heap or global allocator
 #else
 		LINEAR + COPY    // deep heap or global allocator
