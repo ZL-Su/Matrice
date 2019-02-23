@@ -11,7 +11,7 @@ MATRICE_GLOBAL_FINL Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase()
 template<typename _Ty>
 template<Location _Loc, size_t _Opt>
 MATRICE_GLOBAL_FINL Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(int_t _rows, int_t _cols, pointer _data)
- : my_rows(_rows), my_cols(_cols), my_size(my_rows*my_cols), my_data(_data), my_shared(nullptr/*location==OnStack?nullptr:_data*/), my_owner(location == OnStack ? Owner : Proxy) {}
+ : my_rows(_rows), my_cols(_cols), my_size(my_rows*my_cols), my_data(_data), my_owner(location == OnStack ? Owner : Proxy) {}
 
 template<typename _Ty>
 template<Location _Loc, size_t _Opt>
@@ -45,10 +45,9 @@ MATRICE_GLOBAL_FINL Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(
 template<typename _Ty>
 template<Location _Loc, size_t _Opt>
 MATRICE_GLOBAL_FINL Storage_<_Ty>::DenseBase<_Loc, _Opt>::~DenseBase() {
-#ifndef __CXX11_SHARED__
-	if (my_data && my_owner = Owner){
-		privt::unified_free<value_t, location> _Tidy;
-		_Tidy(my_data);
+#if MATRICE_SHARED_STORAGE == 0
+	if (my_data && my_owner == Owner){
+		internal::_Memory::free<location>(my_data);
 	}
 #endif
 }

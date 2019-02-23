@@ -862,13 +862,13 @@
     <CudaCompile Include="src\private\_dev_funcs.cu">
       <Filter>Source Files\Details\CUDA</Filter>
     </CudaCompile>
-    <CudaCompile Include="src\private\_dev_memory.cu">
-      <Filter>Source Files\Details\CUDA</Filter>
-    </CudaCompile>
     <CudaCompile Include="src\private\_dev_ops.cu">
       <Filter>Source Files\Details\CUDA</Filter>
     </CudaCompile>
     <CudaCompile Include="src\private\cuda\_dev_matrix_base.cu">
+      <Filter>Source Files\Details\CUDA</Filter>
+    </CudaCompile>
+    <CudaCompile Include="src\private\_dev_memory.cpp">
       <Filter>Source Files\Details\CUDA</Filter>
     </CudaCompile>
   </ItemGroup>

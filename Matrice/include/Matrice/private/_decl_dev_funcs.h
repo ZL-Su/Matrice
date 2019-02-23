@@ -16,18 +16,18 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
-#include <type_traits>
 #include "../util/_macros.h"
-#if(defined __enable_cuda__ && !defined __disable_cuda__)
-MATRICE_PRIVATE_BEGIN
-template<typename _Scalar, typename = typename std::enable_if<std::is_scalar<_Scalar>::value>::type>
-_Scalar* device_malloc(std::size_t& w, std::size_t h);
-template<typename _Scalar, typename = typename std::enable_if<std::is_scalar<_Scalar>::value>::type>
-_Scalar* global_malloc(std::size_t size);
-template<typename _Scalar, int _Opt, typename = typename std::enable_if<std::is_scalar<_Scalar>::value>::type>
-_Scalar* device_memcpy(_Scalar* hptr, _Scalar* dptr, size_t w, size_t h = 1, size_t p = 1);
-template<typename _Scalar, typename = typename std::enable_if<std::is_scalar<_Scalar>::value>::type>
-void device_free(_Scalar* dptr);
-template<int _Opt = 0> void _Device_sync();
-MATRICE_PRIVATE_END
-#endif
+#include "../util/_std_wrapper.h"
+//#if(defined __enable_cuda__ && !defined __disable_cuda__)
+//MATRICE_PRIVATE_BEGIN
+//template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
+//_Ty* device_malloc(size_t& w, size_t h);
+//template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
+//_Ty* global_malloc(size_t size);
+//template<size_t _Kind, typename _Ty>
+//_Ty* device_memcpy(_Ty* hptr, _Ty* dptr, size_t w, size_t h = 1, size_t p = 1);
+//template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
+//void device_free(_Ty* dptr);
+//template<int _Opt = 0> void _Device_sync();
+//MATRICE_PRIVATE_END
+//#endif

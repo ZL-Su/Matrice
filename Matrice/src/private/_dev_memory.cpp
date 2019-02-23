@@ -17,20 +17,17 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #include <complex>
 #include <stdexcept>
-#include "../../include/Matrice/util/_macros.h"
-#include "../../include/Matrice/private/_devops.h"
-#include "../../include/Matrice/private/_unified_memory.h"
+#include "../../include/Matrice/private/_memory.h"
 
 #if (defined __enable_cuda__ && !defined __disable_cuda__)
 #include <cuda_runtime.h>
 #pragma warning(disable: 4715 4661 4224 4267 4244 4819 4199)
 
-using std::size_t;
 using std::complex;
 using uchar = unsigned char;
 MATRICE_PRIVATE_BEGIN
 //<note> w is the columns, h is the rows </note>
-template<typename _Ty, typename = std::enable_if_t<std::is_scalar_v<_Ty>>>
+template<typename _Ty, typename>
 _Ty* device_malloc(size_t& w, size_t h) {
 	cudaError_t sts; _Ty* dptr;
 	switch (h)
@@ -47,7 +44,7 @@ _Ty* device_malloc(size_t& w, size_t h) {
 	if (sts != cudaSuccess) throw std::runtime_error(cudaGetErrorString(sts));
 	return dptr;
 }
-template<typename _Ty, typename = std::enable_if_t<std::is_scalar_v<_Ty>>>
+template<typename _Ty, typename>
 _Ty* global_malloc(size_t N) {
 	_Ty* dptr; auto sts = cudaMallocManaged(&dptr, N * sizeof(_Ty));
 	if (sts != cudaSuccess)
@@ -55,10 +52,10 @@ _Ty* global_malloc(size_t N) {
 	return dptr;
 }
 //<note> w is the columns, h is the rows, p is the pitch size if pitched memory is used </note>
-template<typename _Ty, int _Opt, typename = std::enable_if_t<std::is_scalar_v<_Ty>>>
-void device_memcpy(_Ty* hptr, _Ty* dptr, size_t w, size_t h = 1, size_t p = 1) {
+template<size_t _Kind, typename _Ty, typename>
+void device_memcpy(_Ty* hptr, _Ty* dptr, size_t w, size_t h, size_t p) {
 	cudaError_t sts; size_t hpitch = w * h * sizeof(_Ty);
-	if (_Opt == ::cudaMemcpyHostToDevice) {
+	if (_Kind == ::cudaMemcpyHostToDevice) {
 		if (p == 1) {
 			sts = cudaMemcpy(dptr, hptr, hpitch, cudaMemcpyHostToDevice);
 		}
@@ -66,7 +63,7 @@ void device_memcpy(_Ty* hptr, _Ty* dptr, size_t w, size_t h = 1, size_t p = 1) {
 			sts = cudaMemcpy2D(dptr, p, hptr, hpitch, hpitch, 1, cudaMemcpyHostToDevice);
 		}
 	}
-	if (_Opt == ::cudaMemcpyDeviceToHost) {
+	if (_Kind == ::cudaMemcpyDeviceToHost) {
 		if (p == 1) {
 			sts = cudaMemcpy(hptr, dptr, hpitch, ::cudaMemcpyDeviceToHost);
 		}
@@ -76,7 +73,7 @@ void device_memcpy(_Ty* hptr, _Ty* dptr, size_t w, size_t h = 1, size_t p = 1) {
 	}
 	if (sts != cudaSuccess) throw std::runtime_error(cudaGetErrorString(sts));
 }
-template<typename _Ty, typename = std::enable_if_t<std::is_scalar_v<_Ty>>>
+template<typename _Ty, typename>
 void device_free(_Ty* dptr) { 
 	if (dptr) {
 		auto sts = cudaFree(dptr);
@@ -86,57 +83,26 @@ void device_free(_Ty* dptr) {
 }
 
 #pragma region <!-- explicit intantiation -->
-#define _DEVMALLOC(type) \
-template type* device_malloc(size_t&, size_t); \
-template type* global_malloc(size_t); \
-template void device_free(type*);
-#define _DEVMEMCPY(type, op) \
-template void device_memcpy<type, op>(type*, type*, size_t, size_t, size_t);
+#define _DEVMALLOC(T) \
+template T* device_malloc(size_t&, size_t); \
+template T* global_malloc(size_t); \
+template void device_free(T*);
 
-_DEVMALLOC(int)        _DEVMALLOC(char)
-_DEVMALLOC(uchar)      _DEVMALLOC(bool)
-_DEVMALLOC(float)      _DEVMALLOC(double)
-_DEVMEMCPY(int, 1)     _DEVMEMCPY(int, 2)
-_DEVMEMCPY(char, 1)    _DEVMEMCPY(char, 2)
-_DEVMEMCPY(bool, 1)    _DEVMEMCPY(bool, 2)
-_DEVMEMCPY(uchar, 1)   _DEVMEMCPY(uchar, 2)
-_DEVMEMCPY(float, 1)   _DEVMEMCPY(float, 2)
-_DEVMEMCPY(double, 1)  _DEVMEMCPY(double, 2)
+#define _DEVMEMCPY(T) \
+template void device_memcpy<1,T,void>(T*, T*, size_t, size_t, size_t); \
+template void device_memcpy<2,T,void>(T*, T*, size_t, size_t, size_t);
+
+_DEVMALLOC(int)    _DEVMALLOC(char)
+_DEVMALLOC(uchar)  _DEVMALLOC(bool)
+_DEVMALLOC(float)  _DEVMALLOC(double)
+_DEVMEMCPY(int)    _DEVMEMCPY(char)
+_DEVMEMCPY(bool)   _DEVMEMCPY(uchar)
+_DEVMEMCPY(float)  _DEVMEMCPY(double)
 
 #pragma endregion
 
 MATRICE_PRIVATE_END
 
-#pragma region <!-- Impl. for device_memcpy -->
-#define _DEVMEMCPY_IMPL(type, option) \
-template void dgelom::device::device_memcpy<type, option> \
-			::impl(pointer, pointer, size_t, size_t, size_t);
-
-template<typename T>
-template<typename... _Args> MATRICE_GLOBAL
-void dgelom::device::device_memcpy<T, 0>::impl(_Args ...args) {
-	return;
-}
-template<typename T>
-template<typename... _Args> MATRICE_GLOBAL
-void dgelom::device::device_memcpy<T, 1>::impl(_Args ...args) {
-	dgelom::privt::device_memcpy<T, option>(args...);
-}
-template<typename T>
-template<typename... _Args> MATRICE_GLOBAL
-void dgelom::device::device_memcpy<T, 2>::impl(_Args ...args) {
-	dgelom::privt::device_memcpy<T, option>(args...);
-}
-
-_DEVMEMCPY_IMPL(uchar, 1)
-_DEVMEMCPY_IMPL(float, 1)
-_DEVMEMCPY_IMPL(double, 1)
-_DEVMEMCPY_IMPL(uchar,  2)
-_DEVMEMCPY_IMPL(float,  2)
-_DEVMEMCPY_IMPL(double, 2)
-#pragma endregion
-
 #undef _DEVMALLOC
 #undef _DEVMEMCPY
-#undef _DEVMEMCPY_IMPL
 #endif

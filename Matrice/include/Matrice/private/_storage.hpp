@@ -43,12 +43,12 @@ public:
 	using pointer   =            _Ty*;
 	using reference =            _Ty&;
 	using int_t     =  std::ptrdiff_t;
-	using idx_t     =     std::size_t;
+	using idx_t     =          size_t;
 #elif
 	typedef _Ty               value_t;
 	typedef _Ty*              pointer;
 	typedef _Ty&            reference;
-	typedef std::size_t         idx_t;
+	typedef size_t              idx_t;
 	typedef std::ptrdiff_t      int_t;
 #endif
 	enum Ownership { Owner = 1, Refer = 0, Proxy = -1, Dummy = -2 };
@@ -56,7 +56,7 @@ public:
 	template<
 		Location _Loc = UnSpecified, 
 		size_t _Opt = LINEAR+
-#ifdef __CXX11_SHARED__
+#if MATRICE_SHARED_STORAGE == 1
 		SHARED
 #else
 		COPY
@@ -64,7 +64,8 @@ public:
 			 > 
 	MATRICE_ALIGNED_CLASS DenseBase {
 	public:
-		enum { location = _Loc, option = _Opt };
+		static constexpr auto location = _Loc;
+		enum { /*location = _Loc, */option = _Opt };
 		MATRICE_GLOBAL_FINL DenseBase();
 		MATRICE_GLOBAL_FINL DenseBase(int_t _rows, int_t _cols, pointer _data);
 		MATRICE_GLOBAL_FINL DenseBase(int_t _rows, int_t _cols, pointer _data, std::initializer_list<value_t> _list);
@@ -81,9 +82,10 @@ public:
 		///<brief> operators </brief>
 		MATRICE_GLOBAL DenseBase& operator=(const DenseBase& _other);
 		MATRICE_GLOBAL DenseBase& operator=(DenseBase&& _other);
-		MATRICE_GLOBAL_FINL auto& operator=(std::initializer_list<value_t> _list);
+		MATRICE_GLOBAL_INL auto& operator=(std::initializer_list<value_t> _list);
 
 		///<brief> methods </brief>
+		MATRICE_GLOBAL DenseBase& create(int_t _Rows, int_t _Cols);
 		MATRICE_GLOBAL_FINL int_t& size() const { return (my_size);}
 		MATRICE_GLOBAL_FINL int_t& rows() const { return (my_rows); }
 		MATRICE_GLOBAL_FINL int_t& cols() const { return (my_cols); }
@@ -94,20 +96,20 @@ public:
 			my_rows = rows, my_cols = cols, my_data = data;
 		}
 		MATRICE_GLOBAL_FINL bool shared() const {
-#ifdef __CXX11_SHARED__
+#if MATRICE_SHARED_STORAGE == 1
 			return (my_shared.get());
 #else
-			return 0;
+			return std::false_type::value;
 #endif
 		}
 		MATRICE_GLOBAL_FINL void free() {
 			my_cols = 0, my_rows = 0, my_size = 0;
 			my_owner = Dummy, my_pitch = 0;
 			my_location = UnSpecified;
-			if (my_shared) {
-				my_shared = nullptr;
-				my_data = nullptr;
-			}
+#if MATRICE_SHARED_STORAGE == 1
+			if (my_shared) my_shared = nullptr;
+#endif
+			my_data = nullptr;
 		}
 
 	protected:
@@ -117,7 +119,7 @@ public:
 		mutable Ownership my_owner = Owner;
 		std::size_t my_pitch = 1; //used for CUDA pitched malloc only
 	private:
-#ifdef __CXX11_SHARED__
+#if MATRICE_SHARED_STORAGE == 1
 		using SharedPtr = std::shared_ptr<value_t>;
 		SharedPtr my_shared;
 #endif
@@ -209,120 +211,8 @@ public:
 		MATRICE_HOST_INL Allocator(const _Args&... _args) : Base(_args...) {}
 
 		MATRICE_DEVICE_INL Allocator& operator= (const Allocator& _other) { return static_cast<Allocator&>(Base::operator= (_other)); }
-		MATRICE_GLOBAL_INL std::size_t pitch() const { return Base::my_pitch; }
+		MATRICE_GLOBAL_INL size_t pitch() const { return Base::my_pitch; }
 	};
-
-#pragma region <!-- decrepated -->
-	///<brief> specialization allocator classes </brief>
-	template<class DerivedAllocator, Location _Loc> class Base_
-	{
-#ifdef __CXX11__
-		using SharedPtr = std::shared_ptr<value_t>;
-#endif
-	public:
-		Base_() : m_rows(0), m_cols(0), m_location(UnSpecified){}
-		Base_(int rows, int cols) : m_rows(rows), m_cols(cols), m_data(privt::aligned_malloc<value_t>(rows*cols)) {}
-#ifdef __CXX11__
-		Base_(int rows, int cols, bool is_shared) : m_rows(rows), m_cols(cols), m_shared(is_shared)
-		{
-			_SharedData = SharedPtr(privt::aligned_malloc<value_t>(rows*cols), [=](pointer ptr) { privt::aligned_free(ptr); });
-			m_data = _SharedData.get();
-		}
-#endif
-		~Base_()
-		{
-			if ((!m_shared) && m_data) privt::aligned_free(m_data);
-		}
-
-#pragma region operator overload
-		MATRICE_GLOBAL_INL
-		reference operator[](idx_t idx) const { return m_data[idx]; }
-#pragma endregion
-#pragma region public methods
-		MATRICE_GLOBAL_INL std::size_t cols() const { return m_cols; }
-		MATRICE_GLOBAL_INL std::size_t rows() const { return m_rows; }
-		MATRICE_GLOBAL_INL std::size_t size() const { return m_rows * m_cols; }
-		MATRICE_GLOBAL_INL pointer data() const { return (m_data); }
-		MATRICE_GLOBAL_INL pointer ptr(idx_t ridx) const { return (m_data + m_cols*ridx); }
-		MATRICE_GLOBAL_INL loctn_t& location() const { return m_location; }
-#pragma endregion
-
-	protected:
-#ifdef __CXX11__
-		
-		pointer m_data = nullptr;
-#elif       
-		pointer m_data;
-#endif
-		mutable Location m_location = _Loc;
-		std::size_t m_rows, m_cols;
-		bool m_shared = false;
-	private:
-#ifdef __CXX11__
-		SharedPtr _SharedData = nullptr;
-#endif
-	};
-	template<int M, int N> MATRICE_ALIGNED_CLASS ManagedAllocator : public Base_<ManagedAllocator<M, N>, OnStack>
-	{
-		using _Base = Base_<ManagedAllocator<M, N>, OnStack>;
-		using _Base::m_rows;
-		using _Base::m_cols;
-		typedef pointer MyPtr;
-	public:
-		ManagedAllocator() : _Base(M, N) { m_data = &_Data[0]; }
-		ManagedAllocator(int _m, int _n) : _Base(M, N) { m_data = &_Data[0]; }
-
-	private:
-		value_t _Data[M*N];
-		using _Base::m_data;
-	};
-	template<typename = std::enable_if<std::is_arithmetic<_Ty>::value, _Ty>::type>
-	class DynamicAllocator : public Base_<DynamicAllocator<_Ty>, OnHeap>
-	{
-		using _Base = Base_<DynamicAllocator<_Ty>, OnHeap>;
-		using _Base::m_rows;
-		using _Base::m_cols;
-		typedef pointer MyPtr;
-	public:
-		DynamicAllocator() :_Base() {}
-		template<typename IntegerType>
-		DynamicAllocator(const IntegerType& _M, const IntegerType& _N) :_Base(_M, _N) {}
-
-	private:
-		using _Base::m_data;
-	};
-#ifdef __CXX11__
-	template<typename = std::enable_if<std::is_arithmetic<_Ty>::value, _Ty>::type> 
-	class SharedAllocator : public Base_<SharedAllocator<_Ty>, OnHeap>
-	{
-		using _Base = Base_<SharedAllocator<_Ty>, OnHeap>;
-		using _Base::m_rows;
-		using _Base::m_cols;
-	public:
-		SharedAllocator() : _Base() {}
-		template<typename IntegerType>
-		SharedAllocator(const IntegerType& _M, const IntegerType& _N) :_Base(_M, _N, true) {}
-
-	private:
-		using _Base::m_data;
-	};
-#endif
-	template<typename = std::enable_if<std::is_arithmetic<_Ty>::value, _Ty>::type>
-	class UnifiedAllocator : public Base_<UnifiedAllocator<_Ty>, OnGlobal>
-	{
-		using _Base = Base_<UnifiedAllocator<_Ty>, OnGlobal>;
-		using _Base::m_rows;
-		using _Base::m_cols;
-		typedef pointer MyPtr;
-	public:
-		UnifiedAllocator() : _Base() {}
-		template<typename IntegerType>
-		UnifiedAllocator(const IntegerType& _M, const IntegerType& _N) :_Base(_M, _N) {}
-
-	private:
-		using _Base::m_data;
-	};
-#pragma endregion
 };
 }} 
 #include "inl\_storage_base.inl"

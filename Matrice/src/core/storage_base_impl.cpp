@@ -33,7 +33,7 @@ namespace dgelom { namespace detail{
 
 MATRICE_DENSEBASE_SIG::DenseBase(int_t _Rows, int_t _Cols)
 	: my_rows(_Rows), my_cols(_Cols), my_size(_Rows*_Cols) {
-#ifdef __CXX11_SHARED__
+#if MATRICE_SHARED_STORAGE == 1
 	if constexpr (location == Location::OnStack) {
 		// donot use shared pointer for managed memory
 	}
@@ -44,12 +44,12 @@ MATRICE_DENSEBASE_SIG::DenseBase(int_t _Rows, int_t _Cols)
 	}
 #if (defined __enable_cuda__ && !defined __disable_cuda__)
 	else if constexpr (location == Location::OnGlobal) {
-		my_data = privt::global_malloc<value_t>(std::size_t(my_size));
+		my_data = privt::global_malloc<value_t>(size_t(my_size));
 		my_shared = SharedPtr(my_data, 
 			[=](pointer ptr) { privt::device_free(ptr); });
 	}
 	else if constexpr (location == Location::OnDevice) {
-		std::size_t w = my_cols, h = my_rows;
+		size_t w = my_cols, h = my_rows;
 		if (w == 1) std::swap(w, h);
 		my_pitch = w;
 		my_data = privt::device_malloc<value_t>(my_pitch, h);
@@ -63,15 +63,15 @@ MATRICE_DENSEBASE_SIG::DenseBase(int_t _Rows, int_t _Cols)
 	if constexpr (location == Location::OnStack) {
 		// donot do anything
 	}
-	if constexpr (location == Location::OnHeap) {
-		my_data = privt::aligned_malloc<value_t>(_size);
+	else if constexpr (location == Location::OnHeap) {
+		my_data = privt::aligned_malloc<value_t>(my_size);
 	} 
 #if (defined __enable_cuda__ && !defined __disable_cuda__)
-	if constexpr (location == Location::OnGlobal) {
-		my_data = privt::global_malloc<value_t>(std::size_t(my_size));
+	else if constexpr (location == Location::OnGlobal) {
+		my_data = privt::global_malloc<value_t>(size_t(my_size));
 	}
-	if constexpr (location == Location::OnDevice) {
-		std::size_t w = my_cols, h = my_rows;
+	else if constexpr (location == Location::OnDevice) {
+		size_t w = my_cols, h = my_rows;
 		if (w == 1) std::swap(w, h);
 		my_pitch = w;
 		my_data = privt::device_malloc<value_t>(my_pitch, h);
@@ -92,9 +92,9 @@ MATRICE_DENSEBASE_SIG::DenseBase(int_t rows, int_t cols, const value_t val)
 }	
 
 MATRICE_DENSEBASE_SIG::DenseBase(const DenseBase& _other)
-	: my_rows(_other.my_rows), my_cols(_other.my_cols), my_size(_other.my_size), my_pitch(_other.my_pitch)
-{
-#ifdef __CXX11_SHARED__
+	: my_rows(_other.my_rows), my_cols(_other.my_cols), 
+	my_size(_other.my_size), my_pitch(_other.my_pitch) {
+#if MATRICE_SHARED_STORAGE == 1
 	if constexpr (_Loc == OnStack) {
 		privt::fill_mem(_other.my_data, my_data, my_size);
 		my_owner = _other.my_owner;
@@ -107,25 +107,76 @@ MATRICE_DENSEBASE_SIG::DenseBase(const DenseBase& _other)
 }
 
 MATRICE_DENSEBASE_SIG::DenseBase(DenseBase && _other)
-	: my_rows(_other.my_rows), my_cols(_other.my_cols), my_size(_other.my_size), my_owner(_other.my_owner), my_pitch(_other.my_pitch),
-#ifdef __CXX11_SHARED__
-	my_shared(std::move(_other.my_shared)), my_data(_other.my_data)
-#else
-	my_data(_other.my_data)
-#endif
+	: my_rows(_other.my_rows), my_cols(_other.my_cols), my_size(_other.my_size), my_owner(_other.my_owner), my_pitch(_other.my_pitch), my_data(_other.my_data)
+#if MATRICE_SHARED_STORAGE == 1
+	 , my_shared(std::move(_other.my_shared))
 {
-#ifdef __CXX11_SHARED__
 	_other.my_shared = nullptr;
+#else
+{
 #endif
 	_other.my_rows = 0, _other.my_cols = 0, _other.my_size = 0;
 	_other.my_data = 0, _other.my_owner = Dummy;
 }
 
 MATRICE_DENSEBASE_SIG&
-Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(const DenseBase& _other)
-{
-	my_rows = _other.my_rows, my_cols = _other.my_cols, my_size = _other.my_size;
-#ifdef __CXX11_SHARED__
+Storage_<_Ty>::DenseBase<_Loc, _Opt>::create(int_t _Rows, int_t _Cols) {
+	my_rows = _Rows, my_cols = _Cols, my_size = _Rows * _Cols;
+#if MATRICE_SHARED_STORAGE == 1
+		if constexpr (location == Location::OnStack) {
+			// donot use shared pointer for managed memory
+		}
+		else if constexpr (location == Location::OnHeap) {
+			my_shared = SharedPtr(privt::aligned_malloc<value_t>(my_size),
+				[=](pointer ptr) { privt::aligned_free(ptr); });
+			my_data = my_shared.get();
+		}
+#if (defined __enable_cuda__ && !defined __disable_cuda__)
+		else if constexpr (location == Location::OnGlobal) {
+			my_data = privt::global_malloc<value_t>(size_t(my_size));
+			my_shared = SharedPtr(my_data,
+				[=](pointer ptr) { privt::device_free(ptr); });
+		}
+		else if constexpr (location == Location::OnDevice) {
+			size_t w = my_cols, h = my_rows;
+			if (w == 1) std::swap(w, h);
+			my_pitch = w;
+			my_data = privt::device_malloc<value_t>(my_pitch, h);
+			my_shared = SharedPtr(my_data,
+				[=](pointer ptr) { privt::device_free(ptr); });
+			my_pitch = my_pitch == w ? 1 : my_pitch;
+		}
+#endif
+		else DGELOM_ERROR("Oops, unknown device is used.");
+#else
+		if constexpr (location == Location::OnStack) {
+			// donot do anything
+		}
+		else if constexpr (location == Location::OnHeap) {
+			my_data = privt::aligned_malloc<value_t>(my_size);
+		}
+#if (defined __enable_cuda__ && !defined __disable_cuda__)
+		else if constexpr (location == Location::OnGlobal) {
+			my_data = privt::global_malloc<value_t>(size_t(my_size));
+		}
+		else if constexpr (location == Location::OnDevice) {
+			size_t w = my_cols, h = my_rows;
+			if (w == 1) std::swap(w, h);
+			my_pitch = w;
+			my_data = privt::device_malloc<value_t>(my_pitch, h);
+			my_pitch = my_pitch == w ? 1 : my_pitch;
+		}
+#endif
+		else DGELOM_ERROR("Oops, unknown device is used.");
+#endif
+		return (*this);
+}
+
+MATRICE_DENSEBASE_SIG&
+Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(const DenseBase& _other){
+	my_rows = _other.my_rows, my_cols = _other.my_cols;
+	my_size = _other.my_size, my_pitch = _other.my_pitch;
+#if MATRICE_SHARED_STORAGE == 1
 	if constexpr (_Loc == OnStack) {
 		privt::fill_mem(_other.my_data, my_data, my_size);
 		my_owner = _other.my_owner;
@@ -139,15 +190,13 @@ Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(const DenseBase& _other)
 }
 
 MATRICE_DENSEBASE_SIG& 
-Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(DenseBase&& _other)
-{
+Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(DenseBase&& _other){
 	my_owner = _other.my_owner, my_size = _other.my_size;
 	my_rows = _other.my_rows, my_cols = _other.my_cols;
-#ifdef __CXX11_SHARED__
-	my_shared = std::move(_other.my_shared), my_data = _other.my_data;
-	_other.my_shared = nullptr;
-#else
 	my_data = _other.my_data;
+#if MATRICE_SHARED_STORAGE == 1
+	my_shared = std::move(_other.my_shared);
+	_other.my_shared = nullptr;
 #endif
 	_other.my_rows = 0, _other.my_cols = 0, _other.my_size = 0;
 	_other.my_data = 0, _other.my_owner = Owner;

@@ -363,7 +363,7 @@
   <ItemGroup>
     <CudaCompile Include="src\private\cuda\_dev_matrix_base.cu" />
     <CudaCompile Include="src\private\_dev_funcs.cu" />
-    <CudaCompile Include="src\private\_dev_memory.cu" />
+    <CudaCompile Include="src\private\_dev_memory.cpp" />
     <CudaCompile Include="src\private\_dev_ops.cu" />
   </ItemGroup>
   <ItemGroup>

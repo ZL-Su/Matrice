@@ -17,7 +17,7 @@ void Matrix_<_Ty, 0, 0>::__create_impl(size_t rows, size_t cols) {
 }
 template<typename _Ty>
 void Matrix_<_Ty, -1, 0>::__create_impl(size_t rows, size_t cols) {
-	_Mybase::m_storage = decltype(_Mybase::m_storage)(rows, cols);
+	_Mybase::m_storage.create(rows, cols);
 	_Mybase::m_rows = rows, _Mybase::m_cols = cols;
 	_Mybase::_Myshape = { 1,1,rows,cols };
 	_Mybase::m_data = internal::_Proxy_checked(_Mybase::m_storage.data());
@@ -25,7 +25,7 @@ void Matrix_<_Ty, -1, 0>::__create_impl(size_t rows, size_t cols) {
 }
 template<typename _Ty>
 void Matrix_<_Ty, -1, -1>::__create_impl(size_t rows, size_t cols) {
-	_Mybase::m_storage = decltype(_Mybase::m_storage)(rows, cols);
+	_Mybase::m_storage.create(rows, cols);
 	_Mybase::m_rows = rows, _Mybase::m_cols = cols;
 	_Mybase::_Myshape = { 1,1,rows,cols };
 	_Mybase::m_data = internal::_Proxy_checked(_Mybase::m_storage.data());
