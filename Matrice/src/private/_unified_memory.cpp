@@ -14,14 +14,11 @@ MATRICE_PRIVATE_BEGIN
 template<typename _Scalar, Location _Host>
 _Scalar* unified_sync<_Scalar, _Host, OnDevice, LINEAR>::op(pointer _Dst, const_pointer _Src, size_t _Rows, size_t _Cols, size_t _1)
 {
-	auto _Stat = cudaMemcpy(_Dst, _Src, _Rows*_Cols * sizeof(_Scalar), ::cudaMemcpyHostToDevice);
-	if (_Stat != cudaSuccess){
+	const auto _Stat = cudaMemcpy(_Dst, _Src, _Rows*_Cols * sizeof(_Scalar), ::cudaMemcpyHostToDevice);
 #ifdef _DEBUG
-		throw std::runtime_error(cudaGetErrorString(_Stat));
+	DGELOM_CHECK(_Stat == cudaSuccess, cudaGetErrorString(_Stat));
 #endif
-		return nullptr;
-	}
-	else return (_Dst);
+	return (_Dst);
 }
 template int* unified_sync<int, OnStack, OnDevice, LINEAR>::op(pointer, const_pointer, size_t, size_t, size_t);
 template char* unified_sync<char, OnStack, OnDevice, LINEAR>::op(pointer, const_pointer, size_t, size_t, size_t);
