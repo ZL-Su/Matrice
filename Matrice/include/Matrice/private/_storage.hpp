@@ -51,7 +51,7 @@ public:
 	typedef size_t              idx_t;
 	typedef std::ptrdiff_t      int_t;
 #endif
-	enum Ownership { Owner = 1, Refer = 0, Proxy = -1, Dummy = -2 };
+	enum Ownership { Owner = 1, Refer = 0, Proxy = -1, Empty = -2 };
 	///<brief> data memory </brief>
 	template<
 		Location _Loc = UnSpecified, 
@@ -104,7 +104,7 @@ public:
 		}
 		MATRICE_GLOBAL_FINL void free() {
 			my_cols = 0, my_rows = 0, my_size = 0;
-			my_owner = Dummy, my_pitch = 0;
+			my_owner = Empty, my_pitch = 0;
 			my_location = UnSpecified;
 #if MATRICE_SHARED_STORAGE == 1
 			if (my_shared) my_shared = nullptr;
@@ -116,7 +116,7 @@ public:
 		mutable int_t my_rows, my_cols;
 		mutable int_t my_size;
 		mutable pointer my_data;
-		mutable Ownership my_owner = Owner;
+		mutable Ownership my_owner = Empty;
 		std::size_t my_pitch = 1; //used for CUDA pitched malloc only
 	private:
 #if MATRICE_SHARED_STORAGE == 1
@@ -149,7 +149,7 @@ public:
 			Base::my_cols = _other.my_cols;
 			Base::my_rows = _other.my_rows;
 			Base::my_size = _other.my_size;
-			Base::my_owner = _other.my_owner;
+			Base::my_owner = Owner;
 			privt::fill_mem(_other._Data, _Data, Base::my_size);
 			return (*this);
 		}

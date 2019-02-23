@@ -32,7 +32,7 @@ Storage_<_Ty>::DenseBase<_Loc, _Opt>
 namespace dgelom { namespace detail{
 
 MATRICE_DENSEBASE_SIG::DenseBase(int_t _Rows, int_t _Cols)
-	: my_rows(_Rows), my_cols(_Cols), my_size(_Rows*_Cols) {
+	: my_rows(_Rows), my_cols(_Cols), my_size(_Rows*_Cols), my_owner(Ownership::Owner) {
 #if MATRICE_SHARED_STORAGE == 1
 	if constexpr (location == Location::OnStack) {
 		// donot use shared pointer for managed memory
@@ -92,21 +92,27 @@ MATRICE_DENSEBASE_SIG::DenseBase(int_t rows, int_t cols, const value_t val)
 }	
 
 MATRICE_DENSEBASE_SIG::DenseBase(const DenseBase& _other)
-	: my_rows(_other.my_rows), my_cols(_other.my_cols), 
-	my_size(_other.my_size), my_pitch(_other.my_pitch) {
 #if MATRICE_SHARED_STORAGE == 1
-	if constexpr (_Loc == OnStack) {
-		privt::fill_mem(_other.my_data, my_data, my_size);
-		my_owner = _other.my_owner;
+	: my_rows(_other.my_rows), my_cols(_other.my_cols),
+	my_size(_other.my_size), my_pitch(_other.my_pitch) {
+	if (this != std::addressof(_other)) {
+		if constexpr (_Loc == OnStack) {
+			privt::fill_mem(_other.my_data, my_data, my_size);
+			my_owner = _other.my_owner;
+		}
+		else my_shared = _other.my_shared, my_data = _other.my_data, my_owner = Refer;
 	}
-	else my_shared = _other.my_shared, my_data = _other.my_data, my_owner = Refer;
-#else
-	privt::unified_sync<value_t, _other.location, location, option>::op(my_data, _other.my_data, my_rows, my_cols, my_pitch);
-	my_owner = _other.my_owner;
-#endif
 }
+#else
+{
+	if (this != std::addressof(_other)) {
+		this->create(_other.rows(), _other.cols());
+		privt::unified_sync<value_t, _other.location, location, option>::op(my_data, _other.my_data, my_rows, my_cols, my_pitch);
+	}
+}
+#endif
 
-MATRICE_DENSEBASE_SIG::DenseBase(DenseBase && _other)
+MATRICE_DENSEBASE_SIG::DenseBase(DenseBase&& _other)
 	: my_rows(_other.my_rows), my_cols(_other.my_cols), my_size(_other.my_size), my_owner(_other.my_owner), my_pitch(_other.my_pitch), my_data(_other.my_data)
 #if MATRICE_SHARED_STORAGE == 1
 	 , my_shared(std::move(_other.my_shared))
@@ -116,12 +122,13 @@ MATRICE_DENSEBASE_SIG::DenseBase(DenseBase && _other)
 {
 #endif
 	_other.my_rows = 0, _other.my_cols = 0, _other.my_size = 0;
-	_other.my_data = 0, _other.my_owner = Dummy;
+	_other.my_data = 0, _other.my_owner = Empty;
 }
 
 MATRICE_DENSEBASE_SIG&
-Storage_<_Ty>::DenseBase<_Loc, _Opt>::create(int_t _Rows, int_t _Cols) {
-	my_rows = _Rows, my_cols = _Cols, my_size = _Rows * _Cols;
+Storage_<_Ty>::DenseBase<_Loc,_Opt>::create(int_t _Rows, int_t _Cols){
+	my_rows = _Rows, my_cols = _Cols;
+	my_size = _Rows*_Cols, my_owner = Owner;
 #if MATRICE_SHARED_STORAGE == 1
 		if constexpr (location == Location::OnStack) {
 			// donot use shared pointer for managed memory
@@ -174,32 +181,36 @@ Storage_<_Ty>::DenseBase<_Loc, _Opt>::create(int_t _Rows, int_t _Cols) {
 
 MATRICE_DENSEBASE_SIG&
 Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(const DenseBase& _other){
-	my_rows = _other.my_rows, my_cols = _other.my_cols;
-	my_size = _other.my_size, my_pitch = _other.my_pitch;
+	if (this != std::addressof(_other)) {
+		my_rows = _other.my_rows, my_cols = _other.my_cols;
+		my_size = _other.my_size, my_pitch = _other.my_pitch;
 #if MATRICE_SHARED_STORAGE == 1
-	if constexpr (_Loc == OnStack) {
-		privt::fill_mem(_other.my_data, my_data, my_size);
-		my_owner = _other.my_owner;
-	}
-	else my_shared = _other.my_shared, my_data = _other.my_data, my_owner = Refer;
+		if constexpr (_Loc == OnStack) {
+			privt::fill_mem(_other.my_data, my_data, my_size);
+			my_owner = _other.my_owner;
+		}
+		else my_shared = _other.my_shared, my_data = _other.my_data, my_owner = Refer;
 #else
-	privt::unified_sync<value_t, _other.location, location, option>::op(my_data, _other.my_data, my_rows, my_cols, my_pitch);
-	my_owner = _other.my_owner;
+		if (my_owner == Empty) this->create(my_rows, my_cols);
+		privt::unified_sync<value_t, _other.location, location, option>::op(my_data, _other.my_data, my_rows, my_cols, my_pitch);
 #endif
+	}
 	return (*this);
 }
 
 MATRICE_DENSEBASE_SIG& 
 Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(DenseBase&& _other){
-	my_owner = _other.my_owner, my_size = _other.my_size;
-	my_rows = _other.my_rows, my_cols = _other.my_cols;
-	my_data = _other.my_data;
+	if (this != std::addressof(_other)) {
+		my_owner = _other.my_owner, my_size = _other.my_size;
+		my_rows = _other.my_rows, my_cols = _other.my_cols;
+		my_data = _other.my_data;
 #if MATRICE_SHARED_STORAGE == 1
-	my_shared = std::move(_other.my_shared);
-	_other.my_shared = nullptr;
+		my_shared = std::move(_other.my_shared);
+		_other.my_shared = nullptr;
 #endif
-	_other.my_rows = 0, _other.my_cols = 0, _other.my_size = 0;
-	_other.my_data = 0, _other.my_owner = Owner;
+		_other.my_rows = 0, _other.my_cols = 0, _other.my_size = 0;
+		_other.my_data = 0, _other.my_owner = Owner;
+	}
 	return (*this);
 }
 

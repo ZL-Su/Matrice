@@ -6,7 +6,7 @@ MATRICE_NAMESPACE_BEGIN_ namespace detail {
 template<typename _Ty>
 template<Location _Loc, size_t _Opt>
 MATRICE_GLOBAL_FINL Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase()
- : my_rows(0), my_cols(0), my_size(0), my_data(0), my_owner(Dummy) {}
+ : my_rows(0), my_cols(0), my_size(0), my_data(0) {}
 
 template<typename _Ty>
 template<Location _Loc, size_t _Opt>
@@ -26,7 +26,7 @@ template<Location _Loc, size_t _Opt>
 template<Location _From, size_t _Option>
 MATRICE_GLOBAL_FINL Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(const DenseBase<_From, _Option>& _other)
  : DenseBase(_other.rows(), _other.cols()) {
-	privt::unified_sync<value_t, _From, _Loc, _Loc == OnDevice ? option : _Option>::op(my_data, _other.data(), my_rows, my_cols, _Loc == OnDevice ? my_pitch : _other.pitch());
+	privt::unified_sync<value_t, _From, _Loc, _Loc==OnDevice?_Opt: _Option>::op(my_data, _other.data(), my_rows, my_cols, _Loc == OnDevice ? my_pitch : _other.pitch());
 }
 
 template<typename _Ty> 
