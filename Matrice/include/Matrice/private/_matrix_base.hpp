@@ -255,15 +255,22 @@ public:
 	MATRICE_GLOBAL_INL Base_(_Myt_move_reference _other) noexcept 
 		:_Mybase(_other._Myshape), m_storage(std::move(_other.m_storage)) MATRICE_LINK_PTR
 	/**
+	 *\from STD vector<value_t>
+	 */
+	MATRICE_HOST_INL Base_(const std::vector<value_t>&_other, int _cols=1) noexcept
+		:Base_(_other.size() / _cols, _cols) { from(_other.data()); }
+	/**
 	 *\from STD valarray<...>
 	 */
-	MATRICE_GLOBAL_INL Base_(const std::valarray<value_t>& _other, int _rows = 1) noexcept 
+	MATRICE_HOST_INL Base_(const std::valarray<value_t>& _other, int _rows = 1) noexcept 
 		:_Mybase(_rows, _other.size() / _rows), m_storage(_rows, _other.size() / _rows, (pointer)std::addressof(_other[0])) MATRICE_LINK_PTR
 	/**
 	 *\from explicit specified matrix type
 	 */
-	template<int _Rows, int _Cols, typename _Mty = Matrix_<value_t, _Rows, _Cols>>
-	MATRICE_GLOBAL_INL Base_(const _Mty& _other) noexcept 
+	template<int _CTR, int _CTC>
+	MATRICE_GLOBAL_INL Base_(const Matrix_<value_t,_CTR,_CTC>& _other)
+		:_Mybase(_other.rows(),_other.cols()),m_storage(_other.m_storage) MATRICE_LINK_PTR
+	MATRICE_GLOBAL_INL Base_(const Matrix_<value_t,-1,-1>& _other)
 		:_Mybase(_other.rows(), _other.cols()), m_storage(_other.m_storage) MATRICE_LINK_PTR
 	/**
 	 *\from expression
@@ -521,8 +528,8 @@ public:
 	 * \interface for STD valarray<...>
 	 * Example: std::valarray<float> _Valarr = _M;
 	 */
-	MATRICE_GLOBAL_FINL operator std::valarray<value_t>() { return std::valarray<value_t>(m_data, size()); }
-	MATRICE_GLOBAL_FINL operator std::valarray<value_t>() const { return std::valarray<value_t>(m_data, size()); }
+	/*MATRICE_GLOBAL_FINL operator std::valarray<value_t>() { return std::valarray<value_t>(m_data, size()); }
+	MATRICE_GLOBAL_FINL operator std::valarray<value_t>() const { return std::valarray<value_t>(m_data, size()); }*/
 #endif
 
 	/**
@@ -793,6 +800,7 @@ protected:
 	using _Mybase::_Myshape;
 
 	size_t m_format = rmaj|gene;
+public:
 	_Myt_storage_type m_storage;
 
 #undef MATRICE_MAKE_EXPOP_TYPE
