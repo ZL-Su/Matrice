@@ -36,7 +36,6 @@ template<typename _Ty> class Base_
 	using _Myt = Base_;
 	using value_t = _Ty;
 	using _Mydt = types::Matrix_<value_t, -1, -1>;
-	using size_t = std::size_t;
 	using int_ptr_t = std::add_pointer_t<int>;
 	using pointer = std::add_pointer_t<value_t>;
 public:
@@ -48,14 +47,14 @@ public:
 
 	//<brief> synchronize all device threads </brief>
 	MATRICE_HOST_INL void sync() { 
-		_Future = std::async(std::launch::async, [&] { _Sync_impl(); }); 
+		_Future = std::async(std::launch::async,[&]{_Sync_impl();}); 
 	}
 
 	//<brief> retrieve data from device memory </brief>
 	MATRICE_HOST_INL void fetch(pointer dst) { 
 		if (_Future.valid()) _Future.get(); _Dnload_impl(dst); 
 	}
-	template<typename _Arg, typename = std::enable_if_t<std::is_class_v<_Arg>>>
+	template<class _Arg, MATRICE_ENABLE_IF(is_class_v<_Arg>)>
 	MATRICE_HOST_INL void fetch(_Arg& dst) { 
 		if (_Future.valid()) _Future.get(); _Dnload_impl(dst.data()); 
 	}
@@ -77,7 +76,7 @@ public:
 	MATRICE_GLOBAL_INL pointer operator= (const pointer _src) {
 		_Upload_impl(_src); return (_Ptr);
 	}
-	template<typename _Rhs, typename = std::enable_if_t<std::is_class_v<_Rhs>>>
+	template<typename _Rhs, MATRICE_ENABLE_IF(is_class_v<_Rhs>)>
 	MATRICE_GLOBAL_INL _Mydt& operator= (const _Rhs& _src) {
 		_Upload_impl(_src.data()); return *static_cast<_Mydt*>(this);
 	}
@@ -97,8 +96,10 @@ public:
 	friend _Mydt operator*(const value_t _Left, const _Mydt& _Right);
 	friend _Mydt operator/(const value_t _Left, const _Mydt& _Right);
 
-private:
+protected:
 	MATRICE_HOST_INL void _Sync_impl() { privt::_Device_sync<0>(); }
+
+private:
 	template<typename... Args>
 	MATRICE_HOST_INL void _Upload_impl(pointer args) { device_memcpy<value_t, 1>::impl(args, _Ptr, size_t(*_W), size_t(*_H), *_P); }
 	template<typename... Args>
