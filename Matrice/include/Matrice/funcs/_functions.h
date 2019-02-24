@@ -21,14 +21,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../util/_macros.h"
 #include "../util/_std_wrapper.h"
 #include "../util/utils.h"
+#include "../arch/ixpacket.h"
 #include "../private/_type_traits.h"
 #include "../private/_size_traits.h"
-#include "../arch/ixpacket.h"
-#ifdef __use_mkl__
-#include <mkl.h>
-#else
-#include <fkl.h>
-#endif
+#include "../private/math/_config.h"
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
@@ -57,16 +53,22 @@ template<typename _T, typename _U,
 	typename _Vty = common_type_t<typename _T::value_t, typename _U::value_t>>
 MATRICE_HOST_INL constexpr _Vty dot(const _T& _x, const _U& _y) {
 #ifdef _DEBUG
-	DGELOM_CHECK(_x.size() != _y.size(), "Oops, non-consistent size error.");
+	DGELOM_CHECK(_x.size()== _y.size(), "Oops, non-consistent size error.");
 #endif
+
+	auto _Ret = zero_v<_Vty>;
+
+#if   MATRICE_MATH_KERNEL == MATRICE_USE_MKL
+
+#elif MATRICE_MATH_KERNEL == MATRICE_USE_FKL
+
+#else //MATRICE_MATH_KERNEL == MATRICE_USE_NAT
 	using packet_type = simd::Packet_<_Vty>;
 
 	const auto _Left = _x.eval();
 	const auto _Right = _y.eval();
 	const auto _Size = min(_Left.size(), _Right.size());
 	const auto _Vsize = simd::vsize<packet_type::size>(_Size);
-
-	auto _Ret = zero_v<_Vty>;
 	for (auto _Idx = 0; _Idx < _Vsize; _Idx += packet_type::size) {
 		_Ret += (
 			packet_type(_Left.data() + _Idx)*
@@ -75,6 +77,7 @@ MATRICE_HOST_INL constexpr _Vty dot(const _T& _x, const _U& _y) {
 	for (auto _Idx = _Vsize; _Idx < _Size; ++_Idx) {
 		_Ret += _Left(_Idx)*_Right(_Idx);
 	}
+#endif
 
 	return (_Ret);
 }
