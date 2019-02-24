@@ -86,6 +86,7 @@ public:
 	using typename _Mybase::value_t;
 	using typename _Mybase::pointer;
 	using typename _Mybase::const_init_list;
+	using device_t = Matrix_<value_t, -1, -1>;
 	enum { Size = __, CompileTimeRows = __, CompileTimeCols = __, };
 	
 	MATRICE_GLOBAL_FINL Matrix_(int _rows) noexcept : _Mybase(_rows, 1) {};
@@ -94,6 +95,7 @@ public:
 	MATRICE_GLOBAL_FINL Matrix_(_Arg&& _other) noexcept : _Mybase(std::move(_other)) {};
 	template<typename... _Args> 
 	MATRICE_GLOBAL_FINL Matrix_(const _Args&... args) noexcept : _Mybase(args...) {};
+	MATRICE_GLOBAL_FINL Matrix_(const device_t& _other) noexcept : _Mybase(_other) {};
 
 	MATRICE_GLOBAL_INL Myt_reference operator= (Myt_const_reference _other) { 
 		return _Mybase::operator=(_other); 
@@ -103,7 +105,7 @@ public:
 	}
 	MATRICE_GLOBAL_FINL Myt_reference operator= (const_init_list _list) { return _Mybase::operator=(_list); }
 	template<typename _Arg> 
-	MATRICE_GLOBAL_FINL Myt_reference operator= (add_const_reference_t<_Arg> _arg) { return _Mybase::operator=(_arg); }
+	MATRICE_GLOBAL_FINL Myt_reference operator= (const _Arg& _arg) { return _Mybase::operator=(_arg); }
 
 	MATRICE_MAKE_METHOD_CREATE
 };
@@ -155,31 +157,40 @@ class Matrix_<_Ty, -1, -1> : public Base_<Matrix_<_Ty, -1, -1>>, public device::
 	using _Mybase::m_data;
 	using _Mybase::m_rows;
 	using _Mybase::m_cols;
-	std::size_t m_pitch = _Mybase::m_storage.pitch();
+	size_t m_pitch = _Mybase::m_storage.pitch();
 public:
 	enum { Size = -1, CompileTimeRows = -1, CompileTimeCols = -1, };
 	using typename _Mybase::value_t;
 	using typename _Mybase::value_type;
 	using typename _Mybase::pointer;
 	using typename _Mybase::const_init_list;
+	using host_t = Matrix_<value_t, 0, 0>;
 
-	MATRICE_GLOBAL_INL Matrix_(int _rows) noexcept : _Mybase(_rows, 1),
-		_Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
-	MATRICE_GLOBAL_INL Matrix_(Myt_const_reference _other) noexcept : _Mybase(_other),
-		_Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
-	MATRICE_GLOBAL_INL Matrix_(Myt_move_reference _other) noexcept : _Mybase(std::move(_other)), 
-		_Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
-	template<int _M = 0, int _N = _M, typename _Mty = Matrix_<value_t, _M, _N>>
-	MATRICE_HOST_INL Matrix_(add_const_reference_t<_Mty> _other) noexcept: _Mybase(_other),
-		_Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
-	template<typename... _Args> 
-	MATRICE_GLOBAL_INL Matrix_(const _Args&... args) noexcept : _Mybase(args...), 
-		_Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
+	MATRICE_GLOBAL_INL Matrix_(int _rows) noexcept 
+		:_Mybase(_rows, 1), _Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
+	MATRICE_GLOBAL_INL Matrix_(Myt_const_reference _other) noexcept 
+		:_Mybase(_other), _Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
+	MATRICE_GLOBAL_INL Matrix_(Myt_move_reference _other) noexcept 
+		:_Mybase(std::move(_other)), _Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
+	MATRICE_GLOBAL_INL Matrix_(const host_t& _other) noexcept
+		:_Mybase(_other), _Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {}
+	template<int _M = 0, int _N = _M, 
+		typename _Mty = Matrix_<value_t, _M, _N>>
+	MATRICE_HOST_INL Matrix_(const _Mty& _other) noexcept 
+		:_Mybase(_other), _Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
+	template<typename... _Args>
+	MATRICE_GLOBAL_INL Matrix_(const _Args&... args) noexcept 
+		:_Mybase(args...), _Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
 
-	MATRICE_MAKE_METHOD_CREATE
+	MATRICE_MAKE_METHOD_CREATE;
+
+	/**
+	 *\sync all device threads, it should be called before downloading data to host memory
+	 */
+	MATRICE_HOST_INL _Myt& sync(){ this->_Sync_impl(); return(*this); }
 
 	template<typename _Arg> 
-	MATRICE_GLOBAL_INL Myt_reference operator= (add_const_reference_t<_Arg> _arg) { 
+	MATRICE_GLOBAL_INL Myt_reference operator= (const _Arg& _arg) { 
 		return _Mydevbase::operator=(_arg); 
 	}
 	MATRICE_DEVICE_INL Myt_reference operator= (Myt_const_reference _other) { 
