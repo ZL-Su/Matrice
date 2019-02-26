@@ -482,7 +482,7 @@ public:
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, { x0, y0, x1, y1 });
 	}
-	template<typename... _Ity, typename = std::enable_if_t<sizeof...(_Ity) == 4>>
+	template<typename... _Ity, MATRICE_ENABLE_IF(sizeof...(_Ity) == 4)>
 	MATRICE_GLOBAL_INL const auto block(const std::tuple<_Ity...>& _R) const {
 		return this->block(std::get<0>(_R), std::get<1>(_R), std::get<2>(_R), std::get<3>(_R));
 	}
@@ -491,14 +491,27 @@ public:
 	 * \brief View of a square submatrix.
 	 * \param [_Cx, _Cy]: central pos, _Rs: radius size 
 	 */
-	template<typename _Ity>
-	MATRICE_GLOBAL_INL const auto block(_Ity _Cx, _Ity _Cy, size_t _Rs = 0) const {
+	template<typename _Ity, MATRICE_ENABLE_IF(is_integral_v<_Ity>)>
+	MATRICE_GLOBAL_INL auto block(_Ity _Cx, _Ity _Cy, size_t _Rs = 0) const {
 		return this->block(_Cx - _Rs, _Cx + _Rs + 1, _Cy - _Rs, _Cy + _Rs + 1);
 	}
 	/**
+	 * \brief View of a square submatrix.
+	 * \param [_Ctr]: central pos, which type _Centy must has forward iterator begin(), _Rs: radius size
+	 */
+	template<typename _Centy>
+	MATRICE_GLOBAL_INL auto block(const _Centy& _Ctr, int _Rs = 0) const {
+		return this->block(*_Ctr.begin(), *(_Ctr.begin() + 1), _Rs);
+	}
+	template<typename _Ity, MATRICE_ENABLE_IF(is_integral_v<_Ity>)>
+	MATRICE_HOST_INL auto block(const initlist<_Ity>& _Ctr, int _Rs)const {
+		return this->block(*_Ctr.begin(), *(_Ctr.begin() + 1), _Rs);
+	}
+
+	/**
 	 * \operator to get a block view of this matrix from a given range.
 	 */
-	template<typename _Ity, typename = std::enable_if_t<std::is_integral_v<_Ity>>>
+	template<typename _Ity, MATRICE_ENABLE_IF(is_integral_v<_Ity>)>
 	MATRICE_GLOBAL_INL auto operator()(_Ity _L, _Ity _R, _Ity _U, _Ity _D) {
 #ifdef _DEBUG
 		DGELOM_CHECK(_R<m_cols, "Input var. _R must be no greater than m_cols.")
@@ -506,7 +519,7 @@ public:
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, { _L, _U, _R, _D });
 	}
-	template<typename _Ity, typename = std::enable_if_t<std::is_integral_v<_Ity>>>
+	template<typename _Ity, MATRICE_ENABLE_IF(is_integral_v<_Ity>)>
 	MATRICE_GLOBAL_INL auto operator()(_Ity _L, _Ity _R, _Ity _U, _Ity _D)const{
 #ifdef _DEBUG
 		DGELOM_CHECK(_R<m_cols, "Input var. _R must be no greater than m_cols.")
@@ -517,8 +530,8 @@ public:
 	/**
 	 * \operator to get a block view of this matrix from a given tupled range.
 	 */
-	template<typename... _Ity, typename = std::enable_if_t<sizeof...(_Ity) == 4>>
-	MATRICE_GLOBAL_INL auto operator()(const std::tuple<_Ity...>& _R) const {
+	template<typename... _Ity, MATRICE_ENABLE_IF(sizeof...(_Ity) == 4)>
+	MATRICE_GLOBAL_INL auto operator()(const tuple<_Ity...>& _R) const {
 		return this->operator()(std::get<0>(_R), std::get<1>(_R), std::get<2>(_R), std::get<3>(_R));
 	}
 #pragma endregion
