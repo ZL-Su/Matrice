@@ -137,7 +137,7 @@ public:
 	public:
 		enum { location = Base::location, option = Base::option };
 		MATRICE_HOST_FINL Allocator(int ph1=0, int ph2=0) : Base(_M, _N, _Data) {}
-		MATRICE_HOST_FINL Allocator(int ph1, int ph2, pointer data) : Base(_M, _N, data) {}
+		MATRICE_HOST_FINL Allocator(int ph1, int ph2, pointer data) : Base(_M, _N, privt::fill_mem(data,_Data, _M*_N)) {}
 		MATRICE_HOST_FINL Allocator(std::initializer_list<value_t> _list) : Base(_M, _N, _Data, _list) {}
 		MATRICE_HOST_FINL Allocator(const Allocator& _other) : Base(_M, _N, privt::fill_mem(_other._Data, _Data, _other.my_size)) {}
 		MATRICE_HOST_FINL Allocator(Allocator&& _other) : Base(std::move(_other)) {}

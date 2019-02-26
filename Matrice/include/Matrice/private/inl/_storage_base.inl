@@ -11,7 +11,10 @@ MATRICE_GLOBAL_FINL Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase()
 template<typename _Ty>
 template<Location _Loc, size_t _Opt>
 MATRICE_GLOBAL_FINL Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(int_t _rows, int_t _cols, pointer _data)
- : my_rows(_rows), my_cols(_cols), my_size(my_rows*my_cols), my_data(_data), my_owner(location == OnStack ? Owner : Proxy) {}
+ : my_rows(_rows), my_cols(_cols), my_size(my_rows*my_cols), my_data(_data) {
+	if constexpr (location == OnStack) my_owner = Owner;
+	else my_owner = Proxy;
+}
 
 template<typename _Ty>
 template<Location _Loc, size_t _Opt>
