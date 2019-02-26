@@ -172,6 +172,9 @@
     <Filter Include="Header Files\Algs\ErrorAnalysis">
       <UniqueIdentifier>{bc759b18-c791-4c6d-9888-7e0b7e7e079b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Algs\Graphics">
+      <UniqueIdentifier>{4b58a893-2f5c-426b-a86f-050ce06b1848}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -695,6 +698,9 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\erroranalysis\_common.h">
       <Filter>Header Files\Algs\ErrorAnalysis</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\graphics\_meshing.h">
+      <Filter>Header Files\Algs\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

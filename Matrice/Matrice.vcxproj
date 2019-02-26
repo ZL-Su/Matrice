@@ -240,6 +240,7 @@
     <ClInclude Include="include\Matrice\algs\erroranalysis\_common.h" />
     <ClInclude Include="include\Matrice\algs\geometry\normalization.h" />
     <ClInclude Include="include\Matrice\algs\geometry\transform.h" />
+    <ClInclude Include="include\Matrice\algs\graphics\_meshing.h" />
     <ClInclude Include="include\Matrice\algs\imageproc.hpp" />
     <ClInclude Include="include\Matrice\algs\interpolation.h" />
     <ClInclude Include="include\Matrice\algs\interpolation\_base.h" />
