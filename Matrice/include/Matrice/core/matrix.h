@@ -237,7 +237,7 @@ MATRICE_NAMESPACE_END_TYPES
 
 DGE_MATRICE_BEGIN
 //\matrix type with host managed memory allocator
-template<typename T, int _M, int _N, size_t _Options = rmaj|gene, typename = enable_if_t<is_arithmetic_v<T>>>
+template<typename T, int _M, int _N=_M, size_t _Options = rmaj|gene, typename = enable_if_t<is_arithmetic_v<T>>>
 using Matrix_ = types::Matrix_<T, _M, _N>;
 
 //\matrix type with host dynamic memory allocator
