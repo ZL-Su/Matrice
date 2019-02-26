@@ -24,6 +24,9 @@ namespace dgelom {
 
 	using diff_t = std::ptrdiff_t;
 
+	template<typename _Ty>
+	using initlist = std::initializer_list<_Ty>;
+
 #if defined(_HAS_CXX14) || defined(_HAS_CXX17)
 	using std::enable_if_t;
 	using std::common_type_t;
