@@ -23,3 +23,12 @@ The software dependencies are:
 * Optinal dependencies:
   * Intel OpenMP
   * CUDA 8.0 or later
+## Reference
+### *BibTex*
+@misc{Su:2019,
+  author = {Zhilong Su},
+  year = {2019},
+  url = {https://github.com/ZL-Su/Matrice},
+  urldate = {February 25, 2019},
+  title = {Matrice Library}
+}
