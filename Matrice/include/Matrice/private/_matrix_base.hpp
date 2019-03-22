@@ -470,15 +470,15 @@ public:
 	// \View of submatrix: x \in [x0, x1) and y \in [y0, y1)
 	MATRICE_GLOBAL_INL auto block(index_t x0, index_t x1, index_t y0, index_t y1) {
 #ifdef _DEBUG
-		DGELOM_CHECK(x1<m_cols, "Input var. x1 must be no greater than m_cols.")
-		DGELOM_CHECK(y1<m_rows, "Input var. y1 must be no greater than m_rows.")
+		DGELOM_CHECK(x1<=m_cols, "Input var. x1 must be no greater than m_cols.")
+		DGELOM_CHECK(y1<=m_rows, "Input var. y1 must be no greater than m_rows.")
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, {x0, y0, x1, y1});
 	}
 	MATRICE_GLOBAL_INL const auto block(index_t x0, index_t x1, index_t y0, index_t y1) const {
 #ifdef _DEBUG
-		DGELOM_CHECK(x1<m_cols, "Input var. x1 must be no greater than m_cols.")
-		DGELOM_CHECK(y1<m_rows, "Input var. y1 must be no greater than m_rows.")
+		DGELOM_CHECK(x1<=m_cols, "Input var. x1 must be no greater than m_cols.")
+		DGELOM_CHECK(y1<=m_rows, "Input var. y1 must be no greater than m_rows.")
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, { x0, y0, x1, y1 });
 	}
@@ -514,16 +514,16 @@ public:
 	template<typename _Ity, MATRICE_ENABLE_IF(is_integral_v<_Ity>)>
 	MATRICE_GLOBAL_INL auto operator()(_Ity _L, _Ity _R, _Ity _U, _Ity _D) {
 #ifdef _DEBUG
-		DGELOM_CHECK(_R<m_cols, "Input var. _R must be no greater than m_cols.")
-		DGELOM_CHECK(_D<m_rows, "Input var. _D must be no greater than m_rows.")
+		DGELOM_CHECK(_R<=m_cols, "Input var. _R must be no greater than m_cols.")
+		DGELOM_CHECK(_D<=m_rows, "Input var. _D must be no greater than m_rows.")
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, { _L, _U, _R, _D });
 	}
 	template<typename _Ity, MATRICE_ENABLE_IF(is_integral_v<_Ity>)>
 	MATRICE_GLOBAL_INL auto operator()(_Ity _L, _Ity _R, _Ity _U, _Ity _D)const{
 #ifdef _DEBUG
-		DGELOM_CHECK(_R<m_cols, "Input var. _R must be no greater than m_cols.")
-		DGELOM_CHECK(_D<m_rows, "Input var. _D must be no greater than m_rows.")
+		DGELOM_CHECK(_R<=m_cols, "Input var. _R must be no greater than m_cols.")
+		DGELOM_CHECK(_D<=m_rows, "Input var. _D must be no greater than m_rows.")
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, { _L, _U, _R, _D });
 	}
@@ -792,9 +792,15 @@ public:
 	 *\brief Create random value filled matrix
 	 *\param [_Rows, Cols] height and width of matrix, only specified for dynamic case
 	 */
-	static MATRICE_GLOBAL_INL auto rand(diff_t _Rows = 0, diff_t _Cols = 0) {
+	static MATRICE_GLOBAL_INL auto rand(diff_t _Rows=0, diff_t _Cols=0) {
 		_Derived _Ret; _Ret.create(_Rows, _Cols);
 		uniform_real<value_type> _Rand; mt19937 _Eng;
+		return std::forward<_Derived>(_Ret.each([&](auto& _Val) {_Val = _Rand(_Eng); }));
+	}
+	static MATRICE_GLOBAL_INL auto randn(const initlist<value_type>& _Pars = {/*mean=*/0, /*STD=*/1}, diff_t _Rows = 0, diff_t _Cols = 0) {
+		_Derived _Ret; _Ret.create(_Rows, _Cols);
+		normal_distribution<value_type> _Rand{ *_Pars.begin(), *(_Pars.begin() + 1) };
+		mt19937 _Eng;
 		return std::forward<_Derived>(_Ret.each([&](auto& _Val) {_Val = _Rand(_Eng); }));
 	}
 
