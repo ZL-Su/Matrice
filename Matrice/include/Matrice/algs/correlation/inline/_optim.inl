@@ -18,9 +18,9 @@ template<> struct _Corr_border_size<_TAG bisspl_tag> {
 };
 
 // \update on warp parameters
-template<std::size_t _Order> struct _Compositional_warp_update{};
+template<size_t _Order> struct _Compositional_warp_update{};
 
-template<> struct _Compositional_warp_update<compile_time_size<>::val_1> {
+template<> struct _Compositional_warp_update<compile_time_size<>::_1> {
 	template<typename _Vecty>
 	static MATRICE_GLOBAL_FINL auto& inv(const _Vecty& x, _Vecty y) {
 		auto _Inv_det = 1 / ((1 + y[1])*(1 + y[5]) - y[2] * y[4]);
@@ -75,7 +75,7 @@ auto _Corr_optim_base<_Derived>::_Init() {
 template<typename _Derived> MATRICE_HOST_INL 
 auto _Corr_optim_base<_Derived>::_Warp(const param_type& _Pars) {
 #define _WITHIN_RANGE_OF_REFIMG(_OP) \
-	if (x - _Bl >= 0 && x - _Bl >= 0 && y + _Bu < _Rows && x + _Bu < _Cols) \
+	if (x-_Bl>=0 && x-_Bl>=0 && y+_Bu<_Rows && x+_Bu<_Cols) \
 		_OP; \
    else _Mycur(r,c) = zero_v<value_type>;
 
@@ -87,13 +87,14 @@ auto _Corr_optim_base<_Derived>::_Warp(const param_type& _Pars) {
 	auto _Cur_x = _Mypos.x + _Pars[0], _Cur_y = _Mypos.y + _Pars[3];
 
 	auto _Mean = zero_v<value_type>;
+	auto _Dvdyp1 = 1 + _Pars[5], _Dudxp1 = 1 + _Pars[1];
 	for (index_t j = -_Radius, r = 0; j <= _Radius; ++j, ++r) {
 		auto dy = static_cast<value_type>(j);
 		auto tx = _Cur_x + _Pars[2] * dy;
-		auto ty = _Cur_y + _Pars[5] * dy + j;
+		auto ty = _Cur_y + _Dvdyp1 * dy;
 		for (index_t i = -_Radius, c = 0; i <= _Radius; ++i, ++c) {
 			auto dx = static_cast<value_type>(i);
-			auto x = _Pars[1] * dx + tx + i, y = _Pars[4] * dx + ty;
+			auto x = _Dudxp1 * dx + tx, y = _Pars[4] * dx + ty;
 			_WITHIN_RANGE_OF_REFIMG(_Mean += _Mycur(r, c) = _Mycur_itp(x,y));
 		}
 	}
@@ -143,16 +144,20 @@ auto _Corr_invcomp_optim<_Ty, _Itag, 1>::_Update(param_type& _P) {
 	// \warp
 	const auto _Scal = _Mybase::_Warp(_P); 
 	// \error image exp.
-	auto _Diff_n = (_Mybase::_Myref - _Mybase::_Mycur)*_Scal; 
+#ifdef _DEBUG
+	auto _Diff_n = ((_Mybase::_Myref - _Mybase::_Mycur)*_Scal).eval();
+#elif
+	auto _Diff_n = (_Mybase::_Myref - _Mybase::_Mycur)*_Scal;
+#endif
 	// \steepest descent param. update
 	param_type _Sdp = (_Diff_n*_Mybase::_Myjaco).reduce().t();
 	// \solve warp param update
 	_Sdp = -1.*_Mybase::_Mysolver.backward(_Sdp);
 
 	auto _Error = (_Sdp*_Sdp).sum();
-	if(_Error < 1.0E-3)
-		// \inverse composition to update param.
-		_P = _Compositional_warp_update<order>::inv(_P, _Sdp);
+	//if(_Error < 1.0E-3)
+	// \inverse composition to update param.
+	_P = _Compositional_warp_update<order>::inv(_P, _Sdp);
 
 	return std::tuple((_Diff_n*_Diff_n).sum(), _Error);
 }

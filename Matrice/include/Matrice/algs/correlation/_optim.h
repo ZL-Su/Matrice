@@ -27,11 +27,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 MATRICE_ALGS_BEGIN _DETAIL_BEGIN namespace corr {
 
 struct _Correlation_options {
-	std::size_t _Stride =  7; //node spacing
 	std::size_t _Radius = 10; //patch radius
 	std::size_t _Maxits = 10; //maximum iterations
+	std::size_t _Stride = 7; //node spacing
 
-	template<typename _Ty, typename = std::enable_if_t<is_floating_point_v<_Ty>>>
+	template<typename _Ty, typename = enable_if_t<is_floating_point_v<_Ty>>>
 	static constexpr _Ty _Mytol = _Ty(1.0E-6); //iteration tolerance
 
 	/**
