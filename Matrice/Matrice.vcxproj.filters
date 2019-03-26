@@ -455,7 +455,7 @@
     <ClCompile Include="src\algorithm\_splineinterp.cpp">
       <Filter>Source Files\Algs\Interpolation</Filter>
     </ClCompile>
-    <ClCompile Include="include\Matrice\algs\dnn\functions\_activations.h">
+    <ClCompile Include="include\Matrice\algs\dnn\functions\_functions.h">
       <Filter>Header Files\Algs\DeepLearning\Functions</Filter>
     </ClCompile>
   </ItemGroup>

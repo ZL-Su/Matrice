@@ -216,7 +216,7 @@
     <ClInclude Include="src\private\generic_fast_math.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="include\Matrice\algs\dnn\functions\_activations.h" />
+    <ClCompile Include="include\Matrice\algs\dnn\functions\_functions.h" />
     <ClCompile Include="src\algorithm\_splineinterp.cpp" />
     <ClCompile Include="src\core\matrix_base_impl.cpp" />
     <ClCompile Include="src\core\matrix_dynamic_impl.cpp" />
