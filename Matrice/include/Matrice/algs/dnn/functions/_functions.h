@@ -35,7 +35,7 @@ struct sigmoid {
 	MATRICE_GLOBAL_INL static _Ty forward(const _Ty& x) {
 		using value_t = conditional_t<is_scalar_v<_Ty>, _Ty, 
 			typename _Ty::value_t>;
-		return one<value_t>/(one<value_t> + exp(value_t(-1)*x));
+		return (one<value_t>/(one<value_t> + exp(value_t(-1)*x)));
 	}
 	/**
 	 *\brief for evaluating gradient(s) w.r.t. the input:
@@ -48,7 +48,7 @@ struct sigmoid {
 		using value_t = conditional_t<is_scalar_v<_Ty>, _Ty, 
 			typename _Ty::value_t>;
 		const auto y = forward(x);
-		return y * (one<value_t> - y);
+		return (y * (one<value_t> - y));
 	}
 };
 
@@ -64,7 +64,7 @@ struct tanh {
 	MATRICE_GLOBAL_INL static _Ty forward(const _Ty& x) {
 		using value_t = conditional_t<is_scalar_v<_Ty>, _Ty,
 			typename _Ty::value_t>;
-		return two<value_t> / (one<value_t> + exp(value_t(-2)*x));
+		return two<value_t>/(one<value_t> + exp(value_t(-2)*x))-1;
 	}
 	/**
 	 *\brief evaluating gradient(s) w.r.t. the input:
