@@ -23,13 +23,6 @@ namespace dnn {
 ///<functional> implementations for DNNs </functional>
 struct functional {
 
-template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)> 
-constexpr static _Ty zero = static_cast<_Ty>(0);
-template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)> 
-constexpr static _Ty one = static_cast<_Ty>(1);
-template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
-constexpr static _Ty two = static_cast<_Ty>(2);
-
 /* Sigmoid activation function */
 struct sigmoid {
 	/**
