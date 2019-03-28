@@ -22,10 +22,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 DGE_MATRICE_BEGIN
 _TYPES_BEGIN
 #define _VIEW_EWISE_COPY_N(_LEFT, _N)\
-if(_N > size()) \
-	throw std::runtime_error("Over the range in _Matrix_xview::eval().");\
-for(std::size_t _Idx = 0; _Idx < _N; ++_Idx) {\
-	_LEFT(_Idx) = this->operator()(_Idx);\
+DGELOM_CHECK(_N < size(), "_N over range of current view."); \
+size_t _Size = _N==0? size() : _N; \
+for(std::size_t _Idx = 0; _Idx < _Size; ++_Idx) { \
+	_LEFT(_Idx) = this->operator()(_Idx); \
 }
 template<typename _Ty, int _Rows, int _cols> class Matrix_;
 /**********************************************************************
@@ -56,12 +56,12 @@ public:
 	struct range_type
 	{
 		// _Rang = {from_x, from_y, end_x, end_y} : [from_x, end_x), [from_y, end_y)
-		template<typename _Idx, typename = std::enable_if_t<std::is_integral_v<_Idx>>>
+		template<typename _Idx, MATRICE_ENABLE_IF(is_integral_v<_Idx>)>
 		MATRICE_GLOBAL_FINL range_type(const std::initializer_list<_Idx> _Rang)
 			:_My_from_x(*_Rang.begin()), _My_from_y(*(_Rang.begin()+1)),
 			 _My_end_x(*(_Rang.begin()+2)), _My_end_y(*(_Rang.begin()+3)) {}
 
-		template<typename _Idx, typename = std::enable_if_t<std::is_integral_v<_Idx>>>
+		template<typename _Idx, MATRICE_ENABLE_IF(is_integral_v<_Idx>)>
 		MATRICE_GLOBAL_FINL range_type& operator= (const std::initializer_list<_Idx> _Rang) {
 			_My_from_x = *_Rang.begin(), _My_from_y = *(_Rang.begin() + 1);
 			_My_end_x = *(_Rang.begin() + 2), _My_end_y = *(_Rang.begin() + 3);
@@ -104,13 +104,13 @@ public:
 	MATRICE_GLOBAL_FINL auto cols() const { return (static_cast<const _Derived*>(this)->cols()); }
 	MATRICE_GLOBAL_FINL constexpr auto shape() const { return std::tie(rows(), cols()); }
 	MATRICE_GLOBAL_FINL constexpr auto dims() const { return basic_shape_t({ 1,1,rows(), cols() }); }
-	MATRICE_GLOBAL_FINL void create(std::size_t, std::size_t) {}
+	MATRICE_GLOBAL_FINL void create(size_t, size_t) {}
 	MATRICE_GLOBAL_FINL value_t sum() const {
 		value_t _Ret = 0;
 #pragma omp parallel if (size() > 100)
 		{
 #pragma omp for reduction (+ : _Ret)
-			for (std::ptrdiff_t _Idx = 0; _Idx < size(); ++_Idx) {
+			for (ptrdiff_t _Idx = 0; _Idx < size(); ++_Idx) {
 				_Ret += static_cast<const _Derived*>(this)->operator()(_Idx);
 			}
 		}
@@ -121,7 +121,7 @@ public:
 	 *\brief Copy a scalar value to memory that the view maps to
 	 *\param [_Val] an input scalar
 	 */
-	template<typename _Ty, typename = enable_if_t<is_scalar_v<_Ty>>>
+	template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 	MATRICE_GLOBAL_INL auto& operator= (const _Ty _Val) {
 		_VIEW_EWISE_OP(static_cast<value_type>(_Val));
 	}
@@ -143,7 +143,7 @@ public:
 	 *\brief Fill view memory from a customer class type
 	 *\param [_M] _Mty should have element accessor ::operator(i)
 	 */
-	template<typename _Mty, typename = std::enable_if_t<std::is_class_v<_Mty>>>
+	template<typename _Mty, MATRICE_ENABLE_IF(is_class_v<_Mty>)>
 	MATRICE_GLOBAL_INL auto& operator= (const _Mty& _M) {
 		_VIEW_EWISE_OP(_M(i));
 	}
@@ -174,7 +174,7 @@ protected:
 						      Row view for Matrix 
 	    Copyright (c) : Zhilong (Dgelom) Su, since 25/Jul/2018
  **********************************************************************/
-template<typename _Ty, typename = std::enable_if_t<std::is_arithmetic_v<_Ty>>>
+template<typename _Ty, MATRICE_ENABLE_IF(is_arithmetic_v<_Ty>)>
 class _Matrix_rview MATRICE_NONHERITABLE : public _View_base<_Ty, _Matrix_rview<_Ty>>
 {
 	using _Base = _View_base<_Ty, _Matrix_rview<_Ty>>;
@@ -202,8 +202,9 @@ public:
 	/**
 	 *\Retrieve the first _N element into a true static row-matrix.
 	 */
-	template<std::size_t _N> MATRICE_GLOBAL_FINL auto eval() const {
-		Matrix_<value_t, min(_N, 1), _N> _Ret;
+	template<size_t _N=0> 
+	MATRICE_GLOBAL_FINL auto eval() const {
+		Matrix_<value_t, min(_N, 1), _N> _Ret(1, _My_size);
 		_VIEW_EWISE_COPY_N(_Ret, _N)
 		return std::forward<decltype(_Ret)>(_Ret);
 	}
@@ -213,7 +214,7 @@ public:
 						     Column view for Matrix 
 	    Copyright (c) : Zhilong (Dgelom) Su, since 25/Jul/2018
  **********************************************************************/
-template<typename _Ty, typename = std::enable_if_t<std::is_arithmetic_v<_Ty>>>
+template<typename _Ty, MATRICE_ENABLE_IF(is_arithmetic_v<_Ty>)>
 class _Matrix_cview MATRICE_NONHERITABLE : public _View_base<_Ty, _Matrix_cview<_Ty>>
 {
 	using _Base = _View_base<_Ty, _Matrix_cview<_Ty>>;
@@ -241,8 +242,9 @@ public:
 	/**
 	 *\Retrieve the first _N element into a true static column-matrix.
 	 */
-	template<std::size_t _N> MATRICE_GLOBAL_FINL auto eval() const {
-		Matrix_<value_t, _N, min(_N, 1)> _Ret;
+	template<size_t _N=0> 
+	MATRICE_GLOBAL_FINL auto eval() const {
+		Matrix_<value_t, _N, min(_N, 1)> _Ret(_My_size, 1);
 		_VIEW_EWISE_COPY_N(_Ret, _N)
 		return std::forward<decltype(_Ret)>(_Ret);
 	}
@@ -252,7 +254,7 @@ public:
 						      Block view for Matrix 
 	    Copyright (c) : Zhilong (Dgelom) Su, since 25/Jul/2018
  **********************************************************************/
-template<typename _Ty, typename = std::enable_if_t<std::is_arithmetic_v<_Ty>>>
+template<typename _Ty, MATRICE_ENABLE_IF(is_arithmetic_v<_Ty>)>
 class _Matrix_block MATRICE_NONHERITABLE : public _View_base<_Ty, _Matrix_block<_Ty>>
 {
 	using _Base = _View_base<_Ty, _Matrix_block<_Ty>>;
@@ -305,7 +307,7 @@ public:
 	template<int _M = 0, int _N = _M>
 	MATRICE_GLOBAL_FINL auto eval() const {
 		Matrix_<value_t, _M, _N> _Ret(rows(), cols());
-		_VIEW_EWISE_COPY_N(_Ret, size());
+		_VIEW_EWISE_COPY_N(_Ret, _Ret.size());
 		return std::forward<decltype(_Ret)>(_Ret);
 	}
 private:
@@ -317,7 +319,7 @@ private:
 								    Tensor CHW view
 		 Copyright (c) : Zhilong (Dgelom) Su, since 24/Jan/2019
  **********************************************************************/
-template<typename _Ty, typename = enable_if_t<is_arithmetic_v<_Ty>>>
+template<typename _Ty, MATRICE_ENABLE_IF(is_arithmetic_v<_Ty>)>
 class _Chw_view MATRICE_NONHERITABLE : public _View_base<_Ty, _Chw_view<_Ty>>
 {
 	using _Myt = _Chw_view;
