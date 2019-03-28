@@ -16,20 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #pragma once
-#include "../../core/matrix.h"
 
-MATRICE_NAMESPACE_BEGIN_
-namespace dnn { namespace kernel {
-// \alias template for dynamic vector type
-template<typename _Ty> using vector_type = Matrix<_Ty>;
-
-template<typename _Ty>
-MATRICE_HOST_FINL _Ty _Gaussian(const vector_type<_Ty>& x, const vector_type<_Ty>& x_pri, const _Ty _sigma) {
-	vector_type<_Ty> _Diff = x - x_pri;
-	auto _Prod = (_Diff*_Diff).sum();
-	return (exp(-0.5 *_Prod / (_sigma * _sigma)));
-}
-
-
-} }
-_MATRICE_NAMESPACE_END
+#include "functions\_functions.h"
+#include "kernels\_kernels.h"

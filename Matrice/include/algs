@@ -5,3 +5,4 @@
 #include "Matrice/algs/interpolation.h"
 #include "Matrice/algs/imageproc.hpp"
 #include "Matrice/algs/correlation/_optim.h"
+#include "Matrice/algs/dnn/functions.h"
