@@ -51,7 +51,6 @@ struct sigmoid {
 		return y * (one<value_t> - y);
 	}
 };
-};
 
 /* Tanh activation function */
 struct tanh {
@@ -82,5 +81,7 @@ struct tanh {
 	}
 };
 
+
+};
 }
 DGE_MATRICE_END
