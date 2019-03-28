@@ -39,6 +39,13 @@ _DETAIL_BEGIN
 template<typename _Ty> class _Tensor;
 _DETAIL_END
 
+template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
+constexpr static _Ty zero = static_cast<_Ty>(0);
+template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
+constexpr static _Ty one = static_cast<_Ty>(1);
+template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
+constexpr static _Ty two = static_cast<_Ty>(2);
+
 template<typename _Ty, int _M, int _N> 
 struct is_matrix<types::Matrix_<_Ty, _M, _N>> : std::true_type {};
 
