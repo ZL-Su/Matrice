@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -70,12 +70,12 @@ public:
 	MATRICE_GLOBAL_FINL constexpr auto shape() const { 
 		return std::tie(m_rows, m_cols);
 	}
-	template<typename _T, typename = std::enable_if_t<std::is_scalar_v<_T>>>
+	template<typename _T, MATRICE_ENABLE_IF(is_scalar_v<_T>)>
 	MATRICE_GLOBAL_FINL constexpr auto shape(_T _Scale) const {
 		return std::make_tuple(m_rows*_Scale, m_cols*_Scale);
 	}
 	template<typename _T1, typename _T2 = _T1, 
-		typename = std::enable_if_t<std::is_scalar_v<_T1>&&std::is_scalar_v<_T2>>>
+		MATRICE_ENABLE_IF(is_scalar_v<_T1>&&is_scalar_v<_T2>)>
 	MATRICE_GLOBAL_FINL constexpr auto shape(_T1 _Rsf, _T2 _Csf) const {
 		return std::make_tuple(m_rows*_Rsf, m_cols*_Csf);
 	}
@@ -132,7 +132,6 @@ protected:
 };
 
 _TYPES_BEGIN
-template<typename _Ty> using nested_initializer_list = std::initializer_list<std::initializer_list<_Ty>>;
 
 /*******************************************************************
 	              Generic Base for Matrix Class
@@ -163,7 +162,7 @@ auto& operator= (const Expr##NAME##Expr<_Args...>& _Ex){ \
 return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 }
 	struct _My_element {
-		_My_element(_Type& _Val, std::size_t _Idx, std::size_t _Std) 
+		_My_element(_Type& _Val, size_t _Idx, size_t _Std) 
 			: _Value(_Val), _Index(_Idx), _Stride(_Std) {}
 		MATRICE_GLOBAL_INL operator _Type&() { return _Value; }
 		MATRICE_GLOBAL_INL operator _Type&() const { return _Value; }
@@ -172,7 +171,7 @@ return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 		MATRICE_GLOBAL_INL auto y() const { return (_Index / _Stride); }
 	private:
 		_Type& _Value;
-		std::size_t _Index, _Stride;
+		size_t _Index, _Stride;
 	};
 	enum { _M = _Traits::size::rows::value, _N = _Traits::size::cols::value };
 	using _Myt_storage_type = typename detail::Storage_<_Type>::template Allocator<_M, _N>;
@@ -209,7 +208,7 @@ public:
 	using reference = std::add_lvalue_reference_t<value_t>;
 	using iterator = pointer;
 	using const_iterator = std::add_const_t<iterator>;
-	using const_init_list = std::add_const_t<std::initializer_list<value_t>>;
+	using const_initlist = std::add_const_t<initlist<value_t>>;
 	using loctn_t = Location;
 	using category = typename _Traits::category;
 	template<typename _Xop> 
@@ -317,7 +316,7 @@ public:
 			static_cast<_Derived*>(this)->__create_impl(_Rows, _Cols);
 		return (*static_cast<_Derived*>(this));
 	};
-	template<typename _Uy, typename = enable_if_t<is_scalar_v<_Uy>>>
+	template<typename _Uy, MATRICE_ENABLE_IF(is_scalar_v<_Uy>)>
 	MATRICE_HOST_ONLY auto& create(diff_t _Rows, diff_t _Cols, _Uy _Val) {
 		this->create(_Rows, _Cols);
 		return (*(this) = { value_type(_Val) });
@@ -327,7 +326,7 @@ public:
 			static_cast<_Derived*>(this)->__create_impl(MATRICE_EXPAND_SHAPE);
 		return (*static_cast<_Derived*>(this));
 	};
-	template<typename _Uy, typename = enable_if_t<is_scalar_v<_Uy>>>
+	template<typename _Uy, MATRICE_ENABLE_IF(is_scalar_v<_Uy>)>
 	MATRICE_HOST_ONLY auto& create(const shape_t<size_t>& _Shape, _Uy _Val) {
 		this->create(_Shape);
 		return (*(this) = { value_type(_Val) });
@@ -483,8 +482,8 @@ public:
 		return _Myt_blockview_type(m_data, m_cols, { x0, y0, x1, y1 });
 	}
 	template<typename... _Ity, MATRICE_ENABLE_IF(sizeof...(_Ity) == 4)>
-	MATRICE_GLOBAL_INL const auto block(const std::tuple<_Ity...>& _R) const {
-		return this->block(std::get<0>(_R), std::get<1>(_R), std::get<2>(_R), std::get<3>(_R));
+	MATRICE_GLOBAL_INL const auto block(const tuple<_Ity...>& _R) const {
+		return this->block(get<0>(_R), get<1>(_R), get<2>(_R), get<3>(_R));
 	}
 
 	/** 
@@ -497,14 +496,14 @@ public:
 	}
 	/**
 	 * \brief View of a square submatrix.
-	 * \param [_Ctr]: central pos, which type _Centy must has forward iterator begin(), _Rs: radius size
+	 * \param [_Ctr]: central pos, which type _Cty must has forward iterator begin(), _Rs: radius size
 	 */
-	template<typename _Centy>
-	MATRICE_GLOBAL_INL auto block(const _Centy& _Ctr, int _Rs = 0) const {
+	template<typename _Cty>
+	MATRICE_GLOBAL_INL auto block(const _Cty& _Ctr, int _Rs = 0)const {
 		return this->block(*_Ctr.begin(), *(_Ctr.begin() + 1), _Rs);
 	}
 	template<typename _Ity, MATRICE_ENABLE_IF(is_integral_v<_Ity>)>
-	MATRICE_HOST_INL auto block(const initlist<_Ity>& _Ctr, int _Rs)const {
+	MATRICE_HOST_INL auto block(const_initlist<_Ity>& _Ctr, int _Rs)const {
 		return this->block(*_Ctr.begin(), *(_Ctr.begin() + 1), _Rs);
 	}
 
@@ -531,8 +530,8 @@ public:
 	 * \operator to get a block view of this matrix from a given tupled range.
 	 */
 	template<typename... _Ity, MATRICE_ENABLE_IF(sizeof...(_Ity) == 4)>
-	MATRICE_GLOBAL_INL auto operator()(const tuple<_Ity...>& _R) const {
-		return this->operator()(std::get<0>(_R), std::get<1>(_R), std::get<2>(_R), std::get<3>(_R));
+	MATRICE_GLOBAL_INL auto operator()(const tuple<_Ity...>& _R)const {
+		return this->operator()(get<0>(_R), get<1>(_R), get<2>(_R), get<3>(_R));
 	}
 #pragma endregion
 
@@ -555,7 +554,7 @@ public:
 	/**
 	 * \assignment operator, from initializer list
 	 */
-	MATRICE_GLOBAL_FINL _Derived& operator= (const_init_list _list) {
+	MATRICE_GLOBAL_FINL _Derived& operator= (const_initlist _list) {
 #ifdef _DEBUG
 		assert(size() == m_storage.size());
 #endif
@@ -609,7 +608,7 @@ public:
 	 */
 	template<int _Rows, int _Cols,
 		typename _Mty = Matrix_<value_t, _Rows, _Cols>,
-		typename = enable_if_t<is_static_v<_Rows, _Cols>&&!is_static_v<_M, _N>>>
+		MATRICE_ENABLE_IF(is_static_v<_Rows,_Cols>&&!is_static_v<_M,_N>)>
 	MATRICE_GLOBAL_FINL _Derived& operator= (_Mty& _managed) {
 		m_data = _managed.data();
 		m_rows = _managed.rows(), m_cols = _managed.cols();
@@ -624,7 +623,8 @@ public:
 	MATRICE_MAKE_ARITHOP(*, mul)
 	MATRICE_MAKE_ARITHOP(/, div)
 
-	template<typename _Rhs> MATRICE_GLOBAL_INL auto mul(const _Rhs& _Right) const { 
+	template<typename _Rhs> 
+	MATRICE_GLOBAL_INL auto mul(const _Rhs& _Right) const { 
 		return Expr::MatBinaryExpr<_Myt, _Rhs, _Xop_mat_mul>(*this, _Right);
 	}
 	MATRICE_GLOBAL_FINL auto sqrt() const { 
@@ -654,29 +654,44 @@ public:
 #pragma endregion
 
 	///<brief> in-time matrix arithmetic </brief>
-	MATRICE_GLOBAL_FINL auto max() const { return (*std::max_element(begin(), end())); }
-	MATRICE_GLOBAL_FINL auto min() const { return (*std::min_element(begin(), end())); }
-	MATRICE_GLOBAL_FINL auto sum() const { return (reduce(begin(), end())); }
-	MATRICE_GLOBAL_FINL auto det() const { return (det_impl(*static_cast<const _Derived*>(this))); }
-	MATRICE_GLOBAL_FINL auto trace() const { return (reduce(begin(), end(), cols() + 1)); }
+	MATRICE_GLOBAL_FINL auto max() const { 
+		return (*std::max_element(begin(), end())); 
+	}
+	MATRICE_GLOBAL_FINL auto min() const { 
+		return (*std::min_element(begin(), end())); 
+	}
+	MATRICE_GLOBAL_FINL auto sum() const { 
+		return (reduce(begin(), end())); 
+	}
+	MATRICE_GLOBAL_FINL auto det() const { 
+		return (det_impl(*static_cast<const _Derived*>(this))); 
+	}
+	MATRICE_GLOBAL_FINL auto trace() const { 
+		return (reduce(begin(), end(), cols() + 1)); 
+	}
 
 	/**
 	 * \matrix Frobenius norm
 	 */
-	MATRICE_GLOBAL_FINL auto norm_2() const { auto _Ans = dot(*this); return (_Ans > eps ? dgelom::sqrt(_Ans) : inf); }
+	MATRICE_GLOBAL_FINL auto norm_2() const { 
+		auto _Ans = dot(*this); 
+		return (_Ans > eps ? dgelom::sqrt(_Ans) : inf); 
+	}
 	/**
 	 * \matrix p-norm: $[\sum_{i=1}^{m}\sum_{j=1}^{}|a_{ij}|^p]^{1/p}$
 	 * Sepcial cases: $p = 0$ for $\infty$-norm, $p = 1$ for 1-norm and $p = 2$ for 2-norm
 	 * Reference: https://en.wikipedia.org/wiki/Matrix_norm
 	 */
-	template<std::size_t _P = 2> MATRICE_GLOBAL_FINL auto norm() const {
+	template<size_t _P = 2> MATRICE_GLOBAL_FINL auto norm() const {
 		return internal::_Matrix_norm_impl<_P>::value(*(this));
 	}
 	/**
 	 * \dot product of this matrix with _Rhs
 	 */
 	template<typename _Rhs> 
-	MATRICE_GLOBAL_FINL auto dot(const _Rhs& _Rhs) const { return (this->operator*(_Rhs)).sum(); }
+	MATRICE_GLOBAL_FINL auto dot(const _Rhs& _Rhs) const { 
+		return (this->operator*(_Rhs)).sum(); 
+	}
 
 	/**
 	 *\brief in-place instant subtraction
@@ -694,12 +709,13 @@ public:
 	 *\brief in-place instant matrix-vector multiplication
 	 *\param [_Right] can be a matrix or a vector types
 	 */
-	template<typename _Rhs, typename = enable_if_t<is_fxdvector_v<_Rhs>>>
+	template<typename _Rhs, MATRICE_ENABLE_IF(is_fxdvector_v<_Rhs>)>
 	MATRICE_HOST_INL auto& mul_(const _Rhs& _Right);
 	/**
 	 * \in-place maxmul with _Rhs. 
 	 */
-	template<ttag _Ltag = ttag::N, ttag _Rtag = ttag::N, typename _Rhs = _Derived, typename = enable_if_t<is_matrix_v<_Rhs>>>
+	template<ttag _Ltag = ttag::N, ttag _Rtag = ttag::N, 
+		typename _Rhs = _Derived, MATRICE_ENABLE_IF(is_matrix_v<_Rhs>)>
 	MATRICE_HOST_FINL auto inplace_mul(const _Rhs& _Right);
 	/**
 	 * \operate each entry via _Fn
@@ -741,7 +757,7 @@ public:
 	 * \param [_Dim] = 0 for row-wise stacking, = 1 for column-wise stacking 
 	 */
 	template<typename _Vecty>
-	MATRICE_HOST_INL _Derived& stack_from(const std::initializer_list<_Vecty>& _L, size_t _Dim = 0) {
+	MATRICE_HOST_INL _Derived& stack_from(const initlist<_Vecty>& _L, size_t _Dim = 0) {
 		const auto _Rows = _Dim == 0 ? _L.size() : _L.begin()->size();
 		const auto _Cols = _Dim == 0 ? _L.begin()->size() : _L.size();
 
@@ -781,10 +797,10 @@ public:
 	 *\param [_Val] diagonal element value, 
 	 *\param [_Size] matrix size, only specified for dynamic case
 	 */
-	template<typename _Uy, typename = enable_if_t<is_scalar_v<_Uy>>>
+	template<typename _Uy, MATRICE_ENABLE_IF(is_scalar_v<_Uy>)>
 	static MATRICE_GLOBAL_INL auto diag(_Uy _Val = 1, diff_t _Size = 0) {
 		_Derived _Ret; _Ret.create(_Size, _Size, 0);
-		const auto _Value = value_type(_Val);
+		const auto _Value = value_type(_Val)
 		for (auto _Idx = 0; _Idx < _Ret.rows(); ++_Idx) _Ret[_Idx][_Idx] = _Value;
 		return std::forward<_Derived>(_Ret);
 	}
@@ -840,8 +856,9 @@ struct _Matrix_padding {
 	 *\param <_S> templated padding size, which should be specified for managed matrix type
 	 *\param [_In] input matrix; [_Size] run-time specified padding size
 	 */
-	template<typename _Mty, size_t _S = 0, typename _Ty = typename _Mty::value_t>
-	MATRICE_GLOBAL_INL static auto zero(const _Mty& _In, size_t _Size = _S) {
+	template<typename _Mty, size_t _S = 0, 
+		typename _Ty = typename _Mty::value_t> MATRICE_GLOBAL_INL 
+	static auto zero(const _Mty& _In, size_t _Size = _S) {
 		// _Size <- max(_Size, _S)
 		static_assert(is_matrix_v<_Mty>, "_Mty must be a matrix type.");
 		
