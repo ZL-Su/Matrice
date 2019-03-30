@@ -48,7 +48,7 @@ class _Basic_plane_view_base {
 	int type = _Type, flags = MAGIC_VAL | _Type; Step step;
 	int nval, cval, hval, wval;
 public:
-	using plvt_type = std::tuple<int, int, std::add_pointer_t<_Ty>>;
+	using plvt_type = tuple<int, int, std::add_pointer_t<_Ty>>;
 	MATRICE_GLOBAL_FINL _Basic_plane_view_base() = default;
 	MATRICE_GLOBAL_FINL _Basic_plane_view_base(int _rows, int _cols, _Ty* _data = nullptr)
 		: m_rows(_rows), m_cols(_cols), m_data(_data), _Myshape{1,1,_rows,_cols} {
@@ -145,14 +145,14 @@ class Base_ : public _Basic_plane_view_base<_Type>
 {
 #define MATRICE_LINK_PTR { m_data = m_storage.data(); }
 #define MATRICE_EVALEXP_TOTHIS { m_data = m_storage.data(); expr.assign(*this); }
-#define MATRICE_EXPAND_SHAPE std::get<0>(_Shape), std::get<1>(_Shape)
+#define MATRICE_EXPAND_SHAPE get<0>(_Shape), get<1>(_Shape)
 #define MATRICE_MAKE_EXPOP_TYPE(DESC, NAME) typename _Exp_op::_##DESC##_##NAME<_Type>
 #define MATRICE_MAKE_ARITHOP(OP, NAME) \
 template<typename _Rhs> MATRICE_GLOBAL_INL \
 auto operator##OP (const _Rhs& _Right) const { \
 	return Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_##NAME>(*this, _Right); \
 } \
-template<typename _Lhs, typename = std::enable_if_t<std::is_scalar_v<_Lhs>>> friend \
+template<typename _Lhs, MATRICE_ENABLE_IF(is_scalar_v<_Lhs>)> friend \
 MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const _Derived& _Right) { \
 	return Expr::EwiseBinaryExpr<_Lhs, _Derived, _Xop_ewise_##NAME>(_Left, _Right); \
 }
@@ -247,7 +247,7 @@ public:
 		:_Mybase(_rows, _cols), m_storage(_rows, _cols, _val) MATRICE_LINK_PTR
 	MATRICE_GLOBAL_INL Base_(const shape_t<size_t>& _Shape, value_t _Val) noexcept
 		:Base_(MATRICE_EXPAND_SHAPE, _Val) {}
-	MATRICE_GLOBAL_INL Base_(const_init_list _list) noexcept 
+	MATRICE_GLOBAL_INL Base_(const_initlist _list) noexcept 
 		:_Mybase(_M, _N), m_storage(_list) MATRICE_LINK_PTR
 	MATRICE_GLOBAL_INL Base_(_Myt_const_reference _other) noexcept 
 		:_Mybase(_other._Myshape), m_storage(_other.m_storage) MATRICE_LINK_PTR
@@ -287,7 +287,7 @@ public:
 		:_Mybase(m_rows = expr.rows(), m_cols = expr.cols()), 
 		m_storage(m_rows, m_cols) MATRICE_EVALEXP_TOTHIS
 	template<typename _Rhs, typename _Op>
-	MATRICE_GLOBAL_FINL Base_(const Expr::MatUnaryExpr<_Rhs, _Op>& expr) 
+	MATRICE_GLOBAL_FINL Base_(const Expr::MatUnaryExpr<_Rhs, _Op>& expr)
 		:_Mybase(m_rows = expr.rows(), m_cols = expr.cols()), 
 		m_storage(m_rows, m_cols) MATRICE_EVALEXP_TOTHIS
 
@@ -503,7 +503,7 @@ public:
 		return this->block(*_Ctr.begin(), *(_Ctr.begin() + 1), _Rs);
 	}
 	template<typename _Ity, MATRICE_ENABLE_IF(is_integral_v<_Ity>)>
-	MATRICE_HOST_INL auto block(const_initlist<_Ity>& _Ctr, int _Rs)const {
+	MATRICE_HOST_INL auto block(const initlist<_Ity>& _Ctr, int _Rs)const {
 		return this->block(*_Ctr.begin(), *(_Ctr.begin() + 1), _Rs);
 	}
 
@@ -573,7 +573,7 @@ public:
 	/**
 	 * \assignment operator, from column-wise iterator
 	 */
-	MATRICE_GLOBAL_FINL _Derived& operator= (const _Myt_cwise_iterator& _It) {
+	MATRICE_GLOBAL_FINL _Derived& operator=(const _Myt_cwise_iterator& _It){
 		std::copy(_It.begin(), _It.end(), m_storage.data());
 		m_data = internal::_Proxy_checked(m_storage.data());
 		return (*static_cast<_Derived*>(this));
@@ -581,7 +581,7 @@ public:
 	/**
 	 * \homotype copy assignment operator
 	 */
-	MATRICE_GLOBAL_INL _Derived& operator= (_Myt_const_reference _other) {
+	MATRICE_GLOBAL_INL _Derived&operator=(_Myt_const_reference _other) {
 		m_cols = _other.m_cols, m_rows = _other.m_rows;
 		m_format = _other.m_format;
 		m_storage = _other.m_storage;
@@ -592,7 +592,7 @@ public:
 	/**
 	 * \homotype move assignment operator
 	 */
-	MATRICE_GLOBAL_INL _Derived& operator= (_Myt_move_reference _other) {
+	MATRICE_GLOBAL_INL _Derived& operator=(_Myt_move_reference _other) {
 		m_cols = _other.m_cols, m_rows = _other.m_rows;
 		m_format = _other.m_format;
 		m_storage = std::move(_other.m_storage);
@@ -608,7 +608,7 @@ public:
 	 */
 	template<int _Rows, int _Cols,
 		typename _Mty = Matrix_<value_t, _Rows, _Cols>,
-		MATRICE_ENABLE_IF(is_static_v<_Rows,_Cols>&&!is_static_v<_M,_N>)>
+		typename = enable_if_t<is_static_v<_Rows,_Cols>&&!is_static_v<_M,_N>>>
 	MATRICE_GLOBAL_FINL _Derived& operator= (_Mty& _managed) {
 		m_data = _managed.data();
 		m_rows = _managed.rows(), m_cols = _managed.cols();
@@ -682,7 +682,8 @@ public:
 	 * Sepcial cases: $p = 0$ for $\infty$-norm, $p = 1$ for 1-norm and $p = 2$ for 2-norm
 	 * Reference: https://en.wikipedia.org/wiki/Matrix_norm
 	 */
-	template<size_t _P = 2> MATRICE_GLOBAL_FINL auto norm() const {
+	template<size_t _P = 2> 
+	MATRICE_GLOBAL_FINL auto norm() const {
 		return internal::_Matrix_norm_impl<_P>::value(*(this));
 	}
 	/**
@@ -722,7 +723,8 @@ public:
 	 */
 	template<typename _Op>
 	MATRICE_GLOBAL_FINL auto& each(_Op&& _Fn) { 
-		for (auto& _Val : *this) _Fn(_Val); return(*static_cast<_Derived*>(this));
+		for (auto& _Val : *this) _Fn(_Val); 
+		return(*static_cast<_Derived*>(this));
 	}
 
 	/**
@@ -781,7 +783,8 @@ public:
 	 *\param [_Val] the value for replacement
 	 */
 	MATRICE_GLOBAL_INL void where(std::function<bool(const value_type&)> _Cond, const value_type _Val) {
-		this->each([&](auto& _My_val) {_My_val = _Cond(_My_val) ? _Val : _My_val; });
+		this->each([&](auto& _My_val) {
+			_My_val = _Cond(_My_val) ? _Val : _My_val; });
 	}
 
 	/**
@@ -800,8 +803,9 @@ public:
 	template<typename _Uy, MATRICE_ENABLE_IF(is_scalar_v<_Uy>)>
 	static MATRICE_GLOBAL_INL auto diag(_Uy _Val = 1, diff_t _Size = 0) {
 		_Derived _Ret; _Ret.create(_Size, _Size, 0);
-		const auto _Value = value_type(_Val)
-		for (auto _Idx = 0; _Idx < _Ret.rows(); ++_Idx) _Ret[_Idx][_Idx] = _Value;
+		const auto _Value = value_type(_Val);
+		for (auto _Idx = 0; _Idx < _Ret.rows(); ++_Idx) 
+			_Ret[_Idx][_Idx] = _Value;
 		return std::forward<_Derived>(_Ret);
 	}
 	/**
@@ -811,13 +815,15 @@ public:
 	static MATRICE_GLOBAL_INL auto rand(diff_t _Rows=0, diff_t _Cols=0) {
 		_Derived _Ret; _Ret.create(_Rows, _Cols);
 		uniform_real<value_type> _Rand; mt19937 _Eng;
-		return std::forward<_Derived>(_Ret.each([&](auto& _Val) {_Val = _Rand(_Eng); }));
+		return std::forward<_Derived>(_Ret.each([&](auto& _Val) {
+			_Val = _Rand(_Eng); }));
 	}
-	static MATRICE_GLOBAL_INL auto randn(const initlist<value_type>& _Pars = {/*mean=*/0, /*STD=*/1}, diff_t _Rows = 0, diff_t _Cols = 0) {
+	static MATRICE_GLOBAL_INL auto randn(const_initlist& _Pars = {/*mean=*/0, /*STD=*/1}, diff_t _Rows = 0, diff_t _Cols = 0) {
 		_Derived _Ret; _Ret.create(_Rows, _Cols);
 		normal_distribution<value_type> _Rand{ *_Pars.begin(), *(_Pars.begin() + 1) };
 		mt19937 _Eng;
-		return std::forward<_Derived>(_Ret.each([&](auto& _Val) {_Val = _Rand(_Eng); }));
+		return std::forward<_Derived>(_Ret.each([&](auto& _Val) {
+			_Val = _Rand(_Eng); }));
 	}
 
 	///<brief> properties </brief>
@@ -843,8 +849,7 @@ public:
 #undef MATRICE_EVALEXP_TOTHIS
 #undef MATRICE_MAKE_ARITHOP
 #undef MATRICE_MAKE_EXP_ASSIGNOP
-};
-_TYPES_END
+}; _TYPES_END
 
 _DETAIL_BEGIN
 struct _Matrix_padding {

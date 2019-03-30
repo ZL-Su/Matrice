@@ -758,13 +758,13 @@ template<
 // *\element-wise division
 template<
 	typename _Lhs, typename _Rhs,
-	typename value_t = conditional_t<is_scalar_v<_Rhs>, typename _Lhs::value_t, typename _Rhs::value_t>,
+	typename value_t = conditional_t<is_scalar_v<_Rhs>, _Rhs, typename _Rhs::value_t>,
 	typename _Op = _Exp::EwiseBinaryExpr<_Lhs, _Rhs, _Exp_op::_Ewise_div<value_t>>>
 	MATRICE_GLOBAL_FINL auto operator/ (const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
 // *\element-wise maximum
 template<
 	typename _Lhs, typename _Rhs,
-	typename value_t = conditional_t<is_scalar_v<_Rhs>, typename _Lhs::value_t, typename _Rhs::value_t>,
+	typename value_t = conditional_t<is_scalar_v<_Rhs>, _Rhs, typename _Rhs::value_t>,
 	typename _Op = _Exp::EwiseBinaryExpr<_Lhs, _Rhs, _Exp_op::_Ewise_max<value_t>>>
 	MATRICE_GLOBAL_FINL auto max(const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
 // *\element-wise minimum

@@ -32,7 +32,7 @@ class Vec_ : public Matrix_<_Ty, _Dim, compile_time_size<>::val_1>
 	using my_const_ref = const_my&;
 protected:
 	using _Base = Matrix_<_Ty, _Dim, compile_time_size<>::val_1>;
-	using const_init_list = typename _Base::const_init_list;
+	using const_initlist = typename _Base::const_initlist;
 public:
 	enum{CompileTimeRows = _Dim, CompileTimeCols = 1};
 	using _Base::data;
@@ -46,13 +46,13 @@ public:
 	vec_global_inl Vec_(const_value _v) : _Base({ _v }) {}
 	vec_global_inl Vec_(const_value _x, const_value _y) : _Base({ _x, _y }) {}
 	vec_global_inl Vec_(my_const_ref _other) : _Base(_other) {}
-	vec_global_inl Vec_(const_init_list _list) : _Base(_list) {}
+	vec_global_inl Vec_(const_initlist _list) : _Base(_list) {}
 	template<typename _Exp, MATRICE_ENABLE_IF(is_expression_v<_Exp>)>
 	vec_global_inl Vec_(const _Exp& _xpr) : _Base(_xpr) {}
 
 	vec_global_inl reference operator[] (size_t i) { return data()[i]; }
 	vec_global_inl const_reference operator[](size_t i)const { return data()[i]; }
-	vec_global_inl Vec_& operator= (const_init_list _list)
+	vec_global_inl Vec_& operator= (const_initlist _list)
 	{ return static_cast<Vec_&>(_Base::operator= (_list)); }
 	vec_global_inl Vec_& operator= (my_const_ref _other)
 	{ return static_cast<Vec_&>(_Base::operator=(_other)); }
@@ -81,7 +81,7 @@ template<typename _Ty> class Vec3_ final : public Vec_<_Ty, 3>
 	using my_const_ref = const Vec3_&;
 	using typename _Base::const_value;
 	using typename _Base::reference;
-	using typename _Base::const_init_list;
+	using typename _Base::const_initlist;
 public:
 	using _Base::CompileTimeRows;
 	using _Base::CompileTimeCols;
@@ -122,7 +122,7 @@ template<typename _Ty> class Vec4_ final : public Vec_<_Ty, 4>
 	using _Base = Vec_<_Ty, 4>;
 	using typename _Base::const_value;
 	using typename _Base::reference;
-	using typename _Base::const_init_list;
+	using typename _Base::const_initlist;
 public:
 	using _Base::CompileTimeRows;
 	using _Base::CompileTimeCols;

@@ -41,18 +41,18 @@ class Matrix_ : public Base_<Matrix_<_Ty, _M, _N>>
 public:
 	using typename _Mybase::value_t;
 	using typename _Mybase::pointer;
-	using typename _Mybase::const_init_list;
+	using typename _Mybase::const_initlist;
 	enum { Size = _M * _N, CompileTimeRows = _M, CompileTimeCols = _N, };
 	MATRICE_GLOBAL_FINL Matrix_(const value_t _val) noexcept : _Mybase({_val}) {};
 	MATRICE_GLOBAL_FINL Matrix_(pointer data) noexcept : _Mybase(_M, _N, data) {};
-	MATRICE_HOST_FINL   Matrix_(const_init_list _list) noexcept : _Mybase(_list) {}
+	MATRICE_HOST_FINL   Matrix_(const_initlist _list) noexcept : _Mybase(_list) {}
 	MATRICE_GLOBAL_FINL Matrix_(Myt_move_reference _other) noexcept : _Mybase((_other)) {}
 	MATRICE_GLOBAL_FINL Matrix_(Myt_const_reference _other) noexcept : _Mybase(_other) {};
 	MATRICE_GLOBAL_FINL Matrix_(int _pld1=0, int _pld2=0) noexcept : _Mybase() {};
 	template<typename... _Arg> 
 	MATRICE_GLOBAL_FINL Matrix_(const _Arg&... _arg) noexcept : _Mybase(_arg...) {};
 
-	MATRICE_HOST_FINL Myt_reference operator= (const_init_list _list) { return _Mybase::operator=(_list); }
+	MATRICE_HOST_FINL Myt_reference operator= (const_initlist _list) { return _Mybase::operator=(_list); }
 	MATRICE_GLOBAL_FINL Myt_reference operator= (Myt_const_reference _other) { return _Mybase::operator=(_other); }
 	MATRICE_GLOBAL_FINL Myt_reference operator= (Myt_move_reference _other) { return _Mybase::operator=(std::move(_other)); }
 	template<typename _Arg>
@@ -85,7 +85,7 @@ class Matrix_<_Ty, __, __> : public Base_<Matrix_<_Ty, __, __>>
 public:
 	using typename _Mybase::value_t;
 	using typename _Mybase::pointer;
-	using typename _Mybase::const_init_list;
+	using typename _Mybase::const_initlist;
 	using device_t = Matrix_<value_t, -1, -1>;
 	enum { Size = __, CompileTimeRows = __, CompileTimeCols = __, };
 	
@@ -103,7 +103,7 @@ public:
 	MATRICE_GLOBAL_INL Myt_reference operator= (Myt_move_reference _other) { 
 		return _Mybase::operator=(std::move(_other)); 
 	}
-	MATRICE_GLOBAL_FINL Myt_reference operator= (const_init_list _list) { return _Mybase::operator=(_list); }
+	MATRICE_GLOBAL_FINL Myt_reference operator= (const_initlist _list) { return _Mybase::operator=(_list); }
 	template<typename _Arg> 
 	MATRICE_GLOBAL_FINL Myt_reference operator= (const _Arg& _arg) { return _Mybase::operator=(_arg); }
 
@@ -127,7 +127,7 @@ class Matrix_<_Ty, -1, __> : public Base_<Matrix_<_Ty, -1, __>>
 public:
 	using typename _Mybase::value_t;
 	using typename _Mybase::pointer;
-	using typename _Mybase::const_init_list;
+	using typename _Mybase::const_initlist;
 	enum { Size = __, CompileTimeRows = -1, CompileTimeCols = __, };
 	MATRICE_GLOBAL_INL Matrix_(int _rows) noexcept : _Mybase(_rows, 1) {};
 	MATRICE_GLOBAL_INL Matrix_(Myt_move_reference _other) noexcept : _Mybase(std::move(_other)) {};
@@ -135,7 +135,7 @@ public:
 
 	template<typename _Arg> MATRICE_GLOBAL_INL Myt_reference operator= (add_const_reference<_Arg> _arg) { return _Mybase::operator=(_arg); }
 	MATRICE_GLOBAL_INL Myt_reference operator= (Myt_move_reference _other) { return _Mybase::operator=(std::move(_other)); }
-	MATRICE_HOST_INL Myt_reference operator= (const_init_list _list) { return _Mybase::operator=(_list); }
+	MATRICE_HOST_INL Myt_reference operator= (const_initlist _list) { return _Mybase::operator=(_list); }
 
 	MATRICE_MAKE_METHOD_CREATE
 };
@@ -163,7 +163,7 @@ public:
 	using typename _Mybase::value_t;
 	using typename _Mybase::value_type;
 	using typename _Mybase::pointer;
-	using typename _Mybase::const_init_list;
+	using typename _Mybase::const_initlist;
 	using host_t = Matrix_<value_t, 0, 0>;
 
 	MATRICE_GLOBAL_INL Matrix_(int _rows) noexcept 
@@ -199,7 +199,7 @@ public:
 	MATRICE_DEVICE_INL Myt_reference operator= (Myt_move_reference _other) { 
 		return _Mydevbase::operator=(std::move(_other)); 
 	}
-	MATRICE_GLOBAL_INL Myt_reference operator= (const_init_list _list) { 
+	MATRICE_GLOBAL_INL Myt_reference operator= (const_initlist _list) { 
 		_Mydevbase::operator=(const_cast<pointer>(_list.begin()));
 		return (*this);
 	}
