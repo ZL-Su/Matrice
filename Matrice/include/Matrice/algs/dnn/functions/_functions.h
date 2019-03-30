@@ -106,8 +106,9 @@ struct relu {
 			_Ty, typename _Ty::value_t>;
 		if constexpr (is_scalar_v<_Ty>) return y > 0 ? 1 : 0;
 		else {
-			_Ty _Ret(y.shape());
-			return std::forward<_Ty>(_Ret.from(y.data(), [](auto _val) { return backward(_val); }));
+			_Ty _Ret = y;
+			_Ret.each([](auto& _val) { _val = _val > 0 ? 1 : 0; });
+			return std::forward<_Ty>(_Ret);
 		}
 	}
 };
