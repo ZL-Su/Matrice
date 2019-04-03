@@ -93,10 +93,11 @@ public:
 	/**
 	 * \brief Move loader iterator _Off steps and return the loader
 	 */
-	MATRICE_HOST_INL auto& shift(index_t _Off) const {
+	MATRICE_HOST_INL decltype(auto) shift(index_t _Off) const {
 		_Mypos += _Off;
 #ifdef _DEBUG
-		_COND_EXCEPTION(end() || rend(), "_Off over range of loader depth")
+		_COND_EXCEPTION(end()||rend(),
+			"_Off over range of loader depth")
 #endif
 			return (*this);
 	}
@@ -106,12 +107,13 @@ public:
 	 */
 	MATRICE_HOST_INL auto forward() const {
 		std::vector<data_type> _Data;
-		for (const auto& _Idx : range(0, _Mydir.size())) {
+		const auto _Size = _Mydir.size() == 0 ? 1 : _Mydir.size();
+		for (const auto& _Idx : range(0, _Size)) {
 			const auto& _Names = _Mynames[_Idx];
 #ifdef _DEBUG
 			DGELOM_CHECK(_Mypos<_Names.size(), "file list subscript out of range.");
 #endif
-			_Data.emplace_back(_Myloader(_Mydir[_Idx]+_Names[_Mypos]));
+			_Data.emplace_back(_Myloader(_Mydir[_Idx] + _Names[_Mypos]));
 		}
 		_Mypos++;
 		return std::forward<decltype(_Data)>(_Data);
@@ -125,7 +127,7 @@ public:
 		auto _First = _Op(0);
 		std::vector<remove_reference_t<decltype(_First)>> _Data;
 		_Data.emplace_back(_First);
-		for (const auto& _Idx : range(1, _Mydir.size())) {
+		for (const auto& _Idx : range(1, _Mydir.size()-1)) {
 			_Data.emplace_back(_Op(_Idx));
 		}
 		_Mypos++;

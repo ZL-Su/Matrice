@@ -220,7 +220,8 @@ public:
 			write("C:/data/", {"f1.txt", "f2.txt"}, [&](auto&& fs1, auto&& fs2){ ... })
 	 */
 	template<typename _Op>
-	static MATRICE_HOST_FINL void write(const std::string& _path, std::initializer_list<std::string> _fnames, _Op _op) {
+	static MATRICE_HOST_FINL void write(const std::string& _path, std::initializer_list<std::string> _fnames, _Op&& _op) {
+		std::cout << "Files are saved in folder: " << _path << std::endl;
 		const auto _N = _fnames.begin();
 		std::ofstream _O1(_path + _N[0]), _O2(_path + _N[1]);
 		DGELOM_CHECK(_O1.is_open(), "Fail to open file: " + _path + _N[0]);

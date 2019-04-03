@@ -64,19 +64,21 @@ public:
 	/**
 	 * \return full path of _Idx-th folder
 	 */
-	MATRICE_HOST_INL auto operator[] (std::size_t _Idx) const {
+	MATRICE_HOST_INL auto operator[] (size_t _Idx) const {
 		return (_Mypath.string() + folder(_Idx));
 	}
 
 	/**
 	 * \return _Idx-th folder name under work-path _Mypath
 	 */
-	MATRICE_HOST_INL value_type folder(std::size_t _Idx) const {
+	MATRICE_HOST_INL value_type folder(size_t _Idx) const {
+		if (_Mysubfolders.size() == 0) return value_type();
+		else {
 #ifdef _DEBUG
-		if (_Idx >= _Mysubfolders.size()) throw
-			std::exception("_Idx over range of _Mysubfolders");
+			DGELOM_CHECK(_Idx < _Mysubfolders.size(), "_Idx over range of _Mysubfolders")
 #endif
-		return (_Mysubfolders[_Idx]);
+			return (_Mysubfolders[_Idx]);
+		}
 	}
 
 	/**
