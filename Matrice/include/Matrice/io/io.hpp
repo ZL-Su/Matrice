@@ -205,6 +205,35 @@ public:
 		}
 	}
 
+	/**
+	 *\brief read data from a file at _Path
+	 *\param [_Path] refers to the location of target file
+			   [_Skips] indicates how many lines to skip over
+	 */
+	template<typename _Ty>
+	static MATRICE_HOST_INL auto read(const std::string& _Path, size_t _Skips = 0) {
+		using value_type = _Ty;
+		DGELOM_CHECK(fs::exists(fs::path(_Path)), "'" + _Path + "' does not exist!");
+		std::ifstream _Fin(_Path);
+		DGELOM_CHECK(_Fin.is_open(), "Cannot open file in " + _Path);
+
+		std::string _Line;
+		for (const auto _Idx : range(0, _Skips)) {
+			std::getline(_Fin, _Line);
+		}
+		std::vector<std::vector<value_type>> _Data;
+		while (std::getline(_Fin, _Line)) {
+			_Data.push_back(split<value_type>(_Line, ','));
+		}
+
+		Matrix<value_type> _Res(_Data.size(),_Data.front().size());
+		for (const auto& _Idx : range(0, _Res.rows())) {
+			_Res.rview(_Idx) = _Data[_Idx].data();
+		}
+
+		return std::forward<decltype(_Res)>(_Res);
+	}
+
 	// \single-stream output
 	template<typename _Op> 
 	static MATRICE_HOST_FINL void write(const std::string& _path, _Op _op) {
@@ -333,6 +362,7 @@ DGE_MATRICE_BEGIN namespace io {
 using directory = detail::_Dir_impl<detail::folder_tag>;
 using folder_collector = detail::_Collector<detail::folder_tag>;
 using file_collector = detail::_Collector<detail::file_tag>;
+using path_t = directory::path_type;
 
 template<typename _Ty = std::float_t>
 using data_loader = detail::_Data_loader_impl<_Ty, detail::loader_tag>;
