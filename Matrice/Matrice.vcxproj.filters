@@ -169,6 +169,15 @@
     <Filter Include="Header Files\Algs\DeepLearning\Functions">
       <UniqueIdentifier>{6ade2d7d-1222-4837-b8ac-8bd715338058}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Addin\eigen">
+      <UniqueIdentifier>{11407415-926f-477d-90df-0cfc810a66d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Addin\eigen\autodiff">
+      <UniqueIdentifier>{e5827951-4548-4191-9cf1-290b0b418598}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Addin\gui">
+      <UniqueIdentifier>{da48dbfb-df67-4870-a0a6-8f87648ca827}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
