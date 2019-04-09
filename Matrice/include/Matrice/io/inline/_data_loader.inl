@@ -144,6 +144,48 @@ public:
 	}
 
 	/**
+	 *\brief load the first file
+	 */
+	MATRICE_HOST_INL auto front() const {
+		std::vector<data_type> _Data;
+		const auto _Size = _Mydir.size() == 0 ? 1 : _Mydir.size();
+		for (const auto& _Idx : range(0, _Size)) {
+			const auto& _Name = _Mynames[_Idx].front();
+			_Data.emplace_back(_Myloader(_Mydir[_Idx] + _Name));
+		}
+		return std::forward<decltype(_Data)>(_Data);
+	}
+	/**
+	 *\brief load the last file
+	 */
+	MATRICE_HOST_INL auto back() const {
+		std::vector<data_type> _Data;
+		const auto _Size = _Mydir.size() == 0 ? 1 : _Mydir.size();
+		for (const auto& _Idx : range(0, _Size)) {
+			const auto& _Name = _Mynames[_Idx].back();
+			_Data.emplace_back(_Myloader(_Mydir[_Idx] + _Name));
+		}
+		return std::forward<decltype(_Data)>(_Data);
+	}
+
+	/**
+	 *\brief load file at i-th position
+	 *\param [i] index of a file name
+	 */
+	MATRICE_HOST_INL auto at(size_t i) const {
+#ifdef _DEBUG
+		DGELOM_CHECK(i<_Names.size(),"file list subscript out of range.");
+#endif
+		std::vector<data_type> _Data;
+		const auto _Size = _Mydir.size()==0?1:_Mydir.size();
+		for (const auto& _Idx : range(0, _Size)) {
+			const auto& _Names = _Mynames[_Idx];
+			_Data.emplace_back(_Myloader(_Mydir[_Idx]+_Names[i]));
+		}
+		return std::forward<decltype(_Data)>(_Data);
+	}
+
+	/**
 	 * \return iterator pos
 	 */
 	MATRICE_HOST_FINL auto& pos() { return (_Mypos); }
@@ -155,7 +197,7 @@ public:
 	MATRICE_HOST_INL const dir_type& directory() const {
 		return (_Mydir);
 	}
-	MATRICE_HOST_FINL std::size_t batch_size() const {
+	MATRICE_HOST_FINL size_t batch_size() const {
 		return (_Mydir.size());
 	}
 
@@ -172,14 +214,14 @@ public:
 	/**
 	 * \return all file names in _Idx-th subfolder for currenct work path
 	 */
-	MATRICE_HOST_FINL _Mydir_type::container& file_names(std::size_t _Idx) {
+	MATRICE_HOST_FINL _Mydir_type::container& file_names(size_t _Idx) {
 #ifdef _DEBUG
 		DGELOM_CHECK(_Idx<_Mynames.size(), "_Idx over range of field ::_Mynames.");
 #endif // _DEBUG
 
 		return (_Mynames)[_Idx];
 	}
-	MATRICE_HOST_FINL const _Mydir_type::container& file_names(std::size_t _Idx) const {
+	MATRICE_HOST_FINL const _Mydir_type::container& file_names(size_t _Idx) const {
 #ifdef _DEBUG
 		DGELOM_CHECK(_Idx<_Mynames.size(), "_Idx over range of field ::_Mynames.");
 #endif // _DEBUG
