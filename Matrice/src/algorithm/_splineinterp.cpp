@@ -78,7 +78,7 @@ void _Spline_interpolation<_Ty, _TAG bicspl_tag>::_Coeff_impl() {
 	auto& _Mycoeff = _Mybase::_Mycoeff;
 
 	auto[_Height, _Width] = _Data.shape();
-	_Mycoeff.create(_Height, _Width, zero_v<value_type>);
+	_Mycoeff.create(_Height, _Width, zero<value_type>);
 
 	//initialization
 	const auto[_Z, _A, _K] = internal::_It_hypar<value_type, _Mybase::category>::value();
@@ -88,7 +88,7 @@ void _Spline_interpolation<_Ty, _TAG bicspl_tag>::_Coeff_impl() {
 	//Recursion over each column
 
 	//pre-calculate the initial value for the first recursion
-	matrix_type _R0(1, _Width, zero_v<value_type>);
+	matrix_type _R0(1, _Width, zero<value_type>);
 	
 #pragma omp parallel if(_K > 100)
 	{
@@ -102,7 +102,7 @@ void _Spline_interpolation<_Ty, _TAG bicspl_tag>::_Coeff_impl() {
 	//Recursion over each row
 
 	//pre-calculate the initial value for the first recursion
-	matrix_type _C0(_Height, 1, zero_v<value_type>);
+	matrix_type _C0(_Height, 1, zero<value_type>);
 #pragma omp parallel if(_K > 100)
 	{
 #pragma omp for
@@ -118,7 +118,7 @@ void _Spline_interpolation<_Ty, _TAG biqspl_tag>::_Coeff_impl() {
 	auto& _Mycoeff = _Mybase::_Mycoeff;
 
 	auto[_Height, _Width] = _Data.shape();
-	_Mycoeff.create(_Height, _Width, zero_v<value_type>);
+	_Mycoeff.create(_Height, _Width, zero<value_type>);
 
 	//initialization
 	const auto[_Z1, _Z2, _A1, _A2, _K1, _K2] = internal::_It_hypar<value_type, _Mybase::category>::value();
@@ -128,7 +128,7 @@ void _Spline_interpolation<_Ty, _TAG biqspl_tag>::_Coeff_impl() {
 	// \Recursion over each column...
 
 	//pre-calculate the initial value for the first recursion
-	matrix_type _R0(1, _Width, zero_v<value_type>);
+	matrix_type _R0(1, _Width, zero<value_type>);
 #pragma omp parallel if(_K1 > 100)
 	{
 #pragma omp for
@@ -138,7 +138,7 @@ void _Spline_interpolation<_Ty, _TAG biqspl_tag>::_Coeff_impl() {
 	}
 	_SPLCOEFF_CWISE_RECURSION(_A1, _Z1);
 
-	_R0 = { zero_v<value_type> };
+	_R0 = { zero<value_type> };
 #pragma omp parallel if(_K2 > 100)
 	{
 #pragma omp for
@@ -151,7 +151,7 @@ void _Spline_interpolation<_Ty, _TAG biqspl_tag>::_Coeff_impl() {
 	// \Recursion over each row...
 
 	//pre-calculate the initial value for the first recursion
-	matrix_type _C0(_Height, 1, zero_v<value_type>);
+	matrix_type _C0(_Height, 1, zero<value_type>);
 #pragma omp parallel if(_K1 > 100)
 	{
 #pragma omp for
@@ -161,7 +161,7 @@ void _Spline_interpolation<_Ty, _TAG biqspl_tag>::_Coeff_impl() {
 	}
 	_SPLCOEFF_RWISE_RECURSION(_A1, _Z1);
 
-	_C0 = { zero_v<value_type> };
+	_C0 = { zero<value_type> };
 #pragma omp parallel if(_K2 > 100)
 	{
 #pragma omp for
@@ -177,14 +177,14 @@ void _Spline_interpolation<_Ty, _TAG bisspl_tag>::_Coeff_impl() {
 	auto& _Mycoeff = _Mybase::_Mycoeff;
 
 	auto[_Height, _Width] = _Data.shape();
-	_Mycoeff.create(_Height, _Width, zero_v<value_type>);
+	_Mycoeff.create(_Height, _Width, zero<value_type>);
 
 	//initialization
 	const auto[_Z1, _Z2, _Z3, _A1, _A2, _A3, _K1, _K2, _K3] = internal::_It_hypar<value_type, _Mybase::category>::value();
 
 	matrix_type _Buff(_Height, _Width);
 
-	matrix_type _R0(1, _Width, zero_v<value_type>);
+	matrix_type _R0(1, _Width, zero<value_type>);
 #pragma omp parallel if(_K1 > 100)
 	{
 #pragma omp for
@@ -194,7 +194,7 @@ void _Spline_interpolation<_Ty, _TAG bisspl_tag>::_Coeff_impl() {
 	}
 	_SPLCOEFF_CWISE_RECURSION(_A1, _Z1);
 
-	_R0 = { zero_v<value_type> };
+	_R0 = { zero<value_type> };
 #pragma omp parallel if(_K2 > 100)
 	{
 #pragma omp for
@@ -204,7 +204,7 @@ void _Spline_interpolation<_Ty, _TAG bisspl_tag>::_Coeff_impl() {
 	}
 	_SPLCOEFF_CWISE_RECURSION(_A2, _Z2);
 
-	_R0 = { zero_v<value_type> };
+	_R0 = { zero<value_type> };
 #pragma omp parallel if(_K3 > 100)
 	{
 #pragma omp for
@@ -214,7 +214,7 @@ void _Spline_interpolation<_Ty, _TAG bisspl_tag>::_Coeff_impl() {
 	}
 	_SPLCOEFF_CWISE_RECURSION(_A3, _Z3);
 
-	matrix_type _C0(_Height, 1, zero_v<value_type>);
+	matrix_type _C0(_Height, 1, zero<value_type>);
 #pragma omp parallel if(_K1 > 100)
 	{
 #pragma omp for
@@ -224,7 +224,7 @@ void _Spline_interpolation<_Ty, _TAG bisspl_tag>::_Coeff_impl() {
 	}
 	_SPLCOEFF_RWISE_RECURSION(_A1, _Z1);
 
-	_C0 = { zero_v<value_type> };
+	_C0 = { zero<value_type> };
 #pragma omp parallel if(_K2 > 100)
 	{
 #pragma omp for
@@ -234,7 +234,7 @@ void _Spline_interpolation<_Ty, _TAG bisspl_tag>::_Coeff_impl() {
 	}
 	_SPLCOEFF_RWISE_RECURSION(_A2, _Z2);
 
-	_C0 = { zero_v<value_type> };
+	_C0 = { zero<value_type> };
 #pragma omp parallel if(_K3 > 100)
 	{
 #pragma omp for
