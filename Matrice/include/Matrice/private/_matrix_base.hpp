@@ -793,7 +793,7 @@ public:
 	 */
 	static MATRICE_GLOBAL_INL auto zero(diff_t _Rows = 0, diff_t _Cols = 0) {
 		_Derived _Ret;
-		return std::forward<_Derived>(_Ret.create(_Rows, _Cols, 0));
+		return forward<_Derived>(_Ret.create(_Rows, _Cols, 0));
 	}
 	/**
 	 *\brief Create a diagonal square matrix
@@ -806,7 +806,7 @@ public:
 		const auto _Value = value_type(_Val);
 		for (auto _Idx = 0; _Idx < _Ret.rows(); ++_Idx) 
 			_Ret[_Idx][_Idx] = _Value;
-		return std::forward<_Derived>(_Ret);
+		return forward<_Derived>(_Ret);
 	}
 	/**
 	 *\brief Create random value filled matrix
@@ -815,14 +815,14 @@ public:
 	static MATRICE_GLOBAL_INL auto rand(diff_t _Rows=0, diff_t _Cols=0) {
 		_Derived _Ret; _Ret.create(_Rows, _Cols);
 		uniform_real<value_type> _Rand; mt19937 _Eng;
-		return std::forward<_Derived>(_Ret.each([&](auto& _Val) {
+		return forward<_Derived>(_Ret.each([&](auto& _Val) {
 			_Val = _Rand(_Eng); }));
 	}
 	static MATRICE_GLOBAL_INL auto randn(const_initlist& _Pars = {/*mean=*/0, /*STD=*/1}, diff_t _Rows = 0, diff_t _Cols = 0) {
 		_Derived _Ret; _Ret.create(_Rows, _Cols);
 		normal_distribution<value_type> _Rand{ *_Pars.begin(), *(_Pars.begin() + 1) };
 		mt19937 _Eng;
-		return std::forward<_Derived>(_Ret.each([&](auto& _Val) {
+		return forward<_Derived>(_Ret.each([&](auto& _Val) {
 			_Val = _Rand(_Eng); }));
 	}
 

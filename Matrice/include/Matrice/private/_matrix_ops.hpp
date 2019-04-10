@@ -24,21 +24,22 @@ DGE_MATRICE_BEGIN
 
 _INTERNAL_BEGIN
 // *\helper operators
-template<typename _InIt, typename = std::enable_if_t<std::is_pointer_v<_InIt>>>
+template<typename _InIt, MATRICE_ENABLE_IF(is_pointer_v<_InIt>)>
 MATRICE_GLOBAL_FINL void _Conformity_check(_InIt _Left, _InIt _Right) {
 #ifdef _DEBUG
-	if (_Left != _Right) throw std::runtime_error("Inconsistent iterators!");
+	DGELOM_CHECK(_Left == _Right, "Inconsistent iterators.");
 #endif
 	_Left = _Right;
 }
-template<typename _InIt, typename = std::enable_if_t<std::is_pointer_v<_InIt>>>
+template<typename _InIt, MATRICE_ENABLE_IF(is_pointer_v<_InIt>)>
 MATRICE_GLOBAL_FINL _InIt _Proxy_checked(const _InIt _Right) {
 	return (_Right);
 }
-template<typename _Valty, size_t _N, typename = std::enable_if_t<std::is_arithmetic_v<_Valty>>>
+template<typename _Valty, size_t _N, 
+	MATRICE_ENABLE_IF(is_arithmetic_v<_Valty>)>
 MATRICE_GLOBAL_FINL auto _Fill_array(const _Valty* _First) {
 #ifdef _DEBUG
-	if (_First + _N - 1 == nullptr) throw std::runtime_error("Unconformable shape!");
+	DGELOM_CHECK(_First+_N-1, "The shapes of the source and destination are inconsistent.")
 #endif
 	std::array<_Valty, _N> _Ret;
 	std::_Copy_unchecked(_First, _First + _N, _Ret.data());
@@ -46,10 +47,15 @@ MATRICE_GLOBAL_FINL auto _Fill_array(const _Valty* _First) {
 }
 // *\determinent expression of square matrix
 template<typename _Rhs,
-	typename value_t = std::enable_if_t<std::is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>>
+	typename value_t = enable_if_t<is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>>
 MATRICE_HOST_ONLY value_t det_impl(const _Rhs& a);
 
-template<std::size_t _P> struct _Matrix_norm_impl {
+
+/**
+ *\brief Evaluate the p-norm for a given matrix or vector.
+ *\param [_P] 
+ */
+template<size_t _P> struct _Matrix_norm_impl {
 	template<typename _Mty>
 	MATRICE_GLOBAL_FINL static constexpr auto value(const _Mty& _A) {
 		static_assert(is_matrix_v<_Mty>, "_Mty is not matrix type.");
@@ -61,30 +67,37 @@ template<std::size_t _P> struct _Matrix_norm_impl {
 		return (pow(_Ret, decltype(_Ret)(1)/_P));
 	}
 };
+/**
+ *\brief Evaluate the 0-norm for a given matrix or vector.
+ */
 template<> struct _Matrix_norm_impl<0> { //infinity norm
 	template<typename _Mty>
 	MATRICE_GLOBAL_FINL static constexpr auto value(const _Mty& _A) {
 		static_assert(is_matrix_v<_Mty>, "_Mty is not matrix type.");
 
 		auto _Ret = typename _Mty::value_type(0);
-		for (std::size_t _Idx = 0; _Idx < _A.rows(); ++_Idx) {
+		for (size_t _Idx = 0; _Idx < _A.rows(); ++_Idx) {
 			_Ret = max(_Ret, abs(_A.rview(_Idx)).sum());
 		}
 		return (_Ret);
 	}
 };
+/**
+ *\brief Evaluate the 1-norm for a given matrix or vector.
+ */
 template<> struct _Matrix_norm_impl<1> {
 	template<typename _Mty>
 	MATRICE_GLOBAL_FINL static constexpr auto value(const _Mty& _A) {
 		static_assert(is_matrix_v<_Mty>, "_Mty is not matrix type.");
 
 		auto _Ret = typename _Mty::value_type(0);
-		for (std::size_t _Idx = 0; _Idx < _A.cols(); ++_Idx) {
+		for (size_t _Idx = 0; _Idx < _A.cols(); ++_Idx) {
 			_Ret = max(_Ret, abs(_A.cview(_Idx)).sum());
 		}
 		return (_Ret);
 	}
 };
+
 _INTERNAL_END
 
 DGE_MATRICE_END
