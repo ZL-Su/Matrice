@@ -27,7 +27,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #if (defined __CXX11__ || defined __CXX17__)
 #define __CXX11_SHARED__
-#define MATRICE_ENABLE_SHARED
+#define MATRICE_SHARED_STORAGE 0
 #endif //enable shared memory allocator
 
 #ifndef __enable_cuda__ 
@@ -59,6 +59,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #define MATRICE_USE_NAT     0 //*\use native kernel code
 #define MATRICE_USE_FKL     1 //*\use fortran kernel lib
 #define MATRICE_USE_MKL     2 //*\use intel mkl lib
+#ifndef MATRICE_MATH_KERNEL
+#define MATRICE_MATH_KERNEL MATRICE_USE_MKL
+#endif // !MATRICE_MATH_KERNEL
+
 
 #ifdef MATRICE_USE_OPENCV
 #ifndef __use_ocv_as_view__
