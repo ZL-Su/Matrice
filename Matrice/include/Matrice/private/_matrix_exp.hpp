@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,10 +18,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include <functional>
 #include <cassert>
-#include "../util/utils.h"
+#include "_matrix_shape.hpp"
 #include "_type_traits.h"
 #include "_size_traits.h"
 #include "_tag_defs.h"
+#include "../private/math/_primitive_funcs.hpp"
 #if defined(MATRICE_SIMD_ARCH)
 #include "../arch/ixpacket.h"
 #endif
@@ -282,7 +283,8 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 			CompileTimeCols = myt_traits::cols};
 
 		MATRICE_GLOBAL_FINL Base_() {}
-		MATRICE_GLOBAL_FINL Base_(const basic_shape_t& _Shape) : Shape(_Shape) {}
+		MATRICE_GLOBAL_FINL Base_(const basic_shape_t& _Shape) 
+			: Shape(_Shape), M(_Shape.rows()), N(_Shape.cols()) {}
 
 		// \evaluate the matrix expression
 		MATRICE_GLOBAL_INL auto eval() const {
@@ -374,12 +376,15 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 	};
 
 	// \matrix element-wise binary operation expression: +, -, *, /, ...
-	template<typename T, typename U, typename _BinaryOp, bool _T = is_scalar_v<T>, bool _U = is_scalar_v<U>> class EwiseBinaryExpr {};
+	template<typename T, typename U, typename _BinaryOp, 
+		bool _T = is_scalar_v<T>, bool _U = is_scalar_v<U>> 
+		class EwiseBinaryExpr {};
 
 	template<typename T, typename U, typename _BinaryOp>
-	class EwiseBinaryExpr<T, U, _BinaryOp, false, false> : public Base_<EwiseBinaryExpr<T, U, _BinaryOp, false, false>>
+	class EwiseBinaryExpr<T, U, _BinaryOp, false, false> 
+		: public Base_<EwiseBinaryExpr<T, U, _BinaryOp, false, false>>
 	{
-		using _Mybase = Base_<EwiseBinaryExpr<T, U, _BinaryOp, false, false>>;
+		using _Mybase = Base_<EwiseBinaryExpr<T,U,_BinaryOp,false,false>>;
 	public:
 		using _Mybase::CompileTimeRows;
 		using _Mybase::CompileTimeCols;
@@ -389,8 +394,8 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		using category = category_type_t<_BinaryOp>;
 		enum { options = option<ewise>::value };
 
-		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T& _lhs, const U& _rhs) noexcept
-			:_Mybase(_lhs.dims()), _LHS(_lhs), _RHS(_rhs) { M = _LHS.rows(), N = _LHS.cols(); }
+		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T& _lhs, const U& _rhs)
+		 :_Mybase(_Union(_lhs.dims(),_rhs.dims())), _LHS(_lhs), _RHS(_rhs){}
 
 		MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) { 
 			return _Op(_LHS(_idx), _RHS(_idx));
@@ -401,8 +406,15 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 
 		template<typename _Mty> 
 		MATRICE_GLOBAL_INL void assign_to(_Mty& _Res) const {
+			if (_LHS.size() == _RHS.size()) { //element-wise operation
 #pragma omp parallel for if(_Res.size() > 100)
-			for (index_t i = 0; i < _Res.size(); ++i) _Res(i) = this->operator()(i);
+				for (index_t i = 0; i < _Res.size(); ++i)
+					_Res(i) = this->operator()(i);
+			}
+			else { //spreaded element-wise operation
+				const auto _L = _LHS.eval();
+				const auto _R = _RHS.eval();
+			}
 		}
 
 	private:
@@ -412,7 +424,8 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		using _Mybase::N;
 	};
 	template<typename T, typename U, typename _BinaryOp>
-	class EwiseBinaryExpr<T, U, _BinaryOp, true, false> : public Base_<EwiseBinaryExpr<T, U, _BinaryOp, true, false>>
+	class EwiseBinaryExpr<T, U, _BinaryOp, true, false> 
+		: public Base_<EwiseBinaryExpr<T, U, _BinaryOp, true, false>>
 	{
 		using _Mybase = Base_<EwiseBinaryExpr<T, U, _BinaryOp, true, false>>;
 	public:
@@ -424,10 +437,8 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		using category = category_type_t<_BinaryOp>;
 		enum { options = option<ewise>::value };
 
-		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T _scalar, const U& _rhs) noexcept
-			:_Mybase(_rhs.dims()), _Scalar(_scalar), _RHS(_rhs) {
-			M = _RHS.rows(), N = _RHS.cols();
-		}
+		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T _scalar, const U& _rhs) 
+			noexcept :_Mybase(_rhs.dims()), _Scalar(_scalar), _RHS(_rhs) {}
 
 		MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) {
 			return _Op(_Scalar, _RHS(_idx));
@@ -450,7 +461,8 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		using _Mybase::N;
 	};
 	template<typename T, typename U, typename _BinaryOp>
-	class EwiseBinaryExpr<T, U, _BinaryOp, false, true> : public Base_<EwiseBinaryExpr<T, U, _BinaryOp, false, true>>
+	class EwiseBinaryExpr<T, U, _BinaryOp, false, true> 
+		: public Base_<EwiseBinaryExpr<T, U, _BinaryOp, false, true>>
 	{
 		using _Mybase = Base_<EwiseBinaryExpr<T, U, _BinaryOp, false, true>>;
 	public:
@@ -462,10 +474,8 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		using category = category_type_t<_BinaryOp>;
 		enum { options = option<ewise>::value };
 
-		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T& _lhs, const U _scalar) noexcept
-			:_Mybase(_lhs.dims()), _Scalar(_scalar), _LHS(_lhs) {
-			M = _LHS.rows(), N = _LHS.cols();
-		}
+		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T& _lhs, const U _scalar) 
+			noexcept :_Mybase(_lhs.dims()), _Scalar(_scalar), _LHS(_lhs) {}
 
 		MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) {
 			return _Op(_LHS(_idx), _Scalar);
@@ -504,7 +514,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		enum { options = expression_options<_UnaryOp>::value };
 
 		EwiseUnaryExpr(const_reference_t _rhs) noexcept
-			:_Mybase(_rhs.dims()), _RHS(_rhs) { M = _rhs.rows(), N = _rhs.cols(); }
+			:_Mybase(_rhs.dims()), _RHS(_rhs) {}
 
 		MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) {
 			return _Op(_RHS(_idx));
@@ -513,9 +523,11 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 			return _Op(_RHS(_idx));
 		}
 
-		template<typename _Mty> MATRICE_GLOBAL_INL void assign_to(_Mty& res) const {
+		template<typename _Mty> 
+		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const {
 #pragma omp parallel for
-			for (index_t i = 0; i < res.size(); ++i) res(i) = this->operator()(i);
+			for (index_t i = 0; i < res.size(); ++i) 
+				res(i) = this->operator()(i);
 		}
 
 	private:
@@ -539,8 +551,8 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		using category = category_type_t<_BinaryOp>;
 		enum{options = option<_BinaryOp::flag>::value};
 
-		MATRICE_GLOBAL_INL MatBinaryExpr(const T& _lhs, const U& _rhs) noexcept 
-			:_Mybase(_lhs.dims()), _LHS(_lhs), _RHS(_rhs) {
+		MATRICE_GLOBAL_INL MatBinaryExpr(const T& _lhs, const U& _rhs) 
+			noexcept :_Mybase(_lhs.dims()), _LHS(_lhs), _RHS(_rhs) {
 			M = _LHS.rows(), K = _LHS.cols(), N = _RHS.cols();
 			if (K != _RHS.rows() && K == N) N = _RHS.rows();
 		}
@@ -559,7 +571,8 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		template<typename _Mty>
 		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const {
 #pragma omp parallel for
-			for (int i = 0; i < res.size(); ++i) res(i) = this->operator()(i);
+			for (int i = 0; i < res.size(); ++i) 
+				res(i) = this->operator()(i);
 		}
 	private:
 		const T& _LHS; 
@@ -585,17 +598,15 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 
 		MATRICE_GLOBAL_INL MatUnaryExpr(const T& inout) noexcept
 			:_Mybase(inout.dims()), _RHS(inout), _ANS(inout) {
-			M = _RHS.rows(), N = _RHS.cols();
 			if constexpr (options & trp == trp) std::swap(M, N);
 		}
 		MATRICE_GLOBAL_INL MatUnaryExpr(const T& _rhs, T& _ans)
 			: _Mybase(_rhs.dims()), _RHS(_rhs), _ANS(_ans) {
-			M = _RHS.rows(), N = _RHS.cols();
 			if constexpr (options & trp == trp) std::swap(M, N);
 		}
 		MATRICE_GLOBAL_INL MatUnaryExpr(MatUnaryExpr&& _other)
 			: _Mybase(_other.dims()), options(_other.options) {
-			*this = std::move(_other);
+			*this = move(_other);
 		}
 
 		MATRICE_GLOBAL_FINL auto operator()() const { 
@@ -673,8 +684,8 @@ struct expression_traits<_Exp::EwiseBinaryExpr<T, U, _Op, false, false>> {
 	using value_type = common_type_t<typename T::value_t, typename U::value_t>;
 	enum {
 		options = _Exp::option<_Exp_tag::ewise>::value,
-		rows = T::CompileTimeRows,
-		cols = U::CompileTimeCols,
+		rows = max_integer_v<T::CompileTimeRows, U::CompileTimeRows>,
+		cols = max_integer_v<T::CompileTimeCols, U::CompileTimeCols>,
 	};
 	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
 };
