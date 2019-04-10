@@ -235,8 +235,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 				return (val);
 			}
 			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
-			auto operator() (const _Lhs& lhs, const _Rhs& rhs, int r, int c) const
-			{
+			auto operator() (const _Lhs& lhs, const _Rhs& rhs, int r, int c) const {
 				value_type _Ret = value_type(0);
 				const int K = rhs.rows(), N = rhs.cols(), _Idx = r * lhs.cols();
 #ifdef __disable_simd__
