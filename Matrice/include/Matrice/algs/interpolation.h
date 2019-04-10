@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ enum {
 template<
 	typename _Ty, 
 	typename _Tag = _TAG bicspl_tag,
-	typename = std::enable_if_t<std::is_scalar_v<_Ty>>>
+	MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 using interpolation = algs::_Interpolation_wrapper<_Ty, _Tag>;
 
 DGE_MATRICE_END
