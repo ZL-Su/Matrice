@@ -252,7 +252,7 @@ public:
 	MATRICE_GLOBAL_INL Base_(_Myt_const_reference _other) noexcept 
 		:_Mybase(_other._Myshape), m_storage(_other.m_storage) MATRICE_LINK_PTR
 	MATRICE_GLOBAL_INL Base_(_Myt_move_reference _other) noexcept 
-		:_Mybase(_other._Myshape), m_storage(std::move(_other.m_storage)) MATRICE_LINK_PTR
+		:_Mybase(_other._Myshape), m_storage(move(_other.m_storage)) MATRICE_LINK_PTR
 	/**
 	 *\from STD vector<value_t>
 	 */
