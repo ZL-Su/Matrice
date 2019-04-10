@@ -1,6 +1,6 @@
 /*  *************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 DGE_MATRICE_BEGIN _DETAIL_BEGIN
 
-template<typename _Ty, 
-	typename = std::enable_if_t<is_floating_point_v<_Ty>>> 
+template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)> 
 struct _Blas_kernel_impl {
 	static_assert("Oops, unsupported data type _Ty in _Blas_kernel_impl<_Ty, void>.");
 
@@ -30,8 +29,7 @@ struct _Blas_kernel_impl {
 	template<typename... _Args> static constexpr auto mul(const _Args&...) {}
 };
 
-template<typename _Ty, 
-	typename = std::enable_if_t<is_floating_point_v<_Ty>>> 
+template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
 struct _Lapack_kernel_impl {
 	static_assert("Oops, unsupported data type _Ty in _Lapack_kernel_impl<_Ty, void>.");
 
