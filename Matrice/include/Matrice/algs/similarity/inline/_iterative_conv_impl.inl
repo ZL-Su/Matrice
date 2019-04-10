@@ -167,7 +167,7 @@ auto _Iterative_conv_base<_Derived>::_Update_subset(const param_type& _P) {
 
 	stack_vector _Buf_x{ 1. }, _Buf_y{ 1. };
 
-	auto _Mean = zero_v<value_type>;
+	auto _Mean = zero<value_type>;
 	for (auto y = _U, _Off_y = 0; y < _D; ++y, ++_Off_y) {
 		auto _Dy = static_cast<value_type>(y - m_pos.y);
 
@@ -186,7 +186,7 @@ auto _Iterative_conv_base<_Derived>::_Update_subset(const param_type& _P) {
 
 				_Mean += _Mycur(_Off_y, _Off_x) = (*_Myitp)(_Ix-_Bl, _Iy);
 			}
-			else _Mycur(_Off_y, _Off_x) = zero_v<value_type>;
+			else _Mycur(_Off_y, _Off_x) = zero<value_type>;
 		}
 	}
 	_Mean /= static_cast<value_type>(multiply(_R - _L, _D - _U));

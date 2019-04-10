@@ -870,9 +870,9 @@ struct _Matrix_padding {
 		constexpr auto _M = _Mty::CompileTimeRows;
 		constexpr auto _N = _Mty::CompileTimeCols;
 		_Matrix_t<_Ty, _M + (_S << 1), _N + (_S << 1)> _Ret;
-		if constexpr (_S > 0) _Ret = { zero_v<_Ty> };
+		if constexpr (_S > 0) _Ret = { zero<_Ty> };
 		else {
-			_Ret.create(_In.rows()+(_Size<<1), _In.cols()+(_Size << 1), zero_v<_Ty>);
+			_Ret.create(_In.rows()+(_Size<<1), _In.cols()+(_Size << 1), zero<_Ty>);
 		}
 		_Ret.block(_Size, _Size+_In.cols(), _Size, _Size+_In.rows()) = _In;
 

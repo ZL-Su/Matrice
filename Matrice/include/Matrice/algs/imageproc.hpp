@@ -129,7 +129,7 @@ public:
 		const auto _Ry = _My_range::_(_U, _D);
 		const auto _Rx = _My_range::_(_L, _R);
 
-		matrix_type _Grad(_D - _U, _R - _L, zero_v<value_type>);
+		matrix_type _Grad(_D - _U, _R - _L, zero<value_type>);
 		for (const auto _Idy : _Ry) {
 			auto _Row = _Grad.rbegin(_Idy - _U);
 			for (const auto _Idx : _Rx) {

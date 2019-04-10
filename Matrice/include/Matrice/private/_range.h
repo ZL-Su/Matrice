@@ -83,13 +83,13 @@ public:
 		return _My_iterator(m_pos, m_stride); 
 	}
 	MATRICE_GLOBAL_INL _My_iterator end() { 
-		return _My_iterator(m_end, zero_v<step_t>);
+		return _My_iterator(m_end, zero<step_t>);
 	}
 	MATRICE_GLOBAL_INL const _My_iterator begin() const {
 		return _My_iterator(m_pos, m_stride);
 	}
 	MATRICE_GLOBAL_INL const _My_iterator end() const {
-		return _My_iterator(m_end, zero_v<step_t>);
+		return _My_iterator(m_end, zero<step_t>);
 	}
 
 	MATRICE_GLOBAL_INL operator bool() const { 

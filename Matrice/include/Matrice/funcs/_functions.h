@@ -56,7 +56,7 @@ MATRICE_HOST_INL constexpr _Vty dot(const _T& _x, const _U& _y) {
 	DGELOM_CHECK(_x.size()== _y.size(), "Oops, non-consistent size error.");
 #endif
 
-	auto _Ret = zero_v<_Vty>;
+	auto _Ret = zero<_Vty>;
 
 #if   MATRICE_MATH_KERNEL == MATRICE_USE_MKL
 
