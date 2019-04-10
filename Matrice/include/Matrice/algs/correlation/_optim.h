@@ -27,19 +27,20 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 MATRICE_ALGS_BEGIN _DETAIL_BEGIN namespace corr {
 
 struct _Correlation_options {
-	std::size_t _Radius = 10; //patch radius
-	std::size_t _Maxits = 10; //maximum iterations
-	std::size_t _Stride = 7; //node spacing
+	size_t _Radius = 10;  //patch radius
+	size_t _Maxits = 10;  //maximum iterations
+	size_t _Stride = 7;   //node spacing
+	float_t _Coeff = 0.8; //correlation threshold
 
-	template<typename _Ty, typename = enable_if_t<is_floating_point_v<_Ty>>>
+	template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
 	static constexpr _Ty _Mytol = _Ty(1.0E-6); //iteration tolerance
 
 	/**
-	 * \retrieve the range of patch centered on point _Pos
+	 * \retrieve range of the patch centered on point _Pos
 	 */
 	template<bool _Is_cutoff, typename _Ty, typename _Ret = conditional_t<_Is_cutoff, index_t, typename _Ty::value_t>>
 	MATRICE_GLOBAL_INL auto range(const _Ty& _Pos) {
-		using tuple_type = std::tuple<_Ret, _Ret, _Ret, _Ret>;
+		using tuple_type = tuple<_Ret, _Ret, _Ret, _Ret>;
 		if constexpr (_Is_cutoff) {
 			const auto x = floor<_Ret>(_Pos.x), y = floor<_Ret>(_Pos.y);
 			return tuple_type(x - _Radius, x + _Radius + 1, y - _Radius, y + _Radius + 1);
@@ -51,15 +52,15 @@ struct _Correlation_options {
 	MATRICE_HOST_INL auto range_check(const _Pty& _Pos, const _Sty& _Shape) {
 		auto _TL = _Pos - _Radius; auto _RB = _Pos + _Radius;
 		if (floor(_TL(0)) < 0 || floor(_TL(1)) < 0 ||
-			_RB(0)>=std::get<0>(_Shape) || _RB(1)>=std::get<1>(_Shape))
+			_RB(0)>=get<0>(_Shape) || _RB(1)>=get<1>(_Shape))
 			return false;
 		return true;
 	}
 };
 
-template<typename _Ty, typename _Itag, std::size_t _Order>
+template<typename _Ty, typename _Itag, size_t _Order>
 class _Corr_invcomp_optim {};
-template<typename _Ty, typename _Itag, std::size_t _Order>
+template<typename _Ty, typename _Itag, size_t _Order>
 struct _Corr_solver_traits<_Corr_invcomp_optim<_Ty, _Itag, _Order>> {
 	using value_type = _Ty;
 	using itp_category = _Itag;
@@ -140,7 +141,7 @@ _DETAIL_END } MATRICE_ALGS_END
 DGE_MATRICE_BEGIN
 struct xcorr_optim {
 	using option = algs::detail::corr::_Correlation_options;
-	template<typename _Ty, typename _Itag, std::size_t _Order>
+	template<typename _Ty, typename _Itag, size_t _Order=1>
 	using ic = algs::detail::corr::_Corr_invcomp_optim<_Ty, _Itag, _Order>;
 };
 DGE_MATRICE_END
