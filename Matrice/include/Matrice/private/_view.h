@@ -22,9 +22,9 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 DGE_MATRICE_BEGIN
 _TYPES_BEGIN
 #define _VIEW_EWISE_COPY_N(_LEFT, _N)\
-DGELOM_CHECK(_N < size(), "_N over range of current view."); \
-size_t _Size = _N==0? size() : _N; \
-for(std::size_t _Idx = 0; _Idx < _Size; ++_Idx) { \
+DGELOM_CHECK(_N <= size(), "matrix size over range of current view."); \
+size_t _Size = (_N==0) ? size() : _N; \
+for(size_t _Idx = 0; _Idx < _Size; ++_Idx) { \
 	_LEFT(_Idx) = this->operator()(_Idx); \
 }
 template<typename _Ty, int _Rows, int _cols> class Matrix_;
@@ -308,7 +308,7 @@ public:
 	MATRICE_GLOBAL_FINL auto eval() const {
 		Matrix_<value_t, _M, _N> _Ret(rows(), cols());
 		_VIEW_EWISE_COPY_N(_Ret, _Ret.size());
-		return std::forward<decltype(_Ret)>(_Ret);
+		return forward<decltype(_Ret)>(_Ret);
 	}
 private:
 	pointer _My_origin;
