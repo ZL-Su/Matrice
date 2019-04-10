@@ -29,7 +29,7 @@ template<typename _Ty, int _M, int _N> class Matrix_;
 
 namespace detail {
 
-template<typename _Ty, int _M = 0, int _N = 0, std::size_t _K = 0,
+template<typename _Ty, int _M = 0, int _N = 0, size_t _K = 0,
 	typename matrix_type = types::Matrix_<_Ty, _M, _N>>
 class _Tensor_impl MATRICE_NONHERITABLE : public std::valarray<matrix_type> {
 	using _Myt = _Tensor_impl;
@@ -44,37 +44,37 @@ public:
 
 	_Tensor_impl() 
 		: _Mybase(), m_rows(0), m_cols(0) {}
-	_Tensor_impl(std::size_t _Rows)
+	_Tensor_impl(size_t _Rows)
 		: _Mybase(m_size = _Rows), m_rows(_Rows), m_cols(1) {}
-	_Tensor_impl(std::size_t _Rows, const matrix_type& _Mat)
+	_Tensor_impl(size_t _Rows, const matrix_type& _Mat)
 		: _Mybase(_Mat, m_size = _Rows), m_rows(_Rows), m_cols(1) {}
-	_Tensor_impl(std::size_t _Rows, std::size_t _Cols) 
+	_Tensor_impl(size_t _Rows, size_t _Cols) 
 		: _Mybase(m_size = _Rows*_Cols), m_rows(_Rows), m_cols(_Cols) {}
-	_Tensor_impl(std::size_t _Rows, std::size_t _Cols, const matrix_type& _Mat) : _Mybase(_Mat, m_size=(_Rows * _Cols)), m_rows(_Rows), m_cols(_Cols) {}
+	_Tensor_impl(size_t _Rows, size_t _Cols, const matrix_type& _Mat) : _Mybase(_Mat, m_size=(_Rows * _Cols)), m_rows(_Rows), m_cols(_Cols) {}
 	_Tensor_impl(const _Myt& _Other)
 		: _Mybase(static_cast<_Mybase>(_Other)), m_rows(_Other.m_rows), m_cols(_Other.m_cols), m_size(m_rows*m_cols) {}
 	_Tensor_impl(_Myt&& _Other)
-		: _Mybase(std::move(static_cast<_Mybase>(_Other))), m_rows(_Other.m_rows), m_cols(_Other.m_cols), m_size(m_rows*m_cols) {}
+		: _Mybase(move(static_cast<_Mybase>(_Other))), m_rows(_Other.m_rows), m_cols(_Other.m_cols), m_size(m_rows*m_cols) {}
 	_Tensor_impl(const _Mybase& _Other)
 		: _Mybase(_Other), m_rows(m_size=(_Other.size())), m_cols(1) {}
 
-	MATRICE_HOST_INL auto& create(std::size_t _Rows, std::size_t _Cols) {
+	MATRICE_HOST_INL auto& create(size_t _Rows, size_t _Cols) {
 		m_rows = _Rows, m_cols = _Cols;
 		_Mybase::resize(m_size = m_rows * m_cols);
 		m_data = &(*this)[0];
 		return (*this);
 	}
 
-	MATRICE_HOST_INL auto& operator()(std::size_t _R, std::size_t _C) {
+	MATRICE_HOST_INL auto& operator()(size_t _R, size_t _C) {
 		return m_data[_R*m_cols + _C];
 	}
-	MATRICE_HOST_INL const auto& operator()(std::size_t _R, std::size_t _C) const {
+	MATRICE_HOST_INL const auto& operator()(size_t _R, size_t _C) const {
 		return m_data[_R*m_cols + _C];
 	}
-	MATRICE_HOST_INL auto& operator()(std::size_t _Idx) {
+	MATRICE_HOST_INL auto& operator()(size_t _Idx) {
 		return m_data[_Idx];
 	}
-	MATRICE_HOST_INL const auto& operator()(std::size_t _Idx) const {
+	MATRICE_HOST_INL const auto& operator()(size_t _Idx) const {
 		return m_data[_Idx];
 	}
 	MATRICE_HOST_INL auto& operator= (const _Mybase& _Other) {
@@ -83,7 +83,7 @@ public:
 		return (*this);
 	}
 	MATRICE_HOST_INL auto& operator= (_Mybase&& _Other) {
-		_Mybase::operator= (std::move(_Other));
+		_Mybase::operator= (move(_Other));
 		m_data = &(*this)[0];
 		return (*this);
 	}
@@ -97,14 +97,14 @@ public:
 	MATRICE_HOST_INL auto& operator= (_Myt&& _Other) {
 		m_rows = _Other.m_rows, m_cols = _Other.m_cols;
 		m_size = _Other.m_size;
-		_Mybase::operator= (std::move(static_cast<_Mybase>(_Other)));
+		_Mybase::operator= (move(static_cast<_Mybase>(_Other)));
 		m_data = &(*this)[0];
 		return (*this);
 	}
 	MATRICE_HOST_INL auto rows() const { return m_rows; }
 	MATRICE_HOST_INL auto cols() const { return m_cols; }
 	MATRICE_HOST_INL auto shape() const { return std::tie(m_rows, m_cols); }
-	MATRICE_HOST_INL auto& reshape(std::size_t _Rows) {
+	MATRICE_HOST_INL auto& reshape(size_t _Rows) {
 		m_rows = _Rows, m_cols = m_size / _Rows;
 		return (*this);
 	}
@@ -118,7 +118,7 @@ public:
 		_Mytp _Ret(m_cols, m_rows);
 		for (const auto _Idx : range(0, m_size))
 			_Ret[_Idx] = m_data[_Idx].t();
-		return std::forward<decltype(_Ret)>(_Ret);
+		return forward<decltype(_Ret)>(_Ret);
 	}
 	MATRICE_HOST_INL auto mul(const _Mytp& _Rhs) const {
 		using _Op = detail::_Tensor_exp_op::_Ewise_mmul<element_type, typename _Mytp::element_type>;
