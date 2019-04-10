@@ -67,13 +67,6 @@ template<typename T = std::string> MATRICE_HOST_FINL
 constexpr T stonv(const std::string& _Str) { return detail::string_to_numval<T>::value(_Str); }
 
 /**
- * \get T-typed zero value
- */
-template<typename T, MATRICE_ENABLE_IF(is_arithmetic_v<T>)>
-struct zero { static constexpr T value = T(0);};
-template<typename T> MATRICE_HOST_INL constexpr auto zero_v = zero<T>::value;
-
-/**
  * \append a T-typed element into tuple _Tpl
  */
 template<typename T, typename... U> MATRICE_HOST_FINL
