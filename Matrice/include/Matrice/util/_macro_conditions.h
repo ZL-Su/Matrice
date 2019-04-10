@@ -17,6 +17,8 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 
+#pragma warning (disable: 4067)
+
 #include "_macros.h"
 
 DGE_MATRICE_BEGIN
