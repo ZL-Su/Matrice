@@ -18,7 +18,7 @@ public:
 	enum { Size = 0, CompileTimeRows = 0, CompileTimeCols = 0, };
 	using typename _Mybase::value_t;
 	using typename _Mybase::value_type;
-	using typename _Mybase::const_init_list;
+	using typename _Mybase::const_initlist;
 	using tensor_shape = basic_shape<size_t>;
 	using _Mybase::dims;
 
@@ -32,53 +32,63 @@ public:
 	 */
 	_Tensor(shape_t<size_t>&& _Shape)
 		: _Mybase(_Shape) {
-		_Myshape = std::move(_Shape); _Mybase::_Flush_view_buf();
+		_Myshape = move(_Shape); _Mybase::_Flush_view_buf();
 	}
 	/**
 	 *\brief Construct a tensor with shape [1,[1,_Shape]] and fill with _Val
 	 */
 	_Tensor(shape_t<size_t>&& _Shape, value_t _Val)
-		: _Tensor(std::move(_Shape)) { _Mybase::operator= ({ _Val }); }
+		: _Tensor(move(_Shape)) { _Mybase::operator= ({ _Val }); }
 	/**
 	 *\brief Construct a tensor with shape [1,[_Shape]]
 	 */
 	_Tensor(shape3_t<size_t>&& _Shape)
-		: _Mybase(std::get<2>(_Shape), std::get<1>(_Shape)*std::get<0>(_Shape)) { 
-		_Myshape=std::move(_Shape); _Mybase::_Flush_view_buf();
+		: _Mybase(get<2>(_Shape), get<1>(_Shape)*get<0>(_Shape)) { 
+		_Myshape=move(_Shape); _Mybase::_Flush_view_buf();
 	}
 	/**
 	 *\brief Construct a tensor with shape [1,[_Shape]] and fill with _Val
 	 */
 	_Tensor(shape3_t<size_t>&& _Shape, value_t _Val)
-		: _Tensor(std::move(_Shape)) { _Mybase::operator= ({ _Val }); }
+		: _Tensor(move(_Shape)) { _Mybase::operator= ({ _Val }); }
 	/**
 	 *\brief Construct a tensor with shape _Shape
 	 */
 	_Tensor(shape4_t<size_t>&& _Shape) 
-		: _Mybase(std::get<0>(_Shape)*std::get<2>(_Shape), std::get<1>(_Shape)*std::get<3>(_Shape)) { 
-		_Myshape=std::move(_Shape); _Mybase::_Flush_view_buf();
+		: _Mybase(get<0>(_Shape)*get<2>(_Shape), get<1>(_Shape)*get<3>(_Shape)) { 
+		_Myshape=move(_Shape); _Mybase::_Flush_view_buf();
 	}
 	/**
 	 *\brief Construct a tensor with shape _Shape and fill with _Val
 	 */
 	_Tensor(shape4_t<size_t>&& _Shape, value_t _Val)
-		: _Tensor(std::move(_Shape)) {_Mybase::operator= ({_Val });}
+		: _Tensor(move(_Shape)) {_Mybase::operator= ({_Val });}
 	/**
 	 *\brief Move constructor
 	 */
 	_Tensor(_Myt&& _Other) noexcept
-		: _Mybase(std::move(_Other)) {}
+		: _Mybase(move(_Other)) {}
 
 	/**
 	 *\brief Create a tensor
 	 *\param [_Shape] any shape type compatible with tensor_shape 
 	 */
 	MATRICE_HOST_INL auto& create(tensor_shape&& _Shape) {
-		_Myshape = std::move(_Shape);
+		_Myshape = move(_Shape);
 		create(_Myshape.rows(), _Myshape.cols());
 		return (*this);
 	}
+	/**
+	 *\brief Get element at _Idx
+	 *\param [_Idx] input linear index
+	 */
+	MATRICE_HOST_INL auto& operator()(size_t _Idx) {
+		auto[n, c, h, w] = _Myshape.parse(_Idx);
 
+	}
+	MATRICE_HOST_INL const auto& operator()(size_t _Idx) const {
+		auto[n, c, h, w] = _Myshape.parse(_Idx);
+	}
 	/**
 	 *\brief Get a sub-tensor at this[n,:,:,:]
 	 *\param [n] the index of the first dim
@@ -87,7 +97,7 @@ public:
 		_Myt _Ret({ 1,dims().get(1),dims().get(2),dims().get(3) });
 		auto _Begin = this->begin()+n*_Ret.size();
 		std::copy(_Begin, _Begin + _Ret.size(), _Ret.begin());
-		return std::forward<_Myt>(_Ret);
+		return forward<_Myt>(_Ret);
 	}
 	/**
 	 *\brief Get a sub-tensor at this[n,c,:,:]
@@ -97,7 +107,7 @@ public:
 		_Myt _Ret({ 1, 1, _Myshape.get(2), _Myshape.get(3) });
 		auto _Begin = this->begin()+n*_Ret.size()*_Myshape.get(1)+c*_Ret.size();
 		std::copy(_Begin, _Begin + _Ret.size(), _Ret.begin());
-		return std::forward<_Myt>(_Ret);
+		return forward<_Myt>(_Ret);
 	}
 
 	/**
@@ -114,7 +124,7 @@ public:
 	 *\param [_Shape] any shape type compatible with tensor_shape
 	 */
 	static MATRICE_HOST_INL auto zero(tensor_shape&& _Shape) {
-		return (std::move(_Myt({_Shape.get(0),_Shape.get(1),_Shape.get(2),_Shape.get(3)}, 0)));
+		return (move(_Myt({_Shape.get(0),_Shape.get(1),_Shape.get(2),_Shape.get(3)}, 0)));
 	}
 	/**
 	 *\brief Generate a random filled tensor
@@ -122,8 +132,8 @@ public:
 	 */
 	static MATRICE_HOST_INL auto rand(tensor_shape&& _Shape) {
 		auto _Ret = _Mybase::rand(_Shape.rows(), _Shape.cols());
-		_Ret._Myshape = std::move(_Shape);
-		return (std::move(_Ret));
+		_Ret._Myshape = move(_Shape);
+		return (move(_Ret));
 	}
 
 	/**
@@ -131,7 +141,7 @@ public:
 	 *\param [_1, _2] dummy
 	 */
 	MATRICE_HOST_INL void create(size_t _1, size_t _2) {
-		_Mybase::operator= (std::move(_Mybase(_1, _2)));
+		_Mybase::operator= (move(_Mybase(_1, _2)));
 		_Mybase::_Flush_view_buf();
 	}
 
