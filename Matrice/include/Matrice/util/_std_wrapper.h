@@ -21,11 +21,14 @@ namespace dgelom {
 	using std::mt19937;
 	using std::uniform_int;
 	using std::uniform_real;
+	using std::normal_distribution;
 
 	using diff_t = std::ptrdiff_t;
 
 	template<typename _Ty>
 	using initlist = std::initializer_list<_Ty>;
+	template<typename _Ty> 
+	using nested_initlist = initlist<initlist<_Ty>>;
 
 #if defined(_HAS_CXX14) || defined(_HAS_CXX17)
 	using std::enable_if_t;
@@ -56,4 +59,8 @@ namespace dgelom {
 
 #undef MATRICE_MAKE_TS_HELPER
 #endif
+
+	using std::get;
+	using std::move;
+	using std::forward;
 }
