@@ -1,9 +1,9 @@
 #pragma once
 #include <stdexcept>
 #include "../_lnalge.h"
-#ifdef __use_mkl__
+#if   MATRICE_MATH_KERNEL == MATRICE_USE_MKL
 #include <mkl.h>
-#else
+#elif MATRICE_MATH_KERNEL == MATRICE_USE_FKL
 #include <fkl.h>
 #endif
 
@@ -11,41 +11,54 @@ DGE_MATRICE_BEGIN _DETAIL_BEGIN
 
 template<ttag _Tag> struct transp_tag {};
 template<> struct transp_tag<ttag::N> { 
+#if   MATRICE_MATH_KERNEL == MATRICE_USE_MKL
 	static constexpr auto value = CBLAS_TRANSPOSE::CblasNoTrans;
+#else 
+	static constexpr auto value = 111;
+#endif
 };
 template<> struct transp_tag<ttag::Y> {
+#if   MATRICE_MATH_KERNEL == MATRICE_USE_MKL
 	static constexpr auto value = CBLAS_TRANSPOSE::CblasTrans;
+#else 
+	static constexpr auto value = 112;
+#endif
 };
 template<ttag _Tag> MATRICE_HOST_INL constexpr auto transp_tag_v = transp_tag<_Tag>::value;
 
 template<typename _Ty> struct _Blas_kernel_impl_base {
 	using pointer = std::add_pointer_t<_Ty>;
-	using size_type = std::tuple<int, int>;
-	using plview_type = std::tuple<int, int, pointer>;
+	using size_type = tuple<int, int>;
+	using plview_type = tuple<int, int, pointer>;
+#if   MATRICE_MATH_KERNEL == MATRICE_USE_MKL
 	static constexpr auto layout = CBLAS_LAYOUT::CblasRowMajor;
+#else 
+	static constexpr auto layout = 101;
+#endif
 };
 /**
  *\Specialization for float-type.
  */
-template<> struct _Blas_kernel_impl<float> : _Blas_kernel_impl_base<float> {
+template<> 
+struct _Blas_kernel_impl<float> : _Blas_kernel_impl_base<float> {
 	MATRICE_HOST_INL static auto dot(const pointer _x, const pointer _y, int _N, int _Incx = 1, int _Incy = 1) {
-#ifdef __use_mkl__
+#if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
 		return cblas_sdot(_N, _x, _Incx, _y, _Incy);
 #else
-		throw std::runtime_error("Undefined kernel in _Blas_kernel_impl<float>::dot(...).");
+		DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
 #endif
 	}
 	template<ttag Ta = ttag::N, ttag Tb = ttag::N>
 	MATRICE_HOST_INL static auto mul(const pointer _A, const pointer _B, pointer _C, int _M, int _N, int _K) {
-#ifdef __use_mkl__
+#if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
 		cblas_sgemm(layout, transp_tag_v<Ta>, transp_tag_v<Tb>, _M, _N, _K, 1.f, _A, _K, _B, _N, 0.f, _C, _N);
 #else
-		throw std::runtime_error("Undefined kernel in _Blas_kernel_impl<float>::mul(...).");
+		DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
 #endif
 	}
 	template<ttag Ta = ttag::N, ttag Tb = ttag::N>
 	MATRICE_HOST_INL static auto mul(const plview_type& _A, const plview_type& _B, const plview_type& _C) {
-		mul<Ta, Tb>(std::get<2>(_A), std::get<2>(_B), std::get<2>(_C), std::get<0>(_A), std::get<1>(_B), std::get<1>(_A));
+		mul<Ta, Tb>(get<2>(_A), get<2>(_B), get<2>(_C), get<0>(_A), get<1>(_B), get<1>(_A));
 	}
 };
 /**
@@ -53,49 +66,56 @@ template<> struct _Blas_kernel_impl<float> : _Blas_kernel_impl_base<float> {
  */
 template<> struct _Blas_kernel_impl<double> : _Blas_kernel_impl_base<double> {
 	MATRICE_HOST_INL static auto dot(const pointer _x, const pointer _y, int _N, int _Incx = 1, int _Incy = 1) {
-#ifdef __use_mkl__
+#if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
 		return cblas_ddot(_N, _x, _Incx, _y, _Incy);
 #else
-		throw std::runtime_error("Undefined kernel in _Blas_kernel_impl<float>::mul(...).");
+		DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
 #endif
 	}
 	template<ttag Ta = ttag::N, ttag Tb = ttag::N>
 	MATRICE_HOST_INL static auto mul(const pointer _A, const pointer _B, pointer _C, int _M, int _N, int _K) {
-#ifdef __use_mkl__
+#if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
 		cblas_dgemm(layout, transp_tag_v<Ta>, transp_tag_v<Tb>, _M, _N, _K, 1., _A, _K, _B, _N, 0., _C, _N);
 #else
-		throw std::runtime_error("Undefined kernel in _Blas_kernel_impl<float>::mul(...).");
+		DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
 #endif
 	}
 	template<ttag Ta = ttag::N, ttag Tb = ttag::N>
 	MATRICE_HOST_INL static auto mul(const plview_type& _A, const plview_type& _B, const plview_type& _C) {
-		mul<Ta, Tb>(std::get<2>(_A), std::get<2>(_B), std::get<2>(_C), std::get<0>(_A), std::get<1>(_B), std::get<1>(_A));
+		mul<Ta, Tb>(get<2>(_A), get<2>(_B), get<2>(_C), get<0>(_A), get<1>(_B), get<1>(_A));
 	}
 };
 
 template<typename _Ty> struct _Lapack_kernel_impl_base {
 	using pointer = std::add_pointer_t<_Ty>;
-	using size_type = std::tuple<int, int>;
-	using plview_type = std::tuple<int, int, pointer>;
+	using size_type = tuple<int, int>;
+	using plview_type = tuple<int, int, pointer>;
+#if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
 	static constexpr int layout = LAPACK_ROW_MAJOR;
+#else
+	static constexpr int layout = 101;
+#endif
 };
 /**
  *\Specialization for float-type.
  */
-template<> struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
+template<> 
+struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 	/**
 	 * \computes singular value decomposition
 	 * \Output: $_A := U, _S := \Sigma, _Vt := V^T$
 	 */
 	MATRICE_HOST_INL static int svd(pointer _A, pointer _S, pointer _Vt, const size_type& _Size) {
 		auto[M, N] = _Size;
-#ifdef __use_mkl__
+#if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
 		float* _Superb = new float[(M < N ? M : N) - 1];
 		return LAPACKE_sgesvd(layout, 'O', 'A',
 			M, N, _A, N, _S, nullptr, 1, _Vt, N, _Superb);
-#else
+#elif MATRICE_MATH_KERNEL == MATRICE_USE_FKL
 		return flapk::_sgesvd(_A, _S, _Vt, M, N);
-#endif // __use_mkl__
+#else
+		DGELOM_ERROR("Undefined math kernel, matrice supports two types of kernels with preprocessor definition of (1) MATRICE_MATH_KERNEL=MATRICE_USE_MKL, or (2) MATRICE_MATH_KERNEL=MATRICE_USE_FKL");
+#endif
 	}
 
 	/**
@@ -103,21 +123,23 @@ template<> struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 	 * \Output: _A := the lower triangular part L, so that $_A = L*L^T$
 	 */
 	MATRICE_HOST_INL static int spd(pointer _A, const size_type& _Size) {
-		auto[M, N] = _Size;
+		const auto[M, N] = _Size;
 #ifdef _DEBUG
-		if (M != N) throw std::runtime_error("Non-sqaure matrix _A in _Lapack_kernel_impl<float>::spd(...).");
+		DGELOM_CHECK(M != N, "Non-sqaure matrix _A in _Lapack_kernel_impl<float>::spd(...).");
 #endif // _DEBUG
 
-#ifdef __use_mkl__
+#if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
 		return LAPACKE_spotrf(layout, 'L', M, _A, N);
-#else
+#elif MATRICE_MATH_KERNEL == MATRICE_USE_FKL
 		return flapk::_scholy(_A, N);
+#else
+		DGELOM_ERROR("Undefined math kernel, matrice supports two types of kernels with preprocessor definition of (1) MATRICE_MATH_KERNEL=MATRICE_USE_MKL, or (2) MATRICE_MATH_KERNEL=MATRICE_USE_FKL");
 #endif
 	}
 	MATRICE_HOST_INL static int spd(const plview_type& _A) {
-		return spd(std::get<2>(_A), { std::get<0>(_A), std::get<1>(_A) });
+		return spd(get<2>(_A), {get<0>(_A), get<1>(_A) });
 	}
-	template<typename _Mty, typename = std::enable_if_t<is_matrix_v<_Mty>>>
+	template<typename _Mty, MATRICE_ENABLE_IF(is_matrix_v<_Mty>)>
 	MATRICE_HOST_INL static int spd(const _Mty& _A) {
 		return spd(_A.data(), _A.shape());
 	}
@@ -130,17 +152,19 @@ template<> struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 		auto[M, N] = _Size;
 		auto _P = new int[max(1, min(M, N))];
 
-#ifdef __use_mkl__
+#if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
 		return LAPACKE_sgetrf(layout, M, N, _A, max(1, N), _P);
-#else
+#elif MATRICE_MATH_KERNEL == MATRICE_USE_FKL
 #ifdef _DEBUG
-		if (M != N) throw std::runtime_error("Non-sqaure matrix _A in _Lapack_kernel_impl<float>::lud(...).");
+		DGELOM_CHECK(M != N, "Non-sqaure matrix _A in _Lapack_kernel_impl<float>::lud(...).");
 #endif // _DEBUG
 		return flak::_sLU(_A, _P, N)
+#else
+		DGELOM_ERROR("Undefined math kernel, matrice supports two types of kernels with preprocessor definition of (1) MATRICE_MATH_KERNEL=MATRICE_USE_MKL, or (2) MATRICE_MATH_KERNEL=MATRICE_USE_FKL");
 #endif
 	}
 	MATRICE_HOST_INL static int lud(const plview_type& _A) {
-		return lud(std::get<2>(_A), { std::get<0>(_A), std::get<1>(_A) });
+		return lud(get<2>(_A), { get<0>(_A), get<1>(_A) });
 	}
 
 	/**
@@ -149,15 +173,15 @@ template<> struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 	 */
 	MATRICE_HOST_INL static int slv(const plview_type& _A, const plview_type& _B) {
 #ifdef _DEBUG
-		if (std::get<0>(_A) != std::get<1>(_A)) throw std::runtime_error("Non-sqaure matrix _A in _Lapack_kernel_impl<float>::slv(...).");
-		if(std::get<1>(_A) != std::get<0>(_B)) throw std::runtime_error("Columns of _A .NEQ. rows of _B in _Lapack_kernel_impl<float>::slv(...).");
+		DGELOM_CHECK(get<0>(_A) != get<1>(_A),"Non-sqaure matrix _A in _Lapack_kernel_impl<float>::slv(...).");
+		DGELOM_CHECK(get<1>(_A) != get<0>(_B),"Columns of _A .NEQ. rows of _B in _Lapack_kernel_impl<float>::slv(...).");
 #endif
-#ifdef __use_mkl__
-		const auto N = std::get<0>(_A), M = std::get<1>(_B);
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
+		const auto N = get<0>(_A), M = get<1>(_B);
 		auto _Ipiv = new int[max(1, N)];
-		return LAPACKE_sgesv(layout, N, M, std::get<2>(_A), N, _Ipiv, std::get<2>(_B), M);
+		return LAPACKE_sgesv(layout, N, M, get<2>(_A), N, _Ipiv, get<2>(_B), M);
 #else
-		throw std::runtime_error("Oops, no implementation is found.");
+		DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
 #endif
 	}
 };
@@ -172,13 +196,15 @@ template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double>
 	 */
 	MATRICE_HOST_INL static int svd(pointer _A, pointer _S, pointer _Vt, const size_type& _Size) {
 		auto[M, N] = _Size;
-#ifdef __use_mkl__
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 		double* _Superb = new double[M < N ? M : N - 1];
 		return LAPACKE_dgesvd(layout, 'O', 'A',
 			M, N, _A, N, _S, nullptr, 1, _Vt, N, _Superb);
-#else
+#elif MATRICE_MATH_KERNEL==MATRICE_USE_FKL
 		return flapk::_dgesvd(_A, _S, _Vt, M, N);
-#endif // __use_mkl__
+#else
+		DGELOM_ERROR("Undefined math kernel, matrice supports two types of kernels with preprocessor definition of (1) MATRICE_MATH_KERNEL=MATRICE_USE_MKL, or (2) MATRICE_MATH_KERNEL=MATRICE_USE_FKL");
+#endif
 	}
 
 	/**
@@ -188,17 +214,19 @@ template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double>
 	MATRICE_HOST_INL static int spd(pointer _A, const size_type& _Size) {
 		auto[M, N] = _Size;
 #ifdef _DEBUG
-		if (M != N) throw std::runtime_error("Non-sqaure matrix _A in _Lapack_kernel_impl<float>::spd(...).");
+		DGELOM_CHECK(M != N,"Non-sqaure matrix _A in _Lapack_kernel_impl<float>::spd(...).");
 #endif // _DEBUG
 
-#ifdef __use_mkl__
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 		return LAPACKE_dpotrf(101, 'L', M, _A, N);
-#else
+#elif MATRICE_MATH_KERNEL==MATRICE_USE_FKL
 		return flapk::_dcholy(_A, N);
+#else
+		DGELOM_ERROR("Undefined math kernel, matrice supports two types of kernels with preprocessor definition of (1) MATRICE_MATH_KERNEL=MATRICE_USE_MKL, or (2) MATRICE_MATH_KERNEL=MATRICE_USE_FKL");
 #endif
 	}
 	MATRICE_HOST_INL static int spd(const plview_type& _A) {
-		return spd(std::get<2>(_A), { std::get<0>(_A), std::get<1>(_A) });
+		return spd(get<2>(_A), { get<0>(_A), get<1>(_A) });
 	}
 
 	/**
@@ -209,17 +237,19 @@ template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double>
 		auto[M, N] = _Size;
 		auto _P = new int[max(1, min(M, N))];
 
-#ifdef __use_mkl__
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 		return LAPACKE_dgetrf(layout, M, N, _A, max(1, N), _P);
-#else
+#elif MATRICE_MATH_KERNEL==MATRICE_USE_FKL
 #ifdef _DEBUG
-		if (M != N) throw std::runtime_error("Non-sqaure matrix _A in _Lapack_kernel_impl<float>::lud(...).");
+		DGELOM_CHECK(M != N, "Non-sqaure matrix _A in _Lapack_kernel_impl<float>::lud(...).");
 #endif // _DEBUG
 		return flak::_dLU(_A, _P, N)
+#else
+		DGELOM_ERROR("Undefined math kernel, matrice supports two types of kernels with preprocessor definition of (1) MATRICE_MATH_KERNEL=MATRICE_USE_MKL, or (2) MATRICE_MATH_KERNEL=MATRICE_USE_FKL");
 #endif
 	}
 	MATRICE_HOST_INL static int lud(const plview_type& _A) {
-		return lud(std::get<2>(_A), { std::get<0>(_A), std::get<1>(_A) });
+		return lud(get<2>(_A), { get<0>(_A), get<1>(_A) });
 	}
 
 	/**
@@ -228,15 +258,15 @@ template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double>
 	 */
 	MATRICE_HOST_INL static int slv(const plview_type& _A, const plview_type& _B) {
 #ifdef _DEBUG
-		if (std::get<0>(_A) != std::get<1>(_A)) throw std::runtime_error("Non-sqaure matrix _A in _Lapack_kernel_impl<float>::slv(...).");
-		if (std::get<1>(_A) != std::get<0>(_B)) throw std::runtime_error("Columns of _A .NEQ. rows of _B in _Lapack_kernel_impl<float>::slv(...).");
+		DGELOM_CHECK(get<0>(_A) != get<1>(_A), "Non-sqaure matrix _A in _Lapack_kernel_impl<float>::slv(...).");
+		DGELOM_CHECK(get<1>(_A) != get<0>(_B), "Columns of _A .NEQ. rows of _B in _Lapack_kernel_impl<float>::slv(...).");
 #endif
-#ifdef __use_mkl__
-		const auto N = std::get<0>(_A), M = std::get<1>(_B);
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
+		const auto N = get<0>(_A), M = get<1>(_B);
 		auto _Ipiv = new int[max(1, N)];
-		return LAPACKE_dgesv(layout, N, M, std::get<2>(_A), N, _Ipiv, std::get<2>(_B), M);
+		return LAPACKE_dgesv(layout, N, M, get<2>(_A), N, _Ipiv, get<2>(_B), M);
 #else
-		throw std::runtime_error("Oops, no implementation is found.");
+		DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
 #endif
 	}
 };
@@ -254,7 +284,7 @@ template<> struct _Lapack_backward_impl<solver_type::CHD> {
 		const auto M = _A.rows(), N = _A.cols();
 		const auto NRhs = _X.cols();
 #ifdef _DEBUG
-		if (M != N) throw std::runtime_error("The coeff. _A in _Lapack_backward_impl<solver_type::CHD> must be a square matrix.");
+		DGELOM_CHECK(M != N, "The coeff. _A in _Lapack_backward_impl<solver_type::CHD> must be a square matrix.");
 #endif
 
 		for (auto k = 0; k < NRhs; ++k) {
