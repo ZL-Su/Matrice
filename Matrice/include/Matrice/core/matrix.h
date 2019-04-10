@@ -92,7 +92,7 @@ public:
 	MATRICE_GLOBAL_FINL Matrix_(int _rows) noexcept : _Mybase(_rows, 1) {};
 	MATRICE_GLOBAL_FINL Matrix_(const Myt& _other) noexcept : _Mybase(_other) {};
 	template<typename _Arg>
-	MATRICE_GLOBAL_FINL Matrix_(_Arg&& _other) noexcept : _Mybase(std::move(_other)) {};
+	MATRICE_GLOBAL_FINL Matrix_(_Arg&& _other) noexcept : _Mybase(move(_other)) {};
 	template<typename... _Args> 
 	MATRICE_GLOBAL_FINL Matrix_(const _Args&... args) noexcept : _Mybase(args...) {};
 	MATRICE_GLOBAL_FINL Matrix_(const device_t& _other) noexcept : _Mybase(_other) {};
@@ -101,7 +101,7 @@ public:
 		return _Mybase::operator=(_other); 
 	}
 	MATRICE_GLOBAL_INL Myt_reference operator= (Myt_move_reference _other) { 
-		return _Mybase::operator=(std::move(_other)); 
+		return _Mybase::operator=(move(_other)); 
 	}
 	MATRICE_GLOBAL_FINL Myt_reference operator= (const_initlist _list) { return _Mybase::operator=(_list); }
 	template<typename _Arg> 
@@ -174,9 +174,8 @@ public:
 		:_Mybase(std::move(_other)), _Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
 	MATRICE_GLOBAL_INL Matrix_(const host_t& _other) noexcept
 		:_Mybase(_other), _Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {}
-	template<int _M = 0, int _N = _M, 
-		typename _Mty = Matrix_<value_t, _M, _N>>
-	MATRICE_HOST_INL Matrix_(const _Mty& _other) noexcept 
+	template<int _M = 0, int _N = _M>
+	MATRICE_HOST_INL Matrix_(const Matrix_<value_t,_M,_N>&_other)noexcept
 		:_Mybase(_other), _Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
 	template<typename... _Args>
 	MATRICE_GLOBAL_INL Matrix_(const _Args&... args) noexcept 
