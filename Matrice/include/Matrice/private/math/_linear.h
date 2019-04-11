@@ -33,12 +33,7 @@ public:
 		: _Mycoef(_A) {}
 
 	MATRICE_HOST_INL auto& forward() {
-		try {
-			_Lapack_kernel_impl<typename _Mty::value_type>::spd(_Mycoef);
-		}
-		catch (std::exception& e) {
-			std::cout << e.what() << std::endl;
-		}
+		_Lapack_kernel_impl<typename _Mty::value_type>::spd(_Mycoef);
 		return (_Mycoef);
 	}
 	template<typename _Rhs>

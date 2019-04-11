@@ -137,7 +137,7 @@ struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 	 * \Output: $_A := U, _S := \Sigma, _Vt := V^T$
 	 */
 	MATRICE_HOST_INL static int svd(pointer _A, pointer _S, pointer _Vt, const size_type& _Size) {
-		auto[M, N] = _Size;
+		const auto[M, N] = _Size;
 #if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
 		float* _Superb = new float[(M < N ? M : N) - 1];
 		return LAPACKE_sgesvd(layout, 'O', 'A',
@@ -156,7 +156,7 @@ struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 	MATRICE_HOST_INL static int spd(pointer _A, const size_type& _Size) {
 		const auto[M, N] = _Size;
 #ifdef _DEBUG
-		DGELOM_CHECK(M != N, "Non-sqaure matrix _A in _Lapack_kernel_impl<float>::spd(...).");
+		DGELOM_CHECK(M == N, "Non-sqaure matrix _A in _Lapack_kernel_impl<float>::spd(...).");
 #endif // _DEBUG
 
 #if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
@@ -180,14 +180,14 @@ struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 	 * \Output: _A := L*U, _P := partial pivoting info
 	 */
 	MATRICE_HOST_INL static int lud(pointer _A, const size_type& _Size) {
-		auto[M, N] = _Size;
+		const auto[M, N] = _Size;
 		auto _P = new int[max(1, min(M, N))];
 
 #if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
 		return LAPACKE_sgetrf(layout, M, N, _A, max(1, N), _P);
 #elif MATRICE_MATH_KERNEL == MATRICE_USE_FKL
 #ifdef _DEBUG
-		DGELOM_CHECK(M != N, "Non-sqaure matrix _A in _Lapack_kernel_impl<float>::lud(...).");
+		DGELOM_CHECK(M == N, "Non-sqaure matrix _A in _Lapack_kernel_impl<float>::lud(...).");
 #endif // _DEBUG
 		return flak::_sLU(_A, _P, N)
 #else
@@ -204,8 +204,8 @@ struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 	 */
 	MATRICE_HOST_INL static int slv(const plview_type& _A, const plview_type& _B) {
 #ifdef _DEBUG
-		DGELOM_CHECK(get<0>(_A) != get<1>(_A),"Non-sqaure matrix _A in _Lapack_kernel_impl<float>::slv(...).");
-		DGELOM_CHECK(get<1>(_A) != get<0>(_B),"Columns of _A .NEQ. rows of _B in _Lapack_kernel_impl<float>::slv(...).");
+		DGELOM_CHECK(get<0>(_A) == get<1>(_A),"Non-sqaure matrix _A in _Lapack_kernel_impl<float>::slv(...).");
+		DGELOM_CHECK(get<1>(_A) == get<0>(_B),"Columns of _A .NEQ. rows of _B in _Lapack_kernel_impl<float>::slv(...).");
 #endif
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 		const auto N = get<0>(_A), M = get<1>(_B);
@@ -226,7 +226,7 @@ template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double>
 	 * \Output: $_A := U, _S := \Sigma, _Vt := V^T$
 	 */
 	MATRICE_HOST_INL static int svd(pointer _A, pointer _S, pointer _Vt, const size_type& _Size) {
-		auto[M, N] = _Size;
+		const auto[M, N] = _Size;
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 		double* _Superb = new double[M < N ? M : N - 1];
 		return LAPACKE_dgesvd(layout, 'O', 'A',
@@ -243,9 +243,9 @@ template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double>
 	 * \Output: _A := the lower triangular part L, so that $_A = LL^T$
 	 */
 	MATRICE_HOST_INL static int spd(pointer _A, const size_type& _Size) {
-		auto[M, N] = _Size;
+		const auto[M, N] = _Size;
 #ifdef _DEBUG
-		DGELOM_CHECK(M != N,"Non-sqaure matrix _A in _Lapack_kernel_impl<float>::spd(...).");
+		DGELOM_CHECK(M == N,"Non-sqaure matrix _A in _Lapack_kernel_impl<float>::spd(...).");
 #endif // _DEBUG
 
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
@@ -265,14 +265,14 @@ template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double>
 	 * \Output: _A := L*U, _P := partial pivoting info
 	 */
 	MATRICE_HOST_INL static int lud(pointer _A, const size_type& _Size) {
-		auto[M, N] = _Size;
+		const auto[M, N] = _Size;
 		auto _P = new int[max(1, min(M, N))];
 
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 		return LAPACKE_dgetrf(layout, M, N, _A, max(1, N), _P);
 #elif MATRICE_MATH_KERNEL==MATRICE_USE_FKL
 #ifdef _DEBUG
-		DGELOM_CHECK(M != N, "Non-sqaure matrix _A in _Lapack_kernel_impl<float>::lud(...).");
+		DGELOM_CHECK(M == N, "Non-sqaure matrix _A in _Lapack_kernel_impl<float>::lud(...).");
 #endif // _DEBUG
 		return flak::_dLU(_A, _P, N)
 #else
@@ -315,7 +315,7 @@ template<> struct _Lapack_backward_impl<solver_type::CHD> {
 		const auto M = _A.rows(), N = _A.cols();
 		const auto NRhs = _X.cols();
 #ifdef _DEBUG
-		DGELOM_CHECK(M != N, "The coeff. _A in _Lapack_backward_impl<solver_type::CHD> must be a square matrix.");
+		DGELOM_CHECK(M == N, "The coeff. _A in _Lapack_backward_impl<solver_type::CHD> must be a square matrix.");
 #endif
 
 		for (auto k = 0; k < NRhs; ++k) {
