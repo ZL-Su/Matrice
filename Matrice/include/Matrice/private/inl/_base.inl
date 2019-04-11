@@ -63,8 +63,13 @@ auto& Base_<_Derived, _Traits, _Type>::mul_(const _Rhs& _Right) {
 template<typename _Derived, typename _Traits, typename _Type>
 template<ttag _Ltag, ttag _Rtag, typename _Rhs, typename> inline
 auto Base_<_Derived, _Traits, _Type>::inplace_mul(const _Rhs& _Right) {
-	Matrix_<value_type, _Myt::_ctrs, _Rhs::_ctcs> _Ret(rows(), _Right.cols());
-	blas_kernel<value_type>::mul<_Ltag, _Rtag>(this->plvt(), _Right.plvt(), _Ret.plvt());
+	Matrix_<value_type, 
+		(_Ltag == ttag::Y)?_Myt::ColsAtCT:_Myt::RowsAtCT,
+		(_Rtag == ttag::Y)?_Rhs::RowsAtCT:_Rhs::ColsAtCT> _Ret(
+		(_Ltag == ttag::Y)?m_cols:m_rows, 
+		(_Rtag == ttag::Y)?_Right.rows():_Right.cols());
+	blas_kernel<value_type>::mul<_Ltag, _Rtag>(
+		this->plvt(), _Right.plvt(), _Ret.plvt());
 	return std::move(_Ret);
 }
 
