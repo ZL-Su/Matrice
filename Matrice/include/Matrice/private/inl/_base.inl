@@ -5,6 +5,7 @@
 #include "../_matrix_base.hpp"
 #include "../_range.h"
 #include "../../thread/_thread.h"
+#include "../../private/nonfree/_lnalge.h"
 
 DGE_MATRICE_BEGIN
 _TYPES_BEGIN
@@ -63,8 +64,31 @@ template<typename _Derived, typename _Traits, typename _Type>
 template<ttag _Ltag, ttag _Rtag, typename _Rhs, typename> inline
 auto Base_<_Derived, _Traits, _Type>::inplace_mul(const _Rhs& _Right) {
 	Matrix_<value_type, _Myt::_ctrs, _Rhs::_ctcs> _Ret(rows(), _Right.cols());
-	detail::_Blas_kernel_impl<value_type>::mul<_Ltag, _Rtag>(this->plvt(), _Right.plvt(), _Ret.plvt());
+	blas_kernel<value_type>::mul<_Ltag, _Rtag>(this->plvt(), _Right.plvt(), _Ret.plvt());
 	return std::move(_Ret);
+}
+
+template<typename _Derived, typename _Traits, typename _Type>
+template<typename _Rhs> MATRICE_GLOBAL_INL
+_Rhs Base_<_Derived, _Traits, _Type>::spreadmul(const _Rhs& _Right)const {
+	_Rhs _Ret(_Right.shape());
+
+	// spread each entry along row and element-wisely mul. with _Right
+	if (m_cols == 1 || size() == _Right.rows()) {
+		for (const auto _r : range(0, _Ret.rows())) {
+			_Ret.rview(_r) = m_data[_r] * _Right.rview(_r);
+		}
+	}
+	// spread each entry along column and element-wisely mul. with _Right
+	else if (m_rows == 1 || size() == _Right.cols()) {
+		for (const auto _c : range(0, _Ret.cols())) {
+			_Ret.cview(_c) = m_data[_c] * _Right.cview(_c);
+		}
+	}
+	else {
+		DGELOM_ERROR("Only one-dimension array spread is supported.");
+	}
+	return forward<_Rhs>(_Ret);
 }
 _TYPES_END
 DGE_MATRICE_END
