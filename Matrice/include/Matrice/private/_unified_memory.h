@@ -22,9 +22,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_memory.h"
 
 MATRICE_PRIVATE_BEGIN
-using std::size_t;
-template<typename T> struct memory_base_v1
-{
+template<typename T> struct memory_base_v1 {
 	using value_t = T;
 	using pointer = value_t * ;
 	using const_pointer = const pointer;
