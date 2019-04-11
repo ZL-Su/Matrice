@@ -133,14 +133,11 @@ MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, index_t _Stride) {
 	for (; _First < _Last; _First += _Stride) _Ret += *(_First);
 	return (_Ret);
 }
-template<typename _InIt, typename _Op, 
-	typename _Ty = typename std::pointer_traits<_InIt>::element_type>
-MATRICE_GLOBAL_INL _Ty reduce(_InIt _First, _InIt _Last, _Op _op) {
-	static_cast<void>(_First == _Last);
-	_Ty _Ret = 0;
-	for (; _First != _Last; ++_First) _Ret += _op(*_First);
-	return (_Ret);
-}
+
+/**
+ *\brief sum over range [_First, _Last) with operator _Op
+ *\param [_op] function operator.
+ */
 template<typename _InIt, typename _Op, MATRICE_ENABLE_IF(is_pointer_v<_InIt>&&is_function_v<_Op>)>
 MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, _Op _op) {
 	static_cast<void>(_First == _Last);
