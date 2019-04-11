@@ -1,7 +1,7 @@
 /*********************************************************************
 	  About License Agreement of this file, see "../lic/license.h"
 *********************************************************************/
-#include "../io.h"
+#include "../io.hpp"
 #include "../../util/_exception.h"
 
 DGE_MATRICE_BEGIN namespace io { _DETAIL_BEGIN
@@ -173,13 +173,13 @@ public:
 	 *\param [i] index of a file name
 	 */
 	MATRICE_HOST_INL auto at(size_t i) const {
-#ifdef _DEBUG
-		DGELOM_CHECK(i<_Names.size(),"file list subscript out of range.");
-#endif
 		std::vector<data_type> _Data;
 		const auto _Size = _Mydir.size()==0?1:_Mydir.size();
 		for (const auto& _Idx : range(0, _Size)) {
 			const auto& _Names = _Mynames[_Idx];
+#ifdef _DEBUG
+			DGELOM_CHECK(i < _Names.size(), "file list subscript out of range.");
+#endif
 			_Data.emplace_back(_Myloader(_Mydir[_Idx]+_Names[i]));
 		}
 		return std::forward<decltype(_Data)>(_Data);
