@@ -219,11 +219,11 @@ public:
 	/**
 	 *\brief for static querying memory block rows
 	 */
-	static constexpr auto _ctrs_ = CompileTimeRows;
+	static constexpr auto RowsAtCT = CompileTimeRows;
 	/**
 	 *\brief for static querying memory block cols
 	 */
-	static constexpr auto _ctcs_ = CompileTimeCols;
+	static constexpr auto ColsAtCT = CompileTimeCols;
 	/**
 	 *\brief for querying infinity attribute of the value type
 	 */
@@ -703,7 +703,7 @@ public:
 	template<typename _Rhs, MATRICE_ENABLE_IF(is_fxdvector_v<_Rhs>)>
 	MATRICE_HOST_INL auto& mul_(const _Rhs& _Right);
 	/**
-	 * \in-place maxmul with _Rhs. 
+	 * \in-place matmul with _Rhs. 
 	 */
 	template<ttag _Ltag = ttag::N, ttag _Rtag = ttag::N, 
 		typename _Rhs = _Derived, MATRICE_ENABLE_IF(is_matrix_v<_Rhs>)>
