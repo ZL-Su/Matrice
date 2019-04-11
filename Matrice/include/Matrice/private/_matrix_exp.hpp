@@ -412,8 +412,9 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 					_Res(i) = this->operator()(i);
 			}
 			else { //spreaded element-wise operation
-				const auto _L = _LHS.eval();
-				const auto _R = _RHS.eval();
+#pragma omp parallel for if(_Res.size() > 100)
+				for (index_t i = 0; i < _Res.size(); ++i)
+					_Res(i) = _Op(_LHS(i/N)), _RHS(i));
 			}
 		}
 
