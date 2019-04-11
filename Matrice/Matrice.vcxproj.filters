@@ -112,12 +112,6 @@
     <Filter Include="Source Files\Details\Nonfree">
       <UniqueIdentifier>{cb69b4a1-807c-46ea-b885-2e50d86ec807}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Detail\nonfree">
-      <UniqueIdentifier>{c5af5bf5-c77b-41c2-b880-4a6b9604f5a0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Detail\nonfree\inl">
-      <UniqueIdentifier>{ffdc0ac3-3e00-45a3-824d-5b0216a5f8c2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Details\Memory">
       <UniqueIdentifier>{2742bc85-21e3-4cb4-9738-d0fa0ca1f42e}</UniqueIdentifier>
     </Filter>
@@ -178,6 +172,12 @@
     <Filter Include="Header Files\Addin\gui">
       <UniqueIdentifier>{da48dbfb-df67-4870-a0a6-8f87648ca827}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Detail\math\nonfree">
+      <UniqueIdentifier>{c5af5bf5-c77b-41c2-b880-4a6b9604f5a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Detail\math\nonfree\inl">
+      <UniqueIdentifier>{ffdc0ac3-3e00-45a3-824d-5b0216a5f8c2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -201,9 +201,6 @@
     <ClInclude Include="include\Matrice\util\_type_defs.h">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\io\io.h">
-      <Filter>Header Files\IO</Filter>
-    </ClInclude>
     <ClInclude Include="include\Matrice\util\genalgs.h">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
@@ -221,9 +218,6 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\imageproc.hpp">
       <Filter>Header Files\Algs</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Matrice\io\hrc.h">
-      <Filter>Header Files\IO</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\mbspa.h">
       <Filter>Header Files\Algs</Filter>
@@ -361,7 +355,7 @@
       <Filter>Header Files\Detail\math</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\nonfree\_lnalge.h">
-      <Filter>Header Files\Detail\nonfree</Filter>
+      <Filter>Header Files\Detail\math\nonfree</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\math\_linear_solver.h">
       <Filter>Header Files\Detail\math</Filter>
@@ -440,6 +434,18 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\dnn\functions.h">
       <Filter>Header Files\Algs\DeepLearning</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\io\io.hpp">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\io\hrc.hpp">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\math\_primitive_funcs.hpp">
+      <Filter>Header Files\Detail\math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\_matrix_shape.hpp">
+      <Filter>Header Files\Detail\matrix</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -579,7 +585,7 @@
       <Filter>Header Files\Detail\inline</Filter>
     </None>
     <None Include="include\Matrice\private\nonfree\inl\_lnalge.inl">
-      <Filter>Header Files\Detail\nonfree\inl</Filter>
+      <Filter>Header Files\Detail\math\nonfree\inl</Filter>
     </None>
     <None Include="include\Matrice\algs\similarity\inline\_iterative_conv_impl.inl">
       <Filter>Header Files\Algs\Similarity\inl</Filter>
@@ -604,6 +610,9 @@
     </None>
     <None Include="include\Matrice\algs\geometry\inline\_transform.inl">
       <Filter>Header Files\Algs\Geometry</Filter>
+    </None>
+    <None Include="include\io">
+      <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
