@@ -64,7 +64,16 @@ struct _Blas_kernel_impl<float> : _Blas_kernel_impl_base<float> {
 	template<ttag Ta = ttag::N, ttag Tb = ttag::N>
 	MATRICE_HOST_INL static auto mul(const pointer _A, const pointer _B, pointer _C, int _M, int _N, int _K) {
 #if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
-		cblas_sgemm(layout, transp_tag_v<Ta>, transp_tag_v<Tb>, _M, _N, _K, 1.f, _A, _K, _B, _N, 0.f, _C, _N);
+		int _T = _K, lda = max(1,_K), ldb = max(1, _N);
+		if constexpr (Ta == ttag::Y) {
+			std::swap(_M, _K);
+			lda = max(1, _M);
+		}
+		if constexpr (Tb == ttag::Y) {
+			std::swap(_T, _N);
+			ldb = max(1, _K);
+		}
+		cblas_sgemm(layout, transp_tag_v<Ta>, transp_tag_v<Tb>, _M, _N, _K, 1.f, _A, lda, _B, ldb, 0.f, _C, _N);
 #else
 		DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
 #endif
@@ -88,6 +97,15 @@ template<> struct _Blas_kernel_impl<double> : _Blas_kernel_impl_base<double> {
 	template<ttag Ta = ttag::N, ttag Tb = ttag::N>
 	MATRICE_HOST_INL static auto mul(const pointer _A, const pointer _B, pointer _C, int _M, int _N, int _K) {
 #if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
+		int _T = _K, lda = max(1, _K), ldb = max(1, _N);
+		if constexpr (Ta == ttag::Y) {
+			std::swap(_M, _K);
+			lda = max(1, _M);
+	}
+		if constexpr (Tb == ttag::Y) {
+			std::swap(_T, _N);
+			ldb = max(1, _K);
+		}
 		cblas_dgemm(layout, transp_tag_v<Ta>, transp_tag_v<Tb>, _M, _N, _K, 1., _A, _K, _B, _N, 0., _C, _N);
 #else
 		DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
