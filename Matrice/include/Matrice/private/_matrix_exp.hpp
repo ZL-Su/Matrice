@@ -311,6 +311,46 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		MATRICE_GLOBAL_INL auto mul(const _Rhs& _rhs) const {
 			return MatBinaryExpr<derived_t, _Rhs, Op::_Mat_mul<value_t>>(*_CDTHIS, _rhs);
 		}
+
+		/**
+		 *\brief spread this to multiply with _rhs element-wisely; if _rhs can be evaluated to a square matrix, this should be unrolled to a 1D array if it is not.
+		 *\param [_rhs] must be a matrix with a type of Matrix_<>, or an expression can be evaluated to a matrix.
+		 */
+		template<typename _Rhs>
+		MATRICE_GLOBAL_INL auto spreadmul(const _Rhs& _rhs) const {
+			conditional_t<is_matrix_v<_Rhs>, 
+				_Rhs, typename _Rhs::matrix_type> _Res(_rhs.shape());
+			//spread this along each row
+			if (N == 1 || size() == _rhs.rows()) {
+#pragma omp parallel for if(_Res.rows() > 100)
+				{
+					for (index_t r = 0; r < _Res.rows(); ++r) {
+						const auto _Val = _CDTHIS->operator()(r);
+						auto _Ptr = _Res[r];
+						for (index_t c = 0; c < _Res.cols(); ++c) {
+							_Ptr[c] = _Val * this->operator()(c, r);
+						}
+					}
+				}
+			}
+			// spread each entry along column and element-wisely mul. with _Right
+			else if (M == 1 || size() == _Res.cols()) {
+#pragma omp parallel for if(_Res.cols() > 100)
+				{
+					for (index_t r = 0; r < _Res.rows(); ++r) {
+						auto _Ptr = _Res[r];
+						for (index_t c = 0; c < _Res.cols(); ++c) {
+							_Ptr[c] = _CDTHIS->operator()(c)*this->operator()(c,r);
+						}
+					}
+				}
+			}
+			else {
+				DGELOM_ERROR("Only one-dimension array spread is supported.");
+			}
+			return forward<decltype(_Res)>(_Res);
+		}
+
 		/**
 		 * \sum over all expression entries
 		 */
@@ -371,7 +411,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 
 	protected:
 		size_t M, K, N;
-		const basic_shape_t& Shape;
+		basic_shape_t Shape;
 #undef _CDTHIS
 	};
 
