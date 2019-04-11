@@ -28,9 +28,7 @@ value_t det_impl(const _Rhs & a) {
 
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 	lapack_kernel<value_t>::lud(a);
-	auto _Ret = one<value_t>;
-	for (int i = 0; i < N; ++i) _Ret *= a[i][i];
-	return (_Ret);
+	return a.trace();
 #elif MATRICE_MATH_KERNEL==MATRICE_USE_FKL
 	if constexpr (type_bytes<value_t>::value == 4)
 		return fblas::_sdetm(fkl::sptr(p), a.rows());

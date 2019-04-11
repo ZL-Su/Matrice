@@ -54,7 +54,7 @@ public:
 
 	MATRICE_HOST_FINL Myt_reference operator= (const_initlist _list) { return _Mybase::operator=(_list); }
 	MATRICE_GLOBAL_FINL Myt_reference operator= (Myt_const_reference _other) { return _Mybase::operator=(_other); }
-	MATRICE_GLOBAL_FINL Myt_reference operator= (Myt_move_reference _other) { return _Mybase::operator=(std::move(_other)); }
+	MATRICE_GLOBAL_FINL Myt_reference operator= (Myt_move_reference _other) { return _Mybase::operator=(move(_other)); }
 	template<typename _Arg>
 	MATRICE_GLOBAL_FINL Myt_reference operator= (add_const_reference_t<_Arg> _arg) { return _Mybase::operator=(_arg); }
 
