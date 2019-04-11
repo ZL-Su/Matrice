@@ -46,7 +46,11 @@ template<typename _Derived> MATRICE_HOST_INL
 auto _Corr_optim_base<_Derived>::_Init() {
 	auto _J = std::async(std::launch::async, [&] {
 		static_cast<_Derived*>(this)->_Diff();
-		_Myhess = _Myjaco.t().mul(_Myjaco).reduce();
+		Matrix<value_type> J(_Myjaco.size(), 6);
+		for (const auto _Idx : range(0, J.rows())) {
+			J.rview(_Idx) = _Myjaco(_Idx);
+		}
+		_Myhess = J.t().mul(J).eval();
 	});
 
 	const auto _Ksize = _Myopt._Radius << 1 | 1;
@@ -77,7 +81,7 @@ auto _Corr_optim_base<_Derived>::_Warp(const param_type& _Pars) {
 #define _WITHIN_RANGE_OF_REFIMG(_OP) \
 	if (x-_Bl>=0 && x-_Bl>=0 && y+_Bu<_Rows && x+_Bu<_Cols) \
 		_OP; \
-   else _Mycur(r,c) = zero_v<value_type>;
+   else _Mycur(r,c) = zero<value_type>;
 
 	using category = category_type_t<interp_type>;
 	constexpr auto _Bl = _Corr_border_size<category>::lower;
@@ -86,7 +90,7 @@ auto _Corr_optim_base<_Derived>::_Warp(const param_type& _Pars) {
 	const auto _Radius = static_cast<index_t>(_Myopt._Radius);
 	auto _Cur_x = _Mypos.x + _Pars[0], _Cur_y = _Mypos.y + _Pars[3];
 
-	auto _Mean = zero_v<value_type>;
+	auto _Mean = zero<value_type>;
 	auto _Dvdyp1 = 1 + _Pars[5], _Dudxp1 = 1 + _Pars[1];
 	for (index_t j = -_Radius, r = 0; j <= _Radius; ++j, ++r) {
 		auto dy = static_cast<value_type>(j);
@@ -115,17 +119,17 @@ auto& _Corr_invcomp_optim<_Ty, _Itag, 1>::_Diff() {
 	_Mybase::_Myjaco.create(_Size, _Size);
 
 	auto[_L, _R, _U, _D] = _Mybase::_Myopt.range<true>(_Mybase::_Mypos);
-	auto _Off = -static_cast<value_type>(_Mybase::_Myopt._Radius);
+	const auto _Off = -static_cast<value_type>(_Mybase::_Myopt._Radius);
 	for (index_t iy = _U, j = 0; iy < _D; ++iy, ++j) {
-		auto dy = _Off + j, y = _Mybase::_Mypos.y + dy;
+		const auto dy = _Off + j, y = _Mybase::_Mypos.y + dy;
 		for (index_t ix = _L, i = 0; ix < _R; ++ix, ++i) {
-			auto dx = _Off + i, x = _Mybase::_Mypos.x + dx;
+			const auto dx = _Off + i, x = _Mybase::_Mypos.x + dx;
 
 			auto[dfdx, dfdy] = _Mybase::_Myref_itp.grad({ x, y });
 			if constexpr (is_float32_v<value_type>) {
 				using packet_t = simd::Packet_<value_type, 4>;
 				auto a = packet_t{ dfdx, dfdx, dfdy, dfdy };
-				auto b = (a * packet_t{ dx, dy, dx, dy }).begin();
+				const auto b = (a * packet_t{ dx, dy, dx, dy }).begin();
 				_Mybase::_Myjaco(j, i) = { dfdx, b[0], b[1], dfdy, b[2], b[3] };
 			}
 			else {
