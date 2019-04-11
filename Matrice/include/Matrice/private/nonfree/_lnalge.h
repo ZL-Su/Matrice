@@ -21,6 +21,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 DGE_MATRICE_BEGIN _DETAIL_BEGIN
 
+/**
+ *\brief blas kernels for matrix and vector linear operation
+ *\param <_Ty> should be a scalar type.
+ */
 template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)> 
 struct _Blas_kernel_impl {
 	static_assert("Oops, unsupported data type _Ty in _Blas_kernel_impl<_Ty, void>.");
@@ -29,6 +33,10 @@ struct _Blas_kernel_impl {
 	template<typename... _Args> static constexpr auto mul(const _Args&...) {}
 };
 
+/**
+ *\brief lapack kernels for matrix and vector linear operation
+ *\param <_Ty> should be a scalar type.
+ */
 template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
 struct _Lapack_kernel_impl {
 	static_assert("Oops, unsupported data type _Ty in _Lapack_kernel_impl<_Ty, void>.");
@@ -39,8 +47,13 @@ struct _Lapack_kernel_impl {
 	template<typename... _Args> static constexpr auto slv(const _Args&...) {}
 };
 
+/**
+ *\brief lapack backward for solving linear eqautions
+ *\param <_Tag> a linear solver type in solver_type::AUTO/LUF/CHD/QRD/SVD.
+ */
 template<solver_type _Tag> struct _Lapack_backward_impl {
-	template<typename... _Args> static constexpr auto _(const _Args&...) {}
+	template<typename... _Args> 
+	static constexpr auto eval(const _Args&...) {}
 };
 
 _DETAIL_END
