@@ -11,7 +11,7 @@ _Ty* aligned_malloc(_Ity size) {
 		auto raw_ptr = std::malloc(size*sizeof(_Ty)+MATRICE_ALIGN_BYTES);
 		auto space = reinterpret_cast<size_t>(raw_ptr);
 		space = space &~(size_t(MATRICE_ALIGN_BYTES - 1));
-		auto aligned_ptr = reinterpret_cast<void*>(space + MATRICE_ALIGN_BYTES);
+		auto aligned_ptr = reinterpret_cast<void*>(space+MATRICE_ALIGN_BYTES);
 		*(reinterpret_cast<void**>(aligned_ptr) - 1) = raw_ptr;
 
 		return (reinterpret_cast<_Ty*>(aligned_ptr));
@@ -23,7 +23,7 @@ _Ty* aligned_malloc(_Ity size) {
 template<typename _Ty>
 void aligned_free(_Ty* aligned_ptr) noexcept {
 	if (aligned_ptr)
-		std::free(*(reinterpret_cast<void**>(reinterpret_cast<void*>(aligned_ptr)) - 1));
+		std::free(*(reinterpret_cast<void**>(reinterpret_cast<void*>(aligned_ptr))-1));
 }
 template<typename _Ty>
 bool is_aligned(_Ty* aligned_ptr) noexcept {
