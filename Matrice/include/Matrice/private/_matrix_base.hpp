@@ -535,15 +535,6 @@ public:
 	}
 #pragma endregion
 
-#ifdef _HAS_CXX17
-	/**
-	 * \interface for STD valarray<...>
-	 * Example: std::valarray<float> _Valarr = _M;
-	 */
-	/*MATRICE_GLOBAL_FINL operator std::valarray<value_t>() { return std::valarray<value_t>(m_data, size()); }
-	MATRICE_GLOBAL_FINL operator std::valarray<value_t>() const { return std::valarray<value_t>(m_data, size()); }*/
-#endif
-
 	/**
 	 * \size properties
 	 */
@@ -645,7 +636,6 @@ public:
 	MATRICE_GLOBAL_FINL auto normalize(value_t _val = inf) const { 
 		return ((*this)*(abs(_val) < eps ? 1 : 1 / (_val == inf ? max() : _val))); 
 	}
-	MATRICE_GLOBAL_INL Expr::MatBinaryExpr<_Myt, _Myt, _Xop_mat_mul> spread();
 
 	MATRICE_MAKE_EXP_ASSIGNOP(::EwiseBinary)
 	MATRICE_MAKE_EXP_ASSIGNOP(::EwiseUnary)
