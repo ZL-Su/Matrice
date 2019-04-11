@@ -67,16 +67,16 @@ public:
 	 * \shape of the matrix
 	 * Example: auto [_Rows, _Cols] = _Matrix.shape();
 	 */
-	MATRICE_GLOBAL_FINL constexpr auto shape() const { 
+	MATRICE_GLOBAL_FINL constexpr shape_t<size_t> shape() const { 
 		return std::tie(m_rows, m_cols);
 	}
 	template<typename _T, MATRICE_ENABLE_IF(is_scalar_v<_T>)>
-	MATRICE_GLOBAL_FINL constexpr auto shape(_T _Scale) const {
+	MATRICE_GLOBAL_FINL constexpr shape_t<size_t>  shape(_T _Scale) const {
 		return std::make_tuple(m_rows*_Scale, m_cols*_Scale);
 	}
 	template<typename _T1, typename _T2 = _T1, 
 		MATRICE_ENABLE_IF(is_scalar_v<_T1>&&is_scalar_v<_T2>)>
-	MATRICE_GLOBAL_FINL constexpr auto shape(_T1 _Rsf, _T2 _Csf) const {
+	MATRICE_GLOBAL_FINL constexpr shape_t<size_t> shape(_T1 _Rsf, _T2 _Csf) const {
 		return std::make_tuple(m_rows*_Rsf, m_cols*_Csf);
 	}
 
@@ -538,9 +538,9 @@ public:
 	/**
 	 * \size properties
 	 */
-	MATRICE_GLOBAL_FINL constexpr auto rows() const { return m_rows; }
-	MATRICE_GLOBAL_FINL constexpr auto cols() const { return m_cols; }
-	MATRICE_GLOBAL_FINL constexpr auto size() const { return m_rows*m_cols; }
+	MATRICE_GLOBAL_FINL constexpr auto(rows)()const{ return m_rows; }
+	MATRICE_GLOBAL_FINL constexpr auto(cols)()const{ return m_cols; }
+	MATRICE_GLOBAL_FINL constexpr auto(size)()const{ return m_rows*m_cols; }
 
 	/**
 	 * \assignment operator, from initializer list
@@ -644,19 +644,19 @@ public:
 #pragma endregion
 
 	///<brief> in-time matrix arithmetic </brief>
-	MATRICE_GLOBAL_FINL auto max() const { 
+	MATRICE_GLOBAL_FINL auto (max)() const { 
 		return (*std::max_element(begin(), end())); 
 	}
-	MATRICE_GLOBAL_FINL auto min() const { 
+	MATRICE_GLOBAL_FINL auto (min)() const { 
 		return (*std::min_element(begin(), end())); 
 	}
-	MATRICE_GLOBAL_FINL auto sum() const { 
+	MATRICE_GLOBAL_FINL auto (sum)() const { 
 		return (reduce(begin(), end())); 
 	}
-	MATRICE_GLOBAL_FINL auto det() const { 
+	MATRICE_GLOBAL_FINL auto (det)() const { 
 		return (det_impl(*static_cast<const _Derived*>(this))); 
 	}
-	MATRICE_GLOBAL_FINL auto trace() const { 
+	MATRICE_GLOBAL_FINL auto (trace)() const { 
 		return (reduce(begin(), end(), cols() + 1)); 
 	}
 
@@ -708,6 +708,13 @@ public:
 	template<ttag _Ltag = ttag::N, ttag _Rtag = ttag::N, 
 		typename _Rhs = _Derived, MATRICE_ENABLE_IF(is_matrix_v<_Rhs>)>
 	MATRICE_HOST_FINL auto inplace_mul(const _Rhs& _Right);
+	/**
+	 *\brief spread to element-wisely multiplicate with an input
+	 *\param [_Right] input argument with a type of _Rhs.
+	 */
+	template<typename _Rhs>
+	MATRICE_GLOBAL_INL _Rhs spreadmul(const _Rhs& _Right) const;
+
 	/**
 	 * \operate each entry via _Fn
 	 */
