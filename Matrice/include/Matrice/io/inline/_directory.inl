@@ -1,7 +1,7 @@
 /*********************************************************************
 	  About License Agreement of this file, see "../lic/license.h"
 *********************************************************************/
-#include "../io.h"
+#include "../io.hpp"
 
 DGE_MATRICE_BEGIN namespace io { _DETAIL_BEGIN
 /**
@@ -12,14 +12,14 @@ template<> struct _Collector<folder_tag> {
 		std::vector<std::string> _Ret;
 		if (fs::path _Path(path); fs::exists(_Path)) {
 			fs::directory_iterator _End;
-			for (decltype(_End) _Begin(_Path); _Begin != _End; ++_Begin) {
+			for (decltype(_End)_Begin(_Path);_Begin != _End; ++_Begin) {
 				if (fs::is_directory(_Begin->status())) {
 					_Ret.emplace_back(_Begin->path().string().substr(path.size()));
 				}
 			}
 			_Ret.shrink_to_fit();
 		}
-		return std::forward<decltype(_Ret)>(_Ret);
+		return forward<decltype(_Ret)>(_Ret);
 	}
 };
 /**
@@ -85,7 +85,7 @@ public:
 	 * \return path of current directory
 	 */
 	MATRICE_HOST_INL value_type path() const {
-		return std::forward<value_type>(_Mypath.string());
+		return forward<value_type>(_Mypath.string());
 	}
 
 	/**
