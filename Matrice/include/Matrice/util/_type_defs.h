@@ -42,6 +42,10 @@ namespace dgelom
 
 	/**
 	 * \enum type for matrix transpose tag
+	 * ttag::A for automatic checking; 
+	 * ttag::Y for transpose;
+	 * ttag::N for no transpose
 	 */
-	enum class ttag { Y = 111, N = 112};
+	enum class ttag {A = 000, Y = 111, N = 112};
+	using transp = ttag;
 }
