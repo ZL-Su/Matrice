@@ -42,7 +42,7 @@ template<ttag _Tag> MATRICE_HOST_INL constexpr auto transp_tag_v = transp_tag<_T
 template<typename _Ty> struct _Blas_kernel_impl_base {
 	using pointer = std::add_pointer_t<_Ty>;
 	using size_type = tuple<int, int>;
-	using plview_type = tuple<int, int, pointer>;
+	using plview_type = tuple<int, int, pointer, bool>;
 #if   MATRICE_MATH_KERNEL == MATRICE_USE_MKL
 	static constexpr auto layout = CBLAS_LAYOUT::CblasRowMajor;
 #else 
@@ -82,6 +82,33 @@ struct _Blas_kernel_impl<float> : _Blas_kernel_impl_base<float> {
 	MATRICE_HOST_INL static auto mul(const plview_type& _A, const plview_type& _B, const plview_type& _C) {
 		mul<Ta, Tb>(get<2>(_A), get<2>(_B), get<2>(_C), get<0>(_A), get<1>(_B), get<1>(_A));
 	}
+
+	MATRICE_HOST_INL static auto& gemm(const plview_type& _A, const plview_type& _B, const plview_type& _C) {
+#if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
+		const auto[ma, na, a, ta] = _A;
+		const auto[mb, nb, b, tb] = _B;
+		auto c = get<2>(_C);
+		if (mb == 1 || nb == 1) { //gemv
+			const auto lda = max(1, na);
+			cblas_sgemv(layout, 
+				ta ? transp_tag_v<ttag::Y> : transp_tag_v<ttag::N>, 
+				ma, na, 1.f, a, lda, b, 1, 1.f, c, 1);
+		}
+		else { //gemm
+			int m = ma, k = nb, n = nb, t = k;
+			int lda = max(1, k), ldb = max(1, n);
+			if (ta) { std::swap(m, k); lda = max(1, m); }
+			if (tb) { std::swap(t, n); ldb = max(1, k); }
+			cblas_sgemm(layout,
+				(ta ? transp_tag_v<ttag::Y> : transp_tag_v<ttag::N>),
+				(tb ? transp_tag_v<ttag::Y> : transp_tag_v<ttag::N>),
+				m, n, k, 1.f, a, lda, b, ldb, 0.f, c, n);
+		}
+#else
+		DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
+#endif
+		return (_C);
+	}
 };
 /**
  *\Specialization for double-type.
@@ -115,6 +142,33 @@ template<> struct _Blas_kernel_impl<double> : _Blas_kernel_impl_base<double> {
 	MATRICE_HOST_INL static auto mul(const plview_type& _A, const plview_type& _B, const plview_type& _C) {
 		mul<Ta, Tb>(get<2>(_A), get<2>(_B), get<2>(_C), get<0>(_A), get<1>(_B), get<1>(_A));
 	}
+
+	MATRICE_HOST_INL static auto& gemm(const plview_type& _A, const plview_type& _B, const plview_type& _C) {
+#if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
+		const auto[ma, na, a, ta] = _A;
+		const auto[mb, nb, b, tb] = _B;
+		auto c = get<2>(_C);
+		if (mb == 1 || nb == 1) { //gemv
+			const auto lda = max(1, na);
+			cblas_dgemv(layout,
+				ta ? transp_tag_v<ttag::Y> : transp_tag_v<ttag::N>,
+				ma, na, 1.f, a, lda, b, 1, 1.f, c, 1);
+		}
+		else { //gemm
+			int m = ma, k = nb, n = nb, t = k;
+			int lda = max(1, k), ldb = max(1, n);
+			if (ta) { std::swap(m, k); lda = max(1, m); }
+			if (tb) { std::swap(t, n); ldb = max(1, k); }
+			cblas_dgemm(layout,
+				(ta ? transp_tag_v<ttag::Y> : transp_tag_v<ttag::N>),
+				(tb ? transp_tag_v<ttag::Y> : transp_tag_v<ttag::N>),
+				m, n, k, 1.f, a, lda, b, ldb, 0.f, c, n);
+	}
+#else
+		DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
+#endif
+		return (_C);
+}
 };
 
 template<typename _Ty> struct _Lapack_kernel_impl_base {

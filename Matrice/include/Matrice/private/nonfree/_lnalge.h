@@ -31,6 +31,7 @@ struct _Blas_kernel_impl {
 
 	template<typename... _Args> static constexpr auto dot(const _Args&...) {}
 	template<typename... _Args> static constexpr auto mul(const _Args&...) {}
+	template<typename... _Args> static constexpr auto gemm(const _Args&...) {}
 };
 
 /**
