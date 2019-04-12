@@ -120,12 +120,19 @@ public:
 	/**
 	 *\brief Get dim value at _Dim
 	 */
-	MATRICE_GLOBAL_INL constexpr auto get(uint8_t _Dim) const {
+	MATRICE_GLOBAL_INL constexpr auto& get(uint8_t _Dim) {
 		if (_Dim == 0) return std::get<0>(_Data);
 		if (_Dim == 1) return std::get<0>(std::get<1>(_Data));
 		if (_Dim == 2) return std::get<0>(std::get<1>(std::get<1>(_Data)));
 		if (_Dim == 3) return std::get<1>(std::get<1>(std::get<1>(_Data)));
 		DGELOM_CHECK(_Dim<3, "_Dim over range of _Data.");
+	}
+	MATRICE_GLOBAL_INL constexpr auto& get(uint8_t _Dim) const {
+		if (_Dim == 0) return std::get<0>(_Data);
+		if (_Dim == 1) return std::get<0>(std::get<1>(_Data));
+		if (_Dim == 2) return std::get<0>(std::get<1>(std::get<1>(_Data)));
+		if (_Dim == 3) return std::get<1>(std::get<1>(std::get<1>(_Data)));
+		DGELOM_CHECK(_Dim < 3, "_Dim over range of _Data.");
 	}
 	/**
 	 *\brief Get full rows

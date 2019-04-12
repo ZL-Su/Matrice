@@ -320,7 +320,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		MATRICE_GLOBAL_INL auto spreadmul(const _Rhs& _rhs) const {
 			conditional_t<is_matrix_v<_Rhs>, 
 				_Rhs, typename _Rhs::matrix_type> _Res(_rhs.shape());
-			//spread this along each row
+			//spread this along each row to mul. with _rhs
 			if (N == 1 || size() == _rhs.rows()) {
 #pragma omp parallel for if(_Res.rows() > 100)
 				{
@@ -333,7 +333,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 					}
 				}
 			}
-			// spread each entry along column and element-wisely mul. with _Right
+			// spread each entry along column to mul. with _rhs
 			else if (M == 1 || size() == _Res.cols()) {
 #pragma omp parallel for if(_Res.cols() > 100)
 				{
@@ -639,11 +639,19 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 
 		MATRICE_GLOBAL_INL MatUnaryExpr(const T& inout) noexcept
 			:_Mybase(inout.dims()), _RHS(inout), _ANS(inout) {
-			if constexpr (options & trp == trp) std::swap(M, N);
+			if constexpr (options & trp == trp) { 
+				std::swap(M, N); 
+				_Mybase::Shape.get(2) = M;
+				_Mybase::Shape.get(3) = N;
+			}
 		}
 		MATRICE_GLOBAL_INL MatUnaryExpr(const T& _rhs, T& _ans)
 			: _Mybase(_rhs.dims()), _RHS(_rhs), _ANS(_ans) {
-			if constexpr (options & trp == trp) std::swap(M, N);
+			if constexpr (options & trp == trp) {
+				std::swap(M, N);
+				_Mybase::Shape.get(2) = M;
+				_Mybase::Shape.get(3) = N;
+			}
 		}
 		MATRICE_GLOBAL_INL MatUnaryExpr(MatUnaryExpr&& _other)
 			: _Mybase(_other.dims()), options(_other.options) {

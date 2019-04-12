@@ -48,7 +48,8 @@ class _Basic_plane_view_base {
 	int type = _Type, flags = MAGIC_VAL | _Type; Step step;
 	int nval, cval, hval, wval;
 public:
-	using plvt_type = tuple<int, int, std::add_pointer_t<_Ty>>;
+	using plvt_type = tuple<int, int, std::add_pointer_t<_Ty>, bool>;
+
 	MATRICE_GLOBAL_FINL _Basic_plane_view_base() = default;
 	MATRICE_GLOBAL_FINL _Basic_plane_view_base(int _rows, int _cols, _Ty* _data = nullptr)
 		: m_rows(_rows), m_cols(_cols), m_data(_data), _Myshape{1,1,_rows,_cols} {
@@ -88,14 +89,27 @@ public:
 	}
 
 	/**
-	 * \tuple of plane view of the matrix
-	 * Example: auto [_Rows, _Cols, _Data] = _Matrix.plvt();
+	 * \a tuple of plane view of the matrix for fast memory access.
+	 * \param <_Axis> indicates view type: x for row vector view, y for column vector view, all for original plane view. 
+	 * \param [require_t] refers to the view will be transposed or not.
 	 */
-	MATRICE_GLOBAL_FINL constexpr plvt_type plvt() {
-		return std::tie(m_rows, m_cols, m_data);
+	template<axis _Axis = axis::all>
+	MATRICE_GLOBAL_FINL constexpr plvt_type plvt(bool require_t = 0) {
+		if constexpr (_Axis == axis::x)
+			return plvt_type(1, m_rows*m_cols, m_data, require_t);
+		else if constexpr (_Axis == axis::y)
+			return plvt_type(m_rows*m_cols, 1, m_data, require_t);
+		else
+			return plvt_type(m_rows, m_cols, m_data, require_t);
 	}
-	MATRICE_GLOBAL_FINL constexpr plvt_type plvt() const {
-		return std::tie(m_rows, m_cols, m_data);
+	template<axis _Axis = axis::all>
+	MATRICE_GLOBAL_FINL constexpr plvt_type plvt(bool require_t = 0) const {
+		if constexpr (_Axis == axis::x)
+			return std::tie(1, m_rows*m_cols, m_data, require_t);
+		else if constexpr (_Axis == axis::y)
+			return std::tie(m_rows*m_cols, 1, m_data, require_t);
+		else
+			return std::tie(m_rows, m_cols, m_data, require_t);
 	}
 	MATRICE_GLOBAL_FINL constexpr operator plvt_type() {
 		return std::tie(m_rows, m_cols, m_data);
@@ -144,7 +158,7 @@ template<
 class Base_ : public _Basic_plane_view_base<_Type>
 {
 #define MATRICE_LINK_PTR { m_data = m_storage.data(); }
-#define MATRICE_EVALEXP_TOTHIS { m_data = m_storage.data(); expr.assign(*this); }
+#define MATRICE_EVALEXP_TOTHIS { m_data = m_storage.data(); exp.assign(*this); }
 #define MATRICE_EXPAND_SHAPE get<0>(_Shape), get<1>(_Shape)
 #define MATRICE_MAKE_EXPOP_TYPE(DESC, NAME) typename _Exp_op::_##DESC##_##NAME<_Type>
 #define MATRICE_MAKE_ARITHOP(OP, NAME) \
@@ -157,10 +171,17 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const _Derived& _Right)
 	return Expr::EwiseBinaryExpr<_Lhs, _Derived, _Xop_ewise_##NAME>(_Left, _Right); \
 }
 #define MATRICE_MAKE_EXP_ASSIGNOP(NAME) \
-template<typename... _Args> MATRICE_GLOBAL_INL \
-auto& operator= (const Expr##NAME##Expr<_Args...>& _Ex){ \
+template<typename _Lhs, typename _Rhs, typename _Op> \
+MATRICE_GLOBAL_INL \
+auto& operator= (const Expr##NAME##BinaryExpr<_Lhs, _Rhs, _Op>& _Ex){ \
+return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
+} \
+template<typename _Rhs, typename _Op> \
+MATRICE_GLOBAL_INL \
+auto& operator= (const Expr##NAME##UnaryExpr<_Rhs, _Op>& _Ex){ \
 return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 }
+
 	struct _My_element {
 		_My_element(_Type& _Val, size_t _Idx, size_t _Std) 
 			: _Value(_Val), _Index(_Idx), _Stride(_Std) {}
@@ -275,20 +296,20 @@ public:
 	 *\from expression
 	 */
 	template<typename _Exp>
-	MATRICE_GLOBAL_FINL Base_(const exprs::_Matrix_exp<_Exp>& expr)
-		: _Mybase(m_rows = expr.rows(), m_cols = expr.cols()), 
+	MATRICE_GLOBAL_FINL Base_(const exprs::_Matrix_exp<_Exp>& exp)
+		: _Mybase(m_rows = exp.rows(), m_cols = exp.cols()), 
 		m_storage(m_rows, m_cols) MATRICE_EVALEXP_TOTHIS
 	template<typename _Lhs, typename _Rhs, typename _Op>
-	MATRICE_GLOBAL_FINL Base_(const Expr::EwiseBinaryExpr<_Lhs, _Rhs, _Op>& expr)
-		:_Mybase(m_rows = expr.rows(), m_cols = expr.cols()), 
+	MATRICE_GLOBAL_FINL Base_(const Expr::EwiseBinaryExpr<_Lhs,_Rhs,_Op>& exp)
+		:_Mybase(m_rows = exp.rows(), m_cols = exp.cols()), 
 		m_storage(m_rows, m_cols) MATRICE_EVALEXP_TOTHIS
 	template<typename _Lhs, typename _Rhs, typename _Op>
-	MATRICE_GLOBAL_FINL Base_(const Expr::MatBinaryExpr<_Lhs, _Rhs, _Op>& expr) 
-		:_Mybase(m_rows = expr.rows(), m_cols = expr.cols()), 
+	MATRICE_GLOBAL_FINL Base_(const Expr::MatBinaryExpr<_Lhs, _Rhs, _Op>& exp) 
+		:_Mybase(m_rows = exp.rows(), m_cols = exp.cols()), 
 		m_storage(m_rows, m_cols) MATRICE_EVALEXP_TOTHIS
 	template<typename _Rhs, typename _Op>
-	MATRICE_GLOBAL_FINL Base_(const Expr::MatUnaryExpr<_Rhs, _Op>& expr)
-		:_Mybase(m_rows = expr.rows(), m_cols = expr.cols()), 
+	MATRICE_GLOBAL_FINL Base_(const Expr::MatUnaryExpr<_Rhs, _Op>& exp)
+		:_Mybase(m_rows = exp.rows(), m_cols = exp.cols()), 
 		m_storage(m_rows, m_cols) MATRICE_EVALEXP_TOTHIS
 
 	/**
@@ -572,7 +593,7 @@ public:
 	/**
 	 * \homotype copy assignment operator
 	 */
-	MATRICE_GLOBAL_INL _Derived&operator=(_Myt_const_reference _other) {
+	MATRICE_GLOBAL_INL _Derived& operator=(_Myt_const_reference _other) {
 		m_cols = _other.m_cols, m_rows = _other.m_rows;
 		m_format = _other.m_format;
 		m_storage = _other.m_storage;
@@ -609,10 +630,10 @@ public:
 	}
 
 #pragma region <!-- Lazied Operators for Matrix Arithmetic -->
-	MATRICE_MAKE_ARITHOP(+, add)
-	MATRICE_MAKE_ARITHOP(-, sub)
-	MATRICE_MAKE_ARITHOP(*, mul)
-	MATRICE_MAKE_ARITHOP(/, div)
+	MATRICE_MAKE_ARITHOP(+, add);
+	MATRICE_MAKE_ARITHOP(-, sub);
+	MATRICE_MAKE_ARITHOP(*, mul);
+	MATRICE_MAKE_ARITHOP(/, div);
 
 	template<typename _Rhs> 
 	MATRICE_GLOBAL_INL auto mul(const _Rhs& _Right) const { 
@@ -637,10 +658,8 @@ public:
 		return ((*this)*(abs(_val) < eps ? 1 : 1 / (_val == inf ? max() : _val))); 
 	}
 
-	MATRICE_MAKE_EXP_ASSIGNOP(::EwiseBinary)
-	MATRICE_MAKE_EXP_ASSIGNOP(::EwiseUnary)
-	MATRICE_MAKE_EXP_ASSIGNOP(::MatBinary)
-	MATRICE_MAKE_EXP_ASSIGNOP(::MatUnary)
+	MATRICE_MAKE_EXP_ASSIGNOP(::Ewise);
+	MATRICE_MAKE_EXP_ASSIGNOP(::Mat);
 #pragma endregion
 
 	///<brief> in-time matrix arithmetic </brief>
@@ -702,6 +721,13 @@ public:
 	 */
 	template<typename _Rhs, MATRICE_ENABLE_IF(is_fxdvector_v<_Rhs>)>
 	MATRICE_HOST_INL auto& mul_(const _Rhs& _Right);
+	/**
+	 *\brief in-place matrix-vector multiplication. Note that if the number of rows of this matrix A equals to the size of the right column vector x, this method returns (A^T)x.
+	 *\param [_Right] will be unrolled to a column vector x if it is not.
+	 */
+	template<typename _Rhs>
+	MATRICE_HOST_INL auto inplace_mv(const _Rhs& _Right) const;
+
 	/**
 	 * \in-place matmul with _Rhs. 
 	 */

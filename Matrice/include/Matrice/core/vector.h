@@ -48,7 +48,7 @@ public:
 	vec_global_inl Vec_(my_const_ref _other) : _Base(_other) {}
 	vec_global_inl Vec_(const_initlist _list) : _Base(_list) {}
 	template<typename _Exp, MATRICE_ENABLE_IF(is_expression_v<_Exp>)>
-	vec_global_inl Vec_(const _Exp& _xpr) : _Base(_xpr) {}
+	vec_global_inl Vec_(const _Exp& _exp) { _exp.assign(*this); }
 
 	vec_global_inl reference operator[] (size_t i) { return data()[i]; }
 	vec_global_inl const_reference operator[](size_t i)const { return data()[i]; }
@@ -59,6 +59,7 @@ public:
 	template<typename _Rval>
 	vec_global_inl Vec_& operator= (const _Rval& _rval)
 	{ return static_cast<Vec_&>(_Base::operator= (_rval)); }
+	
 	vec_global_inl operator typename _Base::pointer() { return data(); }
 
 	vec_global_inl Vec_& normalize(const value_t _val = _Base::inf)
