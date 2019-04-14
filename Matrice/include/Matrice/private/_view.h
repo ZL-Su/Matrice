@@ -35,7 +35,7 @@ template<typename _Ty, int _Rows, int _cols> class Matrix_;
 template<typename _Ty, typename _Derived> class _View_base 
 {
 #define _VIEW_EWISE_OP(_OPERATION) \
-for (std::size_t i = 0; i < size(); ++i) {\
+for (difference_type i = 0; i < size(); ++i) {\
 	static_cast<_Derived*>(this)->operator()(i) = _OPERATION;\
 } return (*this)
 #define _MATRICE_DEFVIEW_ARITHOP(OP, NAME) \
@@ -57,12 +57,12 @@ public:
 	{
 		// _Rang = {from_x, from_y, end_x, end_y} : [from_x, end_x), [from_y, end_y)
 		template<typename _Idx, MATRICE_ENABLE_IF(is_integral_v<_Idx>)>
-		MATRICE_GLOBAL_FINL range_type(const std::initializer_list<_Idx> _Rang)
+		MATRICE_GLOBAL_FINL range_type(const initlist<_Idx> _Rang)
 			:_My_from_x(*_Rang.begin()), _My_from_y(*(_Rang.begin()+1)),
 			 _My_end_x(*(_Rang.begin()+2)), _My_end_y(*(_Rang.begin()+3)) {}
 
 		template<typename _Idx, MATRICE_ENABLE_IF(is_integral_v<_Idx>)>
-		MATRICE_GLOBAL_FINL range_type& operator= (const std::initializer_list<_Idx> _Rang) {
+		MATRICE_GLOBAL_FINL range_type& operator= (const initlist<_Idx> _Rang) {
 			_My_from_x = *_Rang.begin(), _My_from_y = *(_Rang.begin() + 1);
 			_My_end_x = *(_Rang.begin() + 2), _My_end_y = *(_Rang.begin() + 3);
 		}
@@ -136,7 +136,7 @@ public:
 	 *\brief Fill view memory from a initializer_list
 	 *\param [_L] the size of the list should not less than the size of the view
 	 */
-	MATRICE_GLOBAL_FINL auto& operator= (const std::initializer_list<value_type> _L) {
+	MATRICE_GLOBAL_FINL auto& operator= (const initlist<value_type> _L) {
 		_VIEW_EWISE_OP(*(_L.begin() + i));
 	}
 	/**
@@ -154,6 +154,21 @@ public:
 	template<typename _Arg> 
 	MATRICE_GLOBAL_INL auto& operator= (const Expr::Base_<_Arg>& _Ex) { 
 		return (_Ex.assign(*static_cast<_Derived*>(this))); 
+	}
+	/**
+	 *\brief Evaluation this view to an input container.
+	 *\param [_Rt] given templated type with a linear accessor: operator(i).
+	 *\note The first min(_Rt.size(), size()) elements will be evaluated if these two sizes are not identity.
+	 */
+	template<typename _Arg>
+	MATRICE_GLOBAL_INL void eval_to(_Arg& _Rt) const {
+#if _DEBUG
+		DGELOM_CHECK(_Rt.size() != 0, "Input _Rt is empty.");
+#endif
+		const auto _Size = min(_Rt.size(), size());
+		for (difference_type _Idx = 0; _Idx < _Size; ++_Idx) {
+			_Rt(_Idx) = static_cast<_Derived*>(this)->operator()(_Idx);
+		}
 	}
 
 	_MATRICE_DEFVIEW_ARITHOP(+, add)
@@ -206,7 +221,7 @@ public:
 	MATRICE_GLOBAL_FINL auto eval() const {
 		Matrix_<value_t, min(_N, 1), _N> _Ret(1, _My_size);
 		_VIEW_EWISE_COPY_N(_Ret, _N)
-		return std::forward<decltype(_Ret)>(_Ret);
+		return forward<decltype(_Ret)>(_Ret);
 	}
 };
 
