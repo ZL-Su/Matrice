@@ -20,65 +20,80 @@ template<> struct _Corr_border_size<_TAG bisspl_tag> {
 // \update on warp parameters
 template<size_t _Order> struct _Compositional_warp_update{};
 
-template<> struct _Compositional_warp_update<compile_time_size<>::_1> {
+template<> 
+struct _Compositional_warp_update<compile_time_size<>::_1> {
 	template<typename _Vecty>
-	static MATRICE_GLOBAL_FINL auto& inv(const _Vecty& x, _Vecty y) {
-		auto _Inv_det = 1 / ((1 + y[1])*(1 + y[5]) - y[2] * y[4]);
-		auto _Val_0 = y[0] * (1 + y[5]) - y[3] * y[2];
-		auto _Val_1 = y[3] * (1 + y[1]) - y[0] * y[4];
-		auto _Val_2 = y[5] + 1, _Val_3 = y[4];
-		auto _Val_4 = y[3] + 1, _Val_5 = y[2];
+	static MATRICE_GLOBAL_FINL auto& inv(_Vecty& x, const _Vecty& y) {
+		constexpr auto _One = one<typename _Vecty::value_t>;
 
-		y[0] = x[0] - ((1 + x[1])*_Val_0 - x[2] * _Val_1)*_Inv_det;
-		y[1] = ((1 + x[1])*_Val_2 - x[2] * _Val_3)*_Inv_det - 1;
-		y[2] = (x[2] * _Val_4 + (1 + x[1])*_Val_5)*_Inv_det;
-		y[3] = x[3] - ((1 + x[5])*_Val_1 - x[4] * _Val_0)*_Inv_det;
-		y[4] = (x[4] * _Val_2 - (1 + x[5])*_Val_3)*_Inv_det;
-		y[5] = ((1 + x[5])*_Val_4 - x[4] * _Val_5)*_Inv_det - 1;
+		const auto y1p1 = _One + y[1], y5p1 = _One + y[5];
+		const auto _Inv_of_det = _One / (y1p1*y5p1 - y[2]*y[4]);
+		const auto a = y[2] * y[3] - y[0] * y5p1;
+		const auto b = y[0] * y[4] - y[3] * y1p1;
 
-		return (y);
+		const auto x1p1 = _One + x[1], x5p1 = _One + x[5];
+		const auto u  = _Inv_of_det*(x1p1*a    + x[2]*b) + x[0];
+		const auto ux = _Inv_of_det*(x1p1*y5p1 - x[2]*y[4]) - _One;
+		const auto uy = _Inv_of_det*(x[2]*y1p1 - y[2]*x1p1);
+		const auto v  = _Inv_of_det*(x[4]*a    + x5p1*b) + x[3];
+		const auto vx = _Inv_of_det*(x[4]*y5p1 - y[4]*x5p1);
+		const auto vy = _Inv_of_det*(x5p1*y1p1 + x[4]*y[2]) - _One;
+
+		x[0] = u, x[1] = ux, x[2] = uy, x[3] = v, x[4] = vx, x[5] = vy;
+
+		return (x);
 	}
 };
 
 // \base class implementation
 
 template<typename _Derived> MATRICE_HOST_INL 
-auto _Corr_optim_base<_Derived>::_Init() {
+auto& _Corr_optim_base<_Derived>::_Init() {
 	auto _J = std::async(std::launch::async, [&] {
-		static_cast<_Derived*>(this)->_Diff();
-		Matrix<value_type> J(_Myjaco.size(), 6);
-		for (const auto _Idx : range(0, J.rows())) {
-			J.rview(_Idx) = _Myjaco(_Idx);
-		}
-		_Myhess = J.t().mul(J).eval();
+		_MyJaco = static_cast<_Derived*>(this)->_Diff();
+#if MATRICE_MATH_KERNEL==MATRICE_USE_NAT
+		_Myhess = _MyJaco.t().mul(_MyJaco);
+#else
+		_Myhess = _MyJaco.inplace_mul<transp::Y>(_MyJaco);
+#endif
 	});
 
 	const auto _Ksize = _Myopt._Radius << 1 | 1;
 	_Myref.create(_Ksize, _Ksize);
 	_Mycur.create(_Ksize, _Ksize);
+	_Myerr.create(sqr(_Ksize), 1);
 
-	auto[_L, _R, _U, _D] = _Myopt.range<false>(_Mypos);
-	for (auto y = _U; y < _D; ++y) {
-		for (auto x = _L; x < _R; ++x) {
-			_Myref(y - _U, x - _L) = _Myref_itp(x, y);
+	const auto[_L, _R, _U, _D] = _Myopt.range<false>(_Mypos);
+	auto _Mean = zero<value_type>;
+	if (_Mypos.x == floor(_Mypos.x) && _Mypos.y == floor(_Mypos.y)) {
+		_Myref = _Myref_itp.data().block(_L, _R, _U, _D).eval();
+		_Mean = _Myref.sum() / _Myref.size();
+	}
+	else {
+		for (auto y = _U; y < _D; ++y) {
+			for (auto x = _L; x < _R; ++x) {
+				_Mean += _Myref(y - _U, x - _L) = _Myref_itp(x, y);
+			}
 		}
 	}
 
-	auto _Mean = _Myref.sum() / _Myref.size();
 	auto _Diff = _Myref - _Mean;
-	auto _Issd = 1 / sqrt((_Diff*_Diff).sum());
+	auto _Issd = one<value_type> / sqrt(sqr(_Diff).sum());
 	_Myref = _Diff * _Issd;
+	_Myissd = two<value_type>*_Issd;
 
 	if (_J.valid()) _J.get();
 
-	_Myhess = _Myhess * (2 * _Issd);
+	_Myhess = _Myhess*(_Myissd*_Issd);
 
 	_Mysolver.forward();
+
+	return (_Myref);
 }
 
 template<typename _Derived> MATRICE_HOST_INL 
-auto _Corr_optim_base<_Derived>::_Warp(const param_type& _Pars) {
-#define _WITHIN_RANGE_OF_REFIMG(_OP) \
+auto& _Corr_optim_base<_Derived>::_Warp(const param_type& _Pars) {
+#define _IF_WITHIN_RANGE(_OP) \
 	if (x-_Bl>=0 && x-_Bl>=0 && y+_Bu<_Rows && x+_Bu<_Cols) \
 		_OP; \
    else _Mycur(r,c) = zero<value_type>;
@@ -88,27 +103,32 @@ auto _Corr_optim_base<_Derived>::_Warp(const param_type& _Pars) {
 	constexpr auto _Bu = _Corr_border_size<category>::upper;
 	const auto [_Rows, _Cols] = _Mycur_itp().shape();
 	const auto _Radius = static_cast<index_t>(_Myopt._Radius);
-	auto _Cur_x = _Mypos.x + _Pars[0], _Cur_y = _Mypos.y + _Pars[3];
+	const auto &u = _Pars[0],    &v = _Pars[3];
+	const auto &dudx = _Pars[1], &dudy = _Pars[2];
+	const auto &dvdx = _Pars[4], &dvdy = _Pars[5];
+	const auto _Cur_x = _Mypos.x + u, _Cur_y = _Mypos.y + v;
 
 	auto _Mean = zero<value_type>;
-	auto _Dvdyp1 = 1 + _Pars[5], _Dudxp1 = 1 + _Pars[1];
+	const auto dvdyp1 = one<value_type> + _Pars[5];
+	const auto dudxp1 = one<value_type> + _Pars[1];
 	for (index_t j = -_Radius, r = 0; j <= _Radius; ++j, ++r) {
-		auto dy = static_cast<value_type>(j);
-		auto tx = _Cur_x + _Pars[2] * dy;
-		auto ty = _Cur_y + _Dvdyp1 * dy;
+		const auto dy = static_cast<value_type>(j);
+		const auto tx = _Cur_x + _Pars[2] * dy;
+		const auto ty = _Cur_y + dvdyp1 * dy;
 		for (index_t i = -_Radius, c = 0; i <= _Radius; ++i, ++c) {
-			auto dx = static_cast<value_type>(i);
-			auto x = _Dudxp1 * dx + tx, y = _Pars[4] * dx + ty;
-			_WITHIN_RANGE_OF_REFIMG(_Mean += _Mycur(r, c) = _Mycur_itp(x,y));
+			const auto dx = static_cast<value_type>(i);
+			const auto x = dudxp1 * dx + tx, y = _Pars[4] * dx + ty;
+			_IF_WITHIN_RANGE(_Mean += _Mycur(r, c) = _Mycur_itp(x,y));
 		}
 	}
 	_Mean /= _Mycur.size();
 
 	_Mycur = _Mycur - _Mean;
-	auto _Issd = 1./sqrt((_Mycur*_Mycur).sum());
+	const auto _Issd = 1./sqrt(sqr(_Mycur).sum());
 	_Mycur = _Mycur * _Issd;
 
-	return (2 * _Issd);
+	return (_Mycur);
+#undef _IF_WITHIN_RANGE
 }
 
 // \derived class implementation
@@ -116,7 +136,7 @@ auto _Corr_optim_base<_Derived>::_Warp(const param_type& _Pars) {
 template<typename _Ty, typename _Itag> MATRICE_HOST_INL
 auto& _Corr_invcomp_optim<_Ty, _Itag, 1>::_Diff() {
 	const auto _Size = _Mybase::_Myopt._Radius<<1|1;
-	_Mybase::_Myjaco.create(_Size, _Size);
+	_Mybase::_MyJaco.create(sqr(_Size), _Mybase::DOF);
 
 	auto[_L, _R, _U, _D] = _Mybase::_Myopt.range<true>(_Mybase::_Mypos);
 	const auto _Off = -static_cast<value_type>(_Mybase::_Myopt._Radius);
@@ -124,46 +144,41 @@ auto& _Corr_invcomp_optim<_Ty, _Itag, 1>::_Diff() {
 		const auto dy = _Off + j, y = _Mybase::_Mypos.y + dy;
 		for (index_t ix = _L, i = 0; ix < _R; ++ix, ++i) {
 			const auto dx = _Off + i, x = _Mybase::_Mypos.x + dx;
+			const auto[dfdx, dfdy] = _Mybase::_Myref_itp.grad({ x, y });
 
-			auto[dfdx, dfdy] = _Mybase::_Myref_itp.grad({ x, y });
-			if constexpr (is_float32_v<value_type>) {
-				using packet_t = simd::Packet_<value_type, 4>;
-				auto a = packet_t{ dfdx, dfdx, dfdy, dfdy };
-				const auto b = (a * packet_t{ dx, dy, dx, dy }).begin();
-				_Mybase::_Myjaco(j, i) = { dfdx, b[0], b[1], dfdy, b[2], b[3] };
-			}
-			else {
-				_Mybase::_Myjaco(j, i) = {
-				dfdx, dfdx*dx, dfdx*dy, dfdy, dfdy*dx, dfdy*dy
-				};
-			}
+			auto p = _Mybase::_MyJaco[j * _Size + i];
+			p[0] = dfdx, p[1] = dfdx * dx, p[2] = dfdx * dy;
+			p[3] = dfdy, p[4] = dfdy * dx, p[5] = dfdy * dy;
 		}
 	}
 
-	return (_Mybase::_Myjaco);
+	return (_Mybase::_MyJaco);
 }
 
 template<typename _Ty, typename _Itag> MATRICE_HOST_INL
 auto _Corr_invcomp_optim<_Ty, _Itag, 1>::_Update(param_type& _P) {
-	// \warp
-	const auto _Scal = _Mybase::_Warp(_P); 
-	// \error image exp.
-#ifdef _DEBUG
-	auto _Diff_n = ((_Mybase::_Myref - _Mybase::_Mycur)*_Scal).eval();
-#elif
-	auto _Diff_n = (_Mybase::_Myref - _Mybase::_Mycur)*_Scal;
-#endif
-	// \steepest descent param. update
-	param_type _Sdp = (_Diff_n*_Mybase::_Myjaco).reduce().t();
-	// \solve warp param update
-	_Sdp = -1.*_Mybase::_Mysolver.backward(_Sdp);
+	// \warp current subset
+	_Mybase::_Mycur = _Mybase::_Warp(_P);
 
-	auto _Error = (_Sdp*_Sdp).sum();
-	//if(_Error < 1.0E-3)
+	// \error map
+	_Mybase::_Myerr = (_Mybase::_Mycur-_Mybase::_Myref);
+#ifdef _DEBUG
+	typename _Mybase::matrix_type
+		_Diff(_Mybase::_Myref.shape(), _Mybase::_Myerr.data());
+#endif // _DEBUG
+
+	// \steepest descent param. update
+	param_type _Sdp = _Mybase::_MyJaco.t().mul(_Mybase::_Myerr);
+	_Sdp = _Mybase::_Myissd*_Sdp;
+
+	// \solve warp param update
+	_Sdp = _Mybase::_Mysolver.backward(_Sdp);
+	
 	// \inverse composition to update param.
 	_P = _Compositional_warp_update<order>::inv(_P, _Sdp);
 
-	return std::tuple((_Diff_n*_Diff_n).sum(), _Error);
+	// \report least square correlation coeff. and param. error.
+	return tuple(sqr(_Mybase::_Myerr).sum(), _Sdp.dot(_Sdp));
 }
 
 _DETAIL_END } MATRICE_ALGS_END
