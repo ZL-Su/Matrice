@@ -141,7 +141,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 	 * \expression option
 	 */
 	template<int _Option> struct option {
-		enum { value = _Option | expr };
+		enum { value = _Option };
 	};
 	/**
 	 * \factorial_t<N> = N!
@@ -611,7 +611,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 
 		template<typename _Mty>
 		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const {
-#pragma omp parallel for
+#pragma omp parallel for if (res.size() > 10)
 			for (int i = 0; i < res.size(); ++i) 
 				res(i) = this->operator()(i);
 		}
@@ -639,7 +639,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 
 		MATRICE_GLOBAL_INL MatUnaryExpr(const T& inout) noexcept
 			:_Mybase(inout.dims()), _RHS(inout), _ANS(inout) {
-			if constexpr (options & trp == trp) { 
+			if constexpr (options == trp) { 
 				std::swap(M, N); 
 				_Mybase::Shape.get(2) = M;
 				_Mybase::Shape.get(3) = N;
@@ -647,7 +647,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		}
 		MATRICE_GLOBAL_INL MatUnaryExpr(const T& _rhs, T& _ans)
 			: _Mybase(_rhs.dims()), _RHS(_rhs), _ANS(_ans) {
-			if constexpr (options & trp == trp) {
+			if constexpr (options == trp) {
 				std::swap(M, N);
 				_Mybase::Shape.get(2) = M;
 				_Mybase::Shape.get(3) = N;
@@ -662,11 +662,11 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 			return _Op(M, _ANS.data(), _RHS.data());
 		}
 		MATRICE_GLOBAL_FINL value_t operator() (int r, int c) const { 
-			if constexpr (options & inv == inv) return _ANS(c + r * N);
-			if constexpr (options & trp == trp) return _ANS(r + c * N);
+			if constexpr (options == inv) return _ANS(c + r * N);
+			if constexpr (options == trp) return _ANS(r + c * N);
 		}
 		MATRICE_GLOBAL_FINL value_t operator() (int _idx) const { 
-			if constexpr (options & trp == trp)
+			if constexpr (options == trp)
 				_idx = _idx * M + _idx / N * (1 - N * M);
 			return _ANS(_idx);
 		}
@@ -675,19 +675,28 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		template<typename _Rhs, 
 			typename _Ret = MatBinaryExpr<MatUnaryExpr, _Rhs, Op::_Mat_mul<value_t>>> 
 		MATRICE_GLOBAL_INL _Ret mul(const _Rhs& _rhs) {
-			if constexpr (options & inv == inv) this->operator()();
-			if constexpr (options & trp == trp)                   ;
+			if constexpr (options == inv) this->operator()();
+			if constexpr (options == trp)                   ;
 			return _Ret(*this, _rhs);
 		}
 
 		template<typename _Mty>
-		MATRICE_GLOBAL_INL void assign_to(_Mty& res)const {
-			if constexpr (options & inv == inv) {
+		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const {
+			if constexpr (options == inv) {
 				_Op(M, res.data(), _RHS.data());
 			}
-			if constexpr (options & trp == trp) {
+			if constexpr (options == trp) {
 				const int _Size = this->size();
-				for (int i = 0; i < _Size; ++i) res(i) = (*this)(i);
+				if (&res == &_RHS) {
+					_Mty _Res(res.shape());
+					for (int i = 0; i < _Size; ++i)
+							_Res(i) = (*this)(i);
+					res = forward<_Mty>(_Res);
+				}
+				else {
+					for (int i = 0; i < _Size; ++i)
+						res(i) = (*this)(i);
+				}
 			}
 		} /*i*N+(1-N*M)*(i/M) is replaced by i at left hand*/
 	private:
