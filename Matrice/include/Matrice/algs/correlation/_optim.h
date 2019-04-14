@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../../core/matrix.h"
 #include "../../core/vector.h"
 #include "../../core/solver.h"
-#include "../../core/tensor.h"
 #include "../../private/math/_linear.h"
 #include "../interpolation.h"
 #include "_correlation_traits.h"
@@ -29,8 +28,8 @@ MATRICE_ALGS_BEGIN _DETAIL_BEGIN namespace corr {
 struct _Correlation_options {
 	size_t _Radius = 10;  //patch radius
 	size_t _Maxits = 10;  //maximum iterations
-	size_t _Stride = 7;   //node spacing
-	float_t _Coeff = 0.8; //correlation threshold
+	size_t _Stride =  7;  //node spacing
+	float_t _Znssd= 0.4;  //correlation threshold
 
 	template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
 	static constexpr _Ty _Mytol = _Ty(1.0E-6); //iteration tolerance
@@ -84,24 +83,30 @@ public:
 
 	_Corr_optim_base(const interp_type& _Ref, const interp_type& _Cur, const point_type& _Pos, const option_type& _Opt) 
 		:_Myref_itp(_Ref), _Mycur_itp(_Cur), _Mypos(_Pos), 
-		 _Myopt(_Opt), _Mysolver(_Myhess) { this->_Init(); }
+		 _Myopt(_Opt), _Mysolver(_Myhess) { 
+		_Myref = this->_Init(); 
+	}
 
 	MATRICE_HOST_INL auto operator()(param_type& _p) {
 		return static_cast<_Mydt*>(this)->_Update(_p);
 	}
 
+	// \for retrieve reference subset
+	MATRICE_HOST_INL auto& f() const { return (_Myref); }
+
 protected:
-	MATRICE_HOST_INL auto _Init();
-	MATRICE_HOST_INL auto _Warp(const param_type& _Pars);
+	MATRICE_HOST_INL auto& _Init();
+	MATRICE_HOST_INL auto& _Warp(const param_type& _Pars);
 
 	const interp_type& _Myref_itp;
 	const interp_type& _Mycur_itp;
+
 	option_type _Myopt;
 	point_type _Mypos;
-
-	matrix_type  _Myref, _Mycur;
-	matrix_fixed _Myhess;
-	tensor_<value_type, 1, DOF> _Myjaco;
+	value_type _Myissd;
+	matrix_type  _Myref, _Mycur, _Myerr;
+	matrix_type  _MyJaco;
+	matrix_fixed _Myhess, _Hessian;
 	linear_solver _Mysolver;
 };
 
