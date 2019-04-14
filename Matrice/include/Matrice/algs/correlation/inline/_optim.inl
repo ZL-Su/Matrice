@@ -67,7 +67,7 @@ auto& _Corr_optim_base<_Derived>::_Init() {
 	auto _Mean = zero<value_type>;
 	if (_Mypos.x == floor(_Mypos.x) && _Mypos.y == floor(_Mypos.y)) {
 		_Myref = _Myref_itp.data().block(_L, _R, _U, _D).eval();
-		_Mean = _Myref.sum() / _Myref.size();
+		_Mean = _Myref.sum();
 	}
 	else {
 		for (auto y = _U; y < _D; ++y) {
@@ -77,7 +77,7 @@ auto& _Corr_optim_base<_Derived>::_Init() {
 		}
 	}
 
-	auto _Diff = _Myref - _Mean;
+	auto _Diff = _Myref - (_Mean /= _Ksize * _Ksize);
 	auto _Issd = one<value_type> / sqrt(sqr(_Diff).sum());
 	_Myref = _Diff * _Issd;
 	_Myissd = two<value_type>*_Issd;
