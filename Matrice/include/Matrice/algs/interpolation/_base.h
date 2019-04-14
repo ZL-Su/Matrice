@@ -102,6 +102,11 @@ public:
 	}
 
 	/**
+	 * \get original data matrix.
+	 */
+	MATRICE_HOST_INL const auto& data() const { return (_Mydata); }
+
+	/**
 	 * \get the interpolated gradient value at _Pos.
 	 */
 	MATRICE_HOST_INL auto grad(const point_type& _Pos) const {
