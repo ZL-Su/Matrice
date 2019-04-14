@@ -82,3 +82,7 @@ private:
 	time_point_type m_start;
 	const double m_ns2msconst = 1.0e6;
 };
+
+namespace dgelom {
+	using delicate_clock_t = HRC_< std::chrono::high_resolution_clock>;
+}
