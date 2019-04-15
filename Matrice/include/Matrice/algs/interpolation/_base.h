@@ -112,7 +112,7 @@ public:
 	MATRICE_HOST_INL auto grad(const point_type& _Pos) const {
 		return std::make_tuple((this)->_Gradx_at(_Pos), (this)->_Grady_at(_Pos));
 	}
-	template<axis _Axis, typename = std::enable_if_t<_Axis==axis::x||_Axis==axis::y>>
+	template<axis _Axis, typename = enable_if_t<_Axis==axis::x||_Axis==axis::y>>
 	MATRICE_HOST_INL auto grad(const point_type& _Pos) const {
 		if constexpr (_Axis == axis::x) return (this)->_Gradx_at(_Pos);
 		if constexpr (_Axis == axis::y) return (this)->_Grady_at(_Pos);
