@@ -23,7 +23,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 DGE_MATRICE_BEGIN
 
-template<typename _Pixty, typename = std::enable_if_t<std::is_arithmetic_v<_Pixty>>>
+template<typename _Pixty, MATRICE_ENABLE_IF(is_arithmetic_v<_Pixty>)>
 void _Grayscale_stretch(_Pixty* Img, std::size_t rows, std::size_t cols) {
 	using pixel_t = _Pixty;
 	using iterator = std::add_pointer_t<pixel_t>;
@@ -42,7 +42,9 @@ void _Grayscale_stretch(_Pixty* Img, std::size_t rows, std::size_t cols) {
 		*_Begin = pixel_t(_Scal * (*_Begin - _Min));
 }
 
-namespace types { template<typename _Ty, int _M, int _N> class Matrix_; }
+namespace types { 
+	template<typename _Ty, int _M, int _N> class Matrix_; 
+}
 
 namespace detail {
 template<typename _Ty, int _M, int _N> class _Multi_matrix;
@@ -150,16 +152,35 @@ protected:
 	typename _Myitp::type _Myop;
 };
 
-template<typename _Ty> class _Gradient_impl<_Ty, _TAG _Sobel_grad_tag> {
+template<typename _Ty> 
+class _Gradient_impl<_Ty, _TAG _Sobel_grad_tag> {
 	using _Myt = _Gradient_impl;
 public:
 	using value_type = _Ty;
 	using image_type = Matrix<value_type>;
 	_Gradient_impl(const image_type& _Image) : _Myimg(_Image) {}
 
+	MATRICE_HOST_INL auto at(diff_t _x, diff_t _y) const {
+		const auto pu = _Myimg[_y - 1], pc = _Myimg[y], pl = _Myimg[y + 1];
+
+		const auto I00 = pu[_x - 1], I01 = pu[_x], I02 = pu[_x + 1];
+		const auto I10 = pc[_x - 1], I11 = pc[_x], I12 = pc[_x + 1];
+		const auto I20 = pl[_x - 1], I21 = pl[_x], I22 = pl[_x + 1];
+
+		const auto gx = (I01-I00)+two<value_type>*(I12-I10)+(I22-I20);
+		const auto gy = (I20-I00)+two<value_type>*(I21-I01)+(I22-I02);
+
+		return tuple<value_type, value_type>(gx, gy);
+	}
+
 private:
 	const image_type& _Myimg;
 };
+
+template<typename _Mty, typename _Pty>
+MATRICE_GLOBAL_INL auto _Sobel_grads(const _Mty& _Img, const _Pty& _Pos) {
+
+}
 
 template<typename _Ty> 
 class _Gradient_impl<_Ty, _TAG _Itped_grad_tag::bicspl>
