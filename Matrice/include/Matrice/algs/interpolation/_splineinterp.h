@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ public:
 
 	_Spline_interpolation(const matrix_type& _Data) : _Mybase(_Data) {}
 	_Spline_interpolation(const _Myt& _Other) : _Mybase(_Other) {}
-	_Spline_interpolation(_Myt&& _Other) : _Mybase(std::move(_Other)) {}
+	_Spline_interpolation(_Myt&& _Other) : _Mybase(move(_Other)) {}
 
 	MATRICE_HOST_INL void _Coeff_impl();
 	MATRICE_HOST_INL auto _Val_dx_n(const value_type& _) const {
@@ -86,7 +86,7 @@ public:
 
 	_Spline_interpolation(const matrix_type& _Data) : _Mybase(_Data) {}
 	_Spline_interpolation(const _Myt& _Other) : _Mybase(_Other) {}
-	_Spline_interpolation(_Myt&& _Other) : _Mybase(std::move(_Other)) {}
+	_Spline_interpolation(_Myt&& _Other) : _Mybase(move(_Other)) {}
 
 	MATRICE_HOST_INL void _Coeff_impl();
 	MATRICE_HOST_INL auto _Val_dx_n(const value_type& _) const {
@@ -132,7 +132,7 @@ public:
 
 	_Spline_interpolation(const matrix_type& _Data) : _Mybase(_Data) {}
 	_Spline_interpolation(const _Myt& _Other) : _Mybase(_Other) {}
-	_Spline_interpolation(_Myt&& _Other) : _Mybase(std::move(_Other)) {}
+	_Spline_interpolation(_Myt&& _Other) : _Mybase(move(_Other)) {}
 
 	MATRICE_HOST_INL void _Coeff_impl();
 	MATRICE_HOST_INL auto _Val_dx_n(const value_type& _) const {
