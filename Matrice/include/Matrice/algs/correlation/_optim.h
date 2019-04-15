@@ -118,8 +118,8 @@ public:
 	}*/
 
 	/**
-	 *\brief This module is image-wise thread-safe. It allows us to eval. relative deformation of each point between current and last state.
-	 *\param [_Ref] last interpolated image;
+	 *\brief This module is image-wise thread-safe. It allows us to eval. relative deformation of each point between current and reference state.
+	 *\param [_Ref] reference interpolated image;
 	 *\param [_Cur] current interpolated image;
 	 *\param [_Opt] options for the optimizer.
 	 */
@@ -159,7 +159,9 @@ public:
 	MATRICE_HOST_INL auto& get_refpatch() const { 
 		return (_Myref); 
 	}
-
+	MATRICE_HOST_INL auto& options() const {
+		return (_Myopt);
+	}
 protected:
 	///<methods>
 	/**
