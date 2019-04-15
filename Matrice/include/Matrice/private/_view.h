@@ -166,8 +166,9 @@ public:
 		DGELOM_CHECK(_Rt.size() != 0, "Input _Rt is empty.");
 #endif
 		const auto _Size = min(_Rt.size(), size());
+		const auto _Deri = static_cast<const _Derived*>(this);
 		for (difference_type _Idx = 0; _Idx < _Size; ++_Idx) {
-			_Rt(_Idx) = static_cast<_Derived*>(this)->operator()(_Idx);
+			_Rt(_Idx) = _Deri->operator()(_Idx);
 		}
 	}
 
