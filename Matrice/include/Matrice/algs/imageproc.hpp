@@ -161,26 +161,29 @@ public:
 	_Gradient_impl(const image_type& _Image) : _Myimg(_Image) {}
 
 	MATRICE_HOST_INL auto at(diff_t _x, diff_t _y) const {
-		const auto pu = _Myimg[_y - 1], pc = _Myimg[y], pl = _Myimg[y + 1];
+		value_type gx = zero<value_type>, gy = gx;
 
-		const auto I00 = pu[_x - 1], I01 = pu[_x], I02 = pu[_x + 1];
-		const auto I10 = pc[_x - 1], I11 = pc[_x], I12 = pc[_x + 1];
-		const auto I20 = pl[_x - 1], I21 = pl[_x], I22 = pl[_x + 1];
+		if (_x > 0 && _y > 0 && _x < _Myimg.cols() && _y < _Myimg.rows()) {
+			const auto pu = _Myimg[_y - 1], pc = _Myimg[_y], pl = _Myimg[_y + 1];
 
-		const auto gx = (I01-I00)+two<value_type>*(I12-I10)+(I22-I20);
-		const auto gy = (I20-I00)+two<value_type>*(I21-I01)+(I22-I02);
+			const auto I00 = pu[_x - 1], I01 = pu[_x], I02 = pu[_x + 1];
+			const auto I10 = pc[_x - 1], I11 = pc[_x], I12 = pc[_x + 1];
+			const auto I20 = pl[_x - 1], I21 = pl[_x], I22 = pl[_x + 1];
+
+			gx = (I01 - I00) + two<value_type>*(I12 - I10) + (I22 - I20);
+			gy = (I20 - I00) + two<value_type>*(I21 - I01) + (I22 - I02);
+		}
 
 		return tuple<value_type, value_type>(gx, gy);
+	}
+	template<typename _Op>
+	MATRICE_HOST_INL auto eval(_Op&& _op) const {
+		return _op(_Myimg);
 	}
 
 private:
 	const image_type& _Myimg;
 };
-
-template<typename _Mty, typename _Pty>
-MATRICE_GLOBAL_INL auto _Sobel_grads(const _Mty& _Img, const _Pty& _Pos) {
-
-}
 
 template<typename _Ty> 
 class _Gradient_impl<_Ty, _TAG _Itped_grad_tag::bicspl>
@@ -225,5 +228,7 @@ public:
  */
 template<typename _Ty, typename _Tag = _TAG _Itped_grad_tag::bicspl>
 using gradient = detail::_Gradient_impl<_Ty, _Tag>;
+template<typename _Ty>
+using trivial_imgrad = detail::_Gradient_impl<_Ty, _TAG _Sobel_grad_tag>;
 
 DGE_MATRICE_END
