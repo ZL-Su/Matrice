@@ -22,16 +22,19 @@ MATRICE_ALGS_BEGIN
 
 template<typename _Ty, typename _Tag>
 class _Interpolation_wrapper MATRICE_NONHERITABLE
+	: public auto_interp_dispatcher_t<_Ty, _Tag>,
+	std::enable_shared_from_this< _Interpolation_wrapper<_Ty, _Tag>>
 {
+	using _Mytraits = interpolation_traits<auto_interp_dispatcher_t<_Ty, _Tag>>;
 public:
-	using type = auto_interp_dispatcher_t<_Ty, _Tag>;
-	using category = category_type_t<interpolation_traits<type>>;
-	using value_type = typename type::value_type;
-	static constexpr auto option = type::option;
+	using type = typename _Mytraits::type;
+	using value_type = typename _Mytraits::value_type;
+	using category = category_type_t<_Mytraits>;
+	static constexpr auto option = _Mytraits::option;
 
-	template<typename... _Args>
-	MATRICE_GLOBAL_FINL _Interpolation_wrapper(const _Args&... args)
-		:m_op(std::make_shared<type>(args...)) {}
+	template<typename... _Args> MATRICE_GLOBAL_FINL
+		_Interpolation_wrapper(const _Args&... args)
+		: type(args...){}
 
 	/**
 	 * \Get reference of interpolation kernel operator.
@@ -44,18 +47,9 @@ public:
 	 *		_Gx = _Itp.grad<axis::x>(_Pos); \\return interpolated dI/dx.
 	 *		_Gy = _Itp.grad<axis::y>(_Pos); \\return interpolated dI/dy.
 	 */
-	MATRICE_GLOBAL_FINL auto& operator()() {
-		return (m_op);
+	MATRICE_HOST_FINL auto shared() const {
+		return std::make_shared(*this);
 	}
-	MATRICE_GLOBAL_FINL const auto& operator()() const {
-		return (m_op);
-	}
-	MATRICE_GLOBAL_INL operator type() const {
-		return (*m_op);
-	}
-
-private:
-	mutable std::shared_ptr<type> m_op;
 };
 
 MATRICE_ALGS_END
