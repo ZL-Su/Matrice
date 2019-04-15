@@ -857,13 +857,6 @@ public:
 	__declspec(property(get = _Empty_getter)) bool empty;
 	MATRICE_HOST_FINL bool _Empty_getter() const { return (size() == 0); }
 
-	MATRICE_HOST_INL auto& grad() {
-		return (m_grad);
-	}
-	MATRICE_HOST_INL const auto& grad() const {
-		return (m_grad);
-	}
-
 protected:
 	using _Mybase::m_rows;
 	using _Mybase::m_cols;
@@ -873,9 +866,6 @@ protected:
 	size_t m_format = rmaj|gene;
 public:
 	_Myt_storage_type m_storage;
-
-private:
-	Matrix<value_type> m_grad;
 
 #undef MATRICE_MAKE_EXPOP_TYPE
 #undef MATRICE_LINK_PTR
