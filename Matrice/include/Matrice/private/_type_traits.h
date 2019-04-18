@@ -24,7 +24,8 @@ DGE_MATRICE_BEGIN
 
 template<typename T> struct remove_reference { using type = typename std::remove_reference<T>::type; };
 template<typename T> using remove_reference_t = typename remove_reference<T>::type;
-
+template<typename T> struct remove_all { using type = std::remove_cv_t<remove_reference_t<T>>; };
+template<typename T> using remove_all_t = typename remove_all<T>::type;
 template<typename T> struct type_bytes { enum { value = sizeof(T) }; };
 template<typename T> MATRICE_GLOBAL_INL constexpr int type_bytes_v = type_bytes<T>::value;
 
