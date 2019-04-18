@@ -60,10 +60,10 @@ public:
 	MATRICE_HOST_INL auto& _Kernel_of_grad() const { return (_Kog); }
 
 private:
-	const Matrix_<value_type, 4, 4> _Kov { // \Kernel of value interpolation
+	const Matrix_<value_type, Ldv, Ldv> _Kov { // \Kernel of value interpolation
 		1., -3., 3., -1., 4., 0., -6., 3., 
 		1., 3., 3., -3., 0., 0., 0., 1. };
-	const Matrix_<value_type, 4, 3> _Kog { // \Kernel of gradient interpolation
+	const Matrix_<value_type, Ldv, Ldg> _Kog { // \Kernel of gradient interpolation
 		-3., 6., -3., 0., -12., 9., 
 		3., 6., -9., 0., 0., 3. };
 };
