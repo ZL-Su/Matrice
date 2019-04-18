@@ -32,7 +32,7 @@ struct _Correlation_options {
 	float_t _Znssd= 0.4;  //correlation threshold
 
 	template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
-	static constexpr _Ty _Mytol = _Ty(1.0E-6); //iteration tolerance
+	static constexpr _Ty _Mytol = _Ty(5.0E-6); //iteration tolerance
 
 	/**
 	 * \retrieve range of the patch centered on point _Pos
@@ -129,7 +129,7 @@ public:
 		const option_type& _Opt) : _Myopt(_Opt),
 		_Myref_ptr(std::make_shared<interp_type>(_Ref)),
 		_Mycur_ptr(std::make_shared<interp_type>(_Cur)),
-		_Mysolver(_Myhess), _Mysize(_Opt._Radius * 2 + 1) {
+		_Mysolver(_Myhess), _Mysize(_Opt._Radius*2+1) {
 	}
 
 	/**
@@ -162,6 +162,8 @@ public:
 	MATRICE_HOST_INL auto& options() const {
 		return (_Myopt);
 	}
+	MATRICE_HOST_INL auto& refpos() { return _Mypos; }
+	MATRICE_HOST_INL const auto& refpos() const { return _Mypos; }
 protected:
 	///<methods>
 	/**
