@@ -3,6 +3,7 @@
 *********************************************************************/
 #include "../io.hpp"
 #include "../../util/_exception.h"
+#include "../../util/_std_wrapper.h"
 
 DGE_MATRICE_BEGIN namespace io { _DETAIL_BEGIN
 
@@ -23,7 +24,7 @@ class _Data_loader_impl<_Ty, loader_tag> {
 			for (auto _Idx = 0; _Idx < _Mybatchs; ++_Idx) {
 				_Ret.emplace_back(_Mythis->directory()[_Idx] + _Mythis->file_names(_Idx)[_Mypos]);
 			}
-			return std::forward<decltype(_Ret)>(_Ret);
+			return forward<decltype(_Ret)>(_Ret);
 		}
 		MATRICE_HOST_FINL _Loader_iterator operator++() {
 			_Mythis->pos() += 1;
@@ -35,8 +36,8 @@ class _Data_loader_impl<_Ty, loader_tag> {
 			return (_Tmp);
 		}
 	private:
-		std::size_t& _Mypos;
-		std::size_t _Mybatchs = 0;
+		size_t& _Mypos;
+		size_t _Mybatchs = 0;
 		std::add_pointer_t<_Myt> _Mythis = nullptr;
 		_Mydir_type::container::iterator _Myitr;
 	};
@@ -124,8 +125,8 @@ public:
 	template<typename _Fn>
 	MATRICE_HOST_INL auto forward(_Fn&& _Loader) const {
 		auto _Op = [&](auto i){return _Loader(_Mydir[i]+_Mynames[i][_Mypos]); };
-		auto _First = _Op(0);
-		std::vector<remove_reference_t<decltype(_First)>> _Data;
+		const auto _First = _Op(0);
+		std::vector<remove_all_t<decltype(_First)>> _Data;
 		_Data.emplace_back(_First);
 		for (const auto& _Idx : range(1, _Mydir.size()-1)) {
 			_Data.emplace_back(_Op(_Idx));
