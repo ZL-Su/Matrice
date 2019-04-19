@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -32,6 +32,8 @@ auto _Interpolation_base<_Derived>::_Value_at(const point_type& _Pos) const {
 	const auto _Coeff = _Mycoeff(_Ix-_L, _Ix+_R, _Iy-_L, _Iy+_R).eval<Ldv, Ldv>();
 
 	const auto& _Kov = _Mydt_this->_Kernel_of_value();
+	remove_all_t<decltype(_Kov)> _KtCK;
+
 	auto _Temp = _Kov.t().mul(_Coeff.mul(_Kov).eval()).eval();
 
 	return (_Diff_y_n.mul(_Temp.mul(_Diff_x_n).eval()))(0);
