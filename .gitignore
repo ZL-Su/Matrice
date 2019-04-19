@@ -270,3 +270,5 @@ Matrice/Matrice.vcxproj
 Matrice/Matrice.vcxproj.filters
 *.vcxproj
 *.vcxproj
+*.vcxproj
+*.filters
