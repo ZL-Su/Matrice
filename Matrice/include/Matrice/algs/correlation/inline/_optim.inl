@@ -66,26 +66,38 @@ auto& _Corr_optim_base<_Derived>::_Cond() {
 	const auto[_L, _R, _U, _D] = _Myopt.range<true>(_Mypos);
 
 	auto _Mean = zero<value_type>;
-	for (auto y = _U; y < _D; ++y) {
-		if (y >= 0 && y < _Rows) {
-			const auto _Dp = _Data[y];
-			auto _Rp = _Myref[y - _U];
-			for (auto x = _L; x < _R; ++x) {
-				if (x >= 0 && x < _Cols)
-					_Mean += _Rp[x - _L] = _Dp[x];
+	if (_Mypos.x == floor(_Mypos.x) && _Mypos.y == floor(_Mypos.y)) {
+		for (auto y = _U; y < _D; ++y) {
+			if (y >= 0 && y < _Rows) {
+				const auto _Dp = _Data[y]; auto _Rp = _Myref[y - _U];
+				for (auto x = _L; x < _R; ++x) {
+					if (x >= 0 && x < _Cols)
+						_Mean += _Rp[x - _L] = _Dp[x];
+				}
+			}
+		}
+	} else {
+		for (auto y = _U; y < _D; ++y) {
+			if (y >= 0 && y < _Rows) {
+				auto _Rp = _Myref[y - _U];
+				for (auto x = _L; x < _R; ++x) {
+					if (x >= 0 && x < _Cols)
+						_Mean += _Rp[x - _L] = (*_Myref_ptr)(x, y);
+				}
 			}
 		}
 	}
 
 	// \zero mean normalization.
-	_Myref = _Myref - (_Mean /= _Mysize);
+	_Myref = _Myref - (_Mean /= _Mysize*_Mysize);
 	const auto _Issd = one<value_type> / sqrt(sqr(_Myref).sum());
 	_Myref = _Myref * _Issd;
 
 	// \Hessian matrix computation.
 	if (_J.valid()) _J.get();
-	_Myhess = _Myhess*_Issd;
+	_Myhess = _Myhess * _Issd;
 	_Mysolver.forward();
+	_Myhess = _Myhess + matrix_fixed::diag(value_type(0.70));
 
 	return (_Myref);
 #undef _IF_WITHIN_RANGE
@@ -106,24 +118,25 @@ auto& _Corr_optim_base<_Derived>::_Warp(const param_type& _Pars) {
 	const auto &u = _Pars[0],    &v = _Pars[3];
 	const auto &dudx = _Pars[1], &dudy = _Pars[2];
 	const auto &dvdx = _Pars[4], &dvdy = _Pars[5];
-	const auto _Cur_x = _Mypos.x + u, _Cur_y = _Mypos.y + v;
+	const auto _Cur_x = _Mypos[0] + u, _Cur_y = _Mypos[1] + v;
 
 	auto _Mean = zero<value_type>;
 	const auto dvdyp1 = one<value_type> + _Pars[5];
 	const auto dudxp1 = one<value_type> + _Pars[1];
-	for (index_t j = -_Radius, r = 0; j <= _Radius; ++j, ++r) {
+	for (diff_t j = -_Radius, r = 0; j <= _Radius; ++j, ++r) {
 		const auto dy = static_cast<value_type>(j);
 		const auto tx = _Cur_x + _Pars[2] * dy;
 		const auto ty = _Cur_y + dvdyp1 * dy;
-		for (index_t i = -_Radius, c = 0; i <= _Radius; ++i, ++c) {
+		auto _Rc = _Mycur[r];
+		for (diff_t i = -_Radius, c = 0; i <= _Radius; ++i, ++c) {
 			const auto dx = static_cast<value_type>(i);
 			const auto x = dudxp1 * dx + tx, y = _Pars[4] * dx + ty;
-			_IF_WITHIN_RANGE(_Mean += _Mycur(r, c) = (*_Mycur_ptr)(x,y));
+			_IF_WITHIN_RANGE(_Mean += _Rc[c] = (*_Mycur_ptr)(x,y));
 		}
 	}
 
-	_Mycur = _Mycur - (_Mean/=_Mysize);
-	const auto _Issd = 1./sqrt(sqr(_Mycur).sum());
+	_Mycur = _Mycur - (_Mean/=_Mysize*_Mysize);
+	const auto _Issd = one<value_type>/sqrt(sqr(_Mycur).sum());
 	_Mycur = _Mycur * _Issd;
 
 	return (_Mycur);
@@ -163,10 +176,10 @@ auto _Corr_solver_impl<_Ty,_Itag,_Alg_icgn<1>>::_Solve(param_type& _P) {
 
 	// \error map
 	_Mybase::_Mydiff = _Mybase::_Mycur-_Mybase::_Myref;
-//#ifdef _DEBUG
-//	typename _Mybase::matrix_type
-//		_Diff(_Mybase::_Mydiff.shape(), _Mybase::_Mydiff.data());
-//#endif // _DEBUG
+#ifdef MATRICE_DEBUG
+	typename _Mybase::matrix_type
+		_Diff(_Mybase::_Mycur.shape(), _Mybase::_Mydiff.data());
+#endif // _DEBUG
 
 	// \steepest descent param. update
 	param_type _Sdp = _Mybase::_MyJaco.t().mul(_Mybase::_Mydiff);
@@ -178,7 +191,7 @@ auto _Corr_solver_impl<_Ty,_Itag,_Alg_icgn<1>>::_Solve(param_type& _P) {
 	_P = _Mybase::update_strategy::eval(_P, _Sdp);
 
 	// \report least square correlation coeff. and param. error.
-	return tuple(sqr(_Mybase::_Mydiff).sum(), _Sdp.dot(_Sdp));
+	return std::make_tuple(sqr(_Mybase::_Mydiff).sum(), _Sdp.dot(_Sdp));
 }
 ///</derived class implementation>
 
