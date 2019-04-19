@@ -32,7 +32,7 @@ struct _Correlation_options {
 	float_t _Znssd= 0.4;  //correlation threshold
 
 	template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
-	static constexpr _Ty _Mytol = _Ty(5.0E-6); //iteration tolerance
+	static constexpr _Ty _Mytol = _Ty(1.0E-6); //iteration tolerance
 
 	/**
 	 * \retrieve range of the patch centered on point _Pos
