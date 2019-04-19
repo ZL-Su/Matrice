@@ -129,6 +129,7 @@ protected:
 	const matrix_type& _Mydata;
 	const value_type _Myeps = value_type(1.0e-7);
 	matrix_type _Mycoeff;
+	matrix_type _Mygrads;
 };
 
 MATRICE_ALGS_END
