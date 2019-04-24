@@ -178,6 +178,9 @@
     <Filter Include="Header Files\Detail\math\nonfree\inl">
       <UniqueIdentifier>{ffdc0ac3-3e00-45a3-824d-5b0216a5f8c2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Algs\Interpolation\inline">
+      <UniqueIdentifier>{08f02915-7ef2-4f21-a3a5-c89a2b73afeb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -447,6 +450,9 @@
     <ClInclude Include="include\Matrice\private\_matrix_shape.hpp">
       <Filter>Header Files\Detail\matrix</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\algs\correlation\_utils.hpp">
+      <Filter>Header Files\Algs\Correlation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
@@ -574,9 +580,6 @@
     <None Include="addin\Eigen\UmfPackSupport">
       <Filter>Source Files\Util\Eigen</Filter>
     </None>
-    <None Include="include\Matrice\algs\interpolation\_base.inl">
-      <Filter>Header Files\Algs\Interpolation</Filter>
-    </None>
     <None Include="cpp.hint" />
     <None Include="include\Matrice\private\_similarity.inl">
       <Filter>Header Files\Detail\inline</Filter>
@@ -613,6 +616,9 @@
     </None>
     <None Include="include\io">
       <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\Matrice\algs\interpolation\_base.inl">
+      <Filter>Header Files\Algs\Interpolation\inline</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

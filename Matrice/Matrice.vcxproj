@@ -147,6 +147,7 @@
     <ClInclude Include="examples\basic_matrix_usage.h" />
     <ClInclude Include="include\Matrice\algs\correlation\_correlation_traits.h" />
     <ClInclude Include="include\Matrice\algs\correlation\_optim.h" />
+    <ClInclude Include="include\Matrice\algs\correlation\_utils.hpp" />
     <ClInclude Include="include\Matrice\algs\dnn\functions.h" />
     <ClInclude Include="include\Matrice\algs\dnn\kernels\_kernels.h" />
     <ClInclude Include="include\Matrice\algs\erroranalysis\_common.h" />
