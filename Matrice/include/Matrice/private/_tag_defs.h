@@ -84,10 +84,12 @@ namespace tag {
 		struct bicubic : _Interpolation_tag {};
 		struct biquintic : _Interpolation_tag {};
 		struct biseptic : _Interpolation_tag {};
+		struct mbspline : _Interpolation_tag {};
 	};
 	using bicspl_tag = _Bspline_itp_tag::bicubic;
 	using biqspl_tag = _Bspline_itp_tag::biquintic;
 	using bisspl_tag = _Bspline_itp_tag::biseptic;
+	using mbspl_tag = _Bspline_itp_tag::mbspline;
 
 	///<brief> tag definitions for gradient computation </brief>
 	struct _Gradient_tag {};
