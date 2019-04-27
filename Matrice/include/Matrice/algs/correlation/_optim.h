@@ -60,11 +60,11 @@ struct _Correlation_options {
 // \solver tag declarations
 template<size_t _Order> struct _Alg_icgn : _TAG _Solver_tag {
 	static constexpr auto order = _Order;
-	static_assert(order != 1 || order != 2, "_Order must be 1 or 2");
+	static_assert(order < 3, "_Order must be 0, 1 or 2");
 }; // inverse-compositional GN
 template<size_t _Order> struct _Alg_fagn : _TAG _Solver_tag {
 	static constexpr auto order = _Order;
-	static_assert(order != 1 || order != 2, "_Order must be 1 or 2");
+	static_assert(order < 3, "_Order must be 0, 1 or 2");
 }; // forward-additional GN
 
 // \forward solver declaration 
