@@ -20,5 +20,21 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_base.h"
 
 MATRICE_ALGS_BEGIN
+template<typename _Ty> 
+class _Spline_interpolation<_Ty, _TAG mbspl_tag> : public
+	_Interpolation_base<_Spline_interpolation<_Ty, _TAG mbspl_tag>>
+{
+	static_assert(is_scalar_v<_Ty>, "template type _Ty must be a scalar.");
+	using _Myt = _Spline_interpolation<_Ty, _TAG mbspl_tag>;
+	using _Mybase = _Interpolation_base<_Myt>;
+public:
+	using typename _Mybase::category;
+	using typename _Mybase::value_type;
+	using typename _Mybase::point_type;
+	using typename _Mybase::matrix_type;
+	using _Mybase::_Interpolation_base;
+
+	MATRICE_HOST_FINL void _Coeff_impl();
+};
 
 MATRICE_ALGS_END
