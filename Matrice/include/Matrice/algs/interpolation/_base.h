@@ -56,7 +56,8 @@ template<typename _Ty>
 using interpolation_traits_t = typename interpolation_traits<_Ty>::type;
 
 // \Interpolation auto dispatching
-template<typename _Ty, typename _Tag> struct auto_interp_dispatcher {
+template<typename _Ty, typename _Tag> 
+struct auto_interp_dispatcher {
 	using type = _Spline_interpolation<_Ty, _Tag>;
 };
 template<typename _Ty = float, typename _Tag = _TAG bicspl_tag>
