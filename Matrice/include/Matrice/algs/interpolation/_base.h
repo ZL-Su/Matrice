@@ -82,7 +82,7 @@ public:
 		: _Mydata(_Other._Mydata), _Mycoeff(_Other._Mycoeff) {
 	}
 	_Interpolation_base(_Myt&& _Other) noexcept
-		: _Mydata(_Other._Mydata), _Mycoeff(std::move(_Other._Mycoeff)) {
+		: _Mydata(_Other._Mydata), _Mycoeff(move(_Other._Mycoeff)) {
 		this->~_Interpolation_base();
 	}
 	~_Interpolation_base() {
