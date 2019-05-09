@@ -84,12 +84,20 @@ namespace tag {
 		struct bicubic : _Interpolation_tag {};
 		struct biquintic : _Interpolation_tag {};
 		struct biseptic : _Interpolation_tag {};
-		struct mbspline : _Interpolation_tag {};
+		struct multilevel_bicubic_2d : _Interpolation_tag {
+			static constexpr size_t dimension = 2;
+			static constexpr size_t max_levels = 8;
+		};
+		struct multilevel_bicubic_3d : _Interpolation_tag {
+			static constexpr size_t dimension = 3;
+			static constexpr size_t max_levels = 8;
+		};
 	};
 	using bicspl_tag = _Bspline_itp_tag::bicubic;
 	using biqspl_tag = _Bspline_itp_tag::biquintic;
 	using bisspl_tag = _Bspline_itp_tag::biseptic;
-	using mbspl_tag = _Bspline_itp_tag::mbspline;
+	using mbicspl_tag = _Bspline_itp_tag::multilevel_bicubic_2d;
+	using mbicspl3_tag = _Bspline_itp_tag::multilevel_bicubic_3d;
 
 	///<brief> tag definitions for gradient computation </brief>
 	struct _Gradient_tag {};
