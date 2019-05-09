@@ -69,7 +69,7 @@ ValueType* fill_mem(const ValueType* src, ValueType* dst, Integer size)
 #undef _RET
 }
 
-#if(defined __enable_cuda__ && !defined __disable_cuda__)
+#if(defined MATRICE_ENABLE_CUDA && !defined __disable_cuda__)
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 _Ty* device_malloc(size_t& w, size_t h);
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
@@ -106,10 +106,12 @@ struct _Memory {
 			if (_Loc == Location::OnHeap)
 				if (is_aligned(_Ptr)) privt::aligned_free(_Ptr);
 				else std::free(_Ptr);
+#if (defined MATRICE_ENABLE_CUDA && !defined __disable_cuda__)
 			else if (_Loc == Location::OnGlobal)
 				privt::device_free(_Ptr);
 			else if (_Loc == Location::OnDevice)
 				privt::device_free(_Ptr);
+#endif // MATRICE_ENABLE_CUDA
 			else return;
 		}
 		catch (std::exception e) { throw e; }

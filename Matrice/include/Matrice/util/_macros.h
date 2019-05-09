@@ -32,7 +32,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef __enable_cuda__ 
 #define __enable_cuda__
-#define MATRICE_ENABLE_CUDA
+#define MATRICE_ENABLE_CUDA __enable_cuda__
 #endif // !__enable_cuda__ defined for CUDA support
 
 #ifdef _OPENMP
@@ -70,8 +70,9 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #endif
 #endif // __enable_ocv__
 
-#if (defined __enable_cuda__ && !defined __disable_cuda__)
+#if (defined MATRICE_ENABLE_CUDA && !defined __disable_cuda__)
 #define __disable_simd__
+#define MATRICE_DISABLE_SIMD __disable_simd__
 #include <host_defines.h>
 #define MATRICE_HOST_ONLY __host__
 #define MATRICE_DEVICE_ONLY __device__
