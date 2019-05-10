@@ -27,6 +27,7 @@ class multi_array {
 	using _Myidx = Matrix_<size_t, _N, 1>;
 	using _Mybuf = Matrix_<_Ty, 0, 0>;
 public:
+	static constexpr auto dimension = _N;
 	using value_type = typename _Mybuf::value_type;
 	using pointer = typename _Mybuf::pointer;
 	using index_type = _Myidx;
@@ -60,21 +61,21 @@ public:
 private:
 	MATRICE_HOST_INL void _Alloc(const _Myidx& _shape) {
 		size_t _Size = 1;
-		for (int d = _N - 1; d >= 0; --d) {
+		for (int d = dimension - 1; d >= 0; --d) {
 			_Stride(d) = _Size;
 			_Size *= _shape(d);
 		}
-		if constexpr (_N == 2)
+		if constexpr (dimension == 2)
 			_Data.create(_shape(0), _shape(1), zero<value_type>);
 		else {
-			_Data.create(_Size, zero<value_type>);
+			_Data.create(_Size, 1, zero<value_type>);
 		}
 	}
 	MATRICE_HOST_INL size_t _Index(const _Myidx& _index) const {
 		return ((_Stride*_index).sum());
 	}
 
-	Matrix_<int, _N, 1> _Stride;
+	Matrix_<int, dimension, 1> _Stride;
 	_Mybuf _Data;
 };
 
