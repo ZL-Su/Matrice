@@ -168,20 +168,28 @@ template<> struct _Reduce_n<0> {
 	}
 };
 
-template<size_t _N>  struct _Powers_n {
+template<size_t _N, size_t _M>
+struct _Power_nm : std::integral_constant<size_t,N*_Power_nm<_N,_M-1>::value> {};
+template<size_t _N>
+struct _Power_nm<_N,0> : std::integral_constant<size_t, 1> {};
+
+template<size_t _N> struct _Power_n {
 	template<typename _Ty> static
 	MATRICE_GLOBAL_INL auto value(const _Ty _Val) {
-		return (_Powers_n<_N - 1>::value(_Val)*_Val);
+		return (_Power_n<_N - 1>::value(_Val)*_Val);
 	}
 };
-template<> struct _Powers_n<0> {
+template<> struct _Power_n<0> {
 	template<typename _Ty> static
 		MATRICE_GLOBAL_INL auto value(const _Ty _Val) { return _Ty(1); }
 };
+
 _DETAIL_END
 
 template<size_t _Size = 1> 
 using reduce_n_t = detail::_Reduce_n<_Size - 1>;
 template<size_t _Expo = 1> 
-using powers_n_t = detail::_Powers_n<_Expo>;
+using power_n_t = detail::_Power_n<_Expo>;
+template<size_t _N, size_t _M>
+constexpr auto power_nm_v = detail::_Power_nm<_N, _M>::value;
 DGE_MATRICE_END
