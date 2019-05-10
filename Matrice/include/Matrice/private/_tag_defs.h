@@ -55,7 +55,8 @@ namespace tag {
 	struct _Ewise_sin_tag : _Expression_tag {}; // $ sin(x_i)$
 	struct _Ewise_cos_tag : _Expression_tag {}; // $ cos(x_i)$
 	struct _Ewise_sqr_tag : _Expression_tag {}; // $ {x_i}^2 $
-	struct _Ewise_sqrt_tag : _Expression_tag {}; // $ \sqrt{x_i} $
+	struct _Ewise_sqrt_tag : _Expression_tag {}; //$ \sqrt{x_i} $
+	struct _Ewise_floor_tag : _Expression_tag {}; //$ \floor{x_i} $
 	struct _Ewise_max_tag : _Expression_tag {};
 	struct _Ewise_min_tag : _Expression_tag {};
 	struct _Ewise_abs_tag : _Expression_tag {};
