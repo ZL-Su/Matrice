@@ -277,4 +277,37 @@ public:
 private:
 	size_t _My_range = 1;
 };
+
+/**********************************************************************
+						    Transform Forward Iterator
+		 Copyright (c) : Zhilong (Dgelom) Su, since May/10/2019
+ **********************************************************************/
+template<typename _It, typename _Op>
+class _Transform_iterator {
+	using _Myt = _Transform_iterator;
+public:
+	using iterator_category = conditional_t<is_pointer_v<_It>, std::random_access_iterator_tag, typename _It::iterator_category>;
+	using value_type = decltype(std::declval<_Op>()(*std::declval<_It>()));
+	using pointer = std::add_pointer_t<value_type>;
+	using reference = std::add_lvalue_reference_t<value_type>;
+	using difference_type = std::ptrdiff_t;
+	enum { CompileTimeRows = 0, CompileTimeCols = 0 };
+
+	MATRICE_HOST_INL _Transform_iterator(const _It& it, _Op&& op)
+		: _My_it(it), _My_op(op) {}
+	MATRICE_HOST_INL _Transform_iterator(const _Myt& other)
+		: _My_it(other._My_it), _My_op(other._My_op) {}
+
+	decltype(_My_op(*_My_it)) operator*() const {
+		return (_My_op(*_My_it));
+	}
+
+	template<typename _It, typename _Op>
+	MATRICE_HOST_INL friend _Myt make_transform_iter(const _It& it, _Op&& op) {
+		return _Myt(it, op);
+	}
+private:
+	_It _My_it;
+	_Op _My_op;
+};
 _MATRICE_NAMESPACE_END
