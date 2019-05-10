@@ -61,8 +61,12 @@ template void aligned_free(bool*) noexcept;
 template void aligned_free(float*) noexcept;
 template void aligned_free(double*) noexcept;
 template void aligned_free(unsigned char*) noexcept;
+template void aligned_free(std::size_t*) noexcept;
+template void aligned_free(std::ptrdiff_t*) noexcept;
 template bool is_aligned(int*) noexcept;
 template bool is_aligned(float*) noexcept;
 template bool is_aligned(double*) noexcept;
 template bool is_aligned(unsigned char*) noexcept;
+template bool is_aligned(std::size_t*) noexcept;
+template bool is_aligned(std::ptrdiff_t*) noexcept;
 }}
