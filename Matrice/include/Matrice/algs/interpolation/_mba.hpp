@@ -92,12 +92,13 @@ template<typename _Derived> class _Lattice_base {
 	using _Myt = _Lattice_base;
 	using _Mydt = _Derived;
 public:
+	static constexpr auto dimension = _Mytraits::dimension;
 	using value_type = typename _Mytraits::value_type;
-	using idx_array = Vec_<size_t, _Mytraits::dimension>;
-	using point_type = Vec_<value_type, _Mytraits::dimension>;
+	using idx_array = Vec_<size_t, dimension>;
+	using point_type = Vec_<value_type, dimension>;
 	struct options_type {
 		point_type _Min, _Max;//min and max points of the given scatter data
-		idx_array _Gridesize; //grid size
+		idx_array _Grid; //grid size
 	};
 
 	/**
@@ -192,8 +193,14 @@ public:
 
 	template<typename CIt, typename VIt>
 	_Lattice(const CIt& cbegin, const CIt& cend, const VIt& vbegin, const options_type& opts)
-		:{
+		: _Myopts(opts){
+		for (auto i = 0; i < _Mybase::dimension; ++i) {
+			_Myinv = (_Myopts._Grid[i]-1)/(_Myopts._Max[i]-_Myopts._Min[i]);
+			_Myopts._Min[i] -= 1 / _Myinv[i];
+			_Myopts._Grid[i] += 2;
+		}
 
+		Matrix<value_type> delta()
 	}
 
 	MATRICE_HOST_INL value_type _Eval(const point_type& p) const {
