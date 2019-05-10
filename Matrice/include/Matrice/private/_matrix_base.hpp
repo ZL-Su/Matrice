@@ -809,7 +809,17 @@ public:
 		this->each([&](auto& _My_val) {
 			_My_val = _Cond(_My_val) ? _Val : _My_val; });
 	}
-
+	/**
+	 *\brief Check if all elements are contained in a range
+	 *\param [_Lower, _Upper] the range boundary
+	 */
+	MATRICE_GLOBAL_INL bool in_range(const _Myt& _Lower, const _Myt& _Upper) const {
+		for (const auto idx : range(0, size())) {
+			if (m_data[idx] < _Lower.m_data[idx] || m_data[idx] > _Upper.m_data[idx])
+				return std::false_type::value;
+		}
+		return std::true_type::value;
+	}
 	/**
 	 *\brief Create a zero-value filled matrix
 	 *\param [_Rows, Cols] height and width of matrix, only specified for dynamic created matrix 
