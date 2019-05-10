@@ -298,14 +298,20 @@ public:
 	MATRICE_HOST_INL _Transform_iterator(const _Myt& other)
 		: _My_it(other._My_it), _My_op(other._My_op) {}
 
-	decltype(_My_op(*_My_it)) operator*() const {
-		return (_My_op(*_My_it));
+	MATRICE_HOST_INL _Myt& operator++() { ++_My_it; return (*this); }
+	MATRICE_HOST_INL difference_type operator-(const _Myt& other) const { 
+		return(_My_it - other._My_it); 
+	}
+	MATRICE_HOST_INL value_type operator*() const { return (_My_op(*_My_it)); }
+	MATRICE_HOST_INL bool operator!=(const _Myt& other) const { 
+		return(_My_it != other._My_it); 
 	}
 
 	template<typename _It, typename _Op>
 	MATRICE_HOST_INL friend _Myt make_transform_iter(const _It& it, _Op&& op) {
 		return _Myt(it, op);
 	}
+
 private:
 	_It _My_it;
 	_Op _My_op;
