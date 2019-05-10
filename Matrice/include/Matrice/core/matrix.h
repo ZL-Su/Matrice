@@ -286,4 +286,6 @@ template<typename T, size_t _Options = rmaj | gene> using Dmatrix = Matrix_<T,
 	compile_time_size<>::RunTimeDeducedOnDevice,
 	_Options>;
 
+// \N-dimensional array with host managed memory
+template<typename T, int _N> using array_n = Matrix_<T, _N, 1>;
 DGE_MATRICE_END
