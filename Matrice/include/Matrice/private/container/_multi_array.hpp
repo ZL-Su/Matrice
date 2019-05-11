@@ -58,6 +58,11 @@ public:
 		return _Data(_idx);
 	}
 
+	typename _Mybuf::iterator begin() { return _Data.begin(); }
+	const typename _Mybuf::iterator begin() const { return _Data.begin(); }
+	typename _Mybuf::iterator end() { return _Data.end(); }
+	const typename _Mybuf::iterator end() const { return _Data.end(); }
+
 private:
 	MATRICE_HOST_INL void _Alloc(const _Myidx& _shape) {
 		size_t _Size = 1;
