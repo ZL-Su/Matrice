@@ -628,6 +628,18 @@ public:
 		_Mybase::_Flush_view_buf();
 		return (*static_cast<_Derived*>(this));
 	}
+	/**
+	 *\brief Check if this equals to _other or not
+	 *\param [_other] can be any derived type of matrix/array/vector 
+	 */
+	MATRICE_GLOBAL_INL bool operator== (const _Myt& _other) const {
+		if(size() != _other.size()) return std::false_type::value;
+		if(m_data == _other.m_data) return std::true_type::value;
+		for (auto _Idx = 0; _Idx < size(); ++_Idx)
+			if (abs(m_data[_Idx] - _other.m_data[_Idx]) > eps)
+				return std::false_type::value;
+		return std::true_type::value;
+	}
 
 #pragma region <!-- Lazied Operators for Matrix Arithmetic -->
 	MATRICE_MAKE_ARITHOP(+, add);
@@ -755,11 +767,17 @@ public:
 	 */
 	template<typename _It>
 	MATRICE_GLOBAL_FINL _Derived& from(const _It _Data) {
+		using arg_type = remove_all_t<decltype(*_Data)>;
+		if constexpr (std::is_convertible_v<arg_type, _Derived>) {
+			*this = *_Data;
+		}
+		else {
 #ifdef _DEBUG
-		DGELOM_CHECK(_Data + this->size() - 1, "Input length of _Data must be greater or equal to this->size().");
+			DGELOM_CHECK(_Data + this->size() - 1, "Input length of _Data must be greater or equal to this->size().");
 #endif // _DEBUG
-		for (auto _Idx = 0; _Idx < size(); ++_Idx)
-			m_data[_Idx] = static_cast<value_type>(_Data[_Idx]);
+			for (auto _Idx = 0; _Idx < size(); ++_Idx)
+				m_data[_Idx] = static_cast<value_type>(_Data[_Idx]);
+		}
 
 		return (*static_cast<_Derived*>(this));
 	}
