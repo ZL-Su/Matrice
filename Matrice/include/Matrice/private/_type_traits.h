@@ -103,7 +103,7 @@ struct expression_traits : traits<Exp> {};
 
 template<typename T> struct is_iterator: std::false_type {};
 template<typename T> MATRICE_GLOBAL_INL constexpr bool is_iterator_v = is_iterator<T>::value;
-template<typename Iter> struct iterator_traits {
+template<typename Iter> struct iterator_traits : std::iterator_traits<Iter> {
 	using iterator_categary = 
 		conditional_t<is_pointer_v<Iter>, std::random_access_iterator_tag,
 		conditional_t<is_iterator_v<Iter>, typename Iter::iterator_categary, void>>;
