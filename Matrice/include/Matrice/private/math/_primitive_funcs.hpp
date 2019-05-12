@@ -54,4 +54,8 @@ template<typename T, typename _Ret = T, typename = enable_if_t<is_arithmetic_v<T
 MATRICE_HOST_FINL constexpr _Ret ceil(const T& x) { return static_cast<_Ret>(std::ceil(x)); }
 template<typename T1, typename T2, typename _Ret = common_type_t<T1, T2>, typename = enable_if_t<is_arithmetic_v<_Ret>>>
 MATRICE_GLOBAL_FINL constexpr _Ret pow(const T1& x, const T2& y) { return std::pow(x,y); }
+template<typename T1, typename T2, typename _Ret = common_type_t<T1, T2>, typename = enable_if_t<is_arithmetic_v<_Ret>>>
+MATRICE_GLOBAL_FINL constexpr _Ret safe_div(const T1& a, const T2& b) { 
+	return b == T2(0) ? _Ret(0) : div(a, b);
+}
 DGE_MATRICE_END
