@@ -40,7 +40,7 @@ template<bool _Test, typename T, typename U> using conditional_t = typename cond
 template<typename T, typename Enable = void> struct has_value_t : std::false_type {};
 template<typename T> MATRICE_GLOBAL_INL constexpr auto has_value_t_v = has_value_t<T>::value;
 
-template<typename T, typename  = std::enable_if_t<has_value_t_v<T>>> struct value_type { using type = conditional_t<std::is_arithmetic_v<T>, remove_reference_t<T>, typename T::value_t>; };
+template<typename T, typename  = enable_if_t<has_value_t_v<T>>> struct value_type { using type = conditional_t<is_arithmetic_v<T>, remove_all_t<T>, typename T::value_t>; };
 template<typename T> using value_type_t = typename value_type<T>::type;
 
 template<typename T, typename U> struct common_value_type { using type = std::common_type_t<value_type_t<T>, value_type_t<U>>; };
@@ -87,7 +87,7 @@ template<> struct _View_trait<float> { enum { value = 0x0032 }; };
 template<> struct _View_trait<double> { enum { value = 0x0064 }; };
 template<typename T> MATRICE_GLOBAL_INL constexpr auto plane_view_v = _View_trait<T>::value;
 
-template<typename T, typename = std::enable_if_t<std::is_class_v<T>>>
+template<typename T, typename = enable_if_t<std::is_class_v<T>>>
 struct traits { using type = typename T::value_t; };
 
 template<typename T> struct is_matrix : std::false_type {};
@@ -98,12 +98,17 @@ struct matrix_traits : traits<Mty> {};
 template<typename Exp> struct expression_options { enum { value = Exp::flag | expr }; };
 template<typename Exp> struct is_expression :std::false_type {};
 template<typename Exp> MATRICE_GLOBAL_INL constexpr bool is_expression_v = is_expression<Exp>::value;
-template<class Exp, typename = std::enable_if_t<is_expression_v<Exp>>>
+template<class Exp, typename = enable_if_t<is_expression_v<Exp>>>
 struct expression_traits : traits<Exp> {};
 
 template<typename T> struct is_iterator: std::false_type {};
 template<typename T> MATRICE_GLOBAL_INL constexpr bool is_iterator_v = is_iterator<T>::value;
-template<typename Itr> struct iterator_traits : traits<Itr> {};
+template<typename Iter> struct iterator_traits {
+	using iterator_categary = 
+		conditional_t<is_pointer_v<Iter>, std::random_access_iterator_tag,
+		conditional_t<is_iterator_v<Iter>, typename Iter::iterator_categary, void>>;
+	using value_type = decltype(*std::declval<Iter>());
+};
 
 template<typename T> struct is_mtxview : std::false_type {};
 /**
@@ -136,7 +141,7 @@ template<int _M, int _N> struct allocator_traits {
 };
 template<int _M, int _N> MATRICE_GLOBAL_INL constexpr auto allocator_traits_v = allocator_traits<_M, _N>::value;
 
-template<class T, typename = std::enable_if_t<is_matrix_v<T> || is_expression_v<T>>> 
+template<class T, typename = enable_if_t<is_matrix_v<T> || is_expression_v<T>>> 
 struct layout_traits : traits<T> {
 	MATRICE_GLOBAL_FINL static auto layout_type(size_t _format) {
 		return (_format & rmaj == rmaj) ? rmaj : cmaj;
