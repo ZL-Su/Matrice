@@ -55,6 +55,9 @@ public:
 		: _Mybase(_other) {};
 	MATRICE_GLOBAL_FINL Matrix_(int _pld1=0, int _pld2=0) noexcept 
 		: _Mybase() {};
+	template<size_t _Len>
+	MATRICE_HOST_FINL   Matrix_(const std::array<value_t, _Len>& _array) noexcept
+		: Matrix_(pointer(_array.data())) {}
 	template<typename... _Arg> 
 	MATRICE_GLOBAL_FINL Matrix_(const _Arg&... _arg) noexcept 
 		: _Mybase(_arg...) {};
