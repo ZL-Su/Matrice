@@ -227,6 +227,10 @@ template class Storage_<bool>::DenseBase<OnStack, LINEAR + COPY>;
 template class Storage_<bool>::DenseBase<OnHeap, LINEAR + COPY>;
 template class Storage_<bool>::DenseBase<OnGlobal, LINEAR + COPY>;
 template class Storage_<bool>::DenseBase<UnSpecified>;
+template class Storage_<size_t>::DenseBase<OnStack, LINEAR + COPY>;
+template class Storage_<size_t>::DenseBase<OnHeap, LINEAR + COPY>;
+template class Storage_<size_t>::DenseBase<OnGlobal, LINEAR + COPY>;
+template class Storage_<size_t>::DenseBase<UnSpecified>;
 template class Storage_<float>::DenseBase<OnStack, LINEAR + COPY>;
 template class Storage_<float>::DenseBase<OnHeap, LINEAR + COPY>;
 template class Storage_<float>::DenseBase<OnGlobal, LINEAR + COPY>;
@@ -248,6 +252,9 @@ template class Storage_<char>::DenseBase<OnGlobal, LINEAR+SHARED>;
 template class Storage_<bool>::DenseBase<OnStack, LINEAR+SHARED>;
 template class Storage_<bool>::DenseBase<OnHeap, LINEAR+SHARED>;
 template class Storage_<bool>::DenseBase<OnGlobal, LINEAR+SHARED>;
+template class Storage_<size_t>::DenseBase<OnStack, LINEAR+SHARED>;
+template class Storage_<size_t>::DenseBase<OnHeap, LINEAR+SHARED>;
+template class Storage_<size_t>::DenseBase<OnGlobal, LINEAR+SHARED>;
 template class Storage_<float>::DenseBase<OnStack, LINEAR+SHARED>;
 template class Storage_<float>::DenseBase<OnHeap, LINEAR+SHARED>;
 template class Storage_<float>::DenseBase<OnGlobal, LINEAR+SHARED>;
@@ -263,12 +270,14 @@ template class Storage_<bool>::DenseBase<OnDevice, LINEAR>;
 template class Storage_<float>::DenseBase<OnDevice, LINEAR>;
 template class Storage_<double>::DenseBase<OnDevice, LINEAR>;
 template class Storage_<unsigned char>::DenseBase<OnDevice, LINEAR>;
+template class Storage_<size_t>::DenseBase<OnDevice, LINEAR>;
 template class Storage_<int>::DenseBase<OnDevice, PITCHED>;
 template class Storage_<char>::DenseBase<OnDevice, PITCHED>;
 template class Storage_<bool>::DenseBase<OnDevice, PITCHED>;
 template class Storage_<float>::DenseBase<OnDevice, PITCHED>;
 template class Storage_<double>::DenseBase<OnDevice, PITCHED>;
 template class Storage_<unsigned char>::DenseBase<OnDevice, PITCHED>;
+template class Storage_<size_t>::DenseBase<OnDevice, PITCHED>;
 }
 }
 #undef MATRICE_DENSEBASE_SIG

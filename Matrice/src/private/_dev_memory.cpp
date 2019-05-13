@@ -95,9 +95,11 @@ template void device_memcpy<2,T,void>(T*, T*, size_t, size_t, size_t);
 _DEVMALLOC(int)    _DEVMALLOC(char)
 _DEVMALLOC(uchar)  _DEVMALLOC(bool)
 _DEVMALLOC(float)  _DEVMALLOC(double)
+_DEVMALLOC(size_t)
 _DEVMEMCPY(int)    _DEVMEMCPY(char)
 _DEVMEMCPY(bool)   _DEVMEMCPY(uchar)
 _DEVMEMCPY(float)  _DEVMEMCPY(double)
+_DEVMEMCPY(size_t)
 
 #pragma endregion
 
