@@ -31,37 +31,53 @@ public:
 	using value_type = typename _Mybuf::value_type;
 	using pointer = typename _Mybuf::pointer;
 	using index_type = _Myidx;
-	multi_array() {
+	multi_array() noexcept {
 	}
-	multi_array(const _Myidx& _Shape) {
+	multi_array(const _Myidx& _Shape) noexcept {
 		_Alloc(_Shape);
+	}
+	multi_array(const std::array<size_t, dimension>& _Shape) noexcept {
+		_Alloc((typename _Myidx::pointer)_Shape.data());
 	}
 
 	MATRICE_HOST_INL _Myt& resize(const _Myidx& _Shape) {
 		_Alloc(_Shape);
+		return (*this);
+	}
+	MATRICE_HOST_INL _Myt& resize(const std::array<size_t, dimension>& _Shape) {
+		_Alloc((typename _Myidx::pointer)_Shape.data());
+		return (*this);
 	}
 	MATRICE_HOST_INL size_t size() const {
 		return _Data.size();
 	}
-	pointer data() { return _Data.data(); }
-	const pointer data() const { return _Data.data(); }
-	value_type& operator()(const _Myidx& _idx) { 
+	MATRICE_HOST_INL pointer data() { return _Data.data(); }
+	MATRICE_HOST_INL const pointer data() const { return _Data.data(); }
+	MATRICE_HOST_INL value_type& operator()(const _Myidx& _idx) {
 		return _Data(_Index(_idx)); 
 	}
-	const value_type& operator()(const _Myidx& _idx) const {
+	MATRICE_HOST_INL const value_type& operator()(const _Myidx& _idx) const {
 		return _Data(_Index(_idx));
 	}
-	value_type& operator[](size_t _idx) {
+	MATRICE_HOST_INL value_type& operator[](size_t _idx) {
 		return _Data(_idx);
 	}
-	const value_type& operator()(size_t _idx) const {
+	MATRICE_HOST_INL const value_type& operator()(size_t _idx) const {
 		return _Data(_idx);
 	}
 
-	typename _Mybuf::iterator begin() { return _Data.begin(); }
-	const typename _Mybuf::iterator begin() const { return _Data.begin(); }
-	typename _Mybuf::iterator end() { return _Data.end(); }
-	const typename _Mybuf::iterator end() const { return _Data.end(); }
+	MATRICE_HOST_INL typename _Mybuf::iterator begin() { 
+		return _Data.begin(); 
+	}
+	MATRICE_HOST_INL const typename _Mybuf::iterator begin() const { 
+		return _Data.begin(); 
+	}
+	MATRICE_HOST_INL typename _Mybuf::iterator end() { 
+		return _Data.end(); 
+	}
+	MATRICE_HOST_INL const typename _Mybuf::iterator end() const { 
+		return _Data.end(); 
+	}
 
 private:
 	MATRICE_HOST_INL void _Alloc(const _Myidx& _shape) {
@@ -72,9 +88,8 @@ private:
 		}
 		if constexpr (dimension == 2)
 			_Data.create(_shape(0), _shape(1), zero<value_type>);
-		else {
+		else
 			_Data.create(_Size, 1, zero<value_type>);
-		}
 	}
 	MATRICE_HOST_INL size_t _Index(const _Myidx& _index) const {
 		return ((_Stride*_index).sum());
