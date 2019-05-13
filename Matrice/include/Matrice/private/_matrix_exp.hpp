@@ -157,18 +157,19 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 	 * \expression operators
 	 */
 	struct Op {
-		_MATRICE_DEFEXP_EWISEBOP(add)
-		_MATRICE_DEFEXP_EWISEBOP(sub)
-		_MATRICE_DEFEXP_EWISEBOP(mul)
-		_MATRICE_DEFEXP_EWISEBOP(div)
-		_MATRICE_DEFEXP_EWISEBOP(max)
-		_MATRICE_DEFEXP_EWISEBOP(min)
-		_MATRICE_DEFEXP_EWISEUOP(sqrt)
-		_MATRICE_DEFEXP_EWISEUOP(exp)
-		_MATRICE_DEFEXP_EWISEUOP(abs)
-		_MATRICE_DEFEXP_EWISEUOP(log)
-		_MATRICE_DEFEXP_EWISEUOP(log2)
-		_MATRICE_DEFEXP_EWISEUOP(log10)
+		_MATRICE_DEFEXP_EWISEBOP(add);
+		_MATRICE_DEFEXP_EWISEBOP(sub);
+		_MATRICE_DEFEXP_EWISEBOP(mul);
+		_MATRICE_DEFEXP_EWISEBOP(div);
+		_MATRICE_DEFEXP_EWISEBOP(max);
+		_MATRICE_DEFEXP_EWISEBOP(min);
+		_MATRICE_DEFEXP_EWISEUOP(sqrt);
+		_MATRICE_DEFEXP_EWISEUOP(exp);
+		_MATRICE_DEFEXP_EWISEUOP(abs);
+		_MATRICE_DEFEXP_EWISEUOP(log);
+		_MATRICE_DEFEXP_EWISEUOP(log2);
+		_MATRICE_DEFEXP_EWISEUOP(log10);
+		_MATRICE_DEFEXP_EWISEUOP(floor);
 
 		/**
 		 * \accumulates all elements of input expression
@@ -873,6 +874,13 @@ template<
 	typename value_t = enable_if_t<is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>,
 	typename _Op = _Exp::EwiseUnaryExpr<_Rhs, _Exp_op::_Ewise_abs<value_t>>>
 	MATRICE_GLOBAL_FINL auto abs(const _Rhs& _right) { return _Op(_right); }
+
+// *\element-wise floor()
+template<
+	typename _Rhs,
+	typename value_t = enable_if_t<is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>,
+	typename _Op = _Exp::EwiseUnaryExpr<_Rhs, _Exp_op::_Ewise_floor<value_t>>>
+	MATRICE_GLOBAL_FINL auto floor(const _Rhs& _right) { return _Op(_right); }
 
 // *\transpose expression
 template<
