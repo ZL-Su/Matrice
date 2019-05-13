@@ -91,7 +91,7 @@ struct _Memory {
 	 *\param [_Aligns] align bytes for checking
 	 */
 	template<typename _It, MATRICE_ENABLE_IF(is_pointer_v<_It>)>
-	inline static bool is_aligned(const _It _Ptr, size_t _Aligns = 32) {
+	inline static bool is_aligned(const _It _Ptr, size_t _Aligns = MATRICE_ALIGN_BYTES) {
 		return !(reinterpret_cast<size_t>(reinterpret_cast<void*>(_Ptr))%_Aligns);
 	}
 
@@ -104,8 +104,11 @@ struct _Memory {
 	MATRICE_HOST_INL static void free(_It _Ptr) {
 		try {
 			if (_Loc == Location::OnHeap)
-				if (is_aligned(_Ptr)) privt::aligned_free(_Ptr);
-				else std::free(_Ptr);
+				if (is_aligned(_Ptr)) 
+					privt::aligned_free(_Ptr);
+				else { 
+					std::free(_Ptr); _Ptr = nullptr; 
+				}
 #if (defined MATRICE_ENABLE_CUDA && !defined __disable_cuda__)
 			else if (_Loc == Location::OnGlobal)
 				privt::device_free(_Ptr);
