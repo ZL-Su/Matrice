@@ -33,7 +33,7 @@ _InIt _End(const _InIt _Begin, size_t _Size, size_t _Stride = 1) {
                          with STD::ITERATOR
 	    Copyright (c) : Zhilong (Dgelom) Su, since 12/Jul/2018
  **********************************************************************/
-template<typename _Ty, typename = std::enable_if_t<std::is_arithmetic_v<_Ty>>>
+template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 class iterator_base {
 public:
 	using iterator_category = std::random_access_iterator_tag;
@@ -307,13 +307,12 @@ public:
 		return(_My_it != other._My_it); 
 	}
 
-	template<typename _It, typename _Op>
-	MATRICE_HOST_INL friend _Myt make_transform_iter(const _It& it, _Op&& op) {
-		return _Myt(it, op);
-	}
-
 private:
 	_It _My_it;
 	_Op _My_op;
 };
+template<typename _It, typename _Op>
+MATRICE_HOST_INL _Transform_iterator<_It,_Op> make_transform_iter(const _It& it, _Op&& op) {
+	return _Transform_iterator<_It, _Op>(it, op);
+}
 _MATRICE_NAMESPACE_END
