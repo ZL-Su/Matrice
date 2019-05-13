@@ -22,8 +22,10 @@ _Ty* aligned_malloc(_Ity size) {
 }
 template<typename _Ty>
 void aligned_free(_Ty* aligned_ptr) noexcept {
-	if (aligned_ptr)
-		std::free(*(reinterpret_cast<void**>(reinterpret_cast<void*>(aligned_ptr))-1));
+	if (aligned_ptr) {
+		std::free(*(reinterpret_cast<void**>(reinterpret_cast<void*>(aligned_ptr)) - 1));
+		aligned_ptr = nullptr;
+	}
 }
 template<typename _Ty>
 bool is_aligned(_Ty* aligned_ptr) noexcept {
@@ -51,12 +53,6 @@ template unsigned char* aligned_malloc<unsigned char>(std::ptrdiff_t);
 template size_t* aligned_malloc<size_t>(int);
 template size_t* aligned_malloc<size_t>(std::size_t);
 template size_t* aligned_malloc<size_t>(std::ptrdiff_t);
-//template std::complex<float>* aligned_malloc<std::complex<float>>(int);
-//template std::complex<float>* aligned_malloc<std::complex<float>>(std::size_t);
-//template std::complex<float>* aligned_malloc<std::complex<float>>(std::ptrdiff_t);
-//template std::complex<double>* aligned_malloc<std::complex<double>>(int);
-//template std::complex<double>* aligned_malloc<std::complex<double>>(std::size_t);
-//template std::complex<double>* aligned_malloc<std::complex<double>>(std::ptrdiff_t);
 
 template void aligned_free(int*) noexcept;
 template void aligned_free(char*) noexcept;
