@@ -101,14 +101,14 @@ template<typename Exp> MATRICE_GLOBAL_INL constexpr bool is_expression_v = is_ex
 template<class Exp, typename = enable_if_t<is_expression_v<Exp>>>
 struct expression_traits : traits<Exp> {};
 
-template<typename T> struct is_iterator: std::false_type {};
-template<typename T> MATRICE_GLOBAL_INL constexpr bool is_iterator_v = is_iterator<T>::value;
-template<typename Iter> struct iterator_traits : std::iterator_traits<Iter> {
-	using iterator_categary = 
-		conditional_t<is_pointer_v<Iter>, std::random_access_iterator_tag,
-		conditional_t<is_iterator_v<Iter>, typename Iter::iterator_categary, void>>;
-	using value_type = decltype(*std::declval<Iter>());
-};
+/**
+ *\brief is_iterator_v<T> is true iff T is an iterator or pointer.
+ */
+template<typename T> constexpr bool is_iterator_v = std::_Is_iterator_v<T>;
+/**
+ *\brief retrieve iterator traits, including categary, value, difference, pointer, and reference types, etc.
+ */
+template<typename T> using iterater_traits = std::iterator_traits<T>;
 
 template<typename T> struct is_mtxview : std::false_type {};
 /**
@@ -255,5 +255,11 @@ template<typename T> struct tensor_traits {};
  */
 template<typename T> struct category_type { using type = typename T::category; };
 template<typename T> using category_type_t = typename category_type<T>::type;
+
+/**
+ *\brief is_same_v<T,U> is true iff. T and U are same type.
+ */
+template<typename T, typename U> 
+MATRICE_GLOBAL_INL constexpr auto is_same_v = std::is_same<T, U>::value;
 
 DGE_MATRICE_END
