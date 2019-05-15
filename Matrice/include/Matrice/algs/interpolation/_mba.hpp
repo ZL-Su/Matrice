@@ -17,7 +17,9 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #pragma once
 #include <map>
+#include <optional>
 #include "_base.h"
+#include "../../private/_iterator.h"
 #include "../../private/container/_multi_array.hpp"
 
 MATRICE_ALGS_BEGIN
@@ -29,6 +31,9 @@ template<int8_t _N = 2> struct _MBA_base {
 	template<typename _Ty> struct options_type {
 		array_n_type<_Ty> min, max;
 		array_n_type<size_t> grid;
+		size_t max_level = 8;
+		_Ty tolerance = _Ty(1.0e-8);
+		_Ty min_fill = 0.5;
 	};
 
 	template<typename _Cond, typename _Msg>
@@ -61,85 +66,40 @@ template<int8_t _N = 2> struct _MBA_base {
 
 	template<typename _Ty>
 	MATRICE_HOST_INL static _Ty _Safe_divide(_Ty a, _Ty b) {
-		return (b == 0.0 ? 0.0 : a / b);
+		return (b == zero<_Ty> ? zero<_Ty> : a / b);
 	}
 
 	template<typename _Ty>
 	MATRICE_HOST_INL static array_n_type<_Ty> _From(const _Ty* p) {
 		array_n_type<_Ty> _Ret;
-		std::copy(_Ret.begin(), _Ret.end(), p);
+		std::copy(p, p + _Ret.size(), _Ret.begin());
 		return (_Ret);
 	}
-	template<typename _Ty, MATRICE_ENABLE_IF(is_class_v<_Ty>)>
-	MATRICE_HOST_INL static array_n_type<typename _Ty::value_type> _From(const _Ty& p) {
-		array_n_type<typename _Ty::value_type> _Ret;
-		std::copy(_Ret.begin(), _Ret.end(), &p[0]);
-		return (_Ret);
-	}
-
 };
-
-//template <int N> using point = std::array<default_type, N>;
-
-//template <int N> using index = std::array<size_t, N>;
-
-// N-dimensional dense matrix
-//template <class T, int N>
-//class multi_array {
-//	static_assert(N > 0, "Wrong number of dimensions");
-//
-//public:
-//	multi_array() {}
-//	multi_array(index<N> n) { init(n); }
-//
-//	void resize(index<N> n) { init(n); }
-//
-//	size_t size() const { return buf.size(); }
-//
-//	T operator()(index<N> i) const { return buf[idx(i)]; }
-//	T& operator()(index<N> i) { return buf[idx(i)]; }
-//	T operator[](size_t i) const { return buf[i]; }
-//	T& operator[](size_t i) { return buf[i]; }
-//	const T* data() const { return buf.data(); }
-//	T* data() { return buf.data(); }
-//
-//private:
-//	std::array<int, N> stride;
-//	std::vector<T>  buf;
-//
-//	void init(index<N> n) {
-//		size_t s = 1;
-//
-//		for (int d = N - 1; d >= 0; --d) {
-//			stride[d] = s;
-//			s *= n[d];
-//		}
-//
-//		buf.resize(s);
-//	}
-//
-//	size_t idx(index<N> i) const {
-//		size_t p = 0;
-//		for (int d = 0; d < N; ++d)
-//			p += stride[d] * i[d];
-//		return p;
-//	}
-//};
 
 // N-dimensional grid iterator (nested loop with variable depth).
 template <unsigned _N = 2>
 class grid_iterator : _MBA_base<_N> {
 	using index_type = typename _MBA_base<_N>::template array_n_type<size_t>;
 public:
+	/**
+	 *\brief construct from dims
+	 *\param [dims] grid dimensions
+	 */
 	explicit grid_iterator(const index_type &dims) noexcept
-		: _Dims(dims), _Idx{ 0 }, _Is_end(_Idx == _Dims), _Pos(0) { }
-
+		: _Dims(dims), _Idx{ 0 }, _Is_end(_Idx == _Dims), _Pos(0) { 
+	}
+	/**
+	 *\brief construct from a given dim
+	 *\param [dim] dimension
+	 */
 	explicit grid_iterator(size_t dim) noexcept
 		: _Idx{ 0 }, _Pos(0), _Is_end(dim == 0) {
-		for (auto &v : _Dims)  v = dim;
+		for (auto &v : _Dims) v = dim;
 	}
 
 	MATRICE_HOST_INL size_t operator[](size_t d) const { return _Idx[d]; }
+	MATRICE_HOST_INL index_type& operator*() { return _Idx; }
 	MATRICE_HOST_INL const index_type& operator*() const { return _Idx; }
 	MATRICE_HOST_INL grid_iterator& operator++() {
 		_Is_end = std::true_type::value;
@@ -165,31 +125,31 @@ private:
 template <typename T, size_t N>
 std::array<T, N> operator+(std::array<T, N> _Left, const std::array<T, N> &_Right) {
 	for (size_t i = 0; i < N; ++i) _Left[i] += _Right[i];
-	return _Right;
+	return (_Left);
 }
 
 template <typename T, size_t N, typename C>
-std::array<T, N> operator-(std::array<T, N> a, C b) {
-	for (auto &v : a) v -= b;
-	return a;
+std::array<T, N> operator-(std::array<T, N> _Left, C b) {
+	for (auto &v : _Left) v -= b;
+	return (_Left);
 }
 
 template <typename T, size_t N, typename C>
-std::array<T, N> operator*(std::array<T, N> a, C b) {
-	for (auto &v : a) v *= b;
-	return a;
+std::array<T, N> operator*(std::array<T, N> _Left, C b) {
+	for (auto &v : _Left) v *= b;
+	return (_Left);
 }
 
 template <typename _Ty, unsigned _N>
-class control_lattice : _MBA_base<_N> {
+class control_lattice : public _MBA_base<_N> {
 	using _Mybase = _MBA_base<_N>;
 public:
 	using _Mybase::dim;
 	using value_type = _Ty;
-	using point_type = _Mybase::template array_n_type<value_type>;
-	using index_type = _Mybase::template array_n_type<size_t>;
-	using options_type = _Mybase::template options_type<value_type>;
-	using functor_type = _Mybase::template functor<value_type>;
+	using point_type = typename _Mybase::template array_n_type<value_type>;
+	using index_type = typename _Mybase::template array_n_type<size_t>;
+	using options_type = typename _Mybase::template options_type<value_type>;
+	using functor_type = typename _Mybase::template functor<value_type>;
 
 	virtual ~control_lattice() {}
 
@@ -197,19 +157,14 @@ public:
 
 	virtual void report(std::ostream&) const = 0;
 
-	template <typename _Cont, class _Iter>
-	MATRICE_HOST_INL value_type residual(const _Cont& coords, _Iter vbegin) const {
-		auto res = zero<value_type>;
-
-		auto p = coords.begin();
-		auto v = vbegin;
-
-		for (; p != coo_end; ++p, ++v) {
-			(*v) -= (*this)(*p);
-			res = max(res, abs(*v));
+	template <typename _Cont>
+	MATRICE_HOST_INL value_type residual(_Cont& data) const {
+		auto _Res = zero<value_type>;
+		for (ptrdiff_t i = 0; i < data.rows(); ++i) {
+			const auto p = _Mybase::_From(data[i]);
+			_Res = max(_Res, abs(data[i][dim] -= (*this)(p)));
 		}
-
-		return res;
+		return _Res;
 	}
 };
 
@@ -219,7 +174,7 @@ class initial_approximation : public control_lattice<_Ty, _N> {
 public:
 	using typename _Mybase::value_type;
 	using typename _Mybase::point_type;
-	initial_approximation(typename _Mybase::functor_type&& op): _Op(op) {}
+	initial_approximation(typename _Mybase::functor_type op): _Op(op) {}
 
 	MATRICE_HOST_INL value_type operator()(const point_type& p)const { return _Op(p); }
 
@@ -238,46 +193,34 @@ public:
 	using typename _Mybase::index_type;
 	using typename _Mybase::options_type;
 	
-	template <typename _Cont, class _Iter>
-	control_lattice_dense(const _Cont& coords, const _Iter& vbegin, 
-		const options_type& opts) noexcept
+	template <typename _Cont>
+	control_lattice_dense(const _Cont& data, const options_type& opts) noexcept
 		: cmin(opts.min), cmax(opts.max), grid(opts.grid)
 	{
-		for (unsigned i = 0; i < _N; ++i) {
+		for (unsigned i = 0; i < dim; ++i) {
 			hinv[i] = (grid[i] - 1) / (cmax[i] - cmin[i]);
 			cmin[i] -= 1 / hinv[i];
 			grid[i] += 2;
 		}
 
-		multi_array<value_type, _N> delta(grid);
-		multi_array<value_type, _N> omega(grid);
+		multi_array<value_type, dim> delta(grid);
+		multi_array<value_type, dim> omega(grid);
 		phi.resize(grid);
 
-		//std::fill(delta.data(), delta.data() + delta.size(), 0.0);
-		//std::fill(omega.data(), omega.data() + omega.size(), 0.0);
-		//std::fill(phi.data(), phi.data() + phi.size(), 0.0);
-
-		auto n = coords.size();
+		auto n = data.rows();
 		auto m = phi.size();
-
 #pragma omp parallel
 		{
 			multi_array<value_type, dim> t_delta(grid);
 			multi_array<value_type, dim> t_omega(grid);
 
-			//std::fill(t_delta.data(), t_delta.data() + t_delta.size(), 0.0);
-			//std::fill(t_omega.data(), t_omega.data() + t_omega.size(), 0.0);
-
 #pragma omp for
 			for (ptrdiff_t l = 0; l < n; ++l) {
-				auto p = _MBA_base<>::_From(coords[l]);
-				auto v = vbegin[l];
+				auto p = _MBA_base<dim>::_From(data[l]);
 
 				if (!_MBA_base<>::_Boxed(opts.min, p, opts.max)) continue;
 
-				index_type i;
-				point_type s;
-
+				index_type i; point_type s;
 				for (unsigned d = 0; d < dim; ++d) {
 					value_type u = (p[d] - cmin[d]) * hinv[d];
 					i[d] = floor(u) - 1;
@@ -286,28 +229,26 @@ public:
 
 				std::array<value_type, power_nm_v<4,dim>> w;
 				value_type sum_w2 = 0.0;
-
 				for (grid_iterator<dim> d(4); d; ++d) {
 					value_type prod = 1.0;
-					for (unsigned k = 0; k < dim; ++k) 
+					for (unsigned k = 0; k < dim; ++k)
 						prod *= _MBA_base<>::_Bicubic_val(d[k], s[k]);
 
 					w[d.pos()] = prod;
 					sum_w2 += prod * prod;
 				}
 
+				const auto v = data[l][dim];
 				for (grid_iterator<dim> d(4); d; ++d) {
-					value_type w1 = w[d.position()];
+					value_type w1 = w[d.pos()];
 					value_type w2 = w1 * w1;
 					value_type phi = v * w1 / sum_w2;
 
 					auto j = i + (*d);
-
-					t_delta(j) += w2 * phi;
+					t_delta(j) += w2 * phi; 
 					t_omega(j) += w2;
 				}
 			}
-
 			{
 				for (ptrdiff_t i = 0; i < m; ++i) {
 #pragma omp atomic
@@ -317,15 +258,11 @@ public:
 				}
 			}
 		}
-
-		for (ptrdiff_t i = 0; i < m; ++i) {
-			phi[i] = safe_div(delta[i], omega[i]);
-		}
+		for (auto i = 0; i < m; ++i) phi[i] = safe_div(delta[i], omega[i]);
 	}
 
-	value_type operator()(const point_type &p) const {
-		index_type i;
-		point_type s;
+	MATRICE_HOST_INL value_type operator()(const point_type &p) const {
+		index_type i; point_type s;
 
 		for (unsigned d = 0; d < dim; ++d) {
 			value_type u = (p[d] - cmin[d]) * hinv[d];
@@ -357,15 +294,13 @@ public:
 		os.precision(fp);
 	}
 
-	void append_refined(const control_lattice_dense &r) {
-		static const std::array<value_type, 5> s = {
-			 0.125, 0.500, 0.750, 0.500, 0.125
-		};
+	MATRICE_HOST_INL void append_refined(const control_lattice_dense &r) {
+		static const std::array<value_type, 5> s{0.125, 0.500, 0.750, 0.500, 0.125};
 
 		for (grid_iterator<dim> i(r.grid); i; ++i) {
 			value_type f = r.phi(*i);
 
-			if (f == 0.0) continue;
+			if (f == zero<value_type>) continue;
 
 			for (grid_iterator<dim> d(5); d; ++d) {
 				index_type j;
@@ -377,10 +312,9 @@ public:
 						break;
 					}
 				}
-
 				if (skip) continue;
 
-				value_type c = 1.0;
+				auto c = one<value_type>;
 				for (unsigned k = 0; k < dim; ++k) c *= s[d[k]];
 
 				phi(j) += f * c;
@@ -388,7 +322,7 @@ public:
 		}
 	}
 
-	value_type fill_ratio() const {
+	MATRICE_HOST_INL value_type fill_ratio() const {
 		size_t total = phi.size();
 		size_t nonzeros = total - std::count(phi.begin(), phi.end(), zero<value_type>);
 
@@ -412,9 +346,8 @@ public:
 	using typename _Mybase::index_type;
 	using typename _Mybase::options_type;
 
-	template <typename _Cont, class _Iter>
-	control_lattice_sparse(const _Cont& coords, const _Iter& vbegin,
-		const options_type& opts) noexcept
+	template <typename _Cont>
+	control_lattice_sparse(const _Cont& data, const options_type& opts) noexcept
 		: cmin(opts.min), cmax(opts.max), grid(opts.grid)
 	{
 		for (unsigned i = 0; i < dim; ++i) {
@@ -423,16 +356,13 @@ public:
 			grid[i] += 2;
 		}
 
-		std::map<index<dim>, two_doubles> dw;
-		auto v = vbegin;
-		point_type p;
-		for (auto idx = 0; idx < coords.size(); ++idx, ++v) {
-			p = _MBA_base<>::_From(coords[idx]);
+		std::map<index_type, two_doubles> dw;
+		for (auto idx = 0; idx < data.rows(); ++idx) {
+			auto p = _MBA_base<dim>::_From(data[idx]);
 
 			if (!_MBA_base<>::_Boxed(opts.min, p, opts.max)) continue;
 
-			index_type i;
-			point_type s;
+			index_type i; point_type s;
 
 			for (unsigned d = 0; d < dim; ++d) {
 				value_type u = (p[d] - cmin[d]) * hinv[d];
@@ -452,25 +382,24 @@ public:
 				sum_w2 += prod * prod;
 			}
 
+			const auto v = data[idx][dim];
 			for (grid_iterator<dim> d(4); d; ++d) {
 				value_type w1 = w[d.pos()];
 				value_type w2 = w1 * w1;
-				value_type phi = (*v) * w1 / sum_w2;
+				value_type phi = v * w1 / sum_w2;
 
-				const auto ii = i + *d;
+				auto ii = i + *d;
 				dw[ii][0] += w2 * phi;
 				dw[ii][1] += w2;
 			}
 		}
 
-		phi.insert(
-			make_transform_iter(dw.begin(), _Delta_over_omega),
-			make_transform_iter(dw.end(),   _Delta_over_omega));
+		phi.insert(make_transform_iter(dw.begin(), _Delta_over_omega),
+			        make_transform_iter(dw.end(),   _Delta_over_omega));
 	}
 
-	value_type operator()(const point_type &p) const {
-		index_type i;
-		point_type s;
+	MATRICE_HOST_INL value_type operator()(const point_type &p) const {
+		index_type i; point_type s;
 
 		for (unsigned d = 0; d < dim; ++d) {
 			value_type u = (p[d] - cmin[d]) * hinv[d];
@@ -479,11 +408,10 @@ public:
 		}
 
 		value_type f = 0;
-
 		for (grid_iterator<dim> d(4); d; ++d) {
 			value_type w = 1.0;
 			for (unsigned k = 0; k < dim; ++k) 
-				w *= _MBA_base<>::_Bicubic_val(d[k], s[k]);
+				w *= _MBA_base<dim>::_Bicubic_val(d[k], s[k]);
 
 			f += w * _Get_phi(i + (*d));
 		}
@@ -495,7 +423,7 @@ public:
 		std::ios_base::fmtflags ff(os.flags());
 		const auto fp = os.precision();
 
-		const size_t grid_size = grid[0];
+		size_t grid_size = grid[0];
 
 		os << "sparse [" << grid[0];
 		for (unsigned i = 1; i < dim; ++i) {
@@ -525,7 +453,7 @@ private:
 		return std::make_pair(dw.first, safe_div(dw.second[0], dw.second[1]));
 	}
 
-	value_type _Get_phi(const index_type &i) const {
+	MATRICE_HOST_INL value_type _Get_phi(const index_type &i) const {
 		typename decltype(phi)::const_iterator c = phi.find(i);
 		return c == phi.end() ? 0.0 : c->second;
 	}
@@ -621,6 +549,19 @@ private:
 	std::array<value_type, dim+1> C;
 };
 
+/**
+ *\brief MBA Multilevel Bicubic-spline Approximation (interpolation)
+ *\param <_Ty> data type that MBA uses, 
+			<_N> data dimension, which can be 1, 2, or 3. 
+ *\note The input scattred data should be organized as
+		  MBA<>::container _Data = {
+		  x1, y1, f(x1,y1),
+		  x2, y2, f(x2,y2),
+				... ...
+		  xn, yn, f(xn,yn)} 
+		  where _N = 2 for this example. The last column of _Data 
+		  will be replaced by interpolation residuals.
+ */
 template<typename _Ty = float, unsigned _N = 2>
 class MBA : detail::_MBA_base<_N> {
 	using _Mybase = detail::_MBA_base<_N>;
@@ -631,19 +572,18 @@ class MBA : detail::_MBA_base<_N> {
 public:
 	using _Mybase::dim;
 	using value_type = _Ty;
-	using point_type = _Mybase::template array_n_type<value_type>;
-	using index_type = _Mybase::template array_n_type<size_t>;
-	using options_type = _Mybase::template options_type<value_type>;
-	using functor_type = _Mybase::template functor<value_type>;
+	using container = Matrix<value_type>;
+	using point_type = typename _Mybase::template array_n_type<value_type>;
+	using index_type = typename _Mybase::template array_n_type<size_t>;
+	using options_type = typename _Mybase::template options_type<value_type>;
+	using functor_type = typename _Mybase::template functor<value_type>;
 
-	template <class _Cont, class _Iter>
-	MBA(const _Cont& coords, const _Iter& vbegin, const options_type& opts,
-		unsigned max_levels = 8, value_type tol = 1e-8, value_type min_fill = 0.5,
-		functor_type initial = functor_type()) {
-		_Init(coords, vbegin, opts, max_levels, tol, min_fill, initial);
+	MBA(const container& data, options_type& opts, 
+		functor_type&& init_op = functor_type()) {
+		_Init(data, opts, init_op);
 	}
 
-	value_type operator()(const point_type &p) const {
+	MATRICE_HOST_INL value_type operator()(const point_type &p) const {
 		value_type f = 0.0;
 		for (auto &psi : cl) f += (*psi)(p);
 		return f;
@@ -662,58 +602,49 @@ public:
 private:
 	std::list<std::shared_ptr<lattice>> cl;
 
-	template<class _Cont, class _Iter>
-	void _Init(const _Cont& coords, const _Iter& vbegin, const options_type& opts,
-		unsigned max_levels, value_type tol, value_type min_fill, functor_type initial)
+	MATRICE_HOST_INL void _Init(const container& data, options_type& opts, functor_type initial)
 	{
+		auto& grid = opts.grid;
 		for (int i = 0; i < dim; ++i)
-			_Mybase::_Precond(grid[i] > 1, "MBA: grid size in each dimension should be more than 1");
+			_Mybase::_Precond(grid[i] > 1, 
+				"MBA: grid size in each dimension should be more than 1");
 
-		const auto n = coords.size();
-		std::vector<value_type> val(vbegin, vbegin + n);
-
+		const auto n = data.rows();
 		value_type res, eps = 0.0;
-		for (ptrdiff_t i = 0; i < n; ++i)
-			eps = max(eps, abs(val[i]));
-		eps *= tol;
+		for (auto i = 0; i < n; ++i) eps = max(eps, abs(data[i][dim]));
+		eps *= opts.tolerance;
 
 		if (initial) {
-			// Start with the given approximation.
 			cl.push_back(std::make_shared<approx_lattice>(initial));
-			res = cl.back()->residual(coords, val.begin());
+			res = cl.back()->residual(data);
 			if (res <= eps) return;
 		}
 
 		size_t lev = 1;
-		// Create dense head of the hierarchy.
 		{
-			auto psi = std::make_shared<dense_lattice>(coords, val.begin(), opts);
+			auto psi = std::make_shared<dense_lattice>(data, opts);
+			res = psi->residual(data);
+			value_type fill = psi->fill_ratio();
 
-			res = psi->residual(coords, val.begin());
-			const value_type fill = psi->fill_ratio();
+			for (; (lev < opts.max_level) && (res > eps) && (fill > opts.min_fill); ++lev) {
+				for (auto& x : grid) x = x * 2 - 1;
 
-			for (; (lev < max_levels) && (res > eps) && (fill > min_fill); ++lev) {
-				grid = grid * 2ul - 1ul;
-
-				auto f = std::make_shared<dense_lattice>(coords, val.begin(), opts);
-
-				res = f->residual(coords, val.begin());
+				auto f = std::make_shared<dense_lattice>(data, opts);
+				res = f->residual(data);
 				fill = f->fill_ratio();
-
 				f->append_refined(*psi);
+
 				psi.swap(f);
 			}
 
 			cl.push_back(psi);
 		}
+		for (; (lev < opts.max_level) && (res > eps); ++lev) {
+			for (auto& x : grid) x = x * 2 - 1;
 
-		// Create sparse tail of the hierrchy.
-		for (; (lev < max_levels) && (res > eps); ++lev) {
-			grid = grid * 2ul - 1ul;
+			cl.push_back(std::make_shared<sparse_lattice>(data, opts));
 
-			cl.push_back(std::make_shared<sparse_lattice>(coords, val.begin(), opts));
-
-			res = cl.back()->residual(coords val.begin());
+			res = cl.back()->residual(data);
 		}
 	}
 };
