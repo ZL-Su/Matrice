@@ -26,13 +26,14 @@ class multi_array {
 	using _Myt = multi_array;
 	using _Myidx = Matrix_<size_t, _N, 1>;
 	using _Mybuf = Matrix_<_Ty, 0, 0>;
+	//using _Mybuf = std::vector<_Ty>;
 public:
 	static constexpr auto dimension = _N;
 	using value_type = typename _Mybuf::value_type;
 	using pointer = typename _Mybuf::pointer;
 	using index_type = _Myidx;
-	multi_array() noexcept {
-	}
+
+	multi_array() noexcept {}
 	multi_array(const _Myidx& _Shape) noexcept {
 		_Alloc(_Shape);
 	}
@@ -51,31 +52,31 @@ public:
 	MATRICE_HOST_INL size_t size() const {
 		return _Data.size();
 	}
-	MATRICE_HOST_INL pointer data() { return _Data.data(); }
-	MATRICE_HOST_INL const pointer data() const { return _Data.data(); }
+	MATRICE_HOST_INL pointer data() noexcept { return _Data.data(); }
+	MATRICE_HOST_INL const pointer data() const noexcept { return _Data.data(); }
 	MATRICE_HOST_INL value_type& operator()(const _Myidx& _idx) {
-		return _Data(_Index(_idx)); 
+		return _Data.data()[_Index(_idx)];
 	}
 	MATRICE_HOST_INL const value_type& operator()(const _Myidx& _idx) const {
-		return _Data(_Index(_idx));
+		return _Data.data()[_Index(_idx)];
 	}
 	MATRICE_HOST_INL value_type& operator[](size_t _idx) {
-		return _Data(_idx);
+		return _Data.data()[_idx];
 	}
 	MATRICE_HOST_INL const value_type& operator()(size_t _idx) const {
-		return _Data(_idx);
+		return _Data.data()[_idx];
 	}
 
-	MATRICE_HOST_INL typename _Mybuf::iterator begin() { 
+	MATRICE_HOST_INL typename _Mybuf::iterator begin() noexcept {
 		return _Data.begin(); 
 	}
-	MATRICE_HOST_INL const typename _Mybuf::iterator begin() const { 
+	MATRICE_HOST_INL typename _Mybuf::const_iterator begin() const noexcept {
 		return _Data.begin(); 
 	}
-	MATRICE_HOST_INL typename _Mybuf::iterator end() { 
+	MATRICE_HOST_INL typename _Mybuf::iterator end() noexcept {
 		return _Data.end(); 
 	}
-	MATRICE_HOST_INL const typename _Mybuf::iterator end() const { 
+	MATRICE_HOST_INL typename _Mybuf::const_iterator end() const noexcept { 
 		return _Data.end(); 
 	}
 
@@ -86,10 +87,11 @@ private:
 			_Stride(d) = _Size;
 			_Size *= _shape(d);
 		}
+		//_Data.resize(_Size, zero<value_type>);
 		if constexpr (dimension == 2)
 			_Data.create(_shape(0), _shape(1), zero<value_type>);
 		else
-			_Data.create(_Size, 1, zero<value_type>);
+			_Data.create(_Size, zero<value_type>);
 	}
 	MATRICE_HOST_INL size_t _Index(const _Myidx& _index) const {
 		return ((_Stride*_index).sum());
