@@ -23,7 +23,7 @@ MATRICE_ALGS_BEGIN
 template<typename _Ty, typename _Tag>
 class _Interpolation_wrapper MATRICE_NONHERITABLE
 	: public auto_interp_dispatcher_t<_Ty, _Tag>,
-	std::enable_shared_from_this< _Interpolation_wrapper<_Ty, _Tag>>
+	std::enable_shared_from_this<_Interpolation_wrapper<_Ty, _Tag>>
 {
 	using _Mytraits = interpolation_traits<auto_interp_dispatcher_t<_Ty, _Tag>>;
 public:
