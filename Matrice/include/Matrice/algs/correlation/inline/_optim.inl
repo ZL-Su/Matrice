@@ -34,6 +34,15 @@ template<> struct _Corr_border_size<_TAG bisspl_tag> {
 };
 
 // \specializations of parameter update strategy.
+template<> struct _Param_update_strategy<_Alg_icgn<0>> {
+	template<typename _Ty>
+	static MATRICE_GLOBAL_FINL auto& eval(_Ty& x, const _Ty& y) {
+		
+		x[0] -= y[0], x[1] -= y[1];
+
+		return (x);
+	}
+};
 template<> struct _Param_update_strategy<_Alg_icgn<1>> {
 	template<typename _Ty>
 	static MATRICE_GLOBAL_FINL auto& eval(_Ty& x, const _Ty& y) {
@@ -58,7 +67,7 @@ template<> struct _Param_update_strategy<_Alg_icgn<1>> {
 	}
 };
 
-///<base class implementation>
+#pragma region <-- base class implementation -->
 template<typename _Derived> MATRICE_HOST_INL 
 auto& _Corr_optim_base<_Derived>::_Cond() {
 	// \sent eval.s of Jacobian and Hessian to background.
@@ -114,14 +123,37 @@ auto& _Corr_optim_base<_Derived>::_Cond() {
 	if (_J.valid()) _J.get();
 	_Myhess = _Myhess * _Issd;
 	_Mysolver.forward();
-	_Myhess = _Myhess + matrix_fixed::diag(value_type(0.70));
+	_Myhess = _Myhess + matrix_fixed::diag(_Myopt._Coeff);
 
 	return (_Myref);
-#undef _IF_WITHIN_RANGE
 }
 
-template<typename _Derived> MATRICE_HOST_INL 
-auto& _Corr_optim_base<_Derived>::_Warp(const param_type& _Pars) {
+template<typename _Derived> MATRICE_HOST_INL
+auto _Corr_optim_base<_Derived>::_Solve(param_type& Par) {
+	// \warp current image patch.
+	_Mycur = static_cast<_Derived*>(this)->_Warp(Par);
+
+	// \error map
+	_Mydiff = _Mycur - _Myref;
+#ifdef MATRICE_DEBUG
+	matrix_type _Error_map(_Mycur.shape(), _Mydiff.data());
+#endif // _DEBUG
+
+	// \steepest descent param. update
+	param_type _Sdp = _MyJaco.t().mul(_Mydiff);
+
+	// \solve update to the warp parameter vector.
+	_Sdp = _Mysolver.backward(_Sdp);
+
+	// \inverse composition to update param.
+	Par = update_strategy::eval(Par, _Sdp);
+
+	// \report least square correlation coeff. and param. error.
+	return std::make_tuple(sqr(_Mydiff).sum(), _Sdp.dot(_Sdp));
+}
+#pragma endregion
+
+#pragma region <-- derived class implementation -->
 #define _IF_WITHIN_RANGE(_OP) \
 	if (y-_Mytraits::border_size::lower>=0 && \
 		 x-_Mytraits::border_size::lower>=0 && \
@@ -130,51 +162,96 @@ auto& _Corr_optim_base<_Derived>::_Warp(const param_type& _Pars) {
 		_OP; \
    else _Mycur(r,c) = zero<value_type>;
 
-	const auto [_Rows, _Cols] = (*_Mycur_ptr)().shape();
+// \specialization of warp. to eval. current patch.
+template<typename _Ty, typename _Itag> MATRICE_HOST_INL
+auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<0>>::_Warp(const param_type& _Par) {
+
+	const auto[_Rows, _Cols] = (*_Mycur_ptr)().shape();
 	const auto _Radius = static_cast<index_t>(_Myopt._Radius);
-	const auto &u = _Pars[0],    &v = _Pars[3];
-	const auto &dudx = _Pars[1], &dudy = _Pars[2];
-	const auto &dvdx = _Pars[4], &dvdy = _Pars[5];
+
+	const auto _Cur_x = _Mypos[0] + _Par[0];
+	const auto _Cur_y = _Mypos[1] + _Par[1];
+
+	auto _Mean = zero<value_type>;
+	for (diff_t j = -_Radius, r = 0; j <= _Radius; ++j, ++r) {
+		const auto y = _Cur_y + static_cast<value_type>(j);
+		auto _Rc = _Mycur[r];
+		for (diff_t i = -_Radius, c = 0; i <= _Radius; ++i, ++c) {
+			const auto x = static_cast<value_type>(i) + _Cur_x;
+			_IF_WITHIN_RANGE(_Mean += _Rc[c] = (*_Mycur_ptr)(x, y));
+		}
+	}
+
+	_Mycur = _Mycur - (_Mean /= sqr(_Mybase::_Mysize));
+	const auto _Issd = one<value_type>/sqrt(sqr(_Mycur).sum());
+	_Mycur = _Mycur * _Issd;
+	return (_Mycur);
+}
+template<typename _Ty, typename _Itag> MATRICE_HOST_INL
+auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>::_Warp(const param_type& _Par) {
+
+	const auto[_Rows, _Cols] = (*_Mycur_ptr)().shape();
+	const auto _Radius = static_cast<index_t>(_Myopt._Radius);
+	const auto &u = _Par[0], &v = _Par[3];
+	const auto &dudx = _Par[1], &dudy = _Par[2];
+	const auto &dvdx = _Par[4], &dvdy = _Par[5];
 	const auto _Cur_x = _Mypos[0] + u, _Cur_y = _Mypos[1] + v;
 
 	auto _Mean = zero<value_type>;
-	const auto dvdyp1 = one<value_type> + _Pars[5];
-	const auto dudxp1 = one<value_type> + _Pars[1];
+	const auto dvdyp1 = one<value_type> +_Par[5];
+	const auto dudxp1 = one<value_type> +_Par[1];
 	for (diff_t j = -_Radius, r = 0; j <= _Radius; ++j, ++r) {
 		const auto dy = static_cast<value_type>(j);
-		const auto tx = _Cur_x + _Pars[2] * dy;
+		const auto tx = _Cur_x + _Par[2] * dy;
 		const auto ty = _Cur_y + dvdyp1 * dy;
 		auto _Rc = _Mycur[r];
 		for (diff_t i = -_Radius, c = 0; i <= _Radius; ++i, ++c) {
 			const auto dx = static_cast<value_type>(i);
-			const auto x = dudxp1 * dx + tx, y = _Pars[4] * dx + ty;
-			_IF_WITHIN_RANGE(_Mean += _Rc[c] = (*_Mycur_ptr)(x,y));
+			const auto x = dudxp1 * dx + tx, y = _Par[4] * dx + ty;
+			_IF_WITHIN_RANGE(_Mean += _Rc[c] = (*_Mycur_ptr)(x, y));
 		}
 	}
 
-	_Mycur = _Mycur - (_Mean/=_Mysize*_Mysize);
-	const auto _Issd = one<value_type>/sqrt(sqr(_Mycur).sum());
+	_Mycur = _Mycur - (_Mean /= sqr(_Mybase::_Mysize));
+	const auto _Issd = one<value_type> / sqrt(sqr(_Mycur).sum());
 	_Mycur = _Mycur * _Issd;
 
 	return (_Mycur);
-#undef _IF_WITHIN_RANGE
 }
-///</base class implementation>
 
-///<derived class implementation>
 // \specialization of diff. to eval. Jacobian contributions.
+template<typename _Ty, typename _Itag> MATRICE_HOST_INL
+auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<0>>::_Diff() {
+	const auto& _Size = _Mybase::_Mysize;
+	const auto[_L, _R, _U, _D] = _Myopt.range<true>(_Mypos);
+	const auto _Off = -static_cast<value_type>(_Myopt._Radius);
+
+	_Mybase::_MyJaco.create(sqr(_Size), _Mybase::npar);
+	for (index_t iy = _U, j = 0; iy < _D; ++iy, ++j) {
+		const auto y = _Mypos.y + _Off + j;
+		for (index_t ix = _L, i = 0; ix < _R; ++ix, ++i) {
+			const auto x = _Mypos.x + _Off + i;
+			const auto[dfdx, dfdy] = _Myref_ptr->grad({ x, y });
+
+			auto p = _Mybase::_MyJaco[j * _Size + i];
+			p[0] = dfdx, p[1] = dfdy;
+		}
+	}
+
+	return (_Mybase::_MyJaco);
+}
 template<typename _Ty, typename _Itag> MATRICE_HOST_INL
 auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>::_Diff() {
 	const auto& _Size = _Mybase::_Mysize;
-	const auto[_L, _R, _U, _D] = _Mybase::_Myopt.range<true>(_Mybase::_Mypos);
-	const auto _Off = -static_cast<value_type>(_Mybase::_Myopt._Radius);
+	const auto[_L, _R, _U, _D] = _Myopt.range<true>(_Mypos);
+	const auto _Off = -static_cast<value_type>(_Myopt._Radius);
 
-	_Mybase::_MyJaco.create(sqr(_Size), _Mybase::DOF);
+	_Mybase::_MyJaco.create(sqr(_Size), _Mybase::npar);
 	for (index_t iy = _U, j = 0; iy < _D; ++iy, ++j) {
-		const auto dy = _Off + j, y = _Mybase::_Mypos.y + dy;
+		const auto dy = _Off + j, y = _Mypos.y + dy;
 		for (index_t ix = _L, i = 0; ix < _R; ++ix, ++i) {
-			const auto dx = _Off + i, x = _Mybase::_Mypos.x + dx;
-			const auto[dfdx, dfdy] = _Mybase::_Myref_ptr->grad({ x, y });
+			const auto dx = _Off + i, x = _Mypos.x + dx;
+			const auto[dfdx, dfdy] = _Myref_ptr->grad({ x, y });
 
 			auto p = _Mybase::_MyJaco[j * _Size + i];
 			p[0] = dfdx, p[1] = dfdx * dx, p[2] = dfdx * dy;
@@ -185,31 +262,7 @@ auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>::_Diff() {
 	return (_Mybase::_MyJaco);
 }
 
-// \specialization for solving IC-GN normal equations.
-template<typename _Ty, typename _Itag> MATRICE_HOST_INL
-auto _Corr_solver_impl<_Ty,_Itag,_Alg_icgn<1>>::_Solve(param_type& _P) {
-	// \warp current image patch.
-	_Mybase::_Mycur = _Mybase::_Warp(_P);
-
-	// \error map
-	_Mybase::_Mydiff = _Mybase::_Mycur-_Mybase::_Myref;
-#ifdef MATRICE_DEBUG
-	typename _Mybase::matrix_type
-		_Diff(_Mybase::_Mycur.shape(), _Mybase::_Mydiff.data());
-#endif // _DEBUG
-
-	// \steepest descent param. update
-	param_type _Sdp = _Mybase::_MyJaco.t().mul(_Mybase::_Mydiff);
-
-	// \solve update to the warp parameter vector.
-	_Sdp = _Mybase::_Mysolver.backward(_Sdp);
-	
-	// \inverse composition to update param.
-	_P = _Mybase::update_strategy::eval(_P, _Sdp);
-
-	// \report least square correlation coeff. and param. error.
-	return std::make_tuple(sqr(_Mybase::_Mydiff).sum(), _Sdp.dot(_Sdp));
-}
-///</derived class implementation>
+#undef _IF_WITHIN_RANGE
+#pragma endregion
 
 _DETAIL_END } MATRICE_ALGS_END

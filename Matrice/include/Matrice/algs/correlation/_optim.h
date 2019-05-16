@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #pragma once
+#include <variant>
 #include "../../core/matrix.h"
 #include "../../core/vector.h"
 #include "../../core/solver.h"
@@ -29,7 +30,8 @@ struct _Correlation_options {
 	size_t _Radius = 10;  //patch radius
 	size_t _Maxits = 10;  //maximum iterations
 	size_t _Stride =  7;  //node spacing
-	float_t _Znssd= 0.4;  //correlation threshold
+	float_t _Znssd = 0.4; //correlation threshold
+	float_t _Coeff = 0.7; //damping coefficient
 
 	template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
 	static constexpr _Ty _Mytol = _Ty(1.0E-6); //iteration tolerance
@@ -90,32 +92,20 @@ struct _Corr_solver_traits<_Corr_solver_impl<_Ty, _Itag, _Atag>> {
 template<typename _Derived> class _Corr_optim_base {
 	using _Myt = _Corr_optim_base;
 	using _Mydt = _Derived;
+protected:
 	using _Mytraits = _Corr_solver_traits<_Mydt>;
 public:
-	static constexpr auto DOF = _Mytraits::order*6;
+	static constexpr auto npar = conditional_size_v<
+		_Mytraits::order == 0, 2, _Mytraits::order * 6>;
 	using value_type = typename _Mytraits::value_type;
 	using matrix_type = Matrix<value_type>;
-	using matrix_fixed = Matrix_<value_type, DOF, DOF>;
+	using matrix_fixed = Matrix_<value_type, npar, npar>;
 	using point_type = Vec2_<value_type>;
-	using param_type = Vec_<value_type, DOF>;
+	using param_type = Vec_<value_type, npar>;
 	using option_type = _Correlation_options;
 	using interp_type = typename _Mytraits::interpolator;
 	using update_strategy = typename _Mytraits::update_strategy;
 	using linear_solver = matrix_decomp<matrix_fixed, _TAG _Linear_spd_tag>;
-
-	/**
-	 *\brief This module is image-wise thread-safe. It allows us to eval. absolute deformation of each point between current and reference state.
-	 *\param [_Ref] reference image;
-	 *\param [_Cur] current image, which is always interpolated;
-	 *\param [_Opt] options for the optimizer.
-	 */
-	/*_Corr_optim_base(
-		const matrix_type& _Ref, 
-		const interp_type& _Cur,
-		const option_type& _Opt) : _Myopt(_Opt),
-		_Myref_ptr(_Ref), _Mycur_ptr(_Cur), 
-		_Mysolver(_Myhess), _Mysize(_Opt._Radius * 2 + 1){
-	}*/
 
 	/**
 	 *\brief This module is image-wise thread-safe. It allows us to eval. relative deformation of each point between current and reference state.
@@ -152,7 +142,7 @@ public:
 	 *\return [znssd, error := dot(dp, dp)]
 	 */
 	MATRICE_HOST_INL auto operator()(param_type& _pars) {
-		return static_cast<_Mydt*>(this)->_Solve(_pars);
+		return (this->_Solve(_pars));
 	}
 
 	// \for retrieving reference subset
@@ -164,6 +154,7 @@ public:
 	}
 	MATRICE_HOST_INL auto& refpos() { return _Mypos; }
 	MATRICE_HOST_INL const auto& refpos() const { return _Mypos; }
+
 protected:
 	///<methods>
 	/**
@@ -171,22 +162,21 @@ protected:
 	 *\return the refpatch: this->_Myref.
 	 */
 	MATRICE_HOST_INL auto& _Cond();
+
 	/**
-	 *\brief Warp curpatch accord. to input parameters.
-	 *\param [_Pars] warp parameters.
-	 *\return the warped curpatch: this->_Mycur.
+	 *\brief Solve new parameters
+	 *\param [_Par] in: old parameters, output: new parameters
 	 */
-	MATRICE_HOST_INL auto& _Warp(const param_type& _Pars);
+	MATRICE_HOST_INL auto _Solve(param_type& _Pars);
 	///</methods>
 
 	///<fields>
+	diff_t       _Mysize;
+	option_type  _Myopt;
+	point_type   _Mypos;
+	matrix_type  _Myref, _Mycur;
 
-	diff_t _Mysize;
-	option_type _Myopt;
-	point_type _Mypos;
-	matrix_type  _Myref, _Mycur, _Mydiff;
-
-	matrix_type  _MyJaco;
+	matrix_type  _Mydiff, _MyJaco;
 	matrix_fixed _Myhess;
 
 	linear_solver _Mysolver;
@@ -198,6 +188,45 @@ protected:
 	///</fields>
 };
 
+// \zero-order inverse compositional gauss-newton algrithom
+template<typename _Ty, typename _Itag>
+class _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<0>>
+	: public _Corr_optim_base<_Corr_solver_impl<_Ty, _Itag, _Alg_icgn<0>>>
+{
+	using _Myt = _Corr_solver_impl;
+	using _Mybase = _Corr_optim_base<_Myt>;
+	using typename _Mybase::_Mytraits;
+public:
+	static constexpr auto order = _Mytraits::order;
+	using typename _Mybase::option_type;
+	using typename _Mybase::param_type;
+	using typename _Mybase::point_type;
+	using typename _Mybase::value_type;
+
+	_Corr_solver_impl(const _Myt& _Other) = delete;
+	_Corr_solver_impl(_Myt&& _Other) = delete;
+	template<typename... _Args>
+	_Corr_solver_impl(const _Args&..._args) : _Mybase(_args...) {}
+
+	/**
+	 *\brief Evaluate Jacobian contribution at ref. patch.
+	 */
+	MATRICE_HOST_INL auto& _Diff();
+
+	/**
+	 *\brief Construct current image patch.
+	 *\param [_Par] displacement {u, v}.
+	 */
+	MATRICE_HOST_INL auto& _Warp(const param_type& _Par);
+
+private:
+	using _Mybase::_Myref_ptr;
+	using _Mybase::_Mycur_ptr;
+	using _Mybase::_Mycur;
+	using _Mybase::_Myopt;
+	using _Mybase::_Mypos;
+};
+
 // \1-st order inverse compositional gauss-newton algrithom
 template<typename _Ty, typename _Itag>
 class _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>
@@ -205,6 +234,7 @@ class _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>
 {
 	using _Myt = _Corr_solver_impl;
 	using _Mybase = _Corr_optim_base<_Myt>;
+	using typename _Mybase::_Mytraits;
 public:
 	static constexpr auto order = _Alg_icgn<1>::order;
 	using typename _Mybase::option_type;
@@ -219,15 +249,21 @@ public:
 		: _Mybase(_args...) {}
 
 	/**
-	 *\brief Solve normal equations to update parameters
-	 *\param [_P] warp parameter vector
-	 */
-	MATRICE_HOST_INL auto _Solve(param_type& _P);
-
-	/**
 	 *\brief evaluate Jacobian contribution at refpatch.
 	 */
 	MATRICE_HOST_INL auto& _Diff();
+	/**
+	 *\brief Construct current image patch.
+	 *\param [_Par] {u, dudx, dudy, v, dvdx, dvdy}
+	 */
+	MATRICE_HOST_INL auto& _Warp(const param_type& _Par);
+
+private:
+	using _Mybase::_Myref_ptr;
+	using _Mybase::_Mycur_ptr;
+	using _Mybase::_Mycur;
+	using _Mybase::_Myopt;
+	using _Mybase::_Mypos;
 };
 
 _DETAIL_END } MATRICE_ALGS_END
@@ -235,6 +271,50 @@ _DETAIL_END } MATRICE_ALGS_END
 DGE_MATRICE_BEGIN
 struct correlation_optimizer {
 	using options = algs::detail::corr::_Correlation_options;
+
+	/**
+	 *\brief N-th order IC-GN alg. with bicubic spline interpolation.
+	 *\param <_Ty> must be a scalar type of float or double.
+	 */
+	template<typename _Ty, uint8_t _Order = 1>
+	using icgn_bic = algs::detail::corr::_Corr_solver_impl<_Ty,
+		tag::bicspl_tag, algs::detail::corr::_Alg_icgn<_Order>>;
+	/**
+	 *\brief 1th order IC-GN alg. with biquintic spline interpolation.
+	 *\param <_Ty> must be a scalar type of float or double.
+	 */
+	template<typename _Ty, uint8_t _Order = 1>
+	using icgn_biq = algs::detail::corr::_Corr_solver_impl<_Ty,
+		tag::biqspl_tag, algs::detail::corr::_Alg_icgn<_Order>>;
+	/**
+	 *\brief 1th order IC-GN alg. with biseptic spline interpolation.
+	 *\param <_Ty> must be a scalar type of float or double.
+	 */
+	template<typename _Ty, uint8_t _Order = 1>
+	using icgn_bis = algs::detail::corr::_Corr_solver_impl<_Ty,
+		tag::bisspl_tag, algs::detail::corr::_Alg_icgn<_Order>>;
+
+	/**
+	 *\brief 1th order IC-GN alg. with bicubic spline interpolation.
+	 *\param <_Ty> must be a scalar type of float or double.
+	 */
+	template<typename _Ty>
+	using icgn_bic_0 = algs::detail::corr::_Corr_solver_impl<_Ty,
+		tag::bicspl_tag, algs::detail::corr::_Alg_icgn<0>>;
+	/**
+	 *\brief 1th order IC-GN alg. with biquintic spline interpolation.
+	 *\param <_Ty> must be a scalar type of float or double.
+	 */
+	template<typename _Ty>
+	using icgn_biq_0 = algs::detail::corr::_Corr_solver_impl<_Ty,
+		tag::biqspl_tag, algs::detail::corr::_Alg_icgn<0>>;
+	/**
+	 *\brief 1th order IC-GN alg. with biseptic spline interpolation.
+	 *\param <_Ty> must be a scalar type of float or double.
+	 */
+	template<typename _Ty>
+	using icgn_bis_0 = algs::detail::corr::_Corr_solver_impl<_Ty,
+		tag::bisspl_tag, algs::detail::corr::_Alg_icgn<0>>;
 
 	/**
 	 *\brief 1th order IC-GN alg. with bicubic spline interpolation.
@@ -257,7 +337,6 @@ struct correlation_optimizer {
 	template<typename _Ty>
 	using icgn_bis_1 = algs::detail::corr::_Corr_solver_impl<_Ty,
 		tag::bisspl_tag, algs::detail::corr::_Alg_icgn<1>>;
-
 };
 DGE_MATRICE_END
 
