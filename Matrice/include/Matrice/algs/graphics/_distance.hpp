@@ -25,6 +25,18 @@ struct _Signed_distance_function {
 	MATRICE_HOST_INL static _Ty sphere(const Vec3_<_Ty>& p) {
 		return (sqrt(p.dot(p)) - one<_Ty>);
 	}
+	template<typename _Ty>
+	MATRICE_HOST_INL static _Ty intersect(_Ty d1, _Ty d2) {
+		return (max(d1, d2));
+	}
+	template<typename _Ty>
+	MATRICE_HOST_INL static _Ty unions(_Ty d1, _Ty d2) {
+		return (min(d1, d2));
+	}
+	template<typename _Ty>
+	MATRICE_HOST_INL static _Ty diff(_Ty d1, _Ty d2) {
+		return (max(d1, -d2));
+	}
 };
 _DETAIL_END
 MATRICE_ALGS_END
