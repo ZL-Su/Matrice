@@ -39,8 +39,9 @@ struct _Correlation_options {
 	/**
 	 * \retrieve range of the patch centered on point _Pos
 	 */
-	template<bool _Is_cutoff, typename _Ty, typename _Ret = conditional_t<_Is_cutoff, index_t, typename _Ty::value_t>>
-	MATRICE_GLOBAL_INL auto range(const _Ty& _Pos) {
+	template<bool _Is_cutoff, typename _Ty, 
+		typename _Ret = conditional_t<_Is_cutoff, index_t, typename _Ty::value_t>>
+	MATRICE_GLOBAL_INL auto range(const _Ty& _Pos)->tuple<_Ret, _Ret, _Ret, _Ret> {
 		using tuple_type = tuple<_Ret, _Ret, _Ret, _Ret>;
 		if constexpr (_Is_cutoff) {
 			const auto x = floor<_Ret>(_Pos.x), y = floor<_Ret>(_Pos.y);
@@ -50,7 +51,7 @@ struct _Correlation_options {
 	}
 
 	template<typename _Pty, typename _Sty>
-	MATRICE_HOST_INL auto range_check(const _Pty& _Pos, const _Sty& _Shape) {
+	MATRICE_HOST_INL bool range_check(const _Pty& _Pos, const _Sty& _Shape) {
 		auto _TL = _Pos - _Radius; auto _RB = _Pos + _Radius;
 		if (floor(_TL(0)) < 0 || floor(_TL(1)) < 0 ||
 			_RB(0)>=get<0>(_Shape) || _RB(1)>=get<1>(_Shape))
@@ -129,11 +130,11 @@ public:
 	template<typename _Ty>
 	MATRICE_HOST_INL void init(const _Ty& _x, const _Ty& _y) {
 		_Mypos.x = _x, _Mypos.y = _y;
-		_Myref = this->_Cond();
+		/*_Myref = */this->_Cond();
 	}
 	MATRICE_HOST_INL void init(const point_type& _ref_pos) {
 		_Mypos.x = _ref_pos.x, _Mypos.y = _ref_pos.y;
-		_Myref = this->_Cond();
+		/*_Myref = */this->_Cond();
 	}
 
 	/**
@@ -161,7 +162,7 @@ protected:
 	 *\brief Build refpatch, and buffs to hold curpatch and diffs.
 	 *\return the refpatch: this->_Myref.
 	 */
-	MATRICE_HOST_INL auto& _Cond();
+	MATRICE_HOST_INL auto _Cond()->matrix_type&;
 
 	/**
 	 *\brief Solve new parameters

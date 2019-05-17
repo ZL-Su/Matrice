@@ -36,7 +36,7 @@ template<> struct _Corr_border_size<_TAG bisspl_tag> {
 // \specializations of parameter update strategy.
 template<> struct _Param_update_strategy<_Alg_icgn<0>> {
 	template<typename _Ty>
-	static MATRICE_GLOBAL_FINL auto& eval(_Ty& x, const _Ty& y) {
+	static MATRICE_GLOBAL_FINL _Ty& eval(_Ty& x, const _Ty& y) {
 		
 		x[0] -= y[0], x[1] -= y[1];
 
@@ -45,7 +45,7 @@ template<> struct _Param_update_strategy<_Alg_icgn<0>> {
 };
 template<> struct _Param_update_strategy<_Alg_icgn<1>> {
 	template<typename _Ty>
-	static MATRICE_GLOBAL_FINL auto& eval(_Ty& x, const _Ty& y) {
+	static MATRICE_GLOBAL_FINL _Ty& eval(_Ty& x, const _Ty& y) {
 		constexpr auto _One = one<typename _Ty::value_t>;
 
 		const auto y1p1 = _One + y[1], y5p1 = _One + y[5];
@@ -69,7 +69,7 @@ template<> struct _Param_update_strategy<_Alg_icgn<1>> {
 
 #pragma region <-- base class implementation -->
 template<typename _Derived> MATRICE_HOST_INL 
-auto& _Corr_optim_base<_Derived>::_Cond() {
+auto _Corr_optim_base<_Derived>::_Cond()->matrix_type& {
 	// \sent eval.s of Jacobian and Hessian to background.
 	auto _J = std::async(std::launch::async, [&] {
 		_MyJaco = static_cast<_Derived*>(this)->_Diff();
