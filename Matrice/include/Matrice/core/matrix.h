@@ -76,9 +76,9 @@ public:
 		return _Mybase::operator=(_arg); 
 	}
 
-	MATRICE_GLOBAL_FINL constexpr auto size() const { return (Size); }
-	MATRICE_GLOBAL_FINL constexpr auto rows() const { return (CompileTimeRows); }
-	MATRICE_GLOBAL_FINL constexpr auto cols() const { return (CompileTimeCols); }
+	MATRICE_GLOBAL_FINL constexpr auto(size)() const { return (Size); }
+	MATRICE_GLOBAL_FINL constexpr auto(rows)() const { return (CompileTimeRows); }
+	MATRICE_GLOBAL_FINL constexpr auto(cols)() const { return (CompileTimeCols); }
 
 	MATRICE_GLOBAL_FINL operator std::array<value_t, Size>() const { return internal::_Fill_array<value_t, Size>(_Mybase::begin()); }
 	MATRICE_GLOBAL_FINL operator std::array<value_t, Size>() { return internal::_Fill_array<value_t, Size>(_Mybase::begin()); }
@@ -191,7 +191,7 @@ class Matrix_<_Ty, -1, -1> : public Base_<Matrix_<_Ty, -1, -1>>, public device::
 	using _Mybase::m_cols;
 	size_t m_pitch = _Mybase::m_storage.pitch();
 public:
-	enum { Size = -1, CompileTimeRows = -1, CompileTimeCols = -1, };
+	enum { Size = 0, CompileTimeRows = -1, CompileTimeCols = -1, };
 	using typename _Mybase::value_t;
 	using typename _Mybase::value_type;
 	using typename _Mybase::pointer;
@@ -268,7 +268,9 @@ MATRICE_NAMESPACE_END_TYPES
 
 DGE_MATRICE_BEGIN
 //\matrix type with host managed memory allocator
-template<typename T, int _M, int _N=_M, size_t _Options = rmaj|gene, typename = enable_if_t<is_arithmetic_v<T>>>
+template<typename T, int _M, int _N=_M, 
+	size_t _Options = rmaj|gene, 
+	MATRICE_ENABLE_IF(is_arithmetic_v<T>)>
 using Matrix_ = types::Matrix_<T, _M, _N>;
 
 //\matrix type with host dynamic memory allocator
