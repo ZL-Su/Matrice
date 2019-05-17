@@ -655,7 +655,7 @@ private:
  */
 template<typename _Ty> 
 class _Spline_interpolation<_Ty, _TAG mbicspl_tag> : public
-	_Interpolation_base<_Spline_interpolation<_Ty, _TAG mbicspl_tag>> 
+	_Interpolation_base<_Spline_interpolation<_Ty, _TAG mbicspl_tag>>
 {
 	static_assert(is_scalar_v<_Ty>, "template type _Ty must be a scalar.");
 	using _Myt = _Spline_interpolation<_Ty, _TAG mbicspl_tag>;
@@ -669,11 +669,33 @@ public:
 	static constexpr auto dimension = category::dimension;
 
 public:
-	 
+
 	template<typename _Cont, typename _Iter>
 	_Spline_interpolation(const _Cont& coods, const _Iter& vals) {}
 
 	MATRICE_HOST_FINL void _Coeff_impl();
 };
-
 MATRICE_ALGS_END
+
+DGE_MATRICE_BEGIN
+/**
+ *\brief 1-dimensional scattered data interpolation.
+ *\param <_Ty> data type, must be float or double.
+ */
+template<typename _Ty>
+using multilevel_bicubic_1d = algs::MBA<_Ty, 1>;
+
+/**
+ *\brief 2-dimensional scattered data interpolation.
+ *\param <_Ty> data type, must be float or double.
+ */
+template<typename _Ty>
+using multilevel_bicubic_2d = algs::MBA<_Ty, 2>;
+
+/**
+ *\brief 3-dimensional scattered data interpolation.
+ *\param <_Ty> data type, must be float or double.
+ */
+template<typename _Ty>
+using multilevel_bicubic_3d = algs::MBA<_Ty, 3>;
+DGE_MATRICE_END
