@@ -53,8 +53,8 @@ public:
 		MATRICE_HOST_FINL const auto& names(size_t i = 0) const { return (m_names[i]); }
 		MATRICE_HOST_FINL const auto count(size_t _Idx = 0) const { return m_names[_Idx].size(); }
 
-		MATRICE_HOST_FINL auto& path() { return m_path; }
-		MATRICE_HOST_FINL const auto& path() const { return m_path; }
+		MATRICE_HOST_FINL auto& path() noexcept { return m_path; }
+		MATRICE_HOST_FINL const auto& path() const noexcept { return m_path; }
 	private:
 		MATRICE_HOST_INL void _Init() {
 			m_subpaths.clear();
@@ -92,7 +92,7 @@ public:
 		MATRICE_HOST_FINL void open(int _Mode) {
 			_My_file.open(_My_filename, _Mode);
 		}
-		MATRICE_HOST_FINL void close() { 
+		MATRICE_HOST_FINL void close() noexcept {
 			_My_file.close(); 
 		}
 
@@ -112,9 +112,11 @@ public:
 		std::fstream _My_file;
 	};
 
-	IO() {};
+	IO() noexcept {};
 
-	static MATRICE_HOST_FINL auto workspace() { return fs::current_path(); }
+	static MATRICE_HOST_FINL auto workspace() noexcept { 
+		return fs::current_path(); 
+	}
 
 	template<is_skip_folder _Fopt = is_skip_folder::Y>
 	static MATRICE_HOST_INL auto filenames(const std::string& dir)
@@ -143,11 +145,13 @@ public:
 	//@brief: Template function to cvt. any value to std::string 
 	//@author: Zhilong Su - Jan.10.2017 @SEU
 	///</summary>
-	template<typename _Ty> static MATRICE_HOST_FINL auto strf(_Ty _val) {
+	template<typename _Ty> 
+	static MATRICE_HOST_FINL auto strf(_Ty _val) noexcept {
 		std::ostringstream strs; strs << _val; return strs.str();
 	}
 	// \TEMPLATE function to cvt. numeric value to std::string
-	template<typename _Ty> static MATRICE_HOST_FINL auto strfn(_Ty _val) {
+	template<typename _Ty> 
+	static MATRICE_HOST_FINL auto strfn(_Ty _val) noexcept {
 #ifdef __CXX11__
 		return (std::to_string(_val));
 #elif
