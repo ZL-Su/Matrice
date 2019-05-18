@@ -64,7 +64,9 @@ namespace detail {
  * Example: auto _Ret = dgelom::stonv<float>("1.0");
  */
 template<typename T = std::string> MATRICE_HOST_FINL
-constexpr T stonv(const std::string& _Str) { return detail::string_to_numval<T>::value(_Str); }
+constexpr T stonv(const std::string& _Str) noexcept { 
+	return detail::string_to_numval<T>::value(_Str); 
+}
 
 /**
  * \append a T-typed element into tuple _Tpl
@@ -99,6 +101,28 @@ template<> struct tuple_n<0> {
 		return std::make_tuple(_Op(_E[0]));
 	}
 };
+
+/**
+ *\brief get size of built-in array
+ */
+template<typename _Ty, size_t _N>
+MATRICE_GLOBAL_INL constexpr size_t size(_Ty(&)[_N]) noexcept { 
+	return (_N); 
+}
+/**
+ *\brief get size of std::array
+ */
+template<typename _Ty, size_t _N>
+MATRICE_HOST_INL constexpr size_t size(std::array<_Ty, _N>& _) noexcept {
+	return (_N); 
+}
+/**
+ *\brief get size of container which must has method size()
+ */
+template<typename _Cont>
+MATRICE_HOST_INL constexpr size_t size(const _Cont& _) noexcept {
+	return (_.size()); 
+}
 
 /**
  * \transform functor definitions
