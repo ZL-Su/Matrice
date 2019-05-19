@@ -10,8 +10,8 @@
 DGE_MATRICE_BEGIN
 _TYPES_BEGIN
 template<typename _Derived, typename _Traits, typename _Type>
-template<typename _Rhs> inline
-auto& Base_<_Derived, _Traits, _Type>::inplace_sub(const _Rhs& _Right) {
+template<typename _Rhs> MATRICE_HOST_INL
+decltype(auto) Base_<_Derived, _Traits, _Type>::inplace_sub(const _Rhs& _Right) {
 	using packet_t = simd::Packet_<value_type>;
 	constexpr auto step = packet_t::size;
 	const auto plen = simd::vsize<step>(this->size());
@@ -39,12 +39,12 @@ auto& Base_<_Derived, _Traits, _Type>::inplace_sub(const _Rhs& _Right) {
 		parallel_nd([&](const auto& i) { m_data[i] -= _Right(i); });
 	}
 
-	return (*this);
+	return forward<_Myt>(*this);
 }
 
 template<typename _Derived, typename _Traits, typename _Type>
 template<typename _Rhs, typename> inline
-auto& Base_<_Derived, _Traits, _Type>::mul_(const _Rhs& _Right) {
+decltype(auto) Base_<_Derived, _Traits, _Type>::mul_(const _Rhs& _Right) {
 	using packet_t = simd::Packet_<value_type>;
 	constexpr auto step = packet_t::size;
 	if constexpr (_Rhs::_ctrs_ < step) {
@@ -57,20 +57,20 @@ auto& Base_<_Derived, _Traits, _Type>::mul_(const _Rhs& _Right) {
 		DGELOM_ERROR("Undefined operation.");
 	}
 
-	return (_Right);
+	return forward<_Rhs>(_Right);
 }
 
 template<typename _Derived, typename _Traits, typename _Type>
 template<ttag _Ltag, ttag _Rtag, typename _Rhs, typename> inline
 auto Base_<_Derived, _Traits, _Type>::inplace_mul(const _Rhs& _Right) {
 	Matrix_<value_type, 
-		(_Ltag == ttag::Y)?_Myt::ColsAtCT:_Myt::RowsAtCT,
-		(_Rtag == ttag::Y)?_Rhs::RowsAtCT:_Rhs::ColsAtCT> _Ret(
-		(_Ltag == ttag::Y)?m_cols:m_rows, 
+		conditional_size_v<_Ltag == ttag::Y,_Myt::ColsAtCT,_Myt::RowsAtCT>,
+		conditional_size_v<_Rtag == ttag::Y,_Rhs::RowsAtCT,_Rhs::ColsAtCT>>
+		_Ret((_Ltag == ttag::Y)?m_cols:m_rows, 
 		(_Rtag == ttag::Y)?_Right.rows():_Right.cols());
 	blas_kernel<value_type>::mul<_Ltag, _Rtag>(
 		this->plvt(), _Right.plvt(), _Ret.plvt());
-	return std::move(_Ret);
+	return forward<decltype(_Ret)>(_Ret);
 }
 
 template<typename _Derived, typename _Traits, typename _Type>
@@ -96,4 +96,5 @@ _Rhs Base_<_Derived, _Traits, _Type>::spreadmul(const _Rhs& _Right)const {
 	return forward<_Rhs>(_Ret);
 }
 _TYPES_END
+
 DGE_MATRICE_END

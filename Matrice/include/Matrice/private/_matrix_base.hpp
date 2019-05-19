@@ -427,13 +427,13 @@ public:
 	/**
 	 * \returns reference to the derived object
 	 */
-	MATRICE_GLOBAL_FINL auto& eval() {
+	MATRICE_GLOBAL_FINL decltype(auto) eval() {
 		return (*static_cast<_Derived*>(this));
 	}
 	/**
 	 * \returns const reference to the derived object
 	 */
-	MATRICE_GLOBAL_FINL constexpr auto& eval() const { 
+	MATRICE_GLOBAL_FINL constexpr decltype(auto) eval() const {
 		return (*static_cast<const _Derived*>(this)); 
 	}
 
@@ -736,7 +736,7 @@ public:
 	/**
 	 * \matrix Frobenius norm
 	 */
-	MATRICE_GLOBAL_FINL auto norm_2() const { 
+	MATRICE_GLOBAL_FINL auto norm_2()->value_type const { 
 		auto _Ans = dot(*this); 
 		return (_Ans > eps ? dgelom::sqrt(_Ans) : inf); 
 	}
@@ -746,14 +746,14 @@ public:
 	 * Reference: https://en.wikipedia.org/wiki/Matrix_norm
 	 */
 	template<size_t _P = 2> 
-	MATRICE_GLOBAL_FINL auto norm() const {
+	MATRICE_GLOBAL_FINL auto norm()->value_type const {
 		return internal::_Matrix_norm_impl<_P>::value(*(this));
 	}
 	/**
 	 * \dot product of this matrix with _Rhs
 	 */
 	template<typename _Rhs> 
-	MATRICE_GLOBAL_FINL auto dot(const _Rhs& _Rhs) const { 
+	MATRICE_GLOBAL_FINL auto dot(const _Rhs& _Rhs)->value_type const {
 		return (this->operator*(_Rhs)).sum(); 
 	}
 
@@ -762,7 +762,7 @@ public:
 	 *\param [_Right] can be scalar or any compatible types
 	 */
 	template<typename _Rhs>
-	MATRICE_HOST_INL auto& inplace_sub(const _Rhs& _Right);
+	MATRICE_HOST_INL decltype(auto)inplace_sub(const _Rhs& _Right);
 	/**
 	 *\brief instant subtraction
 	 *\param [_Right] can be scalar or any compatible types
@@ -774,7 +774,7 @@ public:
 	 *\param [_Right] can be a matrix or a vector types
 	 */
 	template<typename _Rhs, MATRICE_ENABLE_IF(is_fxdvector_v<_Rhs>)>
-	MATRICE_HOST_INL auto& mul_(const _Rhs& _Right);
+	MATRICE_HOST_INL decltype(auto)mul_(const _Rhs& _Right);
 	/**
 	 *\brief in-place matrix-vector multiplication. Note that if the number of rows of this matrix A equals to the size of the right column vector x, this method returns (A^T)x.
 	 *\param [_Right] will be unrolled to a column vector x if it is not.
