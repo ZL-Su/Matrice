@@ -717,19 +717,19 @@ public:
 #pragma endregion
 
 	///<brief> in-time matrix arithmetic </brief>
-	MATRICE_GLOBAL_FINL auto (max)() const { 
+	MATRICE_GLOBAL_FINL auto(max)() const { 
 		return (*std::max_element(begin(), end())); 
 	}
-	MATRICE_GLOBAL_FINL auto (min)() const { 
+	MATRICE_GLOBAL_FINL auto(min)() const { 
 		return (*std::min_element(begin(), end())); 
 	}
-	MATRICE_GLOBAL_FINL auto (sum)() const { 
+	MATRICE_GLOBAL_FINL auto(sum)() const { 
 		return (reduce(begin(), end())); 
 	}
-	MATRICE_GLOBAL_FINL auto (det)() const { 
+	MATRICE_GLOBAL_FINL auto(det)() const { 
 		return (det_impl(*static_cast<const _Derived*>(this))); 
 	}
-	MATRICE_GLOBAL_FINL auto (trace)() const { 
+	MATRICE_GLOBAL_FINL auto(trace)() const { 
 		return (reduce(begin(), end(), cols() + 1)); 
 	}
 
@@ -743,7 +743,7 @@ public:
 	/**
 	 * \matrix p-norm: $[\sum_{i=1}^{m}\sum_{j=1}^{}|a_{ij}|^p]^{1/p}$
 	 * Sepcial cases: $p = 0$ for $\infty$-norm, $p = 1$ for 1-norm and $p = 2$ for 2-norm
-	 * Reference: https://en.wikipedia.org/wiki/Matrix_norm
+	 * \Reference: https://en.wikipedia.org/wiki/Matrix_norm
 	 */
 	template<size_t _P = 2> 
 	MATRICE_GLOBAL_FINL auto norm()->value_type const {
