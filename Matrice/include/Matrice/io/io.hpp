@@ -64,7 +64,7 @@ public:
 		MATRICE_HOST_FINL decltype(auto) path() noexcept { 
 			return forward<decltype(m_path)>(m_path); 
 		}
-		MATRICE_HOST_FINL const decltype(auto) path() const noexcept { 
+		MATRICE_HOST_FINL decltype(auto) path() const noexcept { 
 			return forward<decltype(m_path)>(m_path);
 		}
 	private:
@@ -80,7 +80,7 @@ public:
 			}
 			if constexpr (_Nsubfolder == 0) m_subpaths.emplace_back("");
 			if (_Nsubfolder != 0 && _Nsubfolder > m_subpaths.size())
-				std::runtime_error("No enough subfolders");
+				DGELOM_ERROR("No enough subfolders");
 			
 			_Cnt = 0; 
 			m_names.resize(_Nsubfolder == 0 ? 1 : min(_Nsubfolder, m_subpaths.size()));
@@ -112,7 +112,8 @@ public:
 		MATRICE_HOST_FINL size_t append(_It _First, _It _Last) {
 			for (; _First != _Last;) {
 				_My_file << *_First;
-				if (++_First != _Last) _My_file << _My_delimeter;
+				if (++_First != _Last) 
+					_My_file << _My_delimeter;
 			}
 			_My_file << "\n";
 
@@ -188,7 +189,7 @@ public:
 	 *\param <_N0, _N1> are the 1-based indices of the begin and end columns to be read. 
 	 */
 	template<typename _Ty, size_t _N0, size_t _N1 = _N0>
-	static MATRICE_HOST_INL auto read(const std::string& _Path, size_t _Skips = 0) {
+	static MATRICE_HOST_INL auto read(std::string _Path, size_t _Skips = 0) {
 		static_assert(_N0 <= _N1, "_N1 must be greater than or equal to _N0");
 		using value_type = _Ty;
 		DGELOM_CHECK(fs::exists(fs::path(_Path)),"'"+_Path+"' does not exist!");
@@ -228,7 +229,7 @@ public:
 			   [_Skips] indicates how many lines to skip over
 	 */
 	template<typename _Ty>
-	static MATRICE_HOST_INL auto read(const std::string& _Path, size_t _Skips = 0) {
+	static MATRICE_HOST_INL auto read(std::string _Path, size_t _Skips = 0) {
 		using value_type = _Ty;
 		DGELOM_CHECK(fs::exists(fs::path(_Path)), "'" + _Path + "' does not exist!");
 		std::ifstream _Fin(_Path);
@@ -253,7 +254,7 @@ public:
 
 	// \single-stream output
 	template<typename _Op> 
-	static MATRICE_HOST_FINL void write(const std::string& _path, _Op _op) {
+	static MATRICE_HOST_FINL void write(std::string _path, _Op _op) {
 		std::ofstream _Fout(_path);
 		DGELOM_CHECK(_Fout.is_open(), "Fail to open file: " + _path);
 		_Fout.setf(std::ios::fixed, std::ios::floatfield);
@@ -266,7 +267,7 @@ public:
 			write("C:/data/", {"f1.txt", "f2.txt"}, [&](auto&& fs1, auto&& fs2){ ... })
 	 */
 	template<typename _Op>
-	static MATRICE_HOST_FINL void write(const std::string& _path, std::initializer_list<std::string> _fnames, _Op&& _op) {
+	static MATRICE_HOST_FINL void write(std::string _path, std::initializer_list<std::string> _fnames, _Op&& _op) {
 		std::cout << "Files are saved in folder: " << _path << std::endl;
 		const auto _N = _fnames.begin();
 		std::ofstream _O1(_path + _N[0]), _O2(_path + _N[1]);
@@ -288,16 +289,16 @@ public:
 
 	// \split a string with the given token
 	template<typename _Ty = std::string> static 
-	MATRICE_HOST_FINL auto split(const std::string& _string, char _token) {
+	MATRICE_HOST_FINL auto split(const std::string& _str, char _tok) {
 		std::vector<_Ty> _Res;
 
-		const auto _String = std::string(1, _token) + _string;
+		const auto _String = std::string(1, _tok) + _str;
 		auto _Pos = _String.begin(), _End = _String.end();
-		if (_String.back() == _token) --_End;
+		if (_String.back() == _tok) --_End;
 
 		while (_Pos != _End) {
 			auto _Pos_last = _Pos+1;
-			_Pos = std::find(_Pos_last, _End, _token);
+			_Pos = std::find(_Pos_last, _End, _tok);
 			_Res.push_back(stonv<_Ty>(_String.substr(std::distance(_String.begin(), _Pos_last), std::distance(_Pos_last, _Pos))));
 		}
 
@@ -307,45 +308,56 @@ public:
 };
 
 // \read interface
-template<typename... _Args> HOST_INL_CXPR_T
-read(_Args... _args) { try { return IO::read(_args...); } catch (std::exception& _E) { throw _E; } };
+template<typename... _Args>
+MATRICE_HOST_INL auto read(_Args...args)->decltype(IO::read(args...)){
+	try { return IO::read(args...); } 
+	catch (std::exception& _E) { throw _E; } 
+};
 // \write interface
-template<typename... _Args> HOST_INL_CXPR_T
-write(_Args... _args) { try { return IO::write(_args...); } catch (std::exception& _E) { throw _E; } };
+template<typename... _Args> 
+MATRICE_HOST_INL auto write(_Args...args)->decltype(IO::write(args...)){
+	try { return IO::write(args...); } 
+	catch (std::exception& _E) { throw _E; } 
+};
 // \definite a path under current folder
-template<typename T> HOST_INL_CXPR_T
-defpath(const T local) { return std::forward<std::string>(IO::workspace().string() + "\\" + IO::strf(local)); };
+template<typename T>
+MATRICE_HOST_INL decltype(auto) defpath(const T local) {
+	return forward<std::string>(IO::workspace().string() + "\\" + IO::strf(local)); 
+};
 
 // \Class: std::string helper  
 // \Coded by: dgelom su
-class string_helper final {
-
+class string_helper MATRICE_NONHERITABLE {
 	using basic_value_type = char;
+public:
 	using value_type = std::string;
 	using const_value_type = std::add_const_t<value_type>;
-	using value_reference = std::add_lvalue_reference_t<value_type>;
-	using const_value_reference = std::add_const_t<value_reference>;
 
-public:
-
-	// \Given a string and a token, return data items with type of "_Ty"
-	template<typename _Ty = value_type> static 
-	_INLINE_VAR auto split(const_value_reference _Str, basic_value_type _Token) {
+	template<typename _Ty = value_type> static
+	/**
+	 *\brief split a given string with a token 
+	 *\param [_Str] string being splitted; [_Tok] token.
+	 *\note: the template is used to specify the returned type.
+	 *\example:
+	   auto _Str1 = string_helper::value_type("dog,car,plane");
+		auto _Items1 = string_helper::split(_Str1,',');//{dog, car, plane}
+		auto _Str2 = string_helper::value_type("2,3,5");
+		auto _Items2 = string_helper::split<float>(_Str2,',');//{2.f, 3.f, 5.f}
+	 */
+	MATRICE_HOST_INL auto split(const value_type& _Str, basic_value_type _Tok) {
 		std::vector<_Ty> _Res;
-		const_value_type _String = value_type(1, _Token) + _Str;
+		const_value_type _String = value_type(1, _Tok) + _Str;
 
 		auto _Pos = _String.begin();
 		while (_Pos != _String.end()) {
-			auto _Pos_last = _Pos + 1;
-
-			_Pos = std::find(_Pos_last, _String.end(), _Token);
-
+			auto _Pos_last = ++_Pos;
+			_Pos = std::find(_Pos_last, _String.end(), _Tok);
 			_Res.push_back(dgelom::stonv<_Ty>(_String.substr(
 				std::distance(_String.begin(), _Pos_last), 
 				std::distance(_Pos_last, _Pos)
 			)));
 		}
-		return std::forward<decltype(_Res)>(_Res);
+		return forward<decltype(_Res)>(_Res);
 	}
 
 };
