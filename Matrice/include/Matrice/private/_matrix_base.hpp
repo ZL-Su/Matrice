@@ -746,15 +746,15 @@ public:
 	 * \Reference: https://en.wikipedia.org/wiki/Matrix_norm
 	 */
 	template<size_t _P = 2> 
-	MATRICE_GLOBAL_FINL auto norm()->value_type const {
+	MATRICE_GLOBAL_FINL value_type norm() const {
 		return internal::_Matrix_norm_impl<_P>::value(*(this));
 	}
 	/**
 	 * \dot product of this matrix with _Rhs
 	 */
 	template<typename _Rhs> 
-	MATRICE_GLOBAL_FINL auto dot(const _Rhs& _Rhs)->value_type const {
-		return (this->operator*(_Rhs)).sum(); 
+	MATRICE_GLOBAL_FINL value_type dot(const _Rhs& _Rhs) const {
+		return this->operator*(_Rhs).sum(); 
 	}
 
 	/**
