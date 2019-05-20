@@ -70,7 +70,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;_SCL_SECURE_NO_WARNINGS;_ENABLE_EXTENDED_ALIGNED_STORAGE;__use_mkl__;MATRICE_THR=MATRICE_THR_OMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;MATRICE_DEBUG;_LIB;_SCL_SECURE_NO_WARNINGS;_ENABLE_EXTENDED_ALIGNED_STORAGE;__use_mkl__;MATRICE_THR=MATRICE_THR_OMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <DisableSpecificWarnings>4006;4221;</DisableSpecificWarnings>
@@ -153,13 +153,14 @@
     <ClInclude Include="include\Matrice\algs\erroranalysis\_common.h" />
     <ClInclude Include="include\Matrice\algs\geometry\normalization.h" />
     <ClInclude Include="include\Matrice\algs\geometry\transform.h" />
+    <ClInclude Include="include\Matrice\algs\graphics\_distance.hpp" />
     <ClInclude Include="include\Matrice\algs\graphics\_meshing.h" />
     <ClInclude Include="include\Matrice\algs\imageproc.hpp" />
     <ClInclude Include="include\Matrice\algs\interpolation.h" />
     <ClInclude Include="include\Matrice\algs\interpolation\_base.h" />
+    <ClInclude Include="include\Matrice\algs\interpolation\_mba.hpp" />
     <ClInclude Include="include\Matrice\algs\interpolation\_splineinterp.h" />
     <ClInclude Include="include\Matrice\algs\interpolation\_interpolation.h" />
-    <ClInclude Include="include\Matrice\algs\mbspa.h" />
     <ClInclude Include="include\Matrice\algs\similarity.h" />
     <ClInclude Include="include\Matrice\algs\similarity\_iterative_conv_impl.h" />
     <ClInclude Include="include\Matrice\algs\similarity\_similarity_traits.h" />
@@ -179,6 +180,7 @@
     <ClInclude Include="include\Matrice\private\autograd\_expression.h" />
     <ClInclude Include="include\Matrice\private\autograd\_grad_ops.h" />
     <ClInclude Include="include\Matrice\private\autograd\_grad_utils.h" />
+    <ClInclude Include="include\Matrice\private\container\_multi_array.hpp" />
     <ClInclude Include="include\Matrice\private\math\_config.h" />
     <ClInclude Include="include\Matrice\private\math\_linear.h" />
     <ClInclude Include="include\Matrice\private\math\_linear_solver.h" />

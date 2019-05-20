@@ -181,6 +181,9 @@
     <Filter Include="Header Files\Algs\Interpolation\inline">
       <UniqueIdentifier>{08f02915-7ef2-4f21-a3a5-c89a2b73afeb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Detail\container">
+      <UniqueIdentifier>{964b65b8-9a9a-47d9-9bec-7d76d0720b9f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -220,9 +223,6 @@
       <Filter>Header Files\Addin</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\imageproc.hpp">
-      <Filter>Header Files\Algs</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Matrice\algs\mbspa.h">
       <Filter>Header Files\Algs</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\arch\_ixtraits.hpp">
@@ -452,6 +452,15 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\correlation\_utils.hpp">
       <Filter>Header Files\Algs\Correlation</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\interpolation\_mba.hpp">
+      <Filter>Header Files\Algs\Interpolation</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\container\_multi_array.hpp">
+      <Filter>Header Files\Detail\container</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\graphics\_distance.hpp">
+      <Filter>Header Files\Algs\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

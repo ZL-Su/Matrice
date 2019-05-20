@@ -49,12 +49,24 @@ public:
 		MATRICE_HOST_INL const auto operator()(size_t i) const {
 			return std::string(m_path + m_names[0][i]);
 		}
-		MATRICE_HOST_FINL auto& names(size_t i = 0) { return (m_names[i]); }
-		MATRICE_HOST_FINL const auto& names(size_t i = 0) const { return (m_names[i]); }
-		MATRICE_HOST_FINL const auto count(size_t _Idx = 0) const { return m_names[_Idx].size(); }
+		MATRICE_HOST_FINL decltype(auto) names(size_t i = 0) {
+			using names_type = typename decltype(m_names)::value_type;
+			return forward<names_type>(m_names)[i];
+		}
+		MATRICE_HOST_FINL const auto& names(size_t i = 0) const { 
+			using names_type = typename decltype(m_names)::value_type;
+			return forward<names_type>(m_names)[i];
+		}
+		MATRICE_HOST_FINL const size_t count(size_t _Idx = 0) const { 
+			return m_names[_Idx].size(); 
+		}
 
-		MATRICE_HOST_FINL auto& path() noexcept { return m_path; }
-		MATRICE_HOST_FINL const auto& path() const noexcept { return m_path; }
+		MATRICE_HOST_FINL decltype(auto) path() noexcept { 
+			return forward<decltype(m_path)>(m_path); 
+		}
+		MATRICE_HOST_FINL const decltype(auto) path() const noexcept { 
+			return forward<decltype(m_path)>(m_path);
+		}
 	private:
 		MATRICE_HOST_INL void _Init() {
 			m_subpaths.clear();
@@ -97,12 +109,13 @@ public:
 		}
 
 		template<typename _It> 
-		MATRICE_HOST_FINL auto append(_It _First, _It _Last) {
+		MATRICE_HOST_FINL size_t append(_It _First, _It _Last) {
 			for (; _First != _Last;) {
 				_My_file << *_First;
 				if (++_First != _Last) _My_file << _My_delimeter;
 			}
 			_My_file << "\n";
+
 			return (_My_linecnt++);
 		}
 
@@ -161,12 +174,12 @@ public:
 
 	template<typename _Op> 
 	static MATRICE_HOST_INL auto read(std::string _path, _Op _op) {
-		if (!fs::exists(fs::path(_path))) 
-			throw std::runtime_error("'" + _path + "' does not exist!");
+		DGELOM_CHECK(fs::exists(fs::path(_path)), "'" + _path + "' does not exist!");
 
 		std::ifstream _Fin(_path);
-		if (!_Fin.is_open()) 
-			throw std::runtime_error("Cannot open file.");
+
+		DGELOM_CHECK(_Fin.is_open(), "Fail to open the file in " + _path);
+			
 		return _op(_Fin);
 	}
 
@@ -197,7 +210,7 @@ public:
 				}
 				_Data.emplace_back(_Myline);
 			}
-			return std::forward<decltype(_Data)>(_Data);
+			return forward<decltype(_Data)>(_Data);
 		}
 		else {
 			std::vector<value_type> _Data;
@@ -205,7 +218,7 @@ public:
 				auto _Res = split<value_type>(_Line, ',');
 				_Data.emplace_back(_Res[_N0-1]);
 			}
-			return std::forward<decltype(_Data)>(_Data);
+			return forward<decltype(_Data)>(_Data);
 		}
 	}
 
@@ -244,7 +257,7 @@ public:
 		std::ofstream _Fout(_path);
 		DGELOM_CHECK(_Fout.is_open(), "Fail to open file: " + _path);
 		_Fout.setf(std::ios::fixed, std::ios::floatfield);
-		_op(std::forward<std::ofstream>(_Fout));
+		_op(forward<std::ofstream>(_Fout));
 		_Fout.close();
 	}
 	/**
@@ -262,7 +275,7 @@ public:
 		_O1.setf(std::ios::fixed, std::ios::floatfield);
 		_O2.setf(std::ios::fixed, std::ios::floatfield);
 
-		_op(std::forward<std::ofstream>(_O1), std::forward<std::ofstream>(_O2));
+		_op(forward<std::ofstream>(_O1), forward<std::ofstream>(_O2));
 
 		_O1.close(), _O2.close();
 	}
