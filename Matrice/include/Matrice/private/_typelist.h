@@ -1,6 +1,6 @@
 /*  *************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,15 +29,15 @@ namespace detail {
  */
 template<typename _TyList> struct to_tuple;
 template<typename _TyList> struct size;
-template<std::size_t _Idx, typename _TyList> struct element;
+template<size_t _Idx, typename _TyList> struct element;
 /**
  * Type holding a list of types for compile time type computations
  */
 template<typename... _Args> struct typelist final {
 
-	static constexpr std::size_t ntypes = size<typelist>::value;
+	static constexpr size_t ntypes = size<typelist>::value;
 	using tuple_type = typename to_tuple<typelist>::type;
-	template<std::size_t _Idx>
+	template<size_t _Idx>
 	using type = typename element<_Idx, typelist>::type;
 
 private:
@@ -53,7 +53,7 @@ template<typename _TyList> struct size final {
 	static_assert(detail::false_t_v<_TyList>, "In tl::size<T>, T must be typelist<...>.");
 };
 template<typename... _Tys> struct size<typelist<_Tys...>> final {
-	static constexpr std::size_t value = sizeof...(_Tys);
+	static constexpr size_t value = sizeof...(_Tys);
 };
 template<typename... _Tys> MATRICE_GLOBAL_INL constexpr auto size_v = size<_Tys>::value;
 
@@ -66,7 +66,7 @@ template<typename _TyList> struct to_tuple final {
 	static_assert(detail::false_t_v<_TyList>, "In tl::to_tuple<T>, T must be typelist<...>.");
 };
 template<typename... _Tys> struct to_tuple<typelist<_Tys...>> final {
-	using type = std::tuple<_Tys...>;
+	using type = tuple<_Tys...>;
 };
 template<typename _TyList> using to_tuple_t = typename to_tuple<_TyList>::type;
 
@@ -137,8 +137,7 @@ struct count_if final {
 	// TODO Direct implementation might be faster
 	static constexpr size_t value = size<filter_t<_Cond, _TyList>>::value;
 };
-template<template <typename> class _Cond, typename _TyList> MATRICE_GLOBAL_INL constexpr std::size_t count_if_v = count_if<_Cond, _TyList>::value;
-
+template<template <typename> class _Cond, typename _TyList> MATRICE_GLOBAL_INL constexpr size_t count_if_v = count_if<_Cond, _TyList>::value;
 
 /**
  * Returns true iff the type trait is true for all types in the type list
@@ -187,7 +186,7 @@ template<typename _TyList> using head_t = typename head<_TyList>::type;
  */
 
  /// Base template.
-template<std::size_t _Idx, typename _TyList> struct element final {
+template<size_t _Idx, typename _TyList> struct element final {
 	static_assert(detail::false_t_v<_TyList>, "In tl::element<T>, the T argument must be typelist<...>.");
 };
 
@@ -196,17 +195,17 @@ template<typename _Head, typename... _Tails> struct element<0, typelist<_Head, _
 
 /// Error case, we have an index but ran out of types! It will only be selected
 /// if `Ts...` is actually empty!
-template <std::size_t _Idx, class... _Tys>
+template <size_t _Idx, class... _Tys>
 struct element<_Idx, typelist<_Tys...>> {
 	static_assert(_Idx < sizeof...(_Tys), "Index is out of bounds in tl::element");
 };
 
 /// Shave off types until we hit the <0, Head, Tail...> or <Index> case.
-template<std::size_t _Idx, typename _Head, typename... _Tails> 
+template<size_t _Idx, typename _Head, typename... _Tails> 
 struct element<_Idx, typelist<_Head, _Tails...>> : element<_Idx - 1, typelist<_Tails...>> { };
 
 /// Convenience alias.
-template<std::size_t _Idx, typename _TyList>
+template<size_t _Idx, typename _TyList>
 using element_t = typename element<_Idx, _TyList>::type;
 
 /**
@@ -224,7 +223,7 @@ template <typename _Head>
 struct last<typelist<_Head>> final { using type = _Head; };
 template <typename _TyList>
 using last_t = typename last<_TyList>::type;
-static_assert( std::is_same_v<int, last_t<typelist<double, float, int>>>, "");
+static_assert(std::is_same_v<int, last_t<typelist<double, float, int>>>, "");
 
 /**
  * Reverses a typelist.
@@ -277,8 +276,8 @@ namespace detail {
 	};
 	template<typename... _Tys> struct map_types_to_values<typelist<_Tys...>> final {
 		template<typename _Fty>
-		static std::tuple<std::invoke_result_t<_Fty(type_<_Tys>)>...> call(_Fty&& func) {
-			return std::tuple<std::invoke_result_t<_Fty(type_<_Tys>)>...> { std::forward<_Fty>(func)(type_<_Tys>())... };
+		static tuple<std::invoke_result_t<_Fty(type_<_Tys>)>...> call(_Fty&& func) {
+			return tuple<std::invoke_result_t<_Fty(type_<_Tys>)>...> { forward<_Fty>(func)(type_<_Tys>())... };
 		}
 	};
 }
@@ -287,6 +286,6 @@ namespace detail {
 template<typename... _Args> using typelist = tl::typelist<_Args...>;
 
 template<typename _TyList, typename _Fty> auto map_types_to_values(_Fty&& func)->
-decltype(tl::detail::map_types_to_values<_TyList>::call(std::forward<_Fty>(func))) {
-	return tl::detail::map_types_to_values<_TyList>::call(std::forward<_Fty>(func));
+decltype(tl::detail::map_types_to_values<_TyList>::call(forward<_Fty>(func))) {
+	return tl::detail::map_types_to_values<_TyList>::call(forward<_Fty>(func));
 } DGE_MATRICE_END
