@@ -37,8 +37,9 @@ template<typename _Ty> using is_function_type_t = typename is_function_type<_Ty>
  * using A = function_traits<int (float, double)>::return_type // A == int
  * using A = function_traits<int (float, double)>::parameter_types::tuple_type // A == tuple<float, double>
  */
-template<typename _Fty, typename = std::enable_if_t<std::is_function_v<_Fty>>> struct function_traits {};
-template<typename _Ret, typename... _Args> struct function_traits<_Ret(_Args...)> {
+template<typename _Fty, MATRICE_ENABLE_IF(is_function_v<_Fty>)> struct function_traits {};
+template<typename _Ret, typename... _Args> 
+struct function_traits<_Ret(_Args...)> {
 	using plain_type = _Ret(_Args...);
 	using function_type = std::function<_Ret(_Args...)>;
 	using return_type = _Ret;
