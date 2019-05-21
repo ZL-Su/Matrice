@@ -33,7 +33,8 @@ template<size_t _Idx, typename _TyList> struct element;
 /**
  * Type holding a list of types for compile time type computations
  */
-template<typename... _Args> struct typelist final {
+template<typename... _Args> 
+struct typelist MATRICE_NONHERITABLE {
 
 	static constexpr size_t ntypes = size<typelist>::value;
 	using tuple_type = typename to_tuple<typelist>::type;
@@ -49,23 +50,28 @@ private:
  * Example:
  *   3  ==  size<typelist<int, int, double>>::value
  */
-template<typename _TyList> struct size final {
+template<typename _TyList> 
+struct size MATRICE_NONHERITABLE {
 	static_assert(detail::false_t_v<_TyList>, "In tl::size<T>, T must be typelist<...>.");
 };
-template<typename... _Tys> struct size<typelist<_Tys...>> final {
+template<typename... _Tys> 
+struct size<typelist<_Tys...>> MATRICE_NONHERITABLE {
 	static constexpr size_t value = sizeof...(_Tys);
 };
-template<typename... _Tys> MATRICE_GLOBAL_INL constexpr auto size_v = size<_Tys>::value;
+template<typename... _Tys> 
+MATRICE_GLOBAL_INL constexpr auto size_v = size<_Tys>::value;
 
 /**
  * Transforms a list of types into a tuple holding these types.
  * Example:
  *   std::tuple<int, string>  ==  to_tuple_t<typelist<int, string>>
  */
-template<typename _TyList> struct to_tuple final {
+template<typename _TyList> 
+struct to_tuple MATRICE_NONHERITABLE {
 	static_assert(detail::false_t_v<_TyList>, "In tl::to_tuple<T>, T must be typelist<...>.");
 };
-template<typename... _Tys> struct to_tuple<typelist<_Tys...>> final {
+template<typename... _Tys> 
+struct to_tuple<typelist<_Tys...>> MATRICE_NONHERITABLE {
 	using type = tuple<_Tys...>;
 };
 template<typename _TyList> using to_tuple_t = typename to_tuple<_TyList>::type;
@@ -76,10 +82,12 @@ template<typename _TyList> using to_tuple_t = typename to_tuple<_TyList>::type;
  * Example:
  *   typelist<int, string>  ==  from_tuple_t<std::tuple<int, string>>
  */
-template<typename _Tuple> struct from_tuple final {
+template<typename _Tuple> 
+struct from_tuple MATRICE_NONHERITABLE {
 	static_assert(detail::false_t_v<_Tuple>, "In tl::from_tuple<T>, T must be std::tuple<...>.");
 };
-template<typename... _Tys> struct from_tuple<std::tuple<_Tys...>> final {
+template<typename... _Tys> 
+struct from_tuple<std::tuple<_Tys...>> MATRICE_NONHERITABLE {
 	using type = typelist<_Tys...>;
 };
 template<class Tuple> using from_tuple_t = typename from_tuple<Tuple>::type;
@@ -90,16 +98,17 @@ template<class Tuple> using from_tuple_t = typename from_tuple<Tuple>::type;
  * Example:
  *   typelist<int, string, int>  ==  concat_t<typelist<int, string>, typelist<int>>
  */
-template<typename... _TyLists> struct concat final {
+template<typename... _TyLists> 
+struct concat MATRICE_NONHERITABLE {
 	static_assert(detail::false_t_v<_TyLists...>, "In tl::concat<T1, ...>, the T arguments each must be typelist<...>.");
 };
 template<typename... _Head1Tys, typename... _Head2Tys, typename... _TailLists>
-struct concat<typelist<_Head1Tys...>, typelist<_Head2Tys...>, _TailLists...> final {
+struct concat<typelist<_Head1Tys...>, typelist<_Head2Tys...>, _TailLists...> MATRICE_NONHERITABLE {
 	using type = typename concat<typelist<_Head1Tys..., _Head2Tys...>, _TailLists...>::type;
 };
 template<typename... _HeadTys>
-struct concat<typelist<_HeadTys...>> final { using type = typelist<_HeadTys...>; };
-template<> struct concat<> final { using type = typelist<>; };
+struct concat<typelist<_HeadTys...>> MATRICE_NONHERITABLE { using type = typelist<_HeadTys...>; };
+template<> struct concat<> MATRICE_NONHERITABLE { using type = typelist<>; };
 template<typename... _TyLists> using concat_t = typename concat<_TyLists...>::type;
 
 /**
@@ -107,19 +116,20 @@ template<typename... _TyLists> using concat_t = typename concat<_TyLists...>::ty
  * Examples:
  *   typelist<int&, const string&&>  ==  filter_t<std::is_reference, typelist<void, string, int&, bool, const string&&, int>>
  */
-template<template <typename> class _Cond, typename _TyList> struct filter final {
-	static_assert(detail::false_t<_TyList>::value, "In tl::filter<_Cond, _TyList>, the _TyList argument must be typelist<...>.");
+template<template <typename> class _Cond, typename _TyList> 
+struct filter MATRICE_NONHERITABLE {
+	static_assert(detail::false_t_v<_TyList>, "In tl::filter<_Cond, _TyList>, the _TyList argument must be typelist<...>.");
 };
 template<template <typename> class _Cond, class _Head, class... _Tails>
-struct filter<_Cond, typelist<_Head, _Tails...>> final {
-	static_assert(is_type_condition<_Cond>::value, "In tl::filter<_Cond, _TyList>, the _Cond argument must be a condition type trait, i.e. have a static constexpr bool ::value member.");
+struct filter<_Cond, typelist<_Head, _Tails...>> MATRICE_NONHERITABLE {
+	static_assert(is_type_condition_v<_Cond>, "In tl::filter<_Cond, _TyList>, the _Cond argument must be a condition type trait, i.e. have a static constexpr bool ::value member.");
 	using type = conditional_t<_Cond<_Head>::value,
 		concat_t<typelist<_Head>, typename filter<_Cond, typelist<_Tails...>>::type>,
 		typename filter<_Cond, typelist<_Tails...>>::type>;
 };
 template<template <typename> class _Cond>
-struct filter<_Cond, typelist<>> final {
-	static_assert(is_type_condition<_Cond>::value, "In tl::filter<_Cond, _TyList>, the _Cond argument must be a condition type trait, i.e. have a static constexpr bool ::value member.");
+struct filter<_Cond, typelist<>> MATRICE_NONHERITABLE {
+	static_assert(is_type_condition_v<_Cond>, "In tl::filter<_Cond, _TyList>, the _Cond argument must be a condition type trait, i.e. have a static constexpr bool ::value member.");
 	using type = typelist<>;
 };
 template<template <typename> class _Cond, typename _TyList>
@@ -132,10 +142,10 @@ using filter_t = typename filter<_Cond, _TyList>::type;
  */
 template<template <typename> class _Cond, typename _TyList>
 struct count_if final {
-	static_assert(is_type_condition<_Cond>::value, "In tl::count_if<_Cond, _TyList>, the _Cond argument must be a condition type trait, i.e. have a static constexpr bool ::value member.");
+	static_assert(is_type_condition_v<_Cond>, "In tl::count_if<_Cond, _TyList>, the _Cond argument must be a condition type trait, i.e. have a static constexpr bool ::value member.");
 	static_assert(is_instantiation_of<typelist, _TyList>::value, "In tl::count_if<_Cond, _TyList>, the _TyList argument must be typelist<...>.");
 	// TODO Direct implementation might be faster
-	static constexpr size_t value = size<filter_t<_Cond, _TyList>>::value;
+	static constexpr size_t value = size_v<filter_t<_Cond, _TyList>>;
 };
 template<template <typename> class _Cond, typename _TyList> MATRICE_GLOBAL_INL constexpr size_t count_if_v = count_if<_Cond, _TyList>::value;
 
@@ -145,12 +155,14 @@ template<template <typename> class _Cond, typename _TyList> MATRICE_GLOBAL_INL c
  *   true   ==  true_for_each_type<std::is_reference, typelist<int&, const float&&, const MyClass&>>::value
  *   false  ==  true_for_each_type<std::is_reference, typelist<int&, const float&&, MyClass>>::value
  */
-template<template <typename> class _Cond, typename _TyList> struct true_for_each_type final {
+template<template <typename> class _Cond, typename _TyList> 
+struct true_for_each_type MATRICE_NONHERITABLE {
 	static_assert(detail::false_t_v<_TyList>, "In tl::true_for_each_type<_Cond, _TyList>, the _TyList argument must be typelist<...>.");
 };
 template<template <typename> class _Cond, class... _Tys>
-struct true_for_each_type<_Cond, typelist<_Tys...>> final : std::conjunction<_Cond<_Tys>...> {
-	static_assert(is_type_condition<_Cond>::value, "In tl::true_for_each_type<_Cond, _TyList>, the _Cond argument must be a condition type trait, i.e. have a static constexpr bool ::value member.");
+struct true_for_each_type<_Cond, typelist<_Tys...>> MATRICE_NONHERITABLE 
+	: std::conjunction<_Cond<_Tys>...> {
+	static_assert(is_type_condition_v<_Cond>, "In tl::true_for_each_type<_Cond, _TyList>, the _Cond argument must be a condition type trait, i.e. have a static constexpr bool ::value member.");
 };
 
 /**
@@ -186,7 +198,8 @@ template<typename _TyList> using head_t = typename head<_TyList>::type;
  */
 
  /// Base template.
-template<size_t _Idx, typename _TyList> struct element final {
+template<size_t _Idx, typename _TyList> 
+struct element MATRICE_NONHERITABLE {
 	static_assert(detail::false_t_v<_TyList>, "In tl::element<T>, the T argument must be typelist<...>.");
 };
 
@@ -230,10 +243,12 @@ static_assert(std::is_same_v<int, last_t<typelist<double, float, int>>>, "");
  * Example:
  *   typelist<int, string>  == reverse_t<typelist<string, int>>
  */
-template<typename _TyList> struct reverse final {
+template<typename _TyList> 
+struct reverse MATRICE_NONHERITABLE {
 	static_assert(detail::false_t_v<_TyList>, "In dgelom::reverse<T>, the T argument must be typelist<...>.");
 };
-template<typename _Head, typename... _Tails> struct reverse<typelist<_Head, _Tails...>> final {
+template<typename _Head, typename... _Tails> 
+struct reverse<typelist<_Head, _Tails...>> MATRICE_NONHERITABLE {
 	using type = concat_t<typename reverse<typelist<_Tails...>>::type, typelist<_Head>>;
 };
 template<> struct reverse<typelist<>> final { using type = typelist<>; };
@@ -285,7 +300,10 @@ namespace detail {
 
 template<typename... _Args> using typelist = tl::typelist<_Args...>;
 
-template<typename _TyList, typename _Fty> auto map_types_to_values(_Fty&& func)->
+template<typename _TyList, typename _Fty> 
+auto map_types_to_values(_Fty&& func)->
 decltype(tl::detail::map_types_to_values<_TyList>::call(forward<_Fty>(func))) {
 	return tl::detail::map_types_to_values<_TyList>::call(forward<_Fty>(func));
-} DGE_MATRICE_END
+} 
+
+DGE_MATRICE_END
