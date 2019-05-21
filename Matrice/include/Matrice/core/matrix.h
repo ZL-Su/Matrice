@@ -55,6 +55,9 @@ public:
 		: _Mybase(_other) {};
 	MATRICE_GLOBAL_FINL Matrix_(int _pld1=0, int _pld2=0) noexcept 
 		: _Mybase() {};
+	template<typename _Uy>
+	MATRICE_HOST_FINL   Matrix_(const nested_initlist<_Uy> _list) noexcept
+		: _Mybase(_list) {}
 	template<size_t _Len>
 	MATRICE_HOST_FINL   Matrix_(const std::array<value_t, _Len>& _array) noexcept
 		: Matrix_(pointer(_array.data())) {}
@@ -70,6 +73,10 @@ public:
 	}
 	MATRICE_GLOBAL_FINL Myt_reference operator=(Myt_move_reference _other) {
 		return _Mybase::operator=(move(_other)); 
+	}
+	template<typename _Uy>
+	MATRICE_HOST_FINL Myt_reference operator=(nested_initlist<_Uy> _list) {
+		return _Mybase::operator=(_list);
 	}
 	template<typename _Arg>
 	MATRICE_GLOBAL_FINL Myt_reference operator=(const _Arg& _arg) { 

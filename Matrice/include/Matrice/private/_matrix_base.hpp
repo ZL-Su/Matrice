@@ -269,7 +269,7 @@ public:
 	MATRICE_GLOBAL_INL Base_(const shape_t<size_t>& _Shape, value_t _Val) noexcept
 		:Base_(MATRICE_EXPAND_SHAPE, _Val) {}
 	MATRICE_GLOBAL_INL Base_(const_initlist _list) noexcept 
-		:_Mybase(_M, _N), m_storage(_list) MATRICE_LINK_PTR
+		:_Mybase((_M <= 0)?_list.size():_M, (_N<=0)?1:_N), m_storage(_list) MATRICE_LINK_PTR
 	MATRICE_GLOBAL_INL Base_(_Myt_const_reference _other) noexcept 
 		:_Mybase(_other._Myshape), m_storage(_other.m_storage) MATRICE_LINK_PTR
 	MATRICE_GLOBAL_INL Base_(_Myt_move_reference _other) noexcept 
@@ -278,12 +278,12 @@ public:
 	 *\from STD vector<value_t>
 	 */
 	MATRICE_HOST_INL Base_(const std::vector<value_t>&_other, int _cols=1) noexcept
-		:Base_(_other.size() / _cols, _cols) { from(_other.data()); }
+		:Base_(_other.size()/_cols, _cols) { from(_other.data()); }
 	/**
 	 *\from STD valarray<...>
 	 */
 	MATRICE_HOST_INL Base_(const std::valarray<value_t>& _other, int _rows = 1) noexcept 
-		:_Mybase(_rows, _other.size() / _rows), m_storage(_rows, _other.size() / _rows, (pointer)std::addressof(_other[0])) MATRICE_LINK_PTR
+		:_Mybase(_rows, _other.size()/_rows), m_storage(_rows, _other.size()/_rows, (pointer)std::addressof(_other[0])) MATRICE_LINK_PTR
 	/**
 	 *\from explicit specified matrix type
 	 */
@@ -304,13 +304,28 @@ public:
 		:_Mybase(m_rows = exp.rows(), m_cols = exp.cols()), 
 		m_storage(m_rows, m_cols) MATRICE_EVALEXP_TOTHIS
 	template<typename _Lhs, typename _Rhs, typename _Op>
-	MATRICE_GLOBAL_FINL Base_(const Expr::MatBinaryExpr<_Lhs, _Rhs, _Op>& exp) 
+	MATRICE_GLOBAL_FINL Base_(const Expr::MatBinaryExpr<_Lhs, _Rhs, _Op>& exp)
 		:_Mybase(m_rows = exp.rows(), m_cols = exp.cols()), 
 		m_storage(m_rows, m_cols) MATRICE_EVALEXP_TOTHIS
 	template<typename _Rhs, typename _Op>
 	MATRICE_GLOBAL_FINL Base_(const Expr::MatUnaryExpr<_Rhs, _Op>& exp)
 		:_Mybase(m_rows = exp.rows(), m_cols = exp.cols()), 
 		m_storage(m_rows, m_cols) MATRICE_EVALEXP_TOTHIS
+
+	/**
+	 *\from nested initializer list {{...},{...},...,{...}}
+	 */
+	template<typename _Ty>
+	MATRICE_HOST_INL Base_(const nested_initlist<_Ty> nil)
+		: Base_(nil.size(), nil.begin()->size()) {
+		size_t _Count = 0;
+		for (const auto It : nil) {
+			auto _Data = m_data + m_cols * _Count++;
+			for (auto i = 0; i < m_cols; ++i) {
+				_Data[i] = It.begin()[i];
+			}
+		}
+	}
 
 	/**
 	 *\interfaces for opencv if it is enabled
@@ -614,6 +629,24 @@ public:
 #endif
 		m_storage = _list;
 		m_data = internal::_Proxy_checked(m_storage.data());
+		return (*static_cast<_Derived*>(this));
+	}
+	/**
+	 * \assignment operator, from nested initializer list
+	 */
+	template<typename _Ty>
+	MATRICE_HOST_INL _Derived& operator=(nested_initlist<_Ty> _list) {
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(_list.size() == m_rows, "Inconsistent rows.");
+		DGELOM_CHECK(_list.begin().size() == m_cols, "Inconsistent cols");
+#endif
+		size_t _Count = 0;
+		for (const auto L : _list) {
+			auto _Data = m_data + m_cols * _Count++;
+			for (auto It = L.begin(); It != L.end(); ++It) {
+				*(_Data++) = *It;
+			}
+		}
 		return (*static_cast<_Derived*>(this));
 	}
 	/**
