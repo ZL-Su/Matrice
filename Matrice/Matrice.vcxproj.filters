@@ -465,6 +465,9 @@
     <ClInclude Include="examples\Invcomp_GaussNewton.hpp">
       <Filter>Examples</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\util\_property.hpp">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
