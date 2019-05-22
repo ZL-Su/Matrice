@@ -1,6 +1,5 @@
 /*************************************************************
-	This is an example illustrating the use of matrix type in
-	the Matrice C++ library.
+	This is an example illustrates how to use dgelom::Matrix_
  *************************************************************/
 #pragma once
 
@@ -26,7 +25,7 @@ int main() try
 	dgelom::Matrix_<default_type, 3, 3> _Mat33;
 
 	// \create a 3x3 zero-valued matrix on the stack
-	dgelom::Matrix_<default_type, 3, 3> _Zero33{ dgelom::zero<default_type>::value };
+	dgelom::Matrix_<default_type, 3, 3> _Zero33{ dgelom::zero<default_type> };
 
 	// \create a 3x3 identity matrix on the stack
 	dgelom::Matrix_<default_type, 3, 3> _Iden33{ 1., 0., 0., 0., 1., 0., 0., 0., 1. };
@@ -42,7 +41,7 @@ int main() try
 	// \create a dynamic matrix on host by specifying _Rows = 0 and _Cols = 0
 	dgelom::Matrix_<default_type, 0, 0> _Mat_1; //empty matrix
 	dgelom::Matrix_<default_type, 0, 0> _Mat_2(3, 3); // 3x3 matrix
-	dgelom::Matrix_<default_type, 0, 0> _Mat_3(3, 3, dgelom::zero<default_type>::value); // 3x3 matrix, initialized by zeros
+	dgelom::Matrix_<default_type, 0, 0> _Mat_3(3, 3, dgelom::zero<default_type>); // 3x3 matrix, initialized by zeros
 	dgelom::Matrix_<default_type, 0, 0> _Mat_4(3, 3, _Ptr); // from a pointer
 	// ...or, use the more compact alias type
 	dgelom::Matrix<default_type> _Mat_5/*(...)*/;
@@ -83,7 +82,7 @@ int main() try
 		auto A_dotm_B_exp = A * B;
 		auto A_over_B_exp = A / B;
 
-		// Of cource, Matrice lib has supported several ways to evaluate an expression,
+		// Of cource, Matrice supports several ways to evaluate an expression,
 		// ...invoke evaluation by passing a expression to a matrix:
 		matrix_t Ewise_sum_1(A_plus_B_exp); 
 		// or...
@@ -109,11 +108,11 @@ int main() try
 		using matrix_t = dgelom::Matrix_<default_type, 3, 3>;
 		using vector_t = dgelom::Vec_<default_type, 3>;
 		// Given a matrix A and vectors x and b, 
-		matrix_t A{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+		matrix_t A{ {1, 2, 3}, {4, 5, 6}, {7, 8, 9} };
 		vector_t x{ 1, 0, 0 }, b{ 0.5 };
-		// ...Matrice can create the expression y = Ax+b as
+		// ...Matrice can create an expression: y = Ax+b as
 		auto y_exp = A.mul(x) + b; //Note that y_exp is just an expression
-		// if we wanna retrieve the values of y, it's should be evaluated
+		// if we wanna retrieve values of y, it's should be evaluated by
 		vector_t y = y_exp; // or auto y = y_exp.eval();
 
 		// ...inversely, we can estimate x in a trivial way as
