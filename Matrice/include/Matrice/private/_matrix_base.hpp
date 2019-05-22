@@ -31,6 +31,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../util/_type_defs.h"
 #include "../util/_macro_conditions.h"
 #include "../util/_exception.h"
+#include "../util/_property.hpp"
 #include "../core/solver.h"
 
 #pragma warning(disable: 4715 4661 4224 4267 4244 4819 4199)
@@ -889,7 +890,8 @@ public:
 			for (auto _Idx = 0; _Idx < _Cols; ++_Idx)
 				this->cview(_Idx) = (_L.begin() + _Idx)->data();
 		}
-		else DGELOM_ERROR("The _Dim value should be 0 or 1.");
+		else 
+			DGELOM_ERROR("The _Dim value should be 0(row-wise) or 1(col-wise).");
 
 		return (*static_cast<_Derived*>(this));
 	}
@@ -957,8 +959,7 @@ public:
 	MATRICE_HOST_FINL size_t _Format_getter() const { return m_format; }
 	MATRICE_HOST_FINL void _Format_setter(size_t format) { m_format = rmaj|format; }
 
-	__declspec(property(get = _Empty_getter)) bool empty;
-	MATRICE_HOST_FINL bool _Empty_getter() const { return (size() == 0); }
+	MATRICE_GET(bool, empty, !bool(size()));
 
 protected:
 	using _Mybase::m_rows;
@@ -988,8 +989,8 @@ struct _Matrix_padding {
 	 *\param [_In] input matrix; [_Size] run-time specified padding size
 	 */
 	template<typename _Mty, size_t _S = 0, 
-		typename _Ty = typename _Mty::value_t> MATRICE_GLOBAL_INL 
-	static auto zero(const _Mty& _In, size_t _Size = _S) {
+		typename _Ty = typename _Mty::value_t> 
+	MATRICE_GLOBAL_INL static auto zero(const _Mty& _In, size_t _Size = _S) {
 		// _Size <- max(_Size, _S)
 		static_assert(is_matrix_v<_Mty>, "_Mty must be a matrix type.");
 		
@@ -1002,7 +1003,7 @@ struct _Matrix_padding {
 		}
 		_Ret.block(_Size, _Size+_In.cols(), _Size, _Size+_In.rows()) = _In;
 
-		return std::forward<decltype(_Ret)>(_Ret);
+		return forward<decltype(_Ret)>(_Ret);
 	}
 };
 _DETAIL_END
