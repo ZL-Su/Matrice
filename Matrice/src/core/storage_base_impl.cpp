@@ -27,7 +27,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #define MATRICE_DENSEBASE_SIG \
 template<typename _Ty> \
 template<Location _Loc, size_t _Opt> \
-Storage_<_Ty>::DenseBase<_Loc, _Opt>
+constexpr Storage_<_Ty>::DenseBase<_Loc, _Opt>
 
 namespace dgelom { namespace detail{
 
