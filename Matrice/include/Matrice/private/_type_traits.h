@@ -18,6 +18,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include <type_traits>
 #include "../util/_type_defs.h"
+#include "../util/_std_wrapper.h"
 #include "_memory.h"
 
 DGE_MATRICE_BEGIN
@@ -104,6 +105,7 @@ template<typename T> using add_pointer_const_t = typename add_pointer_const<T>::
 template<typename T> struct _View_trait { enum { value = 0x0008*sizeof(T) }; };
 template<> struct _View_trait<unsigned char> { enum { value = 0x0008 }; };
 template<> struct _View_trait<int> { enum { value = 0x0016 }; };
+template<> struct _View_trait<size_t> { enum { value = 0x0016 }; };
 template<> struct _View_trait<float> { enum { value = 0x0032 }; };
 template<> struct _View_trait<double> { enum { value = 0x0064 }; };
 template<typename T> MATRICE_GLOBAL_INL constexpr auto plane_view_v = _View_trait<T>::value;
