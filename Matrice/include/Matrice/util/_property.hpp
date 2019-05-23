@@ -22,10 +22,10 @@ DGE_MATRICE_BEGIN
 
 #define MATRICE_GET(T, NAME, EXPR) \
 __declspec(property(get=_##NAME##_getter))T NAME;\
-MATRICE_HOST_FINL T _##NAME##_getter() const { return EXPR; }
+MATRICE_HOST_FINL T _##NAME##_getter() const noexcept { return EXPR; }
 
 #define MATRICE_SET(T, NAME, EXPR) \
 __declspec(property(put=_##NAME##_setter))T NAME;\
-MATRICE_HOST_FINL void _##NAME##_setter(const T NAME) { EXPR = NAME; }
+MATRICE_HOST_FINL void _##NAME##_setter(const T NAME) noexcept { EXPR = NAME; }
 
 DGE_MATRICE_END
