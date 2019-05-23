@@ -27,9 +27,9 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #define MATRICE_DENSEBASE_SIG \
 template<typename _Ty> \
 template<Location _Loc, size_t _Opt> \
-constexpr Storage_<_Ty>::DenseBase<_Loc, _Opt>
+Storage_<_Ty>::DenseBase<_Loc, _Opt>
 
-namespace dgelom { namespace detail{
+DGE_MATRICE_BEGIN _DETAIL_BEGIN
 
 MATRICE_DENSEBASE_SIG::DenseBase(int_t _Rows, int_t _Cols)
 	: my_rows(_Rows), my_cols(_Cols), my_size(_Rows*_Cols), my_owner(Ownership::Owner) {
@@ -278,6 +278,5 @@ template class Storage_<float>::DenseBase<OnDevice, PITCHED>;
 template class Storage_<double>::DenseBase<OnDevice, PITCHED>;
 template class Storage_<unsigned char>::DenseBase<OnDevice, PITCHED>;
 template class Storage_<size_t>::DenseBase<OnDevice, PITCHED>;
-}
-}
+_DETAIL_END DGE_MATRICE_END
 #undef MATRICE_DENSEBASE_SIG
