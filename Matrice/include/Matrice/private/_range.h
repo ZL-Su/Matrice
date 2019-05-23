@@ -171,11 +171,11 @@ class range MATRICE_NONHERITABLE
 public:
 	explicit MATRICE_GLOBAL_INL range(const _Ty& _First, const _Uy& _Last)
 		: _Mybase(_First, _Last) {}
-	explicit MATRICE_GLOBAL_INL range(const _Ty& _First, const _Uy& _Last, typename _Mybase::const_step_t& _Inc)
+	explicit MATRICE_GLOBAL_INL range(const _Ty& _First, const _Uy& _Last, typename _Mybase::const_stride_t& _Inc)
 		: _Mybase(_First, _Last, _Inc) {}
 	explicit MATRICE_GLOBAL_INL range(const _Ty& _First, size_t _Size)
 		: _Mybase(_First, _First+_Size) {}
-	explicit MATRICE_GLOBAL_INL range(const _Ty& _First, size_t _Size, typename _Mybase::const_step_t& _Inc)
+	explicit MATRICE_GLOBAL_INL range(const _Ty& _First, size_t _Size, typename _Mybase::const_stride_t& _Inc)
 		: _Mybase(_First, _First+_Size, _Inc) {}
 };
 
