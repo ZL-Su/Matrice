@@ -6,8 +6,7 @@ DGE_MATRICE_BEGIN namespace detail {
 // \class range base : [begin, end)
 template<typename _Ty, 
 	typename _Iy = conditional_t<
-	is_pointer_v<_Ty>||std::_Is_iterator_v<_Ty>, 
-	int64_t, _Ty>>
+	is_pointer_v<_Ty>||std::_Is_iterator_v<_Ty>, int64_t, _Ty>>
 class _Range_base {
 	using _Myt = _Range_base;
 public:
