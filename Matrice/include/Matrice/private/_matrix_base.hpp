@@ -51,16 +51,16 @@ class _Basic_plane_view_base {
 public:
 	using plvt_type = tuple<int, int, std::add_pointer_t<_Ty>, bool>;
 
-	MATRICE_GLOBAL_FINL _Basic_plane_view_base() = default;
-	MATRICE_GLOBAL_FINL _Basic_plane_view_base(int _rows, int _cols, _Ty* _data = nullptr)
+	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base() noexcept  = default;
+	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base(int _rows, int _cols, _Ty* _data = nullptr) noexcept
 		: m_rows(_rows), m_cols(_cols), m_data(_data), _Myshape{1,1,_rows,_cols} {
 		_Flush_view_buf();
 	};
-	MATRICE_GLOBAL_FINL _Basic_plane_view_base(const basic_shape_t& _Shape, _Ty* _data)
+	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base(const basic_shape_t& _Shape, _Ty* _data) noexcept
 		: m_rows(_Shape.rows()), m_cols(_Shape.cols()), m_data(_data), _Myshape(_Shape) {
 		_Flush_view_buf();
 	};
-	MATRICE_GLOBAL_FINL _Basic_plane_view_base(const basic_shape_t& _Shape)
+	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base(const basic_shape_t& _Shape) noexcept
 		: m_rows(_Shape.rows()), m_cols(_Shape.cols()), _Myshape(_Shape) {
 		_Flush_view_buf();
 	};
@@ -69,23 +69,23 @@ public:
 	 * \shape of the matrix
 	 * Example: auto [_Rows, _Cols] = _Matrix.shape();
 	 */
-	MATRICE_GLOBAL_FINL constexpr shape_t<size_t> shape() const { 
+	MATRICE_GLOBAL_FINL constexpr shape_t<size_t> shape() const noexcept {
 		return std::tie(m_rows, m_cols);
 	}
 	template<typename _T, MATRICE_ENABLE_IF(is_scalar_v<_T>)>
-	MATRICE_GLOBAL_FINL constexpr shape_t<size_t>  shape(_T _Scale) const {
+	MATRICE_GLOBAL_FINL constexpr shape_t<size_t>  shape(_T _Scale) const noexcept {
 		return std::make_tuple(m_rows*_Scale, m_cols*_Scale);
 	}
 	template<typename _T1, typename _T2 = _T1, 
 		MATRICE_ENABLE_IF(is_scalar_v<_T1>&&is_scalar_v<_T2>)>
-	MATRICE_GLOBAL_FINL constexpr shape_t<size_t> shape(_T1 _Rsf, _T2 _Csf) const {
+	MATRICE_GLOBAL_FINL constexpr shape_t<size_t> shape(_T1 _Rsf, _T2 _Csf) const noexcept {
 		return std::make_tuple(m_rows*_Rsf, m_cols*_Csf);
 	}
 
 	/**
 	 *\brief Get full dims {N,{C,{H,W}}}
 	 */
-	MATRICE_GLOBAL_FINL constexpr auto& dims() const {
+	MATRICE_GLOBAL_FINL constexpr auto& dims() const noexcept {
 		return (_Myshape);
 	}
 
@@ -95,7 +95,7 @@ public:
 	 * \param [require_t] refers to the view will be transposed or not.
 	 */
 	template<axis _Axis = axis::all>
-	MATRICE_GLOBAL_FINL constexpr plvt_type plvt(bool require_t = 0) {
+	MATRICE_GLOBAL_FINL constexpr plvt_type plvt(bool require_t = 0) noexcept {
 		if constexpr (_Axis == axis::x)
 			return plvt_type(1, m_rows*m_cols, m_data, require_t);
 		else if constexpr (_Axis == axis::y)
@@ -104,7 +104,7 @@ public:
 			return plvt_type(m_rows, m_cols, m_data, require_t);
 	}
 	template<axis _Axis = axis::all>
-	MATRICE_GLOBAL_FINL constexpr plvt_type plvt(bool require_t = 0) const {
+	MATRICE_GLOBAL_FINL constexpr plvt_type plvt(bool require_t = 0) const noexcept {
 		if constexpr (_Axis == axis::x)
 			return std::tie(1, m_rows*m_cols, m_data, require_t);
 		else if constexpr (_Axis == axis::y)
@@ -112,10 +112,10 @@ public:
 		else
 			return std::tie(m_rows, m_cols, m_data, require_t);
 	}
-	MATRICE_GLOBAL_FINL constexpr operator plvt_type() {
+	MATRICE_GLOBAL_FINL constexpr operator plvt_type() noexcept {
 		return std::tie(m_rows, m_cols, m_data);
 	}
-	MATRICE_GLOBAL_FINL constexpr operator plvt_type() const {
+	MATRICE_GLOBAL_FINL constexpr operator plvt_type() const noexcept {
 		return std::tie(m_rows, m_cols, m_data);
 	}
 
@@ -123,15 +123,15 @@ public:
 	 * \raw plane view of the matrix
 	 * Example: auto& _Raw = _Matrix.raw();
 	 */
-	MATRICE_GLOBAL_FINL constexpr auto& raw() {
+	MATRICE_GLOBAL_FINL constexpr auto& raw() noexcept {
 		return *this;
 	}
-	MATRICE_GLOBAL_FINL constexpr auto& raw() const {
+	MATRICE_GLOBAL_FINL constexpr auto& raw() const noexcept {
 		return *this;
 	}
 
 protected:
-	MATRICE_GLOBAL_FINL void _Flush_view_buf() { 
+	MATRICE_GLOBAL_FINL void _Flush_view_buf() noexcept {
 #ifdef _DEBUG
 		step.buf[0] = m_cols * step.buf[1]; 
 		nval = _Myshape.get(0);
@@ -255,25 +255,25 @@ public:
 	 */
 	static constexpr auto eps = std::numeric_limits<value_t>::epsilon();
 
-	MATRICE_GLOBAL_INL Base_() noexcept
+	MATRICE_GLOBAL_INL constexpr Base_() noexcept
 		:_Mybase(_M<0?0:_M, _N<0?0:_N), m_storage() MATRICE_LINK_PTR
-	MATRICE_GLOBAL_INL Base_(int _rows, int _cols) noexcept 
+	MATRICE_GLOBAL_INL constexpr Base_(int _rows, int _cols) noexcept
 		:_Mybase(_rows, _cols), m_storage(_rows, _cols) MATRICE_LINK_PTR
-	MATRICE_GLOBAL_INL Base_(const shape_t<size_t>& _Shape) noexcept
+	MATRICE_GLOBAL_INL constexpr Base_(const shape_t<size_t>& _Shape) noexcept
 		: Base_(MATRICE_EXPAND_SHAPE) {}
-	MATRICE_GLOBAL_INL Base_(int _rows, int _cols, pointer data) noexcept 
+	MATRICE_GLOBAL_INL constexpr Base_(int _rows, int _cols, pointer data) noexcept
 		:_Mybase(_rows, _cols, data), m_storage(_rows, _cols, data) {}
-	MATRICE_GLOBAL_INL Base_(const shape_t<size_t>& _Shape, pointer _Data) noexcept
+	MATRICE_GLOBAL_INL constexpr Base_(const shape_t<size_t>& _Shape, pointer _Data) noexcept
 		: Base_(MATRICE_EXPAND_SHAPE, _Data) {}
-	MATRICE_GLOBAL_INL Base_(int _rows, int _cols, value_t _val) noexcept 
+	MATRICE_GLOBAL_INL constexpr Base_(int _rows, int _cols, value_t _val) noexcept
 		:_Mybase(_rows, _cols), m_storage(_rows, _cols, _val) MATRICE_LINK_PTR
-	MATRICE_GLOBAL_INL Base_(const shape_t<size_t>& _Shape, value_t _Val) noexcept
+	MATRICE_GLOBAL_INL constexpr Base_(const shape_t<size_t>& _Shape, value_t _Val) noexcept
 		:Base_(MATRICE_EXPAND_SHAPE, _Val) {}
-	MATRICE_GLOBAL_INL Base_(const_initlist _list) noexcept 
+	MATRICE_GLOBAL_INL constexpr Base_(const_initlist _list) noexcept
 		:_Mybase((_M <= 0)?_list.size():_M, (_N<=0)?1:_N), m_storage(_list) MATRICE_LINK_PTR
-	MATRICE_GLOBAL_INL Base_(_Myt_const_reference _other) noexcept 
+	MATRICE_GLOBAL_INL constexpr Base_(_Myt_const_reference _other) noexcept
 		:_Mybase(_other._Myshape), m_storage(_other.m_storage) MATRICE_LINK_PTR
-	MATRICE_GLOBAL_INL Base_(_Myt_move_reference _other) noexcept 
+	MATRICE_GLOBAL_INL constexpr Base_(_Myt_move_reference _other) noexcept
 		:_Mybase(_other._Myshape), m_storage(move(_other.m_storage)) MATRICE_LINK_PTR
 	/**
 	 *\from STD vector<value_t>
@@ -289,9 +289,9 @@ public:
 	 *\from explicit specified matrix type
 	 */
 	template<int _CTR, int _CTC>
-	MATRICE_GLOBAL_INL Base_(const Matrix_<value_t,_CTR,_CTC>& _other)
+	MATRICE_GLOBAL_INL constexpr Base_(const Matrix_<value_t,_CTR,_CTC>& _other)
 		:_Mybase(_other.rows(),_other.cols()),m_storage(_other.m_storage) MATRICE_LINK_PTR
-	MATRICE_GLOBAL_INL Base_(const Matrix_<value_t,-1,-1>& _other)
+	MATRICE_GLOBAL_INL constexpr Base_(const Matrix_<value_t,-1,-1>& _other)
 		:_Mybase(_other.rows(), _other.cols()), m_storage(_other.m_storage) MATRICE_LINK_PTR
 	/**
 	 *\from expression
@@ -317,7 +317,7 @@ public:
 	 *\from nested initializer list {{...},{...},...,{...}}
 	 */
 	template<typename _Ty>
-	MATRICE_HOST_INL Base_(const nested_initlist<_Ty> nil)
+	MATRICE_HOST_INL constexpr Base_(const nested_initlist<_Ty> nil)
 		: Base_(nil.size(), nil.begin()->size()) {
 		size_t _Count = 0;
 		for (const auto It : nil) {
@@ -373,13 +373,13 @@ public:
 	 *\returns pointer to y-th row
 	 *\sa ptr()
 	 */
-	MATRICE_GLOBAL_FINL pointer operator[](index_t y) {
+	MATRICE_GLOBAL_FINL pointer operator[](index_t y) noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(y < rows(), "Matrix_ subscript out of row range.");
 #endif
 		return (m_data + y * m_cols); 
 	}
-	MATRICE_GLOBAL_FINL constexpr pointer operator[](index_t y) const { 
+	MATRICE_GLOBAL_FINL constexpr pointer operator[](index_t y) const noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(y < rows(), "Matrix_ subscript out of row range.");
 #endif
@@ -388,13 +388,13 @@ public:
 	/**
 	 *\1D index random accessor to get i-th element reference
 	 */
-	MATRICE_GLOBAL_FINL reference operator()(index_t i) {
+	MATRICE_GLOBAL_FINL reference operator()(index_t i) noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(i < size(), "Matrix_ subscript out of range.");
 #endif
 		return m_data[i]; 
 	}
-	MATRICE_GLOBAL_FINL constexpr reference operator()(index_t i) const {
+	MATRICE_GLOBAL_FINL constexpr reference operator()(index_t i) const noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(i < size(), "Matrix_ subscript out of range.");
 #endif
@@ -403,14 +403,14 @@ public:
 	/**
 	 *\2D index random accessor to get element reference at r-th row and c-th col.
 	 */
-	MATRICE_GLOBAL_INL reference operator()(index_t r, index_t c) {
+	MATRICE_GLOBAL_INL reference operator()(index_t r, index_t c) noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(r < rows(), "Matrix_ subscript out of row range.");
 		DGELOM_CHECK(c < cols(), "Matrix_ subscript out of column range.");
 #endif
 		return (*this)[r][c]; 
 	}
-	MATRICE_GLOBAL_INL constexpr reference operator()(index_t r, index_t c) const {
+	MATRICE_GLOBAL_INL constexpr reference operator()(index_t r, index_t c) const noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(r < rows(), "Matrix_ subscript out of row range.");
 		DGELOM_CHECK(c < cols(), "Matrix_ subscript out of column range.");
@@ -421,8 +421,8 @@ public:
 	/**
 	 *\returns pointer to object memory
 	 */
-	MATRICE_GLOBAL_FINL pointer data() { return (m_data); }
-	MATRICE_GLOBAL_FINL constexpr pointer data() const { return (m_data); }
+	MATRICE_GLOBAL_FINL pointer data() noexcept { return (m_data); }
+	MATRICE_GLOBAL_FINL constexpr pointer data() const noexcept { return (m_data); }
 	/**
 	 *\returns pointer to y-th row
 	 *\sa operator[]
@@ -443,13 +443,13 @@ public:
 	/**
 	 * \returns reference to the derived object
 	 */
-	MATRICE_GLOBAL_FINL decltype(auto) eval() {
+	MATRICE_GLOBAL_FINL decltype(auto) eval() noexcept {
 		return (*static_cast<_Derived*>(this));
 	}
 	/**
 	 * \returns const reference to the derived object
 	 */
-	MATRICE_GLOBAL_FINL constexpr decltype(auto) eval() const {
+	MATRICE_GLOBAL_FINL constexpr decltype(auto) eval() const noexcept {
 		return (*static_cast<const _Derived*>(this)); 
 	}
 
@@ -457,10 +457,18 @@ public:
 	/**
 	 *\returns STL-stype iterator
 	 */
-	MATRICE_GLOBAL_FINL constexpr iterator begin() { return (m_data); }
-	MATRICE_GLOBAL_FINL constexpr iterator end() { return (m_data + size()); }
-	MATRICE_GLOBAL_FINL constexpr const_iterator begin() const { return (m_data); }
-	MATRICE_GLOBAL_FINL constexpr const_iterator end() const { return (m_data + size()); }
+	MATRICE_GLOBAL_FINL iterator begin() noexcept { 
+		return (m_data); 
+	}
+	MATRICE_GLOBAL_FINL iterator end() noexcept { 
+		return (m_data + size()); 
+	}
+	MATRICE_GLOBAL_FINL const iterator begin() const noexcept { 
+		return (m_data); 
+	}
+	MATRICE_GLOBAL_FINL const iterator end() const noexcept { 
+		return (m_data + size()); 
+	}
 	/**
 	 *\column iterator for accessing elements in i-th column
 	 *\example:
@@ -617,16 +625,16 @@ public:
 	/**
 	 * \size properties
 	 */
-	MATRICE_GLOBAL_FINL constexpr auto(rows)()const{ return m_rows; }
-	MATRICE_GLOBAL_FINL constexpr auto(cols)()const{ return m_cols; }
-	MATRICE_GLOBAL_FINL constexpr auto(size)()const{ return m_rows*m_cols; }
+	MATRICE_GLOBAL_FINL constexpr auto(rows)()const noexcept { return m_rows; }
+	MATRICE_GLOBAL_FINL constexpr auto(cols)()const noexcept { return m_cols; }
+	MATRICE_GLOBAL_FINL constexpr auto(size)()const noexcept { return m_rows*m_cols; }
 
 	/**
 	 * \assignment operator, from initializer list
 	 */
 	MATRICE_GLOBAL_FINL _Derived& operator= (const_initlist _list) {
-#ifdef _DEBUG
-		assert(size() == m_storage.size());
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(_list.size() == size(), "[Warning]: the size of initializer list is not equal to the size of Matrix_<> object.");
 #endif
 		m_storage = _list;
 		m_data = internal::_Proxy_checked(m_storage.data());
@@ -680,7 +688,7 @@ public:
 	/**
 	 * \homotype move assignment operator
 	 */
-	MATRICE_GLOBAL_INL _Derived& operator=(_Myt_move_reference _other) {
+	MATRICE_GLOBAL_INL _Derived& operator=(_Myt_move_reference _other) noexcept {
 		m_cols = _other.m_cols, m_rows = _other.m_rows;
 		m_format = _other.m_format;
 		m_storage = std::move(_other.m_storage);
@@ -772,7 +780,7 @@ public:
 	 */
 	MATRICE_GLOBAL_FINL auto norm_2()->value_type const { 
 		auto _Ans = dot(*this); 
-		return (_Ans > eps ? dgelom::sqrt(_Ans) : inf); 
+		return (_Ans > eps ? ::sqrt(_Ans) : inf); 
 	}
 	/**
 	 * \matrix p-norm: $[\sum_{i=1}^{m}\sum_{j=1}^{}|a_{ij}|^p]^{1/p}$
@@ -833,7 +841,7 @@ public:
 	 * \operate each entry via _Fn
 	 */
 	template<typename _Op>
-	MATRICE_GLOBAL_FINL auto& each(_Op&& _Fn) { 
+	MATRICE_GLOBAL_FINL auto& each(_Op&& _Fn) noexcept {
 		for (auto& _Val : *this) _Fn(_Val); 
 		return(*static_cast<_Derived*>(this));
 	}
