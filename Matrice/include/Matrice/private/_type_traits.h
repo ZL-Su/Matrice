@@ -1,6 +1,6 @@
 /*  *************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -24,45 +24,66 @@ DGE_MATRICE_BEGIN
 
 template<typename T> struct remove_reference { using type = typename std::remove_reference<T>::type; };
 template<typename T> using remove_reference_t = typename remove_reference<T>::type;
+
+/**
+ *\brief retrieve plain type of type T.
+ */
 template<typename T> struct remove_all { using type = std::remove_cv_t<remove_reference_t<T>>; };
 template<typename T> using remove_all_t = typename remove_all<T>::type;
+
+/**
+ *\brief get bytes of type T.
+ */
 template<typename T> struct type_bytes { enum { value = sizeof(T) }; };
 template<typename T> MATRICE_GLOBAL_INL constexpr int type_bytes_v = type_bytes<T>::value;
 
-template<bool _Test, typename T, typename U> struct conditonal {};
-template<typename T, typename U> struct conditonal<true, T, U> { using type = T; };
-template<typename T, typename U> struct conditonal<false, T, U> { using type = U; };
-template<bool _Test, typename T, typename U> struct conditional {};
+/**
+ *\brief conditional_t<_Cond, T, U> is T if _Cond is true, else it is U.  
+ */
+template<bool _Cond, typename T, typename U> struct conditional {};
 template<typename T, typename U> struct conditional<true, T, U> { using type = T; };
 template<typename T, typename U> struct conditional<false, T, U> { using type = U; };
-template<bool _Test, typename T, typename U> using conditional_t = typename conditional<_Test, T, U>::type;
+template<bool _Cond, typename T, typename U> using conditional_t = typename conditional<_Cond, T, U>::type;
 
+/**
+ *\brief has_value_t<T> is true iff T has value_t.
+ */
 template<typename T, typename Enable = void> struct has_value_t : std::false_type {};
 template<typename T> MATRICE_GLOBAL_INL constexpr auto has_value_t_v = has_value_t<T>::value;
 
-template<typename T, typename  = enable_if_t<has_value_t_v<T>>> struct value_type { using type = conditional_t<is_arithmetic_v<T>, remove_all_t<T>, typename T::value_t>; };
+template<typename T, typename = enable_if_t<has_value_t_v<T>>> struct value_type { using type = conditional_t<is_arithmetic_v<T>, remove_all_t<T>, typename T::value_t>; };
 template<typename T> using value_type_t = typename value_type<T>::type;
 
-template<typename T, typename U> struct common_value_type { using type = std::common_type_t<value_type_t<T>, value_type_t<U>>; };
+template<typename T, typename U> struct common_value_type { using type = common_type_t<value_type_t<T>, value_type_t<U>>; };
 template<typename T, typename U> using common_value_t = typename common_value_type<T, U>::type;
 
+/**
+ *\brief is_zero_v<_Val> is true iff _Val == 0.
+ */
 template<int _Val> struct is_zero { enum { value = _Val == 0 }; };
 template<int _Val> MATRICE_GLOBAL_INL constexpr auto is_zero_v = is_zero<_Val>::value;
 
+/**
+ *\brief is_static_v<_R, _C> is true iff both _R and _C is greater than 0.
+ */
 template<int _R, int _C> struct is_static {enum {value = _R > 0 && _C >0 }; };
 template<int _R, int _C> MATRICE_GLOBAL_INL constexpr auto is_static_v = is_static<_R, _C>::value;
 
-template<typename T> struct is_common_int64 { enum { value = std::is_integral_v<T> && sizeof(T) == 8 }; };
+template<typename T> struct is_common_int64 { enum { value = is_integral_v<T> && sizeof(T) == 8 }; };
 template<typename T> MATRICE_GLOBAL_INL constexpr auto is_common_int64_v = is_common_int64<T>::value;
+
 template<typename T> struct is_int64 { enum { value = std::is_signed_v<T> && is_common_int64_v<T> }; };
 template<typename T> MATRICE_GLOBAL_INL constexpr auto is_int64_v = is_int64<T>::value;
+
 template<typename T> struct is_uint64 { enum { value = std::is_unsigned_v<T> && is_common_int64_v<T> }; };
 template<typename T> MATRICE_GLOBAL_INL constexpr auto is_uint64_v = is_uint64<T>::value;
 
 template<typename T> struct is_float32 { enum { value = std::is_floating_point<T>::value && (sizeof(T) == 4) }; };
 template<typename T> MATRICE_GLOBAL_INL constexpr auto is_float32_v = is_float32<T>::value;
+
 template<typename T> struct is_float64 { enum { value = std::is_floating_point<T>::value && (sizeof(T) == 8) }; };
 template<typename T> MATRICE_GLOBAL_INL constexpr auto is_float64_v = is_float64<T>::value;
+
 template<typename T> MATRICE_GLOBAL_INL constexpr auto is_floating_point_v = is_float64_v<T> || is_float32_v<T>;
 
 template<typename T> struct add_const_reference {
