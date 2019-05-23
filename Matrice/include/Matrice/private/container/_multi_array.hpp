@@ -117,13 +117,13 @@ public:
 	/**
 	 *\brief retrieve data buffer by lvalue reference.
 	 */
-	MATRICE_HOST_INL _Mybuf_t& all()& noexcept {
+	MATRICE_HOST_INL _Mybuf_t& array()& noexcept {
 		return _Data; 
 	}
 	/**
 	 *\brief retrieve data buffer by rvalue reference.
 	 */
-	MATRICE_HOST_INL _Mybuf_t all()&& noexcept {
+	MATRICE_HOST_INL _Mybuf_t array()&& noexcept {
 		return move(_Data); 
 	}
 
