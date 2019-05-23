@@ -24,7 +24,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 MATRICE_PRIVATE_BEGIN
 template<typename T> struct memory_base_v1 {
 	using value_t = T;
-	using pointer = value_t * ;
+	using pointer = value_t*;
 	using const_pointer = const pointer;
 };
 ///<!-- generic class for device memory operation-->
