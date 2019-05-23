@@ -68,7 +68,7 @@ public:
 		enum { /*location = _Loc, */option = _Opt };
 		MATRICE_GLOBAL_FINL DenseBase();
 		MATRICE_GLOBAL_FINL DenseBase(int_t _rows, int_t _cols, pointer _data);
-		MATRICE_GLOBAL_FINL DenseBase(int_t _rows, int_t _cols, pointer _data, std::initializer_list<value_t> _list);
+		MATRICE_GLOBAL_FINL DenseBase(int_t _rows, int_t _cols, pointer _data, initlist<value_t> _list);
 		MATRICE_GLOBAL DenseBase(int_t _rows, int_t _cols);
 		MATRICE_GLOBAL DenseBase(int_t _rows, int_t _cols, const value_t _val);
 		MATRICE_GLOBAL DenseBase(const DenseBase& _other);
@@ -82,20 +82,20 @@ public:
 		///<brief> operators </brief>
 		MATRICE_GLOBAL DenseBase& operator=(const DenseBase& _other);
 		MATRICE_GLOBAL DenseBase& operator=(DenseBase&& _other);
-		MATRICE_GLOBAL_INL auto& operator=(std::initializer_list<value_t> _list);
+		MATRICE_GLOBAL_INL decltype(auto) operator=(initlist<value_t> _list);
 
 		///<brief> methods </brief>
 		MATRICE_GLOBAL DenseBase& create(int_t _Rows, int_t _Cols);
-		MATRICE_GLOBAL_FINL int_t& size() const { return (my_size);}
-		MATRICE_GLOBAL_FINL int_t& rows() const { return (my_rows); }
-		MATRICE_GLOBAL_FINL int_t& cols() const { return (my_cols); }
-		MATRICE_GLOBAL_FINL size_t pitch() const { return (my_pitch); }
-		MATRICE_GLOBAL_FINL pointer data() const { return (my_data); }
-		MATRICE_GLOBAL_FINL Ownership& owner() const { return my_owner; }
+		MATRICE_GLOBAL_FINL constexpr int_t& size() const { return (my_size);}
+		MATRICE_GLOBAL_FINL constexpr int_t& rows() const { return (my_rows); }
+		MATRICE_GLOBAL_FINL constexpr int_t& cols() const { return (my_cols); }
+		MATRICE_GLOBAL_FINL constexpr size_t pitch() const { return (my_pitch); }
+		MATRICE_GLOBAL_FINL constexpr pointer data() const { return (my_data); }
+		MATRICE_GLOBAL_FINL constexpr Ownership& owner() const { return my_owner; }
 		MATRICE_GLOBAL_FINL void reset(int_t rows, int_t cols, pointer data) {
 			my_rows = rows, my_cols = cols, my_data = data;
 		}
-		MATRICE_GLOBAL_FINL bool shared() const {
+		MATRICE_GLOBAL_FINL constexpr bool shared() const {
 #if MATRICE_SHARED_STORAGE == 1
 			return (my_shared.get());
 #else
@@ -117,7 +117,7 @@ public:
 		mutable int_t my_size;
 		mutable pointer my_data;
 		mutable Ownership my_owner = Empty;
-		std::size_t my_pitch = 1; //used for CUDA pitched malloc only
+		size_t my_pitch = 1; //used for CUDA pitched malloc only
 	private:
 #if MATRICE_SHARED_STORAGE == 1
 		using SharedPtr = std::shared_ptr<value_t>;
@@ -136,13 +136,19 @@ public:
 		typedef DenseBase<OnStack, _Opt> Base;
 	public:
 		enum { location = Base::location, option = Base::option };
-		MATRICE_HOST_FINL Allocator(int ph1=0, int ph2=0) : Base(_M, _N, _Data) {}
-		MATRICE_HOST_FINL Allocator(int ph1, int ph2, pointer data) : Base(_M, _N, privt::fill_mem(data,_Data, _M*_N)) {}
-		MATRICE_HOST_FINL Allocator(std::initializer_list<value_t> _list) : Base(_M, _N, _Data, _list) {}
-		MATRICE_HOST_FINL Allocator(const Allocator& _other) : Base(_M, _N, privt::fill_mem(_other._Data, _Data, _other.my_size)) {}
-		MATRICE_HOST_FINL Allocator(Allocator&& _other) : Base(std::move(_other)) {}
+		MATRICE_HOST_FINL constexpr Allocator(int ph1=0, int ph2=0) 
+			: Base(_M, _N, _Data) {}
+		MATRICE_HOST_FINL constexpr Allocator(int ph1, int ph2, pointer data) 
+			: Base(_M, _N, privt::fill_mem(data,_Data, _M*_N)) {}
+		MATRICE_HOST_FINL constexpr Allocator(initlist<value_t> _list)
+			: Base(_M, _N, _Data, _list) {}
+		MATRICE_HOST_FINL constexpr Allocator(const Allocator& _other)
+			: Base(_M, _N, privt::fill_mem(_other._Data, _Data, _other.my_size)) {}
+		MATRICE_HOST_FINL constexpr Allocator(Allocator&& _other) 
+			: Base(std::move(_other)) {}
 		template<typename... _Args>
-		MATRICE_HOST_FINL Allocator(const _Args&... _args) : Base(_args..., _Data) {}
+		MATRICE_HOST_FINL constexpr Allocator(const _Args&... _args) 
+			: Base(_args..., _Data) {}
 		MATRICE_HOST_FINL Allocator& operator= (const Allocator& _other)
 		{
 			Base::my_data = _Data;
@@ -155,6 +161,7 @@ public:
 		}
 	private:
 		value_t _Data[_M*_N];
+		mutable Ownership _Myown = 
 	};
 	//<brief> Dynamic host memory allocator </brief>
 	template<size_t _Opt>
