@@ -1,7 +1,7 @@
 #pragma once
 #include "../_storage.hpp"
 
-MATRICE_NAMESPACE_BEGIN_ namespace detail {
+MATRICE_NAMESPACE_BEGIN_ _DETAIL_BEGIN
 
 template<typename _Ty>
 template<Location _Loc, size_t _Opt>
@@ -35,8 +35,7 @@ MATRICE_GLOBAL_FINL Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(const DenseB
 template<typename _Ty> 
 template<Location _Loc, size_t _Opt>
 MATRICE_GLOBAL_FINL Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(
-	int_t _rows, int_t _cols, pointer _data,
-	std::initializer_list<value_t> _list)
+	int_t _rows, int_t _cols, pointer _data, initlist<value_t> _list)
  : DenseBase(_rows, _cols, _data) {
 	my_owner = (Owner);
 	if (_list.size() == 1)
@@ -57,7 +56,7 @@ MATRICE_GLOBAL_FINL Storage_<_Ty>::DenseBase<_Loc, _Opt>::~DenseBase() {
 
 template<typename _Ty> 
 template<Location _Loc, size_t _Opt> MATRICE_GLOBAL_FINL 
-auto& Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(std::initializer_list<value_t> _list) {
+decltype(auto) Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(initlist<value_t> _list) {
 	if (_list.size() == 1)
 		privt::unified_fill<value_t, location + option>::op(my_data, *_list.begin(), my_rows, my_cols, my_pitch);
 	else
@@ -66,4 +65,4 @@ auto& Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(std::initializer_list<valu
 	return (*this);
 }
 
-} _MATRICE_NAMESPACE_END
+_DETAIL_END _MATRICE_NAMESPACE_END
