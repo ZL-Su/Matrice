@@ -5,30 +5,30 @@ DGE_MATRICE_BEGIN namespace detail {
 
 // \class range base : [begin, end)
 template<typename _Ty, 
-	typename _Iy = conditional_t<
-	is_pointer_v<_Ty>||std::_Is_iterator_v<_Ty>, int64_t, _Ty>>
+	typename _Iy = conditional_t<is_iterator_v<_Ty>, int64_t, _Ty>>
 class _Range_base {
 	using _Myt = _Range_base;
 public:
 	using value_t = _Ty;
-	using step_t = _Iy;
+	using stride_t = _Iy;
 	using const_value_t = std::add_const_t<value_t>;
-	using const_step_t = std::add_const_t<step_t>;
+	using const_stride_t = std::add_const_t<stride_t>;
+	using reference = std::add_lvalue_reference_t<value_t>;
 
 	class _My_iterator {
 	public:
-		MATRICE_GLOBAL_INL _My_iterator(const_value_t& _Pos, const_step_t&_Inc = 1) noexcept
+		MATRICE_GLOBAL_INL _My_iterator(const_value_t& _Pos, const_stride_t&_Inc = 1) noexcept
 			: _My_pos(_Pos), _My_inc(_Inc) {}
 
-		MATRICE_GLOBAL_INL value_t& operator++() noexcept {
+		MATRICE_GLOBAL_INL reference operator++() noexcept {
 			return _My_pos += _My_inc; 
 		}
-		MATRICE_GLOBAL_INL const value_t& operator++() const noexcept {
+		MATRICE_GLOBAL_INL const reference operator++() const noexcept {
 			return _My_pos += _My_inc; 
 		}
 
-		MATRICE_GLOBAL_INL value_t& operator*() noexcept { return _My_pos; }
-		MATRICE_GLOBAL_INL const value_t& operator*() const noexcept { return _My_pos; }
+		MATRICE_GLOBAL_INL reference operator*() noexcept { return _My_pos; }
+		MATRICE_GLOBAL_INL const reference operator*() const noexcept { return _My_pos; }
 
 		MATRICE_GLOBAL_INL auto operator != (const _My_iterator& _Other)const noexcept {
 			return _My_pos < (_Other._My_pos);
@@ -38,10 +38,10 @@ public:
 
 	private:
 		value_t _My_pos;
-		step_t  _My_inc;
+		stride_t _My_inc;
 	};
 
-	_Range_base(const_value_t& _Begin, const_value_t& _End, const_step_t& _Stride = 1) noexcept
+	_Range_base(const_value_t& _Begin, const_value_t& _End, const_stride_t& _Stride = 1) noexcept
 		: m_begin(_Begin), m_end(_End), m_stride(_Stride) {}
 	_Range_base(const _Range_base& _other) noexcept
 		:m_begin(_other.m_begin), m_end(_other.m_end), m_stride(_other.m_stride) {}
@@ -71,20 +71,20 @@ public:
 		return operator[](i); 
 	}
 
-	MATRICE_GLOBAL_INL value_t& value() noexcept { 
+	MATRICE_GLOBAL_INL reference value() noexcept {
 		return m_pos; 
 	}
-	MATRICE_GLOBAL_INL const_value_t& value() const noexcept { 
+	MATRICE_GLOBAL_INL const reference value() const noexcept {
 		return m_pos; 
 	}
 	MATRICE_GLOBAL_INL size_t size() const noexcept { 
-		return (m_end - m_begin) / m_stride; 
+		return static_cast<size_t>((m_end - m_begin) / m_stride); 
 	}
 
-	MATRICE_GLOBAL_INL value_t& front() noexcept {
+	MATRICE_GLOBAL_INL reference front() noexcept {
 		return m_begin; 
 	}
-	MATRICE_GLOBAL_INL const value_t& front() const noexcept {
+	MATRICE_GLOBAL_INL const reference front() const noexcept {
 		return m_begin; 
 	}
 
@@ -92,13 +92,13 @@ public:
 		return _My_iterator(m_pos, m_stride); 
 	}
 	MATRICE_GLOBAL_INL _My_iterator end() { 
-		return _My_iterator(m_end, zero<step_t>);
+		return _My_iterator(m_end, zero<stride_t>);
 	}
 	MATRICE_GLOBAL_INL const _My_iterator begin() const {
 		return _My_iterator(m_pos, m_stride);
 	}
 	MATRICE_GLOBAL_INL const _My_iterator end() const {
-		return _My_iterator(m_end, zero<step_t>);
+		return _My_iterator(m_end, zero<stride_t>);
 	}
 
 	/**
@@ -116,7 +116,7 @@ public:
 	/**
 	 *\brief set the stride of a range.
 	 */
-	MATRICE_GLOBAL_INL _Myt& stride(step_t _Std) noexcept {
+	MATRICE_GLOBAL_INL _Myt& stride(stride_t _Std) noexcept {
 		m_stride = _Std; return (*this);
 	}
 	/**
@@ -128,7 +128,7 @@ public:
 
 private:
 	value_t m_begin, m_end;
-	step_t  m_stride = step_t(1);
+	stride_t m_stride = one<stride_t>;
 	mutable value_t m_pos = m_begin;
 };
 
