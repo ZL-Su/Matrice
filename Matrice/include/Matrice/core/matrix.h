@@ -43,26 +43,26 @@ public:
 	using typename _Mybase::pointer;
 	using typename _Mybase::const_initlist;
 	enum { Size = _M * _N, CompileTimeRows = _M, CompileTimeCols = _N, };
-	MATRICE_GLOBAL_FINL Matrix_(const value_t _val) noexcept 
+	MATRICE_GLOBAL_FINL constexpr Matrix_(const value_t _val) noexcept 
 		: _Mybase({_val}) {};
-	MATRICE_GLOBAL_FINL Matrix_(pointer data) noexcept 
+	MATRICE_GLOBAL_FINL constexpr Matrix_(pointer data) noexcept
 		: _Mybase(_M, _N, data) {};
-	MATRICE_HOST_FINL   Matrix_(const_initlist _list) noexcept 
+	MATRICE_HOST_FINL constexpr Matrix_(const_initlist _list) noexcept
 		: _Mybase(_list) {}
-	MATRICE_GLOBAL_FINL Matrix_(Myt_move_reference _other) noexcept 
+	MATRICE_GLOBAL_FINL constexpr Matrix_(Myt_move_reference _other) noexcept
 		: _Mybase((_other)) {}
-	MATRICE_GLOBAL_FINL Matrix_(Myt_const_reference _other) noexcept 
+	MATRICE_GLOBAL_FINL constexpr Matrix_(Myt_const_reference _other) noexcept
 		: _Mybase(_other) {};
-	MATRICE_GLOBAL_FINL Matrix_(int _pld1=0, int _pld2=0) noexcept 
+	MATRICE_GLOBAL_FINL constexpr Matrix_(int _pld1=0, int _pld2=0) noexcept
 		: _Mybase() {};
 	template<typename _Uy>
-	MATRICE_HOST_FINL   Matrix_(const nested_initlist<_Uy> _list) noexcept
+	MATRICE_HOST_FINL constexpr Matrix_(const nested_initlist<_Uy> _list) noexcept
 		: _Mybase(_list) {}
 	template<size_t _Len>
-	MATRICE_HOST_FINL   Matrix_(const std::array<value_t, _Len>& _array) noexcept
+	MATRICE_HOST_FINL constexpr Matrix_(const std::array<value_t, _Len>& _array) noexcept
 		: Matrix_(pointer(_array.data())) {}
 	template<typename... _Arg> 
-	MATRICE_GLOBAL_FINL Matrix_(const _Arg&... _arg) noexcept 
+	MATRICE_GLOBAL_FINL constexpr Matrix_(const _Arg&... _arg) noexcept
 		: _Mybase(_arg...) {};
 
 	MATRICE_HOST_FINL Myt_reference operator=(const_initlist _list) {
@@ -83,9 +83,9 @@ public:
 		return _Mybase::operator=(_arg); 
 	}
 
-	MATRICE_GLOBAL_FINL constexpr auto(size)() const { return (Size); }
-	MATRICE_GLOBAL_FINL constexpr auto(rows)() const { return (CompileTimeRows); }
-	MATRICE_GLOBAL_FINL constexpr auto(cols)() const { return (CompileTimeCols); }
+	MATRICE_GLOBAL_FINL constexpr auto(size)() const noexcept { return (Size); }
+	MATRICE_GLOBAL_FINL constexpr auto(rows)() const noexcept { return (CompileTimeRows); }
+	MATRICE_GLOBAL_FINL constexpr auto(cols)() const noexcept { return (CompileTimeCols); }
 
 	MATRICE_GLOBAL_FINL operator std::array<value_t, Size>() const { return internal::_Fill_array<value_t, Size>(_Mybase::begin()); }
 	MATRICE_GLOBAL_FINL operator std::array<value_t, Size>() { return internal::_Fill_array<value_t, Size>(_Mybase::begin()); }
@@ -125,7 +125,7 @@ public:
 	MATRICE_GLOBAL_INL Myt_reference operator= (Myt_const_reference _other) { 
 		return _Mybase::operator=(_other); 
 	}
-	MATRICE_GLOBAL_INL Myt_reference operator= (Myt_move_reference _other) { 
+	MATRICE_GLOBAL_INL Myt_reference operator= (Myt_move_reference _other) noexcept { 
 		return _Mybase::operator=(move(_other)); 
 	}
 	MATRICE_GLOBAL_FINL Myt_reference operator= (const_initlist _list) { 
