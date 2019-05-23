@@ -17,53 +17,58 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #pragma once
 
-#include "../_matrix_base.hpp"
+#include "../../../core"
 
 DGE_MATRICE_BEGIN
 
-template<typename _Ty, size_t _N>
-class multi_array {
+/**
+ *\brief description
+ *\param <_N> dimensions of multi_array object.
+ */
+template<typename _Ty, size_t _N> class multi_array { 
+	static_assert(is_scalar_v<_Ty>, "_Ty must be a scalar type.");
+
 	using _Myt = multi_array;
-	using _Myidx = Matrix_<size_t, _N, 1>;
 	using _Mybuf = Matrix_<_Ty, 0, 0>;
-	//using _Mybuf = std::vector<_Ty>;
 public:
 	static constexpr auto dimension = _N;
-	using value_type = typename _Mybuf::value_type;
 	using pointer = typename _Mybuf::pointer;
-	using index_type = _Myidx;
+	using value_type = typename _Mybuf::value_type;
+	using index_type = array_n<size_t, dimension>;
+	using reference = std::add_lvalue_reference_t<value_type>;
 
-	multi_array() noexcept {}
-	multi_array(const _Myidx& _Shape) noexcept {
+	multi_array() noexcept {
+	}
+	multi_array(const index_type& _Shape) noexcept {
 		_Alloc(_Shape);
 	}
 	multi_array(const std::array<size_t, dimension>& _Shape) noexcept {
-		_Alloc((typename _Myidx::pointer)_Shape.data());
+		_Alloc((typename index_type::pointer)_Shape.data());
 	}
 
-	MATRICE_HOST_INL _Myt& resize(const _Myidx& _Shape) {
+	MATRICE_HOST_INL _Myt& resize(const index_type& _Shape) {
 		_Alloc(_Shape);
 		return (*this);
 	}
 	MATRICE_HOST_INL _Myt& resize(const std::array<size_t, dimension>& _Shape) {
-		_Alloc((typename _Myidx::pointer)_Shape.data());
+		_Alloc((typename index_type::pointer)_Shape.data());
 		return (*this);
 	}
-	MATRICE_HOST_INL size_t size() const {
+	MATRICE_HOST_INL size_t size() const noexcept {
 		return _Data.size();
 	}
 	MATRICE_HOST_INL pointer data() noexcept { return _Data.data(); }
 	MATRICE_HOST_INL const pointer data() const noexcept { return _Data.data(); }
-	MATRICE_HOST_INL value_type& operator()(const _Myidx& _idx) {
+	MATRICE_HOST_INL reference operator()(const index_type& _idx) {
 		return _Data.data()[_Index(_idx)];
 	}
-	MATRICE_HOST_INL const value_type& operator()(const _Myidx& _idx) const {
+	MATRICE_HOST_INL const reference operator()(const index_type& _idx) const {
 		return _Data.data()[_Index(_idx)];
 	}
-	MATRICE_HOST_INL value_type& operator[](size_t _idx) {
+	MATRICE_HOST_INL reference operator[](size_t _idx) noexcept {
 		return _Data.data()[_idx];
 	}
-	MATRICE_HOST_INL const value_type& operator()(size_t _idx) const {
+	MATRICE_HOST_INL const reference operator()(size_t _idx) const noexcept {
 		return _Data.data()[_idx];
 	}
 
@@ -80,24 +85,37 @@ public:
 		return _Data.end(); 
 	}
 
+	/**
+	 *\brief retrieve data buffer by lvalue reference.
+	 */
+	MATRICE_HOST_INL _Mybuf& all() & {
+		return _Data; 
+	}
+	/**
+	 *\brief retrieve data buffer by rvalue reference.
+	 */
+	MATRICE_HOST_INL _Mybuf all() && { 
+		return move(_Data); 
+	}
+
 private:
-	MATRICE_HOST_INL void _Alloc(const _Myidx& _shape) {
+	MATRICE_HOST_INL void _Alloc(const index_type& _shape) {
 		size_t _Size = 1;
 		for (int d = dimension - 1; d >= 0; --d) {
 			_Stride(d) = _Size;
 			_Size *= _shape(d);
 		}
-		//_Data.resize(_Size, zero<value_type>);
 		if constexpr (dimension == 2)
 			_Data.create(_shape(0), _shape(1), zero<value_type>);
 		else
 			_Data.create(_Size, zero<value_type>);
 	}
-	MATRICE_HOST_INL size_t _Index(const _Myidx& _index) const {
+	MATRICE_HOST_INL size_t _Index(const index_type& _index)const noexcept {
 		return ((_Stride*_index).sum());
 	}
 
-	Matrix_<int, dimension, 1> _Stride;
+private:
+	array_n<int, dimension> _Stride;
 	_Mybuf _Data;
 };
 
