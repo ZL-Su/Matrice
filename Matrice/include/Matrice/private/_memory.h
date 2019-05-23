@@ -48,7 +48,7 @@ template<typename ValueType, typename IntegerType> ValueType* aligned_malloc(Int
 template<typename ValueType> void aligned_free(ValueType* aligned_ptr) noexcept;
 template<typename ValueType> bool is_aligned(ValueType* aligned_ptr) noexcept;
 template<typename ValueType, typename Integer> MATRICE_HOST_FINL
-ValueType* fill_mem(const ValueType* src, ValueType* dst, Integer size)
+constexpr ValueType* fill_mem(const ValueType* src, ValueType* dst, Integer size)
 {
 #define _FILOP(_Idx) dst[_Idx] = src[_Idx]
 #define _RET return (dst);
@@ -85,6 +85,7 @@ template<int _Opt = 0> void _Device_sync();
 namespace internal {
 struct _Memory {
 
+
 	/**
 	 *\brief Check if a given memory is aligned or not
 	 *\param [_Ptr] the pointer to memory block to be checked
@@ -119,6 +120,29 @@ struct _Memory {
 		}
 		catch (std::exception e) { throw e; }
 	}
+
+template<typename _InIt, typename _OutIt> 
+MATRICE_HOST_INL static _OutIt copy(_InIt _First, _InIt _Last, _OutIt _Dest) {
+	
+	if (std::is_trivially_assignable_v<_OutIt, _InIt>) {
+		const char * const _First_ch = const_cast<const char *>(reinterpret_cast<const volatile char *>(_First));
+		const char * const _Last_ch = const_cast<const char *>(reinterpret_cast<const volatile char *>(_Last));
+		char * const _Dest_ch = const_cast<char *>(reinterpret_cast<volatile char *>(_Dest));
+		const auto _Count = static_cast<size_t>(_Last_ch - _First_ch);
+
+		::memmove(_Dest_ch, _First_ch, _Count);
+
+		return (reinterpret_cast<_OutIt>(_Dest_ch + _Count));
+	}
+	else {
+		for (; _First != _Last; ++_Dest, (void)++_First)
+		{
+			*_Dest = *_First;
+		}
+
+		return (_Dest);
+	}
+}
 
 };
 }
