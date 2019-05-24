@@ -21,7 +21,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "matrix.h"
 
 #ifndef vec_global_inl
-#define vec_global_inl MATRICE_GLOBAL_FINL
+#define vec_global_inl constexpr MATRICE_GLOBAL_FINL
 #endif
 
 MATRICE_NAMESPACE_BEGIN_TYPES
