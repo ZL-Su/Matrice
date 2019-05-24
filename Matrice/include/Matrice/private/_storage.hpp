@@ -133,50 +133,38 @@ public:
 
 	//<brief> Managed host memory allocator </brief>
 	template<int _M, int _N, size_t _Opt = allocator_traits<_M, _N>::value>
-	MATRICE_ALIGNED_CLASS Allocator //: public DenseBase<OnStack, _Opt>
-	{
-		//typedef DenseBase<OnStack, _Opt> Base;
+	MATRICE_ALIGNED_CLASS Allocator {
 		using _Myt = Allocator;
 	public:
 		enum { location = Location::OnStack, option = _Opt };
-		MATRICE_GLOBAL_INL constexpr Allocator(int ph1=0, int ph2=0) {}
-			//: Base(_M, _N, _Data) {}
-		MATRICE_GLOBAL_INL constexpr Allocator(int ph1, int ph2, pointer data) {
+
+		MATRICE_GLOBAL_INL constexpr Allocator(int ph1=0, int ph2=0) noexcept {
+		}
+		MATRICE_GLOBAL_INL constexpr Allocator(int ph1, int ph2, pointer data) noexcept {
 			this->_Fill_n(data);
 		}
-		MATRICE_GLOBAL_INL constexpr Allocator(int ph1, int ph2, value_t data) {
+		MATRICE_GLOBAL_INL constexpr Allocator(int ph1, int ph2, value_t data) noexcept {
 			this->_Fill_n(data);
 		}
-			//: Base(_M, _N, privt::fill_mem(data,_Data, _M*_N)) {}
-		MATRICE_GLOBAL_INL constexpr Allocator(initlist<value_t> _List) {
+		MATRICE_GLOBAL_INL constexpr Allocator(initlist<value_t> _List) noexcept {
 			this->_Fill_n(_List.begin());
 		}
-			//: Base(_M, _N, _Data, _list) {}
-		MATRICE_GLOBAL_INL constexpr Allocator(const _Myt& _other) {
+		MATRICE_GLOBAL_INL constexpr Allocator(const _Myt& _other) noexcept {
 			this->_Fill_n(_other._Data);
 		}
-			//: Base(_M, _N, privt::fill_mem(_other._Data, _Data, _other.my_size)) {}
-		MATRICE_GLOBAL_INL constexpr Allocator(_Myt&& _other) {
+		MATRICE_GLOBAL_INL constexpr Allocator(_Myt&& _other) noexcept {
 			this->_Fill_n(_other._Data);
 		}
-			//: Base(std::move(_other)) {}
 		template<typename _Alty>
-		MATRICE_HOST_FINL constexpr Allocator(const _Alty& _alloc) {
+		MATRICE_HOST_FINL constexpr Allocator(const _Alty& _alloc) noexcept {
 			this->_Fill_n(_alloc.data());
 		}
-			//: Base(_args..., _Data) {}
 
 		MATRICE_GLOBAL_INL constexpr auto(data)() noexcept { return (_Data); }
 		MATRICE_GLOBAL_INL constexpr auto(data)() const noexcept { return (_Data); }
 
 		MATRICE_GLOBAL_INL constexpr _Myt& operator= (const _Myt& _other) noexcept {
 			this->_Fill_n(_other._Data);
-			/*Base::my_data = _Data;
-			Base::my_cols = _other.my_cols;
-			Base::my_rows = _other.my_rows;
-			Base::my_size = _other.my_size;
-			Base::my_owner = Owner;
-			privt::fill_mem(_other._Data, _Data, Base::my_size);*/
 			return (*this);
 		}
 		MATRICE_GLOBAL_INL constexpr _Myt& operator= (_Myt&& _other) noexcept {
