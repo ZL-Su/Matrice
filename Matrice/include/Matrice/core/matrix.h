@@ -27,7 +27,7 @@ MATRICE_NAMESPACE_BEGIN_TYPES
 
 /*******************************************************************
 	Generic Matrix Class with Aligned Static Memory Allocation
-	          Copyright (c) : Zhilong Su 14/Feb/2018
+	       Copyright (c) : Zhilong Su, since 14/Feb/2018
 *******************************************************************/
 template<typename _Ty, int _M, int _N>
 class Matrix_ : public Base_<Matrix_<_Ty, _M, _N>>
@@ -101,7 +101,7 @@ public:
 
 /*******************************************************************
     Generic Matrix Class with Aligned Dynamic Memory Allocation
-	         Copyright (c) : Zhilong Su 14/Feb/2018
+	         Copyright (c) : Zhilong Su since 14/Feb/2018
  ******************************************************************/
 template<typename _Ty>
 class Matrix_<_Ty, __, __> : public Base_<Matrix_<_Ty, __, __>>

@@ -692,6 +692,7 @@ public:
 		m_storage = _other.m_storage;
 		m_data = internal::_Proxy_checked(m_storage.data());
 		_Mybase::_Flush_view_buf();
+
 		return (*static_cast<_Derived*>(this));
 	}
 	/**
@@ -700,12 +701,16 @@ public:
 	MATRICE_GLOBAL_INL _Derived& operator=(_Myt_move_reference _other) noexcept {
 		m_cols = _other.m_cols, m_rows = _other.m_rows;
 		m_format = _other.m_format;
-		m_storage = std::move(_other.m_storage);
+		m_storage = move(_other.m_storage);
 		m_data = internal::_Proxy_checked(m_storage.data());
+
+		std::swap(_Mybase::_Myshape, _other._Myshape);
 		_Mybase::_Flush_view_buf();
+
 		_other.m_storage.free();
 		_other.m_data = nullptr;
 		_other.m_cols = _other.m_rows = 0;
+
 		return (*static_cast<_Derived*>(this));
 	}
 	/**
