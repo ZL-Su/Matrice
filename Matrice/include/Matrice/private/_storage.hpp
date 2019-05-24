@@ -66,43 +66,45 @@ public:
 	public:
 		static constexpr auto location = _Loc;
 		enum { /*location = _Loc, */option = _Opt };
-		MATRICE_GLOBAL_FINL DenseBase();
+		MATRICE_GLOBAL_FINL DenseBase() noexcept;
 		MATRICE_GLOBAL_FINL DenseBase(int_t _rows, int_t _cols, pointer _data);
 		MATRICE_GLOBAL_FINL DenseBase(int_t _rows, int_t _cols, pointer _data, initlist<value_t> _list);
 		MATRICE_GLOBAL DenseBase(int_t _rows, int_t _cols);
 		MATRICE_GLOBAL DenseBase(int_t _rows, int_t _cols, const value_t _val);
 		MATRICE_GLOBAL DenseBase(const DenseBase& _other);
-		MATRICE_GLOBAL DenseBase(DenseBase&& _other);
+		MATRICE_GLOBAL DenseBase(DenseBase&& _other) noexcept;
 		template<Location _From, size_t _Option>
 		MATRICE_GLOBAL_FINL DenseBase(const DenseBase<_From, _Option>& _other, pointer _data);
 		template<Location _From, size_t _Option>
 		MATRICE_GLOBAL_FINL DenseBase(const DenseBase<_From, _Option>& _other);
-		MATRICE_GLOBAL_FINL ~DenseBase();
+		MATRICE_GLOBAL_FINL ~DenseBase() noexcept;
 
 		///<brief> operators </brief>
 		MATRICE_GLOBAL DenseBase& operator=(const DenseBase& _other);
-		MATRICE_GLOBAL DenseBase& operator=(DenseBase&& _other);
-		MATRICE_GLOBAL_INL decltype(auto) operator=(initlist<value_t> _list);
+		MATRICE_GLOBAL DenseBase& operator=(DenseBase&& _other) noexcept;
+
+		MATRICE_GLOBAL_INL decltype(auto) operator=(value_t _value) noexcept;
+		MATRICE_GLOBAL_INL decltype(auto) operator=(initlist<value_t> _list) noexcept;
 
 		///<brief> methods </brief>
 		MATRICE_GLOBAL DenseBase& create(int_t _Rows, int_t _Cols);
-		MATRICE_GLOBAL_FINL constexpr int_t& size() const { return (my_size);}
-		MATRICE_GLOBAL_FINL constexpr int_t& rows() const { return (my_rows); }
-		MATRICE_GLOBAL_FINL constexpr int_t& cols() const { return (my_cols); }
-		MATRICE_GLOBAL_FINL constexpr size_t pitch() const { return (my_pitch); }
-		MATRICE_GLOBAL_FINL constexpr pointer data() const { return (my_data); }
-		MATRICE_GLOBAL_FINL constexpr Ownership& owner() const { return my_owner; }
-		MATRICE_GLOBAL_FINL void reset(int_t rows, int_t cols, pointer data) {
+		MATRICE_GLOBAL_FINL constexpr int_t& size() const noexcept { return (my_size);}
+		MATRICE_GLOBAL_FINL constexpr int_t& rows() const noexcept { return (my_rows); }
+		MATRICE_GLOBAL_FINL constexpr int_t& cols() const noexcept { return (my_cols); }
+		MATRICE_GLOBAL_FINL constexpr size_t pitch() const noexcept { return (my_pitch); }
+		MATRICE_GLOBAL_FINL constexpr pointer data() const noexcept { return (my_data); }
+		MATRICE_GLOBAL_FINL constexpr Ownership& owner() const noexcept { return my_owner; }
+		MATRICE_GLOBAL_FINL void reset(int_t rows, int_t cols, pointer data) noexcept {
 			my_rows = rows, my_cols = cols, my_data = data;
 		}
-		MATRICE_GLOBAL_FINL constexpr bool shared() const {
+		MATRICE_GLOBAL_FINL constexpr bool shared() const noexcept {
 #if MATRICE_SHARED_STORAGE == 1
 			return (my_shared.get());
 #else
 			return std::false_type::value;
 #endif
 		}
-		MATRICE_GLOBAL_FINL void free() {
+		MATRICE_GLOBAL_FINL void free() noexcept {
 			my_cols = 0, my_rows = 0, my_size = 0;
 			my_owner = Empty, my_pitch = 0;
 			my_location = UnSpecified;
@@ -185,13 +187,14 @@ public:
 			this->_Fill_n(_Value);
 			return (*this);
 		}
-		MATRICE_GLOBAL_INL constexpr _Myt& operator=(const initlist<value_t> _List) noexcept {
-			this->_Fill_n(_List.begin());
-			return (*this);
-		}
 		template<typename _InIt>
 		MATRICE_GLOBAL_INL constexpr _Myt& operator=(const _InIt _First) noexcept {
 			this->_Fill_n(_First);
+			return (*this);
+		}
+		MATRICE_GLOBAL_INL constexpr _Myt& operator=(const initlist<value_t> _List) noexcept {
+			if (_List.size() == 1) this->operator=(*_List.begin());
+			else this->operator=(_List.begin());
 			return (*this);
 		}
 
