@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ MATRICE_DENSEBASE_SIG::DenseBase(int_t _Rows, int_t _Cols)
 			[=](pointer ptr) { privt::aligned_free(ptr); });
 		my_data = my_shared.get();
 	}
-#if (defined __enable_cuda__ && !defined __disable_cuda__)
+#if (defined MATRICE_ENABLE_CUDA && !defined __disable_cuda__)
 	else if constexpr (location == Location::OnGlobal) {
 		my_data = privt::global_malloc<value_t>(size_t(my_size));
 		my_shared = SharedPtr(my_data, 
@@ -66,7 +66,7 @@ MATRICE_DENSEBASE_SIG::DenseBase(int_t _Rows, int_t _Cols)
 	else if constexpr (location == Location::OnHeap) {
 		my_data = privt::aligned_malloc<value_t>(my_size);
 	} 
-#if (defined __enable_cuda__ && !defined __disable_cuda__)
+#if (defined MATRICE_ENABLE_CUDA && !defined __disable_cuda__)
 	else if constexpr (location == Location::OnGlobal) {
 		my_data = privt::global_malloc<value_t>(size_t(my_size));
 	}
@@ -96,7 +96,7 @@ MATRICE_DENSEBASE_SIG::DenseBase(const DenseBase& _other)
 	: my_rows(_other.my_rows), my_cols(_other.my_cols),
 	my_size(_other.my_size), my_pitch(_other.my_pitch) {
 	if (this != std::addressof(_other)) {
-		if constexpr (_Loc == OnStack) {
+		if constexpr (_Loc == Location::OnStack) {
 			privt::fill_mem(_other.my_data, my_data, my_size);
 			my_owner = _other.my_owner;
 		}
@@ -112,7 +112,7 @@ MATRICE_DENSEBASE_SIG::DenseBase(const DenseBase& _other)
 }
 #endif
 
-MATRICE_DENSEBASE_SIG::DenseBase(DenseBase&& _other)
+MATRICE_DENSEBASE_SIG::DenseBase(DenseBase&& _other) noexcept
 	: my_rows(_other.my_rows), my_cols(_other.my_cols), my_size(_other.my_size), my_owner(_other.my_owner), my_pitch(_other.my_pitch), my_data(_other.my_data)
 #if MATRICE_SHARED_STORAGE == 1
 	 , my_shared(std::move(_other.my_shared))
@@ -138,7 +138,7 @@ Storage_<_Ty>::DenseBase<_Loc,_Opt>::create(int_t _Rows, int_t _Cols){
 				[=](pointer ptr) { privt::aligned_free(ptr); });
 			my_data = my_shared.get();
 		}
-#if (defined __enable_cuda__ && !defined __disable_cuda__)
+#if (defined MATRICE_ENABLE_CUDA && !defined __disable_cuda__)
 		else if constexpr (location == Location::OnGlobal) {
 			my_data = privt::global_malloc<value_t>(size_t(my_size));
 			my_shared = SharedPtr(my_data,
@@ -162,7 +162,7 @@ Storage_<_Ty>::DenseBase<_Loc,_Opt>::create(int_t _Rows, int_t _Cols){
 		else if constexpr (location == Location::OnHeap) {
 			my_data = privt::aligned_malloc<value_t>(my_size);
 		}
-#if (defined __enable_cuda__ && !defined __disable_cuda__)
+#if (defined MATRICE_ENABLE_CUDA && !defined __disable_cuda__)
 		else if constexpr (location == Location::OnGlobal) {
 			my_data = privt::global_malloc<value_t>(size_t(my_size));
 		}
@@ -199,7 +199,7 @@ Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(const DenseBase& _other){
 }
 
 MATRICE_DENSEBASE_SIG& 
-Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(DenseBase&& _other){
+Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(DenseBase&& _other) noexcept{
 	if (this != std::addressof(_other)) {
 		my_owner = _other.my_owner, my_size = _other.my_size;
 		my_rows = _other.my_rows, my_cols = _other.my_cols;
