@@ -635,12 +635,18 @@ public:
 	MATRICE_GLOBAL_FINL constexpr auto(size)()const noexcept { return m_rows*m_cols; }
 
 	/**
-	 * \assignment operator, from initializer list
+	 * \assignment operator, fill Matrix_ from a scalar.
 	 */
-	MATRICE_GLOBAL_FINL _Derived& operator= (const_initlist _list) {
-#ifdef MATRICE_DEBUG
-		DGELOM_CHECK(_list.size() == size(), "[Warning]: the size of initializer list is not equal to the size of Matrix_<> object.");
-#endif
+	MATRICE_GLOBAL_FINL _Derived& operator= (value_t _Val) noexcept {
+		m_storage = _Val;
+		m_data = internal::_Proxy_checked(m_storage.data());
+		return (*static_cast<_Derived*>(this));
+	}
+
+	/**
+	 * \assignment operator, fill Matrix_ from initializer list
+	 */
+	MATRICE_GLOBAL_FINL _Derived& operator= (const_initlist _list) noexcept {
 		m_storage = _list;
 		m_data = internal::_Proxy_checked(m_storage.data());
 		return (*static_cast<_Derived*>(this));
@@ -649,7 +655,7 @@ public:
 	 * \assignment operator, from nested initializer list
 	 */
 	template<typename _Ty>
-	MATRICE_HOST_INL _Derived& operator=(nested_initlist<_Ty> _list) {
+	MATRICE_HOST_INL _Derived& operator=(nested_initlist<_Ty> _list) noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_list.size() == m_rows, "Inconsistent rows.");
 		DGELOM_CHECK(_list.begin().size() == m_cols, "Inconsistent cols");
