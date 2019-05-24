@@ -45,28 +45,26 @@ DGE_MATRICE_BEGIN
 template<typename _Ty, int _Type = _View_trait<_Ty>::value> 
 class _Basic_plane_view_base {
 	enum { MAGIC_VAL = 0x42FF0000 };
-	struct Step { 
-		constexpr Step() {};
-		int buf[2] = { sizeof(_Ty), sizeof(_Ty) }; 
-		int* p = buf;
-	};
-	Step step;
+	size_t stride = type_bytes_v<_Ty>;
 	int type = _Type, flags = MAGIC_VAL | _Type; 
-	int nval = 0, cval = 0, hval = 0, wval = 0;
+	int nval = 1, cval = 1, hval = 1, wval = 1;
 public:
 	using plvt_type = tuple<int, int, std::add_pointer_t<_Ty>, bool>;
 
 	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base() = default;
 	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base(int _rows, int _cols, _Ty* _data = nullptr) noexcept
-		: m_rows(_rows), m_cols(_cols), m_data(_data), _Myshape{1,1,_rows,_cols} {
+		: m_rows(_rows), m_cols(_cols), m_data(_data), 
+		_Myshape{1,1,_rows,_cols} {
 		this->_Flush_view_buf();
 	};
 	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base(const basic_shape_t& _Shape, _Ty* _data) noexcept
-		: m_rows(_Shape.rows()), m_cols(_Shape.cols()), m_data(_data), _Myshape(_Shape) {
+		: m_rows(_Shape.rows()), m_cols(_Shape.cols()), m_data(_data),
+		_Myshape(_Shape) {
 		this->_Flush_view_buf();
 	};
 	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base(const basic_shape_t& _Shape) noexcept
-		: m_rows(_Shape.rows()), m_cols(_Shape.cols()), _Myshape(_Shape) {
+		: m_rows(_Shape.rows()), m_cols(_Shape.cols()), 
+		_Myshape(_Shape) {
 		this->_Flush_view_buf();
 	};
 
@@ -138,7 +136,7 @@ public:
 protected:
 	MATRICE_GLOBAL_FINL constexpr void _Flush_view_buf() noexcept {
 #ifdef _DEBUG
-		step.buf[0] = m_cols * step.buf[1]; 
+		stride = m_cols * type_bytes_v<_Ty>;
 		nval = _Myshape.get(0);
 		cval = _Myshape.get(1);
 		hval = _Myshape.get(2);
@@ -201,7 +199,7 @@ return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 		size_t _Index, _Stride;
 	};
 	enum { _M = _Traits::size::rows::value, _N = _Traits::size::cols::value };
-	using _Myt_storage_type = typename detail::Storage_<_Type>::template Allocator<_M, _N>;
+	using _Myalty = typename detail::Storage_<_Type>::template Allocator<_M, _N>;
 	using _Myt = Base_;
 	using _Mybase = _Basic_plane_view_base<_Type>;
 	using _Myt_const = std::add_const_t<_Myt>;
@@ -241,7 +239,7 @@ public:
 	template<typename _Xop> 
 	using expr_type = Expr::Base_<_Xop>;
 	
-	enum { options = _Myt_storage_type::location };
+	enum { options = _Myalty::location };
 	enum { Size = _M*_N, CompileTimeRows = _M, CompileTimeCols = _N, };
 	/**
 	 *\brief for static querying memory block rows
@@ -988,7 +986,7 @@ protected:
 
 	size_t m_format = rmaj|gene;
 public:
-	_Myt_storage_type m_storage;
+	_Myalty m_storage;
 
 #undef MATRICE_MAKE_EXPOP_TYPE
 #undef MATRICE_LINK_PTR
