@@ -43,8 +43,11 @@ public:
 	using typename _Mybase::pointer;
 	using typename _Mybase::const_initlist;
 	enum { Size = _M * _N, CompileTimeRows = _M, CompileTimeCols = _N, };
-	MATRICE_GLOBAL_FINL constexpr Matrix_(const value_t _val) noexcept 
-		: _Mybase({_val}) {};
+
+	MATRICE_GLOBAL_FINL constexpr Matrix_() noexcept
+		: _Mybase() {};
+	MATRICE_GLOBAL_FINL constexpr Matrix_(int, int) noexcept
+		: _Mybase() {};
 	MATRICE_GLOBAL_FINL constexpr Matrix_(pointer data) noexcept
 		: _Mybase(_M, _N, data) {};
 	MATRICE_HOST_FINL constexpr Matrix_(const_initlist _list) noexcept
@@ -53,8 +56,10 @@ public:
 		: _Mybase((_other)) {}
 	MATRICE_GLOBAL_FINL constexpr Matrix_(Myt_const_reference _other) noexcept
 		: _Mybase(_other) {};
-	MATRICE_GLOBAL_FINL constexpr Matrix_(int _pld1=0, int _pld2=0) noexcept
-		: _Mybase() {};
+
+	template<typename _Uy, MATRICE_ENABLE_IF(is_scalar_v<_Uy>)>
+	MATRICE_GLOBAL_FINL constexpr Matrix_(_Uy _val) noexcept
+		: _Mybase(_M, _N, _val) {};
 	template<typename _Uy>
 	MATRICE_HOST_FINL constexpr Matrix_(const nested_initlist<_Uy> _list) noexcept
 		: _Mybase(_list) {}
