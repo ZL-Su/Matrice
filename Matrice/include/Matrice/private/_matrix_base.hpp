@@ -45,24 +45,29 @@ DGE_MATRICE_BEGIN
 template<typename _Ty, int _Type = _View_trait<_Ty>::value> 
 class _Basic_plane_view_base {
 	enum { MAGIC_VAL = 0x42FF0000 };
-	struct Step { int buf[2] = { sizeof(_Ty), sizeof(_Ty) }; int* p = buf; };
-	int type = _Type, flags = MAGIC_VAL | _Type; Step step;
-	int nval, cval, hval, wval;
+	struct Step { 
+		constexpr Step() {};
+		int buf[2] = { sizeof(_Ty), sizeof(_Ty) }; 
+		int* p = buf;
+	};
+	Step step;
+	int type = _Type, flags = MAGIC_VAL | _Type; 
+	int nval = 0, cval = 0, hval = 0, wval = 0;
 public:
 	using plvt_type = tuple<int, int, std::add_pointer_t<_Ty>, bool>;
 
-	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base() noexcept  = default;
+	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base() = default;
 	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base(int _rows, int _cols, _Ty* _data = nullptr) noexcept
 		: m_rows(_rows), m_cols(_cols), m_data(_data), _Myshape{1,1,_rows,_cols} {
-		_Flush_view_buf();
+		this->_Flush_view_buf();
 	};
 	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base(const basic_shape_t& _Shape, _Ty* _data) noexcept
 		: m_rows(_Shape.rows()), m_cols(_Shape.cols()), m_data(_data), _Myshape(_Shape) {
-		_Flush_view_buf();
+		this->_Flush_view_buf();
 	};
 	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base(const basic_shape_t& _Shape) noexcept
 		: m_rows(_Shape.rows()), m_cols(_Shape.cols()), _Myshape(_Shape) {
-		_Flush_view_buf();
+		this->_Flush_view_buf();
 	};
 
 	/**
@@ -126,12 +131,12 @@ public:
 	MATRICE_GLOBAL_FINL constexpr auto& raw() noexcept {
 		return *this;
 	}
-	MATRICE_GLOBAL_FINL constexpr auto& raw() const noexcept {
+	MATRICE_GLOBAL_FINL constexpr const auto& raw() const noexcept {
 		return *this;
 	}
 
 protected:
-	MATRICE_GLOBAL_FINL void _Flush_view_buf() noexcept {
+	MATRICE_GLOBAL_FINL constexpr void _Flush_view_buf() noexcept {
 #ifdef _DEBUG
 		step.buf[0] = m_cols * step.buf[1]; 
 		nval = _Myshape.get(0);
@@ -421,7 +426,7 @@ public:
 	/**
 	 *\returns pointer to object memory
 	 */
-	MATRICE_GLOBAL_FINL pointer data() noexcept { return (m_data); }
+	MATRICE_GLOBAL_FINL constexpr pointer data() noexcept { return (m_data); }
 	MATRICE_GLOBAL_FINL constexpr pointer data() const noexcept { return (m_data); }
 	/**
 	 *\returns pointer to y-th row
