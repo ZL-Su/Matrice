@@ -155,12 +155,13 @@ public:
 		}
 			//: Base(_M, _N, privt::fill_mem(_other._Data, _Data, _other.my_size)) {}
 		MATRICE_GLOBAL_INL constexpr Allocator(_Myt&& _other) {
-			_Data = _other._Data;
-			_other._Data = nullptr;
+			this->_Fill_n(_other._Data);
 		}
 			//: Base(std::move(_other)) {}
-		//template<typename... _Args>
-		//MATRICE_HOST_FINL constexpr Allocator(const _Args&... _args) 
+		template<typename _Alty>
+		MATRICE_HOST_FINL constexpr Allocator(const _Alty& _alloc) {
+			this->_Fill_n(_alloc.data());
+		}
 			//: Base(_args..., _Data) {}
 
 		MATRICE_GLOBAL_INL constexpr auto(data)() noexcept { return (_Data); }
@@ -177,8 +178,7 @@ public:
 			return (*this);
 		}
 		MATRICE_GLOBAL_INL constexpr _Myt& operator= (_Myt&& _other) noexcept {
-			_Data = _other._Data;
-			_other._Data = nullptr;
+			this->_Fill_n(_other._Data);
 			return (*this);
 		}
 		MATRICE_GLOBAL_INL constexpr _Myt& operator=(const value_t _Value) noexcept {
@@ -198,8 +198,13 @@ public:
 		MATRICE_GLOBAL_FINL constexpr auto(rows)()const noexcept { return _Myrows; }
 		MATRICE_GLOBAL_FINL constexpr auto(cols)()const noexcept { return _Mycols; }
 		MATRICE_GLOBAL_FINL constexpr auto(size)()const noexcept { return (_M*_N); }
-		MATRICE_GLOBAL_FINL constexpr auto(pitch)()const noexcept { return one<size_t>; }
 		MATRICE_GLOBAL_FINL constexpr auto(owner)()const noexcept { return (_Myown); }
+		MATRICE_GLOBAL_FINL constexpr auto(pitch)()const noexcept { return size_t(1); }
+
+		// \fill _Data with zeros, because its managed.
+		MATRICE_GLOBAL_FINL constexpr void free() {
+			this->_Fill_n(value_t(0));
+		}
 
 	private:
 		size_t _Myrows = _M, _Mycols = _N;
@@ -208,6 +213,10 @@ public:
 
 		value_t _Data[_M*_N];
 
+		/**
+		 *\brief fill managed host memory.
+		 *\param [_First] can be a scalar or an iterator/pointer type.
+		 */
 		template<typename _InIt>
 		MATRICE_GLOBAL_INL constexpr void _Fill_n(_InIt _First) noexcept {
 			for (auto _Idx = 0; _Idx < size(); ++_Idx) {
