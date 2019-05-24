@@ -33,8 +33,8 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #define MATRICE_ALIGNED_STRUCT class alignas(MATRICE_ALIGN_BYTES)
 #endif
 
-MATRICE_NAMESPACE_BEGIN_ 
-namespace detail {
+DGE_MATRICE_BEGIN
+_DETAIL_BEGIN
 template<typename _Ty> class Storage_
 {
 public:
@@ -51,7 +51,7 @@ public:
 	typedef size_t              idx_t;
 	typedef std::ptrdiff_t      int_t;
 #endif
-	enum Ownership { Owner = 1, Refer = 0, Proxy = -1, Empty = -2 };
+	enum Ownership { Owner = 1, Refer = 0, Proxy = -1, Empty = -2, Always = 9};
 	///<brief> data memory </brief>
 	template<
 		Location _Loc = UnSpecified, 
@@ -131,41 +131,98 @@ public:
 
 	//<brief> Managed host memory allocator </brief>
 	template<int _M, int _N, size_t _Opt = allocator_traits<_M, _N>::value>
-	MATRICE_ALIGNED_CLASS Allocator : public DenseBase<OnStack, _Opt>
+	MATRICE_ALIGNED_CLASS Allocator //: public DenseBase<OnStack, _Opt>
 	{
-		typedef DenseBase<OnStack, _Opt> Base;
+		//typedef DenseBase<OnStack, _Opt> Base;
+		using _Myt = Allocator;
 	public:
-		enum { location = Base::location, option = Base::option };
-		MATRICE_HOST_FINL constexpr Allocator(int ph1=0, int ph2=0) 
-			: Base(_M, _N, _Data) {}
-		MATRICE_HOST_FINL constexpr Allocator(int ph1, int ph2, pointer data) 
-			: Base(_M, _N, privt::fill_mem(data,_Data, _M*_N)) {}
-		MATRICE_HOST_FINL constexpr Allocator(initlist<value_t> _list)
-			: Base(_M, _N, _Data, _list) {}
-		MATRICE_HOST_FINL constexpr Allocator(const Allocator& _other)
-			: Base(_M, _N, privt::fill_mem(_other._Data, _Data, _other.my_size)) {}
-		MATRICE_HOST_FINL constexpr Allocator(Allocator&& _other) 
-			: Base(std::move(_other)) {}
-		template<typename... _Args>
-		MATRICE_HOST_FINL constexpr Allocator(const _Args&... _args) 
-			: Base(_args..., _Data) {}
-		MATRICE_HOST_FINL Allocator& operator= (const Allocator& _other)
-		{
-			Base::my_data = _Data;
+		enum { location = Location::OnStack, option = _Opt };
+		MATRICE_GLOBAL_INL constexpr Allocator(int ph1=0, int ph2=0) {}
+			//: Base(_M, _N, _Data) {}
+		MATRICE_GLOBAL_INL constexpr Allocator(int ph1, int ph2, pointer data) {
+			this->_Fill_n(data);
+		}
+		MATRICE_GLOBAL_INL constexpr Allocator(int ph1, int ph2, value_t data) {
+			this->_Fill_n(data);
+		}
+			//: Base(_M, _N, privt::fill_mem(data,_Data, _M*_N)) {}
+		MATRICE_GLOBAL_INL constexpr Allocator(initlist<value_t> _List) {
+			this->_Fill_n(_List.begin());
+		}
+			//: Base(_M, _N, _Data, _list) {}
+		MATRICE_GLOBAL_INL constexpr Allocator(const _Myt& _other) {
+			this->_Fill_n(_other._Data);
+		}
+			//: Base(_M, _N, privt::fill_mem(_other._Data, _Data, _other.my_size)) {}
+		MATRICE_GLOBAL_INL constexpr Allocator(_Myt&& _other) {
+			_Data = _other._Data;
+			_other._Data = nullptr;
+		}
+			//: Base(std::move(_other)) {}
+		//template<typename... _Args>
+		//MATRICE_HOST_FINL constexpr Allocator(const _Args&... _args) 
+			//: Base(_args..., _Data) {}
+
+		MATRICE_GLOBAL_INL constexpr auto(data)() noexcept { return (_Data); }
+		MATRICE_GLOBAL_INL constexpr auto(data)() const noexcept { return (_Data); }
+
+		MATRICE_GLOBAL_INL constexpr _Myt& operator= (const _Myt& _other) noexcept {
+			this->_Fill_n(_other._Data);
+			/*Base::my_data = _Data;
 			Base::my_cols = _other.my_cols;
 			Base::my_rows = _other.my_rows;
 			Base::my_size = _other.my_size;
 			Base::my_owner = Owner;
-			privt::fill_mem(_other._Data, _Data, Base::my_size);
+			privt::fill_mem(_other._Data, _Data, Base::my_size);*/
 			return (*this);
 		}
+		MATRICE_GLOBAL_INL constexpr _Myt& operator= (_Myt&& _other) noexcept {
+			_Data = _other._Data;
+			_other._Data = nullptr;
+			return (*this);
+		}
+		MATRICE_GLOBAL_INL constexpr _Myt& operator=(const value_t _Value) noexcept {
+			this->_Fill_n(_Value);
+			return (*this);
+		}
+		MATRICE_GLOBAL_INL constexpr _Myt& operator=(const initlist<value_t> _List) noexcept {
+			this->_Fill_n(_List.begin());
+			return (*this);
+		}
+		template<typename _InIt>
+		MATRICE_GLOBAL_INL constexpr _Myt& operator=(const _InIt _First) noexcept {
+			this->_Fill_n(_First);
+			return (*this);
+		}
+
+		MATRICE_GLOBAL_FINL constexpr auto(rows)()const noexcept { return _Myrows; }
+		MATRICE_GLOBAL_FINL constexpr auto(cols)()const noexcept { return _Mycols; }
+		MATRICE_GLOBAL_FINL constexpr auto(size)()const noexcept { return (_M*_N); }
+		MATRICE_GLOBAL_FINL constexpr auto(pitch)()const noexcept { return one<size_t>; }
+		MATRICE_GLOBAL_FINL constexpr auto(owner)()const noexcept { return (_Myown); }
+
 	private:
+		size_t _Myrows = _M, _Mycols = _N;
+		Location _Myloc = Location::OnStack;
+		Ownership _Myown = Ownership::Always;
+
 		value_t _Data[_M*_N];
-		mutable Ownership _Myown = 
+
+		template<typename _InIt>
+		MATRICE_GLOBAL_INL constexpr void _Fill_n(_InIt _First) noexcept {
+			for (auto _Idx = 0; _Idx < size(); ++_Idx) {
+				if constexpr (is_iterator_v<_InIt>)
+					_Data[_Idx] = _First[_Idx];
+				else
+					_Data[_Idx] = _First;
+			}
+		}
 	};
+
 	//<brief> Dynamic host memory allocator </brief>
 	template<size_t _Opt>
-	MATRICE_ALIGNED_CLASS Allocator<0, 0, _Opt> : public DenseBase<OnHeap, _Opt>
+	MATRICE_ALIGNED_CLASS Allocator<0, 0, _Opt> 
+		: public DenseBase<OnHeap, _Opt>
 	{
 		typedef DenseBase<OnHeap, allocator_traits<0,0>::value> Base;
 	public:
@@ -174,18 +231,20 @@ public:
 		MATRICE_HOST_FINL Allocator(int _m, int _n, const value_t _val) : Base(_m, _n, _val) {}
 		MATRICE_HOST_FINL Allocator(int _m, int _n, pointer data) : Base(_m, _n, data) {}
 		MATRICE_HOST_INL Allocator(const Allocator& _other) : Base(_other) {}
-		MATRICE_HOST_INL Allocator(Allocator&& _other) : Base(std::move(_other)) {}
-		MATRICE_HOST_INL Allocator(std::initializer_list<value_t> _list) {}
+		MATRICE_HOST_INL Allocator(Allocator&& _other) : Base(move(_other)) {}
+		MATRICE_HOST_INL Allocator(initlist<value_t> _list) {}
 		template<typename... _Args>
 		MATRICE_HOST_INL Allocator(const _Args&... _args) : Base(_args...) {}
 
-		MATRICE_HOST_INL Allocator& operator= (const std::initializer_list<value_t> _list) { return static_cast<Allocator&>(Base::operator= (_list)); }
+		MATRICE_HOST_INL Allocator& operator= (const initlist<value_t> _list) { return static_cast<Allocator&>(Base::operator= (_list)); }
 		MATRICE_HOST_INL Allocator& operator= (const Allocator& _other) { return static_cast<Allocator&>(Base::operator= (_other)); }
-		MATRICE_HOST_INL Allocator& operator= (Allocator&& _other) { return static_cast<Allocator&>(Base::operator=(std::move(_other))); }
+		MATRICE_HOST_INL Allocator& operator= (Allocator&& _other) { return static_cast<Allocator&>(Base::operator=(move(_other))); }
 	};
+
 	//<brief> Unified device memory allocator </brief>
 	template<size_t _Opt>
-	MATRICE_ALIGNED_CLASS Allocator<-1, 0, _Opt> : public DenseBase<OnGlobal, allocator_traits<-1, 0>::value>
+	MATRICE_ALIGNED_CLASS Allocator<-1, 0, _Opt> 
+		: public DenseBase<OnGlobal, allocator_traits<-1, 0>::value>
 	{
 		typedef DenseBase<OnGlobal, allocator_traits<-1, 0>::value> Base;
 	public:
@@ -195,14 +254,16 @@ public:
 		MATRICE_HOST_INL Allocator(int _m, int _n, pointer data) : Base(_m, _n, data) {}
 		MATRICE_HOST_INL Allocator(int _m, int _n, value_t _val) : Base(_m, _n, _val) {}
 		MATRICE_HOST_INL Allocator(const Allocator& _other) : Base(_other) {}
-		MATRICE_HOST_INL Allocator(Allocator&& _other) : Base(std::move(_other)) {}
-		MATRICE_HOST_INL Allocator(std::initializer_list<value_t> _list) {}
+		MATRICE_HOST_INL Allocator(Allocator&& _other) : Base(move(_other)) {}
+		MATRICE_HOST_INL Allocator(initlist<value_t> _list) {}
 
 		MATRICE_HOST_INL Allocator& operator= (const Allocator& _other) { return static_cast<Allocator&>(Base::operator= (_other)); }
 	};
+
 	//<brief> Device memory allocator </brief>
 	template<size_t _Opt>
-	MATRICE_ALIGNED_CLASS Allocator<-1, -1, _Opt> : public DenseBase<OnDevice, allocator_traits<-1, -1>::value>
+	MATRICE_ALIGNED_CLASS Allocator<-1, -1, _Opt> 
+		: public DenseBase<OnDevice, allocator_traits<-1, -1>::value>
 	{
 		typedef DenseBase<OnDevice, allocator_traits<-1, -1>::value> Base;
 	public:
@@ -212,8 +273,8 @@ public:
 		MATRICE_DEVICE_INL Allocator(int _m, int _n, pointer data) : Base(_m, _n, data) {}
 		MATRICE_DEVICE_INL Allocator(int _m, int _n, value_t _val) : Base(_m, _n, _val) {}
 		MATRICE_DEVICE_INL Allocator(const Allocator& _other) : Base(_other) {}
-		MATRICE_DEVICE_INL Allocator(Allocator&& _other) : Base(std::move(_other)) {}
-		MATRICE_DEVICE_INL Allocator(std::initializer_list<value_t> _list) {}
+		MATRICE_DEVICE_INL Allocator(Allocator&& _other) : Base(move(_other)) {}
+		MATRICE_DEVICE_INL Allocator(initlist<value_t> _list) {}
 		template<typename... _Args>
 		MATRICE_HOST_INL Allocator(const _Args&... _args) : Base(_args...) {}
 
@@ -221,5 +282,6 @@ public:
 		MATRICE_GLOBAL_INL size_t pitch() const { return Base::my_pitch; }
 	};
 };
-}} 
+_DETAIL_END 
+DGE_MATRICE_END
 #include "inl\_storage_base.inl"
