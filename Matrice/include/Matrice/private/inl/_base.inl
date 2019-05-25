@@ -96,5 +96,8 @@ _Rhs Base_<_Derived, _Traits, _Type>::spreadmul(const _Rhs& _Right)const {
 	return forward<_Rhs>(_Ret);
 }
 _TYPES_END
-
+template<typename _Mty>
+MATRICE_HOST_INL auto make_matrix_deleter(const _Mty& _M) noexcept {
+	return _M.deleter();
+};
 DGE_MATRICE_END
