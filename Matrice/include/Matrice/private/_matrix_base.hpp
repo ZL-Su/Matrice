@@ -242,6 +242,10 @@ public:
 	enum { options = _Myalty::location };
 	enum { Size = _M*_N, CompileTimeRows = _M, CompileTimeCols = _N, };
 	/**
+	 *\brief for static querying memory location
+	 */
+	static constexpr auto location = _Myalty::location;
+	/**
 	 *\brief for static querying memory block rows
 	 */
 	static constexpr auto RowsAtCT = CompileTimeRows;
@@ -990,8 +994,13 @@ protected:
 	using _Mybase::_Myshape;
 
 	size_t m_format = rmaj|gene;
-public:
+
 	_Myalty m_storage;
+
+public:
+	MATRICE_HOST_INL decltype(auto) deleter() noexcept {
+		return (m_storage.deleter());
+	}
 
 #undef MATRICE_MAKE_EXPOP_TYPE
 #undef MATRICE_LINK_PTR
@@ -1030,5 +1039,8 @@ struct _Matrix_padding {
 };
 _DETAIL_END
 using padding =  detail::_Matrix_padding;
+
+template<typename _Mty>
+MATRICE_HOST_INL auto make_matrix_deleter(const _Mty& _M) noexcept;
 DGE_MATRICE_END
 #include "inl\_base.inl"
