@@ -104,16 +104,13 @@ struct _Memory {
 		MATRICE_ENABLE_IF(is_pointer_v<_It>)>
 	MATRICE_HOST_INL static void free(_It _Ptr) {
 		try {
-			if (_Loc == Location::OnHeap)
-				if (is_aligned(_Ptr)) 
-					privt::aligned_free(_Ptr);
-				else { 
-					std::free(_Ptr); _Ptr = nullptr; 
-				}
+			if constexpr (_Loc == Location::OnHeap)
+				if (is_aligned(_Ptr)) privt::aligned_free(_Ptr);
+				else { std::free(_Ptr); _Ptr = nullptr; }
 #if (defined MATRICE_ENABLE_CUDA && !defined __disable_cuda__)
-			else if (_Loc == Location::OnGlobal)
+			else if constexpr (_Loc == Location::OnGlobal)
 				privt::device_free(_Ptr);
-			else if (_Loc == Location::OnDevice)
+			else if constexpr (_Loc == Location::OnDevice)
 				privt::device_free(_Ptr);
 #endif // MATRICE_ENABLE_CUDA
 			else return;
