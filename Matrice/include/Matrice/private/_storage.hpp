@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -193,8 +193,13 @@ public:
 		MATRICE_GLOBAL_FINL constexpr auto(pitch)()const noexcept { return size_t(1); }
 
 		// \fill _Data with zeros, because its managed.
-		MATRICE_GLOBAL_FINL constexpr void free() {
+		MATRICE_GLOBAL_FINL constexpr void free() noexcept {
 			this->_Fill_n(value_t(0));
+		}
+
+		// \reserved method for using smart pointer.
+		MATRICE_GLOBAL_FINL constexpr auto deleter() noexcept {
+			return [](auto _) {};
 		}
 
 	private:
@@ -224,21 +229,31 @@ public:
 	MATRICE_ALIGNED_CLASS Allocator<0, 0, _Opt> 
 		: public DenseBase<OnHeap, _Opt>
 	{
-		typedef DenseBase<OnHeap, allocator_traits<0,0>::value> Base;
+		using _Mybase = DenseBase<OnHeap, allocator_traits<0,0>::value>;
 	public:
-		enum { location = Base::location, option = Base::option };
-		MATRICE_HOST_FINL Allocator(int _m, int _n) : Base(_m, _n) {}
-		MATRICE_HOST_FINL Allocator(int _m, int _n, const value_t _val) : Base(_m, _n, _val) {}
-		MATRICE_HOST_FINL Allocator(int _m, int _n, pointer data) : Base(_m, _n, data) {}
-		MATRICE_HOST_INL Allocator(const Allocator& _other) : Base(_other) {}
-		MATRICE_HOST_INL Allocator(Allocator&& _other) : Base(move(_other)) {}
+		enum { location = _Mybase::location, option = _Mybase::option };
+		MATRICE_HOST_FINL Allocator(int _m, int _n) : _Mybase(_m, _n) {}
+		MATRICE_HOST_FINL Allocator(int _m, int _n, const value_t _val) : _Mybase(_m, _n, _val) {}
+		MATRICE_HOST_FINL Allocator(int _m, int _n, pointer data) : _Mybase(_m, _n, data) {}
+		MATRICE_HOST_INL Allocator(const Allocator& _other) : _Mybase(_other) {}
+		MATRICE_HOST_INL Allocator(Allocator&& _other) : _Mybase(move(_other)) {}
 		MATRICE_HOST_INL Allocator(initlist<value_t> _list) {}
 		template<typename... _Args>
-		MATRICE_HOST_INL Allocator(const _Args&... _args) : Base(_args...) {}
+		MATRICE_HOST_INL Allocator(const _Args&... _args) : _Mybase(_args...) {}
 
-		MATRICE_HOST_INL Allocator& operator= (const initlist<value_t> _list) { return static_cast<Allocator&>(Base::operator= (_list)); }
-		MATRICE_HOST_INL Allocator& operator= (const Allocator& _other) { return static_cast<Allocator&>(Base::operator= (_other)); }
-		MATRICE_HOST_INL Allocator& operator= (Allocator&& _other) { return static_cast<Allocator&>(Base::operator=(move(_other))); }
+		MATRICE_HOST_INL Allocator& operator= (const initlist<value_t> _list) { return static_cast<Allocator&>(_Mybase::operator= (_list)); }
+		MATRICE_HOST_INL Allocator& operator= (const Allocator& _other) { return static_cast<Allocator&>(_Mybase::operator= (_other)); }
+		MATRICE_HOST_INL Allocator& operator= (Allocator&& _other) { return static_cast<Allocator&>(_Mybase::operator=(move(_other))); }
+
+		// \reserved method for using smart pointer.
+		MATRICE_GLOBAL_FINL constexpr auto deleter() noexcept {
+				return [](auto _) { 
+					if (internal::_Memory::is_aligned(_))
+						privt::aligned_free(_);
+					else
+						std::free(_);
+				};
+		}
 	};
 
 	//<brief> Unified device memory allocator </brief>
@@ -246,18 +261,23 @@ public:
 	MATRICE_ALIGNED_CLASS Allocator<-1, 0, _Opt> 
 		: public DenseBase<OnGlobal, allocator_traits<-1, 0>::value>
 	{
-		typedef DenseBase<OnGlobal, allocator_traits<-1, 0>::value> Base;
+		using _Mybase = DenseBase<OnGlobal, allocator_traits<-1, 0>::value>;
 	public:
-		enum { location = Base::location, option = Base::option };
-		MATRICE_HOST_INL Allocator() : Base() {}
-		MATRICE_HOST_INL Allocator(int _m, int _n) : Base(_m, _n) {}
-		MATRICE_HOST_INL Allocator(int _m, int _n, pointer data) : Base(_m, _n, data) {}
-		MATRICE_HOST_INL Allocator(int _m, int _n, value_t _val) : Base(_m, _n, _val) {}
-		MATRICE_HOST_INL Allocator(const Allocator& _other) : Base(_other) {}
-		MATRICE_HOST_INL Allocator(Allocator&& _other) : Base(move(_other)) {}
+		enum { location = _Mybase::location, option = _Mybase::option };
+		MATRICE_HOST_INL Allocator() : _Mybase() {}
+		MATRICE_HOST_INL Allocator(int _m, int _n) : _Mybase(_m, _n) {}
+		MATRICE_HOST_INL Allocator(int _m, int _n, pointer data) : _Mybase(_m, _n, data) {}
+		MATRICE_HOST_INL Allocator(int _m, int _n, value_t _val) : _Mybase(_m, _n, _val) {}
+		MATRICE_HOST_INL Allocator(const Allocator& _other) : _Mybase(_other) {}
+		MATRICE_HOST_INL Allocator(Allocator&& _other) : _Mybase(move(_other)) {}
 		MATRICE_HOST_INL Allocator(initlist<value_t> _list) {}
 
-		MATRICE_HOST_INL Allocator& operator= (const Allocator& _other) { return static_cast<Allocator&>(Base::operator= (_other)); }
+		MATRICE_HOST_INL Allocator& operator= (const Allocator& _other) { return static_cast<Allocator&>(_Mybase::operator= (_other)); }
+
+		// \reserved method for using smart pointer.
+		MATRICE_GLOBAL_INL constexpr auto deleter() noexcept {
+			return [](auto _) { privt::device_free(_); };
+		}
 	};
 
 	//<brief> Device memory allocator </brief>
@@ -280,8 +300,13 @@ public:
 
 		MATRICE_DEVICE_INL Allocator& operator= (const Allocator& _other) { return static_cast<Allocator&>(Base::operator= (_other)); }
 		MATRICE_GLOBAL_INL size_t pitch() const { return Base::my_pitch; }
+
+		// \reserved method for using smart pointer.
+		MATRICE_GLOBAL_INL constexpr auto deleter() noexcept {
+			return [](auto _) { privt::device_free(_); };
+		}
 	};
 };
-_DETAIL_END 
+_DETAIL_END
 DGE_MATRICE_END
 #include "inl\_storage_base.inl"
