@@ -1,6 +1,6 @@
 /***************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library for SC.
-Copyright(C) 2018, Zhilong (Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2019, Zhilong (Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the Free
@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License along with
 this program. If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #pragma once
+#include <functional>
 
 namespace dgelom 
 {
@@ -48,4 +49,7 @@ namespace dgelom
 	 */
 	enum class ttag {A = 000, Y = 111, N = 112};
 	using transp = ttag;
+
+	template<typename _Ty>
+	using deleter_type = std::function<void(std::add_pointer_t<_Ty>)>;
 }
