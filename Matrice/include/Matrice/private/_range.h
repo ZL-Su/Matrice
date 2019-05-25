@@ -132,7 +132,8 @@ private:
 	mutable value_t m_pos = m_begin;
 };
 
-template<typename _Ty> class _Rect_impl MATRICE_NONHERITABLE {
+template<typename _Ty> 
+class _Rect_impl MATRICE_NONHERITABLE {
 public:
 	using value_type = _Ty;
 	using point_type = Vec_<value_type, 2>;
@@ -163,19 +164,24 @@ private:
 };
 }
 
-// \TEMPLATE CLASS range : [begin, end[, stride])
+// \CLASS TEMPLATE linear range : [begin, end[, stride])
 template<typename _Ty, typename _Uy = _Ty>
 class range MATRICE_NONHERITABLE 
 	: public detail::_Range_base<common_type_t<_Ty, _Uy>> {
 	using _Mybase = detail::_Range_base<common_type_t<_Ty, _Uy>>;
 public:
-	explicit MATRICE_GLOBAL_INL range(const _Ty& _First, const _Uy& _Last)
+	using typename _Mybase::stride_t;
+	MATRICE_GLOBAL_INL explicit 
+		range(const _Ty& _First, const _Uy& _Last)
 		: _Mybase(_First, _Last) {}
-	explicit MATRICE_GLOBAL_INL range(const _Ty& _First, const _Uy& _Last, typename _Mybase::const_stride_t& _Inc)
+	MATRICE_GLOBAL_INL explicit 
+		range(const _Ty& _First, const _Uy& _Last, const stride_t _Inc)
 		: _Mybase(_First, _Last, _Inc) {}
-	explicit MATRICE_GLOBAL_INL range(const _Ty& _First, size_t _Size)
+	MATRICE_GLOBAL_INL explicit 
+		range(const _Ty& _First, long _Size)
 		: _Mybase(_First, _First+_Size) {}
-	explicit MATRICE_GLOBAL_INL range(const _Ty& _First, size_t _Size, typename _Mybase::const_stride_t& _Inc)
+	MATRICE_GLOBAL_INL explicit 
+		range(const _Ty& _First, long _Size, const stride_t _Inc)
 		: _Mybase(_First, _First+_Size, _Inc) {}
 };
 
