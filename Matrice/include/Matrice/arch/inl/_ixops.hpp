@@ -88,8 +88,8 @@ struct Op_ MATRICE_NONHERITABLE {
 };
 template<typename _Fn, typename... _Args>
 HOST_INL_CXPR_T _Transform_impl(const _Args&... _args) {
-	_Fn _Func;
-	return _Func(_args...); 
+	//_Fn _Func;
+	return _Fn()(_args...);
 }
 }
 template<typename _Fn, typename... _Args>
