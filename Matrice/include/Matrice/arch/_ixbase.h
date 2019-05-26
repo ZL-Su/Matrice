@@ -69,7 +69,7 @@ public:
 	MATRICE_HOST_FINL auto unpack(_Fwdty& arg) const { _Myop(m_data, arg.data()); }
 
 	// \evaluate the vectorizable size for given 'length'
-	MATRICE_HOST_FINL auto vsize(std::size_t _Len) const noexcept { return (_Len - _Len%size); }
+	MATRICE_HOST_FINL auto vsize(size_t _Len) const noexcept { return (_Len - _Len%size); }
 	
 protected:
 	template<typename... _Args> MATRICE_HOST_FINL constexpr
@@ -79,8 +79,8 @@ protected:
 	internal_t m_data;
 };
 
-template<std::size_t _Elems>
-MATRICE_HOST_FINL std::size_t vsize(std::size_t _Len) {
+template<size_t _Elems = packet_size_v<float>>
+MATRICE_HOST_FINL size_t vsize(size_t _Len) noexcept {
 	return (_Len - _Len % _Elems);
 }
 
