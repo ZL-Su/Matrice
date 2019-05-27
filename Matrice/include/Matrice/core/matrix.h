@@ -23,7 +23,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 MATRICE_NAMESPACE_BEGIN_TYPES
 
 #define MATRICE_MAKE_METHOD_CREATE MATRICE_GLOBAL \
-        void __create_impl(size_t _Rows, size_t _Cols = 1);
+void __create_impl(size_t _Rows, size_t _Cols = 1);
 
 /*******************************************************************
 	Generic Matrix Class with Aligned Static Memory Allocation
@@ -63,12 +63,11 @@ public:
 	template<typename _Uy>
 	MATRICE_HOST_FINL constexpr Matrix_(const nested_initlist<_Uy> _list) noexcept
 		: _Mybase(_list) {}
-	template<size_t _Len>
-	MATRICE_HOST_FINL constexpr Matrix_(const std::array<value_t, _Len>& _array) noexcept
+	MATRICE_HOST_FINL constexpr Matrix_(const std::array<value_t, Size>& _array) noexcept
 		: Matrix_(pointer(_array.data())) {}
-	template<typename... _Arg> 
-	MATRICE_GLOBAL_FINL constexpr Matrix_(const _Arg&... _arg) noexcept
-		: _Mybase(_arg...) {};
+	template<typename... _Args> 
+	MATRICE_GLOBAL_FINL constexpr Matrix_(_Args&&... args) noexcept
+		: _Mybase(forward<_Args>(args)...) {};
 
 	MATRICE_HOST_FINL Myt_reference operator=(const_initlist _list) {
 		return _Mybase::operator=(_list); 
@@ -119,13 +118,18 @@ public:
 	using device_t = Matrix_<value_t, -1, -1>;
 	enum { Size = __, CompileTimeRows = __, CompileTimeCols = __, };
 	
-	MATRICE_GLOBAL_FINL Matrix_(int _rows) noexcept : _Mybase(_rows, 1) {};
-	MATRICE_GLOBAL_FINL Matrix_(const Myt& _other) noexcept : _Mybase(_other) {};
+	MATRICE_GLOBAL_FINL Matrix_(int _rows) noexcept 
+		: _Mybase(_rows, 1) {};
+	MATRICE_GLOBAL_FINL Matrix_(const Myt& _other) noexcept 
+		: _Mybase(_other) {};
 	template<typename _Arg>
-	MATRICE_GLOBAL_FINL Matrix_(_Arg&& _other) noexcept : _Mybase(move(_other)) {};
+	MATRICE_GLOBAL_FINL Matrix_(_Arg&& _other) noexcept 
+		: _Mybase(move(_other)) {};
 	template<typename... _Args> 
-	MATRICE_GLOBAL_FINL Matrix_(const _Args&... args) noexcept : _Mybase(args...) {};
-	MATRICE_GLOBAL_FINL Matrix_(const device_t& _other) noexcept : _Mybase(_other) {};
+	MATRICE_GLOBAL_FINL Matrix_(_Args&&... args) noexcept 
+		: _Mybase(forward<_Args>(args)...) {};
+	MATRICE_GLOBAL_FINL Matrix_(const device_t& _other) noexcept 
+		: _Mybase(_other) {};
 
 	MATRICE_GLOBAL_INL Myt_reference operator= (Myt_const_reference _other) { 
 		return _Mybase::operator=(_other); 
@@ -167,8 +171,8 @@ public:
 	MATRICE_GLOBAL_INL Matrix_(Myt_move_reference _other) noexcept 
 		: _Mybase(move(_other)) {};
 	template<typename... _Args> 
-	MATRICE_GLOBAL_INL Matrix_(_Args... args) noexcept 
-		: _Mybase(args...) {};
+	MATRICE_GLOBAL_INL Matrix_(_Args&&... args) noexcept 
+		: _Mybase(forward<_Args>(args)...) {};
 
 	template<typename _Arg> 
 	MATRICE_GLOBAL_INL Myt_reference operator= (add_const_reference<_Arg> _arg) { 
@@ -219,11 +223,11 @@ public:
 	MATRICE_GLOBAL_INL Matrix_(const host_t& _other) noexcept
 		:_Mybase(_other), _Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {}
 	template<int _M = 0, int _N = _M>
-	MATRICE_HOST_INL Matrix_(const Matrix_<value_t,_M,_N>&_other)noexcept
+	MATRICE_HOST_INL Matrix_(const Matrix_<value_t, _M, _N>&_other)noexcept
 		:_Mybase(_other), _Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
 	template<typename... _Args>
-	MATRICE_GLOBAL_INL Matrix_(const _Args&... args) noexcept 
-		:_Mybase(args...), _Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
+	MATRICE_GLOBAL_INL Matrix_(_Args&&... args) noexcept 
+		:_Mybase(forward<_Args>(args)...), _Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
 
 	MATRICE_MAKE_METHOD_CREATE;
 
