@@ -19,8 +19,6 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <memory>
-#include <initializer_list>
-#include <type_traits>
 #include "../util/_macros.h"
 #include "../private/_memory.h"
 #include "../private/_unified_memory.h"
@@ -52,6 +50,10 @@ public:
 	typedef std::ptrdiff_t      int_t;
 #endif
 	enum Ownership { Owner = 1, Refer = 0, Proxy = -1, Empty = -2, Always = 9};
+
+	///<brief> generic allocator and its specialization </brief>
+	template<int _M, int _N, size_t _Opt> class Allocator;
+
 	///<brief> data memory </brief>
 	template<
 		Location _Loc = UnSpecified, 
@@ -65,14 +67,16 @@ public:
 	MATRICE_ALIGNED_CLASS DenseBase {
 	public:
 		static constexpr auto location = _Loc;
-		enum { /*location = _Loc, */option = _Opt };
+		enum { option = _Opt };
 		MATRICE_GLOBAL_FINL DenseBase() noexcept;
 		MATRICE_GLOBAL_FINL DenseBase(int_t _rows, int_t _cols, pointer _data);
 		MATRICE_GLOBAL_FINL DenseBase(int_t _rows, int_t _cols, pointer _data, initlist<value_t> _list);
 		MATRICE_GLOBAL DenseBase(int_t _rows, int_t _cols);
 		MATRICE_GLOBAL DenseBase(int_t _rows, int_t _cols, const value_t _val);
+		MATRICE_GLOBAL_FINL DenseBase(initlist<value_t> _list);
 		MATRICE_GLOBAL DenseBase(const DenseBase& _other);
 		MATRICE_GLOBAL DenseBase(DenseBase&& _other) noexcept;
+
 		template<Location _From, size_t _Option>
 		MATRICE_GLOBAL_FINL DenseBase(const DenseBase<_From, _Option>& _other, pointer _data);
 		template<Location _From, size_t _Option>
@@ -82,9 +86,13 @@ public:
 		///<brief> operators </brief>
 		MATRICE_GLOBAL DenseBase& operator=(const DenseBase& _other);
 		MATRICE_GLOBAL DenseBase& operator=(DenseBase&& _other) noexcept;
-
 		MATRICE_GLOBAL_INL decltype(auto) operator=(value_t _value) noexcept;
 		MATRICE_GLOBAL_INL decltype(auto) operator=(initlist<value_t> _list) noexcept;
+
+		template<int _M, int _N>
+		MATRICE_GLOBAL_INL DenseBase(const Allocator<_M, _N, allocator_traits<_M, _N>::value>& _al) noexcept;
+		template<int _M, int _N>
+		MATRICE_GLOBAL_INL decltype(auto) operator=(const Allocator<_M, _N, allocator_traits<_M, _N>::value>& _al) noexcept;
 
 		///<brief> methods </brief>
 		MATRICE_GLOBAL DenseBase& create(int_t _Rows, int_t _Cols);
@@ -127,9 +135,6 @@ public:
 #endif
 		Location my_location = _Loc;
 	};
-
-	///<brief> generic allocator and its specialization </brief>
-	template<int _M, int _N, size_t _Opt> class Allocator;
 
 	//<brief> Managed host memory allocator </brief>
 	template<int _M, int _N, size_t _Opt = allocator_traits<_M, _N>::value>
@@ -232,18 +237,32 @@ public:
 		using _Mybase = DenseBase<OnHeap, allocator_traits<0,0>::value>;
 	public:
 		enum { location = _Mybase::location, option = _Mybase::option };
-		MATRICE_HOST_FINL Allocator(int _m, int _n) : _Mybase(_m, _n) {}
-		MATRICE_HOST_FINL Allocator(int _m, int _n, const value_t _val) : _Mybase(_m, _n, _val) {}
-		MATRICE_HOST_FINL Allocator(int _m, int _n, pointer data) : _Mybase(_m, _n, data) {}
-		MATRICE_HOST_INL Allocator(const Allocator& _other) : _Mybase(_other) {}
-		MATRICE_HOST_INL Allocator(Allocator&& _other) : _Mybase(move(_other)) {}
-		MATRICE_HOST_INL Allocator(initlist<value_t> _list) {}
+		MATRICE_HOST_FINL Allocator(int _m, int _n) 
+			:_Mybase(_m, _n) {}
+		MATRICE_HOST_FINL Allocator(int _m, int _n, const value_t _val) 
+			:_Mybase(_m, _n, _val) {}
+		MATRICE_HOST_FINL Allocator(int _m, int _n, pointer data) 
+			:_Mybase(_m, _n, data) {}
+		MATRICE_HOST_INL Allocator(const Allocator& _other) 
+			:_Mybase(_other) {}
+		MATRICE_HOST_INL Allocator(Allocator&& _other) 
+			:_Mybase(move(_other)) {}
+		MATRICE_HOST_INL Allocator(initlist<value_t> _list)
+			:_Mybase(_list) {}
 		template<typename... _Args>
-		MATRICE_HOST_INL Allocator(const _Args&... _args) : _Mybase(_args...) {}
+		MATRICE_HOST_INL Allocator(_Args&&... _args) 
+			:_Mybase(forward<_Args>(_args)...) {}
 
-		MATRICE_HOST_INL Allocator& operator= (const initlist<value_t> _list) { return static_cast<Allocator&>(_Mybase::operator= (_list)); }
-		MATRICE_HOST_INL Allocator& operator= (const Allocator& _other) { return static_cast<Allocator&>(_Mybase::operator= (_other)); }
-		MATRICE_HOST_INL Allocator& operator= (Allocator&& _other) { return static_cast<Allocator&>(_Mybase::operator=(move(_other))); }
+		template<typename... _Args>
+		MATRICE_HOST_INL Allocator& operator=(_Args&&... args) noexcept {
+			return static_cast<Allocator&>(_Mybase::operator=(forward<_Args>(args)...));
+		}
+		MATRICE_HOST_INL Allocator& operator= (const Allocator& _other) { 
+			return static_cast<Allocator&>(_Mybase::operator= (_other)); 
+		}
+		MATRICE_HOST_INL Allocator& operator= (Allocator&& _other) { 
+			return static_cast<Allocator&>(_Mybase::operator=(move(_other))); 
+		}
 
 		// \reserved method for using smart pointer.
 		MATRICE_GLOBAL_FINL constexpr auto deleter() noexcept {
@@ -264,15 +283,27 @@ public:
 		using _Mybase = DenseBase<OnGlobal, allocator_traits<-1, 0>::value>;
 	public:
 		enum { location = _Mybase::location, option = _Mybase::option };
-		MATRICE_HOST_INL Allocator() : _Mybase() {}
-		MATRICE_HOST_INL Allocator(int _m, int _n) : _Mybase(_m, _n) {}
-		MATRICE_HOST_INL Allocator(int _m, int _n, pointer data) : _Mybase(_m, _n, data) {}
-		MATRICE_HOST_INL Allocator(int _m, int _n, value_t _val) : _Mybase(_m, _n, _val) {}
-		MATRICE_HOST_INL Allocator(const Allocator& _other) : _Mybase(_other) {}
-		MATRICE_HOST_INL Allocator(Allocator&& _other) : _Mybase(move(_other)) {}
-		MATRICE_HOST_INL Allocator(initlist<value_t> _list) {}
+		MATRICE_HOST_INL Allocator() 
+			: _Mybase() {}
+		MATRICE_HOST_INL Allocator(int _m, int _n) 
+			: _Mybase(_m, _n) {}
+		MATRICE_HOST_INL Allocator(int _m, int _n, pointer data) 
+			: _Mybase(_m, _n, data) {}
+		MATRICE_HOST_INL Allocator(int _m, int _n, value_t _val) 
+			: _Mybase(_m, _n, _val) {}
+		MATRICE_HOST_INL Allocator(const Allocator& _other) 
+			: _Mybase(_other) {}
+		MATRICE_HOST_INL Allocator(Allocator&& _other) 
+			: _Mybase(move(_other)) {}
+		MATRICE_HOST_INL Allocator(initlist<value_t> _list) 
+			: _Mybase(_list) {}
+		template<typename... _Args>
+		MATRICE_HOST_INL Allocator(_Args&&... _args)
+			: _Mybase(forward<_Args>(_args)...) {}
 
-		MATRICE_HOST_INL Allocator& operator= (const Allocator& _other) { return static_cast<Allocator&>(_Mybase::operator= (_other)); }
+		MATRICE_HOST_INL Allocator& operator= (const Allocator& _other) { 
+			return static_cast<Allocator&>(_Mybase::operator= (_other)); 
+		}
 
 		// \reserved method for using smart pointer.
 		MATRICE_GLOBAL_INL constexpr auto deleter() noexcept {
@@ -285,21 +316,33 @@ public:
 	MATRICE_ALIGNED_CLASS Allocator<-1, -1, _Opt> 
 		: public DenseBase<OnDevice, allocator_traits<-1, -1>::value>
 	{
-		typedef DenseBase<OnDevice, allocator_traits<-1, -1>::value> Base;
+		using _Mybase = DenseBase<OnDevice, allocator_traits<-1, -1>::value>;
 	public:
-		enum { location = Base::location, option = Base::option };
-		MATRICE_DEVICE_INL Allocator() : Base() {}
-		MATRICE_DEVICE_INL Allocator(int _m, int _n) : Base(_m, _n) {}
-		MATRICE_DEVICE_INL Allocator(int _m, int _n, pointer data) : Base(_m, _n, data) {}
-		MATRICE_DEVICE_INL Allocator(int _m, int _n, value_t _val) : Base(_m, _n, _val) {}
-		MATRICE_DEVICE_INL Allocator(const Allocator& _other) : Base(_other) {}
-		MATRICE_DEVICE_INL Allocator(Allocator&& _other) : Base(move(_other)) {}
-		MATRICE_DEVICE_INL Allocator(initlist<value_t> _list) {}
+		enum { location = _Mybase::location, option = _Mybase::option };
+		MATRICE_DEVICE_INL Allocator() 
+			: _Mybase() {}
+		MATRICE_DEVICE_INL Allocator(int _m, int _n) 
+			: _Mybase(_m, _n) {}
+		MATRICE_DEVICE_INL Allocator(int _m, int _n, pointer data) 
+			: _Mybase(_m, _n, data) {}
+		MATRICE_DEVICE_INL Allocator(int _m, int _n, value_t _val) 
+			: _Mybase(_m, _n, _val) {}
+		MATRICE_DEVICE_INL Allocator(const Allocator& _other) 
+			: _Mybase(_other) {}
+		MATRICE_DEVICE_INL Allocator(Allocator&& _other) 
+			: _Mybase(move(_other)) {}
+		MATRICE_DEVICE_INL Allocator(initlist<value_t> _list)
+			: _Mybase(_list) {}
 		template<typename... _Args>
-		MATRICE_HOST_INL Allocator(const _Args&... _args) : Base(_args...) {}
+		MATRICE_HOST_INL Allocator(_Args&&... _args)
+			: _Mybase(forward<_Args>(_args)...) {}
 
-		MATRICE_DEVICE_INL Allocator& operator= (const Allocator& _other) { return static_cast<Allocator&>(Base::operator= (_other)); }
-		MATRICE_GLOBAL_INL size_t pitch() const { return Base::my_pitch; }
+		MATRICE_DEVICE_INL Allocator& operator=(const Allocator& _other) { 
+			return static_cast<Allocator&>(_Mybase::operator= (_other)); 
+		}
+		MATRICE_GLOBAL_INL size_t pitch() const { 
+			return _Mybase::my_pitch; 
+		}
 
 		// \reserved method for using smart pointer.
 		MATRICE_GLOBAL_INL constexpr auto deleter() noexcept {
