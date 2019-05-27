@@ -17,10 +17,8 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 
-#include <iterator>
 #include <valarray>
 #include <functional>
-#include <tuple>
 #include "_type_traits.h"
 #include "_matrix_exp.hpp"
 #include "_matrix_ops.hpp"
@@ -157,14 +155,14 @@ _TYPES_BEGIN
  ******************************************************************/
 template<
 	typename _Derived, 
-	typename _Traits = matrix_traits<_Derived>, 
-	typename _Type = typename _Traits::type>
-class Base_ : public _Basic_plane_view_base<_Type>
+	typename _Mytraits = matrix_traits<_Derived>, 
+	typename _Valtype = typename _Mytraits::type>
+class Base_ : public _Basic_plane_view_base<_Valtype>
 {
 #define MATRICE_LINK_PTR { m_data = m_storage.data(); }
 #define MATRICE_EVALEXP_TOTHIS { m_data = m_storage.data(); exp.assign(*this); }
 #define MATRICE_EXPAND_SHAPE get<0>(_Shape), get<1>(_Shape)
-#define MATRICE_MAKE_EXPOP_TYPE(DESC, NAME) typename _Exp_op::_##DESC##_##NAME<_Type>
+#define MATRICE_MAKE_EXPOP_TYPE(DESC, NAME) typename _Exp_op::_##DESC##_##NAME<_Valtype>
 #define MATRICE_MAKE_ARITHOP(OP, NAME) \
 template<typename _Rhs> MATRICE_GLOBAL_INL \
 auto operator##OP (const _Rhs& _Right) const { \
@@ -187,31 +185,31 @@ return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 }
 
 	struct _My_element {
-		_My_element(_Type& _Val, size_t _Idx, size_t _Std) 
+		_My_element(_Valtype& _Val, size_t _Idx, size_t _Std) 
 			: _Value(_Val), _Index(_Idx), _Stride(_Std) {}
-		MATRICE_GLOBAL_INL operator _Type&() { return _Value; }
-		MATRICE_GLOBAL_INL operator _Type&() const { return _Value; }
+		MATRICE_GLOBAL_INL operator _Valtype&() { return _Value; }
+		MATRICE_GLOBAL_INL operator _Valtype&() const { return _Value; }
 		MATRICE_GLOBAL_INL auto index() const { return _Index; }
 		MATRICE_GLOBAL_INL auto x() const { return (_Index - y()*_Stride); }
 		MATRICE_GLOBAL_INL auto y() const { return (_Index / _Stride); }
 	private:
-		_Type& _Value;
+		_Valtype& _Value;
 		size_t _Index, _Stride;
 	};
-	enum { _M = _Traits::size::rows::value, _N = _Traits::size::cols::value };
-	using _Myalty = typename detail::Storage_<_Type>::template Allocator<_M, _N>;
+	enum { _M = _Mytraits::size::rows::value, _N = _Mytraits::size::cols::value };
+	using _Myalty = typename detail::Storage_<_Valtype>::template Allocator<_M, _N>;
 	using _Myt = Base_;
-	using _Mybase = _Basic_plane_view_base<_Type>;
+	using _Mybase = _Basic_plane_view_base<_Valtype>;
 	using _Myt_const = std::add_const_t<_Myt>;
 	using _Myt_reference = std::add_lvalue_reference_t<_Myt>;
 	using _Myt_const_reference = std::add_lvalue_reference_t<_Myt_const>;
 	using _Myt_move_reference = std::add_rvalue_reference_t<_Myt>;
-	using _Myt_fwd_iterator = _Matrix_forward_iterator<_Type>;
-	using _Myt_rwise_iterator = _Matrix_rwise_iterator<_Type>;
-	using _Myt_cwise_iterator = _Matrix_cwise_iterator<_Type>;
-	using _Myt_rview_type = _Matrix_rview<_Type>;
-	using _Myt_cview_type = _Matrix_cview<_Type>;
-	using _Myt_blockview_type = _Matrix_block<_Type>;
+	using _Myt_fwd_iterator = _Matrix_forward_iterator<_Valtype>;
+	using _Myt_rwise_iterator = _Matrix_rwise_iterator<_Valtype>;
+	using _Myt_cwise_iterator = _Matrix_cwise_iterator<_Valtype>;
+	using _Myt_rview_type = _Matrix_rview<_Valtype>;
+	using _Myt_cview_type = _Matrix_cview<_Valtype>;
+	using _Myt_blockview_type = _Matrix_block<_Valtype>;
 	using _Xop_ewise_add   = MATRICE_MAKE_EXPOP_TYPE(Ewise, add);
 	using _Xop_ewise_sub   = MATRICE_MAKE_EXPOP_TYPE(Ewise, sub);
 	using _Xop_ewise_mul   = MATRICE_MAKE_EXPOP_TYPE(Ewise, mul);
@@ -225,7 +223,7 @@ return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 	using _Xop_mat_inv     = MATRICE_MAKE_EXPOP_TYPE(Mat, inv);
 	using _Xop_mat_trp     = MATRICE_MAKE_EXPOP_TYPE(Mat, trp);
 public:
-	using value_t = _Type;
+	using value_t = _Valtype;
 	using value_type = value_t;
 	using derived_t = _Derived;
 	using base_t = _Mybase;
@@ -235,7 +233,7 @@ public:
 	using const_iterator = std::add_const_t<iterator>;
 	using const_initlist = std::add_const_t<initlist<value_t>>;
 	using loctn_t = Location;
-	using category = typename _Traits::category;
+	using category = typename _Mytraits::category;
 	template<typename _Xop> 
 	using expr_type = Expr::Base_<_Xop>;
 	
@@ -296,10 +294,14 @@ public:
 	 *\from explicit specified matrix type
 	 */
 	template<int _CTR, int _CTC>
-	MATRICE_GLOBAL_INL constexpr Base_(const Matrix_<value_t,_CTR,_CTC>& _other)
-		:_Mybase(_other.rows(),_other.cols()),m_storage(_other.m_storage) MATRICE_LINK_PTR
-	MATRICE_GLOBAL_INL constexpr Base_(const Matrix_<value_t,-1,-1>& _other)
-		:_Mybase(_other.rows(), _other.cols()), m_storage(_other.m_storage) MATRICE_LINK_PTR
+	MATRICE_GLOBAL_INL constexpr Base_(const Matrix_<value_t, _CTR, _CTC>& _Oth) noexcept
+		//: Base_(_Oth.rows(), _Oth.cols(), _Oth.data())
+		:_Mybase(_Oth.rows(), _Oth.cols()),m_storage(_Oth.allocator())
+		MATRICE_LINK_PTR
+	MATRICE_GLOBAL_INL constexpr Base_(const Matrix_<value_t,-1,-1>& _Oth) noexcept
+		//: Base_(_Oth.rows(), _Oth.cols(), _Oth.data())
+		:_Mybase(_Oth.rows(), _Oth.cols()), m_storage(_Oth.allocator())
+		MATRICE_LINK_PTR
 	/**
 	 *\from expression
 	 */
@@ -355,25 +357,25 @@ public:
 	/**
 	 *\create a matrix with dynamic (host or device) memory allocation
 	 */
-	MATRICE_HOST_ONLY auto& create(diff_t _Rows, diff_t _Cols = (1)) {
+	MATRICE_HOST_INL decltype(auto)create(diff_t _Rows, diff_t _Cols = (1)) {
 		if constexpr (_M <= 0 && _N <= 0) 
 			static_cast<_Derived*>(this)->__create_impl(_Rows, _Cols);
 		return (*static_cast<_Derived*>(this));
 	};
 	template<typename _Uy, MATRICE_ENABLE_IF(is_scalar_v<_Uy>)>
-	MATRICE_HOST_ONLY auto& create(diff_t _Rows, diff_t _Cols, _Uy _Val) {
+	MATRICE_HOST_INL decltype(auto)create(diff_t _Rows, diff_t _Cols, _Uy _Val) {
 		this->create(_Rows, _Cols);
-		return (*(this) = { value_type(_Val) });
+		return (*(this) = value_type(_Val));
 	};
-	MATRICE_HOST_ONLY auto& create(const shape_t<size_t>& _Shape) {
+	MATRICE_HOST_INL decltype(auto)create(const shape_t<size_t>& _Shape) {
 		if constexpr (_M <= 0 && _N <= 0) 
 			static_cast<_Derived*>(this)->__create_impl(MATRICE_EXPAND_SHAPE);
 		return (*static_cast<_Derived*>(this));
 	};
 	template<typename _Uy, MATRICE_ENABLE_IF(is_scalar_v<_Uy>)>
-	MATRICE_HOST_ONLY auto& create(const shape_t<size_t>& _Shape, _Uy _Val) {
+	MATRICE_HOST_INL decltype(auto)create(const shape_t<size_t>& _Shape, _Uy _Val) {
 		this->create(_Shape);
-		return (*(this) = { value_type(_Val) });
+		return (*(this) = value_type(_Val));
 	};
 
 	/**
@@ -386,7 +388,7 @@ public:
 #endif
 		return (m_data + y * m_cols); 
 	}
-	MATRICE_GLOBAL_FINL constexpr pointer operator[](index_t y) const noexcept {
+	MATRICE_GLOBAL_FINL constexpr const pointer operator[](index_t y) const noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(y < rows(), "Matrix_ subscript out of row range.");
 #endif
@@ -401,7 +403,7 @@ public:
 #endif
 		return m_data[i]; 
 	}
-	MATRICE_GLOBAL_FINL constexpr reference operator()(index_t i) const noexcept {
+	MATRICE_GLOBAL_FINL constexpr const reference operator()(index_t i) const noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(i < size(), "Matrix_ subscript out of range.");
 #endif
@@ -417,7 +419,7 @@ public:
 #endif
 		return (*this)[r][c]; 
 	}
-	MATRICE_GLOBAL_INL constexpr reference operator()(index_t r, index_t c) const noexcept {
+	MATRICE_GLOBAL_INL constexpr const reference operator()(index_t r, index_t c) const noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(r < rows(), "Matrix_ subscript out of row range.");
 		DGELOM_CHECK(c < cols(), "Matrix_ subscript out of column range.");
@@ -429,7 +431,7 @@ public:
 	 *\returns pointer to object memory
 	 */
 	MATRICE_GLOBAL_FINL constexpr pointer data() noexcept { return (m_data); }
-	MATRICE_GLOBAL_FINL constexpr pointer data() const noexcept { return (m_data); }
+	MATRICE_GLOBAL_FINL constexpr const pointer data() const noexcept { return (m_data); }
 	/**
 	 *\returns pointer to y-th row
 	 *\sa operator[]
@@ -440,7 +442,7 @@ public:
 #endif
 		return (m_data + (m_cols) * (y)); 
 	}
-	MATRICE_GLOBAL_FINL constexpr pointer ptr(int y = 0) const {
+	MATRICE_GLOBAL_FINL constexpr const pointer ptr(int y = 0) const {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(y < rows(), "Matrix_ subscript out of row range.");
 #endif
@@ -450,14 +452,14 @@ public:
 	/**
 	 * \returns reference to the derived object
 	 */
-	MATRICE_GLOBAL_FINL decltype(auto) eval() noexcept {
+	MATRICE_GLOBAL_FINL _Derived& eval()noexcept {
 		return (*static_cast<_Derived*>(this));
 	}
 	/**
 	 * \returns const reference to the derived object
 	 */
-	MATRICE_GLOBAL_FINL constexpr decltype(auto) eval() const noexcept {
-		return (*static_cast<const _Derived*>(this)); 
+	MATRICE_GLOBAL_FINL constexpr const _Derived& eval()const noexcept {
+		return (*static_cast<const _Derived*>(this));
 	}
 
 #pragma region <!-- iterators -->
@@ -859,7 +861,7 @@ public:
 	 * \operate each entry via _Fn
 	 */
 	template<typename _Op>
-	MATRICE_GLOBAL_FINL auto& each(_Op&& _Fn) noexcept {
+	MATRICE_GLOBAL_FINL _Derived& each(_Op&& _Fn) noexcept {
 		for (auto& _Val : *this) _Fn(_Val); 
 		return(*static_cast<_Derived*>(this));
 	}
@@ -998,6 +1000,12 @@ protected:
 	_Myalty m_storage;
 
 public:
+	MATRICE_HOST_INL _Myalty& allocator() noexcept {
+		return (m_storage);
+	}
+	MATRICE_HOST_INL const _Myalty& allocator()const noexcept {
+		return (m_storage);
+	}
 	MATRICE_HOST_INL decltype(auto) deleter() noexcept {
 		return (m_storage.deleter());
 	}
@@ -1042,5 +1050,14 @@ using padding =  detail::_Matrix_padding;
 
 template<typename _Mty>
 MATRICE_HOST_INL auto make_matrix_deleter(const _Mty& _M) noexcept;
+
+/**
+ *\brief dgelom::Matrix_<...> factory function to create matrix object.
+ *\param [params] wrap any parameters supported by dgelom::Matrix_ ctors.
+ */
+template<typename _Ty, int _Rows=0, int _Cols=0, typename... _Args>
+MATRICE_GLOBAL_INL types::Matrix_<_Ty, _Rows, _Cols> make_matrix(_Args&&... params) {
+	return types::Matrix_<_Ty, _Rows, _Cols>(forward<_Args>(params)...);
+};
 DGE_MATRICE_END
 #include "inl\_base.inl"
