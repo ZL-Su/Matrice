@@ -21,7 +21,8 @@ template<Location _Loc, size_t _Opt>
 template<Location _From, size_t _Option> MATRICE_GLOBAL_FINL
 Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(const DenseBase<_From, _Option>& _other, pointer _data)
  : DenseBase(_other.rows(), _other.cols(), _data) {
-	privt::unified_sync<value_t, _From, _Loc, _Option>::op(my_data, _other.data(), my_rows, my_cols, _other.pitch());
+	privt::unified_sync<value_t, _From, _Loc, _Option>::
+		op(my_data, _other.data(), my_rows, my_cols, _other.pitch());
 }
 
 template<typename _Ty>
@@ -29,7 +30,8 @@ template<Location _Loc, size_t _Opt>
 template<Location _From, size_t _Option> MATRICE_GLOBAL_FINL
 Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(const DenseBase<_From, _Option>& _other)
  : DenseBase(_other.rows(), _other.cols()) {
-	privt::unified_sync<value_t, _From, _Loc, _Loc==OnDevice?_Opt: _Option>::op(my_data, _other.data(), my_rows, my_cols, _Loc == OnDevice ? my_pitch : _other.pitch());
+	privt::unified_sync<value_t, _From, _Loc, _Loc==OnDevice?_Opt: _Option>::
+		op(my_data, _other.data(), my_rows, my_cols, _Loc == OnDevice ? my_pitch : _other.pitch());
 }
 
 template<typename _Ty> 
@@ -41,6 +43,17 @@ Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(
 	if (_list.size() == 1)
 		privt::unified_fill<value_t, location + option>::op(my_data, *_list.begin(), my_rows, my_cols, my_pitch);
 	else 
+		std::memcpy((void*)my_data, (void*)&(*_list.begin()), _list.size() * type_bytes_v<value_t>);
+}
+
+template<typename _Ty>
+template<Location _Loc, size_t _Opt> MATRICE_GLOBAL_FINL
+Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(initlist<value_t> _list)
+	: DenseBase(_list.size(), 1) {
+	my_owner = Ownership::Owner;
+	if (_list.size() == 1)
+		privt::unified_fill<value_t, location + option>::op(my_data, *_list.begin(), my_rows, my_cols, my_pitch);
+	else
 		std::memcpy((void*)my_data, (void*)&(*_list.begin()), _list.size() * type_bytes_v<value_t>);
 }
 
@@ -67,11 +80,31 @@ template<typename _Ty>
 template<Location _Loc, size_t _Opt> MATRICE_GLOBAL_FINL 
 decltype(auto) Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(initlist<value_t> _list) noexcept {
 	if (_list.size() == 1) this->operator=(*_list.begin());
-		//privt::unified_fill<value_t, location + option>::op(my_data, *_list.begin(), my_rows, my_cols, my_pitch);
 	else
-		privt::unified_sync<value_t, OnStack, Location(location), LINEAR+COPY>::op(my_data, pointer(_list.begin()), my_rows, my_cols, my_pitch);
+		privt::unified_sync<value_t, OnStack, Location(location), LINEAR+COPY>::
+			op(my_data, pointer(_list.begin()), my_rows, my_cols, my_pitch);
 
 	return (*this);
 }
 
+template<typename _Ty>
+template<Location _Loc, size_t _Opt>
+template<int _M, int _N> MATRICE_GLOBAL_FINL
+Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(const Allocator<_M, _N, allocator_traits<_M, _N>::value>& _al) noexcept
+	: DenseBase(_al.rows(), _al.cols()) {
+	constexpr auto _From = Location(remove_all_t<decltype(_al)>::location);
+	constexpr auto _Option = remove_all_t<decltype(_al)>::option;
+	privt::unified_sync<value_t, _From, _Loc, _Loc==OnDevice?_Opt:_Option>::
+		op(my_data, (pointer)_al.data(), my_rows, my_cols, _Loc == OnDevice ? my_pitch : _al.pitch());
+}
+template<typename _Ty>
+template<Location _Loc, size_t _Opt> 
+template<int _M, int _N> MATRICE_GLOBAL_FINL
+decltype(auto) Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(const Allocator<_M, _N, allocator_traits<_M, _N>::value>& _al) noexcept {
+	constexpr auto _From = Location(remove_all_t<decltype(_al)>::location);
+	constexpr auto _Option = remove_all_t<decltype(_al)>::option;
+	privt::unified_sync<value_t, _From, _Loc, _Loc==OnDevice?_Opt:_Option>::
+		op(my_data, (pointer)_al.data(), my_rows, my_cols, _Loc == OnDevice ? my_pitch : _al.pitch());
+	return (*this);
+}
 _DETAIL_END _MATRICE_NAMESPACE_END
