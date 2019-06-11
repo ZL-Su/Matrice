@@ -295,11 +295,9 @@ public:
 	 */
 	template<int _CTR, int _CTC>
 	MATRICE_GLOBAL_INL constexpr Base_(const Matrix_<value_t, _CTR, _CTC>& _Oth) noexcept
-		//: Base_(_Oth.rows(), _Oth.cols(), _Oth.data())
 		:_Mybase(_Oth.rows(), _Oth.cols()),m_storage(_Oth.allocator())
 		MATRICE_LINK_PTR
 	MATRICE_GLOBAL_INL constexpr Base_(const Matrix_<value_t,-1,-1>& _Oth) noexcept
-		//: Base_(_Oth.rows(), _Oth.cols(), _Oth.data())
 		:_Mybase(_Oth.rows(), _Oth.cols()), m_storage(_Oth.allocator())
 		MATRICE_LINK_PTR
 	/**
@@ -1053,7 +1051,7 @@ MATRICE_HOST_INL auto make_matrix_deleter(const _Mty& _M) noexcept;
 
 /**
  *\brief dgelom::Matrix_<...> factory function to create matrix object.
- *\param [params] wrap any parameters supported by dgelom::Matrix_ ctors.
+ *\param [params] wrap any parameters supported by dgelom::Matrix_ ctors, while except initializer list. 
  */
 template<typename _Ty, int _Rows=0, int _Cols=0, typename... _Args>
 MATRICE_GLOBAL_INL types::Matrix_<_Ty, _Rows, _Cols> make_matrix(_Args&&... params) {
