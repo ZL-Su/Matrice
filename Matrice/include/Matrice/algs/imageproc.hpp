@@ -1,7 +1,6 @@
 /***************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library for SC.
-      Copyright(C) 2018, Zhilong (Dgelom) Su (su-zl@seu.edu.cn), 
-		                   all rights reserved.
+Copyright(C) 2018-2019, Zhilong (Dgelom) Su (su-zl@seu.edu.cn), all rights reserved.
 
 This program is free software : you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the Free
@@ -24,11 +23,11 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 DGE_MATRICE_BEGIN
 
 template<typename _Pixty, MATRICE_ENABLE_IF(is_arithmetic_v<_Pixty>)>
-void _Grayscale_stretch(_Pixty* Img, std::size_t rows, std::size_t cols) {
+void _Grayscale_stretch(_Pixty* Img, size_t rows, size_t cols) {
 	using pixel_t = _Pixty;
 	using iterator = std::add_pointer_t<pixel_t>;
 
-	const std::size_t N = rows * cols;
+	const auto N = rows * cols;
 	iterator _Begin = Img, _End = Img + N;
 
 	pixel_t _Max = pixel_t(0), _Min = pixel_t(255);
@@ -115,18 +114,18 @@ public:
 	/**
 	 * \Get image gradient: $\fract{\partial I}{\partial _Axis}(_Pos)$
 	 */
-	MATRICE_HOST_INL auto at(const point_type& _Pos) const {
+	MATRICE_HOST_INL value_type at(const point_type& _Pos) const {
 		return _Myop.grad(_Pos);
 	}
 	template<axis _Axis>
-	MATRICE_HOST_INL auto at(const point_type& _Pos) const { 
+	MATRICE_HOST_INL value_type at(const point_type& _Pos) const {
 		return _Myop.grad<_Axis>(_Pos); 
 	}
 	/**
 	 * \Get image gradient w.r.t. _Axis in rect. range [_L, _R) | [_U, _D)
 	 */
 	template<axis _Axis> 
-	MATRICE_HOST_INL auto at(int _L, int _R, int _U, int _D) const { 
+	MATRICE_HOST_INL decltype(auto)at(int _L, int _R, int _U, int _D) const { 
 		using _My_range = _Grad_range_clip<category>;
 		const auto _Ry = _My_range::_(_U, _D);
 		const auto _Rx = _My_range::_(_L, _R);
@@ -161,7 +160,7 @@ public:
 	_Gradient_impl(const image_type& _Image) : _Myimg(_Image) {}
 
 	MATRICE_HOST_INL auto at(diff_t _x, diff_t _y) const {
-		value_type gx = zero<value_type>, gy = gx;
+		auto gx = zero<value_type>, gy = gx;
 
 		if (_x > 0 && _y > 0 && _x < _Myimg.cols() && _y < _Myimg.rows()) {
 			const auto pu = _Myimg[_y - 1], pc = _Myimg[_y], pl = _Myimg[_y + 1];
