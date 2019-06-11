@@ -45,7 +45,7 @@ template<typename _Rhs> MATRICE_GLOBAL_FINL auto operator##OP(const _Rhs& _Right
 template<typename _Lhs> friend MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const _Derived& _Right) { \
 	return Expr::EwiseBinaryExpr<_Lhs, _Derived, _Exp_op::_Ewise_##NAME<value_t>>(_Left, _Right); \
 }
-
+	using _Myt = _View_base;
 public:
 	using value_t = _Ty;
 	using value_type = value_t;
@@ -124,6 +124,13 @@ public:
 	template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 	MATRICE_GLOBAL_INL auto& operator= (const _Ty _Val) {
 		_VIEW_EWISE_OP(static_cast<value_type>(_Val));
+	}
+	/**
+	 *\brief Copy from another view
+	 *\param [_Oth] another view input
+	 */
+	MATRICE_GLOBAL_FINL auto& operator= (const _Myt& _Oth) {
+		_VIEW_EWISE_OP(_Oth(i));
 	}
 	/**
 	 *\brief Fill view memory from a given pointer
