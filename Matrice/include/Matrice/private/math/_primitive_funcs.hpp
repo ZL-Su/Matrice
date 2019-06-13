@@ -90,27 +90,27 @@ MATRICE_GLOBAL_FINL constexpr _Ret safe_div(const T1& a, const T2& b) {
 }
 
 ///<brief> trigonometric functions </brief>
-template<typename T, enable_if_t<is_arithmetic_v<T>> = 0>
+template<typename T, MATRICE_ENABLE_IF(is_arithmetic_v<T>)>
 MATRICE_GLOBAL_FINL constexpr T sin(const T& x) noexcept {
 	return std::sin(x);
 }
-template<typename T, enable_if_t<is_arithmetic_v<T>> = 0>
+template<typename T, MATRICE_ENABLE_IF(is_arithmetic_v<T>)>
 MATRICE_GLOBAL_FINL constexpr T cos(const T& x) noexcept {
 	return std::cos(x);
 }
-template<typename T, enable_if_t<is_arithmetic_v<T>> = 0>
+template<typename T, MATRICE_ENABLE_IF(is_arithmetic_v<T>)>
 MATRICE_GLOBAL_FINL constexpr T tan(const T& x) noexcept {
 	return std::tan(x);
 }
-template<typename T, enable_if_t<is_arithmetic_v<T>> = 0>
+template<typename T, MATRICE_ENABLE_IF(is_arithmetic_v<T>)>
 MATRICE_GLOBAL_FINL constexpr T arcsin(const T& x) noexcept {
 	return std::asin(x);
 }
-template<typename T, enable_if_t<is_arithmetic_v<T>> = 0>
+template<typename T, MATRICE_ENABLE_IF(is_arithmetic_v<T>)>
 MATRICE_GLOBAL_FINL constexpr T arccos(const T& x) noexcept {
 	return std::acos(x);
 }
-template<typename T, enable_if_t<is_arithmetic_v<T>> = 0>
+template<typename T, MATRICE_ENABLE_IF(is_arithmetic_v<T>)>
 MATRICE_GLOBAL_FINL constexpr T arctan(const T& x) noexcept {
 	return std::atan(x);
 }

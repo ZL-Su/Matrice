@@ -27,7 +27,7 @@ DGE_MATRICE_BEGIN
 static_assert(sizeof(void *) == 8, "MATRICE supports 64 bit only");
 
 template<typename _Ty = long double>
-MATRICE_GLOBAL_INL constexpr _Ty ¦Ð = static_cast<_Ty>(3.14159265358979323846264338327950288419716939937510582097494459);
+MATRICE_GLOBAL_INL constexpr _Ty pi{ static_cast<_Ty>(3.14159265358979323846264338327950288419716939937510582097494459) };
 
 namespace detail {
 	template<typename _Ty> struct string_to_numval {
