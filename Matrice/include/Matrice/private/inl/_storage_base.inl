@@ -103,6 +103,7 @@ template<int _M, int _N> MATRICE_GLOBAL_FINL
 decltype(auto) Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(const Allocator<_M, _N, allocator_traits<_M, _N>::value>& _al) noexcept {
 	constexpr auto _From = Location(remove_all_t<decltype(_al)>::location);
 	constexpr auto _Option = remove_all_t<decltype(_al)>::option;
+
 	privt::unified_sync<value_t, _From, _Loc, _Loc==OnDevice?_Opt:_Option>::
 		op(my_data, (pointer)_al.data(), my_rows, my_cols, _Loc == OnDevice ? my_pitch : _al.pitch());
 	return (*this);
