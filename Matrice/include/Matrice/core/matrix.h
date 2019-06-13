@@ -307,6 +307,11 @@ template<typename T, size_t _Options = rmaj | gene> using Dmatrix = Matrix_<T,
 	compile_time_size<>::RunTimeDeducedOnDevice,
 	_Options>;
 
-// \N-dimensional array with host managed memory
+//\dynamic matrix type with single(32)/double(64) floating point type
+using matrix_f32 = Matrix<float>;
+using matrix_f64 = Matrix<double>;
+
+//\N-dimensional array with host managed memory
 template<typename T, int _N> using array_n = Matrix_<T, _N, 1>;
+
 DGE_MATRICE_END
