@@ -491,8 +491,9 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 
 		template<typename _Mty> 
 		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const {
-#pragma omp parallel for
-			for (index_t i = 0; i < res.size(); ++i) res(i) = this->operator()(i);
+//#pragma omp parallel for
+			for (index_t i = 0; i < res.size(); ++i) 
+				res(i) = this->operator()(i);
 		}
 
 	private:
@@ -528,8 +529,9 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 
 		template<typename _Mty> 
 		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const {
-#pragma omp parallel for
-			for (index_t i = 0; i < res.size(); ++i) res(i) = this->operator()(i);
+//#pragma omp parallel for
+			for (index_t i = 0; i < res.size(); ++i) 
+				res(i) = this->operator()(i);
 		}
 
 	private:
@@ -567,7 +569,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 
 		template<typename _Mty> 
 		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const {
-#pragma omp parallel for
+//#pragma omp parallel for
 			for (index_t i = 0; i < res.size(); ++i) 
 				res(i) = this->operator()(i);
 		}
@@ -612,7 +614,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 
 		template<typename _Mty>
 		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const {
-#pragma omp parallel for if (res.size() > 10)
+//#pragma omp parallel for if (res.size() > 100)
 			for (int i = 0; i < res.size(); ++i) 
 				res(i) = this->operator()(i);
 		}
