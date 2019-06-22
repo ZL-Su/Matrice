@@ -949,6 +949,17 @@ public:
 		_Derived _Ret;
 		return forward<_Derived>(_Ret.create(_Rows, _Cols, 0));
 	}
+
+	/**
+	 *\brief set this matrix to a diagnal one
+	 *\param [_Val] the value for diagnal elements
+	 */
+	MATRICE_GLOBAL_INL _Derived& diag(value_type _Val) noexcept {
+		this->operator= (value_type(0));
+		for (auto _Idx = 0; _Idx < size(); ++_Idx)
+			this->operator[](_Idx)[_Idx] = _Val;
+		return (*static_cast<_Derived*>(this));
+	}
 	/**
 	 *\brief Create a diagonal square matrix
 	 *\param [_Val] diagonal element value, 
