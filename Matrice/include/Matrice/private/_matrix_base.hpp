@@ -951,13 +951,14 @@ public:
 	}
 
 	/**
-	 *\brief set this matrix to a diagnal one
-	 *\param [_Val] the value for diagnal elements
+	 *\brief set to the identity matrix
+	 *\param [_Size] _Size-by-_Size matrix
 	 */
-	MATRICE_GLOBAL_INL _Derived& diag(value_type _Val) noexcept {
-		this->operator= (value_type(0));
-		for (auto _Idx = 0; _Idx < size(); ++_Idx)
-			this->operator[](_Idx)[_Idx] = _Val;
+	MATRICE_GLOBAL_INL _Derived& identity(diff_t _Size=0) noexcept {
+		if(empty) this->create(_Size, _Size, 0);
+		else this->operator= ((value_type)(0));
+		for (auto _Idx = 0; _Idx < rows(); ++_Idx)
+			this->operator[](_Idx)[_Idx] = one<value_type>;
 		return (*static_cast<_Derived*>(this));
 	}
 	/**
