@@ -184,6 +184,9 @@
     <Filter Include="Header Files\Detail\container">
       <UniqueIdentifier>{964b65b8-9a9a-47d9-9bec-7d76d0720b9f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Algs\Stereovision">
+      <UniqueIdentifier>{2ea01202-bb99-4419-a408-aba73b399ad6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -467,6 +470,9 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\util\_property.hpp">
       <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\stereovision\_projection.hpp">
+      <Filter>Header Files\Algs\Stereovision</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
