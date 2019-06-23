@@ -49,6 +49,22 @@ public:
 		_MyR(6) -= sval * r[1], _MyR(7) += sval * r[0];
 	}
 
+	/**
+	 *\brief transform X with [x, y, z]^T = RX + T
+	 *\param [_X] input 3d point
+	 */
+	MATRICE_HOST_INL point_type transform(const point_type& _X)noexcept{
+		return (_MyR.mul(_X) + _MyT);
+	}
+	/**
+	 *\brief transform and normalize with [x, y, 1]^T = <RX + T>
+	 *\param [_X] input 3d point
+	 */
+	MATRICE_HOST_INL point_type forward(const point_type& _X)noexcept{
+		point_type p = this->transform(_X);
+		return (p.normalize(p.z));
+	}
+
 protected:
 	matrix_type _MyR;
 	point_type _MyT;
