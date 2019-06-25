@@ -477,6 +477,9 @@
     <ClInclude Include="include\Matrice\private\tensor\_tensor_old.hpp">
       <Filter>Header Files\Detail\tensor</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\private\tensor\_dtensor.hpp">
+      <Filter>Header Files\Detail\tensor</Filter>
+    </ClInclude>
     <ClInclude Include="include\Matrice\private\tensor\_tensor.hpp">
       <Filter>Header Files\Detail\tensor</Filter>
     </ClInclude>

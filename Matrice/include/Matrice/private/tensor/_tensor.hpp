@@ -1,158 +1,92 @@
 /*********************************************************************
-	  About License Agreement of this file, see "../lic/license.h"
-*********************************************************************/
+This file is part of Matrice, an effcient and elegant C++ library.
+Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+
+This program is free software : you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.If not, see <http://www.gnu.org/licenses/>.
+***********************************************************************/
 #pragma once
 #include "../_matrix_base.hpp"
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
-namespace common = types;
-
 template<typename _Ty>
-class _Tensor : public common::Base_<_Tensor<_Ty>>
+struct index<_Ty, tag::_Tensor_tag> {
+	static_assert(is_integral_v<_Ty>, "_Ty must be an integer type");
+
+	MATRICE_GLOBAL_INL index(_Ty d, _Ty e, _Ty h, _Ty w) noexcept {
+		data[0] = d, data[1] = e, data[2] = h, data[3] = w;
+	}
+	MATRICE_GLOBAL_INL _Ty value() noexcept {
+		return 0;
+	}
+	_Ty data[4];
+};
+/**
+ *\brief CLASS TEMPLATE dgelom::tensor prototype
+ *\param <_Ty> data type
+ *\param <_D> tensor depth which grows vertically
+ *\param <_E> tensor extent in horizontal, the default is 1
+ */
+template<typename _Ty, size_t _D, size_t _E = 1>
+class _Tensor_ : public types::Base_<_Tensor_<_Ty, _D, _E>, 
+	tensor_traits<_Tensor_<_Ty, _D, _E>>>
 {
-	using _Myt = _Tensor;
-	using _Mybase = common::Base_<_Myt>;
-	using _Mytraits = matrix_traits<_Myt>;
+	using _Myt = _Tensor_;
+	using _Mytraits = tensor_traits<_Myt>;
+	using _Mybase = types::Base_<_Myt, _Mytraits>;
 public:
-	enum { Size = 0, CompileTimeRows = 0, CompileTimeCols = 0, };
-	using typename _Mybase::value_t;
+	enum { Size = 0, CompileTimeRows = 0, CompileTimeCols = 0 };
 	using typename _Mybase::value_type;
-	using typename _Mybase::const_initlist;
-	using tensor_shape = basic_shape<size_t>;
-	using _Mybase::dims;
 
 	/**
-	 *\brief Empty constructor
+	 *\brief constructor
+	 *\param [_H, _W] rows and cols of each tensor cell
 	 */
-	_Tensor() noexcept
-		: _Mybase() {}
-	/**
-	 *\brief Construct a tensor with shape [1,[1,_Shape]]
-	 */
-	_Tensor(shape_t<size_t>&& _Shape) noexcept
-		: _Mybase(_Shape) {
-		_Myshape = move(_Shape); _Mybase::_Flush_view_buf();
-	}
-	/**
-	 *\brief Construct a tensor with shape [1,[1,_Shape]] and fill with _Val
-	 */
-	_Tensor(shape_t<size_t>&& _Shape, value_t _Val) noexcept
-		: _Tensor(move(_Shape)) { _Mybase::operator= ({ _Val }); }
-	/**
-	 *\brief Construct a tensor with shape [1,[_Shape]]
-	 */
-	_Tensor(shape3_t<size_t>&& _Shape) noexcept
-		: _Mybase(get<2>(_Shape), get<1>(_Shape)*get<0>(_Shape)) { 
-		_Myshape=move(_Shape); _Mybase::_Flush_view_buf();
-	}
-	/**
-	 *\brief Construct a tensor with shape [1,[_Shape]] and fill with _Val
-	 */
-	_Tensor(shape3_t<size_t>&& _Shape, value_t _Val) noexcept
-		: _Tensor(move(_Shape)) { _Mybase::operator= ({ _Val }); }
-	/**
-	 *\brief Construct a tensor with shape _Shape
-	 */
-	_Tensor(shape4_t<size_t>&& _Shape) noexcept
-		: _Mybase(get<0>(_Shape)*get<2>(_Shape), get<1>(_Shape)*get<3>(_Shape)) { 
-		_Myshape=move(_Shape); _Mybase::_Flush_view_buf();
-	}
-	/**
-	 *\brief Construct a tensor with shape _Shape and fill with _Val
-	 */
-	_Tensor(shape4_t<size_t>&& _Shape, value_t _Val) noexcept
-		: _Tensor(move(_Shape)) {_Mybase::operator= ({_Val });}
-	/**
-	 *\brief Move constructor
-	 */
-	_Tensor(_Myt&& _Other) noexcept
-		: _Mybase(move(_Other)) {}
-
-	/**
-	 *\brief Create a tensor
-	 *\param [_Shape] any shape type compatible with tensor_shape 
-	 */
-	MATRICE_HOST_INL auto& create(tensor_shape&& _Shape) {
-		_Myshape = move(_Shape);
-		create(_Myshape.rows(), _Myshape.cols());
-		return (*this);
-	}
-	/**
-	 *\brief Get element at _Idx
-	 *\param [_Idx] input linear index
-	 */
-	MATRICE_HOST_INL auto& operator()(size_t _Idx) {
-		auto[n, c, h, w] = _Myshape.parse(_Idx);
-
-	}
-	MATRICE_HOST_INL const auto& operator()(size_t _Idx) const {
-		auto[n, c, h, w] = _Myshape.parse(_Idx);
-	}
-	/**
-	 *\brief Get a sub-tensor at this[n,:,:,:]
-	 *\param [n] the index of the first dim
-	 */
-	MATRICE_HOST_INL auto at(size_t n) const {
-		_Myt _Ret({ 1,dims().get(1),dims().get(2),dims().get(3) });
-		auto _Begin = this->begin()+n*_Ret.size();
-		std::copy(_Begin, _Begin + _Ret.size(), _Ret.begin());
-		return forward<_Myt>(_Ret);
-	}
-	/**
-	 *\brief Get a sub-tensor at this[n,c,:,:]
-	 *\param [n,c] the indices of the first and sencond dim
-	 */
-	MATRICE_HOST_INL auto at(size_t n, size_t c) const {
-		_Myt _Ret({ 1, 1, _Myshape.get(2), _Myshape.get(3) });
-		auto _Begin = this->begin()+n*_Ret.size()*_Myshape.get(1)+c*_Ret.size();
-		std::copy(_Begin, _Begin + _Ret.size(), _Ret.begin());
-		return forward<_Myt>(_Ret);
-	}
-
-	/**
-	 *\brief Get the view at this[n,c,:,:]
-	 *\param [n, c] the indices of the first and sencond dim
-	 */
-	MATRICE_HOST_INL auto view(size_t n, size_t c) const {
-		auto _Off_y = n * dims().get(2), _Off_x = c * dims().get(3);
-		return (this->block(_Off_x, _Off_x+ dims().get(3), _Off_y, _Off_y+ dims().get(2)));
-	}
-
-	/**
-	 *\brief Generate a zero-value filled tensor
-	 *\param [_Shape] any shape type compatible with tensor_shape
-	 */
-	static MATRICE_HOST_INL auto zero(tensor_shape&& _Shape) {
-		return (move(_Myt({_Shape.get(0),_Shape.get(1),_Shape.get(2),_Shape.get(3)}, 0)));
-	}
-	/**
-	 *\brief Generate a random filled tensor
-	 *\param [_Shape] any shape type compatible with tensor_shape
-	 */
-	static MATRICE_HOST_INL auto rand(tensor_shape&& _Shape) {
-		auto _Ret = _Mybase::rand(_Shape.rows(), _Shape.cols());
-		_Ret._Myshape = move(_Shape);
-		return (move(_Ret));
-	}
-
-	/**
-	 *\brief Internal used function
-	 *\param [_1, _2] dummy
-	 */
-	MATRICE_HOST_INL void create(size_t _1, size_t _2) {
-		_Mybase::operator= (move(_Mybase(_1, _2)));
+	_Tensor_(size_t _H, size_t _W) noexcept
+		:_Mybase(_Mytraits::depth*_H, _Mytraits::extent*_W) {
+		_Mybase::_Myshape = { _Mytraits::depth, _Mytraits::extent, _H, _W };
 		_Mybase::_Flush_view_buf();
 	}
+	_Tensor_(size_t _H, size_t _W, value_type _Val) noexcept
+		:_Tensor_(_H, _W) {
+		_Mybase::operator=(_Val);
+	}
 
-	/**
-	 *\brief Deleted methods
-	 */
-	template<ttag _Ltag = ttag::N, ttag _Rtag = ttag::N, typename _Rhs = _Myt>
-	MATRICE_GLOBAL_FINL auto inplace_mul(const _Rhs& _Right) = delete;
+	MATRICE_HOST_INL const value_type& operator()(size_t d, size_t e, size_t j, size_t i) const noexcept {
+		const auto _Row = d * _Mybase::_Myshape.get(2) + j;
+		const auto _Col = e * _Mybase::_Myshape.get(3) + i;
+		return (_Mybase::operator[](_Row)[_Col]);
+	}
+	MATRICE_HOST_INL value_type& operator()(size_t d, size_t e, size_t j, size_t i) noexcept {
+		const auto _Row = d * _Mybase::_Myshape.get(2) + j;
+		const auto _Col = e * _Mybase::_Myshape.get(3) + i;
+		return (_Mybase::operator[](_Row)[_Col]);
+	}
+
 private:
-	using _Mybase::_Myshape; //[batchs, [channels, [height, width]]]
+	
 };
-#undef MATRICE_EXPAND_SHAPE
+
+template<typename _Ty, size_t _D, size_t _E>
+struct tensor_traits<_Tensor_<_Ty, _D, _E>> {
+	using type = _Ty;
+	using category = tag::_Tensor_tag;
+	static constexpr auto depth = _D;
+	static constexpr auto extent = _E;
+	static constexpr auto _M = 0, _N = 0;
+	static constexpr bool Is_base = std::false_type::value;
+};
+
 _DETAIL_END
 DGE_MATRICE_END

@@ -190,6 +190,7 @@
     <ClInclude Include="include\Matrice\private\math\_primitive_funcs.hpp" />
     <ClInclude Include="include\Matrice\private\math\_svd.h" />
     <ClInclude Include="include\Matrice\private\nonfree\_lnalge.h" />
+    <ClInclude Include="include\Matrice\private\tensor\_dtensor.hpp" />
     <ClInclude Include="include\Matrice\private\tensor\_tensor.hpp" />
     <ClInclude Include="include\Matrice\private\tensor\_tensor_old.hpp" />
     <ClInclude Include="include\Matrice\private\tensor\_tensor_exp.hpp" />
