@@ -187,6 +187,9 @@
     <Filter Include="Header Files\Algs\Stereovision">
       <UniqueIdentifier>{2ea01202-bb99-4419-a408-aba73b399ad6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Algs\DeepLearning\Layer">
+      <UniqueIdentifier>{c6ab27da-58e3-4fba-8f90-233f84fd5fa5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -473,6 +476,9 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\stereovision\_projection.hpp">
       <Filter>Header Files\Algs\Stereovision</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\dnn\layer\_layer_base.hpp">
+      <Filter>Header Files\Algs\DeepLearning\Layer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
