@@ -102,6 +102,15 @@ template<typename T> struct add_pointer_const {
 };
 template<typename T> using add_pointer_const_t = typename add_pointer_const<T>::type;
 
+/**
+ *\brief is_iterator_v<T> is true iff T is an iterator or pointer.
+ */
+template<typename T> constexpr bool is_iterator_v = std::_Is_iterator_v<T>;
+/**
+ *\brief retrieve iterator traits, including categary, value, difference, pointer, and reference types, etc.
+ */
+template<typename T> using iterater_traits = std::iterator_traits<T>;
+
 template<typename T> struct _View_trait { enum { value = 0x0008*sizeof(T) }; };
 template<> struct _View_trait<unsigned char> { enum { value = 0x0008 }; };
 template<> struct _View_trait<int> { enum { value = 0x0016 }; };
@@ -110,8 +119,11 @@ template<> struct _View_trait<float> { enum { value = 0x0032 }; };
 template<> struct _View_trait<double> { enum { value = 0x0064 }; };
 template<typename T> MATRICE_GLOBAL_INL constexpr auto plane_view_v = _View_trait<T>::value;
 
-template<typename T, typename = enable_if_t<std::is_class_v<T>>>
-struct traits { using type = typename T::value_t; };
+template<typename T>
+struct traits { 
+	using type =
+		conditional_t<is_class_v<T>, typename T::value_type, remove_all_t<T>>;
+};
 
 template<typename T> struct is_matrix : std::false_type {};
 template<typename T> MATRICE_GLOBAL_INL constexpr bool is_matrix_v = is_matrix<T>::value;
@@ -123,15 +135,6 @@ template<typename Exp> struct is_expression :std::false_type {};
 template<typename Exp> MATRICE_GLOBAL_INL constexpr bool is_expression_v = is_expression<Exp>::value;
 template<class Exp, typename = enable_if_t<is_expression_v<Exp>>>
 struct expression_traits : traits<Exp> {};
-
-/**
- *\brief is_iterator_v<T> is true iff T is an iterator or pointer.
- */
-template<typename T> constexpr bool is_iterator_v = std::_Is_iterator_v<T>;
-/**
- *\brief retrieve iterator traits, including categary, value, difference, pointer, and reference types, etc.
- */
-template<typename T> using iterater_traits = std::iterator_traits<T>;
 
 template<typename T> struct is_mtxview : std::false_type {};
 /**
