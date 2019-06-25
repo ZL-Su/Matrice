@@ -52,4 +52,6 @@ namespace dgelom
 
 	template<typename _Ty>
 	using deleter_type = std::function<void(std::add_pointer_t<_Ty>)>;
+
+	template<typename _Ty, typename _Tag> struct index {};
 }
