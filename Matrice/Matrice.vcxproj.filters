@@ -375,9 +375,6 @@
     <ClInclude Include="include\Matrice\private\_matrix_exp.hpp">
       <Filter>Header Files\Detail\matrix</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\private\tensor\_tensor.hpp">
-      <Filter>Header Files\Detail\tensor</Filter>
-    </ClInclude>
     <ClInclude Include="include\Matrice\core\tensor.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
@@ -425,9 +422,6 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\thread\_thread.h">
       <Filter>Header Files\Thread</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Matrice\private\tensor\_tensor.h">
-      <Filter>Header Files\Detail\tensor</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\math\_config.h">
       <Filter>Header Files\Detail\math</Filter>
@@ -479,6 +473,12 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\dnn\layer\_layer_base.hpp">
       <Filter>Header Files\Algs\DeepLearning\Layer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\tensor\_tensor_old.hpp">
+      <Filter>Header Files\Detail\tensor</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\tensor\_tensor.hpp">
+      <Filter>Header Files\Detail\tensor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
