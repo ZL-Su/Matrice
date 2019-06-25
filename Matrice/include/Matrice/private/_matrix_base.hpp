@@ -133,7 +133,7 @@ public:
 
 protected:
 	MATRICE_GLOBAL_FINL constexpr void _Flush_view_buf() noexcept {
-#ifdef _DEBUG
+#ifdef _DEBUG || MATRICE_DEBUG
 		stride = m_cols * type_bytes_v<_Ty>;
 		nval = _Myshape.get(0);
 		cval = _Myshape.get(1);
@@ -196,7 +196,7 @@ return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 		_Valtype& _Value;
 		size_t _Index, _Stride;
 	};
-	enum { _M = _Mytraits::size::rows::value, _N = _Mytraits::size::cols::value };
+	enum { _M = _Mytraits::_M, _N = _Mytraits::_N };
 	using _Myalty = typename detail::Storage_<_Valtype>::template Allocator<_M, _N>;
 	using _Myt = Base_;
 	using _Mybase = _Basic_plane_view_base<_Valtype>;
