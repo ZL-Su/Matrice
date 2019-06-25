@@ -61,12 +61,6 @@ struct matrix_traits<types::Base_<_Derived, _Traits, _Ty>> {
 	using type = _Ty;
 	enum { _M = _Traits::_M, _N = _Traits::_N };
 	static constexpr bool Is_base = std::true_type::value;
-	struct size {
-		struct rows { static constexpr auto value = _M; };
-		struct cols { static constexpr auto value = _N; };
-		static constexpr auto rows_v = rows::value;
-		static constexpr auto cols_v = cols::value;
-	};
 };
 template<typename _Ty, int _Rows, int _Cols> 
 struct matrix_traits<types::Matrix_<_Ty, _Rows, _Cols>> {
@@ -74,12 +68,6 @@ struct matrix_traits<types::Matrix_<_Ty, _Rows, _Cols>> {
 	using category = tag::_Matrix_tag;
 	enum { _M = _Rows, _N = _Cols };
 	static constexpr bool Is_base = std::false_type::value;
-	struct size {
-		struct rows { static constexpr auto value = _M; };
-		struct cols { static constexpr auto value = _N; };
-		static constexpr auto rows_v = rows::value;
-		static constexpr auto cols_v = cols::value;
-	};
 };
 template<typename _Ty>
 struct matrix_traits<detail::_Tensor<_Ty>> {
@@ -87,12 +75,6 @@ struct matrix_traits<detail::_Tensor<_Ty>> {
 	using category = tag::_Tensor_tag;
 	static constexpr auto _M = 0, _N = 0;
 	static constexpr auto Is_base = std::false_type::value;
-	struct size {
-		struct rows { static constexpr auto value = _M; };
-		struct cols { static constexpr auto value = _N; };
-		static constexpr auto rows_v = rows::value;
-		static constexpr auto cols_v = cols::value;
-	};
 };
 
 #pragma endregion
