@@ -74,8 +74,16 @@ public:
 		return (_Mybase::operator[](_Row)[_Col]);
 	}
 
+	MATRICE_HOST_INL auto operator()(size_t d, size_t e) const noexcept {
+		const auto w = _Mybase::_Myshape.get(3);
+		const auto h = _Mybase::_Myshape.get(2);
+		const auto r0 = d*h, r1 = (d+1) * h;
+		const auto c0 = e*w, c1 = (e+1) * w;
+		return _Mybase::block(c0, c1, r0, r1);
+	}
+
 private:
-	
+	size_t _Myw, _Myh;
 };
 
 template<typename _Ty, size_t _D, size_t _E>
