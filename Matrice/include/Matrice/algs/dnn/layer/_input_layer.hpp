@@ -31,6 +31,7 @@ namespace dnn {
 		using _Myt = _Input_layer;
 	public:
 		using input_type = Matrix_<_Ty, _M, _N>;
+		using category = typename _Layer_tag::input;
 
 		_Input_layer() noexcept {}
 		_Input_layer(const _Myt&) noexcept {}
@@ -45,6 +46,7 @@ namespace dnn {
 		using _Myt = _Input_layer;
 	public:
 		using input_type = std::array<Matrix_<_Ty, _M, _N>, _D>;
+		using category = typename _Layer_tag::input;
 
 		_Input_layer() noexcept {}
 		_Input_layer(const _Myt&) noexcept {}
