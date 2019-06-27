@@ -483,6 +483,9 @@
     <ClInclude Include="include\Matrice\private\tensor\_tensor.hpp">
       <Filter>Header Files\Detail\tensor</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\algs\dnn\layer\_input_layer.hpp">
+      <Filter>Header Files\Algs\DeepLearning\Layer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
