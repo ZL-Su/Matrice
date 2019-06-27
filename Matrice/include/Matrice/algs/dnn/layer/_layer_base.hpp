@@ -20,7 +20,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 DGE_MATRICE_BEGIN
 namespace dnn {
-
+	using dnn_default_value_type = float;
 /**
  *\brief network layer traits
  *\param <_Lyr> layer type
@@ -33,6 +33,7 @@ template<typename _Lyr> struct _Layer_traits : traits<_Lyr> {};
 struct _Layer_tag {
 	struct linear {};  struct conv2d {};
 	struct maxpool {}; struct avgpool {};
+	struct input {};   struct output {};
 };
 
 /**
@@ -46,11 +47,11 @@ template<typename _Derived> class _Layer {
 public:
 
 	MATRICE_HOST_INL auto forward() noexcept {
-		return static_cast<_Mydt*>(this)->_Forward_impl();
+		//return static_cast<_Mydt*>(this)->_Forward_impl();
 	}
 
 	MATRICE_HOST_INL auto backward() noexcept {
-		return static_cast<_Mydt*>(this)->_Backward_impl();
+		//return static_cast<_Mydt*>(this)->_Backward_impl();
 	}
 
 protected:
