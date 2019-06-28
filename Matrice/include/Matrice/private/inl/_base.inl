@@ -100,4 +100,29 @@ template<typename _Mty>
 MATRICE_HOST_INL auto make_matrix_deleter(const _Mty& _M) noexcept {
 	return _M.deleter();
 };
+
+template<typename _Ty, int _Rows = 0, int _Cols = 0, typename... _Args>
+MATRICE_GLOBAL_INL types::Matrix_<_Ty, _Rows, _Cols> make_matrix(_Args&&... params) {
+	return types::Matrix_<_Ty, _Rows, _Cols>(forward<_Args>(params)...);
+};
+
+template<typename _Ty>
+MATRICE_GLOBAL_INL remove_all_t<_Ty>& make_zero(_Ty& data) noexcept {
+	using trivial_type = remove_all_t<_Ty>;
+
+	if constexpr (is_scalar_v<trivial_type>) {
+		data = zero<trivial_type>;
+	}
+	else if constexpr (is_matrix_v<trivial_type>) {
+		data = zero<typename trivial_type::value_type>;
+	}
+	else {
+		auto dp = data.data();
+		for (const auto& idx : range(0, data.size())) {
+			dp[idx] = zero<typename trivial_type::value_type>;
+		}
+	}
+
+	return (data);
+}
 DGE_MATRICE_END
