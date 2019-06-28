@@ -38,6 +38,7 @@ namespace dnn {
 	class _Conv2d_layer 
 		: public _Layer<_Conv2d_layer<_D,_FH,_FW,_Sy,_Sx,_Py,_Px>>
 	{
+		using _Mybase = _Layer<_Conv2d_layer>;
 	public:
 		static constexpr auto depth = _D;
 		static constexpr auto k_rows = _FH, k_cols = _FW;
@@ -45,7 +46,7 @@ namespace dnn {
 		static constexpr auto padding_y = _Py, padding_x = _Px;
 
 		using category = typename _Layer_tag::conv2d;
-		using value_type = dnn_default_value_type;
+		using typename _Mybase::value_type;
 
 		_Conv2d_layer(conv_out_depth cod) noexcept
 			: m_nkernels(cod.value) {
@@ -63,7 +64,27 @@ namespace dnn {
 		value_type m_lr_coef = 1;
 		value_type m_decay_coef = 1;
 		
-		Tensor<value_type, depth> weights, biases;
+		typename _Mybase::tensor_type weights, biases;
+	};
+	template<uint32_t _D, uint32_t... _Sizes>
+	struct _Layer_traits<_Conv2d_layer<_D, _Sizes...>> {
+		static constexpr auto depth = _D;
+		static constexpr auto extent = 1;
+	};
+
+	template<uint32_t _D, uint32_t _E = 1>
+	class _Relu_layer : public _Layer<_Relu_layer<_D, _E>>
+	{
+		using _Mybase = _Layer<_Relu_layer>;
+	public:
+
+	private:
+		using _Mybase::m_params;
+	};
+	template<uint32_t _D, uint32_t _E>
+	struct _Layer_traits<_Relu_layer<_D, _E>> {
+		static constexpr auto depth = _D;
+		static constexpr auto extent = _E;
 	};
 }
 DGE_MATRICE_END
