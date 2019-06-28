@@ -45,6 +45,8 @@ template<typename _Derived> class _Layer {
 	using _Mydt = _Derived;
 	using _Mytraits = _Layer_traits<_Mydt>;
 public:
+	using value_type = dnn_default_value_type;
+	using tensor_type = Tensor<value_type, _Mytraits::depth, _Mytraits::extent>;
 
 	MATRICE_HOST_INL auto forward() noexcept {
 		//return static_cast<_Mydt*>(this)->_Forward_impl();
@@ -55,7 +57,7 @@ public:
 	}
 
 protected:
-
+	tensor_type m_params;
 };
 }
 DGE_MATRICE_END
