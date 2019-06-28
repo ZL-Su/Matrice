@@ -64,17 +64,29 @@ public:
 	}
 
 	MATRICE_HOST_INL const value_type& operator()(size_t d, size_t e, size_t j, size_t i) const noexcept {
+#ifdef _DEBUG || MATRICE_DEBUG
+		DGELOM_CHECK(d < _D, "depth index over range.");
+		DGELOM_CHECK(e < _E, "extent index over range.");
+#endif
 		const auto _Row = d * _Mybase::_Myshape.get(2) + j;
 		const auto _Col = e * _Mybase::_Myshape.get(3) + i;
 		return (_Mybase::operator[](_Row)[_Col]);
 	}
 	MATRICE_HOST_INL value_type& operator()(size_t d, size_t e, size_t j, size_t i) noexcept {
+#ifdef _DEBUG || MATRICE_DEBUG
+		DGELOM_CHECK(d < _D, "depth index over range.");
+		DGELOM_CHECK(e < _E, "extent index over range.");
+#endif
 		const auto _Row = d * _Mybase::_Myshape.get(2) + j;
 		const auto _Col = e * _Mybase::_Myshape.get(3) + i;
 		return (_Mybase::operator[](_Row)[_Col]);
 	}
 
 	MATRICE_HOST_INL auto operator()(size_t d, size_t e) const noexcept {
+#ifdef _DEBUG || MATRICE_DEBUG
+		DGELOM_CHECK(d < _D, "depth index over range.");
+		DGELOM_CHECK(e < _E, "extent index over range.");
+#endif
 		const auto w = _Mybase::_Myshape.get(3);
 		const auto h = _Mybase::_Myshape.get(2);
 		const auto r0 = d*h, r1 = (d+1) * h;
