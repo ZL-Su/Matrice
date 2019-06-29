@@ -190,6 +190,9 @@
     <Filter Include="Header Files\Algs\DeepLearning\Layers">
       <UniqueIdentifier>{c6ab27da-58e3-4fba-8f90-233f84fd5fa5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Algs\DeepLearning\Convolution">
+      <UniqueIdentifier>{77fe9ef4-1397-48de-8da8-a8279b23aa3f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -488,6 +491,9 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\dnn\layer\_layers.hpp">
       <Filter>Header Files\Algs\DeepLearning\Layers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\dnn\conv\_conv_impl.hpp">
+      <Filter>Header Files\Algs\DeepLearning\Convolution</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
