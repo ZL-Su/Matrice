@@ -57,14 +57,12 @@ namespace dnn {
 			: _Conv2d_layer(conv_out_depth(depth)) {
 		}
 
-
-
 	private:
 		uint32_t m_nkernels = depth;
 		value_type m_lr_coef = 1;
 		value_type m_decay_coef = 1;
 		
-		typename _Mybase::tensor_type weights, biases;
+		typename _Mybase::tensor_type m_weights, m_biases;
 	};
 	template<uint32_t _D, uint32_t... _Sizes>
 	struct _Layer_traits<_Conv2d_layer<_D, _Sizes...>> {
