@@ -25,6 +25,12 @@ DGE_MATRICE_BEGIN
 	template specialization and function overloading.
  **********************************************************************/
 namespace tag {
+	///<brief>definitions for device tag</brief>
+	struct device_tag { 
+		struct cpu { static constexpr uint8_t id = 0; };
+		struct gpu { static constexpr uint8_t id = 1; };
+	};
+
 	///<brief> tag definitions for categorizing matrix/tensor instance </brief>
 	struct _Matrix_tag {};
 	struct _Managed_matrix_tag : _Matrix_tag {};
