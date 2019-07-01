@@ -149,10 +149,23 @@ public:
 		_Mybegin = _X; _My_end(); return (*this);
 	}
 
-	MATRICE_HOST_INL auto& begin() { return (_Mybegin); }
-	MATRICE_HOST_INL const auto& begin() const { return (_Mybegin); }
-	MATRICE_HOST_INL auto& end() { return (_Myend); }
-	MATRICE_HOST_INL const auto& end() const { return (_Myend); }
+	MATRICE_HOST_INL point_type& begin() {
+		return (_Mybegin); 
+	}
+	MATRICE_HOST_INL const point_type& begin() const {
+		return (_Mybegin); 
+	}
+	MATRICE_HOST_INL point_type& end() {
+		return (_Myend); 
+	}
+	MATRICE_HOST_INL const point_type& end() const {
+		return (_Myend); 
+	}
+
+	MATRICE_HOST_INL void set_size(value_type w, value_type h) noexcept {
+		_Mywidth = w, _Myheight = h;
+		_My_end();
+	}
 
 private:
 	MATRICE_HOST_INL auto _My_end() {
