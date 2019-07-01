@@ -19,7 +19,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <future>
 #include "../util/_macros.h"
 #include "../util/utils.h"
-#if (defined __enable_cuda__ && !defined __disable_cuda__)
+#if (defined MATRICE_ENABLE_CUDA && !defined __disable_cuda__)
 #include "_decl_dev_funcs.h"
 #include "_devops.h"
 #include "_unified_memory.h"
