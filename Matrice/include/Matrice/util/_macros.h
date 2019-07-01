@@ -53,7 +53,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #define MATRICE_SIMD_AVX512 4 //*\SIMD-512
 
 #ifndef MATRICE_SIMD_ARCH
-#define MATRICE_SIMD_ARCH MATRICE_SIMD_SSE
+#define MATRICE_SIMD_ARCH MATRICE_SIMD_AVX
 #endif
 
 #define MATRICE_USE_NAT     0 //*\use native kernel code
@@ -70,7 +70,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #endif
 #endif // __enable_ocv__
 
-#if (defined MATRICE_ENABLE_CUDA && !defined __disable_cuda__)
+#if (defined MATRICE_ENABLE_CUDA && !defined MATRICE_DISABLE_CUDA)
 #define __disable_simd__
 #define MATRICE_DISABLE_SIMD __disable_simd__
 #include <host_defines.h>
