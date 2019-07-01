@@ -22,15 +22,15 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_tag_defs.h"
 #include "_decl_dev_funcs.h"
 
-#ifdef __AVX__
+#if MATRICE_SIMD_ARCH == MATRICE_SIMD_AVX
 #define MATRICE_ALIGN_BYTES   0x0020
 #else
-#ifdef __AVX512
+#ifdef MATRICE_SIMD_ARCH == MATRICE_SIMD_AVX512
 #define MATRICE_ALIGN_BYTES   0x0040
 #else
 #define MATRICE_ALIGN_BYTES   0x0010
 #endif
-#endif // __AVX__
+#endif
 
 DGE_MATRICE_BEGIN
 #ifdef MATRICE_ALIGN_BYTES
@@ -44,11 +44,11 @@ enum { COPY = 1001, MOVE = 1002, SHARED = 1000 };
 enum { LINEAR = 8000, PITCHED = 8001, ARRTARR = 8002, FROMARR = 8003, TOARRAY = 8004, };
 
 namespace privt {
-template<typename ValueType, typename IntegerType> ValueType* aligned_malloc(IntegerType size);
-template<typename ValueType> void aligned_free(ValueType* aligned_ptr) noexcept;
-template<typename ValueType> bool is_aligned(ValueType* aligned_ptr) noexcept;
-template<typename ValueType, typename Integer> MATRICE_HOST_FINL
-constexpr ValueType* fill_mem(const ValueType* src, ValueType* dst, Integer size)
+template<typename _Vty, typename _Ity> _Vty* aligned_malloc(_Ity size);
+template<typename _Vty> void aligned_free(_Vty* aligned_ptr) noexcept;
+template<typename _Vty> bool is_aligned(_Vty* aligned_ptr) noexcept;
+template<typename _Vty, typename _Ity> MATRICE_HOST_FINL
+constexpr _Vty* fill_mem(const _Vty* src, _Vty* dst, _Ity size)
 {
 #define _FILOP(_Idx) dst[_Idx] = src[_Idx]
 #define _RET return (dst);
@@ -84,8 +84,6 @@ template<int _Opt = 0> void _Device_sync();
 }
 namespace internal {
 struct _Memory {
-
-
 	/**
 	 *\brief Check if a given memory is aligned or not
 	 *\param [_Ptr] the pointer to memory block to be checked
@@ -100,8 +98,7 @@ struct _Memory {
 	 *\brief Memory release
 	 *\param [_Ptr] memory pointer
 	 */
-	template<Location _Loc, typename _It, 
-		MATRICE_ENABLE_IF(is_pointer_v<_It>)>
+	template<Location _Loc, typename _It, MATRICE_ENABLE_IF(is_pointer_v<_It>)>
 	MATRICE_HOST_INL static void free(_It _Ptr) {
 		try {
 			if /*constexpr */(_Loc == Location::OnHeap)
@@ -122,9 +119,9 @@ template<typename _InIt, typename _OutIt>
 MATRICE_HOST_INL static _OutIt copy(_InIt _First, _InIt _Last, _OutIt _Dest) {
 	
 	if (std::is_trivially_assignable_v<_OutIt, _InIt>) {
-		const char * const _First_ch = const_cast<const char *>(reinterpret_cast<const volatile char *>(_First));
-		const char * const _Last_ch = const_cast<const char *>(reinterpret_cast<const volatile char *>(_Last));
-		char * const _Dest_ch = const_cast<char *>(reinterpret_cast<volatile char *>(_Dest));
+		const char* const _First_ch = const_cast<const char*>(reinterpret_cast<const volatile char*>(_First));
+		const char* const _Last_ch = const_cast<const char*>(reinterpret_cast<const volatile char *>(_Last));
+		char* const _Dest_ch = const_cast<char*>(reinterpret_cast<volatile char*>(_Dest));
 		const auto _Count = static_cast<size_t>(_Last_ch - _First_ch);
 
 		::memmove(_Dest_ch, _First_ch, _Count);
