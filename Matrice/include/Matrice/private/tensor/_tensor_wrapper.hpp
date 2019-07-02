@@ -34,7 +34,23 @@ struct tensor_desc {
 template<typename _Ty>
 class tensor_view {
 public:
+	using value_type = _Ty;
+	using pointer = std::add_pointer_t<value_type>;
+
+	MATRICE_GLOBAL_INL const pointer data() const noexcept {
+		return m_data;
+	}
+	MATRICE_GLOBAL_INL pointer data() noexcept {
+		return m_data;
+	}
+	MATRICE_GLOBAL_INL const tensor_desc& desc() const noexcept {
+		return m_desc;
+	}
+	MATRICE_GLOBAL_INL tensor_desc& desc() noexcept {
+		return m_desc;
+	}
 private:
 	tensor_desc m_desc;
+	pointer m_data;
 };
 DGE_MATRICE_END
