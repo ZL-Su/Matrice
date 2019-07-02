@@ -38,13 +38,13 @@ struct _Exception_wrapper
 		using _Mybase = std::exception;
 	public:
 		using _Mybase::exception;
-		error(const loc_type& _Loc, const msg_type& _Msg="None")
+		error(const loc_type& _Loc, const msg_type& _Msg="None") noexcept
 			:_Myloc(_Loc), _Mybase(_Msg.c_str()) {}
 
 		/**
 		 * \return exception location
 		 */
-		MATRICE_HOST_INL auto location() const {
+		MATRICE_HOST_INL loc_type location() const noexcept {
 			return (_Myloc);
 		}
 
