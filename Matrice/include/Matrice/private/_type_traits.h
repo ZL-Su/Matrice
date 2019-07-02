@@ -294,4 +294,10 @@ MATRICE_GLOBAL_INL constexpr auto is_same_v = std::is_same<T, U>::value;
 template<typename T, typename U>
 MATRICE_GLOBAL_INL constexpr auto is_not_same_v = !std::is_same<T, U>::value;
 
+/**
+ *\brief is_any_of_v<T, Ts...> is true iff. T is one of types encapsulated in Ts....
+ */
+template<typename T, typename... Ts>
+MATRICE_GLOBAL_INL constexpr auto is_any_of_v = std::disjunction_v<std::is_same<T, Ts>...>;
+
 DGE_MATRICE_END
