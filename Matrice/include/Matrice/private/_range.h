@@ -138,6 +138,7 @@ public:
 	using value_type = _Ty;
 	using point_type = Vec_<value_type, 2>;
 
+	_Rect_impl() noexcept {}
 	template<typename _U1, typename _U2>
 	_Rect_impl(const Vec_<_U1, 2>& _X, const _U2& _W, const _U2& _H)
 		:_Mybegin(_X.x, _X.y), _Mywidth(_W), _Myheight(_H) { _My_end(); }
@@ -160,6 +161,12 @@ public:
 	}
 	MATRICE_HOST_INL const point_type& end() const {
 		return (_Myend); 
+	}
+
+	MATRICE_HOST_INL void set(const point_type& p, value_type w, value_type h) noexcept {
+		_Mybegin = p;
+		_Mywidth = w, _Myheight = h;
+		_My_end();
 	}
 
 	MATRICE_HOST_INL void set_size(value_type w, value_type h) noexcept {
