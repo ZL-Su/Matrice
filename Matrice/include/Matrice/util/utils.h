@@ -60,12 +60,16 @@ namespace detail {
 }
 
 /**
- * \Convert a string to a user specified (numerical) value.
+ * \Convert a string to a user specified type T.
  * Example: auto _Ret = dgelom::stonv<float>("1.0");
  */
 template<typename T = std::string> MATRICE_HOST_FINL
 constexpr T stonv(const std::string& _Str) noexcept { 
 	return detail::string_to_numval<T>::value(_Str); 
+}
+template<typename T = std::string> MATRICE_HOST_FINL
+constexpr T cast_from_string(std::string&& _Str) noexcept {
+	return stonv(forward<std::string>(_Str));
 }
 
 /**
@@ -122,6 +126,15 @@ MATRICE_HOST_INL constexpr size_t size(std::array<_Ty, _N>& _) noexcept {
 template<typename _Cont>
 MATRICE_HOST_INL constexpr size_t size(const _Cont& _) noexcept {
 	return (_.size()); 
+}
+
+/**
+ *\brief call func[_Fn] in a lock guarded way
+ */
+template<typename _Mtx, typename _Fn, typename... _Args>
+MATRICE_HOST_INL decltype(auto) locked_call(_Mtx& mtx, _Fn&& func, _Args... args) {
+	std::lock_guard<_Mtx> __guard__(mtx);
+	return func(args...);
 }
 
 /**
