@@ -126,13 +126,15 @@ struct traits {
 };
 
 template<typename T> struct is_matrix : std::false_type {};
-template<typename T> MATRICE_GLOBAL_INL constexpr bool is_matrix_v = is_matrix<T>::value;
+template<typename T> MATRICE_GLOBAL_INL constexpr 
+bool is_matrix_v = is_matrix<T>::value;
 template<typename Mty>
 struct matrix_traits : traits<Mty> {};
 
 template<typename Exp> struct expression_options { enum { value = Exp::flag | expr }; };
 template<typename Exp> struct is_expression :std::false_type {};
-template<typename Exp> MATRICE_GLOBAL_INL constexpr bool is_expression_v = is_expression<Exp>::value;
+template<typename Exp> MATRICE_GLOBAL_INL constexpr 
+bool is_expression_v = is_expression<Exp>::value;
 template<class Exp, typename = enable_if_t<is_expression_v<Exp>>>
 struct expression_traits : traits<Exp> {};
 
@@ -209,27 +211,30 @@ struct layout_traits : traits<T> {
  */
 template<typename T, typename Enable = void> struct is_equality_comparable : std::false_type {};
 template<typename T> struct is_equality_comparable<T, std::void_t<decltype(std::declval<T&>() == std::declval<T&>())>> : std::true_type {};
-template<typename T> using is_equality_comparable_t = typename is_equality_comparable<T>::type;
+template<typename T> MATRICE_GLOBAL_INL constexpr
+auto is_equality_comparable_v = is_equality_comparable<T>::value;
 
 /**
  *\brief is_hashable<T> is true_type iff std::hash is defined for T
  */
 template<typename T, typename Enable = void> struct is_hashable : std::false_type {};
 template<typename T> struct is_hashable<T, std::void_t<decltype(std::hash<T>()(std::declval<T&>()))>> : std::true_type {};
-template<typename T> using is_hashable_t = typename is_hashable<T>::type;
+template<typename T> MATRICE_GLOBAL_INL constexpr 
+auto is_hashable_v = is_hashable<T>::value;
 
 /**
- *\brief is_instantiation_of<T, I> is true_type iff I is a template instantiation of T (e.g. vector<int> is an instantiation of vector)
+ *\brief is_instantiation_of_v<T, I> is true_type iff I is a template instantiation of T (e.g. vector<int> is an instantiation of vector)
  *  Example:
- *    is_instantiation_of_t<vector, vector<int>> // true
- *    is_instantiation_of_t<pair, pair<int, string>> // true
- *    is_instantiation_of_t<vector, pair<int, string>> // false
+ *    is_instantiation_of_v<vector, vector<int>> // true
+ *    is_instantiation_of_v<pair, pair<int, string>> // true
+ *    is_instantiation_of_v<vector, pair<int, string>> // false
  */
-template <template<class...> class Template, class T>
+template<template<class...> class Template, class T, int... sizes>
 struct is_instantiation_of : std::false_type {};
-template <template <class...> class Template, class... Args>
+template<template<class...> class Template, class... Args>
 struct is_instantiation_of<Template, Template<Args...>> : std::true_type {};
-template<template<class...> class Template, class T> using is_instantiation_of_t = typename is_instantiation_of<Template, T>::type;
+template<template<class...> class Template, class T> 
+MATRICE_GLOBAL_INL constexpr auto is_instantiation_of_v = is_instantiation_of<Template, T>::value;
 
 /**
  *\brief is_type_condition<C> is true_type iff C<...> is a type trait representing a condition (i.e. has a constexpr static bool ::value member)
@@ -240,7 +245,8 @@ template<template<typename> typename C, typename Enable = void>
 struct is_type_condition : std::false_type {};
 template<template<typename> typename C>
 struct is_type_condition<C, std::enable_if_t<std::is_same<bool, std::remove_cv_t<decltype(C<int>::value)>>::value>> : std::true_type {};
-template<template<typename> typename C> MATRICE_GLOBAL_INL constexpr auto is_type_condition_v = is_type_condition<C>::value;
+template<template<typename> typename C> 
+MATRICE_GLOBAL_INL constexpr auto is_type_condition_v = is_type_condition<C>::value;
 
 /**
  *\brief retrieve solver traits
