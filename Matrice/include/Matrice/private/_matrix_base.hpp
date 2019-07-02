@@ -734,7 +734,7 @@ public:
 	 *\brief Check if this equals to _other or not
 	 *\param [_other] can be any derived type of matrix/array/vector 
 	 */
-	MATRICE_GLOBAL_INL bool operator== (const _Myt& _other) const {
+	MATRICE_GLOBAL_INL bool operator== (const _Myt& _other) const noexcept {
 		if(size() != _other.size()) return std::false_type::value;
 		if(m_data == _other.m_data) return std::true_type::value;
 		for (auto _Idx = 0; _Idx < size(); ++_Idx)
