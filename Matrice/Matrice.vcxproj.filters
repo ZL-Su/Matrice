@@ -495,6 +495,12 @@
     <ClInclude Include="include\Matrice\algs\dnn\conv\_conv_impl.hpp">
       <Filter>Header Files\Algs\DeepLearning\Convolution</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\private\tensor\_tensor_wrapper.hpp">
+      <Filter>Header Files\Detail\tensor</Filter>
+    </ClInclude>
+    <ClInclude Include="examples\speckle_deformation_simulation_ex.hpp">
+      <Filter>Examples</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">

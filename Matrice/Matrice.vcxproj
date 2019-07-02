@@ -146,6 +146,7 @@
     <ClInclude Include="addin\interface.h" />
     <ClInclude Include="examples\basic_matrix_usage.h" />
     <ClInclude Include="examples\Invcomp_GaussNewton.hpp" />
+    <ClInclude Include="examples\speckle_deformation_simulation_ex.hpp" />
     <ClInclude Include="include\Matrice\algs\correlation\_correlation_traits.h" />
     <ClInclude Include="include\Matrice\algs\correlation\_optim.h" />
     <ClInclude Include="include\Matrice\algs\correlation\_utils.hpp" />
@@ -197,6 +198,7 @@
     <ClInclude Include="include\Matrice\private\tensor\_tensor.hpp" />
     <ClInclude Include="include\Matrice\private\tensor\_tensor_old.hpp" />
     <ClInclude Include="include\Matrice\private\tensor\_tensor_exp.hpp" />
+    <ClInclude Include="include\Matrice\private\tensor\_tensor_wrapper.hpp" />
     <ClInclude Include="include\Matrice\private\_decl_dev_funcs.h" />
     <ClInclude Include="include\Matrice\private\_devops.h" />
     <ClInclude Include="include\Matrice\private\_dev_matrix_base.h" />
