@@ -64,11 +64,14 @@ namespace detail {
  * Example: auto _Ret = dgelom::stonv<float>("1.0");
  */
 template<typename T = std::string> MATRICE_HOST_FINL
-constexpr T stonv(const std::string& _Str) noexcept { 
+constexpr T stonv(const std::string& _Str) noexcept {
+#ifdef _DEBUG || MATRICE_DEBUG
+	DGELOM_CHECK(!_Str.empty(), "_Str should not be empty.")
+#endif
 	return detail::string_to_numval<T>::value(_Str); 
 }
 template<typename T = std::string> MATRICE_HOST_FINL
-constexpr T cast_from_string(std::string&& _Str) noexcept {
+constexpr T cast_string_to(std::string&& _Str) noexcept {
 	return stonv(forward<std::string>(_Str));
 }
 
