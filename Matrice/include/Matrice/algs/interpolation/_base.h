@@ -40,7 +40,7 @@ enum {
 
 // \Forward declaration
 template<typename _Ty, typename _Tag> class _Spline_interpolation;
-template<typename _Ty, typename _Tag> class _Bilinear_interpolation;
+template<typename _Ty> class _Bilinear_interpolation;
 
 // \Interpolation traits definition
 template<typename _Ty> struct interpolation_traits {};
@@ -52,12 +52,12 @@ struct interpolation_traits<_Spline_interpolation<_Ty, _Tag>> {
 	using type = _Spline_interpolation<value_type, category>;
 	static constexpr auto option = INTERP|BSPLINE;
 };
-template<typename _Ty, typename _Tag>
-struct interpolation_traits<_Bilinear_interpolation<_Ty, _Tag>> {
+template<typename _Ty>
+struct interpolation_traits<_Bilinear_interpolation<_Ty>> {
 	using value_type = _Ty;
 	using matrix_type = Matrix<value_type>;
-	using category = _Tag;
-	using type = _Bilinear_interpolation<value_type, category>;
+	using category = _TAG _Bilinear_itp_tag;
+	using type = _Bilinear_interpolation<value_type>;
 	static constexpr auto option = INTERP | BILINEAR;
 };
 template<typename _Ty>
@@ -66,7 +66,7 @@ using interpolation_traits_t = typename interpolation_traits<_Ty>::type;
 // \Interpolation auto dispatching
 template<typename _Ty, typename _Tag> 
 struct auto_interp_dispatcher {
-	using type = _Spline_interpolation<_Ty, _Tag>;
+	using type = conditional_t<is_same_v<_Tag, _TAG _Bilinear_itp_tag>, _Bilinear_interpolation<_Ty>, _Spline_interpolation<_Ty, _Tag>>;
 };
 template<typename _Ty = float, typename _Tag = _TAG bicspl_tag>
 using auto_interp_dispatcher_t = typename auto_interp_dispatcher<_Ty, _Tag>::type;
@@ -93,7 +93,6 @@ public:
 	}
 	_Interpolation_base(_Myt&& _Other) noexcept
 		: _Mydata(_Other._Mydata), _Mycoeff(move(_Other._Mycoeff)) {
-		this->~_Interpolation_base();
 	}
 	~_Interpolation_base() {
 	}
@@ -120,6 +119,13 @@ public:
 	 */
 	MATRICE_HOST_INL const decltype(auto)data()const noexcept {
 		return (_Mydata); 
+	}
+	/**
+	 * \set original data matrix.
+	 */
+	MATRICE_HOST_INL _Myt& set(const matrix_type& data)noexcept {
+		_Mydata = data;
+		return (*this);
 	}
 
 	/**
