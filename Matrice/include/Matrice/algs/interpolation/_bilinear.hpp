@@ -32,7 +32,31 @@ public:
 
 	using _Mybase::_Interpolation_base;
 
+	MATRICE_HOST_INL auto operator()(const point_type& pos) const {
+		const auto x1 = (size_t)max(floor(pos.x), 0);
+		const auto x2 = (size_t)min(x1 + 1, _Mydata.cols()-1);
+		const auto y1 = (size_t)max(floor(pos.y), 0);
+		const auto y2 = (size_t)min(y1 + 1, _Mydata.rows()-1);
+		const auto f11 = _Mydata[y1][x1];
+		const auto f12 = _Mydata[y2][x1];
+		const auto f21 = _Mydata[y1][x2];
+		const auto f22 = _Mydata[y2][x2];
+
+		const auto dx1 = pos.x - x1;
+		const auto dx2 = x2 - pos.x;
+		return (y2 - pos.y)*(dx2*f11 + dx1 * f21) + (pos.y - y1)*(dx2*f12 + dx1 * f22);
+	}
+	MATRICE_HOST_INL auto operator()(value_type x, value_type y) const {
+		return (*this)(point_type(x, y));
+	}
+
+	MATRICE_HOST_INL auto grad(const point_type& pos) const {
+		return pos;
+	}
+
 	MATRICE_HOST_INL void _Coeff_impl() noexcept {};
 
+private:
+	using _Mybase::_Mydata;
 };
 MATRICE_ALGS_END
