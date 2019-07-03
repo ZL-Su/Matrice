@@ -156,6 +156,7 @@
     <ClInclude Include="include\Matrice\algs\dnn\layer\_input_layer.hpp" />
     <ClInclude Include="include\Matrice\algs\dnn\layer\_layers.hpp" />
     <ClInclude Include="include\Matrice\algs\dnn\layer\_layer_base.hpp" />
+    <ClInclude Include="include\Matrice\algs\dnn\models\_basic_model.hpp" />
     <ClInclude Include="include\Matrice\algs\erroranalysis\_common.h" />
     <ClInclude Include="include\Matrice\algs\geometry\normalization.h" />
     <ClInclude Include="include\Matrice\algs\geometry\transform.h" />

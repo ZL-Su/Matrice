@@ -193,6 +193,9 @@
     <Filter Include="Header Files\Algs\DeepLearning\Convolution">
       <UniqueIdentifier>{77fe9ef4-1397-48de-8da8-a8279b23aa3f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Algs\DeepLearning\Models">
+      <UniqueIdentifier>{3a5d8763-6700-4334-9540-e405a62b8d61}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -500,6 +503,9 @@
     </ClInclude>
     <ClInclude Include="examples\speckle_deformation_simulation_ex.hpp">
       <Filter>Examples</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\dnn\models\_basic_model.hpp">
+      <Filter>Header Files\Algs\DeepLearning\Models</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
