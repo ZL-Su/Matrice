@@ -85,10 +85,7 @@ constexpr T cast_string_to(std::string&& _Str) noexcept {
 		const auto str = dgelom::cast_to_string(3.14159); //str = "3.14159"
  */
 template<typename T> MATRICE_HOST_INL
-constexpr std::string cast_to_string(T _Val) noexcept {
-	static_assert(!is_any_of_v<T, int, long, long long,
-		unsigned, unsigned long, unsigned long long,
-		float, double, long double>, "Unsupported data type.");
+std::string cast_to_string(T _Val) noexcept {
 	return std::to_string(_Val);
 }
 
