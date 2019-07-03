@@ -106,6 +106,7 @@ namespace tag {
 	using bisspl_tag = _Bspline_itp_tag::biseptic;
 	using mbicspl_tag = _Bspline_itp_tag::multilevel_bicubic_2d;
 	using mbicspl3_tag = _Bspline_itp_tag::multilevel_bicubic_3d;
+	using bilinear_tag = _Bilinear_itp_tag;
 
 	///<brief> tag definitions for gradient computation </brief>
 	struct _Gradient_tag {};
