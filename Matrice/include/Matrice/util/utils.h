@@ -60,8 +60,9 @@ namespace detail {
 }
 
 /**
- * \Convert a string to a user specified type T.
- * Example: auto _Ret = dgelom::stonv<float>("1.0");
+ * \brief  cast a string to a user specified type T.
+ * \example: 
+		const auto val = dgelom::stonv<float>("1.0"); //val = 1.0f;
  */
 template<typename T = std::string> MATRICE_HOST_FINL
 constexpr T stonv(const std::string& _Str) noexcept {
@@ -79,7 +80,20 @@ constexpr T cast_string_to(std::string&& _Str) noexcept {
 }
 
 /**
- * \append a T-typed element into tuple _Tpl
+ * \brief  cast T-typed numeric to std::string
+ * \example: 
+		const auto str = dgelom::cast_to_string(3.14159); //str = "3.14159"
+ */
+template<typename T> MATRICE_HOST_INL
+constexpr std::string cast_to_string(T _Val) noexcept {
+	static_assert(!is_any_of_v<T, int, long, long long,
+		unsigned, unsigned long, unsigned long long,
+		float, double, long double>, "Unsupported data type.");
+	return std::to_string(_Val);
+}
+
+/**
+ * \brief  append a T-typed element into tuple _Tpl
  */
 template<typename T, typename... U> MATRICE_HOST_FINL
 tuple<U..., T> tuple_append(const tuple<U...>& _Tpl, const T& _Val) {
