@@ -107,17 +107,17 @@ public:
 	/**
 	 * \get the interpolated value at _Pos. 
 	 */
-	MATRICE_HOST_INL auto operator()(const point_type& _Pos) const {
-		return (this)->_Value_at(_Pos);
+	MATRICE_HOST_INL auto operator()(const point_type& pos) const {
+		return static_cast<const _Mydt*>(this)->_Value_at(pos);
 	}
-	MATRICE_HOST_INL auto operator()(value_type _X, value_type _Y) const {
-		return (this)->_Value_at(point_type(_X, _Y));
+	MATRICE_HOST_INL auto operator()(value_type x, value_type y) const {
+		return (*this)(point_type(x, y));
 	}
 
 	/**
 	 * \get original data matrix.
 	 */
-	MATRICE_HOST_INL const decltype(auto)data()const noexcept {
+	MATRICE_HOST_INL const matrix_type& data()const noexcept {
 		return (_Mydata); 
 	}
 	/**
@@ -149,7 +149,7 @@ protected:
 
 protected:
 	const value_type _Myeps{ value_type(1.0e-7) };
-	matrix_type& _Mydata;
+	const matrix_type& _Mydata;
 	matrix_type _Mycoeff;
 	matrix_type _Mygrads;
 };
