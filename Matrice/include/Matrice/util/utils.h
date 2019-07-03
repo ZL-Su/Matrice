@@ -134,8 +134,15 @@ MATRICE_GLOBAL_INL constexpr size_t size(_Ty(&)[_N]) noexcept {
  *\brief get size of std::array
  */
 template<typename _Ty, size_t _N>
-MATRICE_HOST_INL constexpr size_t size(std::array<_Ty, _N>& _) noexcept {
+MATRICE_HOST_INL constexpr size_t size(std::array<_Ty, _N>&) noexcept {
 	return (_N); 
+}
+/**
+ *\brief get compile-time size of a matrix_<,,>
+ */
+template<template<typename,int,int>class _My, typename _Ty, int _M, int _N>
+MATRICE_HOST_INL constexpr size_t size(const _My<_Ty, _M, _N>&) noexcept {
+	return (_M*_N);
 }
 /**
  *\brief get size of container which must has method size()
@@ -146,10 +153,11 @@ MATRICE_HOST_INL constexpr size_t size(const _Cont& _) noexcept {
 }
 
 /**
- *\brief call func[_Fn] in a lock guarded way
+ *\brief call func[_Fn] in a lock guarded way.
+ *\param [args] variadic argument(s) in function "func".
  */
 template<typename _Mtx, typename _Fn, typename... _Args>
-MATRICE_HOST_INL decltype(auto) locked_call(_Mtx& mtx, _Fn&& func, _Args... args) {
+MATRICE_HOST_INL decltype(auto)locked_call(_Mtx& mtx, _Fn&& func, _Args...args){
 	std::lock_guard<_Mtx> __guard__(mtx);
 	return func(args...);
 }
