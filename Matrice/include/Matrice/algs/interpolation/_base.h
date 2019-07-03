@@ -1,6 +1,6 @@
 /***********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -39,8 +39,8 @@ enum {
 };
 
 // \Forward declaration
-//template<typename _Ty, typename _Tag> class _Spline_interpolation;
 template<typename _Ty, typename _Tag> class _Spline_interpolation;
+template<typename _Ty, typename _Tag> class _Bilinear_interpolation;
 
 // \Interpolation traits definition
 template<typename _Ty> struct interpolation_traits {};
@@ -51,6 +51,14 @@ struct interpolation_traits<_Spline_interpolation<_Ty, _Tag>> {
 	using category = _Tag;
 	using type = _Spline_interpolation<value_type, category>;
 	static constexpr auto option = INTERP|BSPLINE;
+};
+template<typename _Ty, typename _Tag>
+struct interpolation_traits<_Bilinear_interpolation<_Ty, _Tag>> {
+	using value_type = _Ty;
+	using matrix_type = Matrix<value_type>;
+	using category = _Tag;
+	using type = _Bilinear_interpolation<value_type, category>;
+	static constexpr auto option = INTERP | BILINEAR;
 };
 template<typename _Ty>
 using interpolation_traits_t = typename interpolation_traits<_Ty>::type;
@@ -74,6 +82,8 @@ public:
 	using point_type = Vec2_<value_type>;
 	static constexpr auto option = _Mytraits::option;
 
+	_Interpolation_base() noexcept {
+	}
 	_Interpolation_base(const matrix_type& _Data) noexcept
 		: _Mydata(_Data) { 
 		static_cast<_Mydt*>(this)->_Coeff_impl(); 
@@ -91,7 +101,9 @@ public:
 	/**
 	 * \get interpolation coeff. matrix.
 	 */
-	MATRICE_HOST_INL auto& operator()() const { return (_Mycoeff); }
+	MATRICE_HOST_INL decltype(auto) operator()() const noexcept { 
+		return (_Mycoeff); 
+	}
 
 	/**
 	 * \get the interpolated value at _Pos. 
@@ -106,7 +118,9 @@ public:
 	/**
 	 * \get original data matrix.
 	 */
-	MATRICE_HOST_INL const auto& data() const { return (_Mydata); }
+	MATRICE_HOST_INL const decltype(auto)data()const noexcept {
+		return (_Mydata); 
+	}
 
 	/**
 	 * \get the interpolated gradient value at _Pos.
@@ -120,7 +134,7 @@ public:
 		if constexpr (_Axis == axis::y) return (this)->_Grady_at(_Pos);
 	}
 
-private:
+protected:
 	MATRICE_HOST_INL auto _Value_at(const point_type& _Pos) const;
 	MATRICE_HOST_INL auto _Gradx_at(const point_type& _Pos) const;
 	MATRICE_HOST_INL auto _Grady_at(const point_type& _Pos) const;
@@ -128,8 +142,8 @@ private:
 	std::add_pointer_t<_Mydt> _Mydt_this = static_cast<_Mydt*>(this);
 
 protected:
-	const matrix_type& _Mydata;
-	const value_type _Myeps = value_type(1.0e-7);
+	const value_type _Myeps{ value_type(1.0e-7) };
+	matrix_type& _Mydata;
 	matrix_type _Mycoeff;
 	matrix_type _Mygrads;
 };
