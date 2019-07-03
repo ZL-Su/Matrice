@@ -17,6 +17,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #pragma once
 #include "_splineinterp.h"
+#include "_bilinear.hpp"
 
 MATRICE_ALGS_BEGIN
 
