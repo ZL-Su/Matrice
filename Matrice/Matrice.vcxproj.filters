@@ -507,6 +507,9 @@
     <ClInclude Include="include\Matrice\algs\dnn\models\_basic_model.hpp">
       <Filter>Header Files\Algs\DeepLearning\Models</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\algs\interpolation\_bilinear.hpp">
+      <Filter>Header Files\Algs\Interpolation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
