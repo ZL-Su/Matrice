@@ -16,11 +16,11 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #pragma once
-#include "../../../core"
+#include "../models/_basic_model.hpp"
+
 
 DGE_MATRICE_BEGIN
 namespace dnn {
-	using dnn_default_value_type = float;
 /**
  *\brief network layer traits
  *\param <_Lyr> layer type
@@ -40,13 +40,16 @@ struct _Layer_tag {
  *\brief network layer base class
  *\param <_Derived> derived layer type
  */
-template<typename _Derived> class _Layer {
+template<typename _Derived, typename _Traits = _Layer_traits<_Derived>>
+class _Layer : public detail::_Model<typename _Traits::value_type, _Traits::depth, _Traits::extent, _Traits::has_bias> {
 	using _Myt = _Layer;
 	using _Mydt = _Derived;
-	using _Mytraits = _Layer_traits<_Mydt>;
+	using _Mytraits = _Traits;
+	using _Mybase = detail::_Model<typename _Traits::value_type, 
+		_Traits::depth, _Traits::extent, _Traits::has_bias>;
 public:
-	using value_type = dnn_default_value_type;
-	using tensor_type = Tensor<value_type, _Mytraits::depth, _Mytraits::extent>;
+	using typename _Mybase::value_type;
+	using typename _Mybase::tensor_type;
 
 	MATRICE_HOST_INL auto forward() noexcept {
 		//return static_cast<_Mydt*>(this)->_Forward_impl();
