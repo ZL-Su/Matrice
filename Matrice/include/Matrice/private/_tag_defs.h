@@ -100,6 +100,7 @@ namespace tag {
 			static constexpr size_t max_levels = 8;
 		};
 	};
+	struct _Bilinear_itp_tag : _Interpolation_tag {};
 	using bicspl_tag = _Bspline_itp_tag::bicubic;
 	using biqspl_tag = _Bspline_itp_tag::biquintic;
 	using bisspl_tag = _Bspline_itp_tag::biseptic;
