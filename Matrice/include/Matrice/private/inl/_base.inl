@@ -101,7 +101,7 @@ MATRICE_HOST_INL auto make_matrix_deleter(const _Mty& _M) noexcept {
 	return _M.deleter();
 };
 
-template<typename _Ty, int _Rows = 0, int _Cols = 0, typename... _Args>
+template<typename _Ty, int _Rows, int _Cols, typename... _Args>
 MATRICE_GLOBAL_INL types::Matrix_<_Ty, _Rows, _Cols> make_matrix(_Args&&... params) {
 	return types::Matrix_<_Ty, _Rows, _Cols>(forward<_Args>(params)...);
 };
