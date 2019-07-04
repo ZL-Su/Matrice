@@ -783,8 +783,8 @@ struct expression_traits<_Exp::MatUnaryExpr<T, _Op>> {
 	using value_type = typename T::value_t;
 	enum {
 		options = expression_options<_Op>::value,
-		rows = conditional_size_v<options&_Exp_tag::trp == _Exp_tag::trp, T::CompileTimeCols, T::CompileTimeRows>,
-		cols = conditional_size_v<options&_Exp_tag::trp == _Exp_tag::trp, T::CompileTimeRows, T::CompileTimeCols>
+		rows = conditional_size_v<(options&_Exp_tag::trp) == _Exp_tag::trp, T::CompileTimeCols, T::CompileTimeRows>,
+		cols = conditional_size_v<(options&_Exp_tag::trp) == _Exp_tag::trp, T::CompileTimeRows, T::CompileTimeCols>
 	};
 	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
 };
