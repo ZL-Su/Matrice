@@ -24,6 +24,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../private/_unified_memory.h"
 #include "../private/_type_traits.h"
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#endif
+
 #ifndef MATRICE_ALIGNED_CLASS
 #define MATRICE_ALIGNED_CLASS class alignas(MATRICE_ALIGN_BYTES)
 #endif
@@ -352,4 +356,9 @@ public:
 };
 _DETAIL_END
 DGE_MATRICE_END
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include "inl\_storage_base.inl"
