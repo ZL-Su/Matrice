@@ -48,8 +48,8 @@ public:
 	 *		_Gx = _Itp.grad<axis::x>(_Pos); \\return interpolated dI/dx.
 	 *		_Gy = _Itp.grad<axis::y>(_Pos); \\return interpolated dI/dy.
 	 */
-	MATRICE_HOST_FINL auto shared() const {
-		return std::make_shared(*this);
+	MATRICE_HOST_FINL decltype(auto) shared() const {
+		return this->shared_from_this();
 	}
 };
 
