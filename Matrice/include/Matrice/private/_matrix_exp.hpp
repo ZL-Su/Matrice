@@ -27,7 +27,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../arch/ixpacket.h"
 #endif
 
-#pragma warning(disable: 4715)
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4715 4661 4224 4267 4244 4819 4199)
+#endif
+
 DGE_MATRICE_BEGIN
 #pragma region <!-- Forward declarations and matrix traits supplements -->
 // \forward declarations 
@@ -900,5 +904,9 @@ MATRICE_GLOBAL_INL auto _Exp::Base_<_Op>::var() const {
 			_Avg);
 	return (_Diff*_Diff).avg();
 }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 DGE_MATRICE_END
