@@ -32,7 +32,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../util/_property.hpp"
 #include "../core/solver.h"
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4514 4786 4503 4127)
 #pragma warning(disable: 4715 4661 4224 4267 4244 4819 4199)
+#endif
 
 #ifndef _HAS_CXX17
 #  error Matrice library must be compiled as C++ 17 or above.
@@ -1076,4 +1080,9 @@ template<typename _Ty>
 MATRICE_GLOBAL_INL remove_all_t<_Ty>& make_zero(_Ty& data) noexcept;
 
 DGE_MATRICE_END
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #include "inl\_base.inl"
