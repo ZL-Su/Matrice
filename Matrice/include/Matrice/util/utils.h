@@ -163,6 +163,16 @@ MATRICE_HOST_INL decltype(auto)locked_call(_Mtx& mtx, _Fn&& func, _Args...args){
 }
 
 /**
+ * \unroll a linear index "idx" to 2d indices [y, x].
+ */
+template<typename _Ity>
+MATRICE_GLOBAL_INL decltype(auto) unroll_linear_index(_Ity idx, _Ity width) noexcept {
+	const auto y = safe_div(idx, width);
+	const auto x = idx - y * width;
+	return std::make_tuple(y, x);
+}
+
+/**
  * \transform functor definitions
  */
 struct transforms {
