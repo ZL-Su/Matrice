@@ -384,13 +384,13 @@ public:
 	 *\returns pointer to y-th row
 	 *\sa ptr()
 	 */
-	MATRICE_GLOBAL_FINL pointer operator[](index_t y) noexcept {
+	MATRICE_GLOBAL_FINL pointer operator[](index_t y) {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(y < rows(), "Matrix_ subscript out of row range.");
 #endif
 		return (m_data + y * m_cols); 
 	}
-	MATRICE_GLOBAL_FINL constexpr const pointer operator[](index_t y) const noexcept {
+	MATRICE_GLOBAL_FINL const pointer operator[](index_t y) const {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(y < rows(), "Matrix_ subscript out of row range.");
 #endif
@@ -399,13 +399,13 @@ public:
 	/**
 	 *\1D index random accessor to get i-th element reference
 	 */
-	MATRICE_GLOBAL_FINL reference operator()(index_t i) noexcept {
+	MATRICE_GLOBAL_FINL reference operator()(index_t i) {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(i < size(), "Matrix_ subscript out of range.");
 #endif
 		return m_data[i]; 
 	}
-	MATRICE_GLOBAL_FINL constexpr const reference operator()(index_t i) const noexcept {
+	MATRICE_GLOBAL_FINL const reference operator()(index_t i) const {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(i < size(), "Matrix_ subscript out of range.");
 #endif
@@ -414,14 +414,14 @@ public:
 	/**
 	 *\2D index random accessor to get element reference at r-th row and c-th col.
 	 */
-	MATRICE_GLOBAL_INL reference operator()(index_t r, index_t c) noexcept {
+	MATRICE_GLOBAL_INL reference operator()(index_t r, index_t c) {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(r < rows(), "Matrix_ subscript out of row range.");
 		DGELOM_CHECK(c < cols(), "Matrix_ subscript out of column range.");
 #endif
 		return (*this)[r][c]; 
 	}
-	MATRICE_GLOBAL_INL constexpr const reference operator()(index_t r, index_t c) const noexcept {
+	MATRICE_GLOBAL_INL const reference operator()(index_t r, index_t c) const {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(r < rows(), "Matrix_ subscript out of row range.");
 		DGELOM_CHECK(c < cols(), "Matrix_ subscript out of column range.");
@@ -444,7 +444,7 @@ public:
 #endif
 		return (m_data + (m_cols) * (y)); 
 	}
-	MATRICE_GLOBAL_FINL constexpr const pointer ptr(int y = 0) const {
+	MATRICE_GLOBAL_FINL const pointer ptr(int y = 0) const {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(y < rows(), "Matrix_ subscript out of row range.");
 #endif
@@ -454,7 +454,7 @@ public:
 	/**
 	 * \returns reference to the derived object
 	 */
-	MATRICE_GLOBAL_FINL _Derived& eval()noexcept {
+	MATRICE_GLOBAL_FINL _Derived& eval() noexcept {
 		return (*static_cast<_Derived*>(this));
 	}
 	/**
