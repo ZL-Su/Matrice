@@ -199,6 +199,9 @@
     <Filter Include="Header Files\Addin\libtiff">
       <UniqueIdentifier>{1119b797-6314-4a43-8aea-8993215b95f2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\3rdparty">
+      <UniqueIdentifier>{bee3b1ae-6a99-4e8e-a8e7-722a84ddafd4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -542,6 +545,9 @@
     </ClInclude>
     <ClInclude Include="addin\libtiff\uvcode.h">
       <Filter>Header Files\Addin\libtiff</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\io\_tiff_wrapper.hpp">
+      <Filter>Header Files\Addin</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
