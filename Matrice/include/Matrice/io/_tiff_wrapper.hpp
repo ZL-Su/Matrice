@@ -16,46 +16,84 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #pragma once
-#include <libtiff/tiffio.h>
+#include "../../../addin/libtiff/tiffio.h"
 #include "../util/_macros.h"
 #include "../util/_std_wrapper.h"
 
 DGE_MATRICE_BEGIN
-template<typename _Ty, int _M, int _N> class Matrix_;
-
-using tiff_type = TIFF;
+using tiff_type = tiff;
 using tiff_pointer = std::add_pointer_t<tiff_type>;
+template<typename _Ty> using tiff_matrix_t = Matrix_<_Ty, 0, 0>;
 
 template<typename _Ty> struct tiff_instance {
 	using value_type = _Ty;
 
-	std::add_pointer_t<value_type> m_data = nullptr;
 	uint32_t m_rows = 0, m_cols = 0;
-	std::size_t m_size = 0;
+	uint32_t m_nchs = 1, m_width = 0;
+	tiff_matrix_t<value_type> m_data;
+
+	MATRICE_HOST_INL void create(uint32_t n) noexcept {
+		m_nchs = n;
+		m_width = m_cols * m_nchs;
+		m_data.create(m_rows, m_width, zero<value_type>);
+	}
+	template<typename _Uy = value_type>
+	MATRICE_HOST_INL tiff_matrix_t<_Uy> grayscale() const noexcept {
+		if (m_nchs == 1) if constexpr (is_same_v<_Ty, _Uy>)
+			return forward<decltype(m_data)>(m_data);
+
+		tiff_matrix_t<_Uy> gc(m_rows, m_cols);
+		if (m_nchs == 1) {
+			gc.from(m_data.data());
+		}
+		else {
+			for (auto r = 0; r < m_rows; ++r) {
+				const auto pd = m_data[r];
+				auto pg = gc[r];
+				for (auto c = 0; c < m_cols; ++c) {
+					pg[c] = pd[c] * 0.07 + pd[c + m_cols] * 0.72 + pd[c + 2 * m_cols] * 0.21;
+				}
+			}
+		}
+		if constexpr (is_same_v<_Ty, uint8_t>)
+			if constexpr (is_floating_point_v<_Uy>)
+				gc = gc / 255;
+
+		return forward<decltype(gc)>(gc);
+	}
 };
 
 tiff_pointer open_tiff_file(const char* fname, const char* flag) {
 	return TIFFOpen(fname, flag);
 }
 
-template<typename _Ty, typename _Ret = tiff_instance<_Ty>>
+template<typename _Ty=uint8_t, typename _Ret = tiff_instance<_Ty>>
 MATRICE_HOST_INL _Ret read_tiff_file(const char* fpath) {
 	_Ret inst;
 	if (const auto ptif = open_tiff_file(fpath, "r"); ptif) {
-		uint32_t length;
-		TIFFGetField(ptif, TIFFTAG_IMAGELENGTH, &length);
-
+		TIFFGetField(ptif, TIFFTAG_IMAGELENGTH, &inst.m_rows);
+		TIFFGetField(ptif, TIFFTAG_IMAGEWIDTH, &inst.m_cols);
 		const auto scanline = TIFFScanlineSize(ptif);
-		auto buf = _TIFFmalloc(scanline);
-		for (inst.m_rows = 0; inst.m_rows < length; ++inst.m_rows) {
-			TIFFReadScanline(ptif, buf, inst.m_rows);
-			for (inst.m_cols = 0; inst.m_cols < scanline; ++inst.m_cols) {
-				inst.m_data[inst.m_size++] = static_cast<_Ty>(buf[inst.m_cols]);
+		inst.create(scanline/inst.m_cols);
+
+		auto buf = (_Ty*)_TIFFmalloc(scanline*sizeof(_Ty));
+		for (auto row = 0; row < inst.m_rows; ++row) {
+			TIFFReadScanline(ptif, buf, row);
+			auto pd = inst.m_data[row];
+			for (auto col = 0; col < inst.m_cols; ++col) {
+				auto pb = buf + col * inst.m_nchs;
+				for (auto chn = 0; chn < inst.m_nchs; ++chn) {
+					pd[col + chn * inst.m_cols] = pb[chn];
+					if constexpr (!is_same_v<_Ty, uint8_t>)
+						pb[chn] /= (_Ty)(255);
+				}
 			}
 		}
+
 		_TIFFfree(buf);
 		TIFFClose(ptif);
 	}
+	return forward<_Ret>(inst);
 }
 
 DGE_MATRICE_END
