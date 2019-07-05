@@ -272,3 +272,7 @@ Matrice/Matrice.vcxproj.filters
 *.vcxproj
 *.vcxproj
 *.filters
+Matrice/addin/libtiff/CMakeLists.txt
+Matrice/addin/libtiff/ChangeLog
+Matrice/addin/libtiff/tiffconf.h.cmake.in
+Matrice/addin/libtiff/tif_config.h.cmake.in

@@ -196,6 +196,9 @@
     <Filter Include="Header Files\Algs\DeepLearning\Models">
       <UniqueIdentifier>{3a5d8763-6700-4334-9540-e405a62b8d61}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Addin\libtiff">
+      <UniqueIdentifier>{1119b797-6314-4a43-8aea-8993215b95f2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -510,6 +513,36 @@
     <ClInclude Include="include\Matrice\algs\interpolation\_bilinear.hpp">
       <Filter>Header Files\Algs\Interpolation</Filter>
     </ClInclude>
+    <ClInclude Include="addin\libtiff\t4.h">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\libtiff\tif_dir.h">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\libtiff\tif_fax3.h">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\libtiff\tif_predict.h">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\libtiff\tiff.h">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\libtiff\tiffio.h">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\libtiff\tiffio.hxx">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\libtiff\tiffiop.h">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\libtiff\tiffvers.h">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\libtiff\uvcode.h">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
@@ -538,6 +571,132 @@
     </ClCompile>
     <ClCompile Include="include\Matrice\algs\dnn\functions\_functions.h">
       <Filter>Header Files\Algs\DeepLearning\Functions</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\snprintf.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_aux.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_close.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_codec.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_color.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_compress.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_dir.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_dirinfo.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_dirread.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_dirwrite.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_dumpmode.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_error.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_extension.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_fax3.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_fax3sm.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_flush.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_getimage.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_jbig.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_jpeg.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_jpeg_12.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_luv.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_lzma.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_lzw.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_next.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_ojpeg.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_open.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_packbits.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_pixarlog.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_predict.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_print.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_read.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_stream.cxx">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_strip.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_swab.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_thunder.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_tile.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_unix.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_version.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_warning.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_win32.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_write.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libtiff\tif_zip.c">
+      <Filter>Header Files\Addin\libtiff</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
