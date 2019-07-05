@@ -207,7 +207,6 @@ return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 	using _Myt_const = std::add_const_t<_Myt>;
 	using _Myt_reference = std::add_lvalue_reference_t<_Myt>;
 	using _Myt_const_reference = std::add_lvalue_reference_t<_Myt_const>;
-	using _Myt_move_reference = std::add_rvalue_reference_t<_Myt>;
 	using _Myt_fwd_iterator = _Matrix_forward_iterator<_Valtype>;
 	using _Myt_rwise_iterator = _Matrix_rwise_iterator<_Valtype>;
 	using _Myt_cwise_iterator = _Matrix_cwise_iterator<_Valtype>;
@@ -280,9 +279,9 @@ public:
 		:Base_(MATRICE_EXPAND_SHAPE, _Val) {}
 	MATRICE_GLOBAL_INL constexpr Base_(const_initlist _list) noexcept
 		:_Mybase((_M <= 0)?_list.size():_M, (_N<=0)?1:_N), m_storage(_list) MATRICE_LINK_PTR
-	MATRICE_GLOBAL_INL constexpr Base_(_Myt_const_reference _other) noexcept
+	MATRICE_GLOBAL_INL constexpr Base_(const _Myt& _other) noexcept
 		:_Mybase(_other._Myshape), m_storage(_other.m_storage) MATRICE_LINK_PTR
-	MATRICE_GLOBAL_INL constexpr Base_(_Myt_move_reference _other) noexcept
+	MATRICE_GLOBAL_INL constexpr Base_(_Myt&& _other) noexcept
 		:_Mybase(_other._Myshape), m_storage(move(_other.m_storage)) MATRICE_LINK_PTR
 	/**
 	 *\from STD vector<value_t>
@@ -297,7 +296,7 @@ public:
 	/**
 	 *\from explicit specified matrix type
 	 */
-	template<int _CTR, int _CTC>
+	template<int _CTR, int _CTC, MATRICE_ENABLE_IF((_CTR>0&&_CTC>0))>
 	MATRICE_GLOBAL_INL constexpr Base_(const Matrix_<value_t, _CTR, _CTC>& _Oth) noexcept
 		:_Mybase(_Oth.rows(), _Oth.cols()),m_storage(_Oth.allocator())
 		MATRICE_LINK_PTR
@@ -694,7 +693,7 @@ public:
 	/**
 	 * \homotype copy assignment operator
 	 */
-	MATRICE_GLOBAL_INL _Derived& operator=(_Myt_const_reference _other) {
+	MATRICE_GLOBAL_INL _Derived& operator=(const _Myt& _other) {
 		m_cols = _other.m_cols, m_rows = _other.m_rows;
 		m_format = _other.m_format;
 		m_storage = _other.m_storage;
@@ -706,7 +705,7 @@ public:
 	/**
 	 * \homotype move assignment operator
 	 */
-	MATRICE_GLOBAL_INL _Derived& operator=(_Myt_move_reference _other) noexcept {
+	MATRICE_GLOBAL_INL _Derived& operator=(_Myt&& _other) noexcept {
 		m_cols = _other.m_cols, m_rows = _other.m_rows;
 		m_format = _other.m_format;
 		m_storage = move(_other.m_storage);
