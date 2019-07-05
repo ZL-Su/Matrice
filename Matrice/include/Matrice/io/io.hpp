@@ -19,6 +19,7 @@
 #include "../util/_macro_conditions.h"
 #include "../util/_exception.h"
 #include "../private/_range.h"
+#include "_tiff_wrapper.hpp"
 
 DGE_MATRICE_BEGIN
 /**
