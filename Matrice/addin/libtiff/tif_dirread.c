@@ -38,6 +38,9 @@
  *   the pointer to the appropriate TIFFField structure early on in
  *   TIFFReadDirectory, so as to eliminate current possibly repetitive lookup.
  */
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif // !_CRT_SECURE_NO_WARNINGS
 
 #include "tiffiop.h"
 #include <float.h>

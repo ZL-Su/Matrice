@@ -52,7 +52,11 @@
   builds resulting from this.  Unfortunately, the proposed patch was lost.
 
 */
-  
+
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif // !_CRT_SECURE_NO_WARNINGS
+
 #include "tiffiop.h"
 
 #include <windows.h>

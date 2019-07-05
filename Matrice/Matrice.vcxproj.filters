@@ -632,9 +632,6 @@
     <ClCompile Include="addin\libtiff\tif_jbig.c">
       <Filter>Header Files\Addin\libtiff</Filter>
     </ClCompile>
-    <ClCompile Include="addin\libtiff\tif_jpeg.c">
-      <Filter>Header Files\Addin\libtiff</Filter>
-    </ClCompile>
     <ClCompile Include="addin\libtiff\tif_jpeg_12.c">
       <Filter>Header Files\Addin\libtiff</Filter>
     </ClCompile>
@@ -686,9 +683,6 @@
     <ClCompile Include="addin\libtiff\tif_tile.c">
       <Filter>Header Files\Addin\libtiff</Filter>
     </ClCompile>
-    <ClCompile Include="addin\libtiff\tif_unix.c">
-      <Filter>Header Files\Addin\libtiff</Filter>
-    </ClCompile>
     <ClCompile Include="addin\libtiff\tif_version.c">
       <Filter>Header Files\Addin\libtiff</Filter>
     </ClCompile>
@@ -699,9 +693,6 @@
       <Filter>Header Files\Addin\libtiff</Filter>
     </ClCompile>
     <ClCompile Include="addin\libtiff\tif_write.c">
-      <Filter>Header Files\Addin\libtiff</Filter>
-    </ClCompile>
-    <ClCompile Include="addin\libtiff\tif_zip.c">
       <Filter>Header Files\Addin\libtiff</Filter>
     </ClCompile>
   </ItemGroup>

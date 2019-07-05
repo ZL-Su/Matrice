@@ -30,7 +30,9 @@
  * Various routines support external extension of the tag set, and other
  * application extension capabilities. 
  */
-
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif // !_CRT_SECURE_NO_WARNINGS
 #include "tiffiop.h"
 
 int TIFFGetTagListCount( TIFF *tif )

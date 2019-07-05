@@ -264,7 +264,6 @@
     <ClCompile Include="addin\libtiff\tif_flush.c" />
     <ClCompile Include="addin\libtiff\tif_getimage.c" />
     <ClCompile Include="addin\libtiff\tif_jbig.c" />
-    <ClCompile Include="addin\libtiff\tif_jpeg.c" />
     <ClCompile Include="addin\libtiff\tif_jpeg_12.c" />
     <ClCompile Include="addin\libtiff\tif_luv.c" />
     <ClCompile Include="addin\libtiff\tif_lzma.c" />
@@ -282,12 +281,10 @@
     <ClCompile Include="addin\libtiff\tif_swab.c" />
     <ClCompile Include="addin\libtiff\tif_thunder.c" />
     <ClCompile Include="addin\libtiff\tif_tile.c" />
-    <ClCompile Include="addin\libtiff\tif_unix.c" />
     <ClCompile Include="addin\libtiff\tif_version.c" />
     <ClCompile Include="addin\libtiff\tif_warning.c" />
     <ClCompile Include="addin\libtiff\tif_win32.c" />
     <ClCompile Include="addin\libtiff\tif_write.c" />
-    <ClCompile Include="addin\libtiff\tif_zip.c" />
     <ClCompile Include="include\Matrice\algs\dnn\functions\_functions.h" />
     <ClCompile Include="src\algorithm\_splineinterp.cpp" />
     <ClCompile Include="src\core\matrix_base_impl.cpp" />
