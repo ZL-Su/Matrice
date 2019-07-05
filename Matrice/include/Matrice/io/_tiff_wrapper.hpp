@@ -40,7 +40,7 @@ template<typename _Ty> struct tiff_instance {
 	template<typename _Uy = value_type>
 	MATRICE_HOST_INL tiff_matrix_t<_Uy> grayscale() const noexcept {
 		if (m_nchs == 1) if constexpr (is_same_v<_Ty, _Uy>)
-			return forward<decltype(m_data)>(m_data);
+			return (m_data);
 
 		tiff_matrix_t<_Uy> gc(m_rows, m_cols);
 		if (m_nchs == 1) {
@@ -76,16 +76,16 @@ MATRICE_HOST_INL _Ret read_tiff_file(const char* fpath) {
 		const auto scanline = TIFFScanlineSize(ptif);
 		inst.create(scanline/inst.m_cols);
 
-		auto buf = (_Ty*)_TIFFmalloc(scanline*sizeof(_Ty));
+		auto buf = (uint8_t*)_TIFFmalloc(scanline*sizeof(uint8_t));
 		for (auto row = 0; row < inst.m_rows; ++row) {
 			TIFFReadScanline(ptif, buf, row);
 			auto pd = inst.m_data[row];
 			for (auto col = 0; col < inst.m_cols; ++col) {
 				auto pb = buf + col * inst.m_nchs;
 				for (auto chn = 0; chn < inst.m_nchs; ++chn) {
-					pd[col + chn * inst.m_cols] = pb[chn];
+					auto& val = pd[col + chn * inst.m_cols] = pb[chn];
 					if constexpr (!is_same_v<_Ty, uint8_t>)
-						pb[chn] /= (_Ty)(255);
+						val /= (_Ty)(255);
 				}
 			}
 		}
