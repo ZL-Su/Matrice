@@ -363,25 +363,38 @@ public:
 
 };
 
-namespace io { _DETAIL_BEGIN
+namespace io { 
+_DETAIL_BEGIN
 
 struct folder_tag {};
-struct loader_tag {};
+struct loader_tag {
+	struct tiff {};
+	struct png {};
+	struct bmp {};
+	struct jpeg {};
+	struct xml {};
+};
 struct file_tag {};
 
 /**
  * \file or folder name collector
  */
 template<typename _Tag> struct _Collector {};
+
 /**
  * \build file directory according to a given path
  */
 template<typename _Tag = folder_tag> class _Dir_impl {};
+
 /**
  * \load data file from given directory
  */
 template<typename _Ty, typename _Tag> class _Data_loader_impl{};
 
+/**
+ * \file loader: tiff
+ */
+template<typename _Ty, typename _Tag> class _Loader_impl {};
 _DETAIL_END
 
 } DGE_MATRICE_END
