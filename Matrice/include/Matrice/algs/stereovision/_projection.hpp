@@ -85,7 +85,7 @@ protected:
 };
 
 template<typename _Ty, typename _An> class _Aligned_projection {
-	static_assert("");
+	static_assert("Unsupported coordinate system alignment type.");
 };
 
 template<typename _Ty>
