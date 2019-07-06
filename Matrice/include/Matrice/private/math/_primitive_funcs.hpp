@@ -17,7 +17,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 #include <cmath>
-#if (defined __enable_cuda__ && !defined __disable_cuda__)
+#if (defined MATRICE_ENABLE_CUDA && !defined __disable_cuda__)
 #include <device_functions.h>
 #include <thrust\complex.h>
 #endif
