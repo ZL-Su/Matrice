@@ -343,7 +343,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		 */
 		MATRICE_GLOBAL_INL auto sum() const {
 			auto _Ret = value_t(0); int _Size = _CDTHIS->size();
-#pragma omp parallel if(_Size > 100)
+#pragma omp parallel if(_Size > 1000)
 		{
 #pragma omp for reduction(+:_Ret)
 			for (int i = 0; i < _Size; ++i) _Ret += _CDTHIS->operator()(i);
