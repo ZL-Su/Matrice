@@ -420,5 +420,12 @@ MATRICE_HOST_FINL auto serial(const _Cont& _L) {
 	DGELOM_CHECK(_N<=_L.size(), "The size _N being serialized over range of _L.");
 	return tuple_n<_N - 1>::_(_L.data());
 }
-
-} DGE_MATRICE_END
+} 
+template<typename _Ty, typename _Op>
+decltype(auto) make_loader(std::string path, _Op&& loader) noexcept {
+	return io::data_loader<_Ty>(
+		io::directory{path, io::path_t()},
+		loader
+		);
+}
+DGE_MATRICE_END
