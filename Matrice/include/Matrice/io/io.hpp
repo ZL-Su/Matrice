@@ -389,12 +389,12 @@ template<typename _Tag = folder_tag> class _Dir_impl {};
 /**
  * \load data file from given directory
  */
-template<typename _Ty, typename _Tag> class _Data_loader_impl{};
+template<typename _Ty, class _Tag> class _Data_loader_impl{};
 
 /**
  * \file loader: tiff
  */
-template<typename _Ty, typename _Tag> class _Loader_impl {};
+template<typename _Ty, class _Tag> struct _Loader_impl {};
 _DETAIL_END
 
 } DGE_MATRICE_END
@@ -409,10 +409,12 @@ using path_t = directory::path_type;
 
 template<typename _Ty = std::float_t>
 using data_loader = detail::_Data_loader_impl<_Ty, detail::loader_tag>;
-
 using data_loader_uint8 = data_loader<uint8_t>;
 using data_loader_uint32 = data_loader<uint32_t>;
 using data_loader_f32 = data_loader<float_t>;
+
+template<typename _Ty = float>
+using tiff = detail::_Loader_impl<_Ty, detail::loader_tag::tiff>;
 
 template<size_t _N, typename _Cont>
 MATRICE_HOST_FINL auto serial(const _Cont& _L) {
@@ -421,11 +423,9 @@ MATRICE_HOST_FINL auto serial(const _Cont& _L) {
 	return tuple_n<_N - 1>::_(_L.data());
 }
 } 
-template<typename _Ty, typename _Op>
-decltype(auto) make_loader(std::string path, _Op&& loader) noexcept {
-	return io::data_loader<_Ty>(
-		io::directory{path, io::path_t()},
-		loader
-		);
+template<typename _Ty, class _Op>
+decltype(auto) make_loader(std::string path, _Op&& loader)noexcept {
+	using loader_type = io::data_loader<_Ty>;
+	return loader_type(io::directory{path, io::path_t()}, loader);
 }
 DGE_MATRICE_END
