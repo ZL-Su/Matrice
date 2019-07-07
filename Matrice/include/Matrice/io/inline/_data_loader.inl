@@ -422,14 +422,13 @@ private:
 	std::function<data_type(_Mydir_type::value_type&&)> _Myloader;
 };
 
-/**
- * \Specialization for tiff loader
- */
 template<typename _Ty>
-class _Data_loader_impl<_Ty, loader_tag::tiff>
-	: public _Data_loader_base<_Data_loader_impl<_Ty, loader_tag::tiff>>{
+struct _Loader_impl<_Ty, loader_tag::tiff> {
+	using value_type = _Ty;
+	using category = loader_tag::tiff;
 
-public:
-
+	MATRICE_HOST_INL decltype(auto) operator()(std::string path) {
+		return read_tiff_file<value_type>(path.c_str());
+	}
 };
 _DETAIL_END } DGE_MATRICE_END
