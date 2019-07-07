@@ -64,17 +64,16 @@ MATRICE_HOST_INL decltype(auto) _Imread(const char* path, double) {
 	}
 }
 
-_DETAIL_END 
+_DETAIL_END
 
 template<typename _Ty, class _Pth>
 MATRICE_HOST_INL decltype(auto) imread(const _Pth path) {
-	static_assert(is_any_of_v<_Pth, std::string, path_t, char*>,
-		"Unknown path type in function imread().");
+	//static_assert(is_any_of_v<std::decay_t<_Pth>, std::string, io::path_t, char*>,"Unknown path type in function imread().");
 
 	if constexpr (is_same_v<remove_all_t<_Pth>, std::string>) {
 		return (detail::_Imread(path.c_str(), _Ty()));
 	}
-	else if constexpr (is_same_v<remove_all_t<_Pth>, path_t>) {
+	else if constexpr (is_same_v<remove_all_t<_Pth>, io::path_t>) {
 		const auto str = path.generic_string();
 		return (detail::_Imread(str.c_str(), _Ty()));
 	}
