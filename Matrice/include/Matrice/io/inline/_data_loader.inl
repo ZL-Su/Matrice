@@ -90,10 +90,10 @@ public:
 	MATRICE_HOST_FINL auto& pos() { return (_Mypos); }
 	MATRICE_HOST_FINL const auto& pos() const { return (_Mypos); }
 
-	MATRICE_HOST_INL dir_type& directory() {
+	MATRICE_HOST_INL directory_type& directory() {
 		return (_Mydir);
 	}
-	MATRICE_HOST_INL const dir_type& directory() const {
+	MATRICE_HOST_INL const directory_type& directory() const {
 		return (_Mydir);
 	}
 	MATRICE_HOST_FINL size_t batch_size() const {
@@ -160,6 +160,7 @@ protected:
 	mutable index_t _Mypos = 0;
 	index_t _Mydepth = std::numeric_limits<index_t>::max();
 	std::vector<directory_type::container> _Mynames;
+	uint32_t m_nworkes = 1; //indicates the number of work threads being used
 };
 
 /**
@@ -427,6 +428,8 @@ private:
 template<typename _Ty>
 class _Data_loader_impl<_Ty, loader_tag::tiff>
 	: public _Data_loader_base<_Data_loader_impl<_Ty, loader_tag::tiff>>{
+
+public:
 
 };
 _DETAIL_END } DGE_MATRICE_END
