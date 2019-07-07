@@ -19,7 +19,6 @@
 #include "../util/_macro_conditions.h"
 #include "../util/_exception.h"
 #include "../private/_range.h"
-#include "_tiff_wrapper.hpp"
 
 DGE_MATRICE_BEGIN
 /**
@@ -397,8 +396,17 @@ template<typename _Ty, class _Tag> class _Data_loader_impl{};
 template<typename _Ty, class _Tag> struct _Loader_impl {};
 _DETAIL_END
 
+
+/**
+ *\brief <func> imread: read image file </func>
+ *\param [path] the path of the image to be read.
+ */
+template<typename _Ty = uint8_t, class _Pth = std::string> 
+MATRICE_HOST_INL decltype(auto) imread(const _Pth path);
+
 } DGE_MATRICE_END
 #include "inline\_directory.inl"
+#include "inline\_image.inl"
 #include "inline\_data_loader.inl"
 
 DGE_MATRICE_BEGIN namespace io {
@@ -422,10 +430,15 @@ MATRICE_HOST_FINL auto serial(const _Cont& _L) {
 	DGELOM_CHECK(_N<=_L.size(), "The size _N being serialized over range of _L.");
 	return tuple_n<_N - 1>::_(_L.data());
 }
-} 
 template<typename _Ty, class _Op>
 decltype(auto) make_loader(std::string path, _Op&& loader)noexcept {
 	using loader_type = io::data_loader<_Ty>;
-	return loader_type(io::directory{path, io::path_t()}, loader);
+	return loader_type(io::directory{ path, io::path_t() }, loader);
 }
+}
+
+using io::imread;
+using io::serial;
+using io::make_loader;
+
 DGE_MATRICE_END
