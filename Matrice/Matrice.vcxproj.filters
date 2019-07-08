@@ -202,6 +202,9 @@
     <Filter Include="Source Files\3rdparty">
       <UniqueIdentifier>{bee3b1ae-6a99-4e8e-a8e7-722a84ddafd4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Addin\libpng">
+      <UniqueIdentifier>{36a0b5cc-bdef-4110-a1ac-f5b17c4affa8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -552,6 +555,30 @@
     <ClInclude Include="include\Matrice\algs\geometry\_geo_utils.hpp">
       <Filter>Header Files\Algs\Geometry</Filter>
     </ClInclude>
+    <ClInclude Include="addin\libpng\png.h">
+      <Filter>Header Files\Addin\libpng</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\libpng\pngconf.h">
+      <Filter>Header Files\Addin\libpng</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\libpng\pngdebug.h">
+      <Filter>Header Files\Addin\libpng</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\libpng\pnginfo.h">
+      <Filter>Header Files\Addin\libpng</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\libpng\pnglibconf.h">
+      <Filter>Header Files\Addin\libpng</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\libpng\pngpriv.h">
+      <Filter>Header Files\Addin\libpng</Filter>
+    </ClInclude>
+    <ClInclude Include="addin\libpng\pngstruct.h">
+      <Filter>Header Files\Addin\libpng</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\io\_png_wrapper.hpp">
+      <Filter>Header Files\Addin</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
@@ -697,6 +724,51 @@
     </ClCompile>
     <ClCompile Include="addin\libtiff\tif_write.c">
       <Filter>Header Files\Addin\libtiff</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libpng\png.c">
+      <Filter>Header Files\Addin\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libpng\pngerror.c">
+      <Filter>Header Files\Addin\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libpng\pngget.c">
+      <Filter>Header Files\Addin\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libpng\pngmem.c">
+      <Filter>Header Files\Addin\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libpng\pngpread.c">
+      <Filter>Header Files\Addin\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libpng\pngread.c">
+      <Filter>Header Files\Addin\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libpng\pngrio.c">
+      <Filter>Header Files\Addin\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libpng\pngrtran.c">
+      <Filter>Header Files\Addin\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libpng\pngrutil.c">
+      <Filter>Header Files\Addin\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libpng\pngset.c">
+      <Filter>Header Files\Addin\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libpng\pngtrans.c">
+      <Filter>Header Files\Addin\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libpng\pngwio.c">
+      <Filter>Header Files\Addin\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libpng\pngwrite.c">
+      <Filter>Header Files\Addin\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libpng\pngwtran.c">
+      <Filter>Header Files\Addin\libpng</Filter>
+    </ClCompile>
+    <ClCompile Include="addin\libpng\pngwutil.c">
+      <Filter>Header Files\Addin\libpng</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

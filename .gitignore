@@ -281,3 +281,5 @@ Matrice/addin/libpng/LICENSE
 Matrice/addin/libpng/CHANGES
 Matrice/addin/zlib/CMakeLists.txt
 Matrice/addin/zlib/ChangeLog
+Matrice/Matrice.vcxproj.filters
+Matrice/Matrice.vcxproj
