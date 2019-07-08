@@ -44,10 +44,19 @@ struct sigmoid {
 	 *\param [y] data produced by sigmoid::forward().
 	 */
 	template<typename _Ty>
-	MATRICE_GLOBAL_INL static _Ty backward(const _Ty& y) {
+	MATRICE_GLOBAL_INL static _Ty grad(const _Ty& y) {
 		using value_t = conditional_t<is_scalar_v<_Ty>, _Ty, 
 			typename _Ty::value_t>;
 		return (y * (one<value_t> - y));
+	}
+	/**
+	 *\brief backward update gradient w.r.t. input params in-place.
+	 *\param [g] input gradients, [y] tensor produced by forward().
+	 */
+	template<typename _Ty>
+	MATRICE_GLOBAL_INL static _Ty& backward(_Ty& g, const _Ty& y) {
+		const auto jac = sigmoid::grad(y);
+		return (g);
 	}
 };
 
@@ -72,10 +81,19 @@ struct tanh {
 	 *\param [y] data produced by tanh::forward().
 	 */
 	template<typename _Ty>
-	MATRICE_GLOBAL_INL static _Ty backward(const _Ty& y) {
+	MATRICE_GLOBAL_INL static _Ty grad(const _Ty& y) {
 		using value_t = conditional_t<is_scalar_v<_Ty>, 
 			_Ty, typename _Ty::value_t>;
 		return (one<value_t> - sqr(y));
+	}
+	/**
+	 *\brief backward update gradient w.r.t. input params in-place.
+	 *\param [g] input gradients, [y] tensor produced by forward().
+	 */
+	template<typename _Ty>
+	MATRICE_GLOBAL_INL static _Ty& backward(_Ty& g, const _Ty& y) {
+		const auto jac = tanh::grad(y);
+		return (g);
 	}
 };
 
@@ -101,7 +119,7 @@ struct relu {
 	 *\param [y] data produced by relu::forward().
 	 */
 	template<typename _Ty>
-	MATRICE_GLOBAL_INL static _Ty backward(const _Ty& y) {
+	MATRICE_GLOBAL_INL static _Ty grad(const _Ty& y) {
 		using value_t = conditional_t<is_scalar_v<_Ty>,
 			_Ty, typename _Ty::value_t>;
 		if constexpr (is_scalar_v<_Ty>) return y > 0 ? 1 : 0;
@@ -110,6 +128,15 @@ struct relu {
 			_Ret.each([](auto& _val) { _val = _val > 0 ? 1 : 0; });
 			return std::forward<_Ty>(_Ret);
 		}
+	}
+	/**
+	 *\brief backward update gradient w.r.t. input params in-place.
+	 *\param [g] input gradients, [y] tensor produced by forward().
+	 */
+	template<typename _Ty>
+	MATRICE_GLOBAL_INL static _Ty& backward(_Ty& g, const _Ty& y) {
+		const auto jac = relu::grad(y);
+		return (g);
 	}
 };
 
