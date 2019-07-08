@@ -360,7 +360,7 @@ public:
 	 */
 	MATRICE_HOST_INL decltype(auto)create(diff_t _Rows, diff_t _Cols = (1)) {
 		if constexpr (_M <= 0 && _N <= 0) 
-			static_cast<_Derived*>(this)->__create_impl(_Rows, _Cols);
+			this->derived().__create_impl(_Rows, _Cols);
 		return (*static_cast<_Derived*>(this));
 	};
 	template<typename _Uy, MATRICE_ENABLE_IF(is_scalar_v<_Uy>)>
@@ -370,7 +370,7 @@ public:
 	};
 	MATRICE_HOST_INL decltype(auto)create(const shape_t<size_t>& _Shape) {
 		if constexpr (_M <= 0 && _N <= 0) 
-			static_cast<_Derived*>(this)->__create_impl(MATRICE_EXPAND_SHAPE);
+			this->derived().__create_impl(MATRICE_EXPAND_SHAPE);
 		return (*static_cast<_Derived*>(this));
 	};
 	template<typename _Uy, MATRICE_ENABLE_IF(is_scalar_v<_Uy>)>
@@ -451,16 +451,32 @@ public:
 	}
 
 	/**
+	 *\brief returns a reference to the derived object
+	 */
+	MATRICE_GLOBAL_INL const _Derived& derived() const noexcept {
+		return *static_cast<_Derived*>(this);
+	}
+	MATRICE_GLOBAL_INL _Derived& derived() noexcept {
+		return *static_cast<_Derived*>(this);
+	}
+	/**
+	 *\brief returns a const reference to the derived object
+	 */
+	MATRICE_GLOBAL_INL const _Derived& const_derived() const noexcept {
+		return *static_cast<const _Derived*>(this);
+	}
+
+	/**
 	 * \returns reference to the derived object
 	 */
 	MATRICE_GLOBAL_FINL _Derived& eval() noexcept {
-		return (*static_cast<_Derived*>(this));
+		return (this->derived());
 	}
 	/**
 	 * \returns const reference to the derived object
 	 */
 	MATRICE_GLOBAL_FINL constexpr const _Derived& eval()const noexcept {
-		return (*static_cast<const _Derived*>(this));
+		return (this->derived());
 	}
 
 #pragma region <!-- iterators -->
@@ -645,7 +661,7 @@ public:
 	MATRICE_GLOBAL_FINL _Derived& operator= (value_t _Val) noexcept {
 		m_storage = _Val;
 		m_data = internal::_Proxy_checked(m_storage.data());
-		return (*static_cast<_Derived*>(this));
+		return (this->derived());
 	}
 
 	/**
@@ -654,7 +670,7 @@ public:
 	MATRICE_GLOBAL_FINL _Derived& operator= (const_initlist _list) noexcept {
 		m_storage = _list;
 		m_data = internal::_Proxy_checked(m_storage.data());
-		return (*static_cast<_Derived*>(this));
+		return (this->derived());
 	}
 	/**
 	 * \assignment operator, from nested initializer list
@@ -672,7 +688,7 @@ public:
 				*(_Data++) = *It;
 			}
 		}
-		return (*static_cast<_Derived*>(this));
+		return (this->derived());
 	}
 	/**
 	 * \assignment operator, from row-wise iterator
@@ -680,7 +696,7 @@ public:
 	MATRICE_GLOBAL_FINL _Derived& operator= (const _Myt_rwise_iterator& _It) {
 		std::copy(_It.begin(), _It.end(), m_storage.data());
 		m_data = internal::_Proxy_checked(m_storage.data());
-		return (*static_cast<_Derived*>(this));
+		return (this->derived());
 	}
 	/**
 	 * \assignment operator, from column-wise iterator
@@ -688,7 +704,7 @@ public:
 	MATRICE_GLOBAL_FINL _Derived& operator=(const _Myt_cwise_iterator& _It){
 		std::copy(_It.begin(), _It.end(), m_storage.data());
 		m_data = internal::_Proxy_checked(m_storage.data());
-		return (*static_cast<_Derived*>(this));
+		return (this->derived());
 	}
 	/**
 	 * \homotype copy assignment operator
@@ -700,7 +716,7 @@ public:
 		m_data = internal::_Proxy_checked(m_storage.data());
 		_Mybase::_Flush_view_buf();
 
-		return (*static_cast<_Derived*>(this));
+		return (this->derived());
 	}
 	/**
 	 * \homotype move assignment operator
@@ -718,7 +734,7 @@ public:
 		_other.m_data = nullptr;
 		_other.m_cols = _other.m_rows = 0;
 
-		return (*static_cast<_Derived*>(this));
+		return (this->derived());
 	}
 	/**
 	 * \try to convert managed matrix to dynamic matrix
@@ -731,7 +747,7 @@ public:
 		m_rows = _managed.rows(), m_cols = _managed.cols();
 		m_storage.owner() = detail::Storage_<value_t>::Proxy;
 		_Mybase::_Flush_view_buf();
-		return (*static_cast<_Derived*>(this));
+		return (this->derived());
 	}
 	/**
 	 *\brief Check if this equals to _other or not
@@ -864,7 +880,7 @@ public:
 	template<typename _Op>
 	MATRICE_GLOBAL_FINL _Derived& each(_Op&& _Fn) noexcept {
 		for (auto& _Val : *this) _Fn(_Val); 
-		return(*static_cast<_Derived*>(this));
+		return(this->derived());
 	}
 
 	/**
@@ -884,7 +900,7 @@ public:
 				m_data[_Idx] = static_cast<value_type>(_Data[_Idx]);
 		}
 
-		return (*static_cast<_Derived*>(this));
+		return (this->derived());
 	}
 	/**
 	 * \convert from another data block by function _Fn
@@ -897,7 +913,7 @@ public:
 		for(auto _Idx = 0; _Idx < size(); ++_Idx)
 			m_data[_Idx] = _Fn(static_cast<value_type>(_Data[_Idx]));
 
-		return (*static_cast<_Derived*>(this));
+		return (this->derived());
 	}
 	/**
 	 * \brief Stack from a sequence of vectors with same size, _Vecty can be any type that has members .size() and .data()
@@ -922,7 +938,7 @@ public:
 		else 
 			DGELOM_ERROR("The _Dim value should be 0(row-wise) or 1(col-wise).");
 
-		return (*static_cast<_Derived*>(this));
+		return (this->derived());
 	}
 	/**
 	 *\brief Replace entries meets _Cond with _Val
@@ -962,7 +978,7 @@ public:
 		else this->operator= ((value_type)(0));
 		for (auto _Idx = 0; _Idx < rows(); ++_Idx)
 			this->operator[](_Idx)[_Idx] = one<value_type>;
-		return (*static_cast<_Derived*>(this));
+		return (this->derived());
 	}
 	/**
 	 *\brief Create a diagonal square matrix
