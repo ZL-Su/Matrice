@@ -21,20 +21,21 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 DGE_MATRICE_BEGIN
 namespace dnn {
 _DETAIL_BEGIN
-template<typename _Ty, typename = enable_if_t<is_floating_point_v<_Ty>>>
-void _conv2d_impl(const Matrix<_Ty>& _In, Matrix<_Ty>& _Out, _TAG device_tag::cpu) {
+template<typename _Ty>
+void _conv2d_impl(_TAG device_tag::cpu, const Matrix<_Ty>& _In, Matrix<_Ty>& _Out) {
 
 }
 
-template<typename _Ty, typename = enable_if_t<is_floating_point_v<_Ty>>>
-void _conv2d_impl(const Matrix<_Ty>& _In, Matrix<_Ty>& _Out, _TAG device_tag::gpu) {
+template<typename _Ty>
+void _conv2d_impl(_TAG device_tag::gpu, const Matrix<_Ty>& _In, Matrix<_Ty>& _Out) {
 
 }
 _DETAIL_END
 
 template<typename _Tag, typename _Ty>
-void _conv2d() {
-	detail::_conv2d_impl(Matrix<_Ty>(), Matrix<_Ty>(), _Tag());
+MATRICE_HOST_INL void _conv2d(const Matrix<_Ty>& _In, Matrix<_Ty>& _Out) {
+	static_assert(is_floating_point_v<_Ty>, "Only float or double type is allowed.");
+	detail::_conv2d_impl(_Tag(), _In, _Out);
 }
 }
 DGE_MATRICE_END
