@@ -276,3 +276,8 @@ Matrice/addin/libtiff/CMakeLists.txt
 Matrice/addin/libtiff/ChangeLog
 Matrice/addin/libtiff/tiffconf.h.cmake.in
 Matrice/addin/libtiff/tif_config.h.cmake.in
+Matrice/addin/libpng/CMakeLists.txt
+Matrice/addin/libpng/LICENSE
+Matrice/addin/libpng/CHANGES
+Matrice/addin/zlib/CMakeLists.txt
+Matrice/addin/zlib/ChangeLog
