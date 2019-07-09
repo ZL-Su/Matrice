@@ -41,7 +41,8 @@ template<typename _Ty, int _Rows, int _cols> class Matrix_;
 template<typename _Derived, typename _Traits, typename _Ty> class Base_;
 _TYPES_END
 _DETAIL_BEGIN
-template<typename _Ty> class _Tensor;
+//template<typename _Ty> class _Tensor;
+template<typename _Ty, size_t _Depth> class _Tensor;
 _DETAIL_END
 
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
@@ -74,7 +75,7 @@ struct matrix_traits<types::Matrix_<_Ty, _Rows, _Cols>> {
 	static constexpr bool Is_base = std::false_type::value;
 };
 template<typename _Ty>
-struct matrix_traits<detail::_Tensor<_Ty>> {
+struct matrix_traits<detail::_Tensor<_Ty, 0>> {
 	using type = _Ty;
 	using category = tag::_Tensor_tag;
 	static constexpr auto _M = 0, _N = 0;
@@ -185,7 +186,9 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 			enum { flag = trp };
 			using value_type = _Ty;
 			using category = tag::_Matrix_trp_tag;
-			MATRICE_HOST_FINL value_type operator()(int M, value_type* Out, value_type* i) const { return (Out[int(i[1])*M + int(i[0])]); }
+			MATRICE_HOST_FINL value_type operator()(int M, value_type* Out, value_type* i) const noexcept { 
+				return (Out[int(i[1])*M + int(i[0])]); 
+			}
 		};
 		
 		/**
@@ -195,7 +198,9 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 			enum { flag = undef };
 			using value_type = _Ty;
 			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
-			value_type operator() (const _Lhs& lhs, const _Rhs& rhs, int r, int c) const { return (lhs(r) * rhs(c)); }
+			value_type operator() (const _Lhs& lhs, const _Rhs& rhs, int r, int c) const noexcept { 
+				return (lhs(r) * rhs(c)); 
+			}
 		};
 
 		/**
@@ -208,7 +213,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 			using packet_type = simd::Packet_<value_type, packet_size_v>;
 
 			template<typename _Rhs> MATRICE_GLOBAL_FINL
-			auto operator() (const _Ty* lhs, const _Rhs& rhs, int c, int _plh = 0) const
+			value_type operator() (const _Ty* lhs, const _Rhs& rhs, int c, int _plh = 0) const noexcept
 			{
 				value_type val = value_type(0);
 				const int K = rhs.rows(), N = rhs.cols();
@@ -223,7 +228,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 				return (val);
 			}
 			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
-			auto operator() (const _Lhs& lhs, const _Rhs& rhs, int r, int c) const {
+			value_type operator() (const _Lhs& lhs, const _Rhs& rhs, int r, int c) const noexcept {
 				value_type _Ret = value_type(0);
 				const int K = rhs.rows(), N = rhs.cols(), _Idx = r * lhs.cols();
 #ifdef __disable_simd__
@@ -236,12 +241,12 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 				return (_Ret);
 			}
 			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
-			auto operator() (const _Lhs& _L, const _Rhs& _R, int r, int c, tag::_Matrix_tag, tag::_Matrix_tag) {
+			value_type operator() (const _Lhs& _L, const _Rhs& _R, int r, int c, tag::_Matrix_tag, tag::_Matrix_tag) {
 				const int K = _R.rows(), N = _R.cols(), _Idx = r * _L.cols();
 				return detail::template _Blas_kernel_impl<value_type>::dot(_L(_Idx), _R(c), K, 1, N);
 			}
 			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
-			auto operator() (const _Lhs& _L, const _Rhs& _R, int r, int c, tag::_Matrix_tag, tag::_Matrix_view_tag) {
+			value_type operator() (const _Lhs& _L, const _Rhs& _R, int r, int c, tag::_Matrix_tag, tag::_Matrix_view_tag) {
 				const int K = _R.rows(), N = _R.cols(), _Idx = r * _L.cols();
 				value_type _Ret = value_type(0);
 				for (auto k = 0; k < K; ++k) _Ret += _L(_Idx + k) * _R(k*N + c);
@@ -286,7 +291,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		}
 		// \retrieve the evaluated result
 		template<typename _Ret>
-		MATRICE_GLOBAL_INL _Ret& assign(_Ret& res) const {
+		MATRICE_GLOBAL_INL _Ret& assign(_Ret& res) const noexcept {
 #ifdef _DEBUG
 			if (res.size() == 0) res.create(M, N);
 #endif
@@ -295,7 +300,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		}
 		// \formulate matmul expression
 		template<typename _Rhs>
-		MATRICE_GLOBAL_INL auto mul(const _Rhs& _rhs) const {
+		MATRICE_GLOBAL_INL auto mul(const _Rhs& _rhs) const noexcept {
 			return MatBinaryExpr<derived_t, _Rhs, Op::_Mat_mul<value_t>>(*_CDTHIS, _rhs);
 		}
 
@@ -341,7 +346,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		/**
 		 * \sum over all expression entries
 		 */
-		MATRICE_GLOBAL_INL auto sum() const {
+		MATRICE_GLOBAL_INL auto sum() const noexcept {
 			auto _Ret = value_t(0); int _Size = _CDTHIS->size();
 #pragma omp parallel if(_Size > 1000)
 		{
@@ -353,7 +358,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		/**
 		 * \average of all entries
 		 */
-		MATRICE_GLOBAL_INL auto avg() const {
+		MATRICE_GLOBAL_INL auto avg() const noexcept {
 			return (_CDTHIS->sum() / _CDTHIS->size());
 		}
 		/**
@@ -372,22 +377,22 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		/**
 		 * \2-d ewise evaluation operator
 		 */
-		MATRICE_GLOBAL_FINL auto operator()(size_t x, size_t y) {
+		MATRICE_GLOBAL_FINL auto operator()(size_t x, size_t y) noexcept {
 			return _CDTHIS->operator()(x + y * N);
 		}
-		MATRICE_GLOBAL_FINL const auto operator()(size_t x, size_t y)const{
+		MATRICE_GLOBAL_FINL const auto operator()(size_t x, size_t y)const noexcept {
 			return _CDTHIS->operator()(x + y * N);
 		}
 
-		MATRICE_GLOBAL_FINL constexpr size_t size() const { return M*N; }
-		MATRICE_GLOBAL_FINL constexpr size_t rows() const { return M; }
-		MATRICE_GLOBAL_FINL constexpr size_t cols() const { return N; }
-		MATRICE_GLOBAL_FINL constexpr auto shape() const { return std::tie(M, N); }
+		MATRICE_GLOBAL_FINL constexpr size_t size() const noexcept { return M*N; }
+		MATRICE_GLOBAL_FINL constexpr size_t rows() const noexcept { return M; }
+		MATRICE_GLOBAL_FINL constexpr size_t cols() const noexcept { return N; }
+		MATRICE_GLOBAL_FINL constexpr auto shape() const noexcept { return std::tie(M, N); }
 
 		/**
 		 *\brief Get full dims {N,{C,{H,W}}}
 		 */
-		MATRICE_GLOBAL_FINL constexpr auto& dims() const {
+		MATRICE_GLOBAL_FINL constexpr auto& dims() const noexcept {
 			return (Shape);
 		}
 
@@ -424,22 +429,22 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T& _lhs, const U& _rhs)
 		 :_Mybase(_Union(_lhs.dims(),_rhs.dims())), _LHS(_lhs), _RHS(_rhs){}
 
-		MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) { 
+		/*MATRICE_GLOBAL_FINL value_t operator()(size_t _idx) noexcept { 
 			return _Op(_LHS(_idx), _RHS(_idx));
-		}
-		MATRICE_GLOBAL_FINL const value_t operator() (size_t _idx) const {
+		}*/
+		MATRICE_GLOBAL_FINL value_t operator()(size_t _idx) const noexcept{
 			return _Op(_LHS(_idx), _RHS(_idx));
 		}
 
 		template<typename _Mty> 
-		MATRICE_GLOBAL_INL void assign_to(_Mty& _Res) const {
+		MATRICE_GLOBAL_INL void assign_to(_Mty& _Res) const noexcept{
 			if (_LHS.size() == _RHS.size()) { //element-wise operation
-#pragma omp parallel for if(_Res.size() > 100)
+//#pragma omp parallel for if(_Res.size() > 100)
 				for (index_t i = 0; i < _Res.size(); ++i)
 					_Res(i) = this->operator()(i);
 			}
 			else { //spreaded element-wise operation
-#pragma omp parallel for if(_Res.size() > 100)
+//#pragma omp parallel for if(_Res.size() > 100)
 				for (index_t i = 0; i < _Res.size(); ++i)
 					_Res(i) = _Op(_LHS(i/N), _RHS(i));
 			}
@@ -468,15 +473,15 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T _scalar, const U& _rhs) 
 			noexcept :_Mybase(_rhs.dims()), _Scalar(_scalar), _RHS(_rhs) {}
 
-		MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) {
+		/*MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) {
 			return _Op(_Scalar, _RHS(_idx));
-		}
-		MATRICE_GLOBAL_FINL const value_t operator() (size_t _idx) const {
+		}*/
+		MATRICE_GLOBAL_FINL value_t operator()(size_t _idx) const noexcept {
 			return _Op(_Scalar, _RHS(_idx));
 		}
 
 		template<typename _Mty> 
-		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const {
+		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const noexcept {
 //#pragma omp parallel for
 			for (index_t i = 0; i < res.size(); ++i) 
 				res(i) = this->operator()(i);
@@ -506,15 +511,15 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T& _lhs, const U _scalar) 
 			noexcept :_Mybase(_lhs.dims()), _Scalar(_scalar), _LHS(_lhs) {}
 
-		MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) {
+		/*MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) {
 			return _Op(_LHS(_idx), _Scalar);
-		}
-		MATRICE_GLOBAL_FINL const value_t operator() (size_t _idx) const {
+		}*/
+		MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) const noexcept {
 			return _Op(_LHS(_idx), _Scalar);
 		}
 
 		template<typename _Mty> 
-		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const {
+		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const noexcept {
 //#pragma omp parallel for
 			for (index_t i = 0; i < res.size(); ++i) 
 				res(i) = this->operator()(i);
@@ -546,15 +551,15 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		EwiseUnaryExpr(const_reference_t _rhs) noexcept
 			:_Mybase(_rhs.dims()), _RHS(_rhs) {}
 
-		MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) {
+		/*MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) {
 			return _Op(_RHS(_idx));
-		}
-		MATRICE_GLOBAL_FINL const value_t operator() (size_t _idx) const {
+		}*/
+		MATRICE_GLOBAL_FINL const value_t operator() (size_t _idx) const noexcept {
 			return _Op(_RHS(_idx));
 		}
 
 		template<typename _Mty> 
-		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const {
+		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const noexcept {
 //#pragma omp parallel for
 			for (index_t i = 0; i < res.size(); ++i) 
 				res(i) = this->operator()(i);
@@ -593,13 +598,13 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		MATRICE_GLOBAL_FINL value_t operator() (int r, int c) const {
 			return _Op(_LHS, _RHS, r, c);
 		}
-		MATRICE_GLOBAL_FINL value_t operator() (int _idx) const {
+		MATRICE_GLOBAL_FINL value_t operator() (int _idx) const noexcept {
 			int r = _idx / N, c = _idx - r * N;
 			return _Op(_LHS, _RHS, r, c);
 		}
 
 		template<typename _Mty>
-		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const {
+		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const noexcept {
 //#pragma omp parallel for if (res.size() > 100)
 			for (int i = 0; i < res.size(); ++i) 
 				res(i) = this->operator()(i);
@@ -647,7 +652,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 			*this = move(_other);
 		}
 
-		MATRICE_GLOBAL_FINL auto operator()() const { 
+		MATRICE_GLOBAL_FINL auto operator()() const noexcept { 
 			return _Op(M, _ANS.data(), _RHS.data());
 		}
 		MATRICE_GLOBAL_FINL value_t operator() (int r, int c) const { 
@@ -670,7 +675,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		}
 
 		template<typename _Mty>
-		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const {
+		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const noexcept {
 			if constexpr (options == inv) {
 				_Op(M, res.data(), _RHS.data());
 			}
