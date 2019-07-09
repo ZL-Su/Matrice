@@ -21,10 +21,9 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../private/tensor/_tensor.hpp"
 
 DGE_MATRICE_BEGIN
-template<typename _Ty> using tensor = detail::_Tensor<_Ty>;
 
-template<typename _Ty, size_t _Depth, size_t _Extent=1>
-using Tensor = detail::_Tensor_<_Ty, _Depth, _Extent>;
+template<typename _Ty, size_t _Depth = 0>
+using Tensor = detail::_Tensor<_Ty, _Depth>;
 
 //template<typename _Ty, size_t... _Shape>
 //using tensor_ = detail::_Tensor_impl<_Ty, _Shape...>;
