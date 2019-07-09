@@ -9,7 +9,7 @@ _DETAIL_BEGIN
 namespace common = types;
 
 template<typename _Ty>
-class _Tensor : public common::Base_<_Tensor<_Ty>>
+class _Tensor<_Ty, 0> : public common::Base_<_Tensor<_Ty, 0>>
 {
 	using _Myt = _Tensor;
 	using _Mybase = common::Base_<_Myt>;
