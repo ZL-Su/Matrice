@@ -24,86 +24,103 @@ template<typename _Ty>
 struct index<_Ty, tag::_Tensor_tag> {
 	static_assert(is_integral_v<_Ty>, "_Ty must be an integer type");
 
-	MATRICE_GLOBAL_INL index(_Ty d, _Ty e, _Ty h, _Ty w) noexcept {
-		data[0] = d, data[1] = e, data[2] = h, data[3] = w;
+	MATRICE_GLOBAL_INL index(_Ty d, _Ty h, _Ty w) noexcept {
+		data[0] = d, data[1] = h, data[2] = w;
 	}
 	MATRICE_GLOBAL_INL _Ty value() noexcept {
 		return 0;
 	}
-	_Ty data[4];
+
+	std::array<_Ty, 3> data;
 };
 /**
  *\brief CLASS TEMPLATE dgelom::tensor prototype
  *\param <_Ty> data type
- *\param <_D> tensor depth which grows vertically
- *\param <_E> tensor extent in horizontal, the default is 1
+ *\param <_Depth> tensor depth which grows vertically
  */
-template<typename _Ty, size_t _D, size_t _E = 1>
-class _Tensor_ : public types::Base_<_Tensor_<_Ty, _D, _E>, 
-	tensor_traits<_Tensor_<_Ty, _D, _E>>>
+template<typename _Ty, size_t _Depth>
+class _Tensor 
+	: public types::Base_<_Tensor<_Ty, _Depth>, tensor_traits<_Tensor<_Ty, _Depth>>>
 {
-	using _Myt = _Tensor_;
+	using _Myt = _Tensor;
 	using _Mytraits = tensor_traits<_Myt>;
 	using _Mybase = types::Base_<_Myt, _Mytraits>;
 public:
 	enum { Size = 0, CompileTimeRows = 0, CompileTimeCols = 0 };
 	using typename _Mybase::value_type;
+	using _Mybase::Base_;
+	using _Mybase::operator=;
+	using _Mybase::operator();
 
+	_Tensor() noexcept 
+		: _Mybase() {
+	}
 	/**
 	 *\brief constructor
 	 *\param [_H, _W] rows and cols of each tensor cell
 	 */
-	_Tensor_(size_t _H, size_t _W) noexcept
-		:_Mybase(_Mytraits::depth*_H, _Mytraits::extent*_W) {
-		_Mybase::_Myshape = { _Mytraits::depth, _Mytraits::extent, _H, _W };
+	_Tensor(size_t _H, size_t _W) noexcept
+		:_Mybase(_Depth*_H, _W) {
+		_Mybase::_Myshape = { 1, _Depth, _H, _W };
 		_Mybase::_Flush_view_buf();
 	}
-	_Tensor_(size_t _H, size_t _W, value_type _Val) noexcept
-		:_Tensor_(_H, _W) {
+	_Tensor(size_t _H, size_t _W, value_type _Val) noexcept
+		:_Tensor(_H, _W) {
 		_Mybase::operator=(_Val);
 	}
 
-	MATRICE_HOST_INL const value_type& operator()(size_t d, size_t e, size_t j, size_t i) const noexcept {
-#ifdef _DEBUG || MATRICE_DEBUG
-		DGELOM_CHECK(d < _D, "depth index over range.");
-		DGELOM_CHECK(e < _E, "extent index over range.");
+	MATRICE_HOST_INL const value_type& operator()(size_t d, size_t r, size_t c) const noexcept {
+#if defined _DEBUG || MATRICE_DEBUG
+		DGELOM_CHECK(d < _Depth, "depth index over range.");
 #endif
-		const auto _Row = d * _Mybase::_Myshape.get(2) + j;
-		const auto _Col = e * _Mybase::_Myshape.get(3) + i;
-		return (_Mybase::operator[](_Row)[_Col]);
-	}
-	MATRICE_HOST_INL value_type& operator()(size_t d, size_t e, size_t j, size_t i) noexcept {
-#ifdef _DEBUG || MATRICE_DEBUG
-		DGELOM_CHECK(d < _D, "depth index over range.");
-		DGELOM_CHECK(e < _E, "extent index over range.");
-#endif
-		const auto _Row = d * _Mybase::_Myshape.get(2) + j;
-		const auto _Col = e * _Mybase::_Myshape.get(3) + i;
-		return (_Mybase::operator[](_Row)[_Col]);
+		const auto inner_size = m_width * m_height;
+		return (_Mybase::operator[](d*inner_size+r*m_width)[c]);
 	}
 
-	MATRICE_HOST_INL auto operator()(size_t d, size_t e) const noexcept {
-#ifdef _DEBUG || MATRICE_DEBUG
-		DGELOM_CHECK(d < _D, "depth index over range.");
-		DGELOM_CHECK(e < _E, "extent index over range.");
+	MATRICE_HOST_INL value_type& operator()(size_t d, size_t r, size_t c) noexcept {
+#if defined _DEBUG || MATRICE_DEBUG
+		DGELOM_CHECK(d < _Depth, "depth index over range.");
+#endif
+		const auto inner_size = m_width * m_height;
+		return (_Mybase::operator[](d*inner_size + r * m_width)[c]);
+	}
+
+	MATRICE_HOST_INL decltype(auto) slice(size_t d) const noexcept {
+#if defined _DEBUG || MATRICE_DEBUG
+		DGELOM_CHECK(d < _Depth, "depth index over range.");
 #endif
 		const auto w = _Mybase::_Myshape.get(3);
 		const auto h = _Mybase::_Myshape.get(2);
 		const auto r0 = d*h, r1 = (d+1) * h;
-		const auto c0 = e*w, c1 = (e+1) * w;
+		const auto c0 = w, c1 = w;
 		return _Mybase::block(c0, c1, r0, r1);
 	}
 
+	MATRICE_HOST_INL size_t slice_size() const noexcept {
+		return (m_slice_size);
+	}
+
+	MATRICE_HOST_INL void __create_impl(size_t h, size_t w) {
+		m_width = w, m_height = h, m_slice_size = h * w;
+		_Mybase::_Myshape = { _Depth, 1, m_height, m_width };
+		_Mybase::m_cols = m_width;
+		_Mybase::m_rows = _Depth * m_height;
+		_Mybase::allocator().create(_Mybase::m_rows, _Mybase::m_cols);
+		_Mybase::m_data = _Mybase::allocator().data();
+		_Mybase::_Flush_view_buf();
+	}
+
 private:
-	size_t _Myw, _Myh;
+	size_t m_width, m_height;
+	size_t m_slice_size = m_width * m_height;
+	size_t m_depth = _Mytraits::depth;
 };
 
-template<typename _Ty, size_t _D, size_t _E>
-struct tensor_traits<_Tensor_<_Ty, _D, _E>> {
+template<typename _Ty, size_t _Depth>
+struct tensor_traits<_Tensor<_Ty, _Depth>> {
 	using type = _Ty;
 	using category = tag::_Tensor_tag;
-	static constexpr auto depth = _D;
-	static constexpr auto extent = _E;
+	static constexpr auto depth = _Depth;
 	static constexpr auto _M = 0, _N = 0;
 	static constexpr bool Is_base = std::false_type::value;
 };
