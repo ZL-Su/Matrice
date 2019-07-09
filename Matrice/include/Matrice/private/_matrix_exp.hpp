@@ -61,6 +61,9 @@ struct is_fxdvector<types::Matrix_<_Ty, _M, 1>> : std::true_type {};
 template<typename _Derived, typename _Traits, typename _Ty> 
 struct is_matrix<types::Base_<_Derived, _Traits, _Ty>> : std::true_type {};
 
+template<typename _Ty, size_t _Depth>
+struct is_tensor<detail::_Tensor<_Ty, _Depth>> : std::true_type {};
+
 template<typename _Derived, typename _Traits, typename _Ty>
 struct matrix_traits<types::Base_<_Derived, _Traits, _Ty>> {
 	using type = _Ty;
