@@ -163,8 +163,13 @@ template<
 	typename _Valtype = typename _Mytraits::type>
 class Base_ : public _Basic_plane_view_base<_Valtype>
 {
-#define MATRICE_LINK_PTR { m_data = m_storage.data(); }
-#define MATRICE_EVALEXP_TOTHIS { m_data = m_storage.data(); exp.assign(*this); }
+#define MATRICE_LINK_PTR { \
+	m_data = m_storage.data(); \
+}
+#define MATRICE_EVALEXP_TOTHIS { \
+	m_data = m_storage.data(); \
+	exp.assign(*this); \
+}
 #define MATRICE_EXPAND_SHAPE get<0>(_Shape), get<1>(_Shape)
 #define MATRICE_MAKE_EXPOP_TYPE(DESC, NAME) typename _Exp_op::_##DESC##_##NAME<_Valtype>
 #define MATRICE_MAKE_ARITHOP(OP, NAME) \
