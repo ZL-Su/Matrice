@@ -48,7 +48,7 @@ class _Tensor
 public:
 	enum { Size = 0, CompileTimeRows = 0, CompileTimeCols = 0 };
 	using typename _Mybase::value_type;
-	using _Mybase::Base_;
+	//using _Mybase::Base_;
 	using _Mybase::operator=;
 	using _Mybase::operator();
 
@@ -75,6 +75,34 @@ public:
 	_Tensor(size_t h, size_t w, value_type _Val) noexcept
 		:_Tensor(h, w) {
 		_Mybase::operator=(_Val);
+	}
+	/**
+	 *\brief copy constructor
+	 *\param [oth] an other tensor
+	 */
+	_Tensor(const _Myt& oth) noexcept
+		:_Mybase(oth),
+		m_height(oth.m_height),
+		m_width(oth.m_width) {
+	}
+	/**
+	 *\brief move constructor
+	 *\param [oth] an other tensor
+	 */
+	_Tensor(_Myt&& oth) noexcept
+		:_Mybase(move(oth)),
+		m_height(oth.m_height),
+		m_width(oth.m_width) {
+	}
+	/**
+	 *\brief template constructor
+	 *\param [args...] argument(s) with any supported type(s) 
+	 */
+	template<typename... _Args>
+	_Tensor(_Args&&... args) noexcept
+		:_Mybase(forward<_Args>(args)...) {
+		m_width = this->cols();
+		m_height = this->rows() / m_depth;
 	}
 
 	MATRICE_HOST_INL const value_type& operator()(size_t d, size_t r, size_t c) const noexcept {
@@ -104,12 +132,8 @@ public:
 		return _Mybase::block(c0, c1, r0, r1);
 	}
 
-	MATRICE_HOST_INL size_t slice_size() const noexcept {
-		return (m_slice_size);
-	}
-
 	MATRICE_HOST_INL void __create_impl(size_t h, size_t w) {
-		m_width = w, m_height = h, m_slice_size = h * w;
+		m_width = w, m_height = h;
 		_Mybase::_Myshape = { _Depth, 1, m_height, m_width };
 		_Mybase::m_cols = m_width;
 		_Mybase::m_rows = _Depth * m_height;
@@ -120,7 +144,6 @@ public:
 
 private:
 	size_t m_width, m_height;
-	size_t m_slice_size = m_width * m_height;
 	size_t m_depth = _Mytraits::depth;
 };
 
