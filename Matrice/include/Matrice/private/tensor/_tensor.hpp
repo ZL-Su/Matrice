@@ -52,20 +52,28 @@ public:
 	using _Mybase::operator=;
 	using _Mybase::operator();
 
+	/**
+	 *\brief default constructor
+	 */
 	_Tensor() noexcept 
 		: _Mybase() {
 	}
 	/**
 	 *\brief constructor
-	 *\param [_H, _W] rows and cols of each tensor cell
+	 *\param [h, w] rows and cols of each tensor cell
 	 */
-	_Tensor(size_t _H, size_t _W) noexcept
-		:_Mybase(_Depth*_H, _W) {
-		_Mybase::_Myshape = { 1, _Depth, _H, _W };
+	_Tensor(size_t h, size_t w) noexcept
+		:_Mybase(_Depth*h, w) {
+		_Mybase::_Myshape = { 1, _Depth, h, w };
 		_Mybase::_Flush_view_buf();
 	}
-	_Tensor(size_t _H, size_t _W, value_type _Val) noexcept
-		:_Tensor(_H, _W) {
+	/**
+	 *\brief constructor with a value initialization
+	 *\param [h, w] rows and cols of each tensor cell
+	 *\param [_Val] initial value 
+	 */
+	_Tensor(size_t h, size_t w, value_type _Val) noexcept
+		:_Tensor(h, w) {
 		_Mybase::operator=(_Val);
 	}
 
