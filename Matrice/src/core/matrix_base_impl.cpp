@@ -27,7 +27,7 @@ value_t det_impl(const _Rhs & a) {
 	if (N == 3) return (p[0]*(p[4]*p[8] - p[5]*p[7]) - p[1]*(p[3]*p[8] - p[5]*p[6]) + p[2]*(p[3]*p[7] - p[4]*p[6]));
 
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
-	lapack_kernel<value_t>::lud(a.data(), a.shape());
+	lapack_kernel<value_t>::lud(a.data(), a.shape().tiled());
 	return a.trace();
 #elif MATRICE_MATH_KERNEL==MATRICE_USE_FKL
 	if constexpr (type_bytes<value_t>::value == 4)
