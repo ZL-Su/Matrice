@@ -390,7 +390,16 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		MATRICE_GLOBAL_FINL constexpr size_t size() const noexcept { return M*N; }
 		MATRICE_GLOBAL_FINL constexpr size_t rows() const noexcept { return M; }
 		MATRICE_GLOBAL_FINL constexpr size_t cols() const noexcept { return N; }
-		MATRICE_GLOBAL_FINL constexpr auto shape() const noexcept { return std::tie(M, N); }
+
+		/**
+		 *\brief Get full shape of dst. {N, {D, {H, W}}}
+		 */
+		MATRICE_GLOBAL_FINL const basic_shape_t& shape() const noexcept {
+			return (Shape); 
+		}
+		MATRICE_GLOBAL_FINL basic_shape_t& shape() noexcept {
+			return (Shape);
+		}
 
 		/**
 		 *\brief Get full dims {N,{C,{H,W}}}
@@ -430,7 +439,8 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		enum { options = option<ewise>::value };
 
 		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T& _lhs, const U& _rhs)
-		 :_Mybase(_Union(_lhs.dims(),_rhs.dims())), _LHS(_lhs), _RHS(_rhs){}
+		 :_Mybase(union_shape(_lhs.shape(),_rhs.shape())),
+			_LHS(_lhs), _RHS(_rhs) {}
 
 		/*MATRICE_GLOBAL_FINL value_t operator()(size_t _idx) noexcept { 
 			return _Op(_LHS(_idx), _RHS(_idx));
@@ -473,8 +483,8 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		using category = category_type_t<_BinaryOp>;
 		enum { options = option<ewise>::value };
 
-		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T _scalar, const U& _rhs) 
-			noexcept :_Mybase(_rhs.dims()), _Scalar(_scalar), _RHS(_rhs) {}
+		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T _scalar, const U& _rhs)
+			noexcept :_Mybase(_rhs.shape()), _Scalar(_scalar), _RHS(_rhs) {}
 
 		/*MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) {
 			return _Op(_Scalar, _RHS(_idx));
@@ -511,8 +521,8 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		using category = category_type_t<_BinaryOp>;
 		enum { options = option<ewise>::value };
 
-		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T& _lhs, const U _scalar) 
-			noexcept :_Mybase(_lhs.dims()), _Scalar(_scalar), _LHS(_lhs) {}
+		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T& _lhs, const U _scalar)
+			noexcept :_Mybase(_lhs.shape()), _Scalar(_scalar), _LHS(_lhs) {}
 
 		/*MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) {
 			return _Op(_LHS(_idx), _Scalar);
@@ -552,7 +562,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		enum { options = expression_options<_UnaryOp>::value };
 
 		EwiseUnaryExpr(const_reference_t _rhs) noexcept
-			:_Mybase(_rhs.dims()), _RHS(_rhs) {}
+			:_Mybase(_rhs.shape()), _RHS(_rhs) {}
 
 		/*MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) {
 			return _Op(_RHS(_idx));
@@ -590,7 +600,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		enum{options = option<_BinaryOp::flag>::value};
 
 		MATRICE_GLOBAL_INL MatBinaryExpr(const T& _lhs, const U& _rhs) 
-			noexcept :_Mybase(_lhs.dims()), _LHS(_lhs), _RHS(_rhs) {
+			noexcept :_Mybase(_lhs.shape()), _LHS(_lhs), _RHS(_rhs) {
 			M = _LHS.rows(), K = _LHS.cols(), N = _RHS.cols();
 			if (K != _RHS.rows() && K == N) N = _RHS.rows();
 		}
@@ -635,7 +645,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		enum {options = option<_UnaryOp::flag>::value};
 
 		MATRICE_GLOBAL_INL MatUnaryExpr(const T& inout) noexcept
-			:_Mybase(inout.dims()), _RHS(inout), _ANS(inout) {
+			:_Mybase(inout.shape()), _RHS(inout), _ANS(inout) {
 			if constexpr (options == trp) { 
 				std::swap(M, N); 
 				_Mybase::Shape.get(2) = M;
@@ -643,7 +653,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 			}
 		}
 		MATRICE_GLOBAL_INL MatUnaryExpr(const T& _rhs, T& _ans)
-			: _Mybase(_rhs.dims()), _RHS(_rhs), _ANS(_ans) {
+			: _Mybase(_rhs.shape()), _RHS(_rhs), _ANS(_ans) {
 			if constexpr (options == trp) {
 				std::swap(M, N);
 				_Mybase::Shape.get(2) = M;
@@ -651,7 +661,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 			}
 		}
 		MATRICE_GLOBAL_INL MatUnaryExpr(MatUnaryExpr&& _other)
-			: _Mybase(_other.dims()), options(_other.options) {
+			: _Mybase(_other.shape()), options(_other.options) {
 			*this = move(_other);
 		}
 
