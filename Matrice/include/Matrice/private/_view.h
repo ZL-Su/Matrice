@@ -99,10 +99,12 @@ public:
 		return _My_data[i*_My_stride];
 	}
 
-	MATRICE_GLOBAL_FINL auto size() const { return (static_cast<const _Derived*>(this)->size()); }
-	MATRICE_GLOBAL_FINL auto rows() const { return (static_cast<const _Derived*>(this)->rows()); }
-	MATRICE_GLOBAL_FINL auto cols() const { return (static_cast<const _Derived*>(this)->cols()); }
-	MATRICE_GLOBAL_FINL constexpr auto shape() const { return std::tie(rows(), cols()); }
+	MATRICE_GLOBAL_FINL size_t size() const { return (static_cast<const _Derived*>(this)->size()); }
+	MATRICE_GLOBAL_FINL size_t rows() const { return (static_cast<const _Derived*>(this)->rows()); }
+	MATRICE_GLOBAL_FINL size_t cols() const { return (static_cast<const _Derived*>(this)->cols()); }
+	MATRICE_GLOBAL_FINL constexpr auto shape() const { 
+		return basic_shape_t({ 1, 1, rows(), cols() });
+	}
 	MATRICE_GLOBAL_FINL constexpr auto dims() const { return basic_shape_t({ 1,1,rows(), cols() }); }
 	MATRICE_GLOBAL_FINL void create(size_t, size_t) {}
 	MATRICE_GLOBAL_FINL value_t sum() const {
