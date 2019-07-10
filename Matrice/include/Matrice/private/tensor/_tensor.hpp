@@ -47,8 +47,8 @@ class _Tensor
 	using _Mybase = types::Base_<_Myt, _Mytraits>;
 public:
 	enum { Size = 0, CompileTimeRows = 0, CompileTimeCols = 0 };
+	static constexpr auto depth = _Mytraits::depth;
 	using typename _Mybase::value_type;
-	//using _Mybase::Base_;
 	using _Mybase::operator=;
 	using _Mybase::operator();
 
@@ -63,9 +63,7 @@ public:
 	 *\param [h, w] rows and cols of each tensor cell
 	 */
 	_Tensor(size_t h, size_t w) noexcept
-		:_Mybase(_Depth*h, w) {
-		_Mybase::_Myshape = { 1, _Depth, h, w };
-		_Mybase::_Flush_view_buf();
+		:_Mybase(basic_shape_t{ depth, h, w }) {
 	}
 	/**
 	 *\brief constructor with a value initialization
@@ -81,35 +79,29 @@ public:
 	 *\param [oth] an other tensor
 	 */
 	_Tensor(const _Myt& oth) noexcept
-		:_Mybase(oth),
-		m_height(oth.m_height),
-		m_width(oth.m_width) {
+		:_Mybase(oth) {
 	}
 	/**
 	 *\brief move constructor
 	 *\param [oth] an other tensor
 	 */
 	_Tensor(_Myt&& oth) noexcept
-		:_Mybase(move(oth)),
-		m_height(oth.m_height),
-		m_width(oth.m_width) {
+		:_Mybase(move(oth)) {
 	}
 	/**
 	 *\brief template constructor
 	 *\param [args...] argument(s) with any supported type(s) 
 	 */
-	template<typename... _Args>
-	_Tensor(_Args&&... args) noexcept
-		:_Mybase(forward<_Args>(args)...) {
-		m_width = this->cols();
-		m_height = this->rows() / m_depth;
+	template<typename _Arg>
+	_Tensor(_Arg&& arg) noexcept
+		:_Mybase(forward<_Arg>(arg)) {
 	}
 
 	MATRICE_HOST_INL const value_type& operator()(size_t d, size_t r, size_t c) const noexcept {
 #if defined _DEBUG || MATRICE_DEBUG
-		DGELOM_CHECK(d < _Depth, "depth index over range.");
+		DGELOM_CHECK(d < depth, "depth index over range.");
 #endif
-		const auto inner_size = m_width * m_height;
+		const auto inner_size = m_shape.hw();
 		return (_Mybase::operator[](d*inner_size+r*m_width)[c]);
 	}
 
@@ -117,7 +109,7 @@ public:
 #if defined _DEBUG || MATRICE_DEBUG
 		DGELOM_CHECK(d < _Depth, "depth index over range.");
 #endif
-		const auto inner_size = m_width * m_height;
+		const auto inner_size = m_shape.hw();
 		return (_Mybase::operator[](d*inner_size + r * m_width)[c]);
 	}
 
@@ -125,26 +117,23 @@ public:
 #if defined _DEBUG || MATRICE_DEBUG
 		DGELOM_CHECK(d < _Depth, "depth index over range.");
 #endif
-		const auto w = _Mybase::_Myshape.get(3);
-		const auto h = _Mybase::_Myshape.get(2);
+		const auto w = m_shape.w();
+		const auto h = m_shape.h();
 		const auto r0 = d*h, r1 = (d+1) * h;
 		const auto c0 = w, c1 = w;
 		return _Mybase::block(c0, c1, r0, r1);
 	}
 
 	MATRICE_HOST_INL void __create_impl(size_t h, size_t w) {
-		m_width = w, m_height = h;
-		_Mybase::_Myshape = { _Depth, 1, m_height, m_width };
-		_Mybase::m_cols = m_width;
-		_Mybase::m_rows = _Depth * m_height;
-		_Mybase::allocator().create(_Mybase::m_rows, _Mybase::m_cols);
-		_Mybase::m_data = _Mybase::allocator().data();
-		_Mybase::_Flush_view_buf();
+		this->_Reset({ depth, h, w });
+		m_width = m_shape.w();
+		m_height = m_shape.h();
 	}
 
 private:
-	size_t m_width, m_height;
-	size_t m_depth = _Mytraits::depth;
+	using _Mybase::m_shape;
+	size_t m_width = m_shape.w();
+	size_t m_height = m_shape.h();
 };
 
 template<typename _Ty, size_t _Depth>
