@@ -123,7 +123,7 @@ template<typename _T> LinearOp::info_t LinearOp::OpBase<_T>::_Impl(view_t& U, vi
 
 	info_t info;
 	info.status = detail::_Lapack_kernel_impl<value_t>::svd(
-		U.data(), S.data(), Vt.data(), U.shape());
+		U.data(), S.data(), Vt.data(), U.shape().tiled());
 	info.alg = solver_type::SVD;
 
 	return info;
