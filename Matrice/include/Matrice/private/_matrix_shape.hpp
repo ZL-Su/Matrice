@@ -55,14 +55,15 @@ public:
 		: _Data{ std::get<0>(_Shape), {std::get<1>(_Shape), {std::get<2>(_Shape),std::get<3>(_Shape)}} } {}
 	template<typename _Jty>
 	MATRICE_GLOBAL_INL constexpr basic_shape(const initlist<_Jty> _Shape) noexcept {
+		auto it = _Shape.begin();
 		if (_Shape.size() == 2) {
-			_Data = { 1,{1,{(value_type)*_Shape.begin(), (value_type)*(_Shape.begin() + 1)}} };
+			_Data = { 1,{1,{(value_type)*it, (value_type)*(it + 1)}} };
 		}
-		if (_Shape.size() == 3) {
-			_Data = { 1,{(value_type)*_Shape.begin(),{(value_type)*(_Shape.begin() + 1), (value_type)*(_Shape.begin() + 2)}} };
+		else if (_Shape.size() == 3) {
+			_Data = { 1,{(value_type)*it,{(value_type)*(it + 1), (value_type)*(it + 2)}} };
 		}
-		if (_Shape.size() == 4) {
-			_Data = { (value_type)*_Shape.begin(),{(value_type)*(_Shape.begin() + 1),{(value_type)*(_Shape.begin() + 2), (value_type)*(_Shape.begin() + 3)}} };
+		else if (_Shape.size() == 4) {
+			_Data = { (value_type)*it,{(value_type)*(it + 1),{(value_type)*(it + 2), (value_type)*(it + 3)}} };
 		}
 	}
 	MATRICE_GLOBAL_INL constexpr basic_shape(const _Myt& _Other) noexcept
@@ -77,15 +78,17 @@ public:
 		_Data = move(_Oth._Data); return (*this);
 	}
 	MATRICE_GLOBAL_INL constexpr decltype(auto) operator= (const initlist<size_t> _Shape) noexcept {
+		auto it = _Shape.begin();
 		if (_Shape.size() == 2) {
-			_Data = { 1,{1,{(value_type)*_Shape.begin(), (value_type)*(_Shape.begin() + 1)}} };
+			_Data = { 1,{1,{(value_type)*it, (value_type)*(it + 1)}} };
 		}
-		if (_Shape.size() == 3) {
-			_Data = { 1,{(value_type)*_Shape.begin(),{(value_type)*(_Shape.begin() + 1), (value_type)*(_Shape.begin() + 2)}} };
+		else if (_Shape.size() == 3) {
+			_Data = { 1,{(value_type)*it,{(value_type)*(it + 1), (value_type)*(it + 2)}} };
 		}
-		if (_Shape.size() == 4) {
-			_Data = { (value_type)*_Shape.begin(),{(value_type)*(_Shape.begin() + 1),{(value_type)*(_Shape.begin() + 2), (value_type)*(_Shape.begin() + 3)}} };
+		else if (_Shape.size() == 4) {
+			_Data = { (value_type)*it,{(value_type)*(it + 1),{(value_type)*(it + 2), (value_type)*(it + 3)}} };
 		}
+
 		return (*this);
 	}
 	/**
@@ -125,61 +128,86 @@ public:
 		if (_Dim == 1) return std::get<0>(std::get<1>(_Data));
 		if (_Dim == 2) return std::get<0>(std::get<1>(std::get<1>(_Data)));
 		if (_Dim == 3) return std::get<1>(std::get<1>(std::get<1>(_Data)));
-		DGELOM_CHECK(_Dim<3, "_Dim over range of _Data.");
+		DGELOM_CHECK(_Dim<4, "_Dim over range of _Data.");
 	}
 	MATRICE_GLOBAL_INL constexpr const auto& get(uint8_t _Dim) const noexcept {
 		if (_Dim == 0) return std::get<0>(_Data);
 		if (_Dim == 1) return std::get<0>(std::get<1>(_Data));
 		if (_Dim == 2) return std::get<0>(std::get<1>(std::get<1>(_Data)));
 		if (_Dim == 3) return std::get<1>(std::get<1>(std::get<1>(_Data)));
-		DGELOM_CHECK(_Dim < 3, "_Dim over range of _Data.");
+		DGELOM_CHECK(_Dim<4, "_Dim over range of _Data.");
 	}
 	/**
 	 *\brief Get full rows
 	 */
-	MATRICE_GLOBAL_INL constexpr auto (rows)() const noexcept {
-		return get(0) * get(2);
+	MATRICE_GLOBAL_INL constexpr size_t(rows)() const noexcept {
+		return get(1) * get(2);
 	}
 	/**
 	 *\brief Get full cols
 	 */
-	MATRICE_GLOBAL_INL constexpr auto (cols)() const noexcept {
-		return get(1) * get(3);
+	MATRICE_GLOBAL_INL constexpr size_t(cols)() const noexcept {
+		return get(0) * get(3);
 	}
 	/**
-	 *\brief return C*H*W
+	 *\brief Get inner rows: height
 	 */
-	MATRICE_GLOBAL_INL constexpr auto (chw)() const noexcept {
-		return (get(1)*hw());
+	MATRICE_GLOBAL_INL constexpr size_t(h)() const noexcept {
+		return get(2);
+	}
+	/**
+	 *\brief Get inner cols: width
+	 */
+	MATRICE_GLOBAL_INL constexpr size_t(w)() const noexcept {
+		return get(3);
+	}
+	/**
+	 *\brief Get depth
+	 */
+	MATRICE_GLOBAL_INL constexpr size_t(d)() const noexcept {
+		return get(1);
+	}
+	/**
+	 *\brief Get tiled plain shape
+	 */
+	MATRICE_GLOBAL_INL constexpr shape_t<size_t> tiled() const noexcept {
+		return std::make_tuple(rows(), cols());
+	}
+	/**
+	 *\brief return Depth*Height*Width
+	 */
+	MATRICE_GLOBAL_INL constexpr auto (dhw)() const noexcept {
+		return (d()*h()*w());
 	}
 	/**
 	 *\brief return H*W
 	 */
 	MATRICE_GLOBAL_INL constexpr auto (hw)() const noexcept {
-		return (get(2)*get(3));
+		return (h()*w());
 	}
 	/**
 	 *\brief Parse the index for each dimension from a linear index
 	 *\param [_Idx] input linear index
 	 */
 	MATRICE_GLOBAL_INL constexpr auto parse(size_t _Idx) const noexcept {
-		auto n = _Idx / chw();  _Idx -= n * chw();
+		auto n = _Idx / dhw();  _Idx -= n * dhw();
 		auto c = _Idx / hw();   _Idx -= c * hw();
 		auto h = _Idx / get(3); _Idx -= h * get(3);
 		return shape4_t<>(n, c, h, _Idx);
 	}
 
-	friend MATRICE_GLOBAL_INL _Myt _Union(const _Myt& _1, const _Myt& _2) noexcept {
-		return {max(_1.get(0), _2.get(0)), max(_1.get(1), _2.get(1)),
-		max(_1.get(2), _2.get(2)), max(_1.get(3), _2.get(3)) };
-	}
-
 private:
 	/**
-	 *\brief formatted shape data: {N, {C, {H, W}}}
+	 *\brief formatted shape data: {Extent, {Depth, {Height, Width}}}
 	 */
-	full_shape _Data = { value_type(0),{value_type(0),{value_type(0),value_type(0)}} };
+	full_shape _Data = { value_type(1),{value_type(0),{value_type(0),value_type(0)}} };
 };
+
+template<typename _Ity>
+MATRICE_GLOBAL_INL basic_shape<_Ity> union_shape(const basic_shape<_Ity>& _1, const basic_shape<_Ity>& _2) noexcept {
+	return { max(_1.get(0), _2.get(0)), max(_1.get(1), _2.get(1)),
+	max(_1.get(2), _2.get(2)), max(_1.get(3), _2.get(3)) };
+}
 
 using basic_shape_t = basic_shape<>;
 
