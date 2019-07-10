@@ -55,27 +55,26 @@ public:
 
 	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base() = default;
 	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base(int _rows, int _cols, _Ty* _data = nullptr) noexcept
-		: m_rows(_rows), m_cols(_cols), m_data(_data), 
-		_Myshape{1,1,_rows,_cols} {
+		: m_shape{1,1,_rows,_cols} {
 		this->_Flush_view_buf();
 	};
 	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base(const basic_shape_t& _Shape, _Ty* _data) noexcept
-		: m_rows(_Shape.rows()), m_cols(_Shape.cols()), m_data(_data),
-		_Myshape(_Shape) {
+		: m_data(_data), m_shape(_Shape) {
 		this->_Flush_view_buf();
 	};
 	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base(const basic_shape_t& _Shape) noexcept
-		: m_rows(_Shape.rows()), m_cols(_Shape.cols()), 
-		_Myshape(_Shape) {
+		: m_shape(_Shape) {
 		this->_Flush_view_buf();
 	};
 
 	/**
-	 * \shape of the matrix
-	 * Example: auto [_Rows, _Cols] = _Matrix.shape();
+	 * \shape of a matrix or tensor
+	 * Example: 
+		auto [E, D, _Rows, _Cols] = _Matrix.shape();
+		auto [E, D, H, W] = _Tensor.shape();
 	 */
-	MATRICE_GLOBAL_FINL constexpr shape_t<size_t> shape() const noexcept {
-		return std::tie(m_rows, m_cols);
+	MATRICE_GLOBAL_FINL constexpr decltype(auto) shape() const noexcept {
+		return m_shape;
 	}
 	template<typename _T, MATRICE_ENABLE_IF(is_scalar_v<_T>)>
 	MATRICE_GLOBAL_FINL constexpr shape_t<size_t>  shape(_T _Scale) const noexcept {
@@ -91,7 +90,7 @@ public:
 	 *\brief Get full dims {N,{C,{H,W}}}
 	 */
 	MATRICE_GLOBAL_FINL constexpr auto& dims() const noexcept {
-		return (_Myshape);
+		return (m_shape);
 	}
 
 	/**
@@ -139,16 +138,17 @@ protected:
 	MATRICE_GLOBAL_FINL constexpr void _Flush_view_buf() noexcept {
 #ifdef _DEBUG || MATRICE_DEBUG
 		stride = m_cols * type_bytes_v<_Ty>;
-		nval = _Myshape.get(0);
-		cval = _Myshape.get(1);
-		hval = _Myshape.get(2);
-		wval = _Myshape.get(3);
+		nval = m_shape.get(0);
+		cval = m_shape.get(1);
+		hval = m_shape.get(2);
+		wval = m_shape.get(3);
 #endif
 	}
 
-	int m_rows, m_cols;
+	basic_shape_t m_shape;
+	int m_rows = m_shape.rows();
+	int m_cols = m_shape.cols();
 	_Ty* m_data = nullptr;
-	basic_shape_t _Myshape;
 };
 
 _TYPES_BEGIN
@@ -282,12 +282,15 @@ public:
 		:_Mybase(_rows, _cols), m_storage(_rows, _cols, _val) MATRICE_LINK_PTR
 	MATRICE_GLOBAL_INL constexpr Base_(const shape_t<size_t>& _Shape, value_t _Val) noexcept
 		:Base_(MATRICE_EXPAND_SHAPE, _Val) {}
+	MATRICE_GLOBAL_INL constexpr Base_(const basic_shape_t& _Shape) noexcept
+		:_Mybase(_Shape), m_storage(_Shape.rows(), _Shape.cols())
+		MATRICE_LINK_PTR
 	MATRICE_GLOBAL_INL constexpr Base_(const_initlist _list) noexcept
 		:_Mybase((_M <= 0)?_list.size():_M, (_N<=0)?1:_N), m_storage(_list) MATRICE_LINK_PTR
 	MATRICE_GLOBAL_INL constexpr Base_(const _Myt& _other) noexcept
-		:_Mybase(_other._Myshape), m_storage(_other.m_storage) MATRICE_LINK_PTR
+		:_Mybase(_other.m_shape), m_storage(_other.m_storage) MATRICE_LINK_PTR
 	MATRICE_GLOBAL_INL constexpr Base_(_Myt&& _other) noexcept
-		:_Mybase(_other._Myshape), m_storage(move(_other.m_storage)) MATRICE_LINK_PTR
+		:_Mybase(_other.m_shape), m_storage(move(_other.m_storage)) MATRICE_LINK_PTR
 	/**
 	 *\from STD vector<value_t>
 	 */
@@ -317,7 +320,7 @@ public:
 		m_storage(m_rows, m_cols) MATRICE_EVALEXP_TOTHIS
 	template<typename _Lhs, typename _Rhs, typename _Op>
 	MATRICE_GLOBAL_FINL Base_(const Expr::EwiseBinaryExpr<_Lhs,_Rhs,_Op>& exp)
-		:_Mybase(m_rows = exp.rows(), m_cols = exp.cols()), 
+		:_Mybase(/*m_rows = exp.rows(), m_cols = exp.cols()*/exp.shape()),
 		m_storage(m_rows, m_cols) MATRICE_EVALEXP_TOTHIS
 	template<typename _Lhs, typename _Rhs, typename _Op>
 	MATRICE_GLOBAL_FINL Base_(const Expr::MatBinaryExpr<_Lhs, _Rhs, _Op>& exp)
@@ -732,7 +735,7 @@ public:
 		m_storage = move(_other.m_storage);
 		m_data = internal::_Proxy_checked(m_storage.data());
 
-		std::swap(_Mybase::_Myshape, _other._Myshape);
+		std::swap(_Mybase::m_shape, _other.m_shape);
 		_Mybase::_Flush_view_buf();
 
 		_other.m_storage.free();
@@ -1027,11 +1030,26 @@ protected:
 	using _Mybase::m_rows;
 	using _Mybase::m_cols;
 	using _Mybase::m_data;
-	using _Mybase::_Myshape;
+	using _Mybase::m_shape;
 
 	size_t m_format = rmaj|gene;
 
 	_Myalty m_storage;
+
+	MATRICE_GLOBAL_INL _Myt& _Reset_no_alloc(initlist<size_t> il) noexcept {
+		m_shape = il;
+		m_rows = m_shape.rows();
+		m_cols = m_shape.cols();
+		m_data = m_storage.data();
+		_Mybase::_Flush_view_buf();
+		return (*this);
+	}
+
+	MATRICE_GLOBAL_INL _Myt& _Reset(initlist<size_t> il) noexcept {
+		_Reset_no_alloc(il);
+		m_data = allocator().create(m_rows, m_cols).data();
+		return (*this);
+	}
 
 public:
 	MATRICE_HOST_INL _Myalty& allocator() noexcept {
