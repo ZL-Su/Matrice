@@ -18,6 +18,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include "../io.hpp"
 #include "../_tiff_wrapper.hpp"
+#include "../_png_wrapper.hpp"
 
 DGE_MATRICE_BEGIN namespace io 
 { _DETAIL_BEGIN
