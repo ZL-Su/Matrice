@@ -97,6 +97,10 @@ public:
 		:_Mybase(forward<_Arg>(arg)) {
 	}
 
+	/**
+	 *\brief ewise accessor
+	 *\param [d, r, c] the indices in depth, height and width axis respectively 
+	 */
 	MATRICE_HOST_INL const value_type& operator()(size_t d, size_t r, size_t c) const noexcept {
 #if defined _DEBUG || MATRICE_DEBUG
 		DGELOM_CHECK(d < depth, "depth index over range.");
@@ -104,7 +108,6 @@ public:
 		const auto inner_size = m_shape.hw();
 		return (_Mybase::operator[](d*inner_size+r*m_width)[c]);
 	}
-
 	MATRICE_HOST_INL value_type& operator()(size_t d, size_t r, size_t c) noexcept {
 #if defined _DEBUG || MATRICE_DEBUG
 		DGELOM_CHECK(d < _Depth, "depth index over range.");
@@ -113,17 +116,35 @@ public:
 		return (_Mybase::operator[](d*inner_size + r * m_width)[c]);
 	}
 
-	MATRICE_HOST_INL decltype(auto) slice(size_t d) const noexcept {
+	/**
+	 *\brief tensor slice operation along the depth axis, return value is a matrix view.
+	 *\param [d] - input index of depth
+	 */
+	MATRICE_HOST_INL decltype(auto) array(size_t d) noexcept {
 #if defined _DEBUG || MATRICE_DEBUG
 		DGELOM_CHECK(d < _Depth, "depth index over range.");
 #endif
 		const auto w = m_shape.w();
 		const auto h = m_shape.h();
 		const auto r0 = d*h, r1 = (d+1) * h;
-		const auto c0 = w, c1 = w;
-		return _Mybase::block(c0, c1, r0, r1);
+		return _Mybase::block(0, w, r0, r1);
+	}
+	/**
+	 *\brief returns a matrix view of the full tensor.
+	 */
+	MATRICE_HOST_INL decltype(auto) array() noexcept {
+		return _Mybase::block(0, this->m_cols, 0, this->m_rows);
 	}
 
+	/**
+	 *\brief matrix multiplication is disabled for a tensor.
+	 */
+	template<typename _Rhs>
+	MATRICE_GLOBAL_INL auto mul(const _Rhs& _Right) const = delete;
+
+	/**
+	 *\brief internal used method within CRTP. 
+	 */
 	MATRICE_HOST_INL void __create_impl(size_t h, size_t w) {
 		this->_Reset({ depth, h, w });
 		m_width = m_shape.w();
