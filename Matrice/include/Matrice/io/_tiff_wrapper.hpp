@@ -61,6 +61,10 @@ template<typename _Ty> struct tiff_instance {
 
 		return forward<decltype(gc)>(gc);
 	}
+
+	MATRICE_HOST_INL operator tiff_matrix_t<value_type>() const{
+		return (m_data);
+	}
 };
 
 tiff_pointer open_tiff_file(const char* fname, const char* flag) {
