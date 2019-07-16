@@ -147,5 +147,5 @@ typedef int                                             int_t;
 #endif
 #endif
 #ifndef MATRICE_ENABLE_IF
-#define MATRICE_ENABLE_IF(_COND) typename = enable_if_t<_COND>
+#define MATRICE_ENABLE_IF(_COND) typename = std::enable_if_t<_COND>
 #endif

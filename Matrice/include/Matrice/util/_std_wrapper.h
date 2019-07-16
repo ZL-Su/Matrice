@@ -35,7 +35,7 @@ namespace dgelom {
 	using std::common_type_t;
 	using std::is_integral_v;
 	using std::is_arithmetic_v;
-	using std::is_scalar_v;
+	//using std::is_scalar_v;
 	using std::is_pointer_v;
 	using std::is_class_v;
 	using std::is_function_v;
@@ -52,7 +52,7 @@ namespace dgelom {
 	
 	MATRICE_MAKE_TS_HELPER(integral);
 	MATRICE_MAKE_TS_HELPER(arithmetic);
-	MATRICE_MAKE_TS_HELPER(scalar);
+	//MATRICE_MAKE_TS_HELPER(scalar);
 	MATRICE_MAKE_TS_HELPER(pointer);
 	MATRICE_MAKE_TS_HELPER(class);
 	MATRICE_MAKE_TS_HELPER(function);
