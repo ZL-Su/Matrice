@@ -18,8 +18,8 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <xutility>
-#include "..\util\_macros.h"
 #include "_tag_defs.h"
+#include "_type_traits.h"
 #include "_decl_dev_funcs.h"
 
 #if MATRICE_SIMD_ARCH == MATRICE_SIMD_AVX

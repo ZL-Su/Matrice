@@ -20,3 +20,4 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "Matrice/core/solver.h"
 #include "Matrice/core/tensor.h"
 #include "Matrice/core/vector.h"
+#include "Matrice/private/_scalar.hpp"
