@@ -88,9 +88,6 @@
     <Filter Include="Header Files\Detail\cuda">
       <UniqueIdentifier>{21e75018-4d93-41b3-9e9e-6e14505aedd0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Detail\matrix">
-      <UniqueIdentifier>{a6e47179-54cc-4d7b-bf5f-3e2254a17bae}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Detail\memory">
       <UniqueIdentifier>{8c517709-fbaa-47bc-966d-c990cb36a487}</UniqueIdentifier>
     </Filter>
@@ -141,9 +138,6 @@
     </Filter>
     <Filter Include="Header Files\Thread\inl">
       <UniqueIdentifier>{b683a9c5-1a80-4376-a1d6-580f60db8a58}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Detail\matrix\inline">
-      <UniqueIdentifier>{b88d248b-30ee-4f19-8369-13b6e621a9d0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Detail\inline">
       <UniqueIdentifier>{09339ca4-a7f2-41af-9dce-ed8962478bb9}</UniqueIdentifier>
@@ -204,6 +198,12 @@
     </Filter>
     <Filter Include="Header Files\Addin\libpng">
       <UniqueIdentifier>{36a0b5cc-bdef-4110-a1ac-f5b17c4affa8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Detail\core">
+      <UniqueIdentifier>{a6e47179-54cc-4d7b-bf5f-3e2254a17bae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Detail\core\inline">
+      <UniqueIdentifier>{b88d248b-30ee-4f19-8369-13b6e621a9d0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -327,9 +327,6 @@
     <ClInclude Include="include\Matrice\algs\similarity\_similarity_traits.h">
       <Filter>Header Files\Algs\Similarity</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\private\_matrix_base.hpp">
-      <Filter>Header Files\Detail\matrix</Filter>
-    </ClInclude>
     <ClInclude Include="include\Matrice\private\_memory.h">
       <Filter>Header Files\Detail\memory</Filter>
     </ClInclude>
@@ -385,10 +382,7 @@
       <Filter>Header Files\Detail\math</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_matrix_ops.hpp">
-      <Filter>Header Files\Detail\matrix</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Matrice\private\_matrix_exp.hpp">
-      <Filter>Header Files\Detail\matrix</Filter>
+      <Filter>Header Files\Detail\core</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\core\tensor.h">
       <Filter>Header Files\Core</Filter>
@@ -462,9 +456,6 @@
     <ClInclude Include="include\Matrice\private\math\_primitive_funcs.hpp">
       <Filter>Header Files\Detail\math</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\private\_matrix_shape.hpp">
-      <Filter>Header Files\Detail\matrix</Filter>
-    </ClInclude>
     <ClInclude Include="include\Matrice\algs\correlation\_utils.hpp">
       <Filter>Header Files\Algs\Correlation</Filter>
     </ClInclude>
@@ -490,9 +481,6 @@
       <Filter>Header Files\Algs\DeepLearning\Layers</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\tensor\_tensor_old.hpp">
-      <Filter>Header Files\Detail\tensor</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Matrice\private\tensor\_dtensor.hpp">
       <Filter>Header Files\Detail\tensor</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\tensor\_tensor.hpp">
@@ -578,6 +566,18 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\io\_png_wrapper.hpp">
       <Filter>Header Files\Addin</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\_shape.hpp">
+      <Filter>Header Files\Detail\core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\_plain_base.hpp">
+      <Filter>Header Files\Detail\core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\_plain_exp.hpp">
+      <Filter>Header Files\Detail\core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\_plain_shape.hpp">
+      <Filter>Header Files\Detail\core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -897,7 +897,7 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="include\Matrice\private\inl\_base.inl">
-      <Filter>Header Files\Detail\matrix\inline</Filter>
+      <Filter>Header Files\Detail\core\inline</Filter>
     </None>
     <None Include="include\Matrice\algs\geometry\inline\_transform.inl">
       <Filter>Header Files\Algs\Geometry</Filter>

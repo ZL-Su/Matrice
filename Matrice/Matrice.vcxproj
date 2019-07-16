@@ -217,7 +217,6 @@
     <ClInclude Include="include\Matrice\private\math\_primitive_funcs.hpp" />
     <ClInclude Include="include\Matrice\private\math\_svd.h" />
     <ClInclude Include="include\Matrice\private\nonfree\_lnalge.h" />
-    <ClInclude Include="include\Matrice\private\tensor\_dtensor.hpp" />
     <ClInclude Include="include\Matrice\private\tensor\_tensor.hpp" />
     <ClInclude Include="include\Matrice\private\tensor\_tensor_old.hpp" />
     <ClInclude Include="include\Matrice\private\tensor\_tensor_exp.hpp" />
@@ -227,10 +226,11 @@
     <ClInclude Include="include\Matrice\private\_dev_matrix_base.h" />
     <ClInclude Include="include\Matrice\private\_function_traits.h" />
     <ClInclude Include="include\Matrice\private\_iterator.h" />
-    <ClInclude Include="include\Matrice\private\_matrix_base.hpp" />
-    <ClInclude Include="include\Matrice\private\_matrix_exp.hpp" />
-    <ClInclude Include="include\Matrice\private\_matrix_shape.hpp" />
+    <ClInclude Include="include\Matrice\private\_plain_base.hpp" />
+    <ClInclude Include="include\Matrice\private\_plain_exp.hpp" />
+    <ClInclude Include="include\Matrice\private\_plain_shape.hpp" />
     <ClInclude Include="include\Matrice\private\_range.h" />
+    <ClInclude Include="include\Matrice\private\_shape.hpp" />
     <ClInclude Include="include\Matrice\private\_size_traits.h" />
     <ClInclude Include="include\Matrice\private\_tag_defs.h" />
     <ClInclude Include="include\Matrice\private\_typelist.h" />
