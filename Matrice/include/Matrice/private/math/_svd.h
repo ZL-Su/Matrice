@@ -17,7 +17,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 #include <tuple>
-#include "../_matrix_base.hpp"
+#include "../_plain_base.hpp"
 #include "../nonfree/_lnalge.h"
 
 DGE_MATRICE_BEGIN
