@@ -17,7 +17,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 #include <array>
-#include "../private/_matrix_base.hpp"
+#include "../private/_plain_base.hpp"
 #include "../private/_dev_matrix_base.h"
 
 MATRICE_NAMESPACE_BEGIN_TYPES
