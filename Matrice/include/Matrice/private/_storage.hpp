@@ -36,6 +36,17 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 DGE_MATRICE_BEGIN
+template<int _M, int _N> struct allocator_traits {
+	enum {
+		value = (_M == 0 && _N == -1) ? LINEAR :  // linear device allocator
+		(_M == -1 && _N == -1) ? PITCHED :  // pitched device allocator
+#if MATRICE_SHARED_STORAGE == 1
+		LINEAR + SHARED  // smart heap or global allocator
+#else
+		LINEAR + COPY    // deep heap or global allocator
+#endif      
+	};
+};
 _DETAIL_BEGIN
 template<typename _Ty> class Storage_
 {

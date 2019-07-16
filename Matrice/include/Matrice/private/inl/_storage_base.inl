@@ -126,4 +126,5 @@ decltype(auto) Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(const Allocator<_
 		op(my_data, (pointer)_al.data(), my_rows, my_cols, _Loc == OnDevice ? my_pitch : _al.pitch());
 	return (*this);
 }
-_DETAIL_END _MATRICE_NAMESPACE_END
+_DETAIL_END
+_MATRICE_NAMESPACE_END
