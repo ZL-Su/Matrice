@@ -17,9 +17,9 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 *	*************************************************************************/
 #pragma once
 #include <type_traits>
+#include "../util/_macros.h"
 #include "../util/_type_defs.h"
 #include "../util/_std_wrapper.h"
-#include "_memory.h"
 
 DGE_MATRICE_BEGIN
 
@@ -63,6 +63,11 @@ template<typename T, typename U> using common_value_t = typename common_value_ty
  */
 template<int _Val> struct is_zero { enum { value = _Val == 0 }; };
 template<int _Val> MATRICE_GLOBAL_INL constexpr auto is_zero_v = is_zero<_Val>::value;
+
+template<typename T> struct is_scalar {
+	constexpr static auto value = std::is_scalar_v<T>;
+};
+template<typename T> inline constexpr auto is_scalar_v = is_scalar<T>::value;
 
 /**
  *\brief is_static_v<_R, _C> is true iff both _R and _C is greater than 0.
@@ -156,17 +161,7 @@ template<typename T> MATRICE_GLOBAL_INL constexpr bool is_fxdvector_v = is_fxdve
  */
 template<typename T> MATRICE_GLOBAL_INL constexpr bool is_matrix_convertible_v = is_matrix_v<T> || is_expression_v<T> || is_mtxview_v<T>;
 
-template<int _M, int _N> struct allocator_traits {
-	enum {
-		value = (_M==0&&_N==-1) ? LINEAR :  // linear device allocator
-		       (_M==-1&&_N==-1)? PITCHED :  // pitched device allocator
-#if MATRICE_SHARED_STORAGE == 1
-		LINEAR + SHARED  // smart heap or global allocator
-#else
-		LINEAR + COPY    // deep heap or global allocator
-#endif      
-	};
-};
+template<int _M, int _N> struct allocator_traits;
 template<int _M, int _N> MATRICE_GLOBAL_INL constexpr auto allocator_traits_v = allocator_traits<_M, _N>::value;
 
 template<class T, typename = enable_if_t<is_matrix_v<T> || is_expression_v<T>>> 
