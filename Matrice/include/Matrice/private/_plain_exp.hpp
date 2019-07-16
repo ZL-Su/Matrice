@@ -18,7 +18,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include <functional>
 #include <cassert>
-#include "_matrix_shape.hpp"
+#include "_plain_shape.hpp"
 #include "_type_traits.h"
 #include "_size_traits.h"
 #include "_tag_defs.h"
