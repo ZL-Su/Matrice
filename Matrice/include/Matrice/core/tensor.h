@@ -17,7 +17,6 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 
-#include "../private/tensor/_dtensor.hpp"
 #include "../private/tensor/_tensor.hpp"
 
 DGE_MATRICE_BEGIN
