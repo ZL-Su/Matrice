@@ -20,7 +20,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <valarray>
 #include <functional>
 #include "_type_traits.h"
-#include "_matrix_exp.hpp"
+#include "_plain_exp.hpp"
 #include "_matrix_ops.hpp"
 #include "_storage.hpp"
 #include "_iterator.h"

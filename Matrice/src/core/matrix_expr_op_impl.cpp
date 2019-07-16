@@ -5,7 +5,7 @@
 #else
 #include <fkl.h>
 #endif
-#include "../../include/Matrice/private/_matrix_exp.hpp"
+#include "../../include/Matrice/private/_plain_exp.hpp"
 #include "../../include/Matrice/private/_memory.h"
 #include "../private/generic_fast_math.hpp"
 
