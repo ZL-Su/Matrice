@@ -2,7 +2,7 @@
 	  About License Agreement of this file, see "../lic/license.h"
 *********************************************************************/
 #pragma once
-#include "../_matrix_base.hpp"
+#include "../_plain_base.hpp"
 #include "../_range.h"
 #include "../../thread/_thread.h"
 #include "../../private/nonfree/_lnalge.h"
