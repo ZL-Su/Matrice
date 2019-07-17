@@ -43,8 +43,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 DGE_MATRICE_BEGIN
+
+template<typename _Ty> class Scalar;
+
 // \CLASS TEMPLATE to make plane view for all matrix types
-template<typename _Ty, int _Type = _View_trait<_Ty>::value> 
+template<typename _Ty, int _Type = _View_trait<_Ty>::value>
 class _Basic_plane_view_base {
 	enum { MAGIC_VAL = 0x42FF0000 };
 	size_t stride = type_bytes_v<_Ty>;
@@ -244,6 +247,7 @@ public:
 	using category = typename _Mytraits::category;
 	template<typename _Xop> 
 	using expr_type = Expr::Base_<_Xop>;
+	using scalar_type = Scalar<value_type>;
 	
 	enum { options = _Myalty::location };
 	enum { Size = _M*_N, CompileTimeRows = _M, CompileTimeCols = _N, };
