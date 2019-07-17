@@ -20,8 +20,12 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_type_traits.h"
 
 DGE_MATRICE_BEGIN
-template<typename _Ty, MATRICE_ENABLE_IF(std::is_scalar_v<_Ty>)>
+
+template<typename _Ty>
 class Scalar {
+	static_assert(std::is_scalar_v<_Ty>, 
+		"_Ty in Scalar must be a native scalar type.");
+	using _Myt = Scalar;
 public:
 	using value_type = dgelom::remove_all_t<_Ty>;
 	using refernce = std::add_lvalue_reference_t<value_type>;
@@ -29,7 +33,6 @@ public:
 
 	MATRICE_GLOBAL_FINL Scalar() noexcept {
 	}
-
 	template<typename _Uy>
 	MATRICE_GLOBAL_FINL inline Scalar(const _Uy s) noexcept 
 		: m_value(s) {
@@ -45,4 +48,9 @@ public:
 private:
 	value_type m_value;
 };
+template<typename _Ty>
+struct is_scalar<dgelom::Scalar<_Ty>> {
+	static constexpr auto value = true;
+};
+
 DGE_MATRICE_END
