@@ -104,26 +104,23 @@ public:
 	template<axis _Axis = axis::all>
 	MATRICE_GLOBAL_FINL constexpr plvt_type plvt(bool require_t = 0) noexcept {
 		if constexpr (_Axis == axis::x)
-			return plvt_type(1, m_rows*m_cols, m_data, require_t);
+			return std::make_tuple(1, m_rows*m_cols, m_data, require_t);
 		else if constexpr (_Axis == axis::y)
-			return plvt_type(m_rows*m_cols, 1, m_data, require_t);
+			return std::make_tuple(m_rows*m_cols, 1, m_data, require_t);
 		else
-			return plvt_type(m_rows, m_cols, m_data, require_t);
+			return std::make_tuple(m_rows, m_cols, m_data, require_t);
 	}
 	template<axis _Axis = axis::all>
 	MATRICE_GLOBAL_FINL constexpr plvt_type plvt(bool require_t = 0) const noexcept {
 		if constexpr (_Axis == axis::x)
-			return std::tie(1, m_rows*m_cols, m_data, require_t);
+			return std::make_tuple(1, m_rows*m_cols, m_data, require_t);
 		else if constexpr (_Axis == axis::y)
-			return std::tie(m_rows*m_cols, 1, m_data, require_t);
+			return std::make_tuple(m_rows*m_cols, 1, m_data, require_t);
 		else
-			return std::tie(m_rows, m_cols, m_data, require_t);
+			return std::make_tuple(m_rows, m_cols, m_data, require_t);
 	}
 	MATRICE_GLOBAL_FINL constexpr operator plvt_type() noexcept {
-		return std::tie(m_rows, m_cols, m_data);
-	}
-	MATRICE_GLOBAL_FINL constexpr operator plvt_type() const noexcept {
-		return std::tie(m_rows, m_cols, m_data);
+		return std::make_tuple(m_rows, m_cols, m_data);
 	}
 
 	/**
