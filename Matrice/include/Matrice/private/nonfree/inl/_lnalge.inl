@@ -79,11 +79,11 @@ struct _Blas_kernel_impl<float> : _Blas_kernel_impl_base<float> {
 #endif
 	}
 	template<ttag Ta = ttag::N, ttag Tb = ttag::N>
-	MATRICE_HOST_INL static auto mul(const plview_type& _A, const plview_type& _B, const plview_type& _C) {
+	MATRICE_HOST_INL static auto mul(const plview_type& _A, const plview_type& _B, plview_type& _C) {
 		mul<Ta, Tb>(get<2>(_A), get<2>(_B), get<2>(_C), get<0>(_A), get<1>(_B), get<1>(_A));
 	}
 
-	MATRICE_HOST_INL static auto& gemm(const plview_type& _A, const plview_type& _B, const plview_type& _C) {
+	MATRICE_HOST_INL static auto& gemm(const plview_type& _A, const plview_type& _B, plview_type _C) {
 #if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
 		const auto[ma, na, a, ta] = _A;
 		const auto[mb, nb, b, tb] = _B;
@@ -139,11 +139,11 @@ template<> struct _Blas_kernel_impl<double> : _Blas_kernel_impl_base<double> {
 #endif
 	}
 	template<ttag Ta = ttag::N, ttag Tb = ttag::N>
-	MATRICE_HOST_INL static auto mul(const plview_type& _A, const plview_type& _B, const plview_type& _C) {
+	MATRICE_HOST_INL static auto mul(const plview_type& _A, const plview_type& _B, plview_type& _C) {
 		mul<Ta, Tb>(get<2>(_A), get<2>(_B), get<2>(_C), get<0>(_A), get<1>(_B), get<1>(_A));
 	}
 
-	MATRICE_HOST_INL static auto& gemm(const plview_type& _A, const plview_type& _B, const plview_type& _C) {
+	MATRICE_HOST_INL static auto& gemm(const plview_type& _A, const plview_type& _B, plview_type _C) {
 #if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
 		const auto[ma, na, a, ta] = _A;
 		const auto[mb, nb, b, tb] = _B;
