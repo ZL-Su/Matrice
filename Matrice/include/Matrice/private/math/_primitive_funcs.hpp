@@ -63,48 +63,48 @@ MATRICE_GLOBAL_FINL constexpr _Ret min(const T1& a, const T2& b) {
 template<typename T, typename _Ret = T, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_GLOBAL_FINL constexpr _Ret sqrt(const T& x) { 
-	return std::sqrt(x); 
+	return std::sqrt(T(x));
 }
 template<typename T, typename _Ret = T, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_HOST_FINL constexpr _Ret abs(const T& x) { 
-	return std::abs(x); 
+	return std::abs(T(x));
 }
 template<typename T, typename _Ret = T, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_HOST_FINL constexpr _Ret exp(const T& x) { 
-	return std::exp(x); 
+	return std::exp(T(x));
 }
 template<typename T, typename _Ret = T, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_HOST_FINL constexpr _Ret log(const T& x) { 
-	return std::log(x); 
+	return std::log(T(x));
 }
 template<typename T, typename _Ret = T, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_HOST_FINL constexpr _Ret log2(const T& x) { 
-	return std::log2(x); 
+	return std::log2(T(x));
 }
 template<typename T, typename _Ret = T, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_HOST_FINL constexpr _Ret log10(const T& x) { 
-	return std::log10(x); 
+	return std::log10(T(x));
 }
 template<typename T, typename _Ret = T, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_HOST_FINL constexpr _Ret floor(const T& x) { 
-	return static_cast<_Ret>(std::floor(x)); 
+	return static_cast<_Ret>(std::floor(T(x)));
 }
 template<typename T, typename _Ret = T, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_HOST_FINL constexpr _Ret ceil(const T& x) { 
-	return static_cast<_Ret>(std::ceil(x)); 
+	return static_cast<_Ret>(std::ceil(T(x)));
 }
 template<typename T1, typename T2, 
 	typename _Ret = common_type_t<T1, T2>, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_GLOBAL_FINL constexpr _Ret pow(const T1& x, const T2& y) { 
-	return std::pow(x,y); 
+	return std::pow(T1(x), T2(x));
 }
 template<typename T1, typename T2, 
 	typename _Ret = common_type_t<T1, T2>, 
@@ -116,27 +116,27 @@ MATRICE_GLOBAL_FINL constexpr _Ret safe_div(const T1& a, const T2& b){
 ///<brief> trigonometric functions </brief>
 template<typename T, MATRICE_ENABLE_IF(is_scalar_v<T>)>
 MATRICE_GLOBAL_FINL constexpr T sin(const T& x) noexcept {
-	return std::sin(x);
+	return std::sin(T(x));
 }
 template<typename T, MATRICE_ENABLE_IF(is_scalar_v<T>)>
 MATRICE_GLOBAL_FINL constexpr T cos(const T& x) noexcept {
-	return std::cos(x);
+	return std::cos(T(x));
 }
 template<typename T, MATRICE_ENABLE_IF(is_scalar_v<T>)>
 MATRICE_GLOBAL_FINL constexpr T tan(const T& x) noexcept {
-	return std::tan(x);
+	return std::tan(T(x));
 }
 template<typename T, MATRICE_ENABLE_IF(is_scalar_v<T>)>
 MATRICE_GLOBAL_FINL constexpr T arcsin(const T& x) noexcept {
-	return std::asin(x);
+	return std::asin(T(x));
 }
 template<typename T, MATRICE_ENABLE_IF(is_scalar_v<T>)>
 MATRICE_GLOBAL_FINL constexpr T arccos(const T& x) noexcept {
-	return std::acos(x);
+	return std::acos(T(x));
 }
 template<typename T, MATRICE_ENABLE_IF(is_scalar_v<T>)>
 MATRICE_GLOBAL_FINL constexpr T arctan(const T& x) noexcept {
-	return std::atan(x);
+	return std::atan(T(x));
 }
 
 DGE_MATRICE_END
