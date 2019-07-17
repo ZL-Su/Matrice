@@ -24,68 +24,92 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_config.h"
 
 DGE_MATRICE_BEGIN
-template<typename T1, typename T2, typename _Ret = common_type_t<T1, T2>, typename = enable_if_t<is_scalar_v<_Ret>>>
+template<typename T1, typename T2, 
+	typename _Ret = common_type_t<T1, T2>, 
+	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_GLOBAL_FINL constexpr _Ret add(const T1& a, const T2& b) { 
-	return a + b; 
+	return a + b;
 }
-template<typename T1, typename T2, typename _Ret = common_type_t<T1, T2>, typename = enable_if_t<is_scalar_v<_Ret>>>
+template<typename T1, typename T2, 
+	typename _Ret = common_type_t<T1, T2>, 
+	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_GLOBAL_FINL constexpr _Ret sub(const T1& a, const T2& b) { 
 	return a - b; 
 }
-template<typename T1, typename T2, typename _Ret = common_type_t<T1, T2>, typename = enable_if_t<is_scalar_v<_Ret>>>
+template<typename T1, typename T2, 
+	typename _Ret = common_type_t<T1, T2>, 
+	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_GLOBAL_FINL constexpr _Ret mul(const T1& a, const T2& b) { 
 	return a * b; 
 }
-template<typename T1, typename T2, typename _Ret = common_type_t<T1, T2>, typename = enable_if_t<is_scalar_v<_Ret>>>
+template<typename T1, typename T2, 
+	typename _Ret = common_type_t<T1, T2>, 
+	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_GLOBAL_FINL constexpr _Ret div(const T1& a, const T2& b) { 
-	return a / b; 
+	return a / b;
 }
-template<typename T1, typename T2, typename _Ret = common_type_t<T1, T2>, typename = enable_if_t<is_scalar_v<_Ret>>>
+template<typename T1, typename T2, 
+	typename _Ret = common_type_t<T1, T2>, 
+	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_GLOBAL_FINL constexpr _Ret max(const T1& a, const T2& b) { 
-	return a < b ? b : a; 
+	return a < b ? b : a;
 }
-template<typename T1, typename T2, typename _Ret = common_type_t<T1, T2>, typename = enable_if_t<is_scalar_v<_Ret>>>
+template<typename T1, typename T2, 
+	typename _Ret = common_type_t<T1, T2>, 
+	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_GLOBAL_FINL constexpr _Ret min(const T1& a, const T2& b) { 
-	return a < b ? a : b; 
+	return a < b ? a : b;
 }
-template<typename T, typename _Ret = T, typename = enable_if_t<is_scalar_v<T>>>
+template<typename T, typename _Ret = T, 
+	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_GLOBAL_FINL constexpr _Ret sqrt(const T& x) { 
 	return std::sqrt(x); 
 }
-template<typename T, typename _Ret = T, typename = enable_if_t<is_scalar_v<T>>>
+template<typename T, typename _Ret = T, 
+	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_HOST_FINL constexpr _Ret abs(const T& x) { 
 	return std::abs(x); 
 }
-template<typename T, typename _Ret = T, typename = enable_if_t<is_scalar_v<T>>>
+template<typename T, typename _Ret = T, 
+	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_HOST_FINL constexpr _Ret exp(const T& x) { 
 	return std::exp(x); 
 }
-template<typename T, typename _Ret = T, typename = enable_if_t<is_scalar_v<T>>>
+template<typename T, typename _Ret = T, 
+	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_HOST_FINL constexpr _Ret log(const T& x) { 
 	return std::log(x); 
 }
-template<typename T, typename _Ret = T, typename = enable_if_t<is_scalar_v<T>>>
+template<typename T, typename _Ret = T, 
+	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_HOST_FINL constexpr _Ret log2(const T& x) { 
 	return std::log2(x); 
 }
-template<typename T, typename _Ret = T, typename = enable_if_t<is_scalar_v<T>>>
+template<typename T, typename _Ret = T, 
+	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_HOST_FINL constexpr _Ret log10(const T& x) { 
 	return std::log10(x); 
 }
-template<typename T, typename _Ret = T, typename = enable_if_t<is_scalar_v<T>>>
+template<typename T, typename _Ret = T, 
+	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_HOST_FINL constexpr _Ret floor(const T& x) { 
 	return static_cast<_Ret>(std::floor(x)); 
 }
-template<typename T, typename _Ret = T, typename = enable_if_t<is_scalar_v<T>>>
+template<typename T, typename _Ret = T, 
+	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_HOST_FINL constexpr _Ret ceil(const T& x) { 
 	return static_cast<_Ret>(std::ceil(x)); 
 }
-template<typename T1, typename T2, typename _Ret = common_type_t<T1, T2>, typename = enable_if_t<is_scalar_v<_Ret>>>
+template<typename T1, typename T2, 
+	typename _Ret = common_type_t<T1, T2>, 
+	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_GLOBAL_FINL constexpr _Ret pow(const T1& x, const T2& y) { 
 	return std::pow(x,y); 
 }
-template<typename T1, typename T2, typename _Ret = common_type_t<T1, T2>, typename = enable_if_t<is_scalar_v<_Ret>>>
-MATRICE_GLOBAL_FINL constexpr _Ret safe_div(const T1& a, const T2& b) { 
+template<typename T1, typename T2, 
+	typename _Ret = common_type_t<T1, T2>, 
+	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
+MATRICE_GLOBAL_FINL constexpr _Ret safe_div(const T1& a, const T2& b){
 	return b == T2(0) ? _Ret(0) : div(a, b);
 }
 
