@@ -49,8 +49,7 @@ private:
 	value_type m_value;
 };
 template<typename _Ty>
-struct is_scalar<dgelom::Scalar<_Ty>> {
+struct is_scalar<Scalar<_Ty>> {
 	static constexpr auto value = true;
 };
-
 DGE_MATRICE_END
