@@ -27,6 +27,31 @@ DGE_MATRICE_BEGIN
 namespace fs = std::experimental::filesystem;
 enum is_skip_folder { N = 0, Y = 1 };
 
+template<typename _Ty = uint8_t>
+struct image_instance {
+	using value_type = _Ty;
+	using image_type = Matrix<value_type>;
+
+	MATRICE_HOST_INL operator Matrix_<value_type,0,0>() noexcept {
+		return (m_data);
+	}
+	MATRICE_HOST_INL image_instance& create(uint32_t nchs) noexcept {
+		m_nchs = nchs;
+		m_width = m_cols * m_nchs;
+		m_data.create(m_rows, m_width, zero<value_type>);
+
+		return (*this);
+	}
+	template<typename _Op>
+	MATRICE_HOST_INL decltype(auto) operator()(_Op&& op) noexcept {
+		return (op(m_data));
+	}
+
+	uint32_t m_rows = 0, m_cols = 0;
+	uint32_t m_nchs = 1, m_width = 0;
+	image_type m_data;
+};
+
 class IO : std::ios {
 	using _Mybase = std::ios;
 public:
