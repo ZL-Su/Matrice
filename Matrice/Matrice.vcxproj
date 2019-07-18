@@ -230,6 +230,7 @@
     <ClInclude Include="include\Matrice\private\_plain_exp.hpp" />
     <ClInclude Include="include\Matrice\private\_plain_shape.hpp" />
     <ClInclude Include="include\Matrice\private\_range.h" />
+    <ClInclude Include="include\Matrice\private\_scalar.hpp" />
     <ClInclude Include="include\Matrice\private\_shape.hpp" />
     <ClInclude Include="include\Matrice\private\_size_traits.h" />
     <ClInclude Include="include\Matrice\private\_tag_defs.h" />
