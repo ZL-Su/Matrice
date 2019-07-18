@@ -35,6 +35,9 @@ public:
 			return point_type{};
 		}
 	};
+	_Projection_base() noexcept 
+		:m_tran(0) {
+	}
 	/**
 	 *\brief initialize the rotation and translation
 	 *\param [ext] external geometry parameters: rx, ry, rz, tx, ty, tz
@@ -120,5 +123,6 @@ private:
 	using _Mybase::m_tran;
 };
 _DETAIL_END
-
+template<typename _Ty>
+using left_aligned_projection = detail::_Aligned_projection<_Ty, cs_alignment_tag::left>;
 DGE_MATRICE_END
