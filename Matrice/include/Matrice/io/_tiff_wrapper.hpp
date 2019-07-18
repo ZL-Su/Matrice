@@ -24,34 +24,26 @@ DGE_MATRICE_BEGIN
 using tiff_type = tiff;
 using tiff_pointer = std::add_pointer_t<tiff_type>;
 template<typename _Ty> using tiff_matrix_t = Matrix_<_Ty, 0, 0>;
+template<typename _Ty> struct image_instance;
 
-template<typename _Ty> struct tiff_instance {
-	using value_type = _Ty;
+template<typename _Ty = uint8_t> 
+struct tiff_instance : image_instance<_Ty> {
 
-	uint32_t m_rows = 0, m_cols = 0;
-	uint32_t m_nchs = 1, m_width = 0;
-	tiff_matrix_t<value_type> m_data;
-
-	MATRICE_HOST_INL void create(uint32_t n) noexcept {
-		m_nchs = n;
-		m_width = m_cols * m_nchs;
-		m_data.create(m_rows, m_width, zero<value_type>);
-	}
-	template<typename _Uy = value_type>
+	template<typename _Uy = _Ty>
 	MATRICE_HOST_INL tiff_matrix_t<_Uy> grayscale() const noexcept {
-		if (m_nchs == 1) if constexpr (is_same_v<_Ty, _Uy>)
-			return (m_data);
+		if (this->m_nchs == 1) if constexpr (is_same_v<_Ty, _Uy>)
+			return (this->m_data);
 
-		tiff_matrix_t<_Uy> gc(m_rows, m_cols);
-		if (m_nchs == 1) {
-			gc.from(m_data.data());
+		tiff_matrix_t<_Uy> gc(this->m_rows, this->m_cols);
+		if (this->m_nchs == 1) {
+			gc.from(this->m_data.data());
 		}
 		else {
-			for (auto r = 0; r < m_rows; ++r) {
-				const auto pd = m_data[r];
+			for (auto r = 0; r < this->m_rows; ++r) {
+				const auto pd = this->m_data[r];
 				auto pg = gc[r];
-				for (auto c = 0; c < m_cols; ++c) {
-					pg[c] = pd[c] * 0.07 + pd[c + m_cols] * 0.72 + pd[c + 2 * m_cols] * 0.21;
+				for (auto c = 0; c < this->m_cols; ++c) {
+					pg[c] = pd[c] * 0.07 + pd[c + this->m_cols] * 0.72 + pd[c + 2 * this->m_cols] * 0.21;
 				}
 			}
 		}
@@ -60,10 +52,6 @@ template<typename _Ty> struct tiff_instance {
 				gc = gc / 255;
 
 		return forward<decltype(gc)>(gc);
-	}
-
-	MATRICE_HOST_INL operator tiff_matrix_t<value_type>() const{
-		return (m_data);
 	}
 };
 
