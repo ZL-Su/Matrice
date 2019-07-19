@@ -19,4 +19,5 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "Matrice/algs/interpolation.h"
 #include "Matrice/algs/imageproc.hpp"
 #include "Matrice/algs/correlation/_optim.h"
+#include "Matrice/algs/stereovision/_projection.hpp"
 #include "Matrice/algs/dnn/functions.h"
