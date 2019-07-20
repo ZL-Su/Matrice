@@ -52,11 +52,11 @@ template<typename _Ty> class Storage_
 {
 public:
 #ifdef __CXX11__
-	using value_t   =             _Ty;
-	using pointer   =            _Ty*;
-	using reference =            _Ty&;
-	using int_t     =  std::ptrdiff_t;
-	using idx_t     =          size_t;
+	using value_t = _Ty;
+	using pointer = std::add_pointer_t<value_t>;
+	using reference = std::add_lvalue_reference_t<value_t>;
+	using int_t = std::ptrdiff_t;
+	using idx_t = size_t;
 #elif
 	typedef _Ty               value_t;
 	typedef _Ty*              pointer;
