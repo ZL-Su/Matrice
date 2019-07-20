@@ -164,6 +164,13 @@ template<typename T> MATRICE_GLOBAL_INL constexpr bool is_matrix_convertible_v =
 template<int _M, int _N> struct allocator_traits;
 template<int _M, int _N> MATRICE_GLOBAL_INL constexpr auto allocator_traits_v = allocator_traits<_M, _N>::value;
 
+/**
+ *\brief internal type for accessing allocator traits. 
+ */
+template<typename Al> struct _Allocator_traits {
+	static_assert("Unknown allocator Al in _Allocator_traits.");
+};
+
 template<class T, typename = enable_if_t<is_matrix_v<T> || is_expression_v<T>>> 
 struct layout_traits : traits<T> {
 	MATRICE_GLOBAL_FINL static auto layout_type(size_t _format) {
