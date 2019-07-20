@@ -47,6 +47,12 @@ template<int _M, int _N> struct allocator_traits {
 #endif      
 	};
 };
+struct allocator_tag {
+	struct stack_allocator {};
+	struct heap_allocator {};
+	struct device_allocator {};
+	struct global_allocator {};
+};
 _DETAIL_BEGIN
 template<typename _Ty> class Storage_
 {
@@ -78,7 +84,7 @@ public:
 #else
 		COPY
 #endif 
-			 > 
+			 >
 	MATRICE_ALIGNED_CLASS DenseBase {
 	public:
 		static constexpr auto location = _Loc;
