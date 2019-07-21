@@ -53,7 +53,85 @@ struct allocator_tag {
 	struct device_allocator {};
 	struct global_allocator {};
 };
+struct plain_layout {
+	struct row_major { static constexpr auto value = 101; };
+	struct col_major { static constexpr auto value = 102; };
+};
 _DETAIL_BEGIN
+
+template<class _Altrs>
+MATRICE_ALIGNED_CLASS _Dense_allocator_base {
+	using _Myt = _Dense_allocator_base;
+	using _Mytraits = _Altrs;
+public:
+	using value_type = typename _Mytraits::value_type;
+	using pointer = std::add_pointer_t<value_type>;
+	static constexpr auto rows_at_compiletime = _Mytraits::rows;
+	static constexpr auto cols_at_compiletime = _Mytraits::cols;
+
+	MATRICE_GLOBAL_INL _Dense_allocator_base() noexcept
+		:m_rows(rows_at_compiletime), m_cols(cols_at_compiletime){
+	}
+
+	MATRICE_GLOBAL_INL constexpr decltype(auto) data() const noexcept {
+		return (m_data);
+	}
+	MATRICE_GLOBAL_INL constexpr decltype(auto) data() noexcept {
+		return (m_data);
+	}
+
+protected:
+	pointer m_data = nullptr;
+	size_t m_rows, m_cols;
+};
+
+template<typename _Ty,
+	diff_t _RowsAtCT, diff_t _ColsAtCT,
+	size_t _Opt = allocator_traits_v<_RowsAtCT, _ColsAtCT>,
+	typename _Layout = plain_layout::row_major>
+MATRICE_ALIGNED_CLASS _Allocator MATRICE_NONHERITABLE
+	: public _Dense_allocator_base<_Allocator_traits<_Allocator<_Ty, _RowsAtCT, _ColsAtCT, _Opt, _Layout>>> {
+	using _Myt = _Allocator;
+	using _Mybase = _Dense_allocator_base<_Allocator_traits<_Myt>>;
+public:
+	using typename _Mybase::value_type;
+	using typename _Mybase::pointer;
+
+	MATRICE_GLOBAL_INL _Allocator() noexcept
+		:_Mybase() {
+		_Mybase::m_data = _Alloc();
+	}
+	MATRICE_GLOBAL_INL _Allocator(int, int) noexcept
+		:_Allocator() {
+	}
+
+	MATRICE_GLOBAL_INL constexpr size_t(rows)() noexcept {
+		return _Mybase::rows_at_compiletime;
+	}
+	MATRICE_GLOBAL_INL constexpr size_t(cols)() noexcept {
+		return _Mybase::cols_at_compiletime;
+	}
+	MATRICE_GLOBAL_INL constexpr size_t(size)() noexcept {
+		return (rows()*cols());
+	}
+
+private:
+	MATRICE_GLOBAL_INL constexpr decltype(auto)_Alloc() noexcept {
+		return (_Data);
+	}
+	value_type _Data[_RowsAtCT*_ColsAtCT];
+};
+
+template<typename _Ty, diff_t _M, diff_t _N, size_t _Opt, typename _Ly>
+struct _Allocator_traits<_Allocator<_Ty, _M, _N, _Opt, _Ly>> {
+	using value_type = _Ty;
+	using layout_type = _Ly;
+	using category = allocator_tag::stack_allocator;
+	static constexpr auto rows = _M;
+	static constexpr auto cols = _N;
+	static constexpr auto options = _Opt;
+};
+
 template<typename _Ty> class Storage_
 {
 public:
