@@ -59,6 +59,11 @@ struct plain_layout {
 };
 _DETAIL_BEGIN
 
+
+/**
+ *\brief base class of dense allocator for plain objects.
+ *\param <_Altrs> allocator traits
+ */
 template<class _Altrs>
 MATRICE_ALIGNED_CLASS _Dense_allocator_base {
 	using _Myt = _Dense_allocator_base;
@@ -79,12 +84,20 @@ public:
 	MATRICE_GLOBAL_INL constexpr decltype(auto) data() noexcept {
 		return (m_data);
 	}
-
+	/**
+	 *\brief returns storage order which is one of 101(row-major) and 102(col-major)
+	 */
+	MATRICE_GLOBAL_INL constexpr decltype(auto) fmt() const noexcept {
+		return _Mytraits::layout_type::value;
+	}
 protected:
 	pointer m_data = nullptr;
 	size_t m_rows, m_cols;
 };
 
+/**
+ *\brief allocator for alloc linear stack memory.
+ */
 template<typename _Ty,
 	diff_t _RowsAtCT, diff_t _ColsAtCT,
 	size_t _Opt = allocator_traits_v<_RowsAtCT, _ColsAtCT>,
