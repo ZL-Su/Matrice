@@ -50,6 +50,7 @@ public:
 	enum { Size = 0, CompileTimeRows = 0, CompileTimeCols = 0 };
 	static constexpr auto depth = _Mytraits::depth;
 	using typename _Mybase::value_type;
+	//using typename _Mybase::scalar_type;
 	using _Mybase::operator=;
 	using _Mybase::operator();
 
