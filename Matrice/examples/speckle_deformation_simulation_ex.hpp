@@ -15,7 +15,7 @@ public:
 	using interp_type = interpolation<value_type>;
 	using rect_type = rect<size_t>;
 
-	speckle_generator(size_t rows, size_t cols) noexcept 
+	speckle_generator(size_t rows, size_t cols) noexcept
 		:m_rows(rows), m_cols(cols), m_srcinst(m_original) {
 	}
 
