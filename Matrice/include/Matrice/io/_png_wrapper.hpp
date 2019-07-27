@@ -21,5 +21,8 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../../../addin/libpng/png.h"
 
 DGE_MATRICE_BEGIN
+template<typename _Ty>
+decltype(auto) read_png_file(const char* path) {
 
+}
 DGE_MATRICE_END
