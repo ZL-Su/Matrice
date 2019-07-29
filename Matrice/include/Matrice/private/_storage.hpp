@@ -59,7 +59,6 @@ struct plain_layout {
 };
 _DETAIL_BEGIN
 
-
 /**
  *\brief base class of dense allocator for plain objects.
  *\param <_Altrs> allocator traits
@@ -71,27 +70,78 @@ MATRICE_ALIGNED_CLASS _Dense_allocator_base {
 public:
 	using value_type = typename _Mytraits::value_type;
 	using pointer = std::add_pointer_t<value_type>;
+	using allocator = typename _Mytraits::allocator;
 	static constexpr auto rows_at_compiletime = _Mytraits::rows;
 	static constexpr auto cols_at_compiletime = _Mytraits::cols;
 
 	MATRICE_GLOBAL_INL _Dense_allocator_base() noexcept
 		:m_rows(rows_at_compiletime), m_cols(cols_at_compiletime){
+		m_data = derived()._Alloc();
 	}
 	MATRICE_GLOBAL_INL _Dense_allocator_base(size_t rows, size_t cols) noexcept
 		:m_rows(rows), m_cols(cols) {
+		m_data = derived()._Alloc();
 	}
 
-	MATRICE_GLOBAL_INL constexpr decltype(auto) data() const noexcept {
-		return (m_data);
-	}
-	MATRICE_GLOBAL_INL constexpr decltype(auto) data() noexcept {
-		return (m_data);
-	}
 	/**
-	 *\brief returns storage order which is one of 101(row-major) and 102(col-major)
+	 *\brief retrieves the pointer to this memory block.
+	 *\param [none]
+	 */
+	MATRICE_GLOBAL_INL constexpr decltype(auto)data()const noexcept {
+		return (m_data);
+	}
+	MATRICE_GLOBAL_INL constexpr decltype(auto)data()noexcept {
+		return (m_data);
+	}
+
+	MATRICE_GLOBAL_INL constexpr size_t(rows)()const noexcept {
+		return m_rows;
+	}
+	MATRICE_GLOBAL_INL constexpr size_t(cols)()const noexcept {
+		return m_cols;
+	}
+	MATRICE_GLOBAL_INL constexpr size_t(size)()const noexcept {
+		return (m_rows*m_cols);
+	}
+
+	/**
+	 *\brief returns storage order which is 101 (for row-major) or 102 (for col-major).
+	 \param [none]
 	 */
 	MATRICE_GLOBAL_INL constexpr decltype(auto)fmt()const noexcept {
 		return _Mytraits::layout_type::value;
+	}
+
+	/**
+	 *\brief returns derived allocator.
+	 *\param [none]
+	 */
+	MATRICE_GLOBAL_INL const allocator& derived() const noexcept {
+		return *static_cast<const allocator*>(this);
+	}
+	MATRICE_GLOBAL_INL allocator& derived() noexcept {
+		return *static_cast<allocator*>(this);
+	}
+
+	MATRICE_GLOBAL_INL _Myt& operator=(const value_type val) noexcept {
+		if (m_data != nullptr) {
+			for (auto idx = 0; idx < this->size(); ++idx) {
+				m_data[idx] = val;
+			}
+		}
+		return (*this);
+	}
+	/**
+	 *\brief copy from another memory block, note that the storage orders are the same and the size of source memory must not less than this->size().
+	 *\param [data] the pointer to source memory
+	 */
+	MATRICE_GLOBAL_INL _Myt& operator=(const pointer data) noexcept {
+		if (m_data != nullptr && data) {
+			for (auto idx = 0; idx < this->size(); ++idx) {
+				m_data[idx] = data[idx];
+			}
+		}
+		return (*this);
 	}
 protected:
 	pointer m_data = nullptr;
@@ -112,10 +162,10 @@ MATRICE_ALIGNED_CLASS _Allocator MATRICE_NONHERITABLE
 public:
 	using typename _Mybase::value_type;
 	using typename _Mybase::pointer;
+	using _Mybase::operator=;
 
 	MATRICE_GLOBAL_INL _Allocator() noexcept
 		:_Mybase() {
-		_Mybase::m_data = _Alloc();
 	}
 	MATRICE_GLOBAL_INL _Allocator(int, int) noexcept
 		:_Allocator() {
@@ -132,10 +182,13 @@ public:
 	}
 
 private:
+	value_type _Data[_RowsAtCT*_ColsAtCT];
+
+public:
+	///</brief> reserved for internal using </brief>
 	MATRICE_GLOBAL_INL constexpr decltype(auto)_Alloc() noexcept {
 		return (_Data);
 	}
-	value_type _Data[_RowsAtCT*_ColsAtCT];
 };
 
 template<typename _Ty, diff_t _M, diff_t _N, 
@@ -147,16 +200,16 @@ struct _Allocator_traits<_Allocator<_Ty, _M, _N, _Opt, _Ly>> {
 	static constexpr auto rows = _M;
 	static constexpr auto cols = _N;
 	static constexpr auto options = _Opt;
+
+	using allocator = detail::_Allocator<value_type, rows, cols, options, layout_type>;
 };
 
 /**
  *\brief linear memory allocator on host heap.
  */
-template<typename _Ty,
-	size_t _Opt = allocator_traits_v<0, 0>,
-	typename _Layout = plain_layout::row_major>
-MATRICE_ALIGNED_CLASS _Allocator MATRICE_NONHERITABLE
-	: public _Dense_allocator_base<_Allocator_traits<_Allocator<_Ty, 0, 0, _Opt, _Layout>>>{
+template<typename _Ty, typename _Layout>
+MATRICE_ALIGNED_CLASS _Allocator<_Ty, 0, 0, allocator_traits_v<0, 0>, _Layout> MATRICE_NONHERITABLE
+	: public _Dense_allocator_base<_Allocator_traits<_Allocator<_Ty, 0, 0, allocator_traits_v<0, 0>, _Layout>>>{
 	using _Myt = _Allocator;
 	using _Mybase = _Dense_allocator_base<_Allocator_traits<_Myt>>;
 public:
@@ -167,22 +220,23 @@ public:
 		:_Mybase() {
 	}
 	MATRICE_GLOBAL_INL _Allocator(size_t rows, size_t cols = 1) noexcept
-		:_Mybase() {
-
+		:_Mybase(rows, cols) {
 	}
 
-private:
-	MATRICE_HOST_INL decltype(auto) _Alloc() noexcept;
+public:
+	MATRICE_HOST_INL decltype(auto) _Alloc() noexcept { return nullptr; };
 };
 
 template<typename _Ty, size_t _Opt, typename _Ly>
 struct _Allocator_traits<_Allocator<_Ty, 0, 0, _Opt, _Ly>> {
 	using value_type = _Ty;
 	using layout_type = _Ly;
-	using category = allocator_tag::stack_allocator;
-	static constexpr auto rows = _M;
-	static constexpr auto cols = _N;
+	using category = allocator_tag::heap_allocator;
+	static constexpr auto rows = 0;
+	static constexpr auto cols = 0;
 	static constexpr auto options = _Opt;
+
+	using allocator = detail::_Allocator<value_type, rows, cols, options, layout_type>;
 };
 
 template<typename _Ty> class Storage_
@@ -503,6 +557,18 @@ public:
 	};
 };
 _DETAIL_END
+
+/**
+ *\brief dense allocator interface
+ *\param <see comments below>
+ *\note if both _RowsAtCT and _ColsAtCT are greater than zero, the allocator will create memory block on the stack; if they are zero, the allocator will be dynamically create memory block on the heap; else if they are equal to -1 or -2, the memory will be allocated on a device (GPU), or with the CUDA managed malloc technique.
+ */
+template<typename _Ty, /*data type*/
+	diff_t _RowsAtCT = 0, /*rows at compile-time*/
+	diff_t _ColsAtCT = _RowsAtCT, /*cols at compile-time*/
+	class _Ly=plain_layout::row_major /*storage order*/
+>
+using dense_allocator = detail::_Allocator<_Ty, _RowsAtCT, _ColsAtCT, allocator_traits_v<_RowsAtCT, _ColsAtCT>, _Ly>;
 DGE_MATRICE_END
 
 #ifdef _MSC_VER
