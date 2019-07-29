@@ -77,6 +77,9 @@ public:
 	MATRICE_GLOBAL_INL _Dense_allocator_base() noexcept
 		:m_rows(rows_at_compiletime), m_cols(cols_at_compiletime){
 	}
+	MATRICE_GLOBAL_INL _Dense_allocator_base(size_t rows, size_t cols) noexcept
+		:m_rows(rows), m_cols(cols) {
+	}
 
 	MATRICE_GLOBAL_INL constexpr decltype(auto) data() const noexcept {
 		return (m_data);
@@ -87,7 +90,7 @@ public:
 	/**
 	 *\brief returns storage order which is one of 101(row-major) and 102(col-major)
 	 */
-	MATRICE_GLOBAL_INL constexpr decltype(auto) fmt() const noexcept {
+	MATRICE_GLOBAL_INL constexpr decltype(auto)fmt()const noexcept {
 		return _Mytraits::layout_type::value;
 	}
 protected:
@@ -135,8 +138,45 @@ private:
 	value_type _Data[_RowsAtCT*_ColsAtCT];
 };
 
-template<typename _Ty, diff_t _M, diff_t _N, size_t _Opt, typename _Ly>
+template<typename _Ty, diff_t _M, diff_t _N, 
+	size_t _Opt, typename _Ly>
 struct _Allocator_traits<_Allocator<_Ty, _M, _N, _Opt, _Ly>> {
+	using value_type = _Ty;
+	using layout_type = _Ly;
+	using category = allocator_tag::stack_allocator;
+	static constexpr auto rows = _M;
+	static constexpr auto cols = _N;
+	static constexpr auto options = _Opt;
+};
+
+/**
+ *\brief linear memory allocator on host heap.
+ */
+template<typename _Ty,
+	size_t _Opt = allocator_traits_v<0, 0>,
+	typename _Layout = plain_layout::row_major>
+MATRICE_ALIGNED_CLASS _Allocator MATRICE_NONHERITABLE
+	: public _Dense_allocator_base<_Allocator_traits<_Allocator<_Ty, 0, 0, _Opt, _Layout>>>{
+	using _Myt = _Allocator;
+	using _Mybase = _Dense_allocator_base<_Allocator_traits<_Myt>>;
+public:
+	using typename _Mybase::value_type;
+	using typename _Mybase::pointer;
+
+	MATRICE_GLOBAL_INL _Allocator() noexcept
+		:_Mybase() {
+	}
+	MATRICE_GLOBAL_INL _Allocator(size_t rows, size_t cols = 1) noexcept
+		:_Mybase() {
+
+	}
+
+private:
+	MATRICE_HOST_INL decltype(auto) _Alloc() noexcept;
+};
+
+template<typename _Ty, size_t _Opt, typename _Ly>
+struct _Allocator_traits<_Allocator<_Ty, 0, 0, _Opt, _Ly>> {
 	using value_type = _Ty;
 	using layout_type = _Ly;
 	using category = allocator_tag::stack_allocator;
