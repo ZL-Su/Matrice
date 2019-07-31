@@ -216,15 +216,16 @@ public:
 	using typename _Mybase::value_type;
 	using typename _Mybase::pointer;
 
-	MATRICE_GLOBAL_INL _Allocator() noexcept
+	MATRICE_HOST_INL _Allocator() noexcept
 		:_Mybase() {
 	}
-	MATRICE_GLOBAL_INL _Allocator(size_t rows, size_t cols = 1) noexcept
+	MATRICE_HOST_INL _Allocator(size_t rows, size_t cols = 1) noexcept
 		:_Mybase(rows, cols) {
 	}
+	MATRICE_HOST_INL ~_Allocator();
 
 public:
-	MATRICE_HOST_INL decltype(auto) _Alloc() noexcept { return nullptr; };
+	MATRICE_HOST_INL decltype(auto) _Alloc() noexcept;
 };
 
 template<typename _Ty, size_t _Opt, typename _Ly>
@@ -576,3 +577,4 @@ DGE_MATRICE_END
 #endif
 
 #include "inl\_storage_base.inl"
+#include "storage\_allocator.inl"
