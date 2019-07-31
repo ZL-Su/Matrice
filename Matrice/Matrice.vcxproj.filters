@@ -205,6 +205,9 @@
     <Filter Include="Header Files\Detail\core\inline">
       <UniqueIdentifier>{b88d248b-30ee-4f19-8369-13b6e621a9d0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Detail\memory\inline">
+      <UniqueIdentifier>{7c8b2ea0-e247-4d05-85c5-39a88b5fad6c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -875,9 +878,6 @@
     <None Include="include\Matrice\private\_similarity.inl">
       <Filter>Header Files\Detail\inline</Filter>
     </None>
-    <None Include="include\Matrice\private\inl\_storage_base.inl">
-      <Filter>Header Files\Detail\inline</Filter>
-    </None>
     <None Include="include\Matrice\private\nonfree\inl\_lnalge.inl">
       <Filter>Header Files\Detail\math\nonfree\inl</Filter>
     </None>
@@ -913,6 +913,12 @@
     </None>
     <None Include="include\Matrice\io\inline\_image.inl">
       <Filter>Header Files\IO\inline</Filter>
+    </None>
+    <None Include="include\Matrice\private\inl\_storage_base.inl">
+      <Filter>Header Files\Detail\memory\inline</Filter>
+    </None>
+    <None Include="include\Matrice\private\storage\_allocator.inl">
+      <Filter>Header Files\Detail\memory\inline</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

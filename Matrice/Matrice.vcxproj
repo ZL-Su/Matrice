@@ -366,6 +366,7 @@
     <None Include="include\Matrice\private\inl\_base.inl" />
     <None Include="include\Matrice\private\inl\_storage_base.inl" />
     <None Include="include\Matrice\private\nonfree\inl\_lnalge.inl" />
+    <None Include="include\Matrice\private\storage\_allocator.inl" />
     <None Include="include\Matrice\private\_similarity.inl" />
     <None Include="include\core" />
   </ItemGroup>
