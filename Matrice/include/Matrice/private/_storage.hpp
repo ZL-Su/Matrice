@@ -34,6 +34,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #ifndef MATRICE_ALIGNED_STRUCT
 #define MATRICE_ALIGNED_STRUCT class alignas(MATRICE_ALIGN_BYTES)
 #endif
+namespace {
+	static constexpr int dynamic = 0;
+	static constexpr int device = -1;
+	static constexpr int global = -2;
+}
 
 DGE_MATRICE_BEGIN
 template<int _M, int _N> struct allocator_traits {
@@ -57,6 +62,7 @@ struct plain_layout {
 	struct row_major { static constexpr auto value = 101; };
 	struct col_major { static constexpr auto value = 102; };
 };
+
 _DETAIL_BEGIN
 
 /**
@@ -74,15 +80,18 @@ public:
 	static constexpr auto rows_at_compiletime = _Mytraits::rows;
 	static constexpr auto cols_at_compiletime = _Mytraits::cols;
 
-	MATRICE_GLOBAL_INL _Dense_allocator_base() noexcept
+	MATRICE_GLOBAL_INL _Dense_allocator_base()
 		:m_rows(rows_at_compiletime), m_cols(cols_at_compiletime){
-		m_data = derived()._Alloc();
+		derived()._Alloc();
 	}
-	MATRICE_GLOBAL_INL _Dense_allocator_base(size_t rows, size_t cols) noexcept
+	MATRICE_GLOBAL_INL _Dense_allocator_base(size_t rows, size_t cols)
 		:m_rows(rows), m_cols(cols) {
-		m_data = derived()._Alloc();
+		derived()._Alloc();
 	}
-
+	MATRICE_GLOBAL_INL _Dense_allocator_base(const _Myt& othr)
+		: m_rows(othr.m_rows), m_cols(othr.m_cols) {
+		derived()._Alloc()._Copy(othr);
+	}
 	/**
 	 *\brief retrieves the pointer to this memory block.
 	 *\param [none]
@@ -187,7 +196,7 @@ private:
 public:
 	///</brief> reserved for internal using </brief>
 	MATRICE_GLOBAL_INL constexpr decltype(auto)_Alloc() noexcept {
-		return (_Data);
+		_Mybase::data() = _Data; return (*this);
 	}
 };
 
@@ -215,6 +224,7 @@ MATRICE_ALIGNED_CLASS _Allocator<_Ty, 0, 0, allocator_traits_v<0, 0>, _Layout> M
 public:
 	using typename _Mybase::value_type;
 	using typename _Mybase::pointer;
+	using _Mybase::operator=;
 
 	MATRICE_HOST_INL _Allocator() noexcept
 		:_Mybase() {
@@ -226,6 +236,8 @@ public:
 
 public:
 	MATRICE_HOST_INL decltype(auto) _Alloc() noexcept;
+	MATRICE_HOST_INL decltype(auto) _Copy(const _Mybase& othr) noexcept;
+	MATRICE_HOST_INL decltype(auto) _Move(_Mybase&& othr) noexcept;
 };
 
 template<typename _Ty, size_t _Opt, typename _Ly>
