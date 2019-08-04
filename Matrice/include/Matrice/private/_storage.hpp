@@ -77,6 +77,7 @@ public:
 	using value_type = typename _Mytraits::value_type;
 	using pointer = std::add_pointer_t<value_type>;
 	using allocator = typename _Mytraits::allocator;
+	using category = typename _Mytraits::category;
 	static constexpr auto rows_at_compiletime = _Mytraits::rows;
 	static constexpr auto cols_at_compiletime = _Mytraits::cols;
 
@@ -152,6 +153,13 @@ public:
 		}
 		return (*this);
 	}
+
+private:
+	template<typename _Al>
+	MATRICE_GLOBAL_INL _Myt& _Alloc_copy(const _Al& al) noexcept;
+	template<typename _Al>
+	MATRICE_GLOBAL_INL _Myt& _Alloc_move(_Al&& al) noexcept;
+
 protected:
 	pointer m_data = nullptr;
 	size_t m_rows, m_cols;
