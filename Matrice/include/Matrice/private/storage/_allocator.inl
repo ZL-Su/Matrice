@@ -60,7 +60,7 @@ namespace internal {
 	}
 	
 	template<typename _InIt, typename _OutIt>
-	MATRICE_HOST_INL _OutIt trivially_copy(_InIt _First, _InIt _Last, _OutIt _Dest) {
+	MATRICE_HOST_INL _OutIt copy(_InIt _First, _InIt _Last, _OutIt _Dest) {
 		if constexpr (std::is_trivially_assignable_v<_OutIt, _InIt>||is_same_v<_InIt, _OutIt>) {
 			const char* const _First_ch = const_cast<const char*>(reinterpret_cast<const volatile char*>(_First));
 			const char* const _Last_ch = const_cast<const char*>(reinterpret_cast<const volatile char *>(_Last));
@@ -79,9 +79,34 @@ namespace internal {
 			return (_Dest);
 		}
 	}
+
+	template<typename _InIt, typename _OutIt, class _InCat, class _OutCat>
+	MATRICE_GLOBAL_INL _OutIt copy(_InIt _First, _InIt _Last, _OutIt _Dest, _InCat, _OutCat) {
+
+		return _Dest;
+	}
 }
 
 _DETAIL_BEGIN
+
+template<typename _Altrs> template<typename _Al>
+MATRICE_GLOBAL_INL _Dense_allocator_base<_Altrs>& _Dense_allocator_base<_Altrs>::_Alloc_copy(const _Al& al) noexcept {
+	const auto begin = al.data();
+	const auto end = begin + min(this->size(), al.size());
+	internal::copy(begin, end, this->m_data, typename _Al::category(), category());
+
+	return (*this);
+}
+
+template<typename _Altrs> template<typename _Al>
+MATRICE_GLOBAL_INL _Dense_allocator_base<_Altrs>& _Dense_allocator_base<_Altrs>::_Alloc_move(_Al&& al) noexcept {
+	m_data = al.data();
+	m_rows = al.rows();
+	m_cols = al.cols();
+	al.data() = nullptr;
+
+	return (*this);
+}
 
 MATRICE_ALLOCATOR(HOST,, 0)::~_Allocator() {
 	internal::aligned_free(this->m_data);
@@ -95,7 +120,7 @@ MATRICE_ALLOCATOR(HOST, decltype(auto), 0)::_Alloc() noexcept {
 MATRICE_ALLOCATOR(HOST, decltype(auto), 0)::_Copy(const _Mybase& othr) noexcept {
 	const auto begin = othr.data();
 	const auto end = begin + min(this->size(), othr.size());
-	internal::trivially_copy(begin, end, this->m_data);
+	internal::copy(begin, end, this->m_data);
 	return (*this);
 }
 
