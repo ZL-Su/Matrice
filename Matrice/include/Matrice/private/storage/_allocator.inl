@@ -45,6 +45,7 @@ namespace internal {
 			std::exception("Bad memory allocation.");
 		};
 	}
+	
 	template<typename _Ty>
 	MATRICE_HOST_INL void aligned_free(_Ty* aligned_ptr) noexcept {
 		if (aligned_ptr) {
@@ -52,10 +53,12 @@ namespace internal {
 			aligned_ptr = nullptr;
 		}
 	}
+	
 	template<typename _Ty>
 	MATRICE_HOST_INL bool is_aligned(_Ty* aligned_ptr) noexcept {
 		return !(reinterpret_cast<size_t>(reinterpret_cast<void*>(aligned_ptr)) % MATRICE_ALIGN_BYTES);
 	}
+	
 	template<typename _InIt, typename _OutIt>
 	MATRICE_HOST_INL _OutIt trivially_copy(_InIt _First, _InIt _Last, _OutIt _Dest) {
 		if constexpr (std::is_trivially_assignable_v<_OutIt, _InIt>||is_same_v<_InIt, _OutIt>) {
@@ -97,9 +100,11 @@ MATRICE_ALLOCATOR(HOST, decltype(auto), 0)::_Copy(const _Mybase& othr) noexcept 
 }
 
 MATRICE_ALLOCATOR(HOST, decltype(auto), 0)::_Move(_Mybase&& othr) noexcept {
-	this->m_data = othr.m_data;
-	othr.m_data = nullptr;
-	othr.m_rows = 0, othr.m_cols = 0;
+	if (&othr != this) {
+		this->m_data = othr.m_data;
+		othr.m_data = nullptr;
+		othr.m_rows = 0, othr.m_cols = 0;
+	}
 	return (*this);
 }
 _DETAIL_END
