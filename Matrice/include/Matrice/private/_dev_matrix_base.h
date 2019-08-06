@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,7 +19,8 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <future>
 #include "../util/_macros.h"
 #include "../util/utils.h"
-#if (defined MATRICE_ENABLE_CUDA && !defined __disable_cuda__)
+
+#ifdef MATRICE_ENABLE_CUDA
 #include "_decl_dev_funcs.h"
 #include "_devops.h"
 #include "_unified_memory.h"

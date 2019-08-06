@@ -2,7 +2,7 @@
 #include "../../include/Matrice/util/_exception.h"
 #include "../../include/Matrice/private/_unified_memory.h"
 
-#if (defined MATRICE_ENABLE_CUDA && !defined __disable_cuda__)
+#ifdef MATRICE_ENABLE_CUDA
 #include <cuda_runtime.h>
 #pragma warning(disable: 4715 4661 4224 4267 4244 4819 4199)
 

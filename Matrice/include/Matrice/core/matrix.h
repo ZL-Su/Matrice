@@ -148,7 +148,7 @@ public:
 };
 
 
-#if (defined __enable_cuda__ && !defined __disable_cuda__)
+#ifdef MATRICE_ENABLE_CUDA
 /*******************************************************************
     Generic Matrix Class with Unifief Memory Allocation (CUDA)
 	         Copyright (c) : Zhilong Su 24/May/2018
