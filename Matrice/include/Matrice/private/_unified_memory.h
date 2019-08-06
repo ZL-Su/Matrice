@@ -31,7 +31,7 @@ template<typename T> struct memory_base_v1 {
 template<typename _Scalar, Location _From, Location _To, size_t _Opt>
 struct unified_sync : memory_base_v1<_Scalar> {
 	enum { From = _From, To = _To, Option = _Opt };
-	static_assert(Option == LINEAR + COPY, "Only for host linear memory copy!");
+	//static_assert(Option == LINEAR + COPY, "Only for host linear memory copy!");
 	using typename memory_base_v1<_Scalar>::pointer;
 	using typename memory_base_v1<_Scalar>::const_pointer;
 	MATRICE_GLOBAL_FINL static pointer op(pointer _Dst, const_pointer _Src, size_t _Rows, size_t _Cols = 1, size_t _1 = 1)
@@ -67,6 +67,7 @@ struct unified_sync<_Scalar, OnStack, OnStack, LINEAR + SHARED>
 	MATRICE_GLOBAL_FINL static pointer op(pointer _Dst, const_pointer _Src, size_t _Rows, size_t _Cols = 1, size_t _1 = 1)
 	{ return fill_mem(_Src, _Dst, _Rows*_Cols); }
 };
+#ifdef MATRICE_ENABLE_CUDA
 template<typename _Scalar, Location _Host>
 struct unified_sync<_Scalar, _Host, OnDevice, LINEAR>
 	: memory_base_v1<_Scalar>
@@ -121,18 +122,20 @@ struct unified_sync<_Scalar, OnDevice, OnDevice, PITCHED>
 	enum { From = OnDevice, To = OnDevice, Option = PITCHED };
 	MATRICE_GLOBAL static pointer op(pointer _Dst, const_pointer _Src, size_t _Rows, size_t _Cols, size_t _Pytes);
 };
-
+#endif
 ///<brief> unified memory release </brief>
 template<typename _Ty, Location _Loc> struct unified_free {};
 template<typename _Ty> struct unified_free<_Ty, OnHeap> {
 	MATRICE_GLOBAL_FINL void operator() (_Ty* _Data) { aligned_free(_Data); }
 };
+#ifdef MATRICE_ENABLE_CUDA
 template<typename _Ty> struct unified_free<_Ty, OnDevice> {
 	MATRICE_GLOBAL_FINL void operator() (_Ty* _Data) { device_free(_Data); }
 };
 template<typename _Ty> struct unified_free<_Ty, OnGlobal> {
 	MATRICE_GLOBAL_FINL void operator() (_Ty* _Data) { device_free(_Data); }
 };
+#endif
 
 ///<brief> unified memory set </brief>
 template<typename _Ty, size_t _Opt> struct unified_fill {
@@ -141,6 +144,7 @@ template<typename _Ty, size_t _Opt> struct unified_fill {
 		std::fill(_First, _First + _Size*_1, _Val);
 	}
 };
+#ifdef MATRICE_ENABLE_CUDA
 template<typename _Ty> struct unified_fill<_Ty, OnDevice + LINEAR> {
 	using FwdIt = _Ty * ;
 	MATRICE_GLOBAL_FINL static void op(FwdIt _First, const _Ty& _Val, size_t _Size, size_t _1 = 1, size_t _2 = 1) {
@@ -155,4 +159,5 @@ template<typename _Ty> struct unified_fill<_Ty, OnDevice + PITCHED> {
 		std::runtime_error("Oops, filling pitched device memory has not been implemented.");
 	}
 };
+#endif
 MATRICE_PRIVATE_END
