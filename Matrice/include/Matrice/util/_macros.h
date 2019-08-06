@@ -31,13 +31,13 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #endif //enable shared memory allocator
 
 #ifndef __enable_cuda__ 
-#define __enable_cuda__
-#define MATRICE_ENABLE_CUDA __enable_cuda__
+//#define __enable_cuda__
+//#define MATRICE_ENABLE_CUDA __enable_cuda__
 #endif // !__enable_cuda__ defined for CUDA support
 
 #ifdef _OPENMP
-#define __enable_omp__
-#define MATRICE_ENABLE_OMP
+//#define __enable_omp__
+//#define MATRICE_ENABLE_OMP
 #endif // _OPENMP
 
 
@@ -70,9 +70,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #endif
 #endif // __enable_ocv__
 
-#if (defined MATRICE_ENABLE_CUDA && !defined MATRICE_DISABLE_CUDA)
-#define __disable_simd__
-#define MATRICE_DISABLE_SIMD __disable_simd__
+#ifdef MATRICE_ENABLE_CUDA
 #include <host_defines.h>
 #define MATRICE_HOST_ONLY __host__
 #define MATRICE_DEVICE_ONLY __device__
