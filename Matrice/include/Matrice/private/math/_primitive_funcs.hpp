@@ -17,11 +17,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 #include <cmath>
-#if (defined MATRICE_ENABLE_CUDA && !defined __disable_cuda__)
+#include "_config.h"
+#ifdef MATRICE_ENABLE_CUDA
 #include <device_functions.h>
 #include <thrust\complex.h>
 #endif
-#include "_config.h"
 
 DGE_MATRICE_BEGIN
 template<typename T1, typename T2, 

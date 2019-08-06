@@ -75,7 +75,7 @@ constexpr _Vty* fill_mem(const _Vty* src, _Vty* dst, _Ity size)
 #undef _RET
 }
 
-#if(defined MATRICE_ENABLE_CUDA && !defined __disable_cuda__)
+#ifdef MATRICE_ENABLE_CUDA
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 _Ty* device_malloc(size_t& w, size_t h);
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
@@ -110,7 +110,7 @@ struct _Memory {
 			if /*constexpr */(_Loc == Location::OnHeap)
 				if (is_aligned(_Ptr)) privt::aligned_free(_Ptr);
 				else { std::free(_Ptr); _Ptr = nullptr; }
-#if (defined MATRICE_ENABLE_CUDA && !defined __disable_cuda__)
+#ifdef MATRICE_ENABLE_CUDA
 			else if /*constexpr*/ (_Loc == Location::OnGlobal)
 				privt::device_free(_Ptr);
 			else if /*constexpr*/ (_Loc == Location::OnDevice)

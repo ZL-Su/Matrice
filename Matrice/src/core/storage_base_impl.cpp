@@ -42,7 +42,7 @@ MATRICE_DENSEBASE_SIG::DenseBase(int_t _Rows, int_t _Cols)
 			[=](pointer ptr) { privt::aligned_free(ptr); });
 		my_data = my_shared.get();
 	}
-#if (defined MATRICE_ENABLE_CUDA && !defined __disable_cuda__)
+#ifdef MATRICE_ENABLE_CUDA
 	else if constexpr (location == Location::OnGlobal) {
 		my_data = privt::global_malloc<value_t>(size_t(my_size));
 		my_shared = SharedPtr(my_data, 
@@ -66,7 +66,7 @@ MATRICE_DENSEBASE_SIG::DenseBase(int_t _Rows, int_t _Cols)
 	else if constexpr (location == Location::OnHeap) {
 		my_data = privt::aligned_malloc<value_t>(my_size);
 	} 
-#if (defined MATRICE_ENABLE_CUDA && !defined __disable_cuda__)
+#ifdef MATRICE_ENABLE_CUDA
 	else if constexpr (location == Location::OnGlobal) {
 		my_data = privt::global_malloc<value_t>(size_t(my_size));
 	}
@@ -138,7 +138,7 @@ Storage_<_Ty>::DenseBase<_Loc,_Opt>::create(int_t _Rows, int_t _Cols){
 				[=](pointer ptr) { privt::aligned_free(ptr); });
 			my_data = my_shared.get();
 		}
-#if (defined MATRICE_ENABLE_CUDA && !defined __disable_cuda__)
+#ifdef MATRICE_ENABLE_CUDA
 		else if constexpr (location == Location::OnGlobal) {
 			my_data = privt::global_malloc<value_t>(size_t(my_size));
 			my_shared = SharedPtr(my_data,
@@ -162,7 +162,7 @@ Storage_<_Ty>::DenseBase<_Loc,_Opt>::create(int_t _Rows, int_t _Cols){
 		else if constexpr (location == Location::OnHeap) {
 			my_data = privt::aligned_malloc<value_t>(my_size);
 		}
-#if (defined MATRICE_ENABLE_CUDA && !defined __disable_cuda__)
+#ifdef MATRICE_ENABLE_CUDA
 		else if constexpr (location == Location::OnGlobal) {
 			my_data = privt::global_malloc<value_t>(size_t(my_size));
 		}
@@ -217,52 +217,53 @@ Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(DenseBase&& _other) noexcept{
 ///<brief> Explicit Specialization </brief>
 template class Storage_<int>::DenseBase<OnStack, LINEAR + COPY>;
 template class Storage_<int>::DenseBase<OnHeap, LINEAR + COPY>;
-template class Storage_<int>::DenseBase<OnGlobal, LINEAR + COPY>;
 template class Storage_<int>::DenseBase<UnSpecified>;
 template class Storage_<char>::DenseBase<OnStack, LINEAR + COPY>;
 template class Storage_<char>::DenseBase<OnHeap, LINEAR + COPY>;
-template class Storage_<char>::DenseBase<OnGlobal, LINEAR + COPY>;
 template class Storage_<char>::DenseBase<UnSpecified>;
 template class Storage_<bool>::DenseBase<OnStack, LINEAR + COPY>;
 template class Storage_<bool>::DenseBase<OnHeap, LINEAR + COPY>;
-template class Storage_<bool>::DenseBase<OnGlobal, LINEAR + COPY>;
 template class Storage_<bool>::DenseBase<UnSpecified>;
 template class Storage_<size_t>::DenseBase<OnStack, LINEAR + COPY>;
 template class Storage_<size_t>::DenseBase<OnHeap, LINEAR + COPY>;
-template class Storage_<size_t>::DenseBase<OnGlobal, LINEAR + COPY>;
 template class Storage_<size_t>::DenseBase<UnSpecified>;
 template class Storage_<float>::DenseBase<OnStack, LINEAR + COPY>;
 template class Storage_<float>::DenseBase<OnHeap, LINEAR + COPY>;
-template class Storage_<float>::DenseBase<OnGlobal, LINEAR + COPY>;
 template class Storage_<float>::DenseBase<UnSpecified>;
 template class Storage_<double>::DenseBase<OnStack, LINEAR + COPY>;
 template class Storage_<double>::DenseBase<OnHeap, LINEAR + COPY>;
-template class Storage_<double>::DenseBase<OnGlobal, LINEAR + COPY>;
 template class Storage_<double>::DenseBase<UnSpecified>;
 template class Storage_<unsigned char>::DenseBase<OnStack, LINEAR + COPY>;
 template class Storage_<unsigned char>::DenseBase<OnHeap, LINEAR + COPY>;
-template class Storage_<unsigned char>::DenseBase<OnGlobal, LINEAR + COPY>;
 template class Storage_<unsigned char>::DenseBase<UnSpecified>;
 template class Storage_<int>::DenseBase<OnStack, LINEAR+SHARED>;
 template class Storage_<int>::DenseBase<OnHeap, LINEAR+SHARED>;
-template class Storage_<int>::DenseBase<OnGlobal, LINEAR+SHARED>;
 template class Storage_<char>::DenseBase<OnStack, LINEAR+SHARED>;
 template class Storage_<char>::DenseBase<OnHeap, LINEAR+SHARED>;
-template class Storage_<char>::DenseBase<OnGlobal, LINEAR+SHARED>;
 template class Storage_<bool>::DenseBase<OnStack, LINEAR+SHARED>;
 template class Storage_<bool>::DenseBase<OnHeap, LINEAR+SHARED>;
-template class Storage_<bool>::DenseBase<OnGlobal, LINEAR+SHARED>;
 template class Storage_<size_t>::DenseBase<OnStack, LINEAR+SHARED>;
 template class Storage_<size_t>::DenseBase<OnHeap, LINEAR+SHARED>;
-template class Storage_<size_t>::DenseBase<OnGlobal, LINEAR+SHARED>;
 template class Storage_<float>::DenseBase<OnStack, LINEAR+SHARED>;
 template class Storage_<float>::DenseBase<OnHeap, LINEAR+SHARED>;
-template class Storage_<float>::DenseBase<OnGlobal, LINEAR+SHARED>;
 template class Storage_<double>::DenseBase<OnStack, LINEAR+SHARED>;
 template class Storage_<double>::DenseBase<OnHeap, LINEAR+SHARED>;
-template class Storage_<double>::DenseBase<OnGlobal, LINEAR+SHARED>;
 template class Storage_<unsigned char>::DenseBase<OnStack, LINEAR+SHARED>;
 template class Storage_<unsigned char>::DenseBase<OnHeap, LINEAR+SHARED>;
+#ifdef MATRICE_ENABLE_CUDA
+template class Storage_<int>::DenseBase<OnGlobal, LINEAR + COPY>;
+template class Storage_<char>::DenseBase<OnGlobal, LINEAR + COPY>;
+template class Storage_<size_t>::DenseBase<OnGlobal, LINEAR + COPY>;
+template class Storage_<bool>::DenseBase<OnGlobal, LINEAR + COPY>;
+template class Storage_<float>::DenseBase<OnGlobal, LINEAR + COPY>;
+template class Storage_<double>::DenseBase<OnGlobal, LINEAR + COPY>;
+template class Storage_<unsigned char>::DenseBase<OnGlobal, LINEAR + COPY>;
+template class Storage_<int>::DenseBase<OnGlobal, LINEAR + SHARED>;
+template class Storage_<char>::DenseBase<OnGlobal, LINEAR + SHARED>;
+template class Storage_<bool>::DenseBase<OnGlobal, LINEAR + SHARED>;
+template class Storage_<size_t>::DenseBase<OnGlobal, LINEAR + SHARED>;
+template class Storage_<float>::DenseBase<OnGlobal, LINEAR + SHARED>;
+template class Storage_<double>::DenseBase<OnGlobal, LINEAR + SHARED>;
 template class Storage_<unsigned char>::DenseBase<OnGlobal, LINEAR+SHARED>;
 template class Storage_<int>::DenseBase<OnDevice, LINEAR>;
 template class Storage_<char>::DenseBase<OnDevice, LINEAR>;
@@ -278,5 +279,6 @@ template class Storage_<float>::DenseBase<OnDevice, PITCHED>;
 template class Storage_<double>::DenseBase<OnDevice, PITCHED>;
 template class Storage_<unsigned char>::DenseBase<OnDevice, PITCHED>;
 template class Storage_<size_t>::DenseBase<OnDevice, PITCHED>;
+#endif
 _DETAIL_END DGE_MATRICE_END
 #undef MATRICE_DENSEBASE_SIG

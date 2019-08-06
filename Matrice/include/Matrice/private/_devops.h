@@ -19,7 +19,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <type_traits>
 #include "../util/_macros.h"
 #include "../private/_memory.h"
-#if(defined MATRICE_ENABLE_CUDA && !defined __disable_cuda__)
+#ifdef MATRICE_ENABLE_CUDA
 #include <cuda_runtime.h>
 MATRICE_DEVICE_BEGIN
 enum { LINEAR = 8000, PITCHED = 8001, ARRTARR = 8002, FROMARR = 8003, TOARRAY = 8004, };
