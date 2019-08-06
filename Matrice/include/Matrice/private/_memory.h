@@ -37,7 +37,13 @@ DGE_MATRICE_BEGIN
 #define MATRICE_ALIGNED(TYPE) alignas(MATRICE_ALIGN_BYTES)##TYPE
 #endif
 
-enum Location { UnSpecified = -1, OnStack = 0, OnHeap = 1, OnDevice = 2, OnGlobal = 3 };
+enum Location { 
+	UnSpecified = -1, 
+	OnStack = 0, 
+	OnHeap = 1, 
+	OnDevice = 2, 
+	OnGlobal = 3,
+};
 using loctn_t = Location; using memloc_t = Location;
 
 enum { COPY = 1001, MOVE = 1002, SHARED = 1000 };
