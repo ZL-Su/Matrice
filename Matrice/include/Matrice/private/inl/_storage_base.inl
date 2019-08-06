@@ -48,8 +48,13 @@ template<Location _Loc, size_t _Opt>
 template<Location _From, size_t _Option> MATRICE_GLOBAL_FINL
 Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(const DenseBase<_From, _Option>& _other)
  : DenseBase(_other.rows(), _other.cols()) {
+#ifdef MATRICE_ENABLE_CUDA
 	privt::unified_sync<value_t, _From, _Loc, _Loc==OnDevice?_Opt: _Option>::
 		op(my_data, _other.data(), my_rows, my_cols, _Loc == OnDevice ? my_pitch : _other.pitch());
+#else
+	privt::unified_sync<value_t, _From, _Loc, _Option>::
+		op(my_data, _other.data(), my_rows, my_cols, _other.pitch());
+#endif
 }
 
 template<typename _Ty> 
@@ -112,8 +117,13 @@ Storage_<_Ty>::DenseBase<_Loc, _Opt>::DenseBase(const Allocator<_M, _N, allocato
 	: DenseBase(_al.rows(), _al.cols()) {
 	constexpr auto _From = Location(remove_all_t<decltype(_al)>::location);
 	constexpr auto _Option = remove_all_t<decltype(_al)>::option;
+#ifdef MATRICE_ENABLE_CUDA
 	privt::unified_sync<value_t, _From, _Loc, _Loc==OnDevice?_Opt:_Option>::
 		op(my_data, (pointer)_al.data(), my_rows, my_cols, _Loc == OnDevice ? my_pitch : _al.pitch());
+#else
+	privt::unified_sync<value_t, _From, _Loc, _Option>::
+		op(my_data, (pointer)_al.data(), my_rows, my_cols, _al.pitch());
+#endif
 }
 template<typename _Ty>
 template<Location _Loc, size_t _Opt> 
@@ -121,9 +131,13 @@ template<int _M, int _N> MATRICE_GLOBAL_FINL
 decltype(auto) Storage_<_Ty>::DenseBase<_Loc, _Opt>::operator=(const Allocator<_M, _N, allocator_traits<_M, _N>::value>& _al) noexcept {
 	constexpr auto _From = Location(remove_all_t<decltype(_al)>::location);
 	constexpr auto _Option = remove_all_t<decltype(_al)>::option;
-
+#ifdef MATRICE_ENABLE_CUDA
 	privt::unified_sync<value_t, _From, _Loc, _Loc==OnDevice?_Opt:_Option>::
 		op(my_data, (pointer)_al.data(), my_rows, my_cols, _Loc == OnDevice ? my_pitch : _al.pitch());
+#else
+	privt::unified_sync<value_t, _From, _Loc, _Option>::
+		op(my_data, (pointer)_al.data(), my_rows, my_cols, _al.pitch());
+#endif
 	return (*this);
 }
 _DETAIL_END

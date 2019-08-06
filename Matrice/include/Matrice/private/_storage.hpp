@@ -502,6 +502,7 @@ public:
 		}
 	};
 
+#ifdef MATRICE_ENABLE_CUDA
 	//<brief> Unified device memory allocator </brief>
 	template<size_t _Opt>
 	MATRICE_ALIGNED_CLASS Allocator<-1, 0, _Opt> 
@@ -576,6 +577,7 @@ public:
 			return [](auto _) { privt::device_free(_); };
 		}
 	};
+#endif 
 };
 _DETAIL_END
 

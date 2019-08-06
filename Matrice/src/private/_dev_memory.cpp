@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,12 +19,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <stdexcept>
 #include "../../include/Matrice/private/_memory.h"
 
-#if (defined __enable_cuda__ && !defined __disable_cuda__)
+#ifdef MATRICE_ENABLE_CUDA
 #include <cuda_runtime.h>
 #pragma warning(disable: 4715 4661 4224 4267 4244 4819 4199)
 
-using std::complex;
-using uchar = unsigned char;
 MATRICE_PRIVATE_BEGIN
 //<note> w is the columns, h is the rows </note>
 template<typename _Ty, typename>
@@ -92,13 +90,13 @@ template void device_free(T*);
 template void device_memcpy<1,T,void>(T*, T*, size_t, size_t, size_t); \
 template void device_memcpy<2,T,void>(T*, T*, size_t, size_t, size_t);
 
-_DEVMALLOC(int)    _DEVMALLOC(char)
-_DEVMALLOC(uchar)  _DEVMALLOC(bool)
-_DEVMALLOC(float)  _DEVMALLOC(double)
+_DEVMALLOC(int)            _DEVMALLOC(char)
+_DEVMALLOC(unsigned char)  _DEVMALLOC(bool)
+_DEVMALLOC(float)          _DEVMALLOC(double)
 _DEVMALLOC(size_t)
-_DEVMEMCPY(int)    _DEVMEMCPY(char)
-_DEVMEMCPY(bool)   _DEVMEMCPY(uchar)
-_DEVMEMCPY(float)  _DEVMEMCPY(double)
+_DEVMEMCPY(int)            _DEVMEMCPY(char)
+_DEVMEMCPY(bool)           _DEVMEMCPY(unsigned char)
+_DEVMEMCPY(float)          _DEVMEMCPY(double)
 _DEVMEMCPY(size_t)
 
 #pragma endregion
