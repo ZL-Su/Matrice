@@ -19,7 +19,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../../private/_type_traits.h"
 #include "../../util/_macros.h"
 
-#ifdef __AVX__
+#ifdef MATRICE_SIMD_ARCH
 #include <mmintrin.h>
 #include <pmmintrin.h>
 #include <tmmintrin.h>

@@ -23,7 +23,7 @@ _TYPES_BEGIN
 
 struct Solver MATRICE_NONHERITABLE
 {
-	template<typename _Op = detail::LinearOp::Auto<Matrix_<default_type, __, __>>> 
+	template<typename _Op = detail::LinearOp::Auto<Matrix_<default_type, ::dynamic>>> 
 	class Linear_ : public detail::SolverBase<Linear_<_Op>>
 	{
 		using _Mybase = detail::SolverBase<Linear_<_Op>>;
@@ -52,7 +52,7 @@ using linear_alg_op = detail::LinearOp;
  *\Linear solver, default _Op is auto-solver-kernel.
  */
 template<
-	typename _Op = linear_alg_op::Auto<types::Matrix_<default_type, __, __>>,
+	typename _Op = linear_alg_op::Auto<types::Matrix_<default_type,::dynamic>>,
 	typename = std::enable_if_t<is_matrix_v<typename _Op::_Mty>>>
 using linear_solver = types::Solver::Linear_<_Op>;
 

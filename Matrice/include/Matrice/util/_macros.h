@@ -30,24 +30,6 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #define MATRICE_SHARED_STORAGE 0
 #endif //enable shared memory allocator
 
-#ifndef __enable_cuda__ 
-//#define __enable_cuda__
-//#define MATRICE_ENABLE_CUDA __enable_cuda__
-#endif // !__enable_cuda__ defined for CUDA support
-
-#ifdef _OPENMP
-//#define __enable_omp__
-//#define MATRICE_ENABLE_OMP
-#endif // _OPENMP
-
-
-#ifndef __AVX__
-#define __AVX__
-#endif // !__AVX__
-#ifndef __SSE__
-#define __SSE__
-#endif // !__SSE__
-
 #define MATRICE_SIMD_SSE    2 //*\SIMD-128
 #define MATRICE_SIMD_AVX    3 //*\SIMD-256
 #define MATRICE_SIMD_AVX512 4 //*\SIMD-512

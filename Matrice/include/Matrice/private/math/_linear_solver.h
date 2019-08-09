@@ -51,7 +51,7 @@ protected:
 
 struct LinearOp MATRICE_NONHERITABLE
 {
-	template<typename _Ty, int _M, int _N>
+	template<typename _Ty, int _M, int _N=_M>
 	using Matrix_ = types::Matrix_<_Ty, _M, _N>;
 	struct info_t { solver_type alg = AUTO; int status = 1; int sign = 1; };
 	template<typename _T> class OpBase 
@@ -68,7 +68,7 @@ struct LinearOp MATRICE_NONHERITABLE
 		}
 	public:
 		using value_t = typename conditional <std::is_scalar<_T>::value, _T, default_type>::type;
-		using view_t = Matrix_<value_t, __, __>;
+		using view_t = Matrix_<value_t, ::dynamic>;
 
 	protected:
 		info_t _Info;

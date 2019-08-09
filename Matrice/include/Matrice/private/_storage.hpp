@@ -41,10 +41,11 @@ namespace {
 }
 
 DGE_MATRICE_BEGIN
-template<int _M, int _N> struct allocator_traits {
+template<int _M, int _N=_M> struct allocator_traits {
 	enum {
-		value = (_M == 0 && _N == -1) ? LINEAR :  // linear device allocator
-		(_M == -1 && _N == -1) ? PITCHED :  // pitched device allocator
+		value = 
+		(_M == ::global && _N == ::global) ? LINEAR :  // linear device allocator
+		(_M == ::device && _N == ::device) ? PITCHED :  // pitched device allocator
 #if MATRICE_SHARED_STORAGE == 1
 		LINEAR + SHARED  // smart heap or global allocator
 #else
@@ -364,7 +365,7 @@ public:
 	};
 
 	//<brief> Managed host memory allocator </brief>
-	template<int _M, int _N, size_t _Opt = allocator_traits<_M, _N>::value>
+	template<int _M, int _N=_M, size_t _Opt = allocator_traits<_M, _N>::value>
 	MATRICE_ALIGNED_CLASS Allocator {
 		using _Myt = Allocator;
 	public:
@@ -458,10 +459,10 @@ public:
 
 	//<brief> Dynamic host memory allocator </brief>
 	template<size_t _Opt>
-	MATRICE_ALIGNED_CLASS Allocator<0, 0, _Opt> 
+	MATRICE_ALIGNED_CLASS Allocator<::dynamic, ::dynamic, _Opt>
 		: public DenseBase<OnHeap, _Opt>
 	{
-		using _Mybase = DenseBase<OnHeap, allocator_traits<0,0>::value>;
+		using _Mybase = DenseBase<OnHeap, allocator_traits<::dynamic>::value>;
 	public:
 		enum { location = _Mybase::location, option = _Mybase::option };
 		MATRICE_HOST_FINL Allocator(int _m, int _n) 
@@ -505,10 +506,10 @@ public:
 #ifdef MATRICE_ENABLE_CUDA
 	//<brief> Unified device memory allocator </brief>
 	template<size_t _Opt>
-	MATRICE_ALIGNED_CLASS Allocator<-1, 0, _Opt> 
-		: public DenseBase<OnGlobal, allocator_traits<-1, 0>::value>
+	MATRICE_ALIGNED_CLASS Allocator<::global, ::global, _Opt> 
+		: public DenseBase<OnGlobal, allocator_traits<::global>::value>
 	{
-		using _Mybase = DenseBase<OnGlobal, allocator_traits<-1, 0>::value>;
+		using _Mybase = DenseBase<OnGlobal, allocator_traits<::global>::value>;
 	public:
 		enum { location = _Mybase::location, option = _Mybase::option };
 		MATRICE_HOST_INL Allocator() 
@@ -541,10 +542,10 @@ public:
 
 	//<brief> Device memory allocator </brief>
 	template<size_t _Opt>
-	MATRICE_ALIGNED_CLASS Allocator<-1, -1, _Opt> 
-		: public DenseBase<OnDevice, allocator_traits<-1, -1>::value>
+	MATRICE_ALIGNED_CLASS Allocator<::device, ::device, _Opt> 
+		: public DenseBase<OnDevice, allocator_traits<::device>::value>
 	{
-		using _Mybase = DenseBase<OnDevice, allocator_traits<-1, -1>::value>;
+		using _Mybase = DenseBase<OnDevice, allocator_traits<::device>::value>;
 	public:
 		enum { location = _Mybase::location, option = _Mybase::option };
 		MATRICE_DEVICE_INL Allocator() 
