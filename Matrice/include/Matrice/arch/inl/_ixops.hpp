@@ -17,7 +17,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 #include "../../private/_type_traits.h"
-#ifdef __AVX__
+#ifdef MATRICE_SIMD_ARCH
 #include "../_ixtraits.hpp"
 #include "_ixop_impls.hpp"
 #include <pmmintrin.h>
@@ -25,14 +25,15 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <wmmintrin.h>
 #include <xmmintrin.h>
 
-MATRICE_ARCH_BEGIN  namespace detail {
+MATRICE_ARCH_BEGIN 
+namespace detail {
 
 ///<brief> SIMD operator definitions for application level. </brief>
-template<
-	typename T, 
-	typename = std::enable_if_t<std::is_arithmetic_v<T>>>
+template<typename T>
 struct Op_ MATRICE_NONHERITABLE {
 	using value_t = T;
+	static_assert(is_scalar_v<value_t>, "T in dgelom::simd::detail::Op_<T> must be a scalar.");
+
 	template<size_t _Elems = 4> struct _base_type {
 		enum {num_of_elem = _Elems};
 		using type = conditional_t<value_t, num_of_elem>;
@@ -44,28 +45,28 @@ struct Op_ MATRICE_NONHERITABLE {
 	template<size_t _Elems> struct plus : _base_type<_Elems> {
 		using type = typename _base_type<_Elems>::type;
 		enum { size = _base_type<_Elems>::num_of_elem };
-		HOST_INL_CXPR_T operator() (const type& _Left, const type& _Right) {
+		MATRICE_HOST_INL decltype(auto) operator() (const type& _Left, const type& _Right) {
 			return impl::simd_vop<value_t, size>::sum(_Left, _Right);
 		}
 	};
 	template<size_t _Elems> struct minus {
 		using type = typename _base_type<_Elems>::type;
 		enum { size = _base_type<_Elems>::num_of_elem };
-		HOST_INL_CXPR_T operator() (const type& _Left, const type& _Right) {
+		MATRICE_HOST_INL decltype(auto) operator() (const type& _Left, const type& _Right) {
 			return impl::simd_vop<value_t, size>::sub(_Left, _Right);
 		}
 	};
 	template<size_t _Elems> struct multiplies {
 		using type = typename _base_type<_Elems>::type;
 		enum { size = _base_type<_Elems>::num_of_elem };
-		HOST_INL_CXPR_T operator() (const type& _Left, const type& _Right) {
+		MATRICE_HOST_INL decltype(auto) operator() (const type& _Left, const type& _Right) {
 			return impl::simd_vop<value_t, size>::mul(_Left, _Right);
 		}
 	};
 	template<size_t _Elems> struct divides {
 		using type = typename _base_type<_Elems>::type;
 		enum { size = _base_type<_Elems>::num_of_elem };
-		HOST_INL_CXPR_T operator() (const type& _Left, const type& _Right) {
+		MATRICE_HOST_INL decltype(auto) operator() (const type& _Left, const type& _Right) {
 			return impl::simd_vop<value_t, size>::div(_Left, _Right);
 		}
 	};
@@ -76,7 +77,7 @@ struct Op_ MATRICE_NONHERITABLE {
 	template<size_t _Elems> struct abs {
 		using type = typename _base_type<_Elems>::type;
 		enum { size = _base_type<_Elems>::num_of_elem };
-		HOST_INL_CXPR_T operator() (const type& _Right) {
+		MATRICE_HOST_INL decltype(auto) operator() (const type& _Right) {
 			return impl::simd_vop<value_t, size>::abs(_Right);
 		}
 	};
@@ -87,15 +88,15 @@ struct Op_ MATRICE_NONHERITABLE {
 	template<size_t _Elems> using adaptor = impl::simd_hop<value_t, _Elems>;
 };
 template<typename _Fn, typename... _Args>
-HOST_INL_CXPR_T _Transform_impl(const _Args&... _args) {
+MATRICE_HOST_INL decltype(auto) _Transform_impl(const _Args&... _args) {
 	//_Fn _Func;
 	return _Fn()(_args...);
-}
+};
 }
 template<typename _Fn, typename... _Args>
-HOST_INL_CXPR_T transform(const _Args&... _args) { 
+MATRICE_HOST_INL decltype(auto) transform(const _Args&... _args) {
 	return (detail::_Transform_impl<_Fn>(_args.data()...)); 
-}
+};
 MATRICE_ARCH_END
 
 #endif

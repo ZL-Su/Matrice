@@ -29,7 +29,7 @@ void __create_impl(size_t _Rows, size_t _Cols = 1);
 	Generic Matrix Class with Aligned Static Memory Allocation
 	       Copyright (c) : Zhilong Su, since 14/Feb/2018
 *******************************************************************/
-template<typename _Ty, int _M, int _N>
+template<typename _Ty, int _M, int _N = _M>
 class Matrix_ : public Base_<Matrix_<_Ty, _M, _N>>
 {
 	using Myt = Matrix_;
@@ -93,8 +93,8 @@ public:
 
 	MATRICE_GLOBAL_FINL operator std::array<value_t, Size>() const { return internal::_Fill_array<value_t, Size>(_Mybase::begin()); }
 	MATRICE_GLOBAL_FINL operator std::array<value_t, Size>() { return internal::_Fill_array<value_t, Size>(_Mybase::begin()); }
-	MATRICE_GLOBAL_FINL operator Matrix_<value_t, __, __>() const { return Matrix_<value_t, __, __>(rows(), cols(), _Mybase::m_data); }
-	MATRICE_GLOBAL_FINL operator Matrix_<value_t, __, __>() { return Matrix_<value_t, __, __>(rows(), cols(), _Mybase::m_data); }
+	MATRICE_GLOBAL_FINL operator Matrix_<value_t, ::dynamic>() const { return Matrix_<value_t, ::dynamic>(rows(), cols(), _Mybase::m_data); }
+	MATRICE_GLOBAL_FINL operator Matrix_<value_t, ::dynamic>() { return Matrix_<value_t, ::dynamic>(rows(), cols(), _Mybase::m_data); }
 };
 
 
@@ -103,9 +103,9 @@ public:
 	         Copyright (c) : Zhilong Su since 14/Feb/2018
  ******************************************************************/
 template<typename _Ty>
-class Matrix_<_Ty, __, __> : public Base_<Matrix_<_Ty, __, __>>
+class Matrix_<_Ty, ::dynamic> : public Base_<Matrix_<_Ty, ::dynamic>>
 {
-	using Myt = Matrix_<_Ty, __, __>;
+	using Myt = Matrix_<_Ty, ::dynamic>;
 	using Myt_const = std::add_const_t<Myt>;
 	using Myt_reference = std::add_lvalue_reference_t<Myt>;
 	using Myt_move_reference = std::add_rvalue_reference_t<Myt>;
@@ -116,7 +116,7 @@ public:
 	using typename _Mybase::pointer;
 	using typename _Mybase::const_initlist;
 	using device_t = Matrix_<value_t, -1, -1>;
-	enum { Size = __, CompileTimeRows = __, CompileTimeCols = __, };
+	enum { Size = ::dynamic, CompileTimeRows = ::dynamic, CompileTimeCols = ::dynamic, };
 	
 	MATRICE_GLOBAL_FINL Matrix_(int _rows) noexcept 
 		: _Mybase(_rows, 1) {};
@@ -154,18 +154,18 @@ public:
 	         Copyright (c) : Zhilong Su 24/May/2018
  ******************************************************************/
 template<typename _Ty>
-class Matrix_<_Ty, -1, __> : public Base_<Matrix_<_Ty, -1, __>>
+class Matrix_<_Ty, ::global> : public Base_<Matrix_<_Ty, ::global>>
 {
-	using Myt = Matrix_<_Ty, -1, __>;
+	using Myt = Matrix_<_Ty, ::global>;
 	using Myt_reference = std::add_lvalue_reference_t<Myt>;
 	using Myt_const_reference = add_const_reference_t<Myt>;
 	using Myt_move_reference = std::add_rvalue_reference_t<Myt>;
-	using _Mybase = Base_<Matrix_<_Ty, -1, __>>;
+	using _Mybase = Base_<Matrix_<_Ty, ::global>>;
 public:
 	using typename _Mybase::value_t;
 	using typename _Mybase::pointer;
 	using typename _Mybase::const_initlist;
-	enum { Size = __, CompileTimeRows = -1, CompileTimeCols = __, };
+	enum { Size = ::dynamic, CompileTimeRows = 0, CompileTimeCols = 0, };
 	MATRICE_GLOBAL_INL Matrix_(int _rows) noexcept 
 		: _Mybase(_rows, 1) {};
 	MATRICE_GLOBAL_INL Matrix_(Myt_move_reference _other) noexcept 
@@ -194,26 +194,26 @@ public:
 	         Copyright (c) : Zhilong Su 25/May/2018
  ******************************************************************/
 template<typename _Ty>
-class Matrix_<_Ty, -1, -1> : public Base_<Matrix_<_Ty, -1, -1>>, public device::Base_<_Ty>
+class Matrix_<_Ty, ::device> : public Base_<Matrix_<_Ty, ::device>>, public device::Base_<_Ty>
 {
 	using _Myt = Matrix_;
 	using Myt_reference = std::add_lvalue_reference_t<_Myt>;
 	using Myt_const_reference = add_const_reference_t<_Myt>;
 	using Myt_move_reference = std::add_rvalue_reference_t<_Myt>;
 	using _Mydevbase = device::Base_<_Ty>;
-	using _Mybase = Base_<Matrix_<_Ty, -1, -1>>;
+	using _Mybase = Base_<Matrix_<_Ty, ::device>>;
 	using _Mybase::m_data;
 	using _Mybase::m_rows;
 	using _Mybase::m_cols;
 	size_t m_pitch = _Mybase::m_storage.pitch();
 public:
-	enum { Size = 0, CompileTimeRows = -1, CompileTimeCols = -1, };
+	enum { Size = 0, CompileTimeRows = ::device, CompileTimeCols = ::device, };
 	using typename _Mybase::value_t;
 	using typename _Mybase::value_type;
 	using typename _Mybase::pointer;
 	using typename _Mybase::const_initlist;
-	using host_t = Matrix_<value_t, 0, 0>;
-
+	using host_t = Matrix_<value_t, ::dynamic>;
+	
 	MATRICE_GLOBAL_INL Matrix_(int _rows) noexcept 
 		:_Mybase(_rows, 1), _Mydevbase(m_data, &m_pitch, &m_cols, &m_rows) {};
 	MATRICE_GLOBAL_INL Matrix_(Myt_const_reference _other) noexcept 

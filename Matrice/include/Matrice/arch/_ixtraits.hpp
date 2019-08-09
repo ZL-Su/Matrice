@@ -2,7 +2,7 @@
 #include "../private/_type_traits.h"
 #include "../util/_macros.h"
 
-#ifdef __AVX__
+#ifdef MATRICE_SIMD_ARCH
 #include <mmintrin.h>    //_m64
 #include <emmintrin.h>   //_m128
 #include <immintrin.h>   //_m256

@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <initializer_list>
 #include "../util/_macros.h"
 #include "../util/genalgs.h"
-#ifdef __AVX__
+#if MATRICE_SIMD_ARCH
 #include "./inl/_ixops.hpp"
 
 MATRICE_ARCH_BEGIN
