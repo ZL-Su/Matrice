@@ -94,21 +94,6 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #define MATRICE_NONHERITABLE final
 #endif
 
-#ifndef __
-#define __ 0      //run-time deduced on host
-#endif
-
-#ifndef _RTDD
-#define _RTDD -1  //run-time deduced on device
-#endif
-
-#ifndef MATRICE_INT
-#define MATRICE_INT                                std::ptrdiff_t
-typedef MATRICE_INT                                     int_t;
-#else
-typedef int                                             int_t;
-#endif
-
 #define MATRICE_NAMESPACE_BEGIN_ namespace dgelom {
 #define _MATRICE_NAMESPACE_END                   }
 #define DGE_MATRICE_BEGIN namespace dgelom {
