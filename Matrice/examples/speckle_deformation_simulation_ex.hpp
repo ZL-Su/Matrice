@@ -1,9 +1,9 @@
 
 #pragma once
 #include <optional>
-#include "../include/io"
-#include "../include/core"
-#include "../include/Matrice/algs/interpolation.h"
+#include <../include/io>
+#include <../include/core>
+#include <../include/Matrice/algs/interpolation.h>
 
 DGE_MATRICE_BEGIN
 template<typename _Ty = float>

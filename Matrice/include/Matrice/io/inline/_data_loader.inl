@@ -7,7 +7,6 @@
 
 DGE_MATRICE_BEGIN namespace io { _DETAIL_BEGIN
 
-
 /**
  *\brief <class> _Data_loader_base </class>
  */
