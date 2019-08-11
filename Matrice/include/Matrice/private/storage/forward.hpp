@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,17 +16,13 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
+#include <util/_macros.h>
 
-#if defined MATRICE_USE_OPENCV
-#include <opencv2\core.hpp>
-#define VIEW_BASE_OCV cv::Mat
-#ifdef __CXX11__
-using ocv_view_t = VIEW_BASE_OCV;
-template<typename Type>
-using ocv_view_t_cast = cv::DataType<Type>;
-#else
-#define __view_space__ cv::
-typedef cv::Mat ocv_view_t;
-#endif
-#endif
-
+DGE_MATRICE_BEGIN
+_DETAIL_BEGIN
+template<typename _Ty, diff_t _M, diff_t _N, size_t _Opt, typename _Layout>
+class _Allocator;
+_DETAIL_END
+template<typename _Ty, diff_t _RowsAtCT, diff_t _ColsAtCT, size_t _Options, class _Ly>
+using Allocator = detail::_Allocator<_Ty, _RowsAtCT, _ColsAtCT, _Options, _Ly>;
+DGE_MATRICE_END

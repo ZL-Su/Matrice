@@ -17,8 +17,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 #include <array>
-#include "../private/_plain_base.hpp"
-#include "../private/_dev_matrix_base.h"
+#include <private/_plain_base.hpp>
+#ifdef MATRICE_ENABLE_CUDA
+#include <private/_dev_matrix_base.h>
+#endif
 
 MATRICE_NAMESPACE_BEGIN_TYPES
 
@@ -105,40 +107,38 @@ public:
 template<typename _Ty>
 class Matrix_<_Ty, ::dynamic> : public Base_<Matrix_<_Ty, ::dynamic>>
 {
-	using Myt = Matrix_<_Ty, ::dynamic>;
-	using Myt_const = std::add_const_t<Myt>;
-	using Myt_reference = std::add_lvalue_reference_t<Myt>;
-	using Myt_move_reference = std::add_rvalue_reference_t<Myt>;
+	using _Myt = Matrix_<_Ty, ::dynamic>;
+	using Myt_const = std::add_const_t<_Myt>;
+	using Myt_reference = std::add_lvalue_reference_t<_Myt>;
+	using Myt_move_reference = std::add_rvalue_reference_t<_Myt>;
 	using Myt_const_reference = std::add_lvalue_reference_t<Myt_const>;
-	using _Mybase = Base_<Myt>;
+	using _Mybase = Base_<_Myt>;
 public:
 	using typename _Mybase::value_t;
 	using typename _Mybase::pointer;
 	using typename _Mybase::const_initlist;
-	using device_t = Matrix_<value_t, -1, -1>;
+	
 	enum { Size = ::dynamic, CompileTimeRows = ::dynamic, CompileTimeCols = ::dynamic, };
 	
-	MATRICE_GLOBAL_FINL Matrix_(int _rows) noexcept 
-		: _Mybase(_rows, 1) {};
-	MATRICE_GLOBAL_FINL Matrix_(const Myt& _other) noexcept 
-		: _Mybase(_other) {};
+	MATRICE_GLOBAL_FINL Matrix_(int rows) noexcept 
+		: _Mybase(rows, 1) {};
+	MATRICE_GLOBAL_FINL Matrix_(const _Myt& other) noexcept
+		: _Mybase(other) {};
 	template<typename _Arg>
-	MATRICE_GLOBAL_FINL Matrix_(_Arg&& _other) noexcept 
-		: _Mybase(move(_other)) {};
+	MATRICE_GLOBAL_FINL Matrix_(_Arg&& other) noexcept 
+		: _Mybase(move(other)) {};
 	template<typename... _Args> 
 	MATRICE_GLOBAL_FINL Matrix_(_Args&&... args) noexcept 
 		: _Mybase(forward<_Args>(args)...) {};
-	MATRICE_GLOBAL_FINL Matrix_(const device_t& _other) noexcept 
-		: _Mybase(_other) {};
 
-	MATRICE_GLOBAL_INL Myt_reference operator= (Myt_const_reference _other) { 
-		return _Mybase::operator=(_other); 
+	MATRICE_GLOBAL_INL Myt_reference operator= (Myt_const_reference other) { 
+		return _Mybase::operator=(other); 
 	}
-	MATRICE_GLOBAL_INL Myt_reference operator= (Myt_move_reference _other) noexcept { 
-		return _Mybase::operator=(move(_other)); 
+	MATRICE_GLOBAL_INL Myt_reference operator= (Myt_move_reference other) noexcept { 
+		return _Mybase::operator=(move(other)); 
 	}
-	MATRICE_GLOBAL_FINL Myt_reference operator= (const_initlist _list) { 
-		return _Mybase::operator=(_list); 
+	MATRICE_GLOBAL_FINL Myt_reference operator= (const_initlist list) { 
+		return _Mybase::operator=(list); 
 	}
 	/*template<typename _Arg> 
 	MATRICE_GLOBAL_FINL Myt_reference operator= (const _Arg& _arg) { return _Mybase::operator=(_arg); }*/
