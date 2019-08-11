@@ -53,16 +53,27 @@ MATRICE_GLOBAL_INL _Dense_allocator_base<_Altrs>& _Dense_allocator_base<_Altrs>:
 }
 
 MATRICE_ALLOCATOR(HOST,, 0)::~_Allocator() {
-	internal::aligned_free(this->m_data);
+	internal::free(this->data(), typename _Mybase::category());
 }
 
 MATRICE_ALLOCATOR(HOST, decltype(auto), 0)::_Alloc() noexcept {
-	this->data() = internal::aligned_malloc<value_type>(this->size());
+	auto Cols = this->cols();
+	this->data() = internal::malloc<value_type>(this->rows(), Cols, typename _Mybase::category());
 	return (*this);
 }
 _DETAIL_END
 
 namespace internal {
+template<typename _Ty, class _Tag>
+MATRICE_GLOBAL_INL decltype(auto) malloc(size_t rows, size_t& cols, _Tag) {
+	return impl::_Malloc<_Ty>(rows, cols, _Tag());
+}
+
+template<typename _Ty, class _Tag>
+MATRICE_GLOBAL_INL void free(_Ty* data, _Tag) {
+	return impl::_Free(data, _Tag());
+}
+
 template<typename _Ty>
 MATRICE_HOST_INL decltype(auto) aligned_malloc(size_t size) {
 	using value_type = _Ty;
@@ -99,6 +110,20 @@ MATRICE_GLOBAL_INL _OutIt copy(_InIt _First, _InIt _Last, _OutIt _Dest, _InCat, 
 }
 
 namespace impl {
+template<typename _Ty>
+MATRICE_HOST_INL decltype(auto) _Malloc(size_t rows, size_t cols, heap_alloc_tag) {
+	return aligned_malloc<_Ty>(rows*cols);
+}
+
+template<typename _Ty>
+MATRICE_HOST_INL void _Free(_Ty* data, heap_alloc_tag) {
+	if (data) {
+		auto void_ptr = reinterpret_cast<void*>(data);
+		std::free(*(reinterpret_cast<void**>(void_ptr)-1));
+		data = nullptr;
+	}
+}
+
 template<typename _InIt, typename _OutIt>
 MATRICE_HOST_INL _OutIt _Memcpy(_InIt _First, _InIt _Last, _OutIt _Dest, stack_alloc_tag, stack_alloc_tag) {
 	for (; _First != _Last; ++_Dest, (void)++_First) {
