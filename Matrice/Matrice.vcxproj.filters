@@ -585,6 +585,9 @@
     <ClInclude Include="include\Matrice\private\_scalar.hpp">
       <Filter>Header Files\Detail\core</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\private\storage\forward.hpp">
+      <Filter>Header Files\Detail\memory</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">

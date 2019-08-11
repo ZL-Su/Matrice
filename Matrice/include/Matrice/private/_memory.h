@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <xutility>
 #include "_tag_defs.h"
 #include "_type_traits.h"
-#include "_decl_dev_funcs.h"
 
 #if MATRICE_SIMD_ARCH == MATRICE_SIMD_AVX
 #define MATRICE_ALIGN_BYTES   0x0020
@@ -145,5 +144,49 @@ MATRICE_HOST_INL static _OutIt copy(_InIt _First, _InIt _Last, _OutIt _Dest) {
 }
 
 };
+}
+
+struct stack_alloc_tag {};
+struct heap_alloc_tag {};
+#ifdef MATRICE_ENABLE_CUDA
+struct device_alloc_tag {};
+struct global_alloc_tag {};
+#endif
+
+struct plain_layout {
+	struct row_major { static constexpr auto value = 101; };
+	struct col_major { static constexpr auto value = 102; };
+};
+
+namespace internal {
+
+template<typename _Ty>
+MATRICE_HOST_INL decltype(auto) aligned_malloc(size_t size);
+
+template<typename _Ty>
+MATRICE_HOST_INL void aligned_free(_Ty* aligned_ptr) noexcept;
+
+template<typename _Ty>
+MATRICE_HOST_INL bool is_aligned(_Ty* aligned_ptr) noexcept;
+
+template<typename _InIt, typename _OutIt>
+MATRICE_HOST_INL _OutIt copy(_InIt _First, _InIt _Last, _OutIt _Dest);
+
+template<typename _InIt, typename _OutIt, class _InTag, class _OutTag>
+MATRICE_GLOBAL_INL _OutIt copy(_InIt _First, _InIt _Last, _OutIt _Dest, _InTag, _OutTag);
+
+namespace impl {
+template<typename _InIt, typename _OutIt>
+MATRICE_HOST_INL _OutIt _Memcpy(_InIt _First, _InIt _Last, _OutIt _Dest, stack_alloc_tag, stack_alloc_tag);
+
+template<typename _InIt, typename _OutIt>
+MATRICE_HOST_INL _OutIt _Memcpy(_InIt _First, _InIt _Last, _OutIt _Dest, stack_alloc_tag, heap_alloc_tag);
+
+template<typename _InIt, typename _OutIt>
+MATRICE_HOST_INL _OutIt _Memcpy(_InIt _First, _InIt _Last, _OutIt _Dest, heap_alloc_tag, stack_alloc_tag);
+
+template<typename _InIt, typename _OutIt>
+MATRICE_HOST_INL _OutIt _Memcpy(_InIt _First, _InIt _Last, _OutIt _Dest, heap_alloc_tag, heap_alloc_tag);
+}
 }
 DGE_MATRICE_END

@@ -36,32 +36,26 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #endif
 namespace {
 	static constexpr int dynamic = 0;
+#ifdef MATRICE_ENABLE_CUDA
 	static constexpr int device = -1;
 	static constexpr int global = -2;
+#endif
 }
 
 DGE_MATRICE_BEGIN
 template<int _M, int _N=_M> struct allocator_traits {
 	enum {
 		value = 
+#ifdef MATRICE_ENABLE_CUDA
 		(_M == ::global && _N == ::global) ? LINEAR :  // linear device allocator
 		(_M == ::device && _N == ::device) ? PITCHED :  // pitched device allocator
+#endif
 #if MATRICE_SHARED_STORAGE == 1
 		LINEAR + SHARED  // smart heap or global allocator
 #else
 		LINEAR + COPY    // deep heap or global allocator
 #endif      
 	};
-};
-struct allocator_tag {
-	struct stack_allocator {};
-	struct heap_allocator {};
-	struct device_allocator {};
-	struct global_allocator {};
-};
-struct plain_layout {
-	struct row_major { static constexpr auto value = 101; };
-	struct col_major { static constexpr auto value = 102; };
 };
 
 _DETAIL_BEGIN
@@ -92,7 +86,8 @@ public:
 	}
 	MATRICE_GLOBAL_INL _Dense_allocator_base(const _Myt& othr)
 		: m_rows(othr.m_rows), m_cols(othr.m_cols) {
-		derived()._Alloc()._Copy(othr);
+		derived()._Alloc();
+		_Alloc_copy(othr.derived());
 	}
 	/**
 	 *\brief retrieves the pointer to this memory block.
@@ -214,7 +209,7 @@ template<typename _Ty, diff_t _M, diff_t _N,
 struct _Allocator_traits<_Allocator<_Ty, _M, _N, _Opt, _Ly>> {
 	using value_type = _Ty;
 	using layout_type = _Ly;
-	using category = allocator_tag::stack_allocator;
+	using category = stack_alloc_tag;
 	static constexpr auto rows = _M;
 	static constexpr auto cols = _N;
 	static constexpr auto options = _Opt;
@@ -245,15 +240,13 @@ public:
 
 public:
 	MATRICE_HOST_INL decltype(auto) _Alloc() noexcept;
-	MATRICE_HOST_INL decltype(auto) _Copy(const _Mybase& othr) noexcept;
-	MATRICE_HOST_INL decltype(auto) _Move(_Mybase&& othr) noexcept;
 };
 
 template<typename _Ty, size_t _Opt, typename _Ly>
 struct _Allocator_traits<_Allocator<_Ty, 0, 0, _Opt, _Ly>> {
 	using value_type = _Ty;
 	using layout_type = _Ly;
-	using category = allocator_tag::heap_allocator;
+	using category = heap_alloc_tag;
 	static constexpr auto rows = 0;
 	static constexpr auto cols = 0;
 	static constexpr auto options = _Opt;

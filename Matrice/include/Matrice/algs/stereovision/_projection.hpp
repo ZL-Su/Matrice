@@ -28,7 +28,7 @@ public:
 	static constexpr auto dim = 3;
 	using value_type = _Ty;
 	using point_type = Vec3_<value_type>;
-	using matrix_type = Matrix_<value_type, dim, dim>;
+	using matrix_type = Matrix_<value_type, dim>;
 	template<typename _An> struct depth_paramterized_projection {
 		point_type point;
 		MATRICE_HOST_INL point_type grad() noexcept {
