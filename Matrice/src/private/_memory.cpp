@@ -1,7 +1,60 @@
 #include <memory>
 #include <complex>
-#include <stdexcept>
-#include "../../include/Matrice/private/_memory.h"
+#include <util/_exception.h>
+#include <private/_memory.h>
+#ifdef MATRICE_ENABLE_CUDA
+#include <cuda_runtime.h>
+#pragma warning(disable: 4715 4661 4224 4267 4244 4819 4199)
+#endif
+
+DGE_MATRICE_BEGIN
+namespace internal { namespace impl {
+#ifdef MATRICE_ENABLE_CUDA
+template<typename _Ty>
+MATRICE_GLOBAL _Ty* _Malloc(size_t rows, size_t& cols, device_alloc_tag) {
+	_Ty* Data = nullptr;
+	::cudaError_t Sts;
+	if (cols == 1) {
+		Sts = ::cudaMalloc(&Data, rows*cols * sizeof(_Ty));
+	}
+	else {
+		size_t pitch = 0;
+		Sts = cudaMallocPitch(&Data, &pitch, cols * sizeof(_Ty), rows);
+		cols = pitch;
+	}
+#if (defined _DEBUG || defined MATRICE_DEBUG)
+	DGELOM_CHECK(Sts == ::cudaSuccess, ::cudaGetErrorString(Sts));
+#endif
+	return Data;
+}
+
+template<typename _Ty>
+MATRICE_GLOBAL decltype(auto) _Malloc(size_t rows, size_t cols, global_alloc_tag) {
+	_Ty* Data = nullptr;
+	const auto Sts = ::cudaMallocManaged(&Data, rows*cols*sizeof(_Ty));
+#if (defined _DEBUG || defined MATRICE_DEBUG)
+	DGELOM_CHECK(Sts == ::cudaSuccess, ::cudaGetErrorString(Sts));
+#endif
+	return Data;
+}
+#define MATRICE_CUDA_MEMFUNC_INST(TYPE) \
+template TYPE* _Malloc(size_t, size_t&, device_alloc_tag); \
+template TYPE* _Malloc(size_t, size_t, global_alloc_tag);
+
+MATRICE_CUDA_MEMFUNC_INST(int)
+MATRICE_CUDA_MEMFUNC_INST(char)
+MATRICE_CUDA_MEMFUNC_INST(bool)
+MATRICE_CUDA_MEMFUNC_INST(float)
+MATRICE_CUDA_MEMFUNC_INST(double)
+MATRICE_CUDA_MEMFUNC_INST(uint8_t)
+MATRICE_CUDA_MEMFUNC_INST(size_t)
+
+#undef MATRICE_CUDA_MEMFUNC_INST
+
+#endif //!MATRICE_ENABLE_CUDA
+
+}}
+DGE_MATRICE_END
 
 namespace dgelom { namespace privt {
 
