@@ -17,9 +17,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 
-#include "..\include\Matrice\util\_macros.h"
-
-#if defined __use_ocv_as_view__|| MATRICE_USE_OPENCV
+#if defined MATRICE_USE_OPENCV
 #include <opencv2\core.hpp>
 #define VIEW_BASE_OCV cv::Mat
 #ifdef __CXX11__
@@ -30,5 +28,5 @@ using ocv_view_t_cast = cv::DataType<Type>;
 #define __view_space__ cv::
 typedef cv::Mat ocv_view_t;
 #endif
-#endif // __use_ocv_as_view__
+#endif
 
