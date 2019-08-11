@@ -40,13 +40,27 @@ enum Location {
 	UnSpecified = -1, 
 	OnStack = 0, 
 	OnHeap = 1, 
+#ifdef MATRICE_ENABLE_CUDA
 	OnDevice = 2, 
 	OnGlobal = 3,
+#endif
 };
 using loctn_t = Location; using memloc_t = Location;
 
-enum { COPY = 1001, MOVE = 1002, SHARED = 1000 };
-enum { LINEAR = 8000, PITCHED = 8001, ARRTARR = 8002, FROMARR = 8003, TOARRAY = 8004, };
+enum { 
+	COPY = 1001, 
+	MOVE = 1002, 
+	SHARED = 1000 
+};
+enum { 
+	LINEAR = 8000,
+#ifdef MATRICE_ENABLE_CUDA
+	PITCHED = 8001, 
+	ARRTARR = 8002, 
+	FROMARR = 8003, 
+	TOARRAY = 8004,
+#endif
+};
 
 namespace privt {
 template<typename _Vty, typename _Ity> _Vty* aligned_malloc(_Ity size);
@@ -159,6 +173,11 @@ struct plain_layout {
 };
 
 namespace internal {
+template<typename _Ty, class _Tag>
+MATRICE_GLOBAL_INL decltype(auto) malloc(size_t rows, size_t& cols, _Tag);
+
+template<typename _Ty, class _Tag>
+MATRICE_GLOBAL_INL void free(_Ty* data, _Tag);
 
 template<typename _Ty>
 MATRICE_HOST_INL decltype(auto) aligned_malloc(size_t size);
@@ -169,13 +188,30 @@ MATRICE_HOST_INL void aligned_free(_Ty* aligned_ptr) noexcept;
 template<typename _Ty>
 MATRICE_HOST_INL bool is_aligned(_Ty* aligned_ptr) noexcept;
 
-template<typename _InIt, typename _OutIt>
-MATRICE_HOST_INL _OutIt copy(_InIt _First, _InIt _Last, _OutIt _Dest);
-
 template<typename _InIt, typename _OutIt, class _InTag, class _OutTag>
 MATRICE_GLOBAL_INL _OutIt copy(_InIt _First, _InIt _Last, _OutIt _Dest, _InTag, _OutTag);
 
 namespace impl {
+template<typename _Ty>
+MATRICE_HOST_INL decltype(auto) _Malloc(size_t rows, size_t cols, heap_alloc_tag);
+
+template<typename _Ty>
+MATRICE_HOST_INL void _Free(_Ty* data, heap_alloc_tag);
+
+#ifdef MATRICE_ENABLE_CUDA
+template<typename _Ty>
+MATRICE_GLOBAL _Ty* _Malloc(size_t rows, size_t& cols, device_alloc_tag);
+
+template<typename _Ty>
+MATRICE_GLOBAL _Ty* _Malloc(size_t rows, size_t cols, global_alloc_tag);
+
+template<typename _Ty>
+MATRICE_HOST_INL void _Free(_Ty* data, device_alloc_tag);
+
+template<typename _Ty>
+MATRICE_HOST_INL void _Free(_Ty* data, global_alloc_tag);
+#endif
+
 template<typename _InIt, typename _OutIt>
 MATRICE_HOST_INL _OutIt _Memcpy(_InIt _First, _InIt _Last, _OutIt _Dest, stack_alloc_tag, stack_alloc_tag);
 

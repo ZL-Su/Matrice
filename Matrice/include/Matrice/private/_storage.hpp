@@ -84,11 +84,14 @@ public:
 		:m_rows(rows), m_cols(cols) {
 		derived()._Alloc();
 	}
-	MATRICE_GLOBAL_INL _Dense_allocator_base(const _Myt& othr)
-		: m_rows(othr.m_rows), m_cols(othr.m_cols) {
-		derived()._Alloc();
-		_Alloc_copy(othr.derived());
+	MATRICE_GLOBAL_INL _Dense_allocator_base(const _Myt& other)
+		:_Dense_allocator_base(other.rows(), other.cols()) {
+		_Alloc_copy(other.derived());
 	}
+	MATRICE_GLOBAL_INL _Dense_allocator_base(_Myt&& other) noexcept {
+		_Alloc_move(move(other));
+	}
+
 	/**
 	 *\brief retrieves the pointer to this memory block.
 	 *\param [none]
@@ -228,13 +231,14 @@ MATRICE_ALIGNED_CLASS _Allocator<_Ty, 0, 0, allocator_traits_v<0, 0>, _Layout> M
 public:
 	using typename _Mybase::value_type;
 	using typename _Mybase::pointer;
+	using _Mybase::_Dense_allocator_base;
 	using _Mybase::operator=;
 
-	MATRICE_HOST_INL _Allocator() noexcept
-		:_Mybase() {
+	MATRICE_HOST_INL _Allocator(const _Myt& other) noexcept
+		:_Mybase(other) {
 	}
-	MATRICE_HOST_INL _Allocator(size_t rows, size_t cols = 1) noexcept
-		:_Mybase(rows, cols) {
+	MATRICE_HOST_INL _Allocator(_Myt&& other) noexcept
+		:_Mybase(forward<_Myt>(other)) {
 	}
 	MATRICE_HOST_INL ~_Allocator();
 
