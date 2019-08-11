@@ -25,12 +25,15 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_storage.hpp"
 #include "_iterator.h"
 #include "_view.h"
+#include "storage/forward.hpp"
+#include "util/_type_defs.h"
+#include "util/_macro_conditions.h"
+#include "util/_exception.h"
+#include "util/_property.hpp"
+#include "core/solver.h"
+#ifdef MATRICE_USE_OPENCV
 #include "../../../addin/interface.h"
-#include "../util/_type_defs.h"
-#include "../util/_macro_conditions.h"
-#include "../util/_exception.h"
-#include "../util/_property.hpp"
-#include "../core/solver.h"
+#endif
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -193,20 +196,9 @@ auto& operator= (const Expr##NAME##UnaryExpr<_Rhs, _Op>& _Ex){ \
 return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 }
 
-	struct _My_element {
-		_My_element(_Valtype& _Val, size_t _Idx, size_t _Std) 
-			: _Value(_Val), _Index(_Idx), _Stride(_Std) {}
-		MATRICE_GLOBAL_INL operator _Valtype&() { return _Value; }
-		MATRICE_GLOBAL_INL operator _Valtype&() const { return _Value; }
-		MATRICE_GLOBAL_INL auto index() const { return _Index; }
-		MATRICE_GLOBAL_INL auto x() const { return (_Index - y()*_Stride); }
-		MATRICE_GLOBAL_INL auto y() const { return (_Index / _Stride); }
-	private:
-		_Valtype& _Value;
-		size_t _Index, _Stride;
-	};
 	enum { _M = _Mytraits::_M, _N = _Mytraits::_N };
 	using _Myalty = typename detail::Storage_<_Valtype>::template Allocator<_M, _N>;
+	using _Myalloc = Allocator<_Valtype, _M, _N, allocator_traits_v<_M, _N>, plain_layout::row_major>;
 	using _Myt = Base_;
 	using _Mybase = _Basic_plane_view_base<_Valtype>;
 	using _Myt_const = std::add_const_t<_Myt>;
@@ -227,9 +219,9 @@ return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 	using _Xop_ewise_log   = MATRICE_MAKE_EXPOP_TYPE(Ewise, log);
 	using _Xop_ewise_log2  = MATRICE_MAKE_EXPOP_TYPE(Ewise, log2);
 	using _Xop_ewise_log10 = MATRICE_MAKE_EXPOP_TYPE(Ewise, log10);
-	using _Xop_mat_mul     = MATRICE_MAKE_EXPOP_TYPE(Mat, mul);
-	using _Xop_mat_inv     = MATRICE_MAKE_EXPOP_TYPE(Mat, inv);
-	using _Xop_mat_trp     = MATRICE_MAKE_EXPOP_TYPE(Mat, trp);
+	using _Xop_mat_mul     = MATRICE_MAKE_EXPOP_TYPE(Mat,   mul);
+	using _Xop_mat_inv     = MATRICE_MAKE_EXPOP_TYPE(Mat,   inv);
+	using _Xop_mat_trp     = MATRICE_MAKE_EXPOP_TYPE(Mat,   trp);
 public:
 	using value_t = _Valtype;
 	using value_type = value_t;
@@ -351,17 +343,16 @@ public:
 	 *\interfaces for opencv if it is enabled
 	 */
 #ifdef MATRICE_USE_OPENCV
-	//MATRICE_HOST_INL Base_(const ocv_view_t& mat) : _Mybase(mat.rows, mat.cols, mat.ptr<value_t>()) {}
-	MATRICE_HOST_INL Base_(ocv_view_t&& mat):Base_(mat.rows, mat.cols, mat.ptr<value_t>()){
+	MATRICE_HOST_INL Base_(cv::Mat&& mat):Base_(mat.rows, mat.cols, mat.ptr<value_t>()){
 		mat.flags = 0x42FF0000; mat.dims = mat.rows = mat.cols = 0;
 		mat.data = nullptr; mat.datastart = nullptr; mat.dataend = nullptr; mat.datalimit = nullptr;
 		mat.allocator = nullptr;
 		mat.u = nullptr;
 	}
 	template<typename _Fn>
-	MATRICE_HOST_INL Base_(const ocv_view_t& mat, _Fn&& _Op) : Base_(mat) { each(_Op); }
-	MATRICE_HOST_INL ocv_view_t cvmat() { return ocv_view_t(m_rows, m_cols, ocv_view_t_cast<value_t>::type, m_data); }
-	MATRICE_HOST_INL const ocv_view_t cvmat() const { return ocv_view_t(m_rows, m_cols, ocv_view_t_cast<value_t>::type, m_data); }
+	MATRICE_HOST_INL Base_(const cv::Mat& mat, _Fn&& _Op) : Base_(mat) { each(_Op); }
+	MATRICE_HOST_INL cv::Mat cvmat() { return cv::Mat(m_rows, m_cols, cv::DataType<value_t>::type, m_data); }
+	MATRICE_HOST_INL const cv::Mat cvmat() const { return cv::Mat(m_rows, m_cols, cv::DataType<value_t>::type, m_data); }
 #endif
 public:
 	/**
