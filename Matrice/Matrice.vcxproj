@@ -56,14 +56,14 @@
     <OutDir>.\x64\Debug\</OutDir>
     <IntDir>.\IntDir\Debug\</IntDir>
     <TargetName>matrice</TargetName>
-    <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;.\include\Matrice\algs\deeplearning;E:\Dgelo\Dropbox\Dgelom\Librares;$(IncludePath)</IncludePath>
+    <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;.\include\Matrice;E:\Dgelo\Dropbox\Dgelom\Librares;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>.\x64\Release\</OutDir>
     <IntDir>.\IntDir\Release\</IntDir>
     <TargetName>matrice</TargetName>
-    <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;$(IncludePath)</IncludePath>
+    <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;.\include\Matrice;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -217,6 +217,7 @@
     <ClInclude Include="include\Matrice\private\math\_primitive_funcs.hpp" />
     <ClInclude Include="include\Matrice\private\math\_svd.h" />
     <ClInclude Include="include\Matrice\private\nonfree\_lnalge.h" />
+    <ClInclude Include="include\Matrice\private\storage\forward.hpp" />
     <ClInclude Include="include\Matrice\private\tensor\_tensor.hpp" />
     <ClInclude Include="include\Matrice\private\tensor\_tensor_old.hpp" />
     <ClInclude Include="include\Matrice\private\tensor\_tensor_exp.hpp" />
