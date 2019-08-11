@@ -56,7 +56,11 @@
     <OutDir>.\x64\Debug\</OutDir>
     <IntDir>.\IntDir\Debug\</IntDir>
     <TargetName>matrice</TargetName>
+<<<<<<< HEAD
     <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;.\include\Matrice\algs\deeplearning;.\include\Matrice;E:\Dgelo\Dropbox\Dgelom\Librares;$(IncludePath)</IncludePath>
+=======
+    <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;.\include\Matrice;E:\Dgelo\Dropbox\Dgelom\Librares;$(IncludePath)</IncludePath>
+>>>>>>> feature-allocators
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -217,6 +221,7 @@
     <ClInclude Include="include\Matrice\private\math\_primitive_funcs.hpp" />
     <ClInclude Include="include\Matrice\private\math\_svd.h" />
     <ClInclude Include="include\Matrice\private\nonfree\_lnalge.h" />
+    <ClInclude Include="include\Matrice\private\storage\forward.hpp" />
     <ClInclude Include="include\Matrice\private\tensor\_tensor.hpp" />
     <ClInclude Include="include\Matrice\private\tensor\_tensor_old.hpp" />
     <ClInclude Include="include\Matrice\private\tensor\_tensor_exp.hpp" />
