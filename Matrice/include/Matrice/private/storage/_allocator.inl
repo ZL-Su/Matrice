@@ -52,15 +52,38 @@ MATRICE_GLOBAL_INL _Dense_allocator_base<_Altrs>& _Dense_allocator_base<_Altrs>:
 	return (*this);
 }
 
-MATRICE_ALLOCATOR(HOST,, 0)::~_Allocator() {
+MATRICE_ALLOCATOR(HOST, decltype(auto), ::dynamic)::_Alloc() noexcept {
+	auto cols = this->cols();
+	this->data() = internal::malloc<value_type>(this->rows(), cols, 
+		typename _Mybase::category());
+	return (*this);
+}
+MATRICE_ALLOCATOR(HOST, , ::dynamic)::~_Allocator() {
 	internal::free(this->data(), typename _Mybase::category());
 }
 
-MATRICE_ALLOCATOR(HOST, decltype(auto), 0)::_Alloc() noexcept {
-	auto Cols = this->cols();
-	this->data() = internal::malloc<value_type>(this->rows(), Cols, typename _Mybase::category());
+#ifdef MATRICE_ENABLE_CUDA
+MATRICE_ALLOCATOR(GLOBAL, decltype(auto), ::device)::_Alloc() noexcept {
+	m_pitch = this->cols();
+	this->data() = internal::malloc<value_type>(this->rows(), m_pitch,
+		device_alloc_tag());
 	return (*this);
 }
+MATRICE_ALLOCATOR(GLOBAL, , ::device)::~_Allocator() {
+	internal::free(this->data(), typename _Mybase::category());
+}
+
+MATRICE_ALLOCATOR(GLOBAL, decltype(auto), ::global)::_Alloc() noexcept {
+	auto cols = this->cols();
+	this->data() = internal::malloc<value_type>(this->rows(), cols, 
+		global_alloc_tag());
+	return (*this);
+}
+MATRICE_ALLOCATOR(GLOBAL, , ::global)::~_Allocator() {
+	internal::free(this->data(), typename _Mybase::category());
+}
+#endif
+
 _DETAIL_END
 
 namespace internal {
