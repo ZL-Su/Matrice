@@ -1,7 +1,7 @@
 
-#include "../../include/Matrice/core/solver.h"
-#include "../../include/Matrice/core/matrix.h"
-#include "../../include/Matrice/private/nonfree/_lnalge.h"
+#include "core/solver.h"
+#include "core/matrix.h"
+#include "private/nonfree/_lnalge.h"
 
 DGE_MATRICE_BEGIN _DETAIL_BEGIN
 
@@ -11,23 +11,20 @@ DGE_MATRICE_BEGIN _DETAIL_BEGIN
 template<typename _T> LinearOp::info_t LinearOp::OpBase<_T>::_Impl(view_t& A)
 {
 	typename view_t::pointer pCoef = A.data();
-	size_t _M = A.rows(), _N = A.cols();
-	if (_M != _N) throw std::runtime_error("Support only for square matrix.");
-
+	const auto _M = A.rows(), _N = A.cols();
 	int layout = layout_traits<view_t>::is_rmajor(A.format) ? rmaj : cmaj;
-	info_t info;
 
+	info_t info;
 	if (layout_traits<view_t>::is_symmetric(A.format)) {
 		info.alg = solver_type::CHD;
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
+		if (_M != _N) throw std::runtime_error("Support only for square matrix.");
 		if constexpr (type_bytes<value_t>::value == 4)
-#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 			info.status = LAPACKE_spotrf(layout, 'L', _N, (float*)pCoef, _N);
-#else
-			DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
-#endif
-		if constexpr (type_bytes<value_t>::value == 8)
-#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
+		else if constexpr (type_bytes<value_t>::value == 8)
 			info.status = LAPACKE_dpotrf(layout, 'L', _N, (double*)pCoef, _N);
+		else
+			DGELOM_ERROR("Unsupported data type _T in LinearOp::OpBase<_T>::_Impl.");
 #else
 			DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
 #endif
@@ -36,16 +33,15 @@ template<typename _T> LinearOp::info_t LinearOp::OpBase<_T>::_Impl(view_t& A)
 
 	{ //general dense matrix
 		info.alg = solver_type::LUF;
-		Matrix_<diff_t, view_t::CompileTimeCols, min(view_t::CompileTimeCols, 1)> iwp(_N, 1);
+		
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
+		Matrix_<MKL_INT, view_t::CompileTimeCols, min(view_t::CompileTimeCols, 1)> iwp(_N, 1);
 		if constexpr (type_bytes<value_t>::value == 4)
-#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 			info.status = LAPACKE_sgetrf(layout, _M, _N, (float*)pCoef, _N, iwp.data());
-#else
-			DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
-#endif
-		if constexpr (type_bytes<value_t>::value == 8)
-#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
+		else if constexpr (type_bytes<value_t>::value == 8)
 			info.status = LAPACKE_dgetrf(layout, _M, _N, (double*)pCoef, _N, iwp.data());
+		else
+			DGELOM_ERROR("Unsupported data type _T in LinearOp::OpBase<_T>::_Impl.");
 #else
 			DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
 #endif
