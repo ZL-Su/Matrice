@@ -22,9 +22,6 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #define MATRICE_MATH_KERNEL MATRICE_USE_MKL
 #endif
 
-#if MATRICE_MATH_KERNEL == MATRICE_USE_FKL
-#include <fkl.h>
-#endif
 #if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
 #include <mkl.h>
 #endif

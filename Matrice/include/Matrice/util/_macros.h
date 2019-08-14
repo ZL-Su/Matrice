@@ -39,8 +39,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #define MATRICE_USE_NAT     0 //*\use native kernel code
-#define MATRICE_USE_FKL     1 //*\use fortran kernel lib
-#define MATRICE_USE_MKL     2 //*\use intel mkl lib
+#define MATRICE_USE_MKL     1 //*\use intel mkl lib
 
 
 #ifdef MATRICE_USE_OPENCV

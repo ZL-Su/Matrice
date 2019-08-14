@@ -22,32 +22,32 @@ template<typename _T> LinearOp::info_t LinearOp::OpBase<_T>::_Impl(view_t& A)
 		if constexpr (type_bytes<value_t>::value == 4)
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 			info.status = LAPACKE_spotrf(layout, 'L', _N, (float*)pCoef, _N);
-#elif MATRICE_MATH_KERNEL==MATRICE_USE_FKL
-			info.status = flapk::_scholy(fkl::sptr(pCoef), _N);
+#else
+			DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
 #endif
 		if constexpr (type_bytes<value_t>::value == 8)
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 			info.status = LAPACKE_dpotrf(layout, 'L', _N, (double*)pCoef, _N);
-#elif MATRICE_MATH_KERNEL == MATRICE_USE_FKL
-			info.status = flapk::_dcholy(fkl::dptr(pCoef), _N);
+#else
+			DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
 #endif
 		return info;
 	}
 
 	{ //general dense matrix
 		info.alg = solver_type::LUF;
-		Matrix_<int, view_t::CompileTimeCols, min(view_t::CompileTimeCols, 1)> iwp(_N, 1);
+		Matrix_<diff_t, view_t::CompileTimeCols, min(view_t::CompileTimeCols, 1)> iwp(_N, 1);
 		if constexpr (type_bytes<value_t>::value == 4)
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 			info.status = LAPACKE_sgetrf(layout, _M, _N, (float*)pCoef, _N, iwp.data());
-#elif MATRICE_MATH_KERNEL==MATRICE_USE_FKL
-			info.status = flapk::_sLU(fkl::sptr(pCoef), iwp.data(), _N);
+#else
+			DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
 #endif
 		if constexpr (type_bytes<value_t>::value == 8)
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 			info.status = LAPACKE_dgetrf(layout, _M, _N, (double*)pCoef, _N, iwp.data());
-#elif MATRICE_MATH_KERNEL==MATRICE_USE_FKL
-			info.status = flapk::_dLU(fkl::dptr(pCoef), iwp.data(), _N);
+#else
+			DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
 #endif
 		for (int i = 1; i <= _N; ++i) if (i != iwp(i)) info.sign *= -1;
 		return info;
