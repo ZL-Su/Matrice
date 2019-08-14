@@ -937,6 +937,7 @@
     <None Include="include\Matrice\private\nonfree\inl\math_kernel_wrapper.inl">
       <Filter>Header Files\Detail\math\nonfree</Filter>
     </None>
+    <None Include="cpp.hint" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="src\private\_dev_funcs.cu">
