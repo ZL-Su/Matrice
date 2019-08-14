@@ -221,26 +221,27 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 				value_type val = value_type(0);
 				const int K = rhs.rows(), N = rhs.cols();
 				
-#ifdef __disable_simd__
-				for (int k = 0; k < K; ++k) val += lhs[k] * rhs(k*N + c);
+#ifdef MATRICE_SIMD_ARCH == MATRICE_SIMD_AVX
+				for (int k = 0; k < K; ++k) 
+					val += lhs[k] * rhs(k*N + c);
+#elif MATRICE_SIMD_ARCH == MATRICE_SIMD_AVX512
+
+#elif MATRICE_SIMD_ARCH == MATRICE_SIMD_SSE
+
 #else
-#ifdef __AVX__
-				for (int k = 0; k < K; ++k) val += lhs[k] * rhs(k*N + c);
-#endif
+				for (int k = 0; k < K; ++k) 
+					val += lhs[k] * rhs(k*N + c);
 #endif
 				return (val);
 			}
 			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
 			value_type operator() (const _Lhs& lhs, const _Rhs& rhs, int r, int c) const noexcept {
 				value_type _Ret = value_type(0);
+
 				const int K = rhs.rows(), N = rhs.cols(), _Idx = r * lhs.cols();
-#ifdef __disable_simd__
-				for (auto k = 0; k < K; ++k) _Ret += lhs(_Idx + k) * rhs(k*N + c);
-#else
-#ifdef __AVX__
-				for (auto k = 0; k < K; ++k) _Ret += lhs(_Idx + k) * rhs(k*N + c);
-#endif
-#endif
+				for (auto k = 0; k < K; ++k) 
+					_Ret += lhs(_Idx + k) * rhs(k*N + c);
+
 				return (_Ret);
 			}
 			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
