@@ -16,18 +16,18 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
-#include "_config.h"
+#include <util/_std_wrapper.h>
+#include <private/_type_traits.h>
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
-struct _Blas_kernel_wrapper
-{
-	
-	template<typename _Ty>
-	static _Ty asum(const _Ty* data, )
-};
-struct _Lapack_kernel_wrapper {
-	MKL_INT
-};
+struct _Blas_kernel_wrapper;
+struct _Lapack_kernel_wrapper;
 _DETAIL_END
+using blas_kernel_t = detail::_Blas_kernel_wrapper;
+using lapack_kernel_t = detail::_Lapack_kernel_wrapper;
 DGE_MATRICE_END
+
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
+#include "..//nonfree/inl/math_kernel_wrapper.inl"
+#endif
