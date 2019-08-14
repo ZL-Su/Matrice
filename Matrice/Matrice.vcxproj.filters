@@ -208,6 +208,9 @@
     <Filter Include="Header Files\Detail\memory\inline">
       <UniqueIdentifier>{7c8b2ea0-e247-4d05-85c5-39a88b5fad6c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\3rdparty">
+      <UniqueIdentifier>{bf3a3889-2995-46c0-8d5f-c19a15e148d4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -587,6 +590,12 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\private\storage\forward.hpp">
       <Filter>Header Files\Detail\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\3rdparty\interface.hpp">
+      <Filter>Header Files\3rdparty</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\forward.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

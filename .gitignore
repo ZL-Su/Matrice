@@ -283,3 +283,5 @@ Matrice/addin/zlib/CMakeLists.txt
 Matrice/addin/zlib/ChangeLog
 Matrice/Matrice.vcxproj.filters
 Matrice/Matrice.vcxproj
+/test/include
+/test/src
