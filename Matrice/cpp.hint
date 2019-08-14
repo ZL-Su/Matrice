@@ -3,3 +3,6 @@
 // For more information see https://go.microsoft.com/fwlink/?linkid=865984
 #define MATRICE_HOST_FINL
 #define _IF_WITHIN_RANGE(_OP) if (y-_Mytraits::border_size::lower>=0 && x-_Mytraits::border_size::lower>=0 && y+_Mytraits::border_size::upper<_Rows && x+_Mytraits::border_size::upper<_Cols) _OP; else _Mycur(r,c) = zero<value_type>;
+#define DGE_MATRICE_BEGIN namespace dgelom {
+#define _DETAIL_BEGIN namespace detail {
+#define MATRICE_HOST_INL
