@@ -6,3 +6,8 @@
 #define DGE_MATRICE_BEGIN namespace dgelom {
 #define _DETAIL_BEGIN namespace detail {
 #define MATRICE_HOST_INL
+#define _MATRICE_DEFEXP_EWISEBOP(NAME) template<typename _Ty> struct _Ewise_##NAME { enum {flag = ewise}; using category = tag::_Ewise_##NAME##_tag; template<typename _Uy = _Ty> MATRICE_GLOBAL_FINL constexpr auto operator() (const _Ty& _Left, const _Uy& _Right) const { return (NAME(_Left, _Right)); }};
+#define _MATRICE_DEFEXP_EWISEUOP(NAME) template<typename _Ty> struct _Ewise_##NAME { enum {flag = ewise}; using category = tag::_Ewise_##NAME##_tag; MATRICE_GLOBAL_FINL constexpr auto operator() (const _Ty& _Val) const { return (NAME(_Val)); }};
+#define MATRICE_GLOBAL_INL
+#define MATRICE_SIMD_ARCH
+#define MATRICE_GLOBAL_FINL
