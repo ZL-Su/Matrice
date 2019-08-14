@@ -1,9 +1,7 @@
 #include <functional>
 #include <numeric>
-#ifdef __use_mkl__
+#ifdef MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 #include <mkl.h>
-#else
-#include <fkl.h>
 #endif
 #include "../../include/Matrice/private/_plain_exp.hpp"
 #include "../../include/Matrice/private/_memory.h"
@@ -23,16 +21,16 @@ _Ty * Expr::Op::_Mat_inv<_Ty>::operator()(int M, _Ty * Out, _Ty * In) const
 	if (In != Out) privt::fill_mem(In, Out, M*M);
 	
 	if constexpr (type_bytes<_Ty>::value == 4) 
-#ifdef __use_mkl__
+#ifdef MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 		LAPACKE_sgetri(LAPACK_ROW_MAJOR, M, (float*)Out, M, nullptr);
 #else
-		flapk::_sginv((fkl::sptr)Out, M);
+		DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
 #endif
 	if constexpr (type_bytes<_Ty>::value == 8)
-#ifdef __use_mkl__
+#ifdef MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 		LAPACKE_dgetri(LAPACK_ROW_MAJOR, M, (double*)Out, M, nullptr);
 #else
-		flapk::_dginv((fkl::dptr)Out, M);
+		DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
 #endif
 	return (Out);
 }

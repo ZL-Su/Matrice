@@ -27,7 +27,7 @@ DGE_MATRICE_BEGIN
 static_assert(sizeof(void *) == 8, "MATRICE supports 64 bit only");
 
 template<typename _Ty = long double>
-MATRICE_GLOBAL_INL constexpr _Ty pi{ static_cast<_Ty>(3.14159265358979323846264338327950288419716939937510582097494459) };
+inline constexpr _Ty pi{ static_cast<_Ty>(3.14159265358979323846264338327950288419716939937510582097494459) };
 
 namespace detail {
 	template<typename _Ty> struct string_to_numval {
@@ -65,14 +65,14 @@ namespace detail {
 		const auto val = dgelom::stonv<float>("1.0"); //val = 1.0f;
  */
 template<typename T = std::string> MATRICE_HOST_FINL
-constexpr T stonv(const std::string& _Str) noexcept {
+T stonv(const std::string& _Str) noexcept {
 #if (defined _DEBUG || MATRICE_DEBUG)
 	DGELOM_CHECK(!_Str.empty(), "_Str should not be empty.")
 #endif
 	return detail::string_to_numval<T>::value(_Str); 
 }
 template<typename T = std::string> MATRICE_HOST_FINL
-constexpr T cast_string_to(std::string&& _Str) noexcept {
+T cast_string_to(std::string&& _Str) noexcept {
 #if (defined _DEBUG || MATRICE_DEBUG)
 	DGELOM_CHECK(!_Str.empty(), "_Str should not be empty.")
 #endif

@@ -29,12 +29,8 @@ value_t det_impl(const _Rhs & a) {
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 	lapack_kernel<value_t>::lud(a.data(), a.shape().tiled());
 	return a.trace();
-#elif MATRICE_MATH_KERNEL==MATRICE_USE_FKL
-	if constexpr (type_bytes<value_t>::value == 4)
-		return fblas::_sdetm(fkl::sptr(p), a.rows());
-	if constexpr (type_bytes<value_t>::value == 8)
-		return fblas::_ddetm(fkl::dptr(p), a.rows());
 #else
+	DGELOM_ERROR("Undefined math kernel, matrice supports two types of kernels with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL");
 	return std::numeric_limits<value_t>::infinity();
 #endif
 }
