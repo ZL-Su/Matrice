@@ -597,6 +597,9 @@
     <ClInclude Include="include\Matrice\forward.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\private\math\kernel_wrapper.hpp">
+      <Filter>Header Files\Detail\math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
@@ -931,6 +934,9 @@
     </None>
     <None Include="include\Matrice\private\storage\_allocator.inl">
       <Filter>Header Files\Detail\memory\inline</Filter>
+    </None>
+    <None Include="include\Matrice\private\nonfree\inl\math_kernel_wrapper.inl">
+      <Filter>Header Files\Detail\math\nonfree</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
