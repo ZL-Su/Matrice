@@ -84,11 +84,12 @@ MATRICE_DENSEBASE_SIG::DenseBase(int_t _Rows, int_t _Cols)
 
 MATRICE_DENSEBASE_SIG::DenseBase(int_t rows, int_t cols, const value_t val)
 	: DenseBase(rows, cols) {
+#ifdef MATRICE_ENABLE_CUDA
 	if constexpr (_Loc != OnDevice) {
+#endif
 		for (int_t i = 0; i < my_size; ++i) {
 			my_data[i] = val;
 		}
-	}
 }	
 
 MATRICE_DENSEBASE_SIG::DenseBase(const DenseBase& _other)
