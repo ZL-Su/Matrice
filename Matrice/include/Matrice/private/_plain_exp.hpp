@@ -748,33 +748,27 @@ template<typename T, typename U, typename _Op>
 struct expression_traits<_Exp::EwiseBinaryExpr<T, U, _Op, false, false>> {
 	using type = _Exp::EwiseBinaryExpr<T, U, _Op, false, false>;
 	using value_type = common_type_t<typename T::value_t, typename U::value_t>;
-	enum {
-		options = _Exp::option<_Exp_tag::ewise>::value,
-		rows = max_integer_v<T::CompileTimeRows, U::CompileTimeRows>,
-		cols = max_integer_v<T::CompileTimeCols, U::CompileTimeCols>,
-	};
+	enum { options = _Exp::option<_Exp_tag::ewise>::value };
+	static constexpr auto rows = max_integer_v<T::CompileTimeRows, U::CompileTimeRows>;
+	static constexpr auto cols = max_integer_v<T::CompileTimeCols, U::CompileTimeCols>;
 	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
 };
 template<typename T, typename U, typename _Op>
 struct expression_traits<_Exp::EwiseBinaryExpr<T, U, _Op, true, false>> {
 	using type = _Exp::EwiseBinaryExpr<T, U, _Op, true, false>;
 	using value_type = typename U::value_t;
-	enum {
-		options = _Exp::option<_Exp_tag::ewise>::value,
-		rows = U::CompileTimeRows,
-		cols = U::CompileTimeCols,
-	};
+	enum { options = _Exp::option<_Exp_tag::ewise>::value };
+	static constexpr auto rows = U::CompileTimeRows;
+	static constexpr auto cols = U::CompileTimeCols;
 	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
 };
 template<typename T, typename U, typename _Op>
 struct expression_traits<_Exp::EwiseBinaryExpr<T, U, _Op, false, true>> {
 	using type = _Exp::EwiseBinaryExpr<T, U, _Op, false, true>;
 	using value_type = typename T::value_t;
-	enum {
-		options = _Exp::option<_Exp_tag::ewise>::value,
-		rows = T::CompileTimeRows,
-		cols = T::CompileTimeCols,
-	};
+	enum { options = _Exp::option<_Exp_tag::ewise>::value };
+	static constexpr auto rows = T::CompileTimeRows;
+	static constexpr auto cols = T::CompileTimeCols;
 	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
 };
 
@@ -782,33 +776,27 @@ template<typename T, typename _Op>
 struct expression_traits<_Exp::EwiseUnaryExpr<T, _Op>> {
 	using type = _Exp::EwiseUnaryExpr<T, _Op>;
 	using value_type = typename T::value_t;
-	enum {
-		options = expression_options<_Op>::value,
-		rows = T::CompileTimeRows,
-		cols = T::CompileTimeCols
-	};
+	enum { options = expression_options<_Op>::value };
+	static constexpr auto rows = T::CompileTimeRows;
+	static constexpr auto cols = T::CompileTimeCols;
 	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
 };
 template<typename T, typename U, typename _Op>
 struct expression_traits<_Exp::MatBinaryExpr<T, U, _Op>> {
 	using type = _Exp::MatBinaryExpr<T, U, _Op>;
 	using value_type = common_type_t<typename T::value_t, typename U::value_t>;
-	enum {
-		options = expression_options<_Op>::value,
-		rows = conditional_size_v<T::CompileTimeRows <= 0 || U::CompileTimeRows <= 0, 0, max_integer_v<T::CompileTimeRows, 0>>,
-		cols = conditional_size_v<T::CompileTimeCols <= 0 || U::CompileTimeCols <= 0, 0, max_integer_v<U::CompileTimeCols, 0>>
-	};
+	enum { options = expression_options<_Op>::value };
+	static constexpr auto rows = conditional_size_v<T::CompileTimeRows <= 0 || U::CompileTimeRows <= 0, 0, max_integer_v<T::CompileTimeRows, 0>>;
+	static constexpr auto cols = conditional_size_v<T::CompileTimeCols <= 0 || U::CompileTimeCols <= 0, 0, max_integer_v<U::CompileTimeCols, 0>>;
 	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
 };
 template<typename T, typename _Op>
 struct expression_traits<_Exp::MatUnaryExpr<T, _Op>> {
 	using type = _Exp::MatUnaryExpr<T, _Op>;
 	using value_type = typename T::value_t;
-	enum {
-		options = expression_options<_Op>::value,
-		rows = conditional_size_v<(options&_Exp_tag::trp) == _Exp_tag::trp, T::CompileTimeCols, T::CompileTimeRows>,
-		cols = conditional_size_v<(options&_Exp_tag::trp) == _Exp_tag::trp, T::CompileTimeRows, T::CompileTimeCols>
-	};
+	enum { options = expression_options<_Op>::value };
+	static constexpr auto rows = conditional_size_v<(options & _Exp_tag::trp) == _Exp_tag::trp, T::CompileTimeCols, T::CompileTimeRows>;
+	static constexpr auto cols = conditional_size_v<(options & _Exp_tag::trp) == _Exp_tag::trp, T::CompileTimeRows, T::CompileTimeCols>;
 	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
 };
 

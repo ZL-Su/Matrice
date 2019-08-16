@@ -123,6 +123,10 @@ MATRICE_GLOBAL_FINL constexpr T cos(const T& x) noexcept {
 	return std::cos(T(x));
 }
 template<typename T, MATRICE_ENABLE_IF(is_scalar_v<T>)>
+MATRICE_GLOBAL_FINL constexpr decltype(auto)sin_cos(const T& x)noexcept {
+	return std::make_tuple(sin(x), cos(x));
+}
+template<typename T, MATRICE_ENABLE_IF(is_scalar_v<T>)>
 MATRICE_GLOBAL_FINL constexpr T tan(const T& x) noexcept {
 	return std::tan(T(x));
 }

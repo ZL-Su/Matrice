@@ -31,27 +31,27 @@ void __create_impl(size_t _Rows, size_t _Cols = 1);
 	Generic Matrix Class with Aligned Static Memory Allocation
 	       Copyright (c) : Zhilong Su, since 14/Feb/2018
 *******************************************************************/
-template<typename _Ty, int _M, int _N = _M>
-class Matrix_ : public Base_<Matrix_<_Ty, _M, _N>>
+template<typename _Ty, int M, int N = M>
+class Matrix_ : public Base_<Matrix_<_Ty, M, N>>
 {
 	using Myt = Matrix_;
 	using Myt_const = std::add_const_t<Myt>;
 	using Myt_reference = std::add_lvalue_reference_t<Myt>;
 	using Myt_move_reference = std::add_rvalue_reference_t<Myt>;
 	using Myt_const_reference = std::add_lvalue_reference_t<Myt_const>;
-	using _Mybase = Base_<Matrix_<_Ty, _M, _N>>;
+	using _Mybase = Base_<Matrix_<_Ty, M, N>>;
 public:
 	using typename _Mybase::value_t;
 	using typename _Mybase::pointer;
 	using typename _Mybase::const_initlist;
-	enum { Size = _M * _N, CompileTimeRows = _M, CompileTimeCols = _N, };
+	enum { Size = M * N, CompileTimeRows = M, CompileTimeCols = N, };
 
 	MATRICE_GLOBAL_FINL constexpr Matrix_() noexcept
 		: _Mybase() {};
 	MATRICE_GLOBAL_FINL constexpr Matrix_(int, int) noexcept
 		: _Mybase() {};
 	MATRICE_GLOBAL_FINL constexpr Matrix_(pointer data) noexcept
-		: _Mybase(_M, _N, data) {};
+		: _Mybase(CompileTimeRows, CompileTimeCols, data) {};
 	MATRICE_HOST_FINL constexpr Matrix_(const_initlist _list) noexcept
 		: _Mybase(_list) {}
 	MATRICE_GLOBAL_FINL constexpr Matrix_(Myt_move_reference _other) noexcept
@@ -61,7 +61,7 @@ public:
 
 	template<typename _Uy, MATRICE_ENABLE_IF(is_scalar_v<_Uy>)>
 	MATRICE_GLOBAL_FINL constexpr Matrix_(_Uy _val) noexcept
-		: _Mybase(_M, _N, _val) {};
+		: _Mybase(CompileTimeRows, CompileTimeCols, _val) {};
 	template<typename _Uy>
 	MATRICE_HOST_FINL constexpr Matrix_(const nested_initlist<_Uy> _list) noexcept
 		: _Mybase(_list) {}

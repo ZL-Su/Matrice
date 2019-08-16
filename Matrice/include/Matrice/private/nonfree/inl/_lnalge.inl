@@ -231,9 +231,8 @@ struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 	 */
 	MATRICE_HOST_INL static int lud(pointer _A, const size_type& _Size) {
 		const auto[M, N] = _Size;
-		auto _P = new diff_t[max(1, min(M, N))];
-
 #if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
+		auto _P = new MKL_INT[max(1, min(M, N))];
 		return LAPACKE_sgetrf(layout, M, N, _A, max(1, N), _P);
 #else
 		DGELOM_ERROR("Undefined math kernel, matrice supports two types of kernels with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL");
@@ -254,7 +253,7 @@ struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 #endif
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 		const auto N = get<0>(_A), M = get<1>(_B);
-		auto _Ipiv = new diff_t[max(1, N)];
+		auto _Ipiv = new MKL_INT[max(1, N)];
 		return LAPACKE_sgesv(layout, N, M, get<2>(_A), N, _Ipiv, get<2>(_B), M);
 #else
 		DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
@@ -307,9 +306,9 @@ template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double>
 	 */
 	MATRICE_HOST_INL static int lud(pointer _A, const size_type& _Size) {
 		const auto[M, N] = _Size;
-		auto _P = new diff_t[max(1, min(M, N))];
 
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
+		auto _P = new MKL_INT[max(1, min(M, N))];
 		return LAPACKE_dgetrf(layout, M, N, _A, max(1, N), _P);
 #else
 		DGELOM_ERROR("Undefined math kernel, matrice supports two types of kernels with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL");
@@ -330,7 +329,7 @@ template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double>
 #endif
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 		const auto N = get<0>(_A), M = get<1>(_B);
-		auto _Ipiv = new diff_t[max(1, N)];
+		auto _Ipiv = new MKL_INT[max(1, N)];
 		return LAPACKE_dgesv(layout, N, M, get<2>(_A), N, _Ipiv, get<2>(_B), M);
 #else
 		DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");

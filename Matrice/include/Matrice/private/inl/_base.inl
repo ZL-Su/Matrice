@@ -68,8 +68,7 @@ auto Base_<_Derived, _Traits, _Type>::inplace_mul(const _Rhs& _Right) {
 		conditional_size_v<_Rtag == ttag::Y,_Rhs::RowsAtCT,_Rhs::ColsAtCT>>
 		_Ret((_Ltag == ttag::Y)?m_cols:m_rows, 
 		(_Rtag == ttag::Y)?_Right.rows():_Right.cols());
-	blas_kernel<value_type>::mul<_Ltag, _Rtag>(
-		this->plvt(), _Right.plvt(), _Ret.plvt());
+	blas_kernel<value_type>::mul<_Ltag, _Rtag>(this->plvt(), _Right.plvt(), _Ret.plvt());
 	return forward<decltype(_Ret)>(_Ret);
 }
 

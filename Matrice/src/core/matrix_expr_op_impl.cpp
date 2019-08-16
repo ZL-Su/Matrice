@@ -3,8 +3,8 @@
 #ifdef MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 #include <mkl.h>
 #endif
-#include "../../include/Matrice/private/_plain_exp.hpp"
-#include "../../include/Matrice/private/_memory.h"
+#include "private/_plain_exp.hpp"
+#include "private/_memory.h"
 #include "../private/generic_fast_math.hpp"
 
 #define _EXPOP_EXPLICIT_INSTANTIATION(_Type, _Desc, _Name) \
