@@ -29,5 +29,6 @@ using lapack_kernel_t = detail::_Lapack_kernel_wrapper;
 DGE_MATRICE_END
 
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
-#include "..//nonfree/inl/math_kernel_wrapper.inl"
+#include "..//nonfree//inl//blas_kernel_wrapper.inl"
+#include "..//nonfree//inl//lapack_kernel_wrapper.inl"
 #endif
