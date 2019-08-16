@@ -934,10 +934,13 @@
     <None Include="include\Matrice\private\storage\_allocator.inl">
       <Filter>Header Files\Detail\memory\inline</Filter>
     </None>
-    <None Include="include\Matrice\private\nonfree\inl\math_kernel_wrapper.inl">
-      <Filter>Header Files\Detail\math\nonfree</Filter>
-    </None>
     <None Include="cpp.hint" />
+    <None Include="include\Matrice\private\nonfree\inl\blas_kernel_wrapper.inl">
+      <Filter>Header Files\Detail\math\nonfree\inl</Filter>
+    </None>
+    <None Include="include\Matrice\private\nonfree\inl\lapack_kernel_wrapper.inl">
+      <Filter>Header Files\Detail\math\nonfree\inl</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="src\private\_dev_funcs.cu">
