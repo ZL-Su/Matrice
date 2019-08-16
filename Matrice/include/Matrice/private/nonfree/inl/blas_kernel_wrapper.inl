@@ -60,11 +60,13 @@ struct _Blas_kernel_wrapper {
 	}
 
 	/**
-	 *\brief in-plane rotation of points. For a = {x_0, y_0, x_1, y_1, ..., x_n, y_n}, performs a <- [c, s \\ -s, c]*a
+	 *\brief in-plane rotation of points. 
+	 For a = {x_0, y_0, x_1, y_1, ..., x_n, y_n}, performs a <- [c, s \\ -s, c]*a
 	 */
 	template<class _Aty, typename _Ty = typename _Aty::valye_type>
 	static MATRICE_HOST_INL _Aty& rot(_Aty & a, _Ty c, _Ty s) noexcept {
 		internal::_blas_rot(a.size(), a.data(), 2, a.data(), 2, c, s);
+		return (a);
 	}
 };
 _DETAIL_END
