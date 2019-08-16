@@ -367,7 +367,8 @@
     <None Include="include\Matrice\io\inline\_image.inl" />
     <None Include="include\Matrice\private\inl\_base.inl" />
     <None Include="include\Matrice\private\inl\_storage_base.inl" />
-    <None Include="include\Matrice\private\nonfree\inl\math_kernel_wrapper.inl" />
+    <None Include="include\Matrice\private\nonfree\inl\blas_kernel_wrapper.inl" />
+    <None Include="include\Matrice\private\nonfree\inl\lapack_kernel_wrapper.inl" />
     <None Include="include\Matrice\private\nonfree\inl\_lnalge.inl" />
     <None Include="include\Matrice\private\storage\_allocator.inl" />
     <None Include="include\Matrice\private\_similarity.inl" />
