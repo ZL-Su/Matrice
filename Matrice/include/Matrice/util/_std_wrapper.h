@@ -14,7 +14,8 @@ namespace dgelom {
 	using std::uint32_t;
 	using std::uint64_t;
 	using std::size_t;
-	
+	using std::add_pointer_t;
+
 	using std::tuple;
 	using std::priority_queue;
 
