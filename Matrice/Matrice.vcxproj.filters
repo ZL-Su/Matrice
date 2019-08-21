@@ -603,6 +603,9 @@
     <ClInclude Include="include\Matrice\algs\forward.hpp">
       <Filter>Header Files\Algs</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\private\_refs.hpp">
+      <Filter>Header Files\Detail\core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
