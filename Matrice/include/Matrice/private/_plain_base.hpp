@@ -841,13 +841,13 @@ public:
 	 *\param [_Right] can be scalar or any compatible types
 	 */
 	template<typename _Rhs>
-	MATRICE_HOST_INL decltype(auto)inplace_sub(const _Rhs& _Right);
+	MATRICE_HOST_INL decltype(auto)sub_inplace(const _Rhs& _Right);
 	/**
 	 *\brief instant subtraction
 	 *\param [_Right] can be scalar or any compatible types
 	 */
 	template<typename _Rhs>
-	MATRICE_HOST_INL auto sub_(const _Rhs& _Right);
+	MATRICE_HOST_INL decltype(auto) sub_(const _Rhs& _Right);
 	/**
 	 *\brief in-place instant matrix-vector multiplication
 	 *\param [_Right] can be a matrix or a vector types
@@ -859,14 +859,14 @@ public:
 	 *\param [_Right] will be unrolled to a column vector x if it is not.
 	 */
 	template<typename _Rhs>
-	MATRICE_HOST_INL auto inplace_mv(const _Rhs& _Right) const;
+	MATRICE_HOST_INL decltype(auto) mv_inplace(const _Rhs& _Right) const;
 
 	/**
 	 * \in-place matmul with _Rhs. 
 	 */
 	template<ttag _Ltag = ttag::N, ttag _Rtag = ttag::N, 
 		typename _Rhs = _Derived, MATRICE_ENABLE_IF(is_matrix_v<_Rhs>)>
-	MATRICE_HOST_FINL auto inplace_mul(const _Rhs& _Right);
+	MATRICE_HOST_FINL decltype(auto) mul_inplace(const _Rhs& _Right);
 	/**
 	 *\brief spread to element-wisely multiplicate with an input
 	 *\param [_Right] input argument with a type of _Rhs.
@@ -1093,14 +1093,14 @@ _DETAIL_END
 using padding =  detail::_Matrix_padding;
 
 template<typename _Mty>
-MATRICE_HOST_INL auto make_matrix_deleter(const _Mty& _M) noexcept;
+MATRICE_HOST_INL decltype(auto) make_matrix_deleter(const _Mty& _M) noexcept;
 
 /**
  *\brief dgelom::Matrix_<...> factory function to create matrix object.
  *\param [params] wrap any parameters supported by dgelom::Matrix_ ctors, while except initializer list. 
  */
 template<typename _Ty, int _Rows=0, int _Cols=0, typename... _Args>
-MATRICE_GLOBAL_INL types::Matrix_<_Ty, _Rows, _Cols> make_matrix(_Args&&... params);
+MATRICE_GLOBAL_INL decltype(auto) make_matrix(_Args&&... params);
 
 /**
  *\brief set input data to zero
