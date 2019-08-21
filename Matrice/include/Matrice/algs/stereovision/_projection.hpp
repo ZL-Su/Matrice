@@ -16,8 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #pragma once
-#include "../../../core"
-DGE_MATRICE_BEGIN
+#include "core.hpp"
+
+MATRICE_ALGS_BEGIN
 struct cs_alignment_tag { 
 	struct left {}; struct middle {}; struct right{};
 };
@@ -64,6 +65,11 @@ public:
 		m_rotm(1) -= sval * r[2], m_rotm(2) += sval * r[1];
 		m_rotm(3) += sval * r[2], m_rotm(5) -= sval * r[0];
 		m_rotm(6) -= sval * r[1], m_rotm(7) += sval * r[0];
+
+		m_irot = m_rotm.inv();
+	}
+	_Projection_base(const point_type& r, const point_type& t)noexcept
+		: _Projection_base({r.x, r.y, r.z, t.x, t.y, t.z}) {
 	}
 
 	/**
@@ -81,9 +87,19 @@ public:
 		point_type p = this->rotation(_X) + m_tran;
 		return (p.normalize(p.z));
 	}
+	/**
+	 *\brief back-projection
+	 *\param [_x] input 2d image point [x, y, d]^T, where d is the depth.
+	 */
+	MATRICE_HOST_INL point_type backward(const point_type& _x) noexcept {
+		point_type& x = _x;
+		x.x *= x.z, x.y *= x.z;
+		x = x - m_tran;
+		return m_irot.mul(x);
+	}
 
 protected:
-	matrix_type m_rotm;
+	matrix_type m_rotm, m_irot;
 	point_type m_tran;
 };
 
@@ -125,4 +141,4 @@ private:
 _DETAIL_END
 template<typename _Ty>
 using left_aligned_projection = detail::_Aligned_projection<_Ty, cs_alignment_tag::left>;
-DGE_MATRICE_END
+MATRICE_ALGS_END
