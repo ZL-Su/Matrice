@@ -18,7 +18,8 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include "../../math/kernel_wrapper.hpp"
 #include "../../math/_config.h"
-#include <util/_exception.h>
+#include "util/_exception.h"
+#include "private/_refs.hpp"
 
 DGE_MATRICE_BEGIN
 _INTERNAL_BEGIN
@@ -99,14 +100,23 @@ struct _Blas_kernel_wrapper {
 	}
 
 	template<class _Aty, typename _Ity, typename _Oty = _Ity>
-	static MATRICE_HOST_INL _Oty& gemv(const _Aty& a, const _Ity& x, _Oty& y) noexcept {
-		constexpr auto _1 = typename _Aty::value_type(1);
-		constexpr auto _0 = typename _Aty::value_type(0);
-		if (a.cols() == x.size())
-			internal::_blas_gemv(a.rows(), a.cols(), _1, a.data(), x.data(), 1, _0, y.data(), 1);
-		else if (a.rows() == x.size())
-			internal::_blas_gemtv(a.rows(), a.cols(), _1, a.data(), x.data(), 1, _0, y.data(), 1);
-		else DGELOM_ERROR("The shape of a and x in gemv is not compatible.");
+	static MATRICE_HOST_INL _Oty& gemv(_Aty&& a, const _Ity& x, _Oty& y) noexcept {
+		constexpr auto _1 = typename _Ity::value_type(1);
+		constexpr auto _0 = typename _Ity::value_type(0);
+		if constexpr (is_ref_v<_Aty>) {
+			decltype(auto) m = a.get();
+			if (a)
+				internal::_blas_gemtv(m.rows(), m.cols(), _1, m.data(), x.data(), 1, _0, y.data(), 1);
+			else
+				internal::_blas_gemv(m.rows(), m.cols(), _1, m.data(), x.data(), 1, _0, y.data(), 1);
+		}
+		else {
+			if (a.cols() == x.size())
+				internal::_blas_gemv(a.rows(), a.cols(), _1, a.data(), x.data(), 1, _0, y.data(), 1);
+			else if (a.rows() == x.size())
+				internal::_blas_gemtv(a.rows(), a.cols(), _1, a.data(), x.data(), 1, _0, y.data(), 1);
+			else DGELOM_ERROR("The shape of a and x in gemv is not compatible.");
+		}
 			
 		return (y);
 	}
