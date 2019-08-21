@@ -22,6 +22,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../../core/solver.h"
 #include "../../private/_range.h"
 #include "../../private/_tag_defs.h"
+#include "../forward.hpp"
 
 MATRICE_ALGS_BEGIN
 enum {
@@ -36,6 +37,11 @@ enum {
 	_BICBSPL = INTERP | BICUBIC | BSPLINE,
 	_BIQNSPL = INTERP | BIQUINTIC | BSPLINE,
 	_BISPSPL = INTERP | BISEPTIC | BSPLINE,
+
+	BILERP = BILINEAR|INTERP,
+	BICERP = BICUBIC|BSPLINE|INTERP,
+	BIQERP = BIQUINTIC|BSPLINE|INTERP,
+	BISERP = BISEPTIC|BSPLINE|INTERP,
 };
 
 // \Forward declaration
@@ -50,13 +56,13 @@ struct interpolation_traits<_Spline_interpolation<_Ty, _Tag>> {
 	using matrix_type = Matrix<value_type>;
 	using category = _Tag;
 	using type = _Spline_interpolation<value_type, category>;
-	static constexpr auto option = INTERP|BSPLINE;
+	static constexpr auto option = INTERP | BSPLINE;
 };
 template<typename _Ty>
 struct interpolation_traits<_Bilinear_interpolation<_Ty>> {
 	using value_type = _Ty;
 	using matrix_type = Matrix<value_type>;
-	using category = _TAG _Bilinear_itp_tag;
+	using category = bilerp_tag;
 	using type = _Bilinear_interpolation<value_type>;
 	static constexpr auto option = INTERP | BILINEAR;
 };
@@ -66,9 +72,9 @@ using interpolation_traits_t = typename interpolation_traits<_Ty>::type;
 // \Interpolation auto dispatching
 template<typename _Ty, typename _Tag> 
 struct auto_interp_dispatcher {
-	using type = conditional_t<is_same_v<_Tag, _TAG _Bilinear_itp_tag>, _Bilinear_interpolation<_Ty>, _Spline_interpolation<_Ty, _Tag>>;
+	using type = conditional_t<is_same_v<_Tag, bilerp_tag>, _Bilinear_interpolation<_Ty>, _Spline_interpolation<_Ty, _Tag>>;
 };
-template<typename _Ty = float, typename _Tag = _TAG bicspl_tag>
+template<typename _Ty = float, typename _Tag = bicerp_tag>
 using auto_interp_dispatcher_t = typename auto_interp_dispatcher<_Ty, _Tag>::type;
 
 template<typename _Derived> class _Interpolation_base {
