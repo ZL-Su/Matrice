@@ -280,6 +280,13 @@ template<typename T>
 inline constexpr auto is_tensor_v = is_tensor<T>::value;
 
 /**
+ *\brief is_ref<T> is true_type iff T is dgelom::Ref<...>
+ */
+template<typename T> struct is_ref : std::false_type {};
+template<typename T>
+inline constexpr auto is_ref_v = is_ref<T>::value;
+
+/**
  *\brief tensor_traits<T> for accessing tensor members
  */
 template<typename T> struct tensor_traits {};
