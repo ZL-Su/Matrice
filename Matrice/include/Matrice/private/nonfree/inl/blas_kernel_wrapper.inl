@@ -18,19 +18,42 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include "../../math/kernel_wrapper.hpp"
 #include "../../math/_config.h"
+#include <util/_exception.h>
 
 DGE_MATRICE_BEGIN
 _INTERNAL_BEGIN
 template<typename _Ptr>
-decltype(auto) _blas_asum(const _Ptr x, size_t n, int inc) {};
-template<typename _Ty, typename _Ptr = _Ty*>
-decltype(auto) _blas_axpy(const _Ty a, const _Ptr x, _Ptr y, size_t n, int incx, int incy) {};
+decltype(auto) _blas_asum(const _Ptr x, size_t n, int inc) {
+	MATRICE_FAIL_TO_SPECIALIZATION
+};
+template<typename _Ty, typename _Ptr = add_pointer_t<_Ty>>
+decltype(auto) _blas_axpy(const _Ty a, const _Ptr x, _Ptr y, size_t n, int incx, int incy) {
+	MATRICE_FAIL_TO_SPECIALIZATION
+};
 template<typename _Ptr>
-decltype(auto) _blas_dot(size_t n, const _Ptr x, int incx, const _Ptr y, int incy) {};
+decltype(auto) _blas_dot(size_t n, const _Ptr x, int incx, const _Ptr y, int incy) {
+	MATRICE_FAIL_TO_SPECIALIZATION
+};
 template<typename _Ptr>
-decltype(auto) _blas_nrm2(size_t n, const _Ptr x, int inc) {};
+decltype(auto) _blas_nrm2(size_t n, const _Ptr x, int inc) {
+	MATRICE_FAIL_TO_SPECIALIZATION
+};
 template<typename _Ptr, typename _Ty = typename std::pointer_traits<_Ptr>::element_type>
-decltype(auto) _blas_rot(size_t n, _Ptr x, int incx, _Ptr y, int incy, _Ty c, _Ty s) {};
+decltype(auto) _blas_rot(size_t n, _Ptr x, int incx, _Ptr y, int incy, _Ty c, _Ty s) {
+	MATRICE_FAIL_TO_SPECIALIZATION
+};
+template<typename _Ty, typename _Ptr = add_pointer_t<_Ty>>
+decltype(auto) _blas_scal(size_t n, const _Ty a, _Ptr x, int inc) {
+	MATRICE_FAIL_TO_SPECIALIZATION
+};
+template<typename _Ty, typename _Ptr = add_pointer_t<_Ty>>
+decltype(auto) _blas_gemv(size_t m, size_t n, _Ty a, const _Ptr A, const _Ptr x, int incx, _Ty b, _Ptr y, size_t incy) {
+	MATRICE_FAIL_TO_SPECIALIZATION
+};
+template<typename _Ty, typename _Ptr = add_pointer_t<_Ty>>
+decltype(auto) _blas_gemtv(size_t m, size_t n, _Ty a, const _Ptr A, const _Ptr x, int incx, _Ty b, _Ptr y, size_t incy) {
+	MATRICE_FAIL_TO_SPECIALIZATION
+};
 _INTERNAL_END
 
 _DETAIL_BEGIN
@@ -67,6 +90,25 @@ struct _Blas_kernel_wrapper {
 	static MATRICE_HOST_INL _Aty& rot(_Aty & a, _Ty c, _Ty s) noexcept {
 		internal::_blas_rot(a.size(), a.data(), 2, a.data(), 2, c, s);
 		return (a);
+	}
+
+	template<class _Aty, typename _Ty = typename _Aty::valye_type>
+	static MATRICE_HOST_INL _Aty& scale(_Ty s, _Aty& a) noexcept {
+		internal::_blas_scal(a.size(), s, a.data(), 1);
+		return (a);
+	}
+
+	template<class _Aty, typename _Ity, typename _Oty = _Ity>
+	static MATRICE_HOST_INL _Oty& gemv(const _Aty& a, const _Ity& x, _Oty& y) noexcept {
+		constexpr auto _1 = typename _Aty::value_type(1);
+		constexpr auto _0 = typename _Aty::value_type(0);
+		if (a.cols() == x.size())
+			internal::_blas_gemv(a.rows(), a.cols(), _1, a.data(), x.data(), 1, _0, y.data(), 1);
+		else if (a.rows() == x.size())
+			internal::_blas_gemtv(a.rows(), a.cols(), _1, a.data(), x.data(), 1, _0, y.data(), 1);
+		else DGELOM_ERROR("The shape of a and x in gemv is not compatible.");
+			
+		return (y);
 	}
 };
 _DETAIL_END
@@ -110,6 +152,32 @@ decltype(auto) _blas_nrm2(size_t n, const fptr x, int inc) {
 template<>
 decltype(auto) _blas_nrm2(size_t n, const dptr x, int inc) {
 	return cblas_dnrm2(n, x, inc);
+}
+
+template<>
+decltype(auto) _blas_scal(size_t n, const f32_t a, fptr x, int inc) {
+	return cblas_sscal(n, a, x, inc);
+}
+template<>
+decltype(auto) _blas_scal(size_t n, const f64_t a, dptr x, int inc) {
+	return cblas_dscal(n, a, x, inc);
+}
+
+template<>
+decltype(auto) _blas_gemv(size_t m, size_t n, f32_t a, const fptr A, const fptr x, int incx, f32_t b, fptr y, size_t incy) {
+	return cblas_sgemv(CBLAS_LAYOUT::CblasRowMajor, CBLAS_TRANSPOSE::CblasNoTrans, m, n, a, A, (n > 1 ? n : 1), x, incx, b, y, incy);
+}
+template<>
+decltype(auto) _blas_gemv(size_t m, size_t n, f64_t a, const dptr A, const dptr x, int incx, f64_t b, dptr y, size_t incy) {
+	return cblas_dgemv(CBLAS_LAYOUT::CblasRowMajor, CBLAS_TRANSPOSE::CblasNoTrans, m, n, a, A, (n > 1 ? n : 1), x, incx, b, y, incy);
+}
+template<>
+decltype(auto) _blas_gemtv(size_t m, size_t n, f32_t a, const fptr A, const fptr x, int incx, f32_t b, fptr y, size_t incy) {
+	return cblas_sgemv(CBLAS_LAYOUT::CblasRowMajor, CBLAS_TRANSPOSE::CblasTrans, m, n, a, A, (m > 1 ? m : 1), x, incx, b, y, incy);
+}
+template<>
+decltype(auto) _blas_gemtv(size_t m, size_t n, f64_t a, const dptr A, const dptr x, int incx, f64_t b, dptr y, size_t incy) {
+	return cblas_dgemv(CBLAS_LAYOUT::CblasRowMajor, CBLAS_TRANSPOSE::CblasTrans, m, n, a, A, (m > 1 ? m : 1), x, incx, b, y, incy);
 }
 _INTERNAL_END
 DGE_MATRICE_END
