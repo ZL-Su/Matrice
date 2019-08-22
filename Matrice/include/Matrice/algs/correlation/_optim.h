@@ -17,12 +17,12 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #pragma once
 #include <variant>
-#include "../../core/matrix.h"
-#include "../../core/vector.h"
-#include "../../core/solver.h"
-#include "../../private/math/_linear.h"
-#include "../interpolation.h"
+#include "core/matrix.h"
+#include "core/vector.h"
+#include "core/solver.h"
+#include "private/math/_linear.h"
 #include "_correlation_traits.h"
+#include "../interpolation.h"
 
 MATRICE_ALGS_BEGIN _DETAIL_BEGIN namespace corr {
 
@@ -268,77 +268,5 @@ private:
 };
 
 _DETAIL_END } MATRICE_ALGS_END
-
-DGE_MATRICE_BEGIN
-struct correlation_optimizer {
-	using options = algs::detail::corr::_Correlation_options;
-
-	/**
-	 *\brief N-th order IC-GN alg. with bicubic spline interpolation.
-	 *\param <_Ty> must be a scalar type of float or double.
-	 */
-	template<typename _Ty, uint8_t _Order = 1>
-	using icgn_bic = algs::detail::corr::_Corr_solver_impl<_Ty,
-		tag::bicspl_tag, algs::detail::corr::_Alg_icgn<_Order>>;
-	/**
-	 *\brief 1th order IC-GN alg. with biquintic spline interpolation.
-	 *\param <_Ty> must be a scalar type of float or double.
-	 */
-	template<typename _Ty, uint8_t _Order = 1>
-	using icgn_biq = algs::detail::corr::_Corr_solver_impl<_Ty,
-		tag::biqspl_tag, algs::detail::corr::_Alg_icgn<_Order>>;
-	/**
-	 *\brief 1th order IC-GN alg. with biseptic spline interpolation.
-	 *\param <_Ty> must be a scalar type of float or double.
-	 */
-	template<typename _Ty, uint8_t _Order = 1>
-	using icgn_bis = algs::detail::corr::_Corr_solver_impl<_Ty,
-		tag::bisspl_tag, algs::detail::corr::_Alg_icgn<_Order>>;
-
-	/**
-	 *\brief 1th order IC-GN alg. with bicubic spline interpolation.
-	 *\param <_Ty> must be a scalar type of float or double.
-	 */
-	template<typename _Ty>
-	using icgn_bic_0 = algs::detail::corr::_Corr_solver_impl<_Ty,
-		tag::bicspl_tag, algs::detail::corr::_Alg_icgn<0>>;
-	/**
-	 *\brief 1th order IC-GN alg. with biquintic spline interpolation.
-	 *\param <_Ty> must be a scalar type of float or double.
-	 */
-	template<typename _Ty>
-	using icgn_biq_0 = algs::detail::corr::_Corr_solver_impl<_Ty,
-		tag::biqspl_tag, algs::detail::corr::_Alg_icgn<0>>;
-	/**
-	 *\brief 1th order IC-GN alg. with biseptic spline interpolation.
-	 *\param <_Ty> must be a scalar type of float or double.
-	 */
-	template<typename _Ty>
-	using icgn_bis_0 = algs::detail::corr::_Corr_solver_impl<_Ty,
-		tag::bisspl_tag, algs::detail::corr::_Alg_icgn<0>>;
-
-	/**
-	 *\brief 1th order IC-GN alg. with bicubic spline interpolation.
-	 *\param <_Ty> must be a scalar type of float or double.
-	 */
-	template<typename _Ty>
-	using icgn_bic_1 = algs::detail::corr::_Corr_solver_impl<_Ty,
-		tag::bicspl_tag, algs::detail::corr::_Alg_icgn<1>>;
-	/**
-	 *\brief 1th order IC-GN alg. with biquintic spline interpolation.
-	 *\param <_Ty> must be a scalar type of float or double.
-	 */
-	template<typename _Ty>
-	using icgn_biq_1 = algs::detail::corr::_Corr_solver_impl<_Ty,
-		tag::biqspl_tag, algs::detail::corr::_Alg_icgn<1>>;
-	/**
-	 *\brief 1th order IC-GN alg. with biseptic spline interpolation.
-	 *\param <_Ty> must be a scalar type of float or double.
-	 */
-	template<typename _Ty>
-	using icgn_bis_1 = algs::detail::corr::_Corr_solver_impl<_Ty,
-		tag::bisspl_tag, algs::detail::corr::_Alg_icgn<1>>;
-};
-DGE_MATRICE_END
 
 #include "inline\_optim.inl"
