@@ -164,6 +164,7 @@
     <ClInclude Include="examples\Invcomp_GaussNewton.hpp" />
     <ClInclude Include="examples\speckle_deformation_simulation_ex.hpp" />
     <ClInclude Include="include\Matrice\3rdparty\interface.hpp" />
+    <ClInclude Include="include\Matrice\algs\correlation.hpp" />
     <ClInclude Include="include\Matrice\algs\correlation\_correlation_traits.h" />
     <ClInclude Include="include\Matrice\algs\correlation\_optim.h" />
     <ClInclude Include="include\Matrice\algs\correlation\_utils.hpp" />
