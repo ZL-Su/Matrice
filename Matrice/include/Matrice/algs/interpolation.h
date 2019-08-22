@@ -18,6 +18,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "interpolation\_interpolation.h"
+#include "forward.hpp"
 
 DGE_MATRICE_BEGIN
 enum {
@@ -33,7 +34,7 @@ enum {
  ******************************************************************/
 template<
 	typename _Ty, 
-	typename _Tag = _TAG bicspl_tag,
+	typename _Tag = bicerp_tag,
 	MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 using interpolation = algs::_Interpolation_wrapper<_Ty, _Tag>;
 
