@@ -61,7 +61,7 @@ public:
 
 	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base() = default;
 	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base(int _rows, int _cols, _Ty* _data = nullptr) noexcept
-		: m_shape{1,1,_rows,_cols} {
+		: m_shape{1,1,_rows,_cols}, m_data(_data) {
 		this->_Flush_view_buf();
 	};
 	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base(const basic_shape_t& _Shape, _Ty* _data) noexcept
@@ -163,18 +163,18 @@ _TYPES_BEGIN
 template<
 	typename _Derived, 
 	typename _Mytraits = matrix_traits<_Derived>, 
-	typename _Valtype = typename _Mytraits::type>
-class Base_ : public _Basic_plane_view_base<_Valtype>
+	typename _Valty = typename _Mytraits::type>
+class Base_ : public _Basic_plane_view_base<_Valty>
 {
 #define MATRICE_LINK_PTR { \
-	m_data = m_storage.data(); \
+	m_data = _Myalloc.data(); \
 }
 #define MATRICE_EVALEXP_TOTHIS { \
-	m_data = m_storage.data(); \
+	m_data = _Myalloc.data(); \
 	exp.assign(*this); \
 }
 #define MATRICE_EXPAND_SHAPE get<0>(_Shape), get<1>(_Shape)
-#define MATRICE_MAKE_EXPOP_TYPE(DESC, NAME) typename _Exp_op::_##DESC##_##NAME<_Valtype>
+#define MATRICE_MAKE_EXPOP_TYPE(DESC, NAME) typename _Exp_op::_##DESC##_##NAME<_Valty>
 #define MATRICE_MAKE_ARITHOP(OP, NAME) \
 template<typename _Rhs> MATRICE_GLOBAL_INL \
 auto operator##OP (const _Rhs& _Right) const { \
@@ -197,19 +197,21 @@ return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 }
 
 	enum { _M = _Mytraits::_M, _N = _Mytraits::_N };
-	using _Myalty = typename detail::Storage_<_Valtype>::template Allocator<_M, _N>;
-	using _Myalloc = Allocator<_Valtype, _M, _N, allocator_traits_v<_M, _N>, plain_layout::row_major>;
+	using _Mylayout = plain_layout::row_major;
+	using _Myalty = typename detail::Storage_<_Valty>::template Allocator<_M, _N>;
+	using _Myalloc_t = Allocator<_Valty, _M, _N, allocator_traits_v<_M, _N>, _Mylayout>;
+
 	using _Myt = Base_;
-	using _Mybase = _Basic_plane_view_base<_Valtype>;
-	using _Myt_const = std::add_const_t<_Myt>;
-	using _Myt_reference = std::add_lvalue_reference_t<_Myt>;
-	using _Myt_const_reference = std::add_lvalue_reference_t<_Myt_const>;
-	using _Myt_fwd_iterator = _Matrix_forward_iterator<_Valtype>;
-	using _Myt_rwise_iterator = _Matrix_rwise_iterator<_Valtype>;
-	using _Myt_cwise_iterator = _Matrix_cwise_iterator<_Valtype>;
-	using _Myt_rview_type = _Matrix_rview<_Valtype>;
-	using _Myt_cview_type = _Matrix_cview<_Valtype>;
-	using _Myt_blockview_type = _Matrix_block<_Valtype>;
+	using _Mybase = _Basic_plane_view_base<_Valty>;
+	using _Myconst = std::add_const_t<_Myt>;
+	using _Myref = std::add_lvalue_reference_t<_Myt>;
+	using _Myconstref = std::add_lvalue_reference_t<_Myconst>;
+	using _Myt_fwd_iterator = _Matrix_forward_iterator<_Valty>;
+	using _Myt_rwise_iterator = _Matrix_rwise_iterator<_Valty>;
+	using _Myt_cwise_iterator = _Matrix_cwise_iterator<_Valty>;
+	using _Myt_rview_type = _Matrix_rview<_Valty>;
+	using _Myt_cview_type = _Matrix_cview<_Valty>;
+	using _Myt_blockview_type = _Matrix_block<_Valty>;
 	using _Xop_ewise_add   = MATRICE_MAKE_EXPOP_TYPE(Ewise, add);
 	using _Xop_ewise_sub   = MATRICE_MAKE_EXPOP_TYPE(Ewise, sub);
 	using _Xop_ewise_mul   = MATRICE_MAKE_EXPOP_TYPE(Ewise, mul);
@@ -223,7 +225,7 @@ return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 	using _Xop_mat_inv     = MATRICE_MAKE_EXPOP_TYPE(Mat,   inv);
 	using _Xop_mat_trp     = MATRICE_MAKE_EXPOP_TYPE(Mat,   trp);
 public:
-	using value_t = _Valtype;
+	using value_t = _Valty;
 	using value_type = value_t;
 	using derived_t = _Derived;
 	using base_t = _Mybase;
@@ -261,68 +263,85 @@ public:
 	 */
 	static constexpr auto eps = std::numeric_limits<value_t>::epsilon();
 
-	MATRICE_GLOBAL_INL constexpr Base_() noexcept
-		:_Mybase(_M<0?0:_M, _N<0?0:_N), m_storage() MATRICE_LINK_PTR
-	MATRICE_GLOBAL_INL constexpr Base_(int _rows, int _cols) noexcept
-		:_Mybase(_rows, _cols), m_storage(_rows, _cols) MATRICE_LINK_PTR
-	MATRICE_GLOBAL_INL constexpr Base_(const shape_t<size_t>& _Shape) noexcept
-		: Base_(MATRICE_EXPAND_SHAPE) {}
-	MATRICE_GLOBAL_INL constexpr Base_(int _rows, int _cols, pointer data) noexcept
-		:_Mybase(_rows, _cols, data), m_storage(_rows, _cols, data) {}
-	MATRICE_GLOBAL_INL constexpr Base_(const shape_t<size_t>& _Shape, pointer _Data) noexcept
-		: Base_(MATRICE_EXPAND_SHAPE, _Data) {}
-	MATRICE_GLOBAL_INL constexpr Base_(int _rows, int _cols, value_t _val) noexcept
-		:_Mybase(_rows, _cols), m_storage(_rows, _cols, _val) MATRICE_LINK_PTR
-	MATRICE_GLOBAL_INL constexpr Base_(const shape_t<size_t>& _Shape, value_t _Val) noexcept
-		:Base_(MATRICE_EXPAND_SHAPE, _Val) {}
+	MATRICE_GLOBAL_INL constexpr Base_()noexcept
+		:_Mybase(_M < 0 ? 0 : _M, _N < 0 ? 0 : _N), _Myalloc() {
+		m_data = _Myalloc.data();
+	}
+	MATRICE_GLOBAL_INL constexpr Base_(int _rows, int _cols)noexcept
+		:_Mybase(_rows, _cols), _Myalloc(_rows, _cols) {
+		m_data = _Myalloc.data();
+	}
+	MATRICE_GLOBAL_INL constexpr Base_(const shape_t<size_t>& _Shape)noexcept
+		:Base_(MATRICE_EXPAND_SHAPE) {
+	}
+	MATRICE_GLOBAL_INL constexpr Base_(int _rows, int _cols, pointer data)noexcept
+		:_Mybase(_rows, _cols, data) {
+	}
+	MATRICE_GLOBAL_INL constexpr Base_(const shape_t<size_t>& _Shape, pointer _Data)noexcept
+		:Base_(MATRICE_EXPAND_SHAPE, _Data) {
+	}
+	MATRICE_GLOBAL_INL constexpr Base_(int _rows, int _cols, value_t _val)noexcept
+		:Base_(_rows, _cols) {
+		_Myalloc = (_val);
+	}
+	MATRICE_GLOBAL_INL constexpr Base_(const shape_t<size_t>& _Shape, value_t _Val)noexcept
+		:Base_(MATRICE_EXPAND_SHAPE, _Val) {
+	}
 	MATRICE_GLOBAL_INL constexpr Base_(const basic_shape_t& _Shape) noexcept
-		:_Mybase(_Shape), m_storage(_Shape.rows(), _Shape.cols())
-		MATRICE_LINK_PTR
+		:_Mybase(_Shape), _Myalloc(_Shape.rows(), _Shape.cols()) {
+		m_data = _Myalloc.data();
+	}
 	MATRICE_GLOBAL_INL constexpr Base_(const_initlist _list) noexcept
-		:_Mybase((_M <= 0)?_list.size():_M, (_N<=0)?1:_N), m_storage(_list) MATRICE_LINK_PTR
+		:Base_((_M <= 0) ? _list.size() : _M, (_N <= 0) ? 1 : _N) {
+		_Myalloc = ((pointer)_list.begin());
+	}
 	MATRICE_GLOBAL_INL constexpr Base_(const _Myt& _other) noexcept
-		:_Mybase(_other.m_shape), m_storage(_other.m_storage) MATRICE_LINK_PTR
+		:_Mybase(_other.m_shape), _Myalloc(_other._Myalloc) {
+		m_data = _Myalloc.data();
+	}
 	MATRICE_GLOBAL_INL constexpr Base_(_Myt&& _other) noexcept
-		:_Mybase(_other.m_shape), m_storage(move(_other.m_storage)) MATRICE_LINK_PTR
+		:_Mybase(_other.m_shape), _Myalloc(move(_other._Myalloc)) {
+		m_data = _Myalloc.data();
+	}
 	/**
-	 *\from STD vector<value_t>
+	 *\from STD vector<value_t>, while no memory is copied.
 	 */
 	MATRICE_HOST_INL Base_(const std::vector<value_t>&_other, int _cols=1) noexcept
-		:Base_(_other.size()/_cols, _cols) { from(_other.data()); }
+		:Base_(_other.size()/_cols, _cols, _other.data()) {}
 	/**
-	 *\from STD valarray<...>
+	 *\from STD valarray<...>, while no memory is copied.
 	 */
-	MATRICE_HOST_INL Base_(const std::valarray<value_t>& _other, int _rows = 1) noexcept 
-		:_Mybase(_rows, _other.size()/_rows), m_storage(_rows, _other.size()/_rows, (pointer)std::addressof(_other[0])) MATRICE_LINK_PTR
+	MATRICE_HOST_INL Base_(const std::valarray<value_t>& _other, int _cols = 1) noexcept
+		:Base_(_other.size() / _cols, _cols, &_other[0]) {}
 	/**
 	 *\from explicit specified matrix type
 	 */
 	template<int _CTR, int _CTC, MATRICE_ENABLE_IF((_CTR>0&&_CTC>0))>
 	MATRICE_GLOBAL_INL constexpr Base_(const Matrix_<value_t, _CTR, _CTC>& _Oth) noexcept
-		:_Mybase(_Oth.rows(), _Oth.cols()),m_storage(_Oth.allocator())
-		MATRICE_LINK_PTR
-	MATRICE_GLOBAL_INL constexpr Base_(const Matrix_<value_t,-1,-1>& _Oth) noexcept
-		:_Mybase(_Oth.rows(), _Oth.cols()), m_storage(_Oth.allocator())
-		MATRICE_LINK_PTR
+		:_Mybase(_Oth.rows(), _Oth.cols()),_Myalloc(_Oth.allocator()){
+		m_data = _Myalloc.data();
+	}
+#ifdef MATRICE_ENABLE_CUDA
+	MATRICE_GLOBAL_INL constexpr Base_(const Matrix_<value_t, ::device> & _Oth) noexcept
+		:_Mybase(_Oth.rows(), _Oth.cols()), _Myalloc(_Oth.allocator()) {
+		m_data = _Myalloc.data();
+	}
+#endif
 	/**
 	 *\from expression
 	 */
 	template<typename _Exp>
 	MATRICE_GLOBAL_FINL Base_(const exprs::_Matrix_exp<_Exp>& exp)
-		: _Mybase(m_rows = exp.rows(), m_cols = exp.cols()), 
-		m_storage(m_rows, m_cols) MATRICE_EVALEXP_TOTHIS
+		:Base_(exp.rows(), exp.cols()) MATRICE_EVALEXP_TOTHIS
 	template<typename _Lhs, typename _Rhs, typename _Op>
 	MATRICE_GLOBAL_FINL Base_(const Expr::EwiseBinaryExpr<_Lhs,_Rhs,_Op>& exp)
-		:_Mybase(/*m_rows = exp.rows(), m_cols = exp.cols()*/exp.shape()),
-		m_storage(m_rows, m_cols) MATRICE_EVALEXP_TOTHIS
+		:Base_(exp.shape()) MATRICE_EVALEXP_TOTHIS
 	template<typename _Lhs, typename _Rhs, typename _Op>
 	MATRICE_GLOBAL_FINL Base_(const Expr::MatBinaryExpr<_Lhs, _Rhs, _Op>& exp)
-		:_Mybase(m_rows = exp.rows(), m_cols = exp.cols()), 
-		m_storage(m_rows, m_cols) MATRICE_EVALEXP_TOTHIS
+		:Base_(exp.shape()) MATRICE_EVALEXP_TOTHIS
 	template<typename _Rhs, typename _Op>
 	MATRICE_GLOBAL_FINL Base_(const Expr::MatUnaryExpr<_Rhs, _Op>& exp)
-		:_Mybase(m_rows = exp.rows(), m_cols = exp.cols()), 
-		m_storage(m_rows, m_cols) MATRICE_EVALEXP_TOTHIS
+		:Base_(exp.shape()) MATRICE_EVALEXP_TOTHIS
 
 	/**
 	 *\from nested initializer list {{...},{...},...,{...}}
@@ -659,8 +678,10 @@ public:
 	 * \assignment operator, fill Matrix_ from a scalar.
 	 */
 	MATRICE_GLOBAL_FINL _Derived& operator= (value_t _Val) noexcept {
-		m_storage = _Val;
-		m_data = internal::_Proxy_checked(m_storage.data());
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(_Myalloc, "This object is empty.");
+#endif // MATRICE_DEBUG
+		_Myalloc = (_Val);
 		return (this->derived());
 	}
 
@@ -668,8 +689,10 @@ public:
 	 * \assignment operator, fill Matrix_ from initializer list
 	 */
 	MATRICE_GLOBAL_FINL _Derived& operator= (const_initlist _list) noexcept {
-		m_storage = _list;
-		m_data = internal::_Proxy_checked(m_storage.data());
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(_Myalloc, "This object is empty.");
+#endif // MATRICE_DEBUG
+		_Myalloc = (_list.begin());
 		return (this->derived());
 	}
 	/**
@@ -678,9 +701,10 @@ public:
 	template<typename _Ty>
 	MATRICE_HOST_INL _Derived& operator=(nested_initlist<_Ty> _list) noexcept {
 #ifdef MATRICE_DEBUG
+		DGELOM_CHECK(_Myalloc, "This object is empty.");
 		DGELOM_CHECK(_list.size() == m_rows, "Inconsistent rows.");
 		DGELOM_CHECK(_list.begin().size() == m_cols, "Inconsistent cols");
-#endif
+#endif // MATRICE_DEBUG
 		size_t _Count = 0;
 		for (const auto L : _list) {
 			auto _Data = m_data + m_cols * _Count++;
@@ -694,28 +718,33 @@ public:
 	 * \assignment operator, from row-wise iterator
 	 */
 	MATRICE_GLOBAL_FINL _Derived& operator= (const _Myt_rwise_iterator& _It) {
-		std::copy(_It.begin(), _It.end(), m_storage.data());
-		m_data = internal::_Proxy_checked(m_storage.data());
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(_Myalloc, "This object is empty.");
+#endif // MATRICE_DEBUG
+		std::copy(_It.begin(), _It.end(), _Myalloc.data());
 		return (this->derived());
 	}
 	/**
 	 * \assignment operator, from column-wise iterator
 	 */
-	MATRICE_GLOBAL_FINL _Derived& operator=(const _Myt_cwise_iterator& _It){
-		std::copy(_It.begin(), _It.end(), m_storage.data());
-		m_data = internal::_Proxy_checked(m_storage.data());
+	MATRICE_GLOBAL_FINL _Derived& operator=(const _Myt_cwise_iterator& _It) {
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(_Myalloc, "This object is empty.");
+#endif // MATRICE_DEBUG
+		std::copy(_It.begin(), _It.end(), _Myalloc.data());
 		return (this->derived());
 	}
 	/**
 	 * \homotype copy assignment operator
 	 */
 	MATRICE_GLOBAL_INL _Derived& operator=(const _Myt& _other) {
-		m_cols = _other.m_cols, m_rows = _other.m_rows;
-		m_format = _other.m_format;
-		m_storage = _other.m_storage;
-		m_data = internal::_Proxy_checked(m_storage.data());
-		_Mybase::_Flush_view_buf();
-
+		if (this != &_other) {
+			m_cols = _other.m_cols, m_rows = _other.m_rows;
+			m_shape = _other.shape();
+			if (_other._Myalloc) m_data = _Myalloc = _other._Myalloc;
+			else m_data = _other.data();
+			_Mybase::_Flush_view_buf();
+		}
 		return (this->derived());
 	}
 	/**
@@ -723,16 +752,14 @@ public:
 	 */
 	MATRICE_GLOBAL_INL _Derived& operator=(_Myt&& _other) noexcept {
 		m_cols = _other.m_cols, m_rows = _other.m_rows;
-		m_format = _other.m_format;
-		m_storage = move(_other.m_storage);
-		m_data = internal::_Proxy_checked(m_storage.data());
+		if (_other._Myalloc) {
+			m_data = _Myalloc = move(_other._Myalloc);
+			_other._Myalloc.destroy();
+		}
+		else m_data = _other.data();
 
 		std::swap(_Mybase::m_shape, _other.m_shape);
 		_Mybase::_Flush_view_buf();
-
-		_other.m_storage.free();
-		_other.m_data = nullptr;
-		_other.m_cols = _other.m_rows = 0;
 
 		return (this->derived());
 	}
@@ -740,12 +767,13 @@ public:
 	 * \try to convert managed matrix to dynamic matrix
 	 */
 	template<int _Rows, int _Cols,
-		typename _Mty = Matrix_<value_t, _Rows, _Cols>,
+		typename _Maty = Matrix_<value_t, _Rows, _Cols>,
 		typename = enable_if_t<is_static_v<_Rows,_Cols>&&!is_static_v<_M,_N>>>
-	MATRICE_GLOBAL_FINL _Derived& operator= (_Mty& _managed) {
-		m_data = _managed.data();
-		m_rows = _managed.rows(), m_cols = _managed.cols();
-		m_storage.owner() = detail::Storage_<value_t>::Proxy;
+	MATRICE_GLOBAL_FINL _Derived& operator= (const _Maty& _managed) {
+		_Myalloc = _managed().allocator();
+		m_rows = _Myalloc.rows();
+		m_cols = _Myalloc.cols();
+		m_data = _Myalloc.data();
 		_Mybase::_Flush_view_buf();
 		return (this->derived());
 	}
@@ -778,7 +806,7 @@ public:
 	MATRICE_HOST_FINL auto inv() const { 
 		return Expr::MatUnaryExpr<_Myt, _Xop_mat_inv>(*this); 
 	}
-	MATRICE_HOST_FINL auto inv(_Myt_const_reference _Right) {
+	MATRICE_HOST_FINL auto inv(_Myconstref _Right) {
 		return Expr::MatUnaryExpr<_Myt, _Xop_mat_inv>(_Right, *this);
 	}
 	MATRICE_HOST_FINL auto transpose() const { 
@@ -889,7 +917,7 @@ public:
 	template<typename _It>
 	MATRICE_GLOBAL_FINL _Derived& from(const _It _Data) {
 		using arg_type = remove_all_t<decltype(*_Data)>;
-		if constexpr (std::is_convertible_v<arg_type, _Derived>) {
+		if constexpr (std::is_convertible_v<arg_type, _Derived>&&!is_iterator_v<_It>) {
 			*this = *_Data;
 		}
 		else {
@@ -1011,12 +1039,8 @@ public:
 			_Val = _Rand(_Eng); }));
 	}
 
-	///<brief> properties </brief>
-	__declspec(property(get=_Format_getter, put=_Format_setter))size_t format;
-	MATRICE_HOST_FINL size_t _Format_getter() const { return m_format; }
-	MATRICE_HOST_FINL void _Format_setter(size_t format) { m_format = rmaj|format; }
-
 	MATRICE_GET(bool, empty, !bool(size()));
+	MATRICE_GET(size_t, format, _Myfmt);
 
 protected:
 	using _Mybase::m_rows;
@@ -1024,34 +1048,33 @@ protected:
 	using _Mybase::m_data;
 	using _Mybase::m_shape;
 
-	size_t m_format = rmaj|gene;
+	conditional_t<RowsAtCT>=::dynamic, _Myalloc_t, _Myalty> _Myalloc;
+	size_t _Myfmt = _Myalloc.fmt() | gene;
 
-	_Myalty m_storage;
-
-	MATRICE_GLOBAL_INL _Myt& _Reset_no_alloc(initlist<size_t> il) noexcept {
+	MATRICE_GLOBAL_INL _Myt& _Xfields(initlist<size_t> il) noexcept {
 		m_shape = il;
 		m_rows = m_shape.rows();
 		m_cols = m_shape.cols();
-		m_data = m_storage.data();
+		m_data = _Myalloc.data();
 		_Mybase::_Flush_view_buf();
 		return (*this);
 	}
 
-	MATRICE_GLOBAL_INL _Myt& _Reset(initlist<size_t> il) noexcept {
-		_Reset_no_alloc(il);
-		m_data = allocator().create(m_rows, m_cols).data();
+	MATRICE_GLOBAL_INL _Myt& _Buy(initlist<size_t> il) noexcept {
+		_Xfields(il);
+		m_data = _Myalloc.alloc(m_rows, m_cols).data();
 		return (*this);
 	}
 
 public:
-	MATRICE_HOST_INL _Myalty& allocator() noexcept {
-		return (m_storage);
+	MATRICE_HOST_INL decltype(auto) allocator() noexcept {
+		return (_Myalloc);
 	}
-	MATRICE_HOST_INL const _Myalty& allocator()const noexcept {
-		return (m_storage);
+	MATRICE_HOST_INL decltype(auto) allocator()const noexcept {
+		return (_Myalloc);
 	}
 	MATRICE_HOST_INL decltype(auto) deleter() noexcept {
-		return (m_storage.deleter());
+		return (_Myalloc.deleter());
 	}
 
 #undef MATRICE_MAKE_EXPOP_TYPE
