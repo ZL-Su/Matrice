@@ -304,7 +304,7 @@ template<typename T, typename U>
 inline constexpr auto is_same_v = std::is_same<T, U>::value;
 
 /**
- *\brief is_same_v<T,U> is true iff. T and U are not same type.
+ *\brief is_not_same_v<T,U> is true iff. T and U are not same type.
  */
 template<typename T, typename U>
 inline constexpr auto is_not_same_v = !std::is_same<T, U>::value;
