@@ -269,4 +269,4 @@ private:
 
 _DETAIL_END } MATRICE_ALGS_END
 
-#include "inline\_optim.inl"
+#include "inline/_optim.inl"

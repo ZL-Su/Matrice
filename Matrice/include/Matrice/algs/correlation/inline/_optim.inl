@@ -18,18 +18,18 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "../_optim.h"
-#include "../../../arch/ixpacket.h"
+#include "arch/ixpacket.h"
 
 MATRICE_ALGS_BEGIN _DETAIL_BEGIN namespace corr {
 
 // \retrieve border size for each interpolation alg.
-template<> struct _Corr_border_size<_TAG bicspl_tag> {
+template<> struct _Corr_border_size<bicerp_tag> {
 	static constexpr auto lower = 1, upper = 2;
 };
-template<> struct _Corr_border_size<_TAG biqspl_tag> {
+template<> struct _Corr_border_size<biqerp_tag> {
 	static constexpr auto lower = 2, upper = 3;
 };
-template<> struct _Corr_border_size<_TAG bisspl_tag> {
+template<> struct _Corr_border_size<biserp_tag> {
 	static constexpr auto lower = 3, upper = 4;
 };
 
