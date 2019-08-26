@@ -19,6 +19,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../../math/kernel_wrapper.hpp"
 #include "../../math/_config.h"
 #include "util/_exception.h"
+#include "private/_tag_defs.h"
 #include "private/_refs.hpp"
 
 DGE_MATRICE_BEGIN
@@ -53,6 +54,10 @@ decltype(auto) _blas_gemv(size_t m, size_t n, _Ty a, const _Ptr A, const _Ptr x,
 };
 template<typename _Ty, typename _Ptr = add_pointer_t<_Ty>>
 decltype(auto) _blas_gemtv(size_t m, size_t n, _Ty a, const _Ptr A, const _Ptr x, int incx, _Ty b, _Ptr y, size_t incy) {
+	MATRICE_FAIL_TO_SPECIALIZATION
+};
+template<typename _Ty, typename _Ptr = add_pointer_t<_Ty>>
+decltype(auto) _blas_gemm(int lyt, int trpa, int trpb, size_t m, size_t n, size_t k, _Ty a, const _Ptr A, size_t lda, const _Ptr B, size_t ldb, _Ty b, _Ptr C, size_t ldc) {
 	MATRICE_FAIL_TO_SPECIALIZATION
 };
 _INTERNAL_END
@@ -119,6 +124,49 @@ struct _Blas_kernel_wrapper {
 		}
 			
 		return (y);
+	}
+
+	template<class _Aty, class _Bty, class _Cty>
+	static MATRICE_HOST_INL _Cty& gemm(_Aty&& a, _Bty&& b, _Cty& c) {
+		const int _Lyt = c.allocator().fmt(); 
+		DGELOM_CHECK(_Lyt == 101, "Only-row major storage is supported.");
+
+		int _Tra=111, _Trb=111;
+		size_t M, N, K;
+		auto C = c.data(), B = b.data(), A = a.data();
+		if constexpr (is_ref_v<_Aty> && is_ref_v<_Bty>) {
+			_Tra = a ? 112 : 111; _Trb = b ? 112 : 111;
+			M = a.get().rows(), K = a.get().cols(), N = b.get().cols();
+			if (a) { std::swap(M, K); }
+			if (b) N = b.get().rows();
+		}
+		else if constexpr (is_ref_v<_Aty> && !is_ref_v<_Bty>) {
+			_Trb = 111, N = b.cols();
+			if (a) _Tra = 112, M = a.get().cols(), K = a.get().rows();
+			else _Tra = 111, M = a.get().rows(), K = a.get().cols();
+		}
+		else if constexpr (!is_ref_v<_Aty> && is_ref_v<_Bty>) {
+			_Tra = 111; _Trb = b ? 112 : 111;
+			M = a.rows(), K = a.cols(), N = b.get().cols();
+			if (b) N = b.get().rows();
+		}
+		else {
+			_Tra = _Trb = 111;
+			if constexpr (is_expression_v<_Aty>)
+				if constexpr(is_same_v<typename _Aty::category, tag::_Matrix_trp_tag>) _Tra = 112;
+			if constexpr (is_expression_v<_Bty>)
+				if constexpr (is_same_v<typename _Bty::category, tag::_Matrix_trp_tag>) _Trb = 112;
+			M = a.rows(), K = a.cols(), N = b.cols();
+		}
+		const auto lda = _Tra == 112 ? max(1, M) : max(1, K);
+		const auto ldb = _Trb == 112 ? max(1, K) : max(1, N);
+		const auto ldc = max(1, N);
+
+		constexpr auto _1 = typename _Cty::value_type(1);
+		constexpr auto _0 = typename _Cty::value_type(0);
+		internal::_blas_gemm(_Lyt, _Tra, _Trb, M, N, K, _1, A, lda, B, ldb, _0, C, ldc);
+
+		return (c);
 	}
 };
 _DETAIL_END
@@ -188,6 +236,14 @@ decltype(auto) _blas_gemtv(size_t m, size_t n, f32_t a, const fptr A, const fptr
 template<>
 decltype(auto) _blas_gemtv(size_t m, size_t n, f64_t a, const dptr A, const dptr x, int incx, f64_t b, dptr y, size_t incy) {
 	return cblas_dgemv(CBLAS_LAYOUT::CblasRowMajor, CBLAS_TRANSPOSE::CblasTrans, m, n, a, A, (m > 1 ? m : 1), x, incx, b, y, incy);
+}
+template<>
+decltype(auto) _blas_gemm(int lyt, int trpa, int trpb, size_t m, size_t n, size_t k, f32_t a, const fptr A, size_t lda, const fptr B, size_t ldb, f32_t b, fptr C, size_t ldc) {
+	return cblas_sgemm(CBLAS_LAYOUT(lyt), CBLAS_TRANSPOSE(trpa), CBLAS_TRANSPOSE(trpb), MKL_INT(m), MKL_INT(n), MKL_INT(k), a, A, lda, B, ldb, b, C, ldc);
+}
+template<>
+decltype(auto) _blas_gemm(int lyt, int trpa, int trpb, size_t m, size_t n, size_t k, f64_t a, const dptr A, size_t lda, const dptr B, size_t ldb, f64_t b, dptr C, size_t ldc) {
+	return cblas_dgemm(CBLAS_LAYOUT(lyt), CBLAS_TRANSPOSE(trpa), CBLAS_TRANSPOSE(trpb), MKL_INT(m), MKL_INT(n), MKL_INT(k), a, A, lda, B, ldb, b, C, ldc);
 }
 _INTERNAL_END
 DGE_MATRICE_END
