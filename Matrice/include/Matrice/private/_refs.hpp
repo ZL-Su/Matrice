@@ -34,6 +34,9 @@ public:
 	MATRICE_GLOBAL_FINL operator bool() noexcept {
 		return _Myreqt;
 	}
+	MATRICE_GLOBAL_FINL decltype(auto) data() noexcept {
+		return _Myinst.data();
+	}
 	MATRICE_GLOBAL_FINL element_type& get() const noexcept {
 		return _Myinst;
 	}
@@ -55,5 +58,9 @@ struct is_ref<Ref<T...>> : std::true_type {};
 template<typename _Mty>
 MATRICE_GLOBAL_FINL decltype(auto) ref(_Mty& cont, bool t=false)noexcept {
 	return Ref<_Mty>(cont, t);
+}
+template<typename _Mty>
+MATRICE_GLOBAL_FINL decltype(auto) ref_t(_Mty& cont) noexcept {
+	return ref(cont, true);
 }
 DGE_MATRICE_END
