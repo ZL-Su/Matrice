@@ -565,10 +565,8 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		EwiseUnaryExpr(const_reference_t _rhs) noexcept
 			:_Mybase(_rhs.shape()), _RHS(_rhs) {}
 
-		/*MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) {
-			return _Op(_RHS(_idx));
-		}*/
-		MATRICE_GLOBAL_FINL const value_t operator() (size_t _idx) const noexcept {
+
+		MATRICE_GLOBAL_FINL const value_t operator()(size_t _idx) const noexcept {
 			return _Op(_RHS(_idx));
 		}
 
@@ -579,6 +577,12 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 				res(i) = this->operator()(i);
 		}
 
+		/**
+		 * \brief returns the pointer of the source object
+		 */
+		MATRICE_GLOBAL_INL decltype(auto) data() const noexcept {
+			return _RHS.data();
+		}
 	private:
 		_UnaryOp _Op;
 		const_reference_t _RHS;
@@ -707,6 +711,14 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 				}
 			}
 		} /*i*N+(1-N*M)*(i/M) is replaced by i at left hand*/
+
+		/**
+		 * \brief returns the pointer of the source object
+		 */
+		MATRICE_GLOBAL_INL decltype(auto) data() const noexcept {
+			return _RHS.data();
+		}
+
 	private:
 		const T& _RHS;
 		const T& _ANS;
