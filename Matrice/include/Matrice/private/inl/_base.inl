@@ -62,7 +62,7 @@ decltype(auto) Base_<_Derived, _Traits, _Type>::mul_(const _Rhs& _Right) {
 
 template<typename _Derived, typename _Traits, typename _Type>
 template<ttag _Ltag, ttag _Rtag, typename _Rhs, typename> inline
-decltype(auto) Base_<_Derived, _Traits, _Type>::mul_inplace(const _Rhs& _Right) {
+auto Base_<_Derived, _Traits, _Type>::mul_inplace(const _Rhs& _Right) {
 	Matrix_<value_type, 
 		conditional_size_v<_Ltag == ttag::Y,_Myt::ColsAtCT,_Myt::RowsAtCT>,
 		conditional_size_v<_Rtag == ttag::Y,_Rhs::RowsAtCT,_Rhs::ColsAtCT>>
