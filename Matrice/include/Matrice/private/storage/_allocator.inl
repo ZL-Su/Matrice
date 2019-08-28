@@ -19,13 +19,8 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #include "../_storage.hpp"
 
-#define MATRICE_ALLOCATOR(LOC, RET, SV) \
-template<typename _Ty, typename _Layout> \
- \
-MATRICE_##LOC##_INL RET \
-_Allocator<_Ty, SV, SV, \
-allocator_traits_v<SV,SV>, \
-_Layout> 
+#define MATRICE_ALLOCTOR_SIG(M, N, OPT) \
+_Allocator<_Ty, M, N, allocator_traits_v<OPT>, _Layout>
 
 #define MATRICE_MEMCPY_ADAPTER_1 \
 typename _Al::category(), category()
@@ -107,37 +102,62 @@ MATRICE_GLOBAL_INL _Dense_allocator_base<_Altrs>& _Dense_allocator_base<_Altrs>:
 	return (*this);
 }
 
-MATRICE_ALLOCATOR(HOST, decltype(auto), ::dynamic)::_Alloc() noexcept {
-	auto cols = this->cols();
-	this->data() = internal::malloc<value_type>(this->rows(), cols, 
-		typename _Mybase::category());
+template<typename _Ty, typename _Layout>
+MATRICE_HOST_INL decltype(auto) MATRICE_ALLOCTOR_SIG(::dynamic, ::dynamic, ::dynamic)::_Alloc() noexcept {
+	auto cols = _Mybase::cols();
+	this->data() = internal::malloc<value_type>(_Mybase::rows(), cols, typename _Mybase::category());
 	return (*this);
 }
 
-MATRICE_ALLOCATOR(HOST, , ::dynamic)::~_Allocator() {
+template<typename _Ty, typename _Layout>
+MATRICE_HOST_INL MATRICE_ALLOCTOR_SIG(::dynamic, ::dynamic, ::dynamic)::~_Allocator() {
+	internal::free(this->data(), typename _Mybase::category());
+}
+
+template<typename _Ty, diff_t _Rows, typename _Layout>
+MATRICE_HOST_INL decltype(auto) MATRICE_ALLOCTOR_SIG(_Rows, ::dynamic, ::dynamic)::_Alloc() noexcept {
+	auto cols = _Mybase::cols();
+	this->data() = internal::malloc<value_type>(rows(), cols, typename _Mybase::category());
+	return (*this);
+}
+
+template<typename _Ty, diff_t _Rows, typename _Layout>
+MATRICE_HOST_INL MATRICE_ALLOCTOR_SIG(_Rows, ::dynamic, ::dynamic)::~_Allocator() {
+	internal::free(this->data(), typename _Mybase::category());
+}
+
+template<typename _Ty, diff_t _Cols, typename _Layout>
+MATRICE_HOST_INL decltype(auto) MATRICE_ALLOCTOR_SIG(::dynamic, _Cols, ::dynamic)::_Alloc() noexcept {
+	auto cols = cols();
+	this->data() = internal::malloc<value_type>(_Mybase::rows(), cols, typename _Mybase::category());
+	return (*this);
+}
+
+template<typename _Ty, diff_t _Cols, typename _Layout>
+MATRICE_HOST_INL MATRICE_ALLOCTOR_SIG(::dynamic, _Cols, ::dynamic)::~_Allocator() {
 	internal::free(this->data(), typename _Mybase::category());
 }
 
 #ifdef MATRICE_ENABLE_CUDA
-MATRICE_ALLOCATOR(GLOBAL, decltype(auto), ::device)::_Alloc() noexcept {
+MATRICE_ALLOCATOR(GLOBAL, decltype(auto), ::device, ::device)::_Alloc() noexcept {
 	m_pitch = this->cols();
 	this->data() = internal::malloc<value_type>(this->rows(), m_pitch,
 		device_alloc_tag());
 	return (*this);
 }
 
-MATRICE_ALLOCATOR(GLOBAL, , ::device)::~_Allocator() {
+MATRICE_ALLOCATOR(GLOBAL, , ::device, ::device)::~_Allocator() {
 	internal::free(this->data(), typename _Mybase::category());
 }
 
-MATRICE_ALLOCATOR(GLOBAL, decltype(auto), ::global)::_Alloc() noexcept {
+MATRICE_ALLOCATOR(GLOBAL, decltype(auto), ::global, ::global)::_Alloc() noexcept {
 	auto cols = this->cols();
 	this->data() = internal::malloc<value_type>(this->rows(), cols, 
 		global_alloc_tag());
 	return (*this);
 }
 
-MATRICE_ALLOCATOR(GLOBAL, , ::global)::~_Allocator() {
+MATRICE_ALLOCATOR(GLOBAL, , ::global, ::global)::~_Allocator() {
 	internal::free(this->data(), typename _Mybase::category());
 }
 #endif
@@ -279,6 +299,6 @@ MATRICE_HOST_INL decltype(auto) _Deleter(global_alloc_tag) noexcept {
 }
 DGE_MATRICE_END
 
-#undef MATRICE_ALLOCATOR
+#undef MATRICE_ALLOCTOR_SIG
 #undef MATRICE_MEMCPY_ADAPTER_1
 #undef MATRICE_MEMCPY_ADAPTER_2
