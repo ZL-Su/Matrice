@@ -241,7 +241,7 @@ public:
 	using scalar_type = Scalar<value_type>;
 	
 	enum { options = _Myalty::location };
-	enum { Size = _M*_N, CompileTimeRows = _M, CompileTimeCols = _N, };
+	enum { Size = _M*_N, rows_at_compiletime = _M, cols_at_compiletime = _N, };
 	/**
 	 *\brief for static querying memory location
 	 */
@@ -249,11 +249,11 @@ public:
 	/**
 	 *\brief for static querying memory block rows
 	 */
-	static constexpr auto RowsAtCT = CompileTimeRows;
+	static constexpr auto RowsAtCT = rows_at_compiletime;
 	/**
 	 *\brief for static querying memory block cols
 	 */
-	static constexpr auto ColsAtCT = CompileTimeCols;
+	static constexpr auto ColsAtCT = cols_at_compiletime;
 	/**
 	 *\brief for querying infinity attribute of the value type
 	 */
@@ -378,7 +378,7 @@ public:
 	 *\create a matrix with dynamic (host or device) memory allocation
 	 */
 	MATRICE_HOST_INL decltype(auto)create(diff_t _Rows, diff_t _Cols = (1)) {
-		if constexpr (_M <= 0 && _N <= 0) 
+		if constexpr (_M <= 0 || _N <= 0) 
 			this->derived().__create_impl(_Rows, _Cols);
 		return (*static_cast<_Derived*>(this));
 	};
@@ -388,7 +388,7 @@ public:
 		return (*(this) = value_type(_Val));
 	};
 	MATRICE_HOST_INL decltype(auto)create(const shape_t<size_t>& _Shape) {
-		if constexpr (_M <= 0 && _N <= 0) 
+		if constexpr (_M <= 0 || _N <= 0) 
 			this->derived().__create_impl(MATRICE_EXPAND_SHAPE);
 		return (*static_cast<_Derived*>(this));
 	};
@@ -891,9 +891,8 @@ public:
 	/**
 	 * \in-place matmul with _Rhs. 
 	 */
-	template<ttag _Ltag = ttag::N, ttag _Rtag = ttag::N, 
-		typename _Rhs = _Derived, MATRICE_ENABLE_IF(is_matrix_v<_Rhs>)>
-	MATRICE_HOST_FINL auto mul_inplace(const _Rhs& _Right);
+	template<typename _Rhs = _Derived>
+	MATRICE_HOST_INL auto mul_inplace(const _Rhs& _Right) const;
 	/**
 	 *\brief spread to element-wisely multiplicate with an input
 	 *\param [_Right] input argument with a type of _Rhs.
@@ -1017,7 +1016,8 @@ public:
 	 */
 	template<typename _Uy, MATRICE_ENABLE_IF(is_scalar_v<_Uy>)>
 	static MATRICE_GLOBAL_INL _Derived diag(_Uy _Val = 1, diff_t _Size = 0) {
-		_Derived _Ret; _Ret.create(_Size, _Size, 0);
+		_Derived _Ret(_Size, _Size);
+		_Ret = value_type(0);
 		const auto _Value = value_type(_Val);
 		for (auto _Idx = 0; _Idx < _Ret.rows(); ++_Idx) 
 			_Ret[_Idx][_Idx] = _Value;
@@ -1028,13 +1028,13 @@ public:
 	 *\param [_Rows, Cols] height and width of matrix, only specified for dynamic case
 	 */
 	static MATRICE_GLOBAL_INL _Derived rand(diff_t _Rows=0, diff_t _Cols=0) {
-		_Derived _Ret; _Ret.create(_Rows, _Cols);
+		_Derived _Ret(_Rows, _Cols);
 		uniform_real<value_type> _Rand; mt19937 _Eng;
 		return forward<_Derived>(_Ret.each([&](auto& _Val) {
 			_Val = _Rand(_Eng); }));
 	}
 	static MATRICE_GLOBAL_INL _Derived randn(const_initlist& _Pars = {/*mean=*/0, /*STD=*/1}, diff_t _Rows = 0, diff_t _Cols = 0) {
-		_Derived _Ret; _Ret.create(_Rows, _Cols);
+		_Derived _Ret(_Rows, _Cols);
 		normal_distribution<value_type> _Rand{ *_Pars.begin(), *(_Pars.begin() + 1) };
 		mt19937 _Eng;
 		return forward<_Derived>(_Ret.each([&](auto& _Val) {
@@ -1056,7 +1056,7 @@ protected:
 	using _Mybase::m_data;
 	using _Mybase::m_shape;
 
-	conditional_t<RowsAtCT>=::dynamic, _Myalloc_t, _Myalty> _Myalloc;
+	conditional_t<(RowsAtCT>=::dynamic||ColsAtCT>=::dynamic), _Myalloc_t, _Myalty> _Myalloc;
 	size_t _Myfmt = _Myalloc.fmt() | gene;
 
 	MATRICE_GLOBAL_INL _Myt& _Xfields(initlist<size_t> il) noexcept {
@@ -1108,8 +1108,8 @@ struct _Matrix_padding {
 		// _Size <- max(_Size, _S)
 		static_assert(is_matrix_v<_Mty>, "_Mty must be a matrix type.");
 		
-		constexpr auto _M = _Mty::CompileTimeRows;
-		constexpr auto _N = _Mty::CompileTimeCols;
+		constexpr auto _M = _Mty::rows_at_compiletime;
+		constexpr auto _N = _Mty::cols_at_compiletime;
 		_Matrix_t<_Ty, _M + (_S << 1), _N + (_S << 1)> _Ret;
 		if constexpr (_S > 0) _Ret = { zero<_Ty> };
 		else {

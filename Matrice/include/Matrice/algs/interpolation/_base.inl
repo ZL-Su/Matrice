@@ -27,7 +27,7 @@ auto _Interpolation_base<_Derived>::_Value_at(const point_type& _Pos) const {
 	const auto _Diff_x_n = _Mydt_this->_Val_dx_n(_Dx);
 	const auto _Diff_y_n = _Mydt_this->_Val_dy_n(_Dy);
 
-	constexpr auto Ldv = decltype(_Diff_x_n)::CompileTimeRows;
+	constexpr auto Ldv = decltype(_Diff_x_n)::rows_at_compiletime;
 	constexpr auto _L = ~-(Ldv >> 1), _R = -~(Ldv >> 1);
 	const auto _Coeff = _Mycoeff(_Ix-_L, _Ix+_R, _Iy-_L, _Iy+_R).eval<Ldv, Ldv>();
 
@@ -46,7 +46,7 @@ auto _Interpolation_base<_Derived>::_Gradx_at(const point_type& _Pos) const {
 	const auto _Diff_x_n = _Mydt_this->_Grad_dx_n(_Dx);
 	const auto _Diff_y_n = _Mydt_this->_Val_dy_n(_Dy);
 
-	constexpr auto Ldv = decltype(_Diff_y_n)::CompileTimeCols;
+	constexpr auto Ldv = decltype(_Diff_y_n)::cols_at_compiletime;
 	constexpr auto _L = ~-(Ldv >> 1), _R = -~(Ldv >> 1);
 	const auto _Coeff = _Mycoeff(_Ix-_L, _Ix+_R, _Iy-_L, _Iy+_R).eval<Ldv, Ldv>();
 
@@ -64,7 +64,7 @@ auto _Interpolation_base<_Derived>::_Grady_at(const point_type& _Pos) const {
 	const auto _Diff_x_n = _Mydt_this->_Val_dx_n(_Dx);
 	const auto _Diff_y_n = _Mydt_this->_Grad_dy_n(_Dy);
 
-	constexpr auto Ldv = decltype(_Diff_x_n)::CompileTimeRows;
+	constexpr auto Ldv = decltype(_Diff_x_n)::rows_at_compiletime;
 	constexpr auto _L = ~-(Ldv >> 1), _R = -~(Ldv >> 1);
 	const auto _Coeff = _Mycoeff(_Ix-_L, _Ix+_R, _Iy-_L, _Iy+_R).eval<Ldv, Ldv>();
 

@@ -34,7 +34,7 @@ constexpr std::size_t packet_size_v =
 
 template<int _Rows = 0, int _Cols = 0> struct compile_time_size {
 	enum { val_1 = 0x0001, val_2 = 0x0002, val_3 = 0x0003, val_4 = 0x0004 };
-	enum { CompileTimeRows = _Rows,  CompileTimeCols = _Cols,
+	enum { rows_at_compiletime = _Rows,  cols_at_compiletime = _Cols,
 			 RunTimeDeducedOnHost = 0, RunTimeDeducedOnDevice = -1 };
 	static constexpr auto _1 = 0x0001;
 	static constexpr auto _2 = 0x0002;
@@ -45,10 +45,10 @@ template<int _Rows = 0, int _Cols = 0> struct compile_time_size {
 };
 // \compile-time size of row value
 template<int _M, int _N> MATRICE_GLOBAL_INL 
-constexpr int ct_size_rv = compile_time_size<_M, _N>::CompileTimeRows;
+constexpr int ct_size_rv = compile_time_size<_M, _N>::rows_at_compiletime;
 // \compile-time size of column value
 template<int _M, int _N> MATRICE_GLOBAL_INL 
-constexpr int ct_size_cv = compile_time_size<_M, _N>::CompileTimeCols;
+constexpr int ct_size_cv = compile_time_size<_M, _N>::cols_at_compiletime;
 // \statically deduced runtime-size on host
 template<int _M, int _N> MATRICE_GLOBAL_INL 
 constexpr int rs_host_v = compile_time_size<_M, _N>::RunTimeDeducedOnHost;

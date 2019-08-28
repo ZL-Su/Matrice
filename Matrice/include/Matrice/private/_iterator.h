@@ -41,7 +41,7 @@ public:
 	using pointer = std::add_pointer_t<value_type>;
 	using reference = std::add_lvalue_reference_t<typename std::pointer_traits<pointer>::element_type>;
 	using difference_type = std::ptrdiff_t;
-	enum { CompileTimeRows = 0, CompileTimeCols = 0 };
+	enum { rows_at_compiletime = 0, cols_at_compiletime = 0 };
 
 	MATRICE_GLOBAL_FINL iterator_base(pointer _Ptr) noexcept 
 		:_My_ptr(_Ptr), _My_begin(_Ptr), _My_size(0), _My_step(0) {}
@@ -291,7 +291,7 @@ public:
 	using pointer = std::add_pointer_t<value_type>;
 	using reference = std::add_lvalue_reference_t<value_type>;
 	using difference_type = std::ptrdiff_t;
-	enum { CompileTimeRows = 0, CompileTimeCols = 0 };
+	enum { rows_at_compiletime = 0, cols_at_compiletime = 0 };
 
 	MATRICE_HOST_INL _Transform_iterator(const _It& it, _Op&& op)
 		: _My_it(it), _My_op(op) {}

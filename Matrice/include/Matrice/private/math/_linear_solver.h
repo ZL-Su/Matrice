@@ -39,7 +39,7 @@ template<class _Derived> class SolverBase
 public:
 	struct Options{ 
 		int status;
-		int iwp[max(1, derived_t::CompileTimeCols)]; 
+		int iwp[max(1, derived_t::cols_at_compiletime)]; 
 		solver_type used_alg = solver_type(derived_t::SolverType);
 	};
 	constexpr SolverBase() = default;
@@ -87,7 +87,7 @@ struct LinearOp MATRICE_NONHERITABLE
 		using base_t = OpBase<typename _T::value_t>;
 		using typename base_t::value_t;
 		using _Mty = typename std::remove_reference<_T>::type;
-		enum { N = _Mty::CompileTimeCols };
+		enum { N = _Mty::cols_at_compiletime };
 		enum { option = solver_type::AUTO };
 
 		MATRICE_HOST_INL constexpr Auto(const _Mty& arg) : A(arg) {
@@ -108,7 +108,7 @@ struct LinearOp MATRICE_NONHERITABLE
 	{
 		using typename OpBase<typename _T::value_t>::value_t;
 		using _Mty = typename std::remove_reference<_T>::type;
-		enum { N = _Mty::CompileTimeCols };
+		enum { N = _Mty::cols_at_compiletime };
 		enum { option = solver_type::GLS };
 
 		MATRICE_GLOBAL_FINL constexpr Gls(const _Mty& arg) : A(arg) {
@@ -127,7 +127,7 @@ struct LinearOp MATRICE_NONHERITABLE
 	{
 		using typename OpBase<typename _T::value_t>::value_t;
 		using _Mty = typename std::remove_reference<_T>::type;
-		enum { N = _Mty::CompileTimeCols };
+		enum { N = _Mty::cols_at_compiletime };
 		enum { option = solver_type::SVD };
 
 		MATRICE_GLOBAL_FINL constexpr Svd(const _Mty& _Coeff) : U(_Coeff) {
@@ -139,14 +139,14 @@ struct LinearOp MATRICE_NONHERITABLE
 		};
 		MATRICE_GLOBAL_FINL constexpr auto operator() (std::_Ph<0> _ph = {}) {
 			OpBase<value_t>::_Launch();
-			auto X = Vt.rview(Vt.rows() - 1).eval<_Mty::CompileTimeCols>().transpose().eval();
+			auto X = Vt.rview(Vt.rows() - 1).eval<_Mty::cols_at_compiletime>().transpose().eval();
 			return std::forward<decltype(X)>(X);
 		}
 		template<typename _Ret = Matrix_<value_t, N, min(N, 1)>> 
 		MATRICE_GLOBAL_FINL constexpr _Ret& operator() (_Ret& X){
 			OpBase<value_t>::_Launch();
 
-			Matrix_<value_t, _Mty::CompileTimeCols, min(_Mty::CompileTimeCols, 1)> Z(X.rows(), 1); //inverse of singular values
+			Matrix_<value_t, _Mty::cols_at_compiletime, min(_Mty::cols_at_compiletime, 1)> Z(X.rows(), 1); //inverse of singular values
 
 			return (X);
 		}
@@ -156,14 +156,14 @@ struct LinearOp MATRICE_NONHERITABLE
 		MATRICE_HOST_FINL auto vt() { OpBase<value_t>::_Launch(); return (Vt); }
 	private:
 		const _Mty& U;
-		Matrix_<value_t, _Mty::CompileTimeCols, min(_Mty::CompileTimeCols,1)> S;
-		Matrix_<value_t, _Mty::CompileTimeCols, _Mty::CompileTimeCols> Vt; //V^{T}
+		Matrix_<value_t, _Mty::cols_at_compiletime, min(_Mty::cols_at_compiletime,1)> S;
+		Matrix_<value_t, _Mty::cols_at_compiletime, _Mty::cols_at_compiletime> Vt; //V^{T}
 	};
 	template<typename _T> struct Evv : public OpBase<typename _T::value_t>
 	{
 		using typename OpBase<typename _T::value_t>::value_t;
 		using _Mty = typename std::remove_reference<_T>::type;
-		enum { N = _Mty::CompileTimeCols };
+		enum { N = _Mty::cols_at_compiletime };
 		enum { option = solver_type::SVD };
 
 		constexpr Evv(const _Mty& args) : A(args) {}

@@ -275,8 +275,8 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		using const_derived = std::add_const_t<derived_t>;
 		using const_derived_pointer = std::add_pointer_t<const_derived>;
 		enum {options = myt_traits::options,
-			CompileTimeRows = myt_traits::rows, 
-			CompileTimeCols = myt_traits::cols};
+			rows_at_compiletime = myt_traits::rows, 
+			cols_at_compiletime = myt_traits::cols};
 
 		MATRICE_GLOBAL_FINL Base_() {}
 		MATRICE_GLOBAL_FINL Base_(const basic_shape_t& _Shape) 
@@ -431,8 +431,8 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 	{
 		using _Mybase = Base_<EwiseBinaryExpr<T,U,_BinaryOp,false,false>>;
 	public:
-		using _Mybase::CompileTimeRows;
-		using _Mybase::CompileTimeCols;
+		using _Mybase::rows_at_compiletime;
+		using _Mybase::cols_at_compiletime;
 		using typename _Mybase::value_t;
 		using typename _Mybase::matrix_type;
 		using _Mybase::operator();
@@ -476,8 +476,8 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 	{
 		using _Mybase = Base_<EwiseBinaryExpr<T, U, _BinaryOp, true, false>>;
 	public:
-		using _Mybase::CompileTimeRows;
-		using _Mybase::CompileTimeCols;
+		using _Mybase::rows_at_compiletime;
+		using _Mybase::cols_at_compiletime;
 		using typename _Mybase::value_t;
 		using typename _Mybase::matrix_type;
 		using _Mybase::operator();
@@ -514,8 +514,8 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 	{
 		using _Mybase = Base_<EwiseBinaryExpr<T, U, _BinaryOp, false, true>>;
 	public:
-		using _Mybase::CompileTimeRows;
-		using _Mybase::CompileTimeCols;
+		using _Mybase::rows_at_compiletime;
+		using _Mybase::cols_at_compiletime;
 		using typename _Mybase::value_t;
 		using typename _Mybase::matrix_type;
 		using _Mybase::operator();
@@ -554,8 +554,8 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		using const_reference_t = add_const_reference_t<T>;
 		using _Mybase = Base_<EwiseUnaryExpr<T, _UnaryOp>>;
 	public:
-		using _Mybase::CompileTimeRows;
-		using _Mybase::CompileTimeCols;
+		using _Mybase::rows_at_compiletime;
+		using _Mybase::cols_at_compiletime;
 		using typename _Mybase::value_t;
 		using typename _Mybase::matrix_type;
 		using _Mybase::operator();
@@ -597,8 +597,8 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		using _Myt = MatBinaryExpr;
 		using _Mybase = Base_<MatBinaryExpr<T, U, _BinaryOp>>;
 	public:
-		using _Mybase::CompileTimeRows;
-		using _Mybase::CompileTimeCols;
+		using _Mybase::rows_at_compiletime;
+		using _Mybase::cols_at_compiletime;
 		using typename _Mybase::value_t;
 		using typename _Mybase::matrix_type;
 		using category = category_type_t<_BinaryOp>;
@@ -642,8 +642,8 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 	{
 		using _Mybase = Base_<MatUnaryExpr<T, _UnaryOp>>;
 	public:
-		using _Mybase::CompileTimeRows;
-		using _Mybase::CompileTimeCols;
+		using _Mybase::rows_at_compiletime;
+		using _Mybase::cols_at_compiletime;
 		using typename _Mybase::value_t;
 		using typename _Mybase::matrix_type;
 		using category = category_type_t<_UnaryOp>;
@@ -761,8 +761,8 @@ struct expression_traits<_Exp::EwiseBinaryExpr<T, U, _Op, false, false>> {
 	using type = _Exp::EwiseBinaryExpr<T, U, _Op, false, false>;
 	using value_type = common_type_t<typename T::value_t, typename U::value_t>;
 	enum { options = _Exp::option<_Exp_tag::ewise>::value };
-	static constexpr auto rows = max_integer_v<T::CompileTimeRows, U::CompileTimeRows>;
-	static constexpr auto cols = max_integer_v<T::CompileTimeCols, U::CompileTimeCols>;
+	static constexpr auto rows = max_integer_v<T::rows_at_compiletime, U::rows_at_compiletime>;
+	static constexpr auto cols = max_integer_v<T::cols_at_compiletime, U::cols_at_compiletime>;
 	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
 };
 template<typename T, typename U, typename _Op>
@@ -770,8 +770,8 @@ struct expression_traits<_Exp::EwiseBinaryExpr<T, U, _Op, true, false>> {
 	using type = _Exp::EwiseBinaryExpr<T, U, _Op, true, false>;
 	using value_type = typename U::value_t;
 	enum { options = _Exp::option<_Exp_tag::ewise>::value };
-	static constexpr auto rows = U::CompileTimeRows;
-	static constexpr auto cols = U::CompileTimeCols;
+	static constexpr auto rows = U::rows_at_compiletime;
+	static constexpr auto cols = U::cols_at_compiletime;
 	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
 };
 template<typename T, typename U, typename _Op>
@@ -779,8 +779,8 @@ struct expression_traits<_Exp::EwiseBinaryExpr<T, U, _Op, false, true>> {
 	using type = _Exp::EwiseBinaryExpr<T, U, _Op, false, true>;
 	using value_type = typename T::value_t;
 	enum { options = _Exp::option<_Exp_tag::ewise>::value };
-	static constexpr auto rows = T::CompileTimeRows;
-	static constexpr auto cols = T::CompileTimeCols;
+	static constexpr auto rows = T::rows_at_compiletime;
+	static constexpr auto cols = T::cols_at_compiletime;
 	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
 };
 
@@ -789,8 +789,8 @@ struct expression_traits<_Exp::EwiseUnaryExpr<T, _Op>> {
 	using type = _Exp::EwiseUnaryExpr<T, _Op>;
 	using value_type = typename T::value_t;
 	enum { options = expression_options<_Op>::value };
-	static constexpr auto rows = T::CompileTimeRows;
-	static constexpr auto cols = T::CompileTimeCols;
+	static constexpr auto rows = T::rows_at_compiletime;
+	static constexpr auto cols = T::cols_at_compiletime;
 	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
 };
 template<typename T, typename U, typename _Op>
@@ -798,8 +798,8 @@ struct expression_traits<_Exp::MatBinaryExpr<T, U, _Op>> {
 	using type = _Exp::MatBinaryExpr<T, U, _Op>;
 	using value_type = common_type_t<typename T::value_t, typename U::value_t>;
 	enum { options = expression_options<_Op>::value };
-	static constexpr auto rows = conditional_size_v<T::CompileTimeRows <= 0 || U::CompileTimeRows <= 0, 0, max_integer_v<T::CompileTimeRows, 0>>;
-	static constexpr auto cols = conditional_size_v<T::CompileTimeCols <= 0 || U::CompileTimeCols <= 0, 0, max_integer_v<U::CompileTimeCols, 0>>;
+	static constexpr auto rows = conditional_size_v<T::rows_at_compiletime <= 0 || U::rows_at_compiletime <= 0, 0, max_integer_v<T::rows_at_compiletime, 0>>;
+	static constexpr auto cols = conditional_size_v<T::cols_at_compiletime <= 0 || U::cols_at_compiletime <= 0, 0, max_integer_v<U::cols_at_compiletime, 0>>;
 	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
 };
 template<typename T, typename _Op>
@@ -807,8 +807,8 @@ struct expression_traits<_Exp::MatUnaryExpr<T, _Op>> {
 	using type = _Exp::MatUnaryExpr<T, _Op>;
 	using value_type = typename T::value_t;
 	enum { options = expression_options<_Op>::value };
-	static constexpr auto rows = conditional_size_v<(options & _Exp_tag::trp) == _Exp_tag::trp, T::CompileTimeCols, T::CompileTimeRows>;
-	static constexpr auto cols = conditional_size_v<(options & _Exp_tag::trp) == _Exp_tag::trp, T::CompileTimeRows, T::CompileTimeCols>;
+	static constexpr auto rows = conditional_size_v<(options & _Exp_tag::trp) == _Exp_tag::trp, T::cols_at_compiletime, T::rows_at_compiletime>;
+	static constexpr auto cols = conditional_size_v<(options & _Exp_tag::trp) == _Exp_tag::trp, T::rows_at_compiletime, T::cols_at_compiletime>;
 	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
 };
 

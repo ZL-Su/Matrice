@@ -37,7 +37,7 @@ class _Tensor_impl MATRICE_NONHERITABLE : public std::valarray<matrix_type> {
 	using _My_element_traits = matrix_traits<matrix_type>;
 	using _Mytp = _Tensor_impl<_Ty, (_M > 0 ? _N:_M), (_N > 0 ? _M:_N)> ;
 public:
-	enum{CompileTimeRows = 0, CompileTimeCols = 0};
+	enum{rows_at_compiletime = 0, cols_at_compiletime = 0};
 	using element_type = matrix_type;
 	using value_type = typename _My_element_traits::type;
 	using value_t = value_type;

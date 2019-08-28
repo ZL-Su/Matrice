@@ -47,7 +47,7 @@ class _Tensor
 	using _Mytraits = tensor_traits<_Myt>;
 	using _Mybase = types::Base_<_Myt, _Mytraits>;
 public:
-	enum { Size = 0, CompileTimeRows = 0, CompileTimeCols = 0 };
+	enum { Size = 0, rows_at_compiletime = 0, cols_at_compiletime = 0 };
 	static constexpr auto depth = _Mytraits::depth;
 	using typename _Mybase::value_type;
 	//using typename _Mybase::scalar_type;
@@ -170,7 +170,7 @@ class _Tensor<_Ty, 0> : public types::Base_<_Tensor<_Ty, 0>>
 	using _Mybase = types::Base_<_Myt>;
 	using _Mytraits = matrix_traits<_Myt>;
 public:
-	enum { Size = 0, CompileTimeRows = 0, CompileTimeCols = 0, };
+	enum { Size = 0, rows_at_compiletime = 0, cols_at_compiletime = 0, };
 	using typename _Mybase::value_t;
 	using typename _Mybase::value_type;
 	using typename _Mybase::const_initlist;
