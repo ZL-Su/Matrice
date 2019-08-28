@@ -20,8 +20,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
-template<typename _Ty, diff_t _M, diff_t _N, size_t _Opt, typename _Layout>
-class _Allocator;
+template<typename _Ty, diff_t _M, diff_t _N, size_t _Opt, typename _Layout> class _Allocator;
 _DETAIL_END
 template<typename _Ty, diff_t _RowsAtCT, diff_t _ColsAtCT, size_t _Options, class _Ly>
 using Allocator = detail::_Allocator<_Ty, _RowsAtCT, _ColsAtCT, _Options, _Ly>;
