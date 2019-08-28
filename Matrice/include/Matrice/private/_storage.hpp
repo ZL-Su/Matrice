@@ -150,25 +150,25 @@ public:
 	 *\brief copy from another allocator.
 	 *\param [othr] any compatible allocators.
 	 */
-	MATRICE_GLOBAL_INL _Myt& operator=(const _Myt& othr) noexcept;
+	MATRICE_GLOBAL_INL allocator& operator=(const allocator& othr) noexcept;
 
 	/**
 	 *\brief move from another allocator.
 	 *\param [othr] any compatible allocators.
 	 */
-	MATRICE_GLOBAL_INL _Myt& operator=(_Myt&& othr) noexcept;
+	MATRICE_GLOBAL_INL allocator& operator=(allocator&& othr) noexcept;
 
 	/**
 	 *\brief fill this with a given value.
 	 *\param [val] the value being filled.
 	 */
-	MATRICE_GLOBAL_INL _Myt& operator=(const value_type val) noexcept;
+	MATRICE_GLOBAL_INL allocator& operator=(const value_type val) noexcept;
 
 	/**
 	 *\brief copy from another memory block, note that the storage orders are the same and the size of source memory must not less than this->size().
 	 *\param [data] the pointer to source memory
 	 */
-	MATRICE_GLOBAL_INL _Myt& operator=(const pointer data) noexcept;
+	MATRICE_GLOBAL_INL allocator& operator=(const pointer data) noexcept;
 
 	/**
 	 *\brief returns if the allocator is empty or not.
@@ -227,6 +227,14 @@ public:
 	MATRICE_GLOBAL_INL _Allocator(int, int) noexcept
 		:_Allocator() {
 	}
+	template<typename _Argt>
+	MATRICE_HOST_INL _Allocator(_Argt&& arg) noexcept
+		:_Mybase(forward<_Argt>(arg)) {
+	}
+
+	MATRICE_HOST_INL _Myt& operator=(const _Myt& othr) noexcept {
+		return _Mybase::operator=(othr);
+	}
 
 	MATRICE_GLOBAL_INL constexpr size_t(rows)()const noexcept {
 		return _Mybase::rows_at_compiletime;
@@ -278,9 +286,17 @@ public:
 		:_Mybase(other) {
 	}
 	MATRICE_HOST_INL _Allocator(_Myt&& other) noexcept
-		:_Mybase(forward<_Myt>(other)) {
+		:_Mybase(move(other)) {
+	}
+	template<typename _Argt>
+	MATRICE_HOST_INL _Allocator(_Argt&& arg) noexcept
+		:_Mybase(forward<_Argt>(arg)){
 	}
 	MATRICE_HOST_INL ~_Allocator();
+
+	MATRICE_HOST_INL _Myt& operator=(const _Myt& othr) noexcept {
+		return _Mybase::operator=(othr);
+	}
 
 public:
 	MATRICE_HOST_INL decltype(auto) _Alloc() noexcept;
@@ -716,5 +732,5 @@ DGE_MATRICE_END
 #pragma warning(pop)
 #endif
 
+#include "storage/_allocator.inl"
 #include "inl\_storage_base.inl"
-#include "storage///_allocator.inl"
