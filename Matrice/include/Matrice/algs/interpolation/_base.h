@@ -17,11 +17,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #pragma once
 
-#include "../../core/matrix.h"
-#include "../../core/vector.h"
-#include "../../core/solver.h"
-#include "../../private/_range.h"
-#include "../../private/_tag_defs.h"
+#include "core/matrix.h"
+#include "core/vector.h"
+#include "core/solver.h"
+#include "private/_range.h"
+#include "private/_tag_defs.h"
 #include "../forward.hpp"
 
 MATRICE_ALGS_BEGIN
