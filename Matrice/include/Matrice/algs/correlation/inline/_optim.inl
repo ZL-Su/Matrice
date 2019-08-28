@@ -76,7 +76,8 @@ auto _Corr_optim_base<_Derived>::_Cond()->matrix_type& {
 #if MATRICE_MATH_KERNEL==MATRICE_USE_NAT
 		_Myhess = _MyJaco.t().mul(_MyJaco);
 #else
-		_Myhess = _MyJaco.inplace_mul<transp::Y>(_MyJaco);
+		_Myhess = _MyJaco.t().mul(_MyJaco);
+		//_Myhess = move(_MyJaco.mul_inplace<transp::Y>(_MyJaco));
 #endif
 	});
 
@@ -88,7 +89,7 @@ auto _Corr_optim_base<_Derived>::_Cond()->matrix_type& {
 
 	// \fill reference image patch.
 	const auto& _Data = _Myref_ptr->data();
-	const auto[_Rows, _Cols] = _Data.shape();
+	const auto[_Rows, _Cols] = _Data.shape().tiled();
 	const auto[_L, _R, _U, _D] = _Myopt.range<true>(_Mypos);
 
 	auto _Mean = zero<value_type>;
@@ -166,7 +167,7 @@ auto _Corr_optim_base<_Derived>::_Solve(param_type& Par) {
 template<typename _Ty, typename _Itag> MATRICE_HOST_INL
 auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<0>>::_Warp(const param_type& _Par) {
 
-	const auto[_Rows, _Cols] = (*_Mycur_ptr)().shape();
+	const auto[_Rows, _Cols] = (*_Mycur_ptr)().shape().tiled();
 	const auto _Radius = static_cast<index_t>(_Myopt._Radius);
 
 	const auto _Cur_x = _Mypos[0] + _Par[0];
@@ -190,7 +191,7 @@ auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<0>>::_Warp(const param_type& _Par)
 template<typename _Ty, typename _Itag> MATRICE_HOST_INL
 auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>::_Warp(const param_type& _Par) {
 
-	const auto[_Rows, _Cols] = (*_Mycur_ptr)().shape();
+	const auto[_Rows, _Cols] = (*_Mycur_ptr)().shape().tiled();
 	const auto _Radius = static_cast<index_t>(_Myopt._Radius);
 	const auto &u = _Par[0], &v = _Par[3];
 	const auto &dudx = _Par[1], &dudy = _Par[2];

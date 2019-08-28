@@ -128,13 +128,15 @@ public:
 	 *\param [_Pos] a reference position for parameter estimation;
 	 */
 	template<typename _Ty>
-	MATRICE_HOST_INL void init(const _Ty& _x, const _Ty& _y) {
+	MATRICE_HOST_INL _Myt& init(const _Ty& _x, const _Ty& _y) {
 		_Mypos.x = _x, _Mypos.y = _y;
 		/*_Myref = */this->_Cond();
+		return (*this);
 	}
-	MATRICE_HOST_INL void init(const point_type& _ref_pos) {
+	MATRICE_HOST_INL _Myt& init(const point_type& _ref_pos) {
 		_Mypos.x = _ref_pos.x, _Mypos.y = _ref_pos.y;
 		/*_Myref = */this->_Cond();
+		return (*this);
 	}
 
 	/**
@@ -147,14 +149,21 @@ public:
 	}
 
 	// \for retrieving reference subset
-	MATRICE_HOST_INL auto& get_refpatch() const { 
+	MATRICE_HOST_INL decltype(auto)get_refpatch() const { 
 		return (_Myref); 
 	}
-	MATRICE_HOST_INL auto& options() const {
+	MATRICE_HOST_INL decltype(auto)options() const {
 		return (_Myopt);
 	}
-	MATRICE_HOST_INL auto& refpos() { return _Mypos; }
-	MATRICE_HOST_INL const auto& refpos() const { return _Mypos; }
+	MATRICE_HOST_INL decltype(auto)options() {
+		return (_Myopt);
+	}
+	MATRICE_HOST_INL decltype(auto)refpos() { 
+		return _Mypos; 
+	}
+	MATRICE_HOST_INL decltype(auto)refpos() const { 
+		return _Mypos; 
+	}
 
 protected:
 	///<methods>
