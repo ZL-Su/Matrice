@@ -110,3 +110,9 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #ifndef MATRICE_ENABLE_IF
 #define MATRICE_ENABLE_IF(_COND) typename = std::enable_if_t<_COND>
 #endif
+
+#ifndef MATRICE_DEBUG
+#ifdef _DEBUG
+#define MATRICE_DEBUG
+#endif
+#endif

@@ -139,7 +139,7 @@ public:
 
 protected:
 	MATRICE_GLOBAL_FINL constexpr void _Flush_view_buf() noexcept {
-#ifdef _DEBUG || MATRICE_DEBUG
+#ifdef MATRICE_DEBUG
 		stride = m_cols * type_bytes_v<_Ty>;
 		nval = m_shape.get(0);
 		cval = m_shape.get(1);
@@ -271,23 +271,23 @@ public:
 		:_Mybase(_rows, _cols), _Myalloc(_rows, _cols) {
 		m_data = _Myalloc.data();
 	}
-	MATRICE_GLOBAL_INL constexpr Base_(const shape_t<size_t>& _Shape)noexcept
+	MATRICE_GLOBAL_INL explicit Base_(const shape_t<size_t>& _Shape)noexcept
 		:Base_(MATRICE_EXPAND_SHAPE) {
 	}
 	MATRICE_GLOBAL_INL constexpr Base_(int _rows, int _cols, pointer data)noexcept
 		:_Mybase(_rows, _cols, data) {
 	}
-	MATRICE_GLOBAL_INL constexpr Base_(const shape_t<size_t>& _Shape, pointer _Data)noexcept
+	MATRICE_GLOBAL_INL explicit Base_(const shape_t<size_t>& _Shape, pointer _Data)noexcept
 		:Base_(MATRICE_EXPAND_SHAPE, _Data) {
 	}
 	MATRICE_GLOBAL_INL constexpr Base_(int _rows, int _cols, value_t _val)noexcept
 		:Base_(_rows, _cols) {
 		_Myalloc = (_val);
 	}
-	MATRICE_GLOBAL_INL constexpr Base_(const shape_t<size_t>& _Shape, value_t _Val)noexcept
+	MATRICE_GLOBAL_INL explicit Base_(const shape_t<size_t>& _Shape, value_t _Val)noexcept
 		:Base_(MATRICE_EXPAND_SHAPE, _Val) {
 	}
-	MATRICE_GLOBAL_INL constexpr Base_(const basic_shape_t& _Shape) noexcept
+	MATRICE_GLOBAL_INL explicit Base_(const basic_shape_t& _Shape) noexcept
 		:_Mybase(_Shape), _Myalloc(_Shape.rows(), _Shape.cols()) {
 		m_data = _Myalloc.data();
 	}
@@ -316,7 +316,7 @@ public:
 	/**
 	 *\from explicit specified matrix type
 	 */
-	template<int _CTR, int _CTC, MATRICE_ENABLE_IF((_CTR>0&&_CTC>0))>
+	template<int _CTR, int _CTC, MATRICE_ENABLE_IF((_CTR>=0&&_CTC>=0))>
 	MATRICE_GLOBAL_INL constexpr Base_(const Matrix_<value_t, _CTR, _CTC>& _Oth) noexcept
 		:_Mybase(_Oth.rows(), _Oth.cols()),_Myalloc(_Oth.allocator()){
 		m_data = _Myalloc.data();
@@ -600,14 +600,14 @@ public:
 	}
 	// \View of submatrix: x \in [x0, x1) and y \in [y0, y1)
 	MATRICE_GLOBAL_INL auto block(index_t x0, index_t x1, index_t y0, index_t y1) {
-#ifdef _DEBUG
+#ifdef MATRICE_DEBUG
 		DGELOM_CHECK(x1<=m_cols, "Input var. x1 must be no greater than m_cols.")
 		DGELOM_CHECK(y1<=m_rows, "Input var. y1 must be no greater than m_rows.")
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, {x0, y0, x1, y1});
 	}
 	MATRICE_GLOBAL_INL const auto block(index_t x0, index_t x1, index_t y0, index_t y1) const {
-#ifdef _DEBUG
+#ifdef MATRICE_DEBUG
 		DGELOM_CHECK(x1<=m_cols, "Input var. x1 must be no greater than m_cols.")
 		DGELOM_CHECK(y1<=m_rows, "Input var. y1 must be no greater than m_rows.")
 #endif // _DEBUG
@@ -644,7 +644,7 @@ public:
 	 */
 	template<typename _Ity, MATRICE_ENABLE_IF(is_integral_v<_Ity>)>
 	MATRICE_GLOBAL_INL auto operator()(_Ity _L, _Ity _R, _Ity _U, _Ity _D) {
-#ifdef _DEBUG
+#ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_R<=m_cols, "Input var. _R must be no greater than m_cols.")
 		DGELOM_CHECK(_D<=m_rows, "Input var. _D must be no greater than m_rows.")
 #endif // _DEBUG
@@ -652,7 +652,7 @@ public:
 	}
 	template<typename _Ity, MATRICE_ENABLE_IF(is_integral_v<_Ity>)>
 	MATRICE_GLOBAL_INL auto operator()(_Ity _L, _Ity _R, _Ity _U, _Ity _D)const{
-#ifdef _DEBUG
+#ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_R<=m_cols, "Input var. _R must be no greater than m_cols.")
 		DGELOM_CHECK(_D<=m_rows, "Input var. _D must be no greater than m_rows.")
 #endif // _DEBUG
@@ -737,11 +737,11 @@ public:
 	/**
 	 * \homotype copy assignment operator
 	 */
-	MATRICE_GLOBAL_INL _Derived& operator=(const _Myt& _other) {
+	MATRICE_GLOBAL_INL _Derived& operator=(const _Derived& _other) {
 		if (this != &_other) {
 			m_cols = _other.m_cols, m_rows = _other.m_rows;
 			m_shape = _other.shape();
-			if (_other._Myalloc) m_data = _Myalloc = _other._Myalloc;
+			if (_other._Myalloc) m_data = _Myalloc =(_other._Myalloc);
 			else m_data = _other.data();
 			_Mybase::_Flush_view_buf();
 		}
@@ -750,7 +750,7 @@ public:
 	/**
 	 * \homotype move assignment operator
 	 */
-	MATRICE_GLOBAL_INL _Derived& operator=(_Myt&& _other) noexcept {
+	MATRICE_GLOBAL_INL _Derived& operator=(_Derived&& _other) noexcept {
 		m_cols = _other.m_cols, m_rows = _other.m_rows;
 		if (_other._Myalloc) {
 			m_data = _Myalloc = move(_other._Myalloc);
@@ -767,8 +767,7 @@ public:
 	 * \try to convert managed matrix to dynamic matrix
 	 */
 	template<int _Rows, int _Cols,
-		typename _Maty = Matrix_<value_t, _Rows, _Cols>,
-		typename = enable_if_t<is_static_v<_Rows,_Cols>&&!is_static_v<_M,_N>>>
+		typename _Maty = Matrix_<value_t, _Rows, _Cols>>
 	MATRICE_GLOBAL_FINL _Derived& operator= (const _Maty& _managed) {
 		_Myalloc = _managed().allocator();
 		m_rows = _Myalloc.rows();
@@ -894,7 +893,7 @@ public:
 	 */
 	template<ttag _Ltag = ttag::N, ttag _Rtag = ttag::N, 
 		typename _Rhs = _Derived, MATRICE_ENABLE_IF(is_matrix_v<_Rhs>)>
-	MATRICE_HOST_FINL decltype(auto) mul_inplace(const _Rhs& _Right);
+	MATRICE_HOST_FINL auto mul_inplace(const _Rhs& _Right);
 	/**
 	 *\brief spread to element-wisely multiplicate with an input
 	 *\param [_Right] input argument with a type of _Rhs.
@@ -921,7 +920,7 @@ public:
 			*this = *_Data;
 		}
 		else {
-#ifdef _DEBUG
+#ifdef MATRICE_DEBUG
 			DGELOM_CHECK(_Data + this->size() - 1, "Input length of _Data must be greater or equal to this->size().");
 #endif // _DEBUG
 			for (auto _Idx = 0; _Idx < size(); ++_Idx)
@@ -933,9 +932,10 @@ public:
 	/**
 	 * \convert from another data block by function _Fn
 	 */
-	template<typename _It, typename _Op>
+	template<typename _It, typename _Op, 
+		MATRICE_ENABLE_IF(is_iterator_v<_It >)>
 	MATRICE_GLOBAL_FINL _Derived& from(const _It _Data, _Op&& _Fn) {
-#ifdef _DEBUG
+#ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_Data + this->size() - 1, "Input length of _Data must be greater or equal to this->size().");
 #endif // _DEBUG
 		for(auto _Idx = 0; _Idx < size(); ++_Idx)
@@ -988,14 +988,6 @@ public:
 		}
 		return std::true_type::value;
 	}
-	/**
-	 *\brief Create a zero-value filled matrix
-	 *\param [_Rows, Cols] height and width of matrix, only specified for dynamic created matrix 
-	 */
-	static MATRICE_GLOBAL_INL auto zero(diff_t _Rows = 0, diff_t _Cols = 0) {
-		_Derived _Ret;
-		return forward<_Derived>(_Ret.create(_Rows, _Cols, 0));
-	}
 
 	/**
 	 *\brief set to the identity matrix
@@ -1008,13 +1000,23 @@ public:
 			this->operator[](_Idx)[_Idx] = one<value_type>;
 		return (this->derived());
 	}
+
+	/**
+	 *\brief Create a zero-value filled matrix
+	 *\param [_Rows, Cols] height and width of matrix, only specified for dynamic created matrix
+	 */
+	static MATRICE_GLOBAL_INL _Derived zero(diff_t _Rows=0, diff_t _Cols=0) {
+		_Derived _Ret;
+		return forward<_Derived>(_Ret.create(_Rows, _Cols, 0));
+	}
+
 	/**
 	 *\brief Create a diagonal square matrix
 	 *\param [_Val] diagonal element value, 
 	 *\param [_Size] matrix size, only specified for dynamic case
 	 */
 	template<typename _Uy, MATRICE_ENABLE_IF(is_scalar_v<_Uy>)>
-	static MATRICE_GLOBAL_INL auto diag(_Uy _Val = 1, diff_t _Size = 0) {
+	static MATRICE_GLOBAL_INL _Derived diag(_Uy _Val = 1, diff_t _Size = 0) {
 		_Derived _Ret; _Ret.create(_Size, _Size, 0);
 		const auto _Value = value_type(_Val);
 		for (auto _Idx = 0; _Idx < _Ret.rows(); ++_Idx) 
@@ -1025,18 +1027,24 @@ public:
 	 *\brief Create random value filled matrix
 	 *\param [_Rows, Cols] height and width of matrix, only specified for dynamic case
 	 */
-	static MATRICE_GLOBAL_INL auto rand(diff_t _Rows=0, diff_t _Cols=0) {
+	static MATRICE_GLOBAL_INL _Derived rand(diff_t _Rows=0, diff_t _Cols=0) {
 		_Derived _Ret; _Ret.create(_Rows, _Cols);
 		uniform_real<value_type> _Rand; mt19937 _Eng;
 		return forward<_Derived>(_Ret.each([&](auto& _Val) {
 			_Val = _Rand(_Eng); }));
 	}
-	static MATRICE_GLOBAL_INL auto randn(const_initlist& _Pars = {/*mean=*/0, /*STD=*/1}, diff_t _Rows = 0, diff_t _Cols = 0) {
+	static MATRICE_GLOBAL_INL _Derived randn(const_initlist& _Pars = {/*mean=*/0, /*STD=*/1}, diff_t _Rows = 0, diff_t _Cols = 0) {
 		_Derived _Ret; _Ret.create(_Rows, _Cols);
 		normal_distribution<value_type> _Rand{ *_Pars.begin(), *(_Pars.begin() + 1) };
 		mt19937 _Eng;
 		return forward<_Derived>(_Ret.each([&](auto& _Val) {
 			_Val = _Rand(_Eng); }));
+	}
+
+	template<class _Mt, typename _Op, MATRICE_ENABLE_IF(is_matrix_v<_Mt>)>
+	static MATRICE_GLOBAL_INL _Derived make(const _Mt& m, _Op&& op) {
+		_Derived _Ret(m.shape());
+		return forward<_Derived>(_Ret.from(m.data(), op));
 	}
 
 	MATRICE_GET(bool, empty, !bool(size()));
@@ -1138,4 +1146,4 @@ DGE_MATRICE_END
 #pragma warning(pop)
 #endif
 
-#include "inl\_base.inl"
+#include "inl/_base.inl"

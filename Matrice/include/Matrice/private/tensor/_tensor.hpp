@@ -104,14 +104,14 @@ public:
 	 *\param [d, r, c] the indices in depth, height and width axis respectively 
 	 */
 	MATRICE_HOST_INL const value_type& operator()(size_t d, size_t r, size_t c) const noexcept {
-#if defined _DEBUG || MATRICE_DEBUG
+#ifdef MATRICE_DEBUG
 		DGELOM_CHECK(d < depth, "depth index over range.");
 #endif
 		const auto inner_size = m_shape.hw();
 		return (_Mybase::operator[](d*inner_size+r*m_width)[c]);
 	}
 	MATRICE_HOST_INL value_type& operator()(size_t d, size_t r, size_t c) noexcept {
-#if defined _DEBUG || MATRICE_DEBUG
+#ifdef MATRICE_DEBUG
 		DGELOM_CHECK(d < _Depth, "depth index over range.");
 #endif
 		const auto inner_size = m_shape.hw();
@@ -123,7 +123,7 @@ public:
 	 *\param [d] - input index of depth
 	 */
 	MATRICE_HOST_INL decltype(auto) array(size_t d) noexcept {
-#if defined _DEBUG || MATRICE_DEBUG
+#ifdef MATRICE_DEBUG
 		DGELOM_CHECK(d < _Depth, "depth index over range.");
 #endif
 		const auto w = m_shape.w();
