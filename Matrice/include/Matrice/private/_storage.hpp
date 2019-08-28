@@ -271,8 +271,8 @@ struct _Allocator_traits<_Allocator<_Ty, _M, _N, _Opt, _Ly>> {
  *\brief linear memory allocator on host heap.
  */
 template<typename _Ty, typename _Layout>
-MATRICE_ALIGNED_CLASS _Allocator<_Ty, 0, 0, allocator_traits_v<::dynamic>, _Layout> MATRICE_NONHERITABLE
-	:public _Dense_allocator_base<_Allocator_traits<_Allocator<_Ty,0,0,allocator_traits_v<::dynamic>, _Layout>>>
+MATRICE_ALIGNED_CLASS _Allocator<_Ty, ::dynamic, ::dynamic, allocator_traits_v<::dynamic>, _Layout> MATRICE_NONHERITABLE
+	:public _Dense_allocator_base<_Allocator_traits<_Allocator<_Ty, ::dynamic, ::dynamic, allocator_traits_v<::dynamic>, _Layout>>>
 {
 	using _Myt = _Allocator;
 	using _Mybase = _Dense_allocator_base<_Allocator_traits<_Myt>>;
@@ -301,7 +301,6 @@ public:
 public:
 	MATRICE_HOST_INL decltype(auto) _Alloc() noexcept;
 };
-
 template<typename _Ty, size_t _Opt, typename _Ly>
 struct _Allocator_traits<_Allocator<_Ty, ::dynamic, ::dynamic, _Opt, _Ly>> {
 	using value_type = _Ty;
@@ -314,13 +313,107 @@ struct _Allocator_traits<_Allocator<_Ty, ::dynamic, ::dynamic, _Opt, _Ly>> {
 	using type = detail::_Allocator<value_type, rows, cols, options, layout_type>;
 };
 
+template<typename _Ty, diff_t _RowsAtCT, typename _Layout>
+MATRICE_ALIGNED_CLASS _Allocator<_Ty, _RowsAtCT, ::dynamic, allocator_traits_v<::dynamic>, _Layout> MATRICE_NONHERITABLE
+	:public _Dense_allocator_base<_Allocator_traits<_Allocator<_Ty, _RowsAtCT, ::dynamic, allocator_traits_v<::dynamic>, _Layout>>>
+{
+	using _Myt = _Allocator;
+	using _Mybase = _Dense_allocator_base<_Allocator_traits<_Myt>>;
+public:
+	using typename _Mybase::value_type;
+	using typename _Mybase::pointer;
+	using _Mybase::_Dense_allocator_base;
+	using _Mybase::operator=;
+
+	MATRICE_HOST_INL _Allocator(const _Myt& other) noexcept
+		:_Mybase(other) {
+	}
+	MATRICE_HOST_INL _Allocator(_Myt&& other) noexcept
+		:_Mybase(move(other)) {
+	}
+	template<typename _Argt>
+	MATRICE_HOST_INL _Allocator(_Argt&& arg) noexcept
+		:_Mybase(forward<_Argt>(arg)) {
+	}
+	MATRICE_HOST_INL ~_Allocator();
+
+	MATRICE_HOST_INL _Myt& operator=(const _Myt& othr) noexcept {
+		return _Mybase::operator=(othr);
+	}
+
+	MATRICE_HOST_INL constexpr size_t(rows)()const noexcept {
+		return _Mybase::rows_at_compiletime;
+	}
+
+public:
+	MATRICE_HOST_INL decltype(auto) _Alloc() noexcept;
+};
+template<typename _Ty, diff_t _RowsAtCT, size_t _Opt, typename _Ly>
+struct _Allocator_traits<_Allocator<_Ty, _RowsAtCT, ::dynamic, _Opt, _Ly>> {
+	using value_type = _Ty;
+	using layout_type = _Ly;
+	using category = heap_alloc_tag;
+	static constexpr auto rows = _RowsAtCT;
+	static constexpr auto cols = ::dynamic;
+	static constexpr auto options = _Opt;
+
+	using type = detail::_Allocator<value_type, rows, cols, options, layout_type>;
+};
+
+template<typename _Ty, diff_t _ColsAtCT, typename _Layout>
+MATRICE_ALIGNED_CLASS _Allocator<_Ty, ::dynamic, _ColsAtCT, allocator_traits_v<::dynamic>, _Layout> MATRICE_NONHERITABLE
+	:public _Dense_allocator_base<_Allocator_traits<_Allocator<_Ty, ::dynamic, _ColsAtCT, allocator_traits_v<::dynamic>, _Layout>>>
+{
+	using _Myt = _Allocator;
+	using _Mybase = _Dense_allocator_base<_Allocator_traits<_Myt>>;
+public:
+	using typename _Mybase::value_type;
+	using typename _Mybase::pointer;
+	using _Mybase::_Dense_allocator_base;
+	using _Mybase::operator=;
+
+	MATRICE_HOST_INL _Allocator(const _Myt& other) noexcept
+		:_Mybase(other) {
+	}
+	MATRICE_HOST_INL _Allocator(_Myt&& other) noexcept
+		:_Mybase(move(other)) {
+	}
+	template<typename _Argt>
+	MATRICE_HOST_INL _Allocator(_Argt&& arg) noexcept
+		:_Mybase(forward<_Argt>(arg)) {
+	}
+	MATRICE_HOST_INL ~_Allocator();
+
+	MATRICE_HOST_INL _Myt& operator=(const _Myt& othr) noexcept {
+		return _Mybase::operator=(othr);
+	}
+
+	MATRICE_HOST_INL constexpr size_t(cols)()const noexcept {
+		return _Mybase::cols_at_compiletime;
+	}
+
+public:
+	MATRICE_HOST_INL decltype(auto) _Alloc() noexcept;
+};
+template<typename _Ty, diff_t _ColsAtCT, size_t _Opt, typename _Ly>
+struct _Allocator_traits<_Allocator<_Ty, ::dynamic, _ColsAtCT, _Opt, _Ly>> {
+	using value_type = _Ty;
+	using layout_type = _Ly;
+	using category = heap_alloc_tag;
+	static constexpr auto rows = ::dynamic;
+	static constexpr auto cols = _ColsAtCT;
+	static constexpr auto options = _Opt;
+
+	using type = detail::_Allocator<value_type, rows, cols, options, layout_type>;
+};
+
 #ifdef MATRICE_ENABLE_CUDA
 /**
  *\brief memory allocator on CUDA supprted device.
  */
 template<typename _Ty, typename _Layout>
-MATRICE_ALIGNED_CLASS _Allocator<_Ty, -1, -1, allocator_traits_v<::device>, _Layout> MATRICE_NONHERITABLE
-	:public _Dense_allocator_base<_Allocator_traits<_Allocator<_Ty, -1, -1, allocator_traits_v<::device>, _Layout>>>
+MATRICE_ALIGNED_CLASS _Allocator<_Ty, ::device, ::device, allocator_traits_v<::device>, _Layout> MATRICE_NONHERITABLE
+	:public _Dense_allocator_base<_Allocator_traits<_Allocator<_Ty, ::device, ::device, allocator_traits_v<::device>, _Layout>>>
 {
 	using _Myt = _Allocator;
 	using _Mybase = _Dense_allocator_base<_Allocator_traits<_Myt>>;
@@ -359,8 +452,8 @@ struct _Allocator_traits<_Allocator<_Ty, ::device, ::device, _Opt, _Ly>> {
  *\brief memory allocator on CUDA supprted device.
  */
 template<typename _Ty, typename _Layout>
-MATRICE_ALIGNED_CLASS _Allocator<_Ty, -2, -2, allocator_traits_v<::global>, _Layout> MATRICE_NONHERITABLE
-	:public _Dense_allocator_base<_Allocator_traits<_Allocator<_Ty, -2, -2, allocator_traits_v<::global>, _Layout>>>
+MATRICE_ALIGNED_CLASS _Allocator<_Ty, ::global, ::global, allocator_traits_v<::global>, _Layout> MATRICE_NONHERITABLE
+	:public _Dense_allocator_base<_Allocator_traits<_Allocator<_Ty, ::global, ::global, allocator_traits_v<::global>, _Layout>>>
 {
 	using _Myt = _Allocator;
 	using _Mybase = _Dense_allocator_base<_Allocator_traits<_Myt>>;
@@ -392,7 +485,6 @@ struct _Allocator_traits<_Allocator<_Ty, ::global, ::global, _Opt, _Ly>> {
 	using type = detail::_Allocator<value_type, rows, cols, options, layout_type>;
 };
 #endif
-
 
 template<typename _Ty> class Storage_
 {
