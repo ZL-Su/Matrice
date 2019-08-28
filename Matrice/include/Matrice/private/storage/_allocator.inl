@@ -36,40 +36,44 @@ DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
 
 template<typename _Altrs>
-MATRICE_GLOBAL_INL _Dense_allocator_base<_Altrs>& _Dense_allocator_base<_Altrs>::operator=(const _Myt& othr) noexcept {
+MATRICE_GLOBAL_INL typename _Dense_allocator_base<_Altrs>::allocator&
+_Dense_allocator_base<_Altrs>::operator=(const allocator& othr) noexcept {
 	if (this != &othr) {
 		alloc(othr.rows(), othr.cols());
 		_Alloc_copy(othr.derived());
 	}
-	return (*this);
+	return (this->derived());
 }
 
 template<typename _Altrs>
-MATRICE_GLOBAL_INL _Dense_allocator_base<_Altrs>& _Dense_allocator_base<_Altrs>::operator=(_Myt&& othr) noexcept {
+MATRICE_GLOBAL_INL typename _Dense_allocator_base<_Altrs>::allocator&
+_Dense_allocator_base<_Altrs>::operator=(allocator&& othr) noexcept {
 	if (this != &othr) {
 		_Alloc_move(othr.derived());
 	}
-	return (*this);
+	return (this->derived());
 }
 
 template<typename _Altrs>
-MATRICE_GLOBAL_INL _Dense_allocator_base<_Altrs>& _Dense_allocator_base<_Altrs>::operator=(const value_type val) noexcept {
+MATRICE_GLOBAL_INL typename _Dense_allocator_base<_Altrs>::allocator&
+_Dense_allocator_base<_Altrs>::operator=(const value_type val) noexcept {
 	if (m_data != nullptr) {
 		for (auto idx = 0; idx < this->size(); ++idx) {
 			m_data[idx] = val;
 		}
 	}
-	return (*this);
+	return (this->derived());
 }
 
 template<typename _Altrs>
-MATRICE_GLOBAL_INL _Dense_allocator_base<_Altrs>& _Dense_allocator_base<_Altrs>::operator=(const pointer data) noexcept {
+MATRICE_GLOBAL_INL typename _Dense_allocator_base<_Altrs>::allocator&
+_Dense_allocator_base<_Altrs>::operator=(const pointer data) noexcept {
 	if (m_data != nullptr && data) {
 		for (auto idx = 0; idx < this->size(); ++idx) {
 			m_data[idx] = data[idx];
 		}
 	}
-	return (*this);
+	return (this->derived());
 }
 
 template<typename _Altrs>
