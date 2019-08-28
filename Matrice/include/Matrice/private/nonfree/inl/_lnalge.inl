@@ -222,7 +222,7 @@ struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 	}
 	template<typename _Mty, MATRICE_ENABLE_IF(is_matrix_v<_Mty>)>
 	MATRICE_HOST_INL static int spd(const _Mty& _A) {
-		return spd(_A.data(), _A.shape());
+		return spd(_A.data(), _A.shape().tiled());
 	}
 
 	/**
