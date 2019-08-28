@@ -54,7 +54,7 @@ public:
 	vec_global_inl const_reference operator[](size_t i)const { return data()[i]; }
 	vec_global_inl Vec_& operator= (const_initlist _list)
 	{ return static_cast<Vec_&>(_Base::operator= (_list)); }
-	vec_global_inl Vec_& operator= (my_const_ref _other)
+	vec_global_inl Vec_& operator= (const Vec_& _other)
 	{ return static_cast<Vec_&>(_Base::operator=(_other)); }
 	template<typename _Rval>
 	vec_global_inl Vec_& operator= (const _Rval& _rval)
