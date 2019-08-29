@@ -139,25 +139,29 @@ MATRICE_HOST_INL MATRICE_ALLOCTOR_SIG(::dynamic, _Cols, ::dynamic)::~_Allocator(
 }
 
 #ifdef MATRICE_ENABLE_CUDA
-MATRICE_ALLOCATOR(GLOBAL, decltype(auto), ::device, ::device)::_Alloc() noexcept {
+template<typename _Ty, typename _Layout>
+MATRICE_GLOBAL_INL decltype(auto) MATRICE_ALLOCTOR_SIG(::device, ::device, ::device)::_Alloc() noexcept {
 	m_pitch = this->cols();
 	this->data() = internal::malloc<value_type>(this->rows(), m_pitch,
 		device_alloc_tag());
 	return (*this);
 }
 
-MATRICE_ALLOCATOR(GLOBAL, , ::device, ::device)::~_Allocator() {
+template<typename _Ty, typename _Layout>
+MATRICE_GLOBAL_INL MATRICE_ALLOCTOR_SIG(::device, ::device, ::device)::~_Allocator() {
 	internal::free(this->data(), typename _Mybase::category());
 }
 
-MATRICE_ALLOCATOR(GLOBAL, decltype(auto), ::global, ::global)::_Alloc() noexcept {
+template<typename _Ty, typename _Layout>
+MATRICE_GLOBAL_INL decltype(auto) MATRICE_ALLOCTOR_SIG(::global, ::global, ::global)::_Alloc() noexcept {
 	auto cols = this->cols();
 	this->data() = internal::malloc<value_type>(this->rows(), cols, 
 		global_alloc_tag());
 	return (*this);
 }
 
-MATRICE_ALLOCATOR(GLOBAL, , ::global, ::global)::~_Allocator() {
+template<typename _Ty, typename _Layout>
+MATRICE_GLOBAL_INL MATRICE_ALLOCTOR_SIG(::global, ::global, ::global)::~_Allocator() {
 	internal::free(this->data(), typename _Mybase::category());
 }
 #endif
