@@ -317,8 +317,10 @@ public:
 	/**
 	 *\from explicit specified matrix type
 	 */
-	template<int _CTR, int _CTC, MATRICE_ENABLE_IF((_CTR>=0&&_CTC>=0))>
-	MATRICE_GLOBAL_INL constexpr Base_(const Matrix_<value_t, _CTR, _CTC>& _Oth) noexcept
+	template<int _CTR, int _CTC,
+		typename _Mty = Matrix_<value_t, _CTR, _CTC>, 
+		typename = enable_if_t<is_not_same_v<_Mty, _Derived>>>
+	MATRICE_GLOBAL_INL constexpr Base_(const _Mty& _Oth) noexcept
 		:_Mybase(_Oth.rows(), _Oth.cols()),_Myalloc(_Oth.allocator()){
 		m_data = _Myalloc.data();
 	}
