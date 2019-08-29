@@ -22,14 +22,14 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_type_traits.h"
 #include "_size_traits.h"
 #include "_tag_defs.h"
-#include "../private/math/_primitive_funcs.hpp"
+#include "private/math/_primitive_funcs.hpp"
 #if defined(MATRICE_SIMD_ARCH)
 #include "../arch/ixpacket.h"
 #endif
 
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable: 4715 4661 4224 4267 4244 4819 4199)
+#pragma warning(disable: 4715 4661 4224 4267 4244 4819 4199 26495)
 #endif
 
 DGE_MATRICE_BEGIN
@@ -43,6 +43,7 @@ _TYPES_END
 _DETAIL_BEGIN
 //template<typename _Ty> class _Tensor;
 template<typename _Ty, size_t _Depth> class _Tensor;
+struct _Blas_kernel_wrapper;
 _DETAIL_END
 
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
@@ -302,10 +303,24 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 			_CDTHIS->assign_to(res);
 			return (res);
 		}
+
+		MATRICE_GLOBAL_INL derived_t& derived() noexcept {
+			return *static_cast<derived_pointer>(this);
+		}
+		MATRICE_GLOBAL_INL const derived_t& derived() const noexcept {
+			return *_CDTHIS;
+		}
+
 		// \formulate matmul expression
 		template<typename _Rhs>
 		MATRICE_GLOBAL_INL auto mul(const _Rhs& _rhs) const noexcept {
 			return MatBinaryExpr<derived_t, _Rhs, Op::_Mat_mul<value_t>>(*_CDTHIS, _rhs);
+		}
+
+		template<typename _Rhs>
+		MATRICE_HOST_INL auto mul_inplace(const _Rhs& _rhs) const {
+			types::Matrix_<value_type, rows_at_compiletime, _Rhs::cols_at_compiletime> _Ret(rows(), _rhs.cols());
+			return detail::_Blas_kernel_wrapper::gemm(derived(), _rhs, _Ret);
 		}
 
 		/**
@@ -565,7 +580,6 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		EwiseUnaryExpr(const_reference_t _rhs) noexcept
 			:_Mybase(_rhs.shape()), _RHS(_rhs) {}
 
-
 		MATRICE_GLOBAL_FINL const value_t operator()(size_t _idx) const noexcept {
 			return _Op(_RHS(_idx));
 		}
@@ -798,8 +812,10 @@ struct expression_traits<_Exp::MatBinaryExpr<T, U, _Op>> {
 	using type = _Exp::MatBinaryExpr<T, U, _Op>;
 	using value_type = common_type_t<typename T::value_t, typename U::value_t>;
 	enum { options = expression_options<_Op>::value };
-	static constexpr auto rows = conditional_size_v<T::rows_at_compiletime <= 0 || U::rows_at_compiletime <= 0, 0, max_integer_v<T::rows_at_compiletime, 0>>;
-	static constexpr auto cols = conditional_size_v<T::cols_at_compiletime <= 0 || U::cols_at_compiletime <= 0, 0, max_integer_v<U::cols_at_compiletime, 0>>;
+	//static constexpr auto rows = conditional_size_v<T::rows_at_compiletime <= 0 || U::rows_at_compiletime <= 0, 0, max_integer_v<T::rows_at_compiletime, 0>>;
+	//static constexpr auto cols = conditional_size_v<T::cols_at_compiletime <= 0 || U::cols_at_compiletime <= 0, 0, max_integer_v<U::cols_at_compiletime, 0>>;
+	static constexpr auto rows = T::rows_at_compiletime;
+	static constexpr auto cols = U::cols_at_compiletime;
 	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
 };
 template<typename T, typename _Op>
