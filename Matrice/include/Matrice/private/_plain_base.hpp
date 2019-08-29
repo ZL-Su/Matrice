@@ -264,11 +264,12 @@ public:
 	static constexpr auto eps = std::numeric_limits<value_t>::epsilon();
 
 	MATRICE_GLOBAL_INL constexpr Base_()noexcept
-		:_Mybase(_M < 0 ? 0 : _M, _N < 0 ? 0 : _N), _Myalloc() {
+		:_Mybase(max_integer_v<0, _M>, max_integer_v<0, _N>), _Myalloc() {
 		m_data = _Myalloc.data();
 	}
 	MATRICE_GLOBAL_INL constexpr Base_(int _rows, int _cols)noexcept
-		:_Mybase(_rows, _cols), _Myalloc(_rows, _cols) {
+		:_Mybase(_rows < _M ? _M : _rows, _cols < _N ? _N : _cols),
+		_Myalloc(_rows < _M ? _M : _rows, _cols < _N ? _N : _cols) {
 		m_data = _Myalloc.data();
 	}
 	MATRICE_GLOBAL_INL explicit Base_(const shape_t<size_t>& _Shape)noexcept
