@@ -1,6 +1,6 @@
 #pragma once
-#include "../private/_type_traits.h"
-#include "../util/_macros.h"
+#include "private/_type_traits.h"
+#include "util/_macros.h"
 
 #ifdef MATRICE_SIMD_ARCH
 #include <mmintrin.h>    //_m64

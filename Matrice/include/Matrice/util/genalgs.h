@@ -120,7 +120,7 @@ MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last) {
 	}
 	for (_First += _N * _Step; _First != _Last; ++_First) _Ret += *_First;
 #else
-	for (; _First != _Last; ++_First) _Ret += *_First;
+	for (; _First != _Last; (void)++_First) _Ret += *_First;
 #endif
 	return (_Ret);
 }

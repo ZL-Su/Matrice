@@ -16,8 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
-#include "../../private/_type_traits.h"
-#include "../../util/_macros.h"
+#include "private/_type_traits.h"
+#include "util/_macros.h"
 
 #ifdef MATRICE_SIMD_ARCH
 #include <mmintrin.h>

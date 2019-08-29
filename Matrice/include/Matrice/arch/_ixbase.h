@@ -17,8 +17,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 #include <initializer_list>
-#include "../util/_macros.h"
-#include "../util/genalgs.h"
+#include "util/_macros.h"
+#include "util/genalgs.h"
 #if MATRICE_SIMD_ARCH
 #include "./inl/_ixops.hpp"
 

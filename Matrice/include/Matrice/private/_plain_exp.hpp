@@ -214,24 +214,18 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 			enum { flag = mmul };
 			using category = tag::_Matrix_mul_tag;
 			using value_type = _Ty;
+#ifdef MATRICE_SIMD_ARCH
 			using packet_type = simd::Packet_<value_type, packet_size_v>;
+#endif
 
 			template<typename _Rhs> MATRICE_GLOBAL_FINL
-			value_type operator() (const _Ty* lhs, const _Rhs& rhs, int c, int _plh = 0) const noexcept
-			{
+			value_type operator() (const _Ty* lhs, const _Rhs& rhs, int c, int _plh = 0) const noexcept {
 				value_type val = value_type(0);
 				const int K = rhs.rows(), N = rhs.cols();
-				
-#ifdef MATRICE_SIMD_ARCH == MATRICE_SIMD_AVX
-				for (int k = 0; k < K; ++k) 
-					val += lhs[k] * rhs(k*N + c);
-#elif MATRICE_SIMD_ARCH == MATRICE_SIMD_AVX512
-
-#elif MATRICE_SIMD_ARCH == MATRICE_SIMD_SSE
-
+#ifdef MATRICE_SIMD_ARCH
+				for (int k = 0; k < K; ++k) val += lhs[k] * rhs(k*N + c);
 #else
-				for (int k = 0; k < K; ++k) 
-					val += lhs[k] * rhs(k*N + c);
+				for (int k = 0; k < K; ++k) val += lhs[k] * rhs(k*N + c);
 #endif
 				return (val);
 			}

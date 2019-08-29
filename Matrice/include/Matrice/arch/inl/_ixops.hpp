@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
-#include "../../private/_type_traits.h"
+#include "private/_type_traits.h"
 #ifdef MATRICE_SIMD_ARCH
 #include "../_ixtraits.hpp"
 #include "_ixop_impls.hpp"
