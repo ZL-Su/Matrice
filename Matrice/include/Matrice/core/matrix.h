@@ -40,12 +40,14 @@ public:
 	using typename _Mybase::value_t;
 	using typename _Mybase::pointer;
 	using typename _Mybase::const_initlist;
-	enum { Size = M * N, rows_at_compiletime = M, cols_at_compiletime = N, };
+	using _Mybase::Size;
+	using _Mybase::rows_at_compiletime;
+	using _Mybase::cols_at_compiletime;
 
 	MATRICE_GLOBAL_FINL constexpr Matrix_() noexcept
 		: _Mybase() {};
 	MATRICE_GLOBAL_FINL constexpr Matrix_(int, int) noexcept
-		: _Mybase() {};
+		: Matrix_() {};
 	MATRICE_GLOBAL_FINL constexpr Matrix_(pointer data) noexcept
 		: _Mybase(rows_at_compiletime, cols_at_compiletime, data) {};
 	MATRICE_HOST_FINL constexpr Matrix_(const_initlist _list) noexcept
@@ -64,35 +66,49 @@ public:
 	MATRICE_HOST_FINL constexpr Matrix_(const std::array<value_t, Size>& _array) noexcept
 		: Matrix_(pointer(_array.data())) {}
 	template<typename... _Args> 
-	MATRICE_GLOBAL_FINL constexpr Matrix_(_Args&&... args) noexcept
+	MATRICE_GLOBAL_FINL constexpr Matrix_(_Args&&... args)noexcept
 		: _Mybase(forward<_Args>(args)...) {};
 
-	MATRICE_HOST_FINL _Myt& operator=(const_initlist _list) {
+	MATRICE_HOST_FINL _Myt& operator=(const_initlist _list)noexcept {
 		return _Mybase::operator=(_list); 
 	}
-	MATRICE_GLOBAL_FINL _Myt& operator=(const _Myt& _other){ 
+	MATRICE_GLOBAL_FINL _Myt& operator=(const _Myt& _other)noexcept {
 		return _Mybase::operator=(_other);
 	}
-	MATRICE_GLOBAL_FINL _Myt& operator=(_Myt&& _other) {
+	MATRICE_GLOBAL_FINL _Myt& operator=(_Myt&& _other)noexcept {
 		return _Mybase::operator=(move(_other)); 
 	}
 	template<typename _Uy>
-	MATRICE_HOST_FINL _Myt& operator=(nested_initlist<_Uy> _list) {
+	MATRICE_HOST_FINL _Myt& operator=(nested_initlist<_Uy> _list)noexcept {
 		return _Mybase::operator=(_list);
 	}
 	template<typename _Argt>
-	MATRICE_HOST_INL _Myt& operator=(const _Argt& _arg) {
+	MATRICE_HOST_INL _Myt& operator=(const _Argt& _arg)noexcept {
 		return _Mybase::operator=(_arg);
 	}
 	
-	MATRICE_GLOBAL_FINL constexpr auto(size)() const noexcept { return (Size); }
-	MATRICE_GLOBAL_FINL constexpr auto(rows)() const noexcept { return (rows_at_compiletime); }
-	MATRICE_GLOBAL_FINL constexpr auto(cols)() const noexcept { return (cols_at_compiletime); }
+	MATRICE_GLOBAL_FINL constexpr auto(size)() const noexcept { 
+		return (Size);
+	}
+	MATRICE_GLOBAL_FINL constexpr auto(rows)() const noexcept { 
+		return (rows_at_compiletime);
+	}
+	MATRICE_GLOBAL_FINL constexpr auto(cols)() const noexcept { 
+		return (cols_at_compiletime);
+	}
 
-	MATRICE_GLOBAL_FINL operator std::array<value_t, Size>() const { return internal::_Fill_array<value_t, Size>(_Mybase::begin()); }
-	MATRICE_GLOBAL_FINL operator std::array<value_t, Size>() { return internal::_Fill_array<value_t, Size>(_Mybase::begin()); }
-	MATRICE_GLOBAL_FINL operator Matrix_<value_t, ::dynamic>() const { return Matrix_<value_t, ::dynamic>(rows(), cols(), _Mybase::m_data); }
-	MATRICE_GLOBAL_FINL operator Matrix_<value_t, ::dynamic>() { return Matrix_<value_t, ::dynamic>(rows(), cols(), _Mybase::m_data); }
+	MATRICE_GLOBAL_FINL operator std::array<value_t, Size>() const noexcept {
+		return internal::_Fill_array<value_t, Size>(_Mybase::begin());
+	}
+	MATRICE_GLOBAL_FINL operator std::array<value_t, Size>() noexcept {
+		return internal::_Fill_array<value_t, Size>(_Mybase::begin());
+	}
+	MATRICE_GLOBAL_FINL operator Matrix_<value_t, ::dynamic>() const noexcept {
+		return Matrix_<value_t, ::dynamic>(rows(), cols(), _Mybase::m_data); 
+	}
+	MATRICE_GLOBAL_FINL operator Matrix_<value_t, ::dynamic>() noexcept {
+		return Matrix_<value_t, ::dynamic>(rows(), cols(), _Mybase::m_data); 
+	}
 };
 
 template<typename _Ty, size_t Rows>
@@ -104,15 +120,30 @@ public:
 	using typename _Mybase::value_t;
 	using typename _Mybase::pointer;
 	using typename _Mybase::const_initlist;
+	using _Mybase::operator=;
 
-	MATRICE_HOST_INL Matrix_(int cols) noexcept
-		: _Mybase(_Mybase::RowsAtCT, cols) {};
-	MATRICE_HOST_INL Matrix_(int, int cols) noexcept
-		: _Mybase(_Mybase::RowsAtCT, cols) {};
-	MATRICE_HOST_INL Matrix_(const _Myt& other) noexcept
+	MATRICE_HOST_INL Matrix_(diff_t cols)
+		: _Mybase(_Mybase::rows_at_compiletime, cols) {};
+	MATRICE_HOST_INL Matrix_(diff_t, diff_t cols)
+		: Matrix_(cols) {};
+	MATRICE_HOST_INL Matrix_(const _Myt& other)
 		: _Mybase(other) {};
 	MATRICE_HOST_INL Matrix_(_Myt&& other) noexcept
 		: _Mybase(move(other)) {};
+	template<typename _Argt>
+	MATRICE_HOST_INL Matrix_(_Argt&& arg) noexcept
+		: _Mybase(forward<_Argt>(arg)) {};
+
+	MATRICE_HOST_INL _Myt& operator= (const _Myt& other) {
+		return _Mybase::operator=(other);
+	}
+	MATRICE_HOST_INL _Myt& operator= (_Myt&& other) noexcept {
+		return _Mybase::operator=(move(other));
+	}
+	template<typename _Argt>
+	MATRICE_HOST_INL _Myt& operator=(const _Argt& _arg) {
+		return _Mybase::operator=(_arg);
+	}
 
 	MATRICE_GLOBAL_FINL constexpr auto(rows)() const noexcept {
 		return (_Mybase::rows_at_compiletime);
@@ -133,15 +164,30 @@ public:
 	using typename _Mybase::value_t;
 	using typename _Mybase::pointer;
 	using typename _Mybase::const_initlist;
+	using _Mybase::operator=;
 
-	MATRICE_HOST_INL Matrix_(int rows) noexcept
-		: _Mybase(rows, _Mybase::ColsAtCT) {};
-	MATRICE_HOST_INL Matrix_(int rows, int) noexcept
-		: _Mybase(rows, _Mybase::ColsAtCT) {};
-	MATRICE_HOST_INL Matrix_(const _Myt& other) noexcept
+	MATRICE_HOST_INL Matrix_(diff_t rows)
+		: _Mybase(rows, _Mybase::cols_at_compiletime) {};
+	MATRICE_HOST_INL Matrix_(diff_t rows, diff_t)
+		: Matrix_(rows) {};
+	MATRICE_HOST_INL Matrix_(const _Myt& other)
 		: _Mybase(other) {};
 	MATRICE_HOST_INL Matrix_(_Myt&& other) noexcept
 		: _Mybase(move(other)) {};
+	template<typename _Argt>
+	MATRICE_HOST_INL Matrix_(_Argt&& arg) noexcept
+		: _Mybase(forward<_Argt>(arg)) {};
+
+	MATRICE_HOST_INL _Myt& operator= (const _Myt& other) {
+		return _Mybase::operator=(other);
+	}
+	MATRICE_HOST_INL _Myt& operator= (_Myt&& other) noexcept {
+		return _Mybase::operator=(move(other));
+	}
+	template<typename _Argt>
+	MATRICE_HOST_INL _Myt& operator=(const _Argt& _arg) {
+		return _Mybase::operator=(_arg);
+	}
 
 	MATRICE_GLOBAL_FINL constexpr auto(cols)() const noexcept { 
 		return (_Mybase::cols_at_compiletime);
@@ -166,27 +212,26 @@ public:
 	using typename _Mybase::value_t;
 	using typename _Mybase::pointer;
 	using typename _Mybase::const_initlist;
+	//enum { Size = ::dynamic, rows_at_compiletime = ::dynamic, cols_at_compiletime = ::dynamic, };
 	
-	enum { Size = ::dynamic, rows_at_compiletime = ::dynamic, cols_at_compiletime = ::dynamic, };
-	
-	MATRICE_GLOBAL_FINL Matrix_(int rows) noexcept 
+	MATRICE_HOST_INL Matrix_(diff_t rows) noexcept
 		: _Mybase(rows, 1) {};
-	MATRICE_GLOBAL_FINL Matrix_(const _Myt& other) noexcept
+	MATRICE_HOST_INL Matrix_(const _Myt& other) noexcept
 		: _Mybase(other) {};
 	template<typename _Arg>
-	MATRICE_GLOBAL_FINL Matrix_(_Arg&& other) noexcept 
+	MATRICE_HOST_INL Matrix_(_Arg&& other) noexcept
 		: _Mybase(move(other)) {};
 	template<typename... _Args> 
-	MATRICE_GLOBAL_FINL Matrix_(_Args&&... args) noexcept 
+	MATRICE_HOST_INL Matrix_(_Args&&... args) noexcept
 		: _Mybase(forward<_Args>(args)...) {};
 
-	MATRICE_GLOBAL_INL _Myt& operator= (const _Myt& other) {
+	MATRICE_HOST_INL _Myt& operator= (const _Myt& other) {
 		return _Mybase::operator=(other); 
 	}
-	MATRICE_GLOBAL_INL _Myt& operator= (_Myt&& other) noexcept {
+	MATRICE_HOST_INL _Myt& operator= (_Myt&& other) noexcept {
 		return _Mybase::operator=(move(other)); 
 	}
-	MATRICE_GLOBAL_FINL _Myt& operator= (const_initlist list) {
+	MATRICE_HOST_INL _Myt& operator= (const_initlist list) {
 		return _Mybase::operator=(list); 
 	}
 	
