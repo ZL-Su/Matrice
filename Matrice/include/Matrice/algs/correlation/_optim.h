@@ -17,8 +17,6 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #pragma once
 #include <variant>
-#include "core/matrix.h"
-#include "core/vector.h"
 #include "core/solver.h"
 #include "private/math/_linear.h"
 #include "_correlation_traits.h"
@@ -103,6 +101,8 @@ public:
 	using matrix_fixed = Matrix_<value_type, npar, npar>;
 	using point_type = Vec2_<value_type>;
 	using param_type = Vec_<value_type, npar>;
+	using jacob_type = Matrix_<value_type, ::dynamic, npar>;
+	using vector_type = Matrix_<value_type, ::dynamic, 1>;
 	using option_type = _Correlation_options;
 	using interp_type = typename _Mytraits::interpolator;
 	using update_strategy = typename _Mytraits::update_strategy;
@@ -120,7 +120,8 @@ public:
 		const option_type& _Opt) : _Myopt(_Opt),
 		_Myref_ptr(std::make_shared<interp_type>(_Ref)),
 		_Mycur_ptr(std::make_shared<interp_type>(_Cur)),
-		_Mysolver(_Myhess), _Mysize(_Opt._Radius*2+1) {
+		_Mysolver(_Myhess), _Mysize(_Opt._Radius*2+1),
+		_Myjaco(sqr(_Mysize)), _Mydiff(sqr(_Mysize)){
 	}
 
 	/**
@@ -185,8 +186,8 @@ protected:
 	option_type  _Myopt;
 	point_type   _Mypos;
 	matrix_type  _Myref, _Mycur;
-
-	matrix_type  _Mydiff, _MyJaco;
+	vector_type  _Mydiff;
+	jacob_type   _Myjaco;
 	matrix_fixed _Myhess;
 
 	linear_solver _Mysolver;
