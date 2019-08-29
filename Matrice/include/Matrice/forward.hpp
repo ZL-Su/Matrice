@@ -20,10 +20,18 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 namespace dgelom {
 namespace types {
 	template<typename _Ty, int _M, int _N> class Matrix_;
+	template<typename _Ty, int _Dim> class Vec_;
+	template<typename _Ty> class Vec2_;
 }
 
 template<typename _Ty, int _RowsAtCompileTime, int _ColsAtCompileTime=_RowsAtCompileTime> 
 using Matrix_ = types::Matrix_<_Ty, _RowsAtCompileTime, _ColsAtCompileTime>;
+
+template<typename _Ty, int _Ndims>
+using Vec_ = types::Vec_<_Ty, _Ndims>;
+
+template<typename _Ty>
+using Vec2_ = types::Vec2_<_Ty>;
 
 template<typename _Ty, int _Size>
 using Array_ = types::Matrix_<_Ty, _Size, (_Size > 0 ? 1 : _Size)> ;
