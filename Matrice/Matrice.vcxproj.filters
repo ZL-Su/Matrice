@@ -803,6 +803,9 @@
     <ClCompile Include="addin\libpng\pngwutil.c">
       <Filter>Header Files\Addin\libpng</Filter>
     </ClCompile>
+    <ClCompile Include="src\private\nonfree\_blas_lapack_kernels.cpp">
+      <Filter>Source Files\Details\Nonfree</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\Matrice\core\cpp.hint">
