@@ -24,7 +24,7 @@
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseIntelMKL>Parallel</UseIntelMKL>
-    <UseILP64Interfaces>true</UseILP64Interfaces>
+    <UseILP64Interfaces>false</UseILP64Interfaces>
     <UseIntelTBB>false</UseIntelTBB>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -164,6 +164,7 @@
     <ClInclude Include="examples\Invcomp_GaussNewton.hpp" />
     <ClInclude Include="examples\speckle_deformation_simulation_ex.hpp" />
     <ClInclude Include="include\Matrice\3rdparty\interface.hpp" />
+    <ClInclude Include="include\Matrice\algs\correlation.hpp" />
     <ClInclude Include="include\Matrice\algs\correlation\_correlation_traits.h" />
     <ClInclude Include="include\Matrice\algs\correlation\_optim.h" />
     <ClInclude Include="include\Matrice\algs\correlation\_utils.hpp" />
@@ -175,6 +176,7 @@
     <ClInclude Include="include\Matrice\algs\dnn\layer\_layer_base.hpp" />
     <ClInclude Include="include\Matrice\algs\dnn\models\_basic_model.hpp" />
     <ClInclude Include="include\Matrice\algs\erroranalysis\_common.h" />
+    <ClInclude Include="include\Matrice\algs\forward.hpp" />
     <ClInclude Include="include\Matrice\algs\geometry\normalization.h" />
     <ClInclude Include="include\Matrice\algs\geometry\transform.h" />
     <ClInclude Include="include\Matrice\algs\geometry\_geo_utils.hpp" />
@@ -190,6 +192,7 @@
     <ClInclude Include="include\Matrice\algs\similarity.h" />
     <ClInclude Include="include\Matrice\algs\similarity\_iterative_conv_impl.h" />
     <ClInclude Include="include\Matrice\algs\similarity\_similarity_traits.h" />
+    <ClInclude Include="include\Matrice\algs\stereovision\_depth_estimation.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_projection.hpp" />
     <ClInclude Include="include\Matrice\arch\inl\_ixops.hpp" />
     <ClInclude Include="include\Matrice\arch\inl\_ixop_impls.hpp" />
@@ -232,6 +235,7 @@
     <ClInclude Include="include\Matrice\private\_plain_exp.hpp" />
     <ClInclude Include="include\Matrice\private\_plain_shape.hpp" />
     <ClInclude Include="include\Matrice\private\_range.h" />
+    <ClInclude Include="include\Matrice\private\_refs.hpp" />
     <ClInclude Include="include\Matrice\private\_scalar.hpp" />
     <ClInclude Include="include\Matrice\private\_shape.hpp" />
     <ClInclude Include="include\Matrice\private\_size_traits.h" />
@@ -319,6 +323,7 @@
     <ClCompile Include="src\core\matrix_expr_op_impl.cpp" />
     <ClCompile Include="src\core\solver_impl.cpp" />
     <ClCompile Include="src\core\storage_base_impl.cpp" />
+    <ClCompile Include="src\private\nonfree\_blas_lapack_kernels.cpp" />
     <ClCompile Include="src\private\_memory.cpp" />
     <ClCompile Include="src\private\_unified_memory.cpp" />
   </ItemGroup>
@@ -367,7 +372,8 @@
     <None Include="include\Matrice\io\inline\_image.inl" />
     <None Include="include\Matrice\private\inl\_base.inl" />
     <None Include="include\Matrice\private\inl\_storage_base.inl" />
-    <None Include="include\Matrice\private\nonfree\inl\math_kernel_wrapper.inl" />
+    <None Include="include\Matrice\private\nonfree\inl\blas_kernel_wrapper.inl" />
+    <None Include="include\Matrice\private\nonfree\inl\lapack_kernel_wrapper.inl" />
     <None Include="include\Matrice\private\nonfree\inl\_lnalge.inl" />
     <None Include="include\Matrice\private\storage\_allocator.inl" />
     <None Include="include\Matrice\private\_similarity.inl" />

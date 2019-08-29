@@ -18,18 +18,18 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "../_optim.h"
-#include "../../../arch/ixpacket.h"
+#include "arch/ixpacket.h"
 
 MATRICE_ALGS_BEGIN _DETAIL_BEGIN namespace corr {
 
 // \retrieve border size for each interpolation alg.
-template<> struct _Corr_border_size<_TAG bicspl_tag> {
+template<> struct _Corr_border_size<bicerp_tag> {
 	static constexpr auto lower = 1, upper = 2;
 };
-template<> struct _Corr_border_size<_TAG biqspl_tag> {
+template<> struct _Corr_border_size<biqerp_tag> {
 	static constexpr auto lower = 2, upper = 3;
 };
-template<> struct _Corr_border_size<_TAG bisspl_tag> {
+template<> struct _Corr_border_size<biserp_tag> {
 	static constexpr auto lower = 3, upper = 4;
 };
 
@@ -70,13 +70,13 @@ template<> struct _Param_update_strategy<_Alg_icgn<1>> {
 #pragma region <-- base class implementation -->
 template<typename _Derived> MATRICE_HOST_INL 
 auto _Corr_optim_base<_Derived>::_Cond()->matrix_type& {
-	// \sent eval.s of Jacobian and Hessian to background.
-	auto _J = std::async(std::launch::async, [&] {
-		_MyJaco = static_cast<_Derived*>(this)->_Diff();
+	// \sent eval. of Jacobian and Hessian to background.
+	auto _Eval_struct_mats = std::async(std::launch::async, [&] {
+		/*_Myjaco = */static_cast<_Derived*>(this)->_Diff();
 #if MATRICE_MATH_KERNEL==MATRICE_USE_NAT
-		_Myhess = _MyJaco.t().mul(_MyJaco);
+		_Myhess = _Myjaco.t().mul(_Myjaco);
 #else
-		_Myhess = _MyJaco.inplace_mul<transp::Y>(_MyJaco);
+		_Myhess = _Myjaco.t().mul_inplace(_Myjaco);
 #endif
 	});
 
@@ -84,11 +84,10 @@ auto _Corr_optim_base<_Derived>::_Cond()->matrix_type& {
 	// and the differences between them.
 	_Myref.create(_Mysize, _Mysize, zero<value_type>);
 	_Mycur.create(_Mysize, _Mysize);
-	_Mydiff.create(sqr(_Mysize), 1);
 
 	// \fill reference image patch.
 	const auto& _Data = _Myref_ptr->data();
-	const auto[_Rows, _Cols] = _Data.shape();
+	const auto[_Rows, _Cols] = _Data.shape().tiled();
 	const auto[_L, _R, _U, _D] = _Myopt.range<true>(_Mypos);
 
 	auto _Mean = zero<value_type>;
@@ -120,7 +119,7 @@ auto _Corr_optim_base<_Derived>::_Cond()->matrix_type& {
 	_Myref = _Myref * _Issd;
 
 	// \Hessian matrix computation.
-	if (_J.valid()) _J.get();
+	if (_Eval_struct_mats.valid()) _Eval_struct_mats.get();
 	_Myhess = _Myhess * _Issd;
 	_Mysolver.forward();
 	_Myhess = _Myhess + matrix_fixed::diag(_Myopt._Coeff);
@@ -137,10 +136,10 @@ auto _Corr_optim_base<_Derived>::_Solve(param_type& Par) {
 	_Mydiff = _Mycur - _Myref;
 #ifdef MATRICE_DEBUG
 	matrix_type _Error_map(_Mycur.shape(), _Mydiff.data());
-#endif // _DEBUG
+#endif // MATRICE_DEBUG
 
 	// \steepest descent param. update
-	param_type _Sdp = _MyJaco.t().mul(_Mydiff);
+	param_type _Sdp = _Myjaco.t().mul_inplace(_Mydiff);
 
 	// \solve update to the warp parameter vector.
 	_Sdp = _Mysolver.backward(_Sdp);
@@ -166,7 +165,7 @@ auto _Corr_optim_base<_Derived>::_Solve(param_type& Par) {
 template<typename _Ty, typename _Itag> MATRICE_HOST_INL
 auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<0>>::_Warp(const param_type& _Par) {
 
-	const auto[_Rows, _Cols] = (*_Mycur_ptr)().shape();
+	const auto[_Rows, _Cols] = (*_Mycur_ptr)().shape().tiled();
 	const auto _Radius = static_cast<index_t>(_Myopt._Radius);
 
 	const auto _Cur_x = _Mypos[0] + _Par[0];
@@ -190,7 +189,7 @@ auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<0>>::_Warp(const param_type& _Par)
 template<typename _Ty, typename _Itag> MATRICE_HOST_INL
 auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>::_Warp(const param_type& _Par) {
 
-	const auto[_Rows, _Cols] = (*_Mycur_ptr)().shape();
+	const auto[_Rows, _Cols] = (*_Mycur_ptr)().shape().tiled();
 	const auto _Radius = static_cast<index_t>(_Myopt._Radius);
 	const auto &u = _Par[0], &v = _Par[3];
 	const auto &dudx = _Par[1], &dudy = _Par[2];
@@ -226,19 +225,18 @@ auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<0>>::_Diff() {
 	const auto[_L, _R, _U, _D] = _Myopt.range<true>(_Mypos);
 	const auto _Off = -static_cast<value_type>(_Myopt._Radius);
 
-	_Mybase::_MyJaco.create(sqr(_Size), _Mybase::npar);
 	for (index_t iy = _U, j = 0; iy < _D; ++iy, ++j) {
 		const auto y = _Mypos.y + _Off + j;
 		for (index_t ix = _L, i = 0; ix < _R; ++ix, ++i) {
 			const auto x = _Mypos.x + _Off + i;
 			const auto[dfdx, dfdy] = _Myref_ptr->grad({ x, y });
 
-			auto p = _Mybase::_MyJaco[j * _Size + i];
-			p[0] = dfdx, p[1] = dfdy;
+			auto q = _Mybase::_Myjaco[j * _Size + i];
+			q[0] = dfdx, q[1] = dfdy;
 		}
 	}
 
-	return (_Mybase::_MyJaco);
+	return (_Mybase::_Myjaco);
 }
 template<typename _Ty, typename _Itag> MATRICE_HOST_INL
 auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>::_Diff() {
@@ -246,20 +244,19 @@ auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>::_Diff() {
 	const auto[_L, _R, _U, _D] = _Myopt.range<true>(_Mypos);
 	const auto _Off = -static_cast<value_type>(_Myopt._Radius);
 
-	_Mybase::_MyJaco.create(sqr(_Size), _Mybase::npar);
 	for (index_t iy = _U, j = 0; iy < _D; ++iy, ++j) {
 		const auto dy = _Off + j, y = _Mypos.y + dy;
 		for (index_t ix = _L, i = 0; ix < _R; ++ix, ++i) {
 			const auto dx = _Off + i, x = _Mypos.x + dx;
 			const auto[dfdx, dfdy] = _Myref_ptr->grad({ x, y });
 
-			auto p = _Mybase::_MyJaco[j * _Size + i];
-			p[0] = dfdx, p[1] = dfdx * dx, p[2] = dfdx * dy;
-			p[3] = dfdy, p[4] = dfdy * dx, p[5] = dfdy * dy;
+			auto q = _Mybase::_Myjaco[j * _Size + i];
+			q[0] = dfdx, q[1] = dfdx * dx, q[2] = dfdx * dy;
+			q[3] = dfdy, q[4] = dfdy * dx, q[5] = dfdy * dy;
 		}
 	}
 
-	return (_Mybase::_MyJaco);
+	return (_Mybase::_Myjaco);
 }
 
 #undef _IF_WITHIN_RANGE

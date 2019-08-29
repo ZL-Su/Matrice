@@ -17,12 +17,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #pragma once
 #include <variant>
-#include "../../core/matrix.h"
-#include "../../core/vector.h"
-#include "../../core/solver.h"
-#include "../../private/math/_linear.h"
-#include "../interpolation.h"
+#include "core/solver.h"
+#include "private/math/_linear.h"
 #include "_correlation_traits.h"
+#include "../interpolation.h"
 
 MATRICE_ALGS_BEGIN _DETAIL_BEGIN namespace corr {
 
@@ -103,6 +101,8 @@ public:
 	using matrix_fixed = Matrix_<value_type, npar, npar>;
 	using point_type = Vec2_<value_type>;
 	using param_type = Vec_<value_type, npar>;
+	using jacob_type = Matrix_<value_type, ::dynamic, npar>;
+	using vector_type = Matrix_<value_type, ::dynamic, 1>;
 	using option_type = _Correlation_options;
 	using interp_type = typename _Mytraits::interpolator;
 	using update_strategy = typename _Mytraits::update_strategy;
@@ -120,7 +120,8 @@ public:
 		const option_type& _Opt) : _Myopt(_Opt),
 		_Myref_ptr(std::make_shared<interp_type>(_Ref)),
 		_Mycur_ptr(std::make_shared<interp_type>(_Cur)),
-		_Mysolver(_Myhess), _Mysize(_Opt._Radius*2+1) {
+		_Mysolver(_Myhess), _Mysize(_Opt._Radius*2+1),
+		_Myjaco(sqr(_Mysize)), _Mydiff(sqr(_Mysize)){
 	}
 
 	/**
@@ -128,13 +129,15 @@ public:
 	 *\param [_Pos] a reference position for parameter estimation;
 	 */
 	template<typename _Ty>
-	MATRICE_HOST_INL void init(const _Ty& _x, const _Ty& _y) {
+	MATRICE_HOST_INL _Myt& init(const _Ty& _x, const _Ty& _y) {
 		_Mypos.x = _x, _Mypos.y = _y;
 		/*_Myref = */this->_Cond();
+		return (*this);
 	}
-	MATRICE_HOST_INL void init(const point_type& _ref_pos) {
+	MATRICE_HOST_INL _Myt& init(const point_type& _ref_pos) {
 		_Mypos.x = _ref_pos.x, _Mypos.y = _ref_pos.y;
 		/*_Myref = */this->_Cond();
+		return (*this);
 	}
 
 	/**
@@ -147,14 +150,21 @@ public:
 	}
 
 	// \for retrieving reference subset
-	MATRICE_HOST_INL auto& get_refpatch() const { 
+	MATRICE_HOST_INL decltype(auto)get_refpatch() const { 
 		return (_Myref); 
 	}
-	MATRICE_HOST_INL auto& options() const {
+	MATRICE_HOST_INL decltype(auto)options() const {
 		return (_Myopt);
 	}
-	MATRICE_HOST_INL auto& refpos() { return _Mypos; }
-	MATRICE_HOST_INL const auto& refpos() const { return _Mypos; }
+	MATRICE_HOST_INL decltype(auto)options() {
+		return (_Myopt);
+	}
+	MATRICE_HOST_INL decltype(auto)refpos() { 
+		return _Mypos; 
+	}
+	MATRICE_HOST_INL decltype(auto)refpos() const { 
+		return _Mypos; 
+	}
 
 protected:
 	///<methods>
@@ -176,8 +186,8 @@ protected:
 	option_type  _Myopt;
 	point_type   _Mypos;
 	matrix_type  _Myref, _Mycur;
-
-	matrix_type  _Mydiff, _MyJaco;
+	vector_type  _Mydiff;
+	jacob_type   _Myjaco;
 	matrix_fixed _Myhess;
 
 	linear_solver _Mysolver;
@@ -269,76 +279,4 @@ private:
 
 _DETAIL_END } MATRICE_ALGS_END
 
-DGE_MATRICE_BEGIN
-struct correlation_optimizer {
-	using options = algs::detail::corr::_Correlation_options;
-
-	/**
-	 *\brief N-th order IC-GN alg. with bicubic spline interpolation.
-	 *\param <_Ty> must be a scalar type of float or double.
-	 */
-	template<typename _Ty, uint8_t _Order = 1>
-	using icgn_bic = algs::detail::corr::_Corr_solver_impl<_Ty,
-		tag::bicspl_tag, algs::detail::corr::_Alg_icgn<_Order>>;
-	/**
-	 *\brief 1th order IC-GN alg. with biquintic spline interpolation.
-	 *\param <_Ty> must be a scalar type of float or double.
-	 */
-	template<typename _Ty, uint8_t _Order = 1>
-	using icgn_biq = algs::detail::corr::_Corr_solver_impl<_Ty,
-		tag::biqspl_tag, algs::detail::corr::_Alg_icgn<_Order>>;
-	/**
-	 *\brief 1th order IC-GN alg. with biseptic spline interpolation.
-	 *\param <_Ty> must be a scalar type of float or double.
-	 */
-	template<typename _Ty, uint8_t _Order = 1>
-	using icgn_bis = algs::detail::corr::_Corr_solver_impl<_Ty,
-		tag::bisspl_tag, algs::detail::corr::_Alg_icgn<_Order>>;
-
-	/**
-	 *\brief 1th order IC-GN alg. with bicubic spline interpolation.
-	 *\param <_Ty> must be a scalar type of float or double.
-	 */
-	template<typename _Ty>
-	using icgn_bic_0 = algs::detail::corr::_Corr_solver_impl<_Ty,
-		tag::bicspl_tag, algs::detail::corr::_Alg_icgn<0>>;
-	/**
-	 *\brief 1th order IC-GN alg. with biquintic spline interpolation.
-	 *\param <_Ty> must be a scalar type of float or double.
-	 */
-	template<typename _Ty>
-	using icgn_biq_0 = algs::detail::corr::_Corr_solver_impl<_Ty,
-		tag::biqspl_tag, algs::detail::corr::_Alg_icgn<0>>;
-	/**
-	 *\brief 1th order IC-GN alg. with biseptic spline interpolation.
-	 *\param <_Ty> must be a scalar type of float or double.
-	 */
-	template<typename _Ty>
-	using icgn_bis_0 = algs::detail::corr::_Corr_solver_impl<_Ty,
-		tag::bisspl_tag, algs::detail::corr::_Alg_icgn<0>>;
-
-	/**
-	 *\brief 1th order IC-GN alg. with bicubic spline interpolation.
-	 *\param <_Ty> must be a scalar type of float or double.
-	 */
-	template<typename _Ty>
-	using icgn_bic_1 = algs::detail::corr::_Corr_solver_impl<_Ty,
-		tag::bicspl_tag, algs::detail::corr::_Alg_icgn<1>>;
-	/**
-	 *\brief 1th order IC-GN alg. with biquintic spline interpolation.
-	 *\param <_Ty> must be a scalar type of float or double.
-	 */
-	template<typename _Ty>
-	using icgn_biq_1 = algs::detail::corr::_Corr_solver_impl<_Ty,
-		tag::biqspl_tag, algs::detail::corr::_Alg_icgn<1>>;
-	/**
-	 *\brief 1th order IC-GN alg. with biseptic spline interpolation.
-	 *\param <_Ty> must be a scalar type of float or double.
-	 */
-	template<typename _Ty>
-	using icgn_bis_1 = algs::detail::corr::_Corr_solver_impl<_Ty,
-		tag::bisspl_tag, algs::detail::corr::_Alg_icgn<1>>;
-};
-DGE_MATRICE_END
-
-#include "inline\_optim.inl"
+#include "inline/_optim.inl"

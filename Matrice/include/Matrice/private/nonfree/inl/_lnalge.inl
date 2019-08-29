@@ -222,7 +222,7 @@ struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 	}
 	template<typename _Mty, MATRICE_ENABLE_IF(is_matrix_v<_Mty>)>
 	MATRICE_HOST_INL static int spd(const _Mty& _A) {
-		return spd(_A.data(), _A.shape());
+		return spd(_A.data(), _A.shape().tiled());
 	}
 
 	/**
@@ -347,8 +347,7 @@ template<> struct _Lapack_backward_impl<solver_type::CHD> {
 
 		using iterator = typename _Lhs::iterator;
 		using value_type = typename _Lhs::value_type;
-		const auto M = _A.rows(), N = _A.cols();
-		const auto NRhs = _X.cols();
+		const int M = _A.rows(), N = _A.cols(), NRhs = _X.cols();
 #ifdef _DEBUG
 		DGELOM_CHECK(M == N, "The coeff. _A in _Lapack_backward_impl<solver_type::CHD> must be a square matrix.");
 #endif

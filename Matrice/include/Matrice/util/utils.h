@@ -66,14 +66,14 @@ namespace detail {
  */
 template<typename T = std::string> MATRICE_HOST_FINL
 T stonv(const std::string& _Str) noexcept {
-#if (defined _DEBUG || MATRICE_DEBUG)
+#ifdef MATRICE_DEBUG
 	DGELOM_CHECK(!_Str.empty(), "_Str should not be empty.")
 #endif
 	return detail::string_to_numval<T>::value(_Str); 
 }
 template<typename T = std::string> MATRICE_HOST_FINL
 T cast_string_to(std::string&& _Str) noexcept {
-#if (defined _DEBUG || MATRICE_DEBUG)
+#ifdef MATRICE_DEBUG
 	DGELOM_CHECK(!_Str.empty(), "_Str should not be empty.")
 #endif
 		return detail::string_to_numval<T>::value(_Str);

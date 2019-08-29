@@ -35,7 +35,7 @@ template<typename _T> LinearOp::info_t LinearOp::OpBase<_T>::_Impl(view_t& A)
 		info.alg = solver_type::LUF;
 		
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
-		Matrix_<MKL_INT, view_t::CompileTimeCols, min(view_t::CompileTimeCols, 1)> iwp(_N, 1);
+		Matrix_<MKL_INT, view_t::cols_at_compiletime, min(view_t::cols_at_compiletime, 1)> iwp(_N, 1);
 		if constexpr (type_bytes<value_t>::value == 4)
 			info.status = LAPACKE_sgetrf(layout, _M, _N, (float*)pCoef, _N, iwp.data());
 		else if constexpr (type_bytes<value_t>::value == 8)

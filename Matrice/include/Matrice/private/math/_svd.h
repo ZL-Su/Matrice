@@ -30,8 +30,8 @@ class _Svd_impl
 	using traits_type = matrix_traits<matrix_type>;
 	using size_traits = typename traits_type::size;
 	enum {
-		CompileTimeRows = size_traits::rows::value,
-		CompileTimeCols = size_traits::cols::value
+		rows_at_compiletime = size_traits::rows::value,
+		cols_at_compiletime = size_traits::cols::value
 	};
 
 public:
@@ -46,16 +46,16 @@ public:
 	 *\Static svd operator, which is thread-safe totally.
 	 */
 	MATRICE_GLOBAL_INL static auto op(const matrix_type& _A) {
-		types::Matrix_<value_t, CompileTimeCols, 1> S;
-		types::Matrix_<value_t, CompileTimeCols, CompileTimeCols> Vt;
+		types::Matrix_<value_t, cols_at_compiletime, 1> S;
+		types::Matrix_<value_t, cols_at_compiletime, cols_at_compiletime> Vt;
 		detail::_Lapack_kernel_impl<value_t>::svd(_A.data(), S.data(), Vt.data(), _A.shape());
 
 		return std::make_tuple(std::ref(_A), std::ref(S), std::ref(Vt));
 	}
 private:
 	const matrix_type& _A_view;
-	types::Matrix_<value_t, CompileTimeCols, 1> _S;
-	types::Matrix_<value_t, CompileTimeCols, CompileTimeCols> _Vt;
+	types::Matrix_<value_t, cols_at_compiletime, 1> _S;
+	types::Matrix_<value_t, cols_at_compiletime, cols_at_compiletime> _Vt;
 
 };
 _DETAIL_END

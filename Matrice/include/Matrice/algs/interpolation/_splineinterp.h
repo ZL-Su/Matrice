@@ -27,8 +27,8 @@ template<typename _Ty, typename _Tag> class _Spline_interpolation {};
  * \Partial specialization for Bi-Cubic B-Spline interpolation.
  */
 template<typename _Ty>
-class _Spline_interpolation<_Ty, _TAG _Bspline_itp_tag::bicubic>
-	: public _Interpolation_base<_Spline_interpolation<_Ty, _TAG bicspl_tag>>
+class _Spline_interpolation<_Ty, bicerp_tag>
+	: public _Interpolation_base<_Spline_interpolation<_Ty, bicerp_tag>>
 {
 	using _Myt = _Spline_interpolation;
 	using _Mybase = _Interpolation_base<_Myt>;
@@ -72,8 +72,8 @@ private:
  * \Partial specialization for Bi-Quintic B-Spline interpolation.
  */
 template<typename _Ty>
-class _Spline_interpolation<_Ty, _TAG _Bspline_itp_tag::biquintic>
-	: public _Interpolation_base<_Spline_interpolation<_Ty, _TAG biqspl_tag>>
+class _Spline_interpolation<_Ty, biqerp_tag>
+	: public _Interpolation_base<_Spline_interpolation<_Ty, biqerp_tag>>
 {
 	using _Myt = _Spline_interpolation;
 	using _Mybase = _Interpolation_base<_Myt>;
@@ -118,8 +118,8 @@ private:
  * \Partial specialization for Bi-septic B-Spline interpolation.
  */
 template<typename _Ty>
-class _Spline_interpolation<_Ty, _TAG _Bspline_itp_tag::biseptic>
-	: public _Interpolation_base<_Spline_interpolation<_Ty, _TAG bisspl_tag>>
+class _Spline_interpolation<_Ty, biserp_tag>
+	: public _Interpolation_base<_Spline_interpolation<_Ty, biserp_tag>>
 {
 	using _Myt = _Spline_interpolation;
 	using _Mybase = _Interpolation_base<_Myt>;

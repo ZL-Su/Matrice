@@ -16,19 +16,21 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
-#include <util/_std_wrapper.h>
-#include <private/_type_traits.h>
+#include "../../math/_config.h"
+#include "../../math/kernel_wrapper.hpp"
 
 DGE_MATRICE_BEGIN
-_DETAIL_BEGIN
-struct _Blas_kernel_wrapper;
-struct _Lapack_kernel_wrapper;
-_DETAIL_END
-using blas_kernel_t = detail::_Blas_kernel_wrapper;
-using lapack_kernel_t = detail::_Lapack_kernel_wrapper;
-DGE_MATRICE_END
+_INTERNAL_BEGIN
 
-#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
-#include "..//nonfree//inl//blas_kernel_wrapper.inl"
-#include "..//nonfree//inl//lapack_kernel_wrapper.inl"
-#endif
+_INTERNAL_END
+
+_DETAIL_BEGIN
+struct _Lapack_kernel_wrapper {
+
+};
+_DETAIL_END
+
+_INTERNAL_BEGIN
+
+_INTERNAL_END
+DGE_MATRICE_END

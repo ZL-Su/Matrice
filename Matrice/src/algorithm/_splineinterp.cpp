@@ -1,4 +1,21 @@
-#include "../../include/Matrice/algs/interpolation/_splineinterp.h"
+/**************************************************************************
+This file is part of Matrice, an effcient and elegant C++ library.
+Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+
+This program is free software : you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.If not, see <http://www.gnu.org/licenses/>.
+**************************************************************************/
+#include "algs/interpolation/_splineinterp.h"
 
 MATRICE_ALGS_BEGIN
 
@@ -30,7 +47,7 @@ namespace internal {
 	};
 	template<typename _Ty, typename _Tag> struct _It_hypar {};
 
-	template<typename _Ty> struct _It_hypar<_Ty, _TAG bicspl_tag> : _Itpar_base<_Ty> {
+	template<typename _Ty> struct _It_hypar<_Ty, bicerp_tag> : _Itpar_base<_Ty> {
 		MATRICE_HOST_INL static auto value() {
 			constexpr auto _Myeps = _Itpar_base<_Ty>::_Myeps;
 
@@ -41,7 +58,7 @@ namespace internal {
 			return std::make_tuple(_Z, _A, _K);
 		}
 	};
-	template<typename _Ty> struct _It_hypar<_Ty, _TAG biqspl_tag> : _Itpar_base<_Ty> {
+	template<typename _Ty> struct _It_hypar<_Ty, biqerp_tag> : _Itpar_base<_Ty> {
 		MATRICE_HOST_INL static auto value() {
 			constexpr auto _Myeps = _Itpar_base<_Ty>::_Myeps;
 
@@ -53,7 +70,7 @@ namespace internal {
 			return std::make_tuple(_Z1, _Z2, _A1, _A2, _K1, _K2);
 		}
 	};
-	template<typename _Ty> struct _It_hypar<_Ty, _TAG bisspl_tag> : _Itpar_base<_Ty> {
+	template<typename _Ty> struct _It_hypar<_Ty, biserp_tag> : _Itpar_base<_Ty> {
 		MATRICE_HOST_INL static auto value() {
 			constexpr auto _Myeps = _Itpar_base<_Ty>::_Myeps;
 
@@ -73,7 +90,7 @@ namespace internal {
 }
 
 template<typename _Ty> 
-void _Spline_interpolation<_Ty, _TAG bicspl_tag>::_Coeff_impl() {
+void _Spline_interpolation<_Ty, bicerp_tag>::_Coeff_impl() {
 	const auto& _Data = _Mybase::_Mydata;
 	auto& _Mycoeff = _Mybase::_Mycoeff;
 
@@ -112,7 +129,7 @@ void _Spline_interpolation<_Ty, _TAG bicspl_tag>::_Coeff_impl() {
 	_SPLCOEFF_RWISE_RECURSION(_A, _Z);
 }
 template<typename _Ty> 
-void _Spline_interpolation<_Ty, _TAG biqspl_tag>::_Coeff_impl() {
+void _Spline_interpolation<_Ty, biqerp_tag>::_Coeff_impl() {
 	const auto& _Data = _Mybase::_Mydata;
 	auto& _Mycoeff = _Mybase::_Mycoeff;
 
@@ -171,7 +188,7 @@ void _Spline_interpolation<_Ty, _TAG biqspl_tag>::_Coeff_impl() {
 	_SPLCOEFF_RWISE_RECURSION(_A2, _Z2);
 }
 template<typename _Ty> 
-void _Spline_interpolation<_Ty, _TAG bisspl_tag>::_Coeff_impl() {
+void _Spline_interpolation<_Ty, biserp_tag>::_Coeff_impl() {
 	const auto& _Data = _Mybase::_Mydata;
 	auto& _Mycoeff = _Mybase::_Mycoeff;
 
@@ -244,12 +261,12 @@ void _Spline_interpolation<_Ty, _TAG bisspl_tag>::_Coeff_impl() {
 	_SPLCOEFF_RWISE_RECURSION(_A3, _Z3);
 }
 
-template class _Spline_interpolation<float,  _TAG bicspl_tag>;
-template class _Spline_interpolation<double, _TAG bicspl_tag>;
-template class _Spline_interpolation<float,  _TAG biqspl_tag>;
-template class _Spline_interpolation<double, _TAG biqspl_tag>;
-template class _Spline_interpolation<float,  _TAG bisspl_tag>;
-template class _Spline_interpolation<double, _TAG bisspl_tag>;
+template class _Spline_interpolation<float,  bicerp_tag>;
+template class _Spline_interpolation<double, bicerp_tag>;
+template class _Spline_interpolation<float,  biqerp_tag>;
+template class _Spline_interpolation<double, biqerp_tag>;
+template class _Spline_interpolation<float,  biserp_tag>;
+template class _Spline_interpolation<double, biserp_tag>;
 
 #undef _SPLCOEFF_CWISE_RECURSION
 #undef _SPLCOEFF_RWISE_RECURSION

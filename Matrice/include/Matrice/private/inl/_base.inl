@@ -5,13 +5,14 @@
 #include "../_plain_base.hpp"
 #include "../_range.h"
 #include "../../thread/_thread.h"
-#include "../../private/nonfree/_lnalge.h"
+#include "private/nonfree/_lnalge.h"
+#include "private/math/kernel_wrapper.hpp"
 
 DGE_MATRICE_BEGIN
 _TYPES_BEGIN
 template<typename _Derived, typename _Traits, typename _Type>
 template<typename _Rhs> MATRICE_HOST_INL
-decltype(auto) Base_<_Derived, _Traits, _Type>::inplace_sub(const _Rhs& _Right) {
+decltype(auto) Base_<_Derived, _Traits, _Type>::sub_inplace(const _Rhs& _Right) {
 	using packet_t = simd::Packet_<value_type>;
 	constexpr auto step = packet_t::size;
 	const auto plen = simd::vsize<step>(this->size());
@@ -61,15 +62,10 @@ decltype(auto) Base_<_Derived, _Traits, _Type>::mul_(const _Rhs& _Right) {
 }
 
 template<typename _Derived, typename _Traits, typename _Type>
-template<ttag _Ltag, ttag _Rtag, typename _Rhs, typename> inline
-auto Base_<_Derived, _Traits, _Type>::inplace_mul(const _Rhs& _Right) {
-	Matrix_<value_type, 
-		conditional_size_v<_Ltag == ttag::Y,_Myt::ColsAtCT,_Myt::RowsAtCT>,
-		conditional_size_v<_Rtag == ttag::Y,_Rhs::RowsAtCT,_Rhs::ColsAtCT>>
-		_Ret((_Ltag == ttag::Y)?m_cols:m_rows, 
-		(_Rtag == ttag::Y)?_Right.rows():_Right.cols());
-	blas_kernel<value_type>::mul<_Ltag, _Rtag>(this->plvt(), _Right.plvt(), _Ret.plvt());
-	return forward<decltype(_Ret)>(_Ret);
+template<typename _Rhs> MATRICE_HOST_INL
+auto Base_<_Derived, _Traits, _Type>::mul_inplace(const _Rhs& _Right) const{
+	Matrix_<value_type, _Myt::rows_at_compiletime, _Rhs::cols_at_compiletime>_Ret(m_rows, _Right.cols());
+	return forward<decltype(_Ret)>(blas_kernel_t::gemm(*this, _Right, _Ret));
 }
 
 template<typename _Derived, typename _Traits, typename _Type>
@@ -96,12 +92,12 @@ _Rhs Base_<_Derived, _Traits, _Type>::spreadmul(const _Rhs& _Right)const {
 }
 _TYPES_END
 template<typename _Mty>
-MATRICE_HOST_INL auto make_matrix_deleter(const _Mty& _M) noexcept {
+MATRICE_HOST_INL decltype(auto) make_matrix_deleter(const _Mty& _M) noexcept {
 	return _M.deleter();
 };
 
 template<typename _Ty, int _Rows, int _Cols, typename... _Args>
-MATRICE_GLOBAL_INL types::Matrix_<_Ty, _Rows, _Cols> make_matrix(_Args&&... params) {
+MATRICE_GLOBAL_INL decltype(auto) make_matrix(_Args&&... params) {
 	return types::Matrix_<_Ty, _Rows, _Cols>(forward<_Args>(params)...);
 };
 

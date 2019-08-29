@@ -15,26 +15,23 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include <stdexcept>
-#include "../../include/Matrice/private/_decl_dev_funcs.h"
+#include "util/_exception.h"
+#include "private/_decl_dev_funcs.h"
 
-#if (defined __enable_cuda__ && !defined __disable_cuda__)
+#ifdef MATRICE_ENABLE_CUDA
 #include <cuda_runtime.h>
 
 #pragma warning(disable: 4715 4661 4224 4267 4244 4819 4199)
 
 MATRICE_PRIVATE_BEGIN
 
-template<int _Opt> void _Device_sync()
-{
+template<int _Opt> void _Device_sync() {
 	cudaError_t sts;
 	switch (_Opt){
 	case 0: sts = cudaDeviceSynchronize(); break;
 	default: break;
 	}
-
-	if(sts != cudaError_t::cudaSuccess) 
-		throw std::runtime_error("Fail to device thread synchronization.");
+	DGELOM_CHECK(sts == cudaError_t::cudaSuccess, "Error in _Device_sync()");
 }
 
 template void _Device_sync<0>();

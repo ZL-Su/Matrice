@@ -19,8 +19,8 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <map>
 #include <optional>
 #include "_base.h"
-#include "../../private/_iterator.h"
-#include "../../private/container/_multi_array.hpp"
+#include "private/_iterator.h"
+#include "private/container/_multi_array.hpp"
 
 MATRICE_ALGS_BEGIN
 _DETAIL_BEGIN
@@ -64,11 +64,7 @@ template<int8_t _N = 2> struct _MBA_base {
 		return true;
 	}
 
-	template<typename _Ty>
-	MATRICE_HOST_INL static _Ty _Safe_divide(_Ty a, _Ty b) {
-		return (b == zero<_Ty> ? zero<_Ty> : a / b);
-	}
-
+	// Copy from pointer p
 	template<typename _Ty>
 	MATRICE_HOST_INL static array_n_type<_Ty> _From(const _Ty* p) {
 		array_n_type<_Ty> _Ret;
@@ -563,7 +559,7 @@ private:
 		  will be replaced by interpolation residuals.
  */
 template<typename _Ty = float, unsigned _N = 2>
-class MBA : detail::_MBA_base<_N> {
+class multilevel_bicerp_approx : detail::_MBA_base<_N> {
 	using _Mybase = detail::_MBA_base<_N>;
 	using lattice = detail::control_lattice<_Ty, _N>;
 	using approx_lattice = detail::initial_approximation<_Ty, _N>;
@@ -578,7 +574,7 @@ public:
 	using options_type = typename _Mybase::template options_type<value_type>;
 	using functor_type = typename _Mybase::template functor<value_type>;
 
-	MBA(const container& data, options_type& opts, 
+	multilevel_bicerp_approx(const container& data, options_type& opts,
 		functor_type&& init_op = functor_type()) {
 		_Init(data, opts, init_op);
 	}
@@ -600,8 +596,6 @@ public:
 	}
 
 private:
-	std::list<std::shared_ptr<lattice>> cl;
-
 	MATRICE_HOST_INL void _Init(const container& data, options_type& opts, functor_type initial)
 	{
 		auto& grid = opts.grid;
@@ -647,6 +641,8 @@ private:
 			res = cl.back()->residual(data);
 		}
 	}
+
+	std::list<std::shared_ptr<lattice>> cl;
 };
 
 /**
@@ -654,11 +650,11 @@ private:
  *\param <_Ty> a scalar template type
  */
 template<typename _Ty> 
-class _Spline_interpolation<_Ty, _TAG mbicspl_tag> : public
-	_Interpolation_base<_Spline_interpolation<_Ty, _TAG mbicspl_tag>>
+class _Spline_interpolation<_Ty, mbicerp_2d_tag> : public
+	_Interpolation_base<_Spline_interpolation<_Ty, mbicerp_2d_tag>>
 {
 	static_assert(is_scalar_v<_Ty>, "template type _Ty must be a scalar.");
-	using _Myt = _Spline_interpolation<_Ty, _TAG mbicspl_tag>;
+	using _Myt = _Spline_interpolation<_Ty, mbicerp_2d_tag>;
 	using _Mybase = _Interpolation_base<_Myt>;
 public:
 	using typename _Mybase::category;
@@ -676,26 +672,3 @@ public:
 	MATRICE_HOST_FINL void _Coeff_impl();
 };
 MATRICE_ALGS_END
-
-DGE_MATRICE_BEGIN
-/**
- *\brief 1-dimensional scattered data interpolation.
- *\param <_Ty> data type, must be float or double.
- */
-template<typename _Ty>
-using multilevel_bicubic_1d = algs::MBA<_Ty, 1>;
-
-/**
- *\brief 2-dimensional scattered data interpolation.
- *\param <_Ty> data type, must be float or double.
- */
-template<typename _Ty>
-using multilevel_bicubic_2d = algs::MBA<_Ty, 2>;
-
-/**
- *\brief 3-dimensional scattered data interpolation.
- *\param <_Ty> data type, must be float or double.
- */
-template<typename _Ty>
-using multilevel_bicubic_3d = algs::MBA<_Ty, 3>;
-DGE_MATRICE_END

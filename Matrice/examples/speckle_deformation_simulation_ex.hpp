@@ -47,7 +47,7 @@ public:
 	inline std::optional<matrix_type> random_warp() noexcept {
 		mt19937 eng;
 		normal_distribution<value_type> ndist;
-		interpolation<value_type, tag::bilinear_tag> itp(m_original);
+		interpolation<value_type, bilerp_tag> itp(m_original);
 
 		matrix_type dst(m_rows, m_cols);
 		if constexpr (_Order == static_cast<uint16_t>(0)) {

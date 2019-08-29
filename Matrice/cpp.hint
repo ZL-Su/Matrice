@@ -6,3 +6,4 @@
 #define _DETAIL_BEGIN namespace detail {
 #define _DETAIL_END }
 #define _INTERNAL_BEGIN namespace internal {
+#define MATRICE_GLOBAL_INL

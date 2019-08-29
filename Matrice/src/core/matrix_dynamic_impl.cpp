@@ -1,4 +1,4 @@
-#include "../../include/Matrice/core/matrix.h"
+#include "core/matrix.h"
 
 MATRICE_NAMESPACE_BEGIN_TYPES
 
@@ -6,9 +6,9 @@ MATRICE_NAMESPACE_BEGIN_TYPES
 template void Matrix_<TYPE, ALTYPE>::__create_impl(size_t, size_t);
 
 template<typename _Ty>
-void Matrix_<_Ty, 0, 0>::__create_impl(size_t rows, size_t cols) {
-	_Mybase::m_storage.create(rows, cols);
-	this->_Reset_no_alloc({ rows, cols });
+void Matrix_<_Ty, ::dynamic>::__create_impl(size_t rows, size_t cols) {
+	_Mybase::_Myalloc.alloc(rows, cols);
+	this->_Xfields({ rows, cols });
 }
 
 MATRICE_INSTANTIATE_METHOD_CREATE(int, ::dynamic)
@@ -21,13 +21,13 @@ MATRICE_INSTANTIATE_METHOD_CREATE(uint8_t, ::dynamic)
 #ifdef MATRICE_ENABLE_CUDA
 template<typename _Ty>
 void Matrix_<_Ty, ::global>::__create_impl(size_t rows, size_t cols) {
-	_Mybase::m_storage.create(rows, cols);
-	this->_Reset_no_alloc({ rows, cols });
+	_Mybase::_Myalloc.alloc(rows, cols);
+	this->_Xfields({ rows, cols });
 }
 template<typename _Ty>
 void Matrix_<_Ty, ::device>::__create_impl(size_t rows, size_t cols) {
-	_Mybase::m_storage.create(rows, cols);
-	this->_Reset_no_alloc({ rows, cols });
+	_Mybase::_Myalloc.alloc(rows, cols);
+	this->_Xfields({ rows, cols });
 }
 
 MATRICE_INSTANTIATE_METHOD_CREATE(int, ::global)

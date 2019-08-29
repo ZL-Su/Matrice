@@ -47,7 +47,7 @@ class _Tensor
 	using _Mytraits = tensor_traits<_Myt>;
 	using _Mybase = types::Base_<_Myt, _Mytraits>;
 public:
-	enum { Size = 0, CompileTimeRows = 0, CompileTimeCols = 0 };
+	enum { Size = 0, rows_at_compiletime = 0, cols_at_compiletime = 0 };
 	static constexpr auto depth = _Mytraits::depth;
 	using typename _Mybase::value_type;
 	//using typename _Mybase::scalar_type;
@@ -104,14 +104,14 @@ public:
 	 *\param [d, r, c] the indices in depth, height and width axis respectively 
 	 */
 	MATRICE_HOST_INL const value_type& operator()(size_t d, size_t r, size_t c) const noexcept {
-#if defined _DEBUG || MATRICE_DEBUG
+#ifdef MATRICE_DEBUG
 		DGELOM_CHECK(d < depth, "depth index over range.");
 #endif
 		const auto inner_size = m_shape.hw();
 		return (_Mybase::operator[](d*inner_size+r*m_width)[c]);
 	}
 	MATRICE_HOST_INL value_type& operator()(size_t d, size_t r, size_t c) noexcept {
-#if defined _DEBUG || MATRICE_DEBUG
+#ifdef MATRICE_DEBUG
 		DGELOM_CHECK(d < _Depth, "depth index over range.");
 #endif
 		const auto inner_size = m_shape.hw();
@@ -123,7 +123,7 @@ public:
 	 *\param [d] - input index of depth
 	 */
 	MATRICE_HOST_INL decltype(auto) array(size_t d) noexcept {
-#if defined _DEBUG || MATRICE_DEBUG
+#ifdef MATRICE_DEBUG
 		DGELOM_CHECK(d < _Depth, "depth index over range.");
 #endif
 		const auto w = m_shape.w();
@@ -170,7 +170,7 @@ class _Tensor<_Ty, 0> : public types::Base_<_Tensor<_Ty, 0>>
 	using _Mybase = types::Base_<_Myt>;
 	using _Mytraits = matrix_traits<_Myt>;
 public:
-	enum { Size = 0, CompileTimeRows = 0, CompileTimeCols = 0, };
+	enum { Size = 0, rows_at_compiletime = 0, cols_at_compiletime = 0, };
 	using typename _Mybase::value_t;
 	using typename _Mybase::value_type;
 	using typename _Mybase::const_initlist;

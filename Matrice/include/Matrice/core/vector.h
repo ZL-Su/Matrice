@@ -28,44 +28,44 @@ MATRICE_NAMESPACE_BEGIN_TYPES
 template<typename _Ty, int _Dim = 2> 
 class Vec_ : public Matrix_<_Ty, _Dim, compile_time_size<>::val_1>
 {
-	using const_my = const Vec_;
-	using my_const_ref = const_my&;
+	using _Myt = Vec_;
 protected:
-	using _Base = Matrix_<_Ty, _Dim, compile_time_size<>::val_1>;
-	using const_initlist = typename _Base::const_initlist;
+	using _Mybase = Matrix_<_Ty, _Dim, compile_time_size<>::val_1>;
+	using const_initlist = typename _Mybase::const_initlist;
 public:
-	enum{CompileTimeRows = _Dim, CompileTimeCols = 1};
-	using _Base::data;
-	using typename _Base::value_t;
-	using typename _Base::value_type;
+	enum{rows_at_compiletime = _Dim, cols_at_compiletime = 1};
+	using _Mybase::data;
+	using typename _Mybase::value_t;
+	using typename _Mybase::value_type;
 	using const_value = const value_t;
 	using reference = value_t & ;
 	using const_reference = const reference;
 
-	vec_global_inl Vec_() : _Base({ 0 }) {}
-	vec_global_inl Vec_(const_value _v) : _Base({ _v }) {}
-	vec_global_inl Vec_(const_value _x, const_value _y) : _Base({ _x, _y }) {}
-	vec_global_inl Vec_(my_const_ref _other) : _Base(_other) {}
-	vec_global_inl Vec_(const_initlist _list) : _Base(_list) {}
+	vec_global_inl Vec_() : _Mybase({ 0 }) {}
+	vec_global_inl Vec_(const_value _v) : _Mybase({ _v }) {}
+	vec_global_inl Vec_(const_value _x, const_value _y) : _Mybase({ _x, _y }) {}
+	vec_global_inl Vec_(const _Myt& _other) : _Mybase(_other) {}
+	vec_global_inl Vec_(const_initlist _list) : _Mybase(_list) {}
+	vec_global_inl Vec_(const _Mybase& _mtx) : _Mybase(_mtx) {}
 	template<typename _Exp, MATRICE_ENABLE_IF(is_expression_v<_Exp>)>
 	vec_global_inl Vec_(const _Exp& _exp) { _exp.assign(*this); }
 
 	vec_global_inl reference operator[] (size_t i) { return data()[i]; }
 	vec_global_inl const_reference operator[](size_t i)const { return data()[i]; }
-	vec_global_inl Vec_& operator= (const_initlist _list)
-	{ return static_cast<Vec_&>(_Base::operator= (_list)); }
-	vec_global_inl Vec_& operator= (my_const_ref _other)
-	{ return static_cast<Vec_&>(_Base::operator=(_other)); }
+	vec_global_inl _Myt& operator= (const_initlist _list)
+	{ return static_cast<_Myt&>(_Mybase::operator= (_list)); }
+	vec_global_inl _Myt& operator= (const _Myt& _other)
+	{ return static_cast<_Myt&>(_Mybase::operator=(_other)); }
 	template<typename _Rval>
-	vec_global_inl Vec_& operator= (const _Rval& _rval)
-	{ return static_cast<Vec_&>(_Base::operator= (_rval)); }
+	vec_global_inl _Myt& operator= (const _Rval& _rval)
+	{ return static_cast<_Myt&>(_Mybase::operator= (_rval)); }
 	
-	vec_global_inl operator typename _Base::pointer() { return data(); }
+	vec_global_inl operator typename _Mybase::pointer() { return data(); }
 
-	vec_global_inl Vec_& normalize(const value_t _val = _Base::inf)
-	{ return static_cast<Vec_&>(_Base::operator = (_Base::normalize(_val))); }
-	vec_global_inl value_t dot(my_const_ref _other) const
-	{ return _Base::dot(_other); }
+	vec_global_inl _Myt& normalize(const value_t _val = _Mybase::inf)
+	{ return static_cast<_Myt&>(_Mybase::operator = (_Mybase::normalize(_val))); }
+	vec_global_inl value_t dot(const _Myt& _other) const
+	{ return _Mybase::dot(_other); }
 	
 	///<brief> properties </brief>
 	__declspec(property(get = _x_getter, put = _x_setter)) reference x;
@@ -76,80 +76,89 @@ public:
 	vec_global_inl void _y_setter(value_t _y) { data()[1] = _y; }
 
 };
-template<typename _Ty> class Vec3_ final : public Vec_<_Ty, 3>
+template<typename _Ty> 
+class Vec3_ MATRICE_NONHERITABLE : public Vec_<_Ty, 3>
 {
-	using _Base = Vec_<_Ty, 3>;
-	using my_const_ref = const Vec3_&;
-	using typename _Base::const_value;
-	using typename _Base::reference;
-	using typename _Base::const_initlist;
+	using _Myt = Vec3_;
+	using _Mybase = Vec_<_Ty, 3>;
+	using typename _Mybase::const_value;
+	using typename _Mybase::reference;
+	using typename _Mybase::const_initlist;
 public:
-	using _Base::CompileTimeRows;
-	using _Base::CompileTimeCols;
-	using typename _Base::value_t;
-	using typename _Base::value_type;
-	using _Base::operator=;
-	using _Base::operator[];
-	using _Base::data;
-	using _Base::x;
-	using _Base::y;
-	using _Base::Vec_;
+	using _Mybase::rows_at_compiletime;
+	using _Mybase::cols_at_compiletime;
+	using typename _Mybase::value_t;
+	using typename _Mybase::value_type;
+	using _Mybase::operator=;
+	using _Mybase::operator[];
+	using _Mybase::data;
+	using _Mybase::x;
+	using _Mybase::y;
+	using _Mybase::Vec_;
 
 	vec_global_inl Vec3_(const_value _x, const_value _y, const_value _z) 
-		: _Base({_x, _y, _z}) {}
+		: _Mybase({_x, _y, _z}) {}
 	template<typename _Uy>
 	vec_global_inl Vec3_(const Vec3_<_Uy>& _other) 
 		: Vec3_(_other.x, _other.y, _other.z) {}
 
-	vec_global_inl Vec3_& operator= (my_const_ref _other)
-	{ return static_cast<Vec3_&>(_Base::operator=(_other)); }
+	vec_global_inl _Myt& operator=(const _Myt& _other) { 
+		return static_cast<_Myt&>(_Mybase::operator=(_other)); 
+	}
 	template<typename _Rval>
-	vec_global_inl Vec3_& operator= (const _Rval& _rval)
-	{ return static_cast<Vec3_&>(_Base::operator= (_rval)); }
+	vec_global_inl _Myt& operator=(const _Rval& _rval) { 
+		return static_cast<_Myt&>(_Mybase::operator= (_rval)); 
+	}
 
-	vec_global_inl Vec3_& normalize(const value_t _val = _Base::inf)
-	{ return static_cast<Vec3_&>(_Base::normalize(_val)); }
-	vec_global_inl value_t dot(my_const_ref _other) const
-	{ return _Base::dot(_other); }
-	vec_global_inl Vec3_ cross(my_const_ref _rhs) const
-	{ return Vec3_(y*_rhs[2] - z*_rhs[1], z*_rhs[0] - x * _rhs[2], x*_rhs[1] - y * _rhs[0]); }
+	vec_global_inl _Myt& normalize(const value_t _val = _Mybase::inf) { 
+		return static_cast<_Myt&>(_Mybase::normalize(_val)); 
+	}
+	vec_global_inl value_t dot(const _Myt& _other) const { 
+		return _Mybase::dot(_other); 
+	}
+	vec_global_inl _Myt cross(const _Myt& _rhs) const noexcept { 
+		return _Myt(y*_rhs[2] - z*_rhs[1], z*_rhs[0] - x * _rhs[2], x*_rhs[1] - y * _rhs[0]); 
+	}
+
 	__declspec(property(get = _z_getter, put = _z_setter)) reference z;
-	vec_global_inl reference _z_getter() const { return data()[2]; }
-	vec_global_inl void _z_setter(value_t _z) { data()[2] = _z; }
+	vec_global_inl reference _z_getter() const noexcept { return data()[2]; }
+	vec_global_inl void _z_setter(value_t _z) noexcept { data()[2] = _z; }
 };
 
-template<typename _Ty> class Vec4_ final : public Vec_<_Ty, 4>
+template<typename _Ty> 
+class Vec4_ MATRICE_NONHERITABLE : public Vec_<_Ty, 4>
 {
-	using _Base = Vec_<_Ty, 4>;
-	using typename _Base::const_value;
-	using typename _Base::reference;
-	using typename _Base::const_initlist;
+	using _Myt = Vec4_;
+	using _Mybase = Vec_<_Ty, 4>;
+	using typename _Mybase::const_value;
+	using typename _Mybase::reference;
+	using typename _Mybase::const_initlist;
 public:
-	using _Base::CompileTimeRows;
-	using _Base::CompileTimeCols;
-	using typename _Base::value_t;
-	using typename _Base::value_type;
-	using _Base::operator=;
-	using _Base::operator[];
-	using _Base::data;
-	using _Base::x;
-	using _Base::y;
-	using _Base::Vec_;
+	using _Mybase::rows_at_compiletime;
+	using _Mybase::cols_at_compiletime;
+	using typename _Mybase::value_t;
+	using typename _Mybase::value_type;
+	using _Mybase::operator=;
+	using _Mybase::operator[];
+	using _Mybase::data;
+	using _Mybase::x;
+	using _Mybase::y;
+	using _Mybase::Vec_;
 
 	vec_global_inl Vec4_(const_value _x, const_value _y, const_value _z) 
-		: _Base({ _x, _y, _z, 1}) {}
+		: _Mybase({ _x, _y, _z, 1}) {}
 	vec_global_inl Vec4_(const_value _x,const_value _y,const_value _z,const_value _w) 
-		: _Base({ _x, _y, _z, _w }) {}
+		: _Mybase({ _x, _y, _z, _w }) {}
 	template<typename _Uy>
 	vec_global_inl Vec4_(const Vec4_<_Uy>& _other)
 		: Vec4_(_other.x, _other.y, _other.z, _other.w) {}
 
 	template<typename _Rval>
-	vec_global_inl Vec4_& operator= (const _Rval& _rval)
-	{ return static_cast<Vec4_&>(_Base::operator= (_rval)); }
+	vec_global_inl _Myt& operator= (const _Rval& _rval)
+	{ return static_cast<_Myt&>(_Mybase::operator= (_rval)); }
 
-	vec_global_inl Vec4_& normalize(const value_t _val = _Base::inf)
-	{ return static_cast<Vec4_&>(_Base::normalize(_val)); }
+	vec_global_inl _Myt& normalize(const value_t _val = _Mybase::inf)
+	{ return static_cast<_Myt&>(_Mybase::normalize(_val)); }
 
 	__declspec(property(get = _z_getter, put = _z_setter)) reference z;
 	vec_global_inl reference _z_getter() const { return data()[2]; }

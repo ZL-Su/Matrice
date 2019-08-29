@@ -19,13 +19,8 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #include "../_storage.hpp"
 
-#define MATRICE_ALLOCATOR(LOC, RET, SV) \
-template<typename _Ty, typename _Layout> \
- \
-MATRICE_##LOC##_INL RET \
-_Allocator<_Ty, SV, SV, \
-allocator_traits_v<SV,SV>, \
-_Layout> 
+#define MATRICE_ALLOCTOR_SIG(M, N, OPT) \
+_Allocator<_Ty, M, N, allocator_traits_v<OPT>, _Layout>
 
 #define MATRICE_MEMCPY_ADAPTER_1 \
 typename _Al::category(), category()
@@ -34,6 +29,61 @@ category(), typename _Al::category()
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
+
+template<typename _Altrs>
+MATRICE_GLOBAL_INL typename _Dense_allocator_base<_Altrs>::allocator&
+_Dense_allocator_base<_Altrs>::operator=(const allocator& othr) noexcept {
+	if (this != &othr) {
+		alloc(othr.rows(), othr.cols());
+		_Alloc_copy(othr.derived());
+	}
+	return (this->derived());
+}
+
+template<typename _Altrs>
+MATRICE_GLOBAL_INL typename _Dense_allocator_base<_Altrs>::allocator&
+_Dense_allocator_base<_Altrs>::operator=(allocator&& othr) noexcept {
+	if (this != &othr) {
+		_Alloc_move(othr.derived());
+	}
+	return (this->derived());
+}
+
+template<typename _Altrs>
+MATRICE_GLOBAL_INL typename _Dense_allocator_base<_Altrs>::allocator&
+_Dense_allocator_base<_Altrs>::operator=(const value_type val) noexcept {
+	if (m_data != nullptr) {
+		for (auto idx = 0; idx < this->size(); ++idx) {
+			m_data[idx] = val;
+		}
+	}
+	return (this->derived());
+}
+
+template<typename _Altrs>
+MATRICE_GLOBAL_INL typename _Dense_allocator_base<_Altrs>::allocator&
+_Dense_allocator_base<_Altrs>::operator=(const pointer data) noexcept {
+	if (m_data != nullptr && data) {
+		for (auto idx = 0; idx < this->size(); ++idx) {
+			m_data[idx] = data[idx];
+		}
+	}
+	return (this->derived());
+}
+
+template<typename _Altrs>
+MATRICE_GLOBAL_INL void _Dense_allocator_base<_Altrs>::destroy() noexcept {
+	if constexpr (is_not_same_v<category, stack_alloc_tag>) {
+		internal::free(m_data, category());
+		m_rows = size_t();
+		m_cols = size_t();
+	}
+}
+
+template<typename _Altrs>
+MATRICE_GLOBAL_INL decltype(auto) _Dense_allocator_base<_Altrs>::deleter() const noexcept {
+	return internal::make_alloc_deleter(category());
+}
 
 template<typename _Altrs> template<typename _Al>
 MATRICE_GLOBAL_INL _Dense_allocator_base<_Altrs>& _Dense_allocator_base<_Altrs>::_Alloc_copy(const _Al& al) noexcept {
@@ -52,34 +102,62 @@ MATRICE_GLOBAL_INL _Dense_allocator_base<_Altrs>& _Dense_allocator_base<_Altrs>:
 	return (*this);
 }
 
-MATRICE_ALLOCATOR(HOST, decltype(auto), ::dynamic)::_Alloc() noexcept {
-	auto cols = this->cols();
-	this->data() = internal::malloc<value_type>(this->rows(), cols, 
-		typename _Mybase::category());
+template<typename _Ty, typename _Layout>
+MATRICE_HOST_INL decltype(auto) MATRICE_ALLOCTOR_SIG(::dynamic, ::dynamic, ::dynamic)::_Alloc() noexcept {
+	auto cols = _Mybase::cols();
+	this->data() = internal::malloc<value_type>(_Mybase::rows(), cols, typename _Mybase::category());
 	return (*this);
 }
-MATRICE_ALLOCATOR(HOST, , ::dynamic)::~_Allocator() {
+
+template<typename _Ty, typename _Layout>
+MATRICE_HOST_INL MATRICE_ALLOCTOR_SIG(::dynamic, ::dynamic, ::dynamic)::~_Allocator() {
+	internal::free(this->data(), typename _Mybase::category());
+}
+
+template<typename _Ty, diff_t _Rows, typename _Layout>
+MATRICE_HOST_INL decltype(auto) MATRICE_ALLOCTOR_SIG(_Rows, ::dynamic, ::dynamic)::_Alloc() noexcept {
+	size_t cols = _Mybase::cols();
+	this->data() = internal::malloc<value_type>(rows(), cols, typename _Mybase::category());
+	return (*this);
+}
+
+template<typename _Ty, diff_t _Rows, typename _Layout>
+MATRICE_HOST_INL MATRICE_ALLOCTOR_SIG(_Rows, ::dynamic, ::dynamic)::~_Allocator() {
+	internal::free(this->data(), typename _Mybase::category());
+}
+
+template<typename _Ty, diff_t _Cols, typename _Layout>
+MATRICE_HOST_INL decltype(auto) MATRICE_ALLOCTOR_SIG(::dynamic, _Cols, ::dynamic)::_Alloc() noexcept {
+	size_t cols = _Mybase::cols_at_compiletime;
+	this->data() = internal::malloc<value_type>(_Mybase::rows(), cols, typename _Mybase::category());
+	return (*this);
+}
+
+template<typename _Ty, diff_t _Cols, typename _Layout>
+MATRICE_HOST_INL MATRICE_ALLOCTOR_SIG(::dynamic, _Cols, ::dynamic)::~_Allocator() {
 	internal::free(this->data(), typename _Mybase::category());
 }
 
 #ifdef MATRICE_ENABLE_CUDA
-MATRICE_ALLOCATOR(GLOBAL, decltype(auto), ::device)::_Alloc() noexcept {
+MATRICE_ALLOCATOR(GLOBAL, decltype(auto), ::device, ::device)::_Alloc() noexcept {
 	m_pitch = this->cols();
 	this->data() = internal::malloc<value_type>(this->rows(), m_pitch,
 		device_alloc_tag());
 	return (*this);
 }
-MATRICE_ALLOCATOR(GLOBAL, , ::device)::~_Allocator() {
+
+MATRICE_ALLOCATOR(GLOBAL, , ::device, ::device)::~_Allocator() {
 	internal::free(this->data(), typename _Mybase::category());
 }
 
-MATRICE_ALLOCATOR(GLOBAL, decltype(auto), ::global)::_Alloc() noexcept {
+MATRICE_ALLOCATOR(GLOBAL, decltype(auto), ::global, ::global)::_Alloc() noexcept {
 	auto cols = this->cols();
 	this->data() = internal::malloc<value_type>(this->rows(), cols, 
 		global_alloc_tag());
 	return (*this);
 }
-MATRICE_ALLOCATOR(GLOBAL, , ::global)::~_Allocator() {
+
+MATRICE_ALLOCATOR(GLOBAL, , ::global, ::global)::~_Allocator() {
 	internal::free(this->data(), typename _Mybase::category());
 }
 #endif
@@ -132,6 +210,11 @@ MATRICE_GLOBAL_INL _OutIt copy(_InIt _First, _InIt _Last, _OutIt _Dest, _InCat, 
 	return impl::_Memcpy(_First, _Last, _Dest, _InCat(), _OutCat());
 }
 
+template<typename _Tag>
+MATRICE_GLOBAL_INL decltype(auto) make_alloc_deleter(_Tag) {
+	return impl::_Deleter(_Tag());
+}
+
 namespace impl {
 template<typename _Ty>
 MATRICE_HOST_INL decltype(auto) _Malloc(size_t rows, size_t cols, heap_alloc_tag) {
@@ -145,6 +228,17 @@ MATRICE_HOST_INL void _Free(_Ty* data, heap_alloc_tag) {
 		std::free(*(reinterpret_cast<void**>(void_ptr)-1));
 		data = nullptr;
 	}
+}
+
+MATRICE_HOST_INL decltype(auto) _Deleter(stack_alloc_tag) noexcept {
+	return [](auto _dummy_) {};
+}
+
+MATRICE_HOST_INL decltype(auto) _Deleter(heap_alloc_tag) noexcept {
+	return [](auto _ptr_) {
+		if (is_aligned(_ptr_)) aligned_free(_ptr_);
+		else std::free(_ptr_);
+	};
 }
 
 template<typename _InIt, typename _OutIt>
@@ -190,10 +284,21 @@ MATRICE_HOST_INL _OutIt _Memcpy(_InIt _First, _InIt _Last, _OutIt _Dest, heap_al
 		return (_Dest);
 	}
 }
+
+#ifdef MATRICE_ENABLE_CUDA
+MATRICE_HOST_INL decltype(auto) _Deleter(device_alloc_tag) noexcept {
+	static_assert(true, "Oops, the deleter is not implemented yet.");
+}
+
+MATRICE_HOST_INL decltype(auto) _Deleter(global_alloc_tag) noexcept {
+	static_assert(true, "Oops, the deleter is not implemented yet.");
+}
+#endif
+
 }
 }
 DGE_MATRICE_END
 
-#undef MATRICE_ALLOCATOR
+#undef MATRICE_ALLOCTOR_SIG
 #undef MATRICE_MEMCPY_ADAPTER_1
 #undef MATRICE_MEMCPY_ADAPTER_2

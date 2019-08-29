@@ -16,26 +16,23 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #pragma once
+#include "algs/correlation/_optim.h"
+#include "_projection.hpp"
 
-#include "interpolation\_interpolation.h"
-#include "forward.hpp"
+MATRICE_ALGS_BEGIN
+_DETAIL_BEGIN
+template<typename _Ty>
+class _Ewise_depth_estimation {
+	using _Myt = _Ewise_depth_estimation;
+	using _Projection = _Aligned_projection<_Ty, cs_alignment_tag::left>;
+public:
+	using point_type = typename _Projection::point_type;
+	_Ewise_depth_estimation(const point_type& r, const point_type& t)
+		:m_projection(r,t){
+	}
 
-DGE_MATRICE_BEGIN
-enum {
-	bilinear = algs::INTERP | algs::BILINEAR,
-	bcspline = algs::_BICBSPL,
-	bqspline = algs::_BIQNSPL,
-	bsspline = algs::_BISPSPL
-}; //interpolation algorithms
-
-/*******************************************************************
-	              Unified Interpolation Interface
-	    Copyright (c) : Zhilong (Dgelom) Su, since 31/Jul/2018
- ******************************************************************/
-template<
-	typename _Ty, 
-	typename _Tag = bicerp_tag,
-	MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
-using interpolation = algs::_Interpolation_wrapper<_Ty, _Tag>;
-
-DGE_MATRICE_END
+private:
+	_Projection m_projection;
+};
+_DETAIL_END
+MATRICE_ALGS_END

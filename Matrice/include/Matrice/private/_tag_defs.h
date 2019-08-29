@@ -17,7 +17,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 
-#include "../util/_macros.h"
+#include "util/_macros.h"
 
 DGE_MATRICE_BEGIN
 /**********************************************************************
@@ -100,13 +100,8 @@ namespace tag {
 			static constexpr size_t max_levels = 8;
 		};
 	};
-	struct _Bilinear_itp_tag : _Interpolation_tag {};
-	using bicspl_tag = _Bspline_itp_tag::bicubic;
-	using biqspl_tag = _Bspline_itp_tag::biquintic;
-	using bisspl_tag = _Bspline_itp_tag::biseptic;
 	using mbicspl_tag = _Bspline_itp_tag::multilevel_bicubic_2d;
 	using mbicspl3_tag = _Bspline_itp_tag::multilevel_bicubic_3d;
-	using bilinear_tag = _Bilinear_itp_tag;
 
 	///<brief> tag definitions for gradient computation </brief>
 	struct _Gradient_tag {};

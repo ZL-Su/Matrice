@@ -237,9 +237,6 @@
     <ClInclude Include="include\Matrice\util\genalgs.h">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Matrice\arch\_ixbase.h">
       <Filter>Header Files\Arch</Filter>
     </ClInclude>
@@ -594,11 +591,26 @@
     <ClInclude Include="include\Matrice\3rdparty\interface.hpp">
       <Filter>Header Files\3rdparty</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\forward.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Matrice\private\math\kernel_wrapper.hpp">
       <Filter>Header Files\Detail\math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\forward.hpp">
+      <Filter>Header Files\Detail\core</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\forward.hpp">
+      <Filter>Header Files\Algs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\_refs.hpp">
+      <Filter>Header Files\Detail\core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\stereovision\_depth_estimation.hpp">
+      <Filter>Header Files\Algs\Stereovision</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\correlation.hpp">
+      <Filter>Header Files\Algs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -791,6 +803,9 @@
     <ClCompile Include="addin\libpng\pngwutil.c">
       <Filter>Header Files\Addin\libpng</Filter>
     </ClCompile>
+    <ClCompile Include="src\private\nonfree\_blas_lapack_kernels.cpp">
+      <Filter>Source Files\Details\Nonfree</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\Matrice\core\cpp.hint">
@@ -934,10 +949,13 @@
     <None Include="include\Matrice\private\storage\_allocator.inl">
       <Filter>Header Files\Detail\memory\inline</Filter>
     </None>
-    <None Include="include\Matrice\private\nonfree\inl\math_kernel_wrapper.inl">
-      <Filter>Header Files\Detail\math\nonfree</Filter>
-    </None>
     <None Include="cpp.hint" />
+    <None Include="include\Matrice\private\nonfree\inl\blas_kernel_wrapper.inl">
+      <Filter>Header Files\Detail\math\nonfree\inl</Filter>
+    </None>
+    <None Include="include\Matrice\private\nonfree\inl\lapack_kernel_wrapper.inl">
+      <Filter>Header Files\Detail\math\nonfree\inl</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="src\private\_dev_funcs.cu">

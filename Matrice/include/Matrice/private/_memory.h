@@ -191,12 +191,18 @@ MATRICE_HOST_INL bool is_aligned(_Ty* aligned_ptr) noexcept;
 template<typename _InIt, typename _OutIt, class _InTag, class _OutTag>
 MATRICE_GLOBAL_INL _OutIt copy(_InIt _First, _InIt _Last, _OutIt _Dest, _InTag, _OutTag);
 
+template<class _Tag>
+MATRICE_GLOBAL_INL decltype(auto) make_alloc_deleter(_Tag);
+
 namespace impl {
 template<typename _Ty>
 MATRICE_HOST_INL decltype(auto) _Malloc(size_t rows, size_t cols, heap_alloc_tag);
 
 template<typename _Ty>
 MATRICE_HOST_INL void _Free(_Ty* data, heap_alloc_tag);
+
+MATRICE_HOST_INL decltype(auto) _Deleter(stack_alloc_tag) noexcept;
+MATRICE_HOST_INL decltype(auto) _Deleter(heap_alloc_tag) noexcept;
 
 #ifdef MATRICE_ENABLE_CUDA
 template<typename _Ty>
@@ -210,6 +216,9 @@ MATRICE_HOST_INL void _Free(_Ty* data, device_alloc_tag);
 
 template<typename _Ty>
 MATRICE_HOST_INL void _Free(_Ty* data, global_alloc_tag);
+
+MATRICE_HOST_INL decltype(auto) _Deleter(device_alloc_tag);
+MATRICE_HOST_INL decltype(auto) _Deleter(global_alloc_tag);
 #endif
 
 template<typename _InIt, typename _OutIt>
