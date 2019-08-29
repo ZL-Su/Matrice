@@ -116,7 +116,7 @@ MATRICE_HOST_INL MATRICE_ALLOCTOR_SIG(::dynamic, ::dynamic, ::dynamic)::~_Alloca
 
 template<typename _Ty, diff_t _Rows, typename _Layout>
 MATRICE_HOST_INL decltype(auto) MATRICE_ALLOCTOR_SIG(_Rows, ::dynamic, ::dynamic)::_Alloc() noexcept {
-	auto cols = _Mybase::cols();
+	size_t cols = _Mybase::cols();
 	this->data() = internal::malloc<value_type>(rows(), cols, typename _Mybase::category());
 	return (*this);
 }
@@ -128,7 +128,7 @@ MATRICE_HOST_INL MATRICE_ALLOCTOR_SIG(_Rows, ::dynamic, ::dynamic)::~_Allocator(
 
 template<typename _Ty, diff_t _Cols, typename _Layout>
 MATRICE_HOST_INL decltype(auto) MATRICE_ALLOCTOR_SIG(::dynamic, _Cols, ::dynamic)::_Alloc() noexcept {
-	auto cols = cols();
+	size_t cols = _Mybase::cols_at_compiletime;
 	this->data() = internal::malloc<value_type>(_Mybase::rows(), cols, typename _Mybase::category());
 	return (*this);
 }
