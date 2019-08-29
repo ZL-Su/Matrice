@@ -46,6 +46,7 @@ public:
 	vec_global_inl Vec_(const_value _x, const_value _y) : _Mybase({ _x, _y }) {}
 	vec_global_inl Vec_(const _Myt& _other) : _Mybase(_other) {}
 	vec_global_inl Vec_(const_initlist _list) : _Mybase(_list) {}
+	vec_global_inl Vec_(const _Mybase& _mtx) : _Mybase(_mtx) {}
 	template<typename _Exp, MATRICE_ENABLE_IF(is_expression_v<_Exp>)>
 	vec_global_inl Vec_(const _Exp& _exp) { _exp.assign(*this); }
 
