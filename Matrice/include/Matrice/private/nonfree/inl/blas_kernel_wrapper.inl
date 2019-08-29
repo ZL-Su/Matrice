@@ -17,7 +17,6 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 #include "../../math/kernel_wrapper.hpp"
-#include "../../math/_config.h"
 #include "util/_exception.h"
 #include "private/_tag_defs.h"
 #include "private/_refs.hpp"
@@ -25,41 +24,23 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 DGE_MATRICE_BEGIN
 _INTERNAL_BEGIN
 template<typename _Ptr>
-decltype(auto) _blas_asum(const _Ptr x, size_t n, int inc) {
-	MATRICE_FAIL_TO_SPECIALIZATION
-};
+decltype(auto) _blas_asum(const _Ptr x, size_t n, int inc);
 template<typename _Ty, typename _Ptr = add_pointer_t<_Ty>>
-decltype(auto) _blas_axpy(const _Ty a, const _Ptr x, _Ptr y, size_t n, int incx, int incy) {
-	MATRICE_FAIL_TO_SPECIALIZATION
-};
+decltype(auto) _blas_axpy(const _Ty a, const _Ptr x, _Ptr y, size_t n, int incx, int incy);
 template<typename _Ptr>
-decltype(auto) _blas_dot(size_t n, const _Ptr x, int incx, const _Ptr y, int incy) {
-	MATRICE_FAIL_TO_SPECIALIZATION
-};
+decltype(auto) _blas_dot(size_t n, const _Ptr x, int incx, const _Ptr y, int incy);
 template<typename _Ptr>
-decltype(auto) _blas_nrm2(size_t n, const _Ptr x, int inc) {
-	MATRICE_FAIL_TO_SPECIALIZATION
-};
+decltype(auto) _blas_nrm2(size_t n, const _Ptr x, int inc);
 template<typename _Ptr, typename _Ty = typename std::pointer_traits<_Ptr>::element_type>
-decltype(auto) _blas_rot(size_t n, _Ptr x, int incx, _Ptr y, int incy, _Ty c, _Ty s) {
-	MATRICE_FAIL_TO_SPECIALIZATION
-};
+decltype(auto) _blas_rot(size_t n, _Ptr x, int incx, _Ptr y, int incy, _Ty c, _Ty s);
 template<typename _Ty, typename _Ptr = add_pointer_t<_Ty>>
-decltype(auto) _blas_scal(size_t n, const _Ty a, _Ptr x, int inc) {
-	MATRICE_FAIL_TO_SPECIALIZATION
-};
+decltype(auto) _blas_scal(size_t n, const _Ty a, _Ptr x, int inc);
 template<typename _Ty, typename _Ptr = add_pointer_t<_Ty>>
-decltype(auto) _blas_gemv(size_t m, size_t n, _Ty a, const _Ptr A, const _Ptr x, int incx, _Ty b, _Ptr y, size_t incy) {
-	MATRICE_FAIL_TO_SPECIALIZATION
-};
+void _blas_gemv(size_t m, size_t n, _Ty a, const _Ptr A, const _Ptr x, int incx, _Ty b, _Ptr y, size_t incy);
 template<typename _Ty, typename _Ptr = add_pointer_t<_Ty>>
-decltype(auto) _blas_gemtv(size_t m, size_t n, _Ty a, const _Ptr A, const _Ptr x, int incx, _Ty b, _Ptr y, size_t incy) {
-	MATRICE_FAIL_TO_SPECIALIZATION
-};
+void _blas_gemtv(size_t m, size_t n, _Ty a, const _Ptr A, const _Ptr x, int incx, _Ty b, _Ptr y, size_t incy);
 template<typename _Ty, typename _Ptr = add_pointer_t<_Ty>>
-decltype(auto) _blas_gemm(int lyt, int trpa, int trpb, size_t m, size_t n, size_t k, _Ty a, const _Ptr A, size_t lda, const _Ptr B, size_t ldb, _Ty b, _Ptr C, size_t ldc) {
-	MATRICE_FAIL_TO_SPECIALIZATION
-};
+void _blas_gemm(int lyt, int trpa, int trpb, size_t m, size_t n, size_t k, _Ty a, const _Ptr A, size_t lda, const _Ptr B, size_t ldb, _Ty b, _Ptr C, size_t ldc);
 _INTERNAL_END
 
 _DETAIL_BEGIN
@@ -134,33 +115,35 @@ struct _Blas_kernel_wrapper {
 		int _Tra=111, _Trb=111;
 		size_t M, N, K;
 		auto C = c.data(), B = b.data(), A = a.data();
-		if constexpr (is_ref_v<_Aty> && is_ref_v<_Bty>) {
+		if constexpr (is_ref_v<remove_all_t<_Aty>> && is_ref_v<remove_all_t<_Bty>>) {
 			_Tra = a ? 112 : 111; _Trb = b ? 112 : 111;
 			M = a.get().rows(), K = a.get().cols(), N = b.get().cols();
 			if (a) { std::swap(M, K); }
 			if (b) N = b.get().rows();
 		}
-		else if constexpr (is_ref_v<_Aty> && !is_ref_v<_Bty>) {
+		else if constexpr (is_ref_v<remove_all_t<_Aty>> && !is_ref_v<remove_all_t<_Bty>>) {
 			_Trb = 111, N = b.cols();
 			if (a) _Tra = 112, M = a.get().cols(), K = a.get().rows();
 			else _Tra = 111, M = a.get().rows(), K = a.get().cols();
 		}
-		else if constexpr (!is_ref_v<_Aty> && is_ref_v<_Bty>) {
+		else if constexpr (!is_ref_v<remove_all_t<_Aty>> && is_ref_v<remove_all_t<_Bty>>) {
 			_Tra = 111; _Trb = b ? 112 : 111;
 			M = a.rows(), K = a.cols(), N = b.get().cols();
 			if (b) N = b.get().rows();
 		}
 		else {
 			_Tra = _Trb = 111;
-			if constexpr (is_expression_v<_Aty>)
-				if constexpr(is_same_v<typename _Aty::category, tag::_Matrix_trp_tag>) _Tra = 112;
-			if constexpr (is_expression_v<_Bty>)
-				if constexpr (is_same_v<typename _Bty::category, tag::_Matrix_trp_tag>) _Trb = 112;
+			using A_type = remove_all_t<_Aty>;
+			using B_type = remove_all_t<_Bty>;
+			if constexpr (is_expression_v<A_type>)
+				if constexpr(is_same_v<typename A_type::category, tag::_Matrix_trp_tag>) _Tra = 112;
+			if constexpr (is_expression_v<B_type>)
+				if constexpr (is_same_v<typename B_type::category, tag::_Matrix_trp_tag>) _Trb = 112;
 			M = a.rows(), K = a.cols(), N = b.cols();
 		}
-		const auto lda = _Tra == 112 ? max(1, M) : max(1, K);
-		const auto ldb = _Trb == 112 ? max(1, K) : max(1, N);
-		const auto ldc = max(1, N);
+		const auto lda = _Tra == 112 ? std::max(size_t(1), M) : std::max(size_t(1), K);
+		const auto ldb = _Trb == 112 ? std::max(size_t(1), K) : std::max(size_t(1), N);
+		const auto ldc = std::max(size_t(1), N);
 
 		constexpr auto _1 = typename _Cty::value_type(1);
 		constexpr auto _0 = typename _Cty::value_type(0);
@@ -171,79 +154,5 @@ struct _Blas_kernel_wrapper {
 };
 _DETAIL_END
 
-_INTERNAL_BEGIN
-using f32_t = float;
-using f64_t = double;
-using fptr = std::add_pointer_t<f32_t>;
-using dptr = std::add_pointer_t<double>;
-template<>
-decltype(auto) _blas_asum(const fptr x, size_t n, int inc) {
-	return cblas_sasum(MKL_INT(n), x, MKL_INT(inc));
-}
-template<>
-decltype(auto) _blas_asum(const dptr x, size_t n, int inc) {
-	return cblas_dasum(MKL_INT(n), x, MKL_INT(inc));
-}
 
-template<>
-decltype(auto) _blas_axpy(const f32_t a, const fptr x, fptr y, size_t n, int incx, int incy) {
-	return cblas_saxpy(n, a, x, incx, y, incy);
-}
-template<>
-decltype(auto) _blas_axpy(const f64_t a, const dptr x, dptr y, size_t n, int incx, int incy) {
-	return cblas_daxpy(n, a, x, incx, y, incy);
-}
-
-template<>
-decltype(auto) _blas_dot(size_t n, const fptr x, int incx, const fptr y, int incy) {
-	return cblas_sdot(n, x, incx, y, incy);
-}
-template<>
-decltype(auto) _blas_dot(size_t n, const dptr x, int incx, const dptr y, int incy) {
-	return cblas_ddot(n, x, incx, y, incy);
-}
-
-template<>
-decltype(auto) _blas_nrm2(size_t n, const fptr x, int inc) {
-	return cblas_snrm2(n, x, inc);
-}
-template<>
-decltype(auto) _blas_nrm2(size_t n, const dptr x, int inc) {
-	return cblas_dnrm2(n, x, inc);
-}
-
-template<>
-decltype(auto) _blas_scal(size_t n, const f32_t a, fptr x, int inc) {
-	return cblas_sscal(n, a, x, inc);
-}
-template<>
-decltype(auto) _blas_scal(size_t n, const f64_t a, dptr x, int inc) {
-	return cblas_dscal(n, a, x, inc);
-}
-
-template<>
-decltype(auto) _blas_gemv(size_t m, size_t n, f32_t a, const fptr A, const fptr x, int incx, f32_t b, fptr y, size_t incy) {
-	return cblas_sgemv(CBLAS_LAYOUT::CblasRowMajor, CBLAS_TRANSPOSE::CblasNoTrans, m, n, a, A, (n > 1 ? n : 1), x, incx, b, y, incy);
-}
-template<>
-decltype(auto) _blas_gemv(size_t m, size_t n, f64_t a, const dptr A, const dptr x, int incx, f64_t b, dptr y, size_t incy) {
-	return cblas_dgemv(CBLAS_LAYOUT::CblasRowMajor, CBLAS_TRANSPOSE::CblasNoTrans, m, n, a, A, (n > 1 ? n : 1), x, incx, b, y, incy);
-}
-template<>
-decltype(auto) _blas_gemtv(size_t m, size_t n, f32_t a, const fptr A, const fptr x, int incx, f32_t b, fptr y, size_t incy) {
-	return cblas_sgemv(CBLAS_LAYOUT::CblasRowMajor, CBLAS_TRANSPOSE::CblasTrans, m, n, a, A, (m > 1 ? m : 1), x, incx, b, y, incy);
-}
-template<>
-decltype(auto) _blas_gemtv(size_t m, size_t n, f64_t a, const dptr A, const dptr x, int incx, f64_t b, dptr y, size_t incy) {
-	return cblas_dgemv(CBLAS_LAYOUT::CblasRowMajor, CBLAS_TRANSPOSE::CblasTrans, m, n, a, A, (m > 1 ? m : 1), x, incx, b, y, incy);
-}
-template<>
-decltype(auto) _blas_gemm(int lyt, int trpa, int trpb, size_t m, size_t n, size_t k, f32_t a, const fptr A, size_t lda, const fptr B, size_t ldb, f32_t b, fptr C, size_t ldc) {
-	return cblas_sgemm(CBLAS_LAYOUT(lyt), CBLAS_TRANSPOSE(trpa), CBLAS_TRANSPOSE(trpb), MKL_INT(m), MKL_INT(n), MKL_INT(k), a, A, lda, B, ldb, b, C, ldc);
-}
-template<>
-decltype(auto) _blas_gemm(int lyt, int trpa, int trpb, size_t m, size_t n, size_t k, f64_t a, const dptr A, size_t lda, const dptr B, size_t ldb, f64_t b, dptr C, size_t ldc) {
-	return cblas_dgemm(CBLAS_LAYOUT(lyt), CBLAS_TRANSPOSE(trpa), CBLAS_TRANSPOSE(trpb), MKL_INT(m), MKL_INT(n), MKL_INT(k), a, A, lda, B, ldb, b, C, ldc);
-}
-_INTERNAL_END
 DGE_MATRICE_END
