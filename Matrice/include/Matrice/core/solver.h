@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 *	*************************************************************************/
 #pragma once
-#include "../private/math/_linear_solver.h"
+#include "private/math/_linear_solver.h"
 
 DGE_MATRICE_BEGIN
 _TYPES_BEGIN
