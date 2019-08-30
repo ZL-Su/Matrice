@@ -17,9 +17,9 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 *	*************************************************************************/
 #pragma once
 #include <type_traits>
-#include "../util/_macros.h"
-#include "../util/_type_defs.h"
-#include "../util/_std_wrapper.h"
+#include "util/_macros.h"
+#include "util/_type_defs.h"
+#include "util/_std_wrapper.h"
 
 DGE_MATRICE_BEGIN
 

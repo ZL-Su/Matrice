@@ -19,7 +19,6 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <memory>
-#include "util/_macros.h"
 #include "private/_memory.h"
 #include "private/_unified_memory.h"
 #include "private/_type_traits.h"
@@ -34,18 +33,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #ifndef MATRICE_ALIGNED_STRUCT
 #define MATRICE_ALIGNED_STRUCT class alignas(MATRICE_ALIGN_BYTES)
 #endif
-namespace {
-	static constexpr int dynamic = 0;
-#ifdef MATRICE_ENABLE_CUDA
-	static constexpr int device = -1;
-	static constexpr int global = -2;
-#endif
-}
 
 DGE_MATRICE_BEGIN
-template<int _M, int _N=_M> struct allocator_traits {
+template<int _M, int _N = _M> struct allocator_traits {
 	enum {
-		value = 
+		value =
 #ifdef MATRICE_ENABLE_CUDA
 		(_M == ::global && _N == ::global) ? LINEAR :  // linear device allocator
 		(_M == ::device && _N == ::device) ? PITCHED :  // pitched device allocator
@@ -57,9 +49,7 @@ template<int _M, int _N=_M> struct allocator_traits {
 #endif      
 	};
 };
-
 _DETAIL_BEGIN
-
 /**
  *\brief base class of dense allocator for plain objects.
  *\param <_Altrs> allocator traits
@@ -590,7 +580,7 @@ public:
 	};
 
 	//<brief> Managed host memory allocator </brief>
-	template<int _M, int _N=_M, size_t _Opt = allocator_traits<_M, _N>::value>
+	template<int _M, int _N=_M, size_t _Opt = allocator_traits_v<_M, _N>>
 	MATRICE_ALIGNED_CLASS Allocator {
 		using _Myt = Allocator;
 	public:

@@ -22,10 +22,9 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_type_traits.h"
 #include "_plain_exp.hpp"
 #include "_matrix_ops.hpp"
-#include "_storage.hpp"
 #include "_iterator.h"
 #include "_view.h"
-#include "storage/forward.hpp"
+#include "_storage.hpp"
 #include "util/_type_defs.h"
 #include "util/_macro_conditions.h"
 #include "util/_exception.h"
@@ -1007,9 +1006,9 @@ public:
 	 *\brief Create a zero-value filled matrix
 	 *\param [_Rows, Cols] height and width of matrix, only specified for dynamic created matrix
 	 */
-	static MATRICE_GLOBAL_INL _Derived zero(diff_t _Rows=0, diff_t _Cols=0) {
-		_Derived _Ret;
-		return forward<_Derived>(_Ret.create(_Rows, _Cols, 0));
+	static MATRICE_GLOBAL_INL _Derived zeros(diff_t _Rows=0, diff_t _Cols=0) {
+		_Derived _Ret(_Rows, _Cols);
+		return forward<_Derived>(_Ret = zero<value_type>);
 	}
 
 	/**
