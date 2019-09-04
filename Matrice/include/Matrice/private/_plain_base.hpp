@@ -208,8 +208,8 @@ return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 	using _Myt_fwd_iterator = _Matrix_forward_iterator<_Valty>;
 	using _Myt_rwise_iterator = _Matrix_rwise_iterator<_Valty>;
 	using _Myt_cwise_iterator = _Matrix_cwise_iterator<_Valty>;
-	using _Myt_rview_type = _Matrix_rview<_Valty>;
-	using _Myt_cview_type = _Matrix_cview<_Valty>;
+	using _Myt_rview_type = _Matrix_rview<_Valty, _N>;
+	using _Myt_cview_type = _Matrix_cview<_Valty, _M>;
 	using _Myt_blockview_type = _Matrix_block<_Valty>;
 	using _Xop_ewise_add   = MATRICE_MAKE_EXPOP_TYPE(Ewise, add);
 	using _Xop_ewise_sub   = MATRICE_MAKE_EXPOP_TYPE(Ewise, sub);
@@ -912,6 +912,18 @@ public:
 	}
 
 	/**
+	 * \operate each entry via _Fn in parallel.
+	 */
+	template<typename _Ewop>
+	MATRICE_HOST_INL _Derived& parallel_each(_Ewop&& _Fn) {
+#pragma omp parallel for
+		for (diff_t _Idx = 0; _Idx < size(); ++_Idx) {
+			m_data[_Idx] = _Fn(m_data[_Idx]);
+		}
+		return(this->derived());
+	}
+
+	/**
 	 * \copy from another data block
 	 */
 	template<typename _It>
@@ -923,11 +935,10 @@ public:
 		else {
 #ifdef MATRICE_DEBUG
 			DGELOM_CHECK(_Data + this->size() - 1, "Input length of _Data must be greater or equal to this->size().");
-#endif // _DEBUG
-			for (auto _Idx = 0; _Idx < size(); ++_Idx)
+#endif
+			for (diff_t _Idx = 0; _Idx < size(); ++_Idx)
 				m_data[_Idx] = static_cast<value_type>(_Data[_Idx]);
 		}
-
 		return (this->derived());
 	}
 	/**
@@ -938,8 +949,9 @@ public:
 	MATRICE_GLOBAL_FINL _Derived& from(const _It _Data, _Op&& _Fn) {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_Data + this->size() - 1, "Input length of _Data must be greater or equal to this->size().");
-#endif // _DEBUG
-		for(auto _Idx = 0; _Idx < size(); ++_Idx)
+#endif
+#pragma omp parallel for if (size()>1000)
+		for(diff_t _Idx = 0; _Idx < size(); ++_Idx)
 			m_data[_Idx] = _Fn(static_cast<value_type>(_Data[_Idx]));
 
 		return (this->derived());

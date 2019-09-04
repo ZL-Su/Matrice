@@ -269,7 +269,11 @@ public:
 #ifdef _DEBUG
 			DGELOM_CHECK(_Mypos<_Names.size(), "file list subscript out of range.");
 #endif
-			_Data.emplace_back(_Myloader(_Mydir[_Idx] + _Names[_Mypos]));
+			auto _File = _Myloader(_Mydir[_Idx] + _Names[_Mypos]);
+			if (_File.size() != 0)
+				_Data.emplace_back(_File);
+			else
+				continue;
 		}
 		_Mypos++;
 		return std::forward<decltype(_Data)>(_Data);
@@ -284,7 +288,9 @@ public:
 		std::vector<remove_all_t<decltype(_First)>> _Data;
 		_Data.emplace_back(_First);
 		for (const auto& _Idx : range(1, _Mydir.size()-1)) {
-			_Data.emplace_back(_Op(_Idx));
+			auto _File = _Op(_Idx);
+			if(_File.size()!=0) _Data.emplace_back(_File);
+			else continue;
 		}
 		_Mypos++;
 		return std::forward<decltype(_Data)>(_Data);
@@ -336,7 +342,9 @@ public:
 #ifdef _DEBUG
 			DGELOM_CHECK(i < _Names.size(), "file list subscript out of range.");
 #endif
-			_Data.emplace_back(_Myloader(_Mydir[_Idx]+_Names[i]));
+			auto _File = _Myloader(_Mydir[_Idx] + _Names[i]);
+			if(_File) 
+				_Data.push_back(_File);
 		}
 		return std::forward<decltype(_Data)>(_Data);
 	}
@@ -427,7 +435,9 @@ struct _Loader_impl<_Ty, loader_tag::tiff> {
 	using category = loader_tag::tiff;
 
 	MATRICE_HOST_INL decltype(auto) operator()(std::string path) {
-		return read_tiff_file<value_type>(path.c_str());
+		if(string_helper::split(path, '.').back() == "tif")
+			return read_tiff_file<value_type>(path.c_str());
+		else return tiff_instance<value_type>();
 	}
 };
 _DETAIL_END } DGE_MATRICE_END

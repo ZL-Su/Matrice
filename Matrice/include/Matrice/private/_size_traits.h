@@ -32,7 +32,8 @@ constexpr std::size_t packet_size_v =
 ;
 #endif
 
-template<int _Rows = 0, int _Cols = 0> struct compile_time_size {
+template<int _Rows = 0, int _Cols = _Rows>
+struct compile_time_size {
 	enum { val_1 = 0x0001, val_2 = 0x0002, val_3 = 0x0003, val_4 = 0x0004 };
 	enum { rows_at_compiletime = _Rows,  cols_at_compiletime = _Cols,
 			 RunTimeDeducedOnHost = 0, RunTimeDeducedOnDevice = -1 };

@@ -18,6 +18,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include "util/_std_wrapper.h"
 #include "private/_type_traits.h"
+#include "_config.h"
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN

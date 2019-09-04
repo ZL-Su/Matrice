@@ -81,10 +81,14 @@ public:
 	MATRICE_GLOBAL_INL _Dense_allocator_base(_Myt&& other) noexcept {
 		_Alloc_move(move(other));
 	}
-	template<typename _Al>
+	template<typename _Al, enable_if_t<is_not_same_v<_Al, allocator>>>
 	MATRICE_GLOBAL_INL _Dense_allocator_base(const _Al& other)
 		:_Dense_allocator_base(other.rows(), other.cols()){
 		_Alloc_copy(other);
+	}
+	template<typename _Al, enable_if_t<is_not_same_v<_Al, allocator>>>
+	MATRICE_GLOBAL_INL _Dense_allocator_base(_Al&& other) noexcept {
+		_Alloc_move(move(other));
 	}
 
 	/**

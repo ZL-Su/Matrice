@@ -369,7 +369,7 @@ public:
 		auto _Str2 = string_helper::value_type("2,3,5");
 		auto _Items2 = string_helper::split<float>(_Str2,',');//{2.f, 3.f, 5.f}
 	 */
-	MATRICE_HOST_INL auto split(const value_type& _Str, basic_value_type _Tok) {
+	MATRICE_HOST_INL std::vector<_Ty> split(const value_type& _Str, basic_value_type _Tok) {
 		std::vector<_Ty> _Res;
 		const_value_type _String = value_type(1, _Tok) + _Str;
 
@@ -446,7 +446,7 @@ using data_loader_uint8 = data_loader<uint8_t>;
 using data_loader_uint32 = data_loader<uint32_t>;
 using data_loader_f32 = data_loader<float_t>;
 
-template<typename _Ty = float>
+template<typename _Ty = uint8_t>
 using tiff = detail::_Loader_impl<_Ty, detail::loader_tag::tiff>;
 
 template<size_t _N, typename _Cont>
@@ -455,9 +455,9 @@ MATRICE_HOST_FINL auto serial(const _Cont& _L) {
 	DGELOM_CHECK(_N<=_L.size(), "The size _N being serialized over range of _L.");
 	return tuple_n<_N - 1>::_(_L.data());
 }
-template<typename _Ty, class _Op>
+template<class _Op, typename _Vty = typename _Op::value_type>
 decltype(auto) make_loader(std::string path, _Op&& loader)noexcept {
-	using loader_type = io::data_loader<_Ty>;
+	using loader_type = io::data_loader<_Vty>;
 	return loader_type(io::directory{ path, io::path_t() }, loader);
 }
 }

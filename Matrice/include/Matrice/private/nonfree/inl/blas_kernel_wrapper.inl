@@ -21,6 +21,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "private/_tag_defs.h"
 #include "private/_refs.hpp"
 
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 DGE_MATRICE_BEGIN
 _INTERNAL_BEGIN
 template<typename _Ptr>
@@ -103,7 +104,6 @@ struct _Blas_kernel_wrapper {
 				internal::_blas_gemtv(a.rows(), a.cols(), _1, a.data(), x.data(), 1, _0, y.data(), 1);
 			else DGELOM_ERROR("The shape of a and x in gemv is not compatible.");
 		}
-			
 		return (y);
 	}
 
@@ -153,6 +153,5 @@ struct _Blas_kernel_wrapper {
 	}
 };
 _DETAIL_END
-
-
 DGE_MATRICE_END
+#endif

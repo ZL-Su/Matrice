@@ -22,6 +22,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_type_traits.h"
 #include "_size_traits.h"
 #include "_tag_defs.h"
+#include "forward.hpp"
 #include "private/math/_primitive_funcs.hpp"
 #if defined(MATRICE_SIMD_ARCH)
 #include "../arch/ixpacket.h"
@@ -36,12 +37,11 @@ DGE_MATRICE_BEGIN
 #pragma region <!-- Forward declarations and matrix traits supplements -->
 // \forward declarations 
 _TYPES_BEGIN
-template<typename _Ty> class Matrix;
-template<typename _Ty, int _Rows, int _cols> class Matrix_;
+//template<typename _Ty> class Matrix;
+//template<typename _Ty, int _Rows, int _cols> class Matrix_;
 template<typename _Derived, typename _Traits, typename _Ty> class Base_;
 _TYPES_END
 _DETAIL_BEGIN
-//template<typename _Ty> class _Tensor;
 template<typename _Ty, size_t _Depth> class _Tensor;
 struct _Blas_kernel_wrapper;
 _DETAIL_END
@@ -54,25 +54,25 @@ template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 constexpr static _Ty two = static_cast<_Ty>(2);
 
 template<typename _Ty, int _M, int _N> 
-struct is_matrix<types::Matrix_<_Ty, _M, _N>> : std::true_type {};
+struct is_matrix<Matrix_<_Ty, _M, _N>> : std::true_type {};
 
 template<typename _Ty, int _M>
-struct is_fxdvector<types::Matrix_<_Ty, _M, 1>> : std::true_type {};
+struct is_fxdvector<Matrix_<_Ty, _M, 1>> : std::true_type {};
 
-template<typename _Derived, typename _Traits, typename _Ty> 
+template<class _Derived, class _Traits, typename _Ty>
 struct is_matrix<types::Base_<_Derived, _Traits, _Ty>> : std::true_type {};
 
 template<typename _Ty, size_t _Depth>
 struct is_tensor<detail::_Tensor<_Ty, _Depth>> : std::true_type {};
 
-template<typename _Derived, typename _Traits, typename _Ty>
+template<class _Derived, class _Traits, typename _Ty>
 struct matrix_traits<types::Base_<_Derived, _Traits, _Ty>> {
 	using type = _Ty;
 	enum { _M = _Traits::_M, _N = _Traits::_N };
 	static constexpr bool Is_base = std::true_type::value;
 };
 template<typename _Ty, int _Rows, int _Cols> 
-struct matrix_traits<types::Matrix_<_Ty, _Rows, _Cols>> {
+struct matrix_traits<Matrix_<_Ty, _Rows, _Cols>> {
 	using type = _Ty;
 	using category = tag::_Matrix_tag;
 	enum { _M = _Rows, _N = _Cols };
