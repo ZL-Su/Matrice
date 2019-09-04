@@ -560,6 +560,7 @@ private:
  */
 template<typename _Ty = float, unsigned _N = 2>
 class multilevel_bicerp_approx : detail::_MBA_base<_N> {
+	using _Myt = multilevel_bicerp_approx;
 	using _Mybase = detail::_MBA_base<_N>;
 	using lattice = detail::control_lattice<_Ty, _N>;
 	using approx_lattice = detail::initial_approximation<_Ty, _N>;
@@ -585,7 +586,7 @@ public:
 		return f;
 	}
 
-	friend std::ostream& operator<<(std::ostream &os, const MBA &other) {
+	friend std::ostream& operator<<(std::ostream &os, const _Myt &other) {
 		size_t level = 0;
 		for (auto &psi : other.cl) {
 			os << "level " << ++level << ": ";
