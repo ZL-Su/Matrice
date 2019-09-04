@@ -315,4 +315,11 @@ inline constexpr auto is_not_same_v = !std::is_same<T, U>::value;
 template<typename T, typename... Ts>
 inline constexpr auto is_any_of_v = std::disjunction_v<std::is_same<T, Ts>...>;
 
+/**
+ *\brief auto_matrix_type<T,U> for deducing optimal matrix type from T and U.
+ */
+template<typename T, typename U = T>
+struct auto_matrix_type { using type = T; };
+template<typename T, typename U = T>
+using auto_matrix_type_t = typename auto_matrix_type<T, U>::type;
 DGE_MATRICE_END
