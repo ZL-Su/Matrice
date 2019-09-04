@@ -27,12 +27,32 @@ namespace types {
 template<typename _Ty, int _RowsAtCompileTime, int _ColsAtCompileTime=_RowsAtCompileTime> 
 using Matrix_ = types::Matrix_<_Ty, _RowsAtCompileTime, _ColsAtCompileTime>;
 
-template<typename _Ty, int _Ndims>
-using Vec_ = types::Vec_<_Ty, _Ndims>;
+//\matrix type with host dynamic memory allocator
+template<typename _Ty> 
+using Matrix = Matrix_<_Ty, 0>;
 
-template<typename _Ty>
-using Vec2_ = types::Vec2_<_Ty>;
+#ifdef MATRICE_ENABLE_CUDA
+//\matrix type with unified memory allocator
+template<typename T, size_t _Options = rmaj | gene> 
+using Umatrix = Matrix_<T,
+	compile_time_size<>::RunTimeDeducedOnDevice,
+	compile_time_size<>::RunTimeDeducedOnHost>;
+
+//\matrix type with device memory allocator
+template<typename T, size_t _Options = rmaj | gene> 
+using Dmatrix = Matrix_<T,
+	compile_time_size<>::RunTimeDeducedOnDevice,
+	compile_time_size<>::RunTimeDeducedOnDevice>;
+#endif
+
+//\dynamic matrix type with single(32)/double(64) floating point type
+using matrix_f32 = Matrix<float>;
+using matrix_f64 = Matrix<double>;
+
+//\N-dimensional array with host managed memory
+template<typename T, int _N> 
+using array_n = Matrix_<T, _N, 1>;
 
 template<typename _Ty, int _Size>
-using Array_ = types::Matrix_<_Ty, _Size, (_Size > 0 ? 1 : _Size)> ;
+using Array_ = Matrix_<_Ty, _Size, (_Size > 0 ? 1 : _Size)> ;
 }
