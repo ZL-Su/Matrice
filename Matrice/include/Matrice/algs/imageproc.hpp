@@ -17,11 +17,13 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #pragma once
 #include <type_traits>
-#include "../private/_range.h"
-#include "../algs/interpolation.h"
+#include <random>
+#include "../forward.hpp"
+#include "algs/forward.hpp"
+#include "private/_range.h"
 
 DGE_MATRICE_BEGIN
-
+_DETAIL_BEGIN
 template<typename _Pixty, MATRICE_ENABLE_IF(is_arithmetic_v<_Pixty>)>
 void _Grayscale_stretch(_Pixty* Img, size_t rows, size_t cols) {
 	using pixel_t = _Pixty;
@@ -31,14 +33,35 @@ void _Grayscale_stretch(_Pixty* Img, size_t rows, size_t cols) {
 	iterator _Begin = Img, _End = Img + N;
 
 	pixel_t _Max = pixel_t(0), _Min = pixel_t(255);
-	for (; _Begin != _End; ++_Begin) {
+	for (; _Begin != _End; (void)++_Begin) {
 		_Max = _Max > *_Begin ? _Max : *_Begin;
 		_Min = _Min < *_Begin ? _Min : *_Begin;
 	}
 
 	float_t _Scal = 255.f / float_t(_Max - _Min);
-	for (_Begin -= N; _Begin != _End; ++_Begin)
+	for (_Begin -= N; _Begin != _End; (void)++_Begin)
 		*_Begin = pixel_t(_Scal * (*_Begin - _Min));
+}
+template<typename _Pixty, MATRICE_ENABLE_IF(is_scalar_v<_Pixty>)>
+void _Add_gaussian_noise(Matrix_<_Pixty, ::dynamic>& _Img, float _Sig) {
+	std::random_device rd{}; std::mt19937 gen{ rd() };
+	normal_distribution<decltype(_Sig)> r{ 0, _Sig };
+	_Img.parallel_each([&r, &gen](auto& val) {
+		const auto _Noise = r(gen);
+		//if constexpr (is_integral_v<_Pixty>) _Noise *= 255;
+		val = round(val+_Noise);
+		if (val < 0) return zero<_Pixty>;
+		else if (val > conditional_size_v<is_integral_v<_Pixty>, 255, 1>)
+			return _Pixty(conditional_size_v<is_integral_v<_Pixty>, 255, 1>);
+		else return val;
+	});
+}
+_DETAIL_END
+template<typename _Ty>
+inline auto imnoise(Matrix_<_Ty, ::dynamic>&& _Img, float _Sigma = 1) {
+	auto _Noise = forward<remove_all_t<decltype(_Img)>>(_Img);
+	detail::_Add_gaussian_noise(_Noise, _Sigma);
+	return forward<decltype(_Noise)>(_Noise);
 }
 
 namespace types { 
@@ -67,8 +90,8 @@ template<typename _Ty, typename _Tag> class _Gradient_impl;
 template<typename _Ty, typename _Tag>
 struct gradient_traits<_Gradient_impl<_Ty, _Tag>> {
 	using value_type = _Ty;
-	using image_type = types::Matrix_<value_type, 0, 0>;
-	using matrix_type = types::Matrix_<value_type, 0, 0>;
+	using image_type = Matrix_<value_type, ::dynamic>;
+	using matrix_type = Matrix_<value_type, ::dynamic>;
 	using category = _Tag;
 };
 
