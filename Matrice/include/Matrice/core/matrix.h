@@ -61,12 +61,12 @@ public:
 	MATRICE_GLOBAL_FINL constexpr Matrix_(_Uy _val) noexcept
 		: _Mybase(rows_at_compiletime, cols_at_compiletime, _val) {};
 	template<typename _Uy>
-	MATRICE_HOST_FINL constexpr Matrix_(const nested_initlist<_Uy> _list) noexcept
+	MATRICE_HOST_FINL Matrix_(const nested_initlist<_Uy> _list) noexcept
 		: _Mybase(_list) {}
-	MATRICE_HOST_FINL constexpr Matrix_(const std::array<value_t, Size>& _array) noexcept
+	MATRICE_HOST_FINL Matrix_(const std::array<value_t, Size> _array) noexcept
 		: Matrix_(pointer(_array.data())) {}
 	template<typename... _Args> 
-	MATRICE_GLOBAL_FINL constexpr Matrix_(_Args&&... args)noexcept
+	MATRICE_GLOBAL_FINL Matrix_(_Args&&... args)noexcept
 		: _Mybase(forward<_Args>(args)...) {};
 
 	MATRICE_HOST_FINL _Myt& operator=(const_initlist _list)noexcept {
@@ -376,35 +376,8 @@ public:
 MATRICE_NAMESPACE_END_TYPES
 
 DGE_MATRICE_BEGIN
-//\matrix type with host managed memory allocator
-template<typename T, int _M, int _N=_M, 
-	size_t _Options = rmaj|gene, 
-	MATRICE_ENABLE_IF(is_arithmetic_v<T>)>
-using Matrix_ = types::Matrix_<T, _M, _N>;
 
-//\matrix type with host dynamic memory allocator
-template<typename T, size_t _Options = rmaj | gene> using Matrix = Matrix_<T,
-	compile_time_size<>::RunTimeDeducedOnHost,
-	compile_time_size<>::RunTimeDeducedOnHost,
-	_Options>;
-
-//\matrix type with unified memory allocator
-template<typename T, size_t _Options = rmaj | gene> using Umatrix = Matrix_<T,
-	compile_time_size<>::RunTimeDeducedOnDevice,
-	compile_time_size<>::RunTimeDeducedOnHost,
-	_Options>;
-
-//\matrix type with device memory allocator
-template<typename T, size_t _Options = rmaj | gene> using Dmatrix = Matrix_<T,
-	compile_time_size<>::RunTimeDeducedOnDevice,
-	compile_time_size<>::RunTimeDeducedOnDevice,
-	_Options>;
-
-//\dynamic matrix type with single(32)/double(64) floating point type
-using matrix_f32 = Matrix<float>;
-using matrix_f64 = Matrix<double>;
-
-//\N-dimensional array with host managed memory
-template<typename T, int _N> using array_n = Matrix_<T, _N, 1>;
 
 DGE_MATRICE_END
+
+#include "../forward.hpp"
