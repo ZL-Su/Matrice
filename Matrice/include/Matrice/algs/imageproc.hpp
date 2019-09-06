@@ -56,12 +56,45 @@ void _Add_gaussian_noise(Matrix_<_Pixty, ::dynamic>& _Img, float _Sig) {
 		else return val;
 	});
 }
+template<class _ItpTag = bicerp_tag, typename _Pixty = uint8_t, MATRICE_ENABLE_IF(is_scalar_v<_Pixty>)>
+auto _Image_resize(const Matrix_<_Pixty, ::dynamic>& _Img, shape_t<size_t> _Size) {
+	using value_type = conditional_t<is_integral_v<_Pixty>, float, _Pixty>;
+	Matrix_<value_type, ::dynamic> _Space;
+	auto _Scale = one<value_type>;
+	if constexpr (is_floating_point_v<_Pixty>) {
+		_Space = decltype(space)(_Img.shape(), _Img.data());
+	}
+	else {
+		_Space.create(_Img.shape());
+		_Scale = 1 / value_type(255);
+		_Space.from(_Img.data(), [_Scale](auto _Val) {return _Val*_Scale; });
+	}
+	interpolation<value_type,_ItpTag> _Itp(_Space);
+
+	_Scale = 1 / _Scale;
+	const auto[_W, _H] = _Size;
+	const auto _Scale_x = _Img.cols() / value_type(_W);
+	const auto _Scale_y = _Img.rows() / value_type(_H);
+	Matrix_<_Pixty, ::dynamic> _Ret(_H, _W, 0);
+	for (auto y = 0; y < _H-1; ++y) {
+		auto _Rptr = _Ret[y];
+		for (auto x = 0; x < _W-1; ++x) {
+			_Rptr[x] = _Itp((x + 0.5f)*_Scale_x, (y + 0.5f)*_Scale_y)*_Scale;
+		}
+	}
+	return forward<decltype(_Ret)>(_Ret);
+}
 _DETAIL_END
 template<typename _Ty>
 inline auto imnoise(Matrix_<_Ty, ::dynamic>&& _Img, float _Sigma = 1) {
 	auto _Noise = forward<remove_all_t<decltype(_Img)>>(_Img);
 	detail::_Add_gaussian_noise(_Noise, _Sigma);
 	return forward<decltype(_Noise)>(_Noise);
+}
+
+template<class _ItpTag = bicerp_tag, typename _Ty = uint8_t>
+inline auto resize(const Matrix_<_Ty, ::dynamic>& _Img, shape_t<size_t> _Size) {
+	return detail::_Image_resize<_ItpTag>(_Img, _Size);
 }
 
 namespace types { 
