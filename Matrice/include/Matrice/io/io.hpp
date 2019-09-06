@@ -350,6 +350,18 @@ MATRICE_HOST_INL decltype(auto) defpath(const T local) {
 	return forward<std::string>(IO::workspace().string() + "\\" + IO::strf(local)); 
 };
 
+template<typename _Ty, int _M, int _N>
+void print(const Matrix_<_Ty, _M, _N>& m) {
+	std::cout << "[\n[rows: " << m.rows() << "; cols: " << m.cols() << "]\n";
+	for (auto _It = m.rwbegin(); _It != m.rwend(); ++_It) {
+		for (auto _Vl : _It)
+			std::cout << std::setiosflags(std::ios::left)
+			<< std::setprecision(8) << std::setw(15) << _Vl;
+		std::cout << "\n";
+	}
+	std::cout << "]\n";
+}
+
 // \Class: std::string helper  
 // \Coded by: dgelom su
 class string_helper MATRICE_NONHERITABLE {
