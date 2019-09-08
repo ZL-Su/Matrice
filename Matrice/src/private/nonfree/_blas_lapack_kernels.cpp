@@ -82,6 +82,22 @@ _INTERNAL_END
 
 _INTERNAL_BEGIN
 template<>
+lapack_int _lapack_potrf(int lyt, char ul, lapack_int n, float* a, lapack_int lda) {
+	return LAPACKE_spotrf(lyt, ul, n, a, lda);
+}
+template<>
+lapack_int _lapack_potrf(int lyt, char ul, lapack_int n, double* a, lapack_int lda) {
+	return LAPACKE_dpotrf(lyt, ul, n, a, lda);
+}
+template<>
+lapack_int _lapack_gesvd(int lyt, char jobu, char jobvt, lapack_int m, lapack_int n, fptr a, lapack_int lda, fptr s, fptr u, lapack_int ldu, fptr vt, lapack_int ldvt, fptr superb) {
+	return LAPACKE_sgesvd(lyt, jobu, jobvt, m, n, a, lda, s, u, ldu, vt, ldvt, superb);
+}
+template<>
+lapack_int _lapack_gesvd(int lyt, char jobu, char jobvt, lapack_int m, lapack_int n, dptr a, lapack_int lda, dptr s, dptr u, lapack_int ldu, dptr vt, lapack_int ldvt, dptr superb) {
+	return LAPACKE_dgesvd(lyt, jobu, jobvt, m, n, a, lda, s, u, ldu, vt, ldvt, superb);
+}
+template<>
 lapack_int _lapack_syev(int lyt, char job, char ul, lapack_int n, fptr a, lapack_int lda, fptr w) {
 	return LAPACKE_ssyev(lyt, job, ul, n, a, lda, w);
 }
