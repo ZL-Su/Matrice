@@ -26,7 +26,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_view.h"
 #include "_storage.hpp"
 #include "util/_type_defs.h"
-#include "util/_macro_conditions.h"
+#include "util/_conditional_macros.h"
 #include "util/_exception.h"
 #include "util/_property.hpp"
 #include "core/solver.h"
@@ -1038,8 +1038,8 @@ public:
 		return forward<_Derived>(_Ret);
 	}
 	/**
-	 *\brief Create random value filled matrix
-	 *\param [_Rows, Cols] height and width of matrix, only specified for dynamic case
+	 *\brief creates a matrix filled by real numbers of uniform distribution.
+	 *\param [_Rows, Cols] the height and width of a matrix, only needed to specify for dynamic memory alloc cases.
 	 */
 	static MATRICE_GLOBAL_INL _Derived rand(diff_t _Rows=0, diff_t _Cols=0) {
 		_Derived _Ret(_Rows, _Cols);
@@ -1047,7 +1047,27 @@ public:
 		return forward<_Derived>(_Ret.each([&](auto& _Val) {
 			_Val = _Rand(_Eng); }));
 	}
-	static MATRICE_GLOBAL_INL _Derived randn(const_initlist& _Pars = {/*mean=*/0, /*STD=*/1}, diff_t _Rows = 0, diff_t _Cols = 0) {
+
+	/**
+	 *\brief creates a matrix filled by random numbers of normal distribution.
+	 *\param [_Pars] = {Mean, STD}
+	 */
+	MATRICE_REQUIRES(rows_at_compiletime>0&&cols_at_compiletime>0)
+	static MATRICE_HOST_INL _Derived randn(const_initlist& _Pars = {/*mean=*/0, /*STD=*/1}) {
+		_Derived _Ret;
+		normal_distribution<value_type> _Rand{ *_Pars.begin(), *(_Pars.begin() + 1) };
+		mt19937 _Eng;
+		return forward<_Derived>(_Ret.each([&](auto& _Val) {
+			_Val = _Rand(_Eng); }));
+	}
+	static MATRICE_HOST_INL _Derived randn(diff_t _Extent, const_initlist& _Pars = {/*mean=*/0, /*STD=*/1 }) {
+		_Derived _Ret(_Extent);
+		normal_distribution<value_type> _Rand{ *_Pars.begin(), *(_Pars.begin() + 1) };
+		mt19937 _Eng;
+		return forward<_Derived>(_Ret.each([&](auto& _Val) {
+			_Val = _Rand(_Eng); }));
+	}
+	static MATRICE_HOST_INL _Derived randn(diff_t _Rows, diff_t _Cols, const_initlist& _Pars = {/*mean=*/0, /*STD=*/1 }) {
 		_Derived _Ret(_Rows, _Cols);
 		normal_distribution<value_type> _Rand{ *_Pars.begin(), *(_Pars.begin() + 1) };
 		mt19937 _Eng;
