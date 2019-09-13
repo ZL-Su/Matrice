@@ -252,7 +252,7 @@
     <ClInclude Include="include\Matrice\util\genalgs.h" />
     <ClInclude Include="include\Matrice\util\utils.h" />
     <ClInclude Include="include\Matrice\util\_exception.h" />
-    <ClInclude Include="include\Matrice\util\_macro_conditions.h" />
+    <ClInclude Include="include\Matrice\util\_conditional_macros.h" />
     <ClInclude Include="include\Matrice\util\_macros.h" />
     <ClInclude Include="include\Matrice\util\_property.hpp" />
     <ClInclude Include="include\Matrice\util\_std_wrapper.h" />

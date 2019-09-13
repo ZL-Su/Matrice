@@ -357,9 +357,6 @@
     <ClInclude Include="include\Matrice\private\_size_traits.h">
       <Filter>Header Files\Detail\traits</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\util\_macro_conditions.h">
-      <Filter>Header Files\Util</Filter>
-    </ClInclude>
     <ClInclude Include="include\Matrice\private\_function_traits.h">
       <Filter>Header Files\Detail\traits</Filter>
     </ClInclude>
@@ -611,6 +608,9 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\correlation.hpp">
       <Filter>Header Files\Algs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\util\_conditional_macros.h">
+      <Filter>Header Files\Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

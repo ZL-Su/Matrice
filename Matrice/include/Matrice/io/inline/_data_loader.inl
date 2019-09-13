@@ -77,7 +77,7 @@ public:
 	MATRICE_HOST_INL decltype(auto) shift(index_t _Off) const {
 		_Mypos += _Off;
 #ifdef _DEBUG
-		_COND_EXCEPTION(end() || rend(),
+		MATRICE_COND_EXCEPTION(end() || rend(),
 			"_Off over range of loader depth")
 #endif
 			return (*this);
@@ -252,7 +252,7 @@ public:
 	MATRICE_HOST_INL decltype(auto) shift(index_t _Off) const {
 		_Mypos += _Off;
 #ifdef _DEBUG
-		_COND_EXCEPTION(end()||rend(),
+		MATRICE_COND_EXCEPTION(end()||rend(),
 			"_Off over range of loader depth")
 #endif
 			return (*this);

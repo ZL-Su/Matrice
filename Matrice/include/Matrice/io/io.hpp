@@ -16,7 +16,7 @@
 #include "../core/vector.h"
 #include "../util/utils.h"
 #include "../util/genalgs.h"
-#include "../util/_macro_conditions.h"
+#include "../util/_conditional_macros.h"
 #include "../util/_exception.h"
 #include "../private/_range.h"
 
