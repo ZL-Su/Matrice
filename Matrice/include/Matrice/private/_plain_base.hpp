@@ -1133,29 +1133,32 @@ struct _Matrix_padding {
 
 	/**
 	 *\brief Make zero padding
-	 *\param <_S> templated padding size, which should be specified for managed matrix type
-	 *\param [_In] input matrix; [_Size] run-time specified padding size
+	 *\param <_B> templated padding size, [_In] input matrix.
 	 */
-	template<typename _Mty, size_t _S = 0, 
-		typename _Ty = typename _Mty::value_t> 
-	MATRICE_GLOBAL_INL static auto zero(const _Mty& _In, size_t _Size = _S) {
-		// _Size <- max(_Size, _S)
+	template<size_t _B, typename _Mty, typename _Ty = typename _Mty::value_t> 
+	MATRICE_GLOBAL_INL static auto zero(const _Mty& _In) {
 		static_assert(is_matrix_v<_Mty>, "_Mty must be a matrix type.");
 		
-		constexpr auto _M = _Mty::rows_at_compiletime;
-		constexpr auto _N = _Mty::cols_at_compiletime;
-		_Matrix_t<_Ty, _M + (_S << 1), _N + (_S << 1)> _Ret;
-		if constexpr (_S > 0) _Ret = { zero<_Ty> };
-		else {
-			_Ret.create(_In.rows()+(_Size<<1), _In.cols()+(_Size << 1), zero<_Ty>);
-		}
-		_Ret.block(_Size, _Size+_In.cols(), _Size, _Size+_In.rows()) = _In;
+		constexpr size_t _M = _Mty::rows_at_compiletime;
+		constexpr size_t _N = _Mty::cols_at_compiletime;
+		_Matrix_t<_Ty, _M + (_B << 1), _N + (_B << 1)> _Ret;
+		_Ret.block(_B, size_t(_In.cols()) + _B, _B, size_t(_In.rows()) + _B) = _In;
+
+		return forward<decltype(_Ret)>(_Ret);
+	}
+
+	template<typename _Mty, typename _Ty = typename _Mty::value_t>
+	MATRICE_GLOBAL_INL static auto zero(const _Mty & _In, size_t _B) {
+		static_assert(is_matrix_v<_Mty>, "_Mty must be a matrix type.");
+
+		_Mty _Ret(_In.rows()+ (_B << 1), _In.cols()+(_B<<1), 0);
+		_Ret.block(_B, _In.cols() + _B, _B, _In.rows() + _B) = _In;
 
 		return forward<decltype(_Ret)>(_Ret);
 	}
 };
 _DETAIL_END
-using padding =  detail::_Matrix_padding;
+using matrix_padding =  detail::_Matrix_padding;
 
 template<typename _Mty>
 MATRICE_HOST_INL decltype(auto) make_matrix_deleter(const _Mty& _M) noexcept;
