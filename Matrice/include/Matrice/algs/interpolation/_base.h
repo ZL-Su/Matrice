@@ -91,8 +91,9 @@ public:
 	_Interpolation_base() noexcept {
 	}
 	_Interpolation_base(const matrix_type& _Data) noexcept
-		: _Mydata(_Data) { 
-		static_cast<_Mydt*>(this)->_Coeff_impl(); 
+		: _Mydata(_Data) {
+		if constexpr (is_not_same_v<category, bilerp_tag>)
+			static_cast<_Mydt*>(this)->_Coeff_impl();
 	}
 	_Interpolation_base(const _Myt& _Other) noexcept
 		: _Mydata(_Other._Mydata), _Mycoeff(_Other._Mycoeff) {

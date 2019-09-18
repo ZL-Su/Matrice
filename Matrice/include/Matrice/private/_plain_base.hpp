@@ -168,30 +168,37 @@ class Base_ : public _Basic_plane_view_base<_Valty>
 #define MATRICE_LINK_PTR { \
 	m_data = _Myalloc.data(); \
 }
+
 #define MATRICE_EVALEXP_TOTHIS { \
 	m_data = _Myalloc.data(); \
 	exp.assign(*this); \
 }
-#define MATRICE_EXPAND_SHAPE get<0>(_Shape), get<1>(_Shape)
-#define MATRICE_MAKE_EXPOP_TYPE(DESC, NAME) typename _Exp_op::_##DESC##_##NAME<_Valty>
+
+#define MATRICE_EXPAND_SHAPE \
+get<0>(_Shape), get<1>(_Shape)
+
+#define MATRICE_MAKE_EXPOP_TYPE(DESC, NAME) \
+typename _Exp_op::_##DESC##_##NAME<_Valty>
+
 #define MATRICE_MAKE_ARITHOP(OP, NAME) \
 template<typename _Rhs> MATRICE_GLOBAL_INL \
-auto operator##OP (const _Rhs& _Right) const { \
+auto operator##OP(const _Rhs& _Right) const noexcept { \
 	return Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_##NAME>(*this, _Right); \
 } \
 template<typename _Lhs, MATRICE_ENABLE_IF(is_scalar_v<_Lhs>)> friend \
-MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const _Derived& _Right) { \
+MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const _Derived& _Right) noexcept { \
 	return Expr::EwiseBinaryExpr<_Lhs, _Derived, _Xop_ewise_##NAME>(_Left, _Right); \
 }
+
 #define MATRICE_MAKE_EXP_ASSIGNOP(NAME) \
 template<typename _Lhs, typename _Rhs, typename _Op> \
 MATRICE_GLOBAL_INL \
-auto& operator= (const Expr##NAME##BinaryExpr<_Lhs, _Rhs, _Op>& _Ex){ \
+auto& operator=(const Expr##NAME##BinaryExpr<_Lhs,_Rhs,_Op>& _Ex)noexcept{ \
 return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 } \
 template<typename _Rhs, typename _Op> \
 MATRICE_GLOBAL_INL \
-auto& operator= (const Expr##NAME##UnaryExpr<_Rhs, _Op>& _Ex){ \
+auto& operator=(const Expr##NAME##UnaryExpr<_Rhs, _Op>& _Ex) noexcept{ \
 return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 }
 
@@ -238,21 +245,19 @@ public:
 	template<typename _Xop> 
 	using expr_type = Expr::Base_<_Xop>;
 	using scalar_type = Scalar<value_type>;
-	
-	enum { options = _Myalty::location };
-	enum { Size = _M*_N, rows_at_compiletime = _M, cols_at_compiletime = _N, };
+	/**
+	 *\brief static properties
+	 */
+	enum { 
+		Size = _M*_N, 
+		rows_at_compiletime = _M, 
+		cols_at_compiletime = _N, 
+		options = _Myalty::location
+	};
 	/**
 	 *\brief for static querying memory location
 	 */
 	static constexpr auto location = _Myalty::location;
-	/**
-	 *\brief for static querying memory block rows
-	 */
-	static constexpr auto RowsAtCT = rows_at_compiletime;
-	/**
-	 *\brief for static querying memory block cols
-	 */
-	static constexpr auto ColsAtCT = cols_at_compiletime;
 	/**
 	 *\brief for querying infinity attribute of the value type
 	 */
@@ -404,13 +409,13 @@ public:
 	 *\returns pointer to y-th row
 	 *\sa ptr()
 	 */
-	MATRICE_GLOBAL_FINL pointer operator[](index_t y) {
+	MATRICE_GLOBAL_FINL pointer operator[](index_t y) noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(y < rows(), "Matrix_ subscript out of row range.");
 #endif
 		return (m_data + y * m_cols); 
 	}
-	MATRICE_GLOBAL_FINL const pointer operator[](index_t y) const {
+	MATRICE_GLOBAL_FINL const pointer operator[](index_t y) const noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(y < rows(), "Matrix_ subscript out of row range.");
 #endif
@@ -419,13 +424,13 @@ public:
 	/**
 	 *\1D index random accessor to get i-th element reference
 	 */
-	MATRICE_GLOBAL_FINL reference operator()(index_t i) {
+	MATRICE_GLOBAL_FINL reference operator()(index_t i) noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(i < size(), "Matrix_ subscript out of range.");
 #endif
 		return m_data[i]; 
 	}
-	MATRICE_GLOBAL_FINL const reference operator()(index_t i) const {
+	MATRICE_GLOBAL_FINL const reference operator()(index_t i)const noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(i < size(), "Matrix_ subscript out of range.");
 #endif
@@ -434,14 +439,14 @@ public:
 	/**
 	 *\2D index random accessor to get element reference at r-th row and c-th col.
 	 */
-	MATRICE_GLOBAL_INL reference operator()(index_t r, index_t c) {
+	MATRICE_GLOBAL_INL reference operator()(index_t r, index_t c) noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(r < rows(), "Matrix_ subscript out of row range.");
 		DGELOM_CHECK(c < cols(), "Matrix_ subscript out of column range.");
 #endif
 		return (*this)[r][c]; 
 	}
-	MATRICE_GLOBAL_INL const reference operator()(index_t r, index_t c) const {
+	MATRICE_GLOBAL_INL const reference operator()(index_t r, index_t c) const noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(r < rows(), "Matrix_ subscript out of row range.");
 		DGELOM_CHECK(c < cols(), "Matrix_ subscript out of column range.");
@@ -450,12 +455,13 @@ public:
 	}
 
 	/**
-	 *\returns pointer to object memory
+	 *\brief returns pointer to the object memory
 	 */
 	MATRICE_GLOBAL_FINL constexpr pointer data() noexcept { return (m_data); }
 	MATRICE_GLOBAL_FINL constexpr const pointer data() const noexcept { return (m_data); }
+
 	/**
-	 *\returns pointer to y-th row
+	 *\brief returns pointer to y-th row
 	 *\sa operator[]
 	 */
 	MATRICE_GLOBAL_FINL pointer ptr(int y = 0) {
@@ -480,6 +486,7 @@ public:
 	MATRICE_GLOBAL_INL _Derived& derived() noexcept {
 		return *static_cast<_Derived*>(this);
 	}
+
 	/**
 	 *\brief returns a const reference to the derived object
 	 */
@@ -488,13 +495,13 @@ public:
 	}
 
 	/**
-	 * \returns reference to the derived object
+	 * \brief returns reference to the derived object
 	 */
 	MATRICE_GLOBAL_FINL _Derived& eval() noexcept {
 		return (this->derived());
 	}
 	/**
-	 * \returns const reference to the derived object
+	 * \brief returns const reference to the derived object
 	 */
 	MATRICE_GLOBAL_FINL constexpr const _Derived& eval()const noexcept {
 		return (this->derived());
@@ -502,102 +509,102 @@ public:
 
 #pragma region <!-- iterators -->
 	/**
-	 *\returns STL-stype iterator
+	 *\brief returns STL-stype element-wise iterator
 	 */
-	MATRICE_GLOBAL_FINL iterator begin() noexcept { 
+	MATRICE_GLOBAL_FINL iterator begin()noexcept { 
 		return (m_data); 
 	}
-	MATRICE_GLOBAL_FINL iterator end() noexcept { 
+	MATRICE_GLOBAL_FINL iterator end()noexcept { 
 		return (m_data + size()); 
 	}
-	MATRICE_GLOBAL_FINL const iterator begin() const noexcept { 
+	MATRICE_GLOBAL_FINL const iterator begin()const noexcept { 
 		return (m_data); 
 	}
-	MATRICE_GLOBAL_FINL const iterator end() const noexcept { 
+	MATRICE_GLOBAL_FINL const iterator end()const noexcept { 
 		return (m_data + size()); 
 	}
 	/**
-	 *\column iterator for accessing elements in i-th column
+	 *\brief column iterator for accessing elements in i-th column
 	 *\example:
 	 *		auto _A = Matrix_<float,3,3>::rand();
 	 *		auto _Fwd_col = _A.cbegin(1); //get 1-th column iterator
 	 *		for(auto& _It : _Fwd_col) _It = float(0); //set this column to zero
 	 */
-	MATRICE_GLOBAL_FINL _Myt_fwd_iterator cbegin(size_t i) {
+	MATRICE_GLOBAL_FINL _Myt_fwd_iterator cbegin(size_t i) noexcept {
 		return _Myt_fwd_iterator(m_data + i, m_rows, m_cols);
 	}
-	MATRICE_GLOBAL_FINL _Myt_fwd_iterator cend(size_t i) {
+	MATRICE_GLOBAL_FINL _Myt_fwd_iterator cend(size_t i) noexcept {
 		return _Myt_fwd_iterator(_End(m_data + i, m_rows, m_cols));
 	}
-	MATRICE_GLOBAL_FINL const _Myt_fwd_iterator cbegin(size_t i) const {
+	MATRICE_GLOBAL_FINL const _Myt_fwd_iterator cbegin(size_t i) const noexcept {
 		return _Myt_fwd_iterator(m_data + i, m_rows, m_cols);
 	}
-	MATRICE_GLOBAL_FINL const _Myt_fwd_iterator cend(size_t i) const {
+	MATRICE_GLOBAL_FINL const _Myt_fwd_iterator cend(size_t i) const noexcept {
 		return _Myt_fwd_iterator(_End(m_data + i, m_rows, m_cols));
 	}
 
 	/**
-	 *\row iterator for accessing elements in i-th row
+	 *\brief row iterator for accessing elements in i-th row
 	 */
-	MATRICE_GLOBAL_FINL _Myt_fwd_iterator rbegin(size_t i) {
+	MATRICE_GLOBAL_FINL _Myt_fwd_iterator rbegin(size_t i) noexcept {
 		return _Myt_fwd_iterator(m_data + i * m_cols, m_cols);
 	}
-	MATRICE_GLOBAL_FINL _Myt_fwd_iterator rend(size_t i) {
+	MATRICE_GLOBAL_FINL _Myt_fwd_iterator rend(size_t i) noexcept {
 		return _Myt_fwd_iterator(_End(m_data + i * m_cols, m_cols));
 	}
-	MATRICE_GLOBAL_FINL const _Myt_fwd_iterator rbegin(size_t i) const {
+	MATRICE_GLOBAL_FINL const _Myt_fwd_iterator rbegin(size_t i) const noexcept {
 		return _Myt_fwd_iterator(m_data + i * m_cols, m_cols);
 	}
-	MATRICE_GLOBAL_FINL const _Myt_fwd_iterator rend(size_t i) const {
+	MATRICE_GLOBAL_FINL const _Myt_fwd_iterator rend(size_t i) const noexcept {
 		return _Myt_fwd_iterator(_End(m_data + i * m_cols, m_cols));
 	}
 
 	/**
-	 *\column-wise iterator for accessing elements
+	 *\brief column-wise iterator for accessing elements
 	 */
-	MATRICE_GLOBAL_FINL _Myt_cwise_iterator cwbegin(size_t i = 0) {
+	MATRICE_GLOBAL_FINL _Myt_cwise_iterator cwbegin(size_t i = 0) noexcept {
 		return _Myt_cwise_iterator(m_data + i * m_rows, m_cols, m_rows);
 	}
-	MATRICE_GLOBAL_FINL _Myt_cwise_iterator cwend() {
+	MATRICE_GLOBAL_FINL _Myt_cwise_iterator cwend() noexcept {
 		return _Myt_cwise_iterator(_End(m_data, m_cols));
 	}
-	MATRICE_GLOBAL_FINL const _Myt_cwise_iterator cwbegin(size_t i = 0) const {
+	MATRICE_GLOBAL_FINL const _Myt_cwise_iterator cwbegin(size_t i = 0) const noexcept {
 		return _Myt_cwise_iterator(m_data + i * m_rows, m_cols, m_rows);
 	}
-	MATRICE_GLOBAL_FINL const _Myt_cwise_iterator cwend(size_t i = 0) const {
+	MATRICE_GLOBAL_FINL const _Myt_cwise_iterator cwend(size_t i = 0) const noexcept {
 		return _Myt_cwise_iterator(_End(m_data, m_cols));
 	}
 
 	/**
 	 * \row-wise iterator for accessing elements
 	 */
-	MATRICE_GLOBAL_FINL _Myt_rwise_iterator rwbegin(size_t i = 0) {
+	MATRICE_GLOBAL_FINL _Myt_rwise_iterator rwbegin(size_t i = 0) noexcept {
 		return _Myt_rwise_iterator(m_data + i * m_cols, m_rows, m_cols);
 	}
-	MATRICE_GLOBAL_FINL _Myt_rwise_iterator rwend() {
+	MATRICE_GLOBAL_FINL _Myt_rwise_iterator rwend() noexcept {
 		return _Myt_rwise_iterator(_End(m_data, m_rows, m_cols));
 	}
-	MATRICE_GLOBAL_FINL const _Myt_rwise_iterator rwbegin(size_t i = 0) const {
+	MATRICE_GLOBAL_FINL const _Myt_rwise_iterator rwbegin(size_t i = 0) const noexcept {
 		return _Myt_rwise_iterator(m_data + i * m_cols, m_rows, m_cols);
 	}
-	MATRICE_GLOBAL_FINL const _Myt_rwise_iterator rwend() const {
+	MATRICE_GLOBAL_FINL const _Myt_rwise_iterator rwend() const noexcept {
 		return _Myt_rwise_iterator(_End(m_data, m_rows, m_cols));
 	}
 #pragma endregion
 
 #pragma region <!-- views -->
 	// \View of i-th row 
-	MATRICE_GLOBAL_FINL _Myt_rview_type rview(size_t i) {
+	MATRICE_GLOBAL_FINL _Myt_rview_type rview(size_t i) noexcept {
 		return _Myt_rview_type(m_data + m_cols * i, m_cols);
 	}
-	MATRICE_GLOBAL_FINL const _Myt_rview_type rview(size_t i) const {
+	MATRICE_GLOBAL_FINL const _Myt_rview_type rview(size_t i) const noexcept {
 		return _Myt_rview_type(m_data + m_cols * i, m_cols);
 	}
 	// \View of i-th column
-	MATRICE_GLOBAL_FINL _Myt_cview_type cview(size_t i) {
+	MATRICE_GLOBAL_FINL _Myt_cview_type cview(size_t i) noexcept {
 		return _Myt_cview_type(m_data + i, m_rows, m_cols, i);
 	}
-	MATRICE_GLOBAL_FINL const _Myt_cview_type cview(size_t i) const {
+	MATRICE_GLOBAL_FINL const _Myt_cview_type cview(size_t i) const noexcept {
 		return _Myt_cview_type(m_data + i, m_rows, m_cols, i);
 	}
 	// \View of submatrix: x \in [x0, x1) and y \in [y0, y1)
@@ -1090,7 +1097,7 @@ protected:
 	using _Mybase::m_data;
 	using _Mybase::m_shape;
 
-	conditional_t<(RowsAtCT>=::dynamic||ColsAtCT>=::dynamic), _Myalloc_t, _Myalty> _Myalloc;
+	conditional_t<(rows_at_compiletime>=::dynamic||cols_at_compiletime >=::dynamic), _Myalloc_t, _Myalty> _Myalloc;
 	size_t _Myfmt = _Myalloc.fmt() | gene;
 
 	MATRICE_GLOBAL_INL _Myt& _Xfields(initlist<size_t> il) noexcept {
