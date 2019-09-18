@@ -32,29 +32,48 @@ public:
 
 	using _Mybase::_Interpolation_base;
 
-	MATRICE_HOST_INL auto operator()(const point_type& pos) const {
-		const auto x1 = (size_t)max(floor(pos.x), 0);
-		const auto x2 = (size_t)min(x1 + 1, _Mydata.cols()-1);
-		const auto y1 = (size_t)max(floor(pos.y), 0);
-		const auto y2 = (size_t)min(y1 + 1, _Mydata.rows()-1);
+	MATRICE_HOST_INL value_type operator()(const point_type& pos) const noexcept {
+		return (*this)(pos.x, pos.y);
+	}
+
+	/**
+	 * \brief computes the value at (x, y)
+	 */
+	MATRICE_HOST_INL value_type operator()(value_type x, value_type y) const noexcept {
+		const auto x1 = max(floor<diff_t>(x), 0);
+		const auto x2 = min(x1 + 1, _Mydata.cols() - 1);
+		const auto y1 = max(floor<diff_t>(y), 0);
+		const auto y2 = min(y1 + 1, _Mydata.rows() - 1);
 		const auto f11 = _Mydata[y1][x1];
 		const auto f12 = _Mydata[y2][x1];
 		const auto f21 = _Mydata[y1][x2];
 		const auto f22 = _Mydata[y2][x2];
 
-		const auto dx1 = pos.x - x1;
-		const auto dx2 = x2 - pos.x;
-		return (y2 - pos.y)*(dx2*f11 + dx1 * f21) + (pos.y - y1)*(dx2*f12 + dx1 * f22);
-	}
-	MATRICE_HOST_INL auto operator()(value_type x, value_type y) const {
-		return (*this)(point_type(x, y));
+		const auto dx1 = x - x1;
+		const auto dx2 = x2 - x;
+		return (y2 - y) * (dx2 * f11 + dx1 * f21) + (y - y1) * (dx2 * f12 + dx1 * f22);
 	}
 
-	MATRICE_HOST_INL auto grad(const point_type& pos) const {
-		return pos;
+	MATRICE_HOST_INL auto grad(const point_type& pos) const noexcept {
+		return (this->grad(pos.x, pos.y));
+	}
+	MATRICE_HOST_INL auto grad(value_type x, value_type y) const noexcept{
+		const auto x1 = max(floor<diff_t>(x), 0);
+		const auto x2 = min(x1 + 1, _Mydata.cols() - 1);
+		const auto y1 = max(floor<diff_t>(y), 0);
+		const auto y2 = min(y1 + 1, _Mydata.rows() - 1);
+		const auto f11 = _Mydata[y1][x1];
+		const auto f12 = _Mydata[y2][x1];
+		const auto f21 = _Mydata[y1][x2];
+		const auto f22 = _Mydata[y2][x2];
+
+		const auto dfdx = (f21 - f11) * (y2 - y) + (f22 - f12) * (y - y1);
+		const auto dfdy = (f12 - f11) * (x2 - x) + (f22 - f21) * (x - x1);
+		const auto deno = (x2 - x1) * (y2 - y1);
+		return std::make_tuple(dfdx / deno, dfdy / deno);
 	}
 
-	MATRICE_HOST_INL void _Coeff_impl() noexcept {};
+	MATRICE_HOST_INL void _Coeff_impl() noexcept = delete;
 
 private:
 	using _Mybase::_Mydata;
