@@ -988,6 +988,21 @@ public:
 
 		return (this->derived());
 	}
+
+	/**
+	 *\brief convert to a vector
+	 */
+	MATRICE_GLOBAL_INL auto vec() const noexcept {
+		Matrix_<value_type, Size, 1> _Ret(size());
+		size_t _Idx = 0;
+		for (auto _Col = cwbegin(); _Col != cwend(); ++_Col) {
+			for (auto _It = _Col.begin(); _It != _Col.end(); ++_It) {
+				_Ret(_Idx++) = *_It;
+			}
+		}
+		return _Ret;
+	}
+
 	/**
 	 *\brief Replace entries meets _Cond with _Val
 	 *\param [_Cond] the condition function
@@ -1160,6 +1175,16 @@ struct _Matrix_padding {
 
 		_Mty _Ret(_In.rows()+ (_B << 1), _In.cols()+(_B<<1), 0);
 		_Ret.block(_B, _In.cols() + _B, _B, _In.rows() + _B) = _In;
+
+		return forward<decltype(_Ret)>(_Ret);
+	}
+
+	template<typename _Mty, typename _Ty = typename _Mty::value_t>
+	MATRICE_GLOBAL_INL static auto zero(const _Mty & _In, size_t _LU, size_t _RB) {
+		static_assert(is_matrix_v<_Mty>, "_Mty must be a matrix type.");
+
+		_Mty _Ret(_In.rows() + _LU+_RB, _In.cols() + _LU+_RB, 0);
+		_Ret.block(_LU, _In.cols() + _LU, _LU, _In.rows() + _LU) = _In;
 
 		return forward<decltype(_Ret)>(_Ret);
 	}
