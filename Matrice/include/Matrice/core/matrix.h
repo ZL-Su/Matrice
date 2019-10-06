@@ -122,9 +122,9 @@ public:
 	using typename _Mybase::const_initlist;
 	using _Mybase::operator=;
 
-	MATRICE_HOST_INL Matrix_(diff_t cols)
+	MATRICE_HOST_INL Matrix_(size_t cols)
 		: _Mybase(_Mybase::rows_at_compiletime, cols) {};
-	MATRICE_HOST_INL Matrix_(diff_t, diff_t cols)
+	MATRICE_HOST_INL Matrix_(size_t, size_t cols)
 		: Matrix_(cols) {};
 	MATRICE_HOST_INL Matrix_(const _Myt& other)
 		: _Mybase(other) {};
@@ -166,9 +166,9 @@ public:
 	using typename _Mybase::const_initlist;
 	using _Mybase::operator=;
 
-	MATRICE_HOST_INL Matrix_(diff_t rows)
+	MATRICE_HOST_INL Matrix_(size_t rows)
 		: _Mybase(rows, _Mybase::cols_at_compiletime) {};
-	MATRICE_HOST_INL Matrix_(diff_t rows, diff_t)
+	MATRICE_HOST_INL Matrix_(size_t rows, size_t)
 		: Matrix_(rows) {};
 	MATRICE_HOST_INL Matrix_(const _Myt& other)
 		: _Mybase(other) {};
@@ -212,9 +212,9 @@ public:
 	using typename _Mybase::value_t;
 	using typename _Mybase::pointer;
 	using typename _Mybase::const_initlist;
-	//enum { Size = ::dynamic, rows_at_compiletime = ::dynamic, cols_at_compiletime = ::dynamic, };
+	using _Mybase::operator=;
 	
-	MATRICE_HOST_INL Matrix_(diff_t rows) noexcept
+	MATRICE_HOST_INL Matrix_(size_t rows) noexcept
 		: _Mybase(rows, 1) {};
 	MATRICE_HOST_INL Matrix_(const _Myt& other) noexcept
 		: _Mybase(other) {};
@@ -234,8 +234,6 @@ public:
 	MATRICE_HOST_INL _Myt& operator= (const_initlist list) {
 		return _Mybase::operator=(list); 
 	}
-	
-	using _Mybase::operator=;
 
 	MATRICE_MAKE_METHOD_CREATE(rows, cols = 1);
 };
