@@ -612,6 +612,9 @@
     <ClInclude Include="include\Matrice\util\_conditional_macros.h">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\algs\interpolation\_cubic_conv_interp.hpp">
+      <Filter>Header Files\Algs\Interpolation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">

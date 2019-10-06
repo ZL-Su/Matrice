@@ -186,6 +186,7 @@
     <ClInclude Include="include\Matrice\algs\interpolation.h" />
     <ClInclude Include="include\Matrice\algs\interpolation\_base.h" />
     <ClInclude Include="include\Matrice\algs\interpolation\_bilinear.hpp" />
+    <ClInclude Include="include\Matrice\algs\interpolation\_cubic_conv_interp.hpp" />
     <ClInclude Include="include\Matrice\algs\interpolation\_mba.hpp" />
     <ClInclude Include="include\Matrice\algs\interpolation\_splineinterp.h" />
     <ClInclude Include="include\Matrice\algs\interpolation\_interpolation.h" />
