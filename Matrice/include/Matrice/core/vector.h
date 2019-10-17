@@ -95,7 +95,7 @@ public:
 	using _Mybase::x;
 	using _Mybase::y;
 	using _Mybase::Vec_;
-
+	vec_global_inl Vec3_() {}
 	vec_global_inl Vec3_(const_value _x, const_value _y, const_value _z) 
 		: _Mybase({_x, _y, _z}) {}
 	template<typename _Uy>
