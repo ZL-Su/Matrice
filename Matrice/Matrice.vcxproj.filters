@@ -615,6 +615,12 @@
     <ClInclude Include="include\Matrice\algs\interpolation\_cubic_conv_interp.hpp">
       <Filter>Header Files\Algs\Interpolation</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\algs\geometry\quaternion.hpp">
+      <Filter>Header Files\Algs\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\geometry\geo_fwd.hpp">
+      <Filter>Header Files\Algs\Geometry</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">

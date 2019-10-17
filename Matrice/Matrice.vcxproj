@@ -177,7 +177,9 @@
     <ClInclude Include="include\Matrice\algs\dnn\models\_basic_model.hpp" />
     <ClInclude Include="include\Matrice\algs\erroranalysis\_common.h" />
     <ClInclude Include="include\Matrice\algs\forward.hpp" />
+    <ClInclude Include="include\Matrice\algs\geometry\geo_fwd.hpp" />
     <ClInclude Include="include\Matrice\algs\geometry\normalization.h" />
+    <ClInclude Include="include\Matrice\algs\geometry\quaternion.hpp" />
     <ClInclude Include="include\Matrice\algs\geometry\transform.h" />
     <ClInclude Include="include\Matrice\algs\geometry\_geo_utils.hpp" />
     <ClInclude Include="include\Matrice\algs\graphics\_distance.hpp" />
