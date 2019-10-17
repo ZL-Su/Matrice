@@ -76,7 +76,7 @@ public:
 	 */
 	MATRICE_HOST_INL decltype(auto) shift(index_t _Off) const {
 		_Mypos += _Off;
-#ifdef _DEBUG
+#ifdef MATRICE_DEBUG
 		MATRICE_COND_EXCEPTION(end() || rend(),
 			"_Off over range of loader depth")
 #endif
@@ -113,14 +113,14 @@ public:
 	 * \return all file names in _Idx-th subfolder for currenct work path
 	 */
 	MATRICE_HOST_FINL directory_type::container& file_names(size_t _Idx) {
-#ifdef _DEBUG
+#ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_Idx < _Mynames.size(), "_Idx over range of field ::_Mynames.");
 #endif // _DEBUG
 
 		return (_Mynames)[_Idx];
 	}
 	MATRICE_HOST_FINL const directory_type::container& file_names(size_t _Idx) const {
-#ifdef _DEBUG
+#ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_Idx < _Mynames.size(), "_Idx over range of field ::_Mynames.");
 #endif // _DEBUG
 		return (_Mynames)[_Idx];
@@ -251,7 +251,7 @@ public:
 	 */
 	MATRICE_HOST_INL decltype(auto) shift(index_t _Off) const {
 		_Mypos += _Off;
-#ifdef _DEBUG
+#ifdef MATRICE_DEBUG
 		MATRICE_COND_EXCEPTION(end()||rend(),
 			"_Off over range of loader depth")
 #endif
@@ -266,7 +266,7 @@ public:
 		const auto _Size = _Mydir.size() == 0 ? 1 : _Mydir.size();
 		for (const auto& _Idx : range(0, _Size)) {
 			const auto& _Names = _Mynames[_Idx];
-#ifdef _DEBUG
+#ifdef MATRICE_DEBUG
 			DGELOM_CHECK(_Mypos<_Names.size(), "file list subscript out of range.");
 #endif
 			auto _File = _Myloader(_Mydir[_Idx] + _Names[_Mypos]);
@@ -339,7 +339,7 @@ public:
 		const auto _Size = _Mydir.size()==0?1:_Mydir.size();
 		for (const auto& _Idx : range(0, _Size)) {
 			const auto& _Names = _Mynames[_Idx];
-#ifdef _DEBUG
+#ifdef MATRICE_DEBUG
 			DGELOM_CHECK(i < _Names.size(), "file list subscript out of range.");
 #endif
 			auto _File = _Myloader(_Mydir[_Idx] + _Names[i]);
@@ -379,16 +379,16 @@ public:
 	 * \return all file names in _Idx-th subfolder for currenct work path
 	 */
 	MATRICE_HOST_FINL _Mydir_type::container& file_names(size_t _Idx) {
-#ifdef _DEBUG
-		DGELOM_CHECK(_Idx<_Mynames.size(), "_Idx over range of field ::_Mynames.");
-#endif // _DEBUG
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(_Idx < _Mynames.size(), "_Idx over range of field ::_Mynames.");
+#endif
 
 		return (_Mynames)[_Idx];
 	}
 	MATRICE_HOST_FINL const _Mydir_type::container& file_names(size_t _Idx) const {
-#ifdef _DEBUG
-		DGELOM_CHECK(_Idx<_Mynames.size(), "_Idx over range of field ::_Mynames.");
-#endif // _DEBUG
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(_Idx < _Mynames.size(), "_Idx over range of field ::_Mynames.");
+#endif
 		return (_Mynames)[_Idx];
 	}
 
