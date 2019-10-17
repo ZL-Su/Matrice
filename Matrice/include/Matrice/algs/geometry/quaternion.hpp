@@ -69,16 +69,64 @@ public:
 	}
 
 	/**
+	 *\brief rotate a point with the quaternion.
+	 *\param [point] a given 3d point.
+	 */
+	MATRICE_GLOBAL_INL vector_type rot(const vector_type& point) const noexcept {
+		//_Myt p(0, point);
+		auto prod = (*this)*_Myt(0, point)*this->conj();
+		return (prod.imag());
+	}
+
+	/**
 	 *\brief converts the quaternion to a rotation matrix.
 	 */
 	MATRICE_GLOBAL_INL Matrix_<value_type, 3> matrix() const noexcept {
 		const auto s = 2*this->norm();
+
 		Matrix_<value_type, 3> _Ret;
-		_Ret[0][0] = 1 - s * (sqr(m_imag.y) + sqr(m_imag.z));
-		_Ret[1][1] = 1 - s * (sqr(m_imag.x) + sqr(m_imag.z));
-		_Ret[2][2] = 1 - s * (sqr(m_imag.x) + sqr(m_imag.y));
-		_Ret[0][1] = s * (m_imag.x*m_imag.y - m_imag.z*m_real);
+		const auto x = m_imag.x, y = m_imag.y, z = m_imag.z;
+		_Ret[0][0] = 1 - s * (sqr(y) + sqr(z));
+		_Ret[1][1] = 1 - s * (sqr(x) + sqr(z));
+		_Ret[2][2] = 1 - s * (sqr(x) + sqr(y));
+		_Ret[0][1] = s * (x*y - z * m_real);
+		_Ret[0][2] = s * (x*z + y * m_real);
+		_Ret[1][0] = s * (x*y + z * m_real);
+		_Ret[1][2] = s * (z*y - x * m_real);
+		_Ret[2][0] = s * (x*z - y * m_real);
+		_Ret[2][1] = s * (y*z + x * m_real);
+
 		return (_Ret);
+	}
+
+	MATRICE_GLOBAL_INL _Myt& operator+=(const value_type _real) noexcept {
+		this->real() += _real;
+		return (*this);
+	}
+	MATRICE_GLOBAL_INL _Myt& operator+=(const _Myt& _other) noexcept {
+		this->real() += _other.real();
+		this->imag() = m_imag + _other.imag();
+		return (*this);
+	}
+	MATRICE_GLOBAL_INL _Myt& operator*=(const _Myt& _right) noexcept {
+		const auto dot = m_imag.dot(_right.imag());
+		const auto cro = m_imag.cross(_right.imag());
+		m_imag = m_real * _right.imag() + _right.real()*m_imag + cro;
+		m_real = m_real * _right.real() - dot;
+		return (*this);
+	}
+
+	template<typename _Ty> friend
+	MATRICE_GLOBAL_INL auto operator+(const _Quaternion<_Ty>& _left, const _Ty _real)noexcept {
+		auto _Ret = _left; return (_Ret += _real);
+	}
+	template<typename _Ty> friend
+	MATRICE_GLOBAL_INL auto operator+(const _Quaternion<_Ty>& _left, const _Quaternion<_Ty>& _right)noexcept {
+		auto _Ret = _left; return (_Ret += _right);
+	}
+	template<typename _Ty> friend
+	MATRICE_GLOBAL_INL auto operator*(const _Quaternion<_Ty>& _left, const _Quaternion<_Ty>& _right)noexcept {
+		auto _Ret = _left; return (_Ret *= _right);
 	}
 
 private:
