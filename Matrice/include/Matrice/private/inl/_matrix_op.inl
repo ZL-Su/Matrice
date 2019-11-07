@@ -41,25 +41,7 @@ public:
 
 	MATRICE_GLOBAL_INL matrix_type inv() noexcept {
 		matrix_type inv(m_ret.shape());
-		typename matrix_type::value_type sum;
-		const diff_t n = inv.rows();
-		for (auto r = 0; r < n; ++r) {
-			for (auto c = 0; c <= r; ++c) {
-				sum = r == c ? decltype(sum)(1) : 0;
-				for (auto k = r - 1; k >= c; --k) {
-					sum -= m_ret[r][k] * inv[c][k];
-				}
-				inv[c][r] = sum / m_ret[r][r];
-			}
-		}
-		for (auto r = n - 1; r >= 0; --r) {
-			for (auto c = 0; c <= r; ++c) {
-				sum = (r < c ? 0. : inv[c][r]);
-				for (auto k = r + 1; k < n; ++k)
-					sum -= m_ret[k][r] * inv[c][k];
-				inv[r][c] = inv[c][r] = sum / m_ret[r][r];
-			}
-		}
+		_Linear_ispd_kernel(m_ret.data(), inv.data(), inv.rows());
 		return inv;
 	}
 

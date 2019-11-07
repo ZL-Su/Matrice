@@ -20,9 +20,12 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
+
 template<typename _Ptr>
 MATRICE_GLOBAL int _Linear_spd_kernel(_Ptr data, size_t n) noexcept;
 
+template<typename _Ptr>
+MATRICE_GLOBAL void _Linear_ispd_kernel(_Ptr data, _Ptr inv, size_t n) noexcept;
 
 _DETAIL_END
 DGE_MATRICE_END
