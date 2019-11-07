@@ -54,7 +54,7 @@
     <OutDir>.\x64\Debug\</OutDir>
     <IntDir>.\IntDir\Debug\</IntDir>
     <TargetName>matrice</TargetName>
-    <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;.\include\Matrice;$(IncludePath)</IncludePath>
+    <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;.\include\Matrice;.\include\Matrice\private;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -221,6 +221,7 @@
     <ClInclude Include="include\Matrice\private\math\_config.h" />
     <ClInclude Include="include\Matrice\private\math\_linear.h" />
     <ClInclude Include="include\Matrice\private\math\_linear_solver.h" />
+    <ClInclude Include="include\Matrice\private\math\_linear_fact.hpp" />
     <ClInclude Include="include\Matrice\private\math\_primitive_funcs.hpp" />
     <ClInclude Include="include\Matrice\private\math\_svd.h" />
     <ClInclude Include="include\Matrice\private\nonfree\_lnalge.h" />
@@ -326,6 +327,7 @@
     <ClCompile Include="src\core\matrix_expr_op_impl.cpp" />
     <ClCompile Include="src\core\solver_impl.cpp" />
     <ClCompile Include="src\core\storage_base_impl.cpp" />
+    <ClCompile Include="src\private\math\_linear_fact.cpp" />
     <ClCompile Include="src\private\nonfree\_blas_lapack_kernels.cpp" />
     <ClCompile Include="src\private\_memory.cpp" />
     <ClCompile Include="src\private\_unified_memory.cpp" />
