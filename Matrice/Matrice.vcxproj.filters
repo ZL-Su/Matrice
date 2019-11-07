@@ -980,6 +980,9 @@
     <None Include="include\Matrice\private\nonfree\inl\lapack_kernel_wrapper.inl">
       <Filter>Header Files\Detail\math\nonfree\inl</Filter>
     </None>
+    <None Include="include\Matrice\private\inl\_matrix_op.inl">
+      <Filter>Header Files\Detail\core\inline</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="src\private\_dev_funcs.cu">

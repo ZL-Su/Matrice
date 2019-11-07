@@ -100,4 +100,9 @@ template<> struct _Matrix_norm_impl<1> {
 
 _INTERNAL_END
 
+_DETAIL_BEGIN
+template<class _Mty, class _Tag> class _Matrix_fact {};
+_DETAIL_END
+
 DGE_MATRICE_END
+#include "inl/_matrix_op.inl"

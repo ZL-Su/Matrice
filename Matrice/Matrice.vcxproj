@@ -376,6 +376,7 @@
     <None Include="include\Matrice\io\inline\_directory.inl" />
     <None Include="include\Matrice\io\inline\_image.inl" />
     <None Include="include\Matrice\private\inl\_base.inl" />
+    <None Include="include\Matrice\private\inl\_matrix_op.inl" />
     <None Include="include\Matrice\private\inl\_storage_base.inl" />
     <None Include="include\Matrice\private\nonfree\inl\blas_kernel_wrapper.inl" />
     <None Include="include\Matrice\private\nonfree\inl\lapack_kernel_wrapper.inl" />

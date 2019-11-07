@@ -1037,6 +1037,14 @@ public:
 	}
 
 	/**
+	 *\brief Cholesky decomposition 
+	  //tex:$A = {L}{L^T}$.
+	 */
+	MATRICE_GLOBAL_INL auto spd() noexcept {
+		return detail::_Matrix_fact<_Derived, tag::_Linear_spd_tag>(this->derived());
+	}
+
+	/**
 	 *\brief Create a zero-value filled matrix
 	 *\param [_Rows, Cols] height and width of matrix, only specified for dynamic created matrix
 	 */
