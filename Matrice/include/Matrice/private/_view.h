@@ -229,8 +229,8 @@ public:
 	 */
 	template<size_t N=_Base::cols_at_compiletime> 
 	MATRICE_GLOBAL_FINL auto eval() const {
-		Matrix_<value_t, rows(), min(N, _Base::cols_at_compiletime)> _Ret(1, cols());
-		_VIEW_EWISE_COPY_N(_Ret, N)
+		Matrix_<value_t, 1, min_integer_v<N, _Base::cols_at_compiletime>> _Ret(1, cols());
+		_VIEW_EWISE_COPY_N(_Ret, N);
 		return forward<decltype(_Ret)>(_Ret);
 	}
 };
@@ -269,8 +269,8 @@ public:
 	 */
 	template<size_t N= _Base::rows_at_compiletime>
 	MATRICE_GLOBAL_FINL auto eval() const {
-		Matrix_<value_t, min(N, _Base::rows_at_compiletime), cols()> _Ret(rows(), 1);
-		_VIEW_EWISE_COPY_N(_Ret, N)
+		Matrix_<value_t, min_integer_v<N, _Base::rows_at_compiletime>, 1> _Ret(rows(), 1);
+		_VIEW_EWISE_COPY_N(_Ret, N);
 		return std::forward<decltype(_Ret)>(_Ret);
 	}
 };
