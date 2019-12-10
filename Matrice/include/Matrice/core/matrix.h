@@ -17,9 +17,9 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 #include <array>
-#include "private/_plain_base.hpp"
+#include <private/_plain_base.hpp>
 #ifdef MATRICE_ENABLE_CUDA
-#include "private/_dev_matrix_base.h"
+#include <private/_dev_matrix_base.h>
 #endif
 
 MATRICE_NAMESPACE_BEGIN_TYPES

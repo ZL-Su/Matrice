@@ -762,8 +762,13 @@ public:
 	MATRICE_GLOBAL_INL _Derived& operator=(_Derived&& _other) noexcept {
 		m_cols = _other.m_cols, m_rows = _other.m_rows;
 		if (_other._Myalloc) {
-			m_data = _Myalloc = move(_other._Myalloc);
-			_other._Myalloc.destroy();
+			if constexpr (Size > 0) { //copy if the mem allocated on stack
+				m_data = _Myalloc = (_other._Myalloc);
+			}
+			else {
+				m_data = _Myalloc = move(_other._Myalloc);
+				_other._Myalloc.destroy();
+			}
 		}
 		else m_data = _other.data();
 

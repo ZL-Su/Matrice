@@ -55,7 +55,7 @@ template<> struct packet_size<double> {
 };
 
 template<typename T>
-MATRICE_HOST_INL constexpr int packet_size_v = packet_size<T>::value;
+MATRICE_HOST_INL constexpr auto packet_size_v = packet_size<T>::value;
 
 template<typename T, int _Elems> struct simd_traits
 {

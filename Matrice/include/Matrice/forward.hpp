@@ -55,4 +55,12 @@ using array_n = Matrix_<T, _N, 1>;
 
 template<typename _Ty, int _Size>
 using Array_ = Matrix_<_Ty, _Size, (_Size > 0 ? 1 : _Size)> ;
+
+//\shared_matrix_t<_Ty> is a pure dynamic matrix type managed by std::shared_ptr.
+template<typename _Ty> 
+using shared_matrix_t = shared_ptr<Matrix<_Ty>>;
+template<typename _Ty>
+MATRICE_HOST_INL auto make_shared(const Matrix<_Ty>& mat) noexcept {
+	return std::make_shared<Matrix<_Ty>>(mat);
+}
 }

@@ -9,7 +9,9 @@ template<typename _Data_type, typename value_t = typename _Data_type::value_t>
 class normalization MATRICE_NONHERITABLE
 {
 	using data_t = _Data_type;
+#ifdef MATRICE_SIMD_ARCH
 	using packet_t = simd::Packet_<value_t, 4>;
+#endif
 public:
 	MATRICE_HOST_INL normalization(const data_t& _Data) : m_data(_Data) {}
 

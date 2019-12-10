@@ -21,17 +21,6 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 DGE_MATRICE_BEGIN
 
-#ifdef MATRICE_SIMD_ARCH
-// \default vector unit size for SIMD support
-constexpr std::size_t packet_size_v =
-#if MATRICE_SIMD_ARCH==MATRICE_SIMD_SSE
-	4
-#elif MATRICE_SIMD_ARCH==MATRICE_SIMD_AVX
-	8
-#endif
-;
-#endif
-
 template<int _Rows = 0, int _Cols = _Rows>
 struct compile_time_size {
 	enum { val_1 = 0x0001, val_2 = 0x0002, val_3 = 0x0003, val_4 = 0x0004 };

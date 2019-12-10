@@ -47,6 +47,7 @@ enum {
 // \Forward declaration
 template<typename _Ty, typename _Tag> class _Spline_interpolation;
 template<typename _Ty> class _Bilinear_interpolation;
+template<typename _Ty> class _Cubic_conv_interpolation;
 
 // \Interpolation traits definition
 template<typename _Ty> struct interpolation_traits {};
@@ -67,7 +68,21 @@ struct interpolation_traits<_Bilinear_interpolation<_Ty>> {
 	static constexpr auto option = INTERP | BILINEAR;
 };
 template<typename _Ty>
+struct interpolation_traits<_Cubic_conv_interpolation<_Ty>> {
+	using value_type = _Ty;
+	using matrix_type = Matrix<value_type>;
+	using category = cubconerp_tag;
+	using type = _Cubic_conv_interpolation<value_type>;
+	static constexpr auto option = INTERP | BICUBIC;
+};
+template<typename _Ty>
 using interpolation_traits_t = typename interpolation_traits<_Ty>::type;
+
+template<typename _Tag> struct require_coeff_lut {
+	static constexpr auto value = conditional_t<
+		is_any_of_v<_Tag, bicerp_tag, biqerp_tag, biserp_tag>, 
+		std::true_type, std::false_type>::value;
+};
 
 // \Interpolation auto dispatching
 template<typename _Ty, typename _Tag> 
@@ -91,8 +106,8 @@ public:
 	_Interpolation_base() noexcept {
 	}
 	_Interpolation_base(const matrix_type& _Data) noexcept
-		: _Mydata(_Data) {
-		if constexpr (is_not_same_v<category, bilerp_tag>)
+		: _Mydata(make_shared(_Data)) {
+		if constexpr (require_coeff_lut<category>::value)
 			static_cast<_Mydt*>(this)->_Coeff_impl();
 	}
 	_Interpolation_base(const _Myt& _Other) noexcept
@@ -122,16 +137,17 @@ public:
 	}
 
 	/**
-	 * \get original data matrix.
+	 * \get the original data matrix.
 	 */
-	MATRICE_HOST_INL const matrix_type& data()const noexcept {
-		return (_Mydata); 
+	MATRICE_HOST_INL const matrix_type& data() const noexcept {
+		return (*_Mydata); 
 	}
+
 	/**
 	 * \set original data matrix.
 	 */
 	MATRICE_HOST_INL _Myt& set(const matrix_type& data)noexcept {
-		_Mydata = data;
+		_Mydata = std::make_shared<matrix_type>(data);
 		return (*this);
 	}
 
@@ -156,7 +172,7 @@ protected:
 
 protected:
 	const value_type _Myeps{ value_type(1.0e-7) };
-	const matrix_type& _Mydata;
+	shared_matrix_t<value_type> _Mydata;
 	matrix_type _Mycoeff;
 	matrix_type _Mygrads;
 };
