@@ -327,6 +327,7 @@
     <ClCompile Include="src\core\matrix_expr_op_impl.cpp" />
     <ClCompile Include="src\core\solver_impl.cpp" />
     <ClCompile Include="src\core\storage_base_impl.cpp" />
+    <ClCompile Include="src\io\_tiff_wrapper.cpp" />
     <ClCompile Include="src\private\math\_linear_fact.cpp" />
     <ClCompile Include="src\private\nonfree\_blas_lapack_kernels.cpp" />
     <ClCompile Include="src\private\_memory.cpp" />

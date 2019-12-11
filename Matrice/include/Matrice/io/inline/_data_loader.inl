@@ -1,6 +1,7 @@
 /*********************************************************************
 	  About License Agreement of this file, see "../lic/license.h"
 *********************************************************************/
+#pragma once
 #include "../io.hpp"
 #include "../../util/_exception.h"
 #include "../../util/_std_wrapper.h"

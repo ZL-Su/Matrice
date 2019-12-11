@@ -220,6 +220,9 @@
     <Filter Include="Source Files\Details\math">
       <UniqueIdentifier>{cb96645d-dc78-48fb-b698-f69e677eaaf7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\IO">
+      <UniqueIdentifier>{d520d05d-68f5-4b29-992e-803b19218937}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -829,6 +832,9 @@
     </ClCompile>
     <ClCompile Include="src\private\math\_linear_fact.cpp">
       <Filter>Source Files\Details\math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\io\_tiff_wrapper.cpp">
+      <Filter>Source Files\IO</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

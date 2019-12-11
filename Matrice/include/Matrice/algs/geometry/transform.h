@@ -28,7 +28,7 @@ MATRICE_HOST_INL Vec3_<_Ty> _Rodrigues_impl(const Matrix_<_Ty, 3, 3>& _R) {
 	using value_t = _Ty;
 	constexpr const auto _Unit = value_t(1.0);
 	constexpr const auto _Half = value_t(0.5);
-	constexpr const auto _Zero = zero<value_t>::value;
+	constexpr const auto _Zero = value_t(0);
 
 	Vec3_<value_t> _Ret{_R[2][1]-_R[1][2], _R[0][2]-_R[2][0], _R[1][0]-_R[0][1]};
 
