@@ -133,10 +133,12 @@ struct LinearOp MATRICE_NONHERITABLE
 		MATRICE_GLOBAL_FINL constexpr Svd(const _Mty& _Coeff) : U(_Coeff) {
 			S.create(U.cols(), 1), Vt.create(U.cols(), U.cols());
 			using Op = OpBase<value_t>;
-			Op::_Impl(Op::_Aview = U, Op::_Bview = S, Op::_Cview = Vt);
+			Op::_Aview.ref(U), Op::_Bview.ref(S), Op::_Cview.ref(Vt);
+			Op::_Impl(Op::_Aview, Op::_Bview, Op::_Cview);
 		};
 		MATRICE_GLOBAL_FINL constexpr auto operator() (std::_Ph<0> _ph = {}) {
-			auto X = Vt.rview(Vt.rows() - 1).eval<_Mty::cols_at_compiletime>().transpose().eval();
+			Matrix_<value_t, N, 1> X(Vt.cols(), 1);
+			X.from(Vt[Vt.rows() - 1]);
 			return std::forward<decltype(X)>(X);
 		}
 		template<typename _Ret = Matrix_<value_t, N, min(N, 1)>> 
