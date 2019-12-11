@@ -132,28 +132,23 @@ struct LinearOp MATRICE_NONHERITABLE
 
 		MATRICE_GLOBAL_FINL constexpr Svd(const _Mty& _Coeff) : U(_Coeff) {
 			S.create(U.cols(), 1), Vt.create(U.cols(), U.cols());
-			OpBase<value_t>::_Future = std::async(std::launch::async, [&] {
-				using Op = OpBase<value_t>;
-				return OpBase<value_t>::_Impl(Op::_Aview = U, Op::_Bview = S, Op::_Cview = Vt);
-			});
+			using Op = OpBase<value_t>;
+			Op::_Impl(Op::_Aview = U, Op::_Bview = S, Op::_Cview = Vt);
 		};
 		MATRICE_GLOBAL_FINL constexpr auto operator() (std::_Ph<0> _ph = {}) {
-			OpBase<value_t>::_Launch();
 			auto X = Vt.rview(Vt.rows() - 1).eval<_Mty::cols_at_compiletime>().transpose().eval();
 			return std::forward<decltype(X)>(X);
 		}
 		template<typename _Ret = Matrix_<value_t, N, min(N, 1)>> 
 		MATRICE_GLOBAL_FINL constexpr _Ret& operator() (_Ret& X){
-			OpBase<value_t>::_Launch();
-
 			Matrix_<value_t, _Mty::cols_at_compiletime, min(_Mty::cols_at_compiletime, 1)> Z(X.rows(), 1); //inverse of singular values
 
 			return (X);
 		}
 		//\return singular values
-		MATRICE_HOST_FINL auto& sv() { OpBase<value_t>::_Launch(); return (S); }
+		MATRICE_HOST_FINL auto& sv() { return (S); }
 		//\return V^{T} expression
-		MATRICE_HOST_FINL auto vt() { OpBase<value_t>::_Launch(); return (Vt); }
+		MATRICE_HOST_FINL auto vt() { return (Vt); }
 	private:
 		const _Mty& U;
 		Matrix_<value_t, _Mty::cols_at_compiletime, min(_Mty::cols_at_compiletime,1)> S;
