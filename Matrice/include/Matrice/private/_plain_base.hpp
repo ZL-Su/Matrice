@@ -936,6 +936,20 @@ public:
 	}
 
 	/**
+	 * \ref to another instance without malloc and copy.
+	 */
+	template<typename _Src, MATRICE_ENABLE_IF(Size==::dynamic)>
+	MATRICE_GLOBAL_INL _Derived& ref(_Src& _other) noexcept {
+		if (this->data() != _other.data()) {
+			m_cols = _other.cols(), m_rows = _other.rows();
+			m_shape = _other.shape();
+			m_data = _other.data();
+			_Mybase::_Flush_view_buf();
+		}
+		return (this->derived());
+	}
+
+	/**
 	 * \copy from another data block
 	 */
 	template<typename _It>
