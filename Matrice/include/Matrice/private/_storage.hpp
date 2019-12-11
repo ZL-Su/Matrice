@@ -60,7 +60,7 @@ MATRICE_ALIGNED_CLASS _Dense_allocator_base {
 	using _Mytraits = _Altrs;
 public:
 	using value_type = typename _Mytraits::value_type;
-	using pointer = add_pointer_t<value_type>;
+	using pointer = value_type*;
 	using allocator = typename _Mytraits::type;
 	using category = typename _Mytraits::category;
 	static constexpr auto rows_at_compiletime = _Mytraits::rows;
@@ -69,6 +69,11 @@ public:
 	MATRICE_GLOBAL_INL _Dense_allocator_base()
 		:m_rows(rows_at_compiletime), m_cols(cols_at_compiletime){
 		derived()._Alloc();
+	}
+	MATRICE_GLOBAL_INL _Dense_allocator_base(const pointer data)
+		:m_rows(rows_at_compiletime), m_cols(cols_at_compiletime) {
+		static_assert(rows_at_compiletime*cols_at_compiletime > 0, "The ctor in _Dense_allocator_base<_Altrs> is only valid for stack malloc.");
+		(*this) = data;
 	}
 	MATRICE_GLOBAL_INL _Dense_allocator_base(size_t rows, size_t cols)
 		:m_rows(rows), m_cols(cols) {
