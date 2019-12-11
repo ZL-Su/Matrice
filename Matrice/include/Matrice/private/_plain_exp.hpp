@@ -266,9 +266,9 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		using value_t = value_type;
 		using matrix_type = typename myt_traits::auto_matrix_type;
 		using derived_t = typename myt_traits::type;
-		using derived_pointer = std::add_pointer_t<derived_t>;
-		using const_derived = std::add_const_t<derived_t>;
-		using const_derived_pointer = std::add_pointer_t<const_derived>;
+		using derived_pointer = derived_t*;
+		using const_derived = const derived_t;
+		using const_derived_pointer = const derived_pointer;
 		enum {options = myt_traits::options,
 			rows_at_compiletime = myt_traits::rows, 
 			cols_at_compiletime = myt_traits::cols};
@@ -280,29 +280,27 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		// \evaluate the matrix expression
 		MATRICE_GLOBAL_INL auto eval() const {
 			matrix_type _Ret(M, N);
-			_CDTHIS->assign_to(_Ret);
+			derived_pointer(this)->assign_to(_Ret);
 			return std::forward<matrix_type>(_Ret);
 		}
 		template<typename _Ret> 
 		MATRICE_GLOBAL_INL _Ret eval() const {
-			_Ret ret(_CDTHIS->rows(), _CDTHIS->cols());
-			return std::forward<_Ret>(ret = *_CDTHIS);
+			_Ret ret(derived_pointer(this)->shape());
+			return std::forward<_Ret>(ret = *derived_pointer(this));
 		}
 		// \retrieve the evaluated result
 		template<typename _Ret>
 		MATRICE_GLOBAL_INL _Ret& assign(_Ret& res) const noexcept {
-#ifdef _DEBUG
 			if (res.size() == 0) res.create(M, N);
-#endif
-			_CDTHIS->assign_to(res);
+			derived_pointer(this)->assign_to(res);
 			return (res);
 		}
 
 		MATRICE_GLOBAL_INL derived_t& derived() noexcept {
-			return *static_cast<derived_pointer>(this);
+			return *derived_pointer(this);
 		}
 		MATRICE_GLOBAL_INL const derived_t& derived() const noexcept {
-			return *_CDTHIS;
+			return *derived_pointer(this);
 		}
 
 		// \formulate matmul expression
@@ -360,11 +358,13 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		 * \sum over all expression entries
 		 */
 		MATRICE_GLOBAL_INL auto sum() const noexcept {
-			auto _Ret = value_t(0); int _Size = _CDTHIS->size();
+			auto _Ret = value_t(0); 
+			int _Size = derived_pointer(this)->size();
 #pragma omp parallel if(_Size > 1000)
 		{
 #pragma omp for reduction(+:_Ret)
-			for (int i = 0; i < _Size; ++i) _Ret += _CDTHIS->operator()(i);
+			for (int i = 0; i < _Size; ++i) 
+				_Ret += derived_pointer(this)->operator()(i);
 		}
 			return (_Ret);
 		}
@@ -701,13 +701,13 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		}
 
 		template<typename _Mty>
-		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const noexcept {
+		MATRICE_GLOBAL_INL void assign_to(_Mty& res) noexcept {
 			if constexpr (options == inv) {
 				_Op(M, res.data(), _RHS.data());
 			}
 			if constexpr (options == trp) {
 				const int _Size = this->size();
-				if (&res == &_RHS) {
+				if (res.data() == _RHS.data()) {
 					_Mty _Res(res.shape());
 					for (int i = 0; i < _Size; ++i)
 							_Res(i) = (*this)(i);
