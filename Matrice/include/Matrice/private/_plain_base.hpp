@@ -701,7 +701,7 @@ public:
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_Myalloc, "This object is empty.");
 #endif // MATRICE_DEBUG
-		_Myalloc = (_list.begin());
+		_Myalloc = (const pointer)(_list.begin());
 		return (this->derived());
 	}
 	/**
