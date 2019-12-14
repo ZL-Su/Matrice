@@ -636,6 +636,9 @@
     <ClInclude Include="include\Matrice\private\math\_linear_fact.hpp">
       <Filter>Header Files\Detail\math\lapack</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\private\math\_linear_solver.hpp">
+      <Filter>Header Files\Detail\math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
@@ -835,6 +838,9 @@
     </ClCompile>
     <ClCompile Include="src\io\_tiff_wrapper.cpp">
       <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="src\private\math\_linear_solver_impl.cpp">
+      <Filter>Source Files\Details\math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

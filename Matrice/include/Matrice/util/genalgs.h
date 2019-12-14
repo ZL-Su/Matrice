@@ -193,7 +193,7 @@ using power_n_t = detail::_Power_n<_Expo>;
 
 /**
  *\brief Compile time power operation
-  //tex: $$N^M$$
+//tex: $$N^M$$
  */
 template<size_t _N, size_t _M>
 constexpr auto power_nm_v = detail::_Power_nm<_N, _M>::value;
