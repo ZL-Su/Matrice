@@ -115,12 +115,6 @@
     <Filter Include="Header Files\Detail\tensor">
       <UniqueIdentifier>{965fcf50-4461-4715-a81a-36f93b4661d6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Detail\autograd">
-      <UniqueIdentifier>{e808d49f-e70a-4c9c-9d73-a5dd24ff2b50}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Detail\autograd\inline">
-      <UniqueIdentifier>{d3d722b3-ca0e-4472-81a9-001adf8cfbc6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Algs\Correlation">
       <UniqueIdentifier>{093b07b7-b2a6-42a4-8f4e-bca1a59f8fe9}</UniqueIdentifier>
     </Filter>
@@ -222,6 +216,12 @@
     </Filter>
     <Filter Include="Source Files\IO">
       <UniqueIdentifier>{d520d05d-68f5-4b29-992e-803b19218937}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Detail\autodiff">
+      <UniqueIdentifier>{e808d49f-e70a-4c9c-9d73-a5dd24ff2b50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Detail\autodiff\inline">
+      <UniqueIdentifier>{d3d722b3-ca0e-4472-81a9-001adf8cfbc6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -412,10 +412,10 @@
       <Filter>Header Files\Detail\math</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\autograd\_grad_ops.h">
-      <Filter>Header Files\Detail\autograd</Filter>
+      <Filter>Header Files\Detail\autodiff</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\autograd\_grad_utils.h">
-      <Filter>Header Files\Detail\autograd</Filter>
+      <Filter>Header Files\Detail\autodiff</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\similarity\_iterative_conv_impl.h">
       <Filter>Header Files\Algs\Similarity</Filter>
@@ -427,7 +427,7 @@
       <Filter>Header Files\Algs\Correlation</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\autograd\_expression.h">
-      <Filter>Header Files\Detail\autograd</Filter>
+      <Filter>Header Files\Detail\autodiff</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\lic\license.h">
       <Filter>Header Files\License</Filter>
@@ -603,9 +603,6 @@
     <ClInclude Include="include\Matrice\private\math\kernel_wrapper.hpp">
       <Filter>Header Files\Detail\math</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\forward.hpp">
-      <Filter>Header Files\Detail\core</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
@@ -638,6 +635,12 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\private\math\_linear_solver.hpp">
       <Filter>Header Files\Detail\math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\forward.hpp">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\math_forward.hpp">
+      <Filter>Header Files\Detail</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

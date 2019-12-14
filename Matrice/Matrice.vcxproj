@@ -213,6 +213,7 @@
     <ClInclude Include="include\Matrice\io\_png_wrapper.hpp" />
     <ClInclude Include="include\Matrice\io\_tiff_wrapper.hpp" />
     <ClInclude Include="include\Matrice\lic\license.h" />
+    <ClInclude Include="include\Matrice\math_forward.hpp" />
     <ClInclude Include="include\Matrice\private\autograd\_expression.h" />
     <ClInclude Include="include\Matrice\private\autograd\_grad_ops.h" />
     <ClInclude Include="include\Matrice\private\autograd\_grad_utils.h" />

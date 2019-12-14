@@ -16,15 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
-#include "../_type_traits.h"
-#include "../../forward.hpp"
+#include "_type_traits.h"
+#include "forward.hpp"
 
 DGE_MATRICE_BEGIN
-struct svd { static constexpr auto value = solver_type::SVD; };
-struct spt { static constexpr auto value = solver_type::CHD; };
-struct luf { static constexpr auto value = solver_type::LUF; };
-struct qrd { static constexpr auto value = solver_type::QRD; };
-
+struct svd { enum { singular_value_decomposition = 4 }; };
+struct spt { enum { spdtr_cholesky_decomposition = 2 }; };
+struct luf { enum { lower_upper_tr_decomposition = 1 }; };
+struct qrd { enum { ortho_upper_tr_decomposition = 3 }; };
 _INTERNAL_BEGIN
 	// \brief parse and invoke the linear algebra kernel to _Op.
 	template<typename _Op, typename... _Ts>
@@ -126,4 +125,9 @@ struct _Solver_traits<_Linear_solver<_Mty, _Op>>{
 };
 _DETAIL_END
 
+// \brief: linear solver factory function
+template<class _Mty, typename _Op>
+auto make_linear_solver(_Mty& A, _Op) noexcept {
+	return detail::_Linear_solver<_Mty, _Op>(A);
+}
 DGE_MATRICE_END
