@@ -627,6 +627,23 @@ public:
 		return this->block(get<0>(_R), get<1>(_R), get<2>(_R), get<3>(_R));
 	}
 
+	// \View of submatrix: x \in [x0, x1) and y \in [y0, y1)
+	template<int _Extent>
+	MATRICE_GLOBAL_INL auto block(index_t start, size_t num) {
+		if constexpr (_Extent == ::extent_x) {
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(start + num - 1 <= m_rows, "Over range in the row direction.");
+#endif // _DEBUG
+		return this->block(0, m_cols, start, start + num);
+		}
+		if constexpr (_Extent == ::extent_y) {
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(start + num - 1 <= m_cols, "Over range in the col direction.");
+#endif // _DEBUG
+		return this->block(start, start + num, 0, m_rows);
+		}
+	}
+
 	/** 
 	 * \brief View of a square submatrix.
 	 * \param [_Cx, _Cy]: central pos, _Rs: radius size 
