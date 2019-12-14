@@ -24,6 +24,8 @@ namespace {
 	static constexpr int device = -1;
 	static constexpr int global = -2;
 #endif
+	static constexpr int extent_x = 0;
+	static constexpr int extent_y = 1;
 }
 
 DGE_MATRICE_BEGIN
