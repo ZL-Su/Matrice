@@ -231,20 +231,19 @@ return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 	using _Xop_mat_inv     = MATRICE_MAKE_EXPOP_TYPE(Mat,   inv);
 	using _Xop_mat_trp     = MATRICE_MAKE_EXPOP_TYPE(Mat,   trp);
 public:
+	using base_t = _Mybase;
 	using value_t = _Valty;
 	using value_type = value_t;
-	using derived_t = _Derived;
-	using base_t = _Mybase;
+	using scalar_type = Scalar<value_type>;
 	using pointer = std::add_pointer_t<value_t>;
 	using reference = std::add_lvalue_reference_t<value_t>;
 	using iterator = pointer;
 	using const_iterator = std::add_const_t<iterator>;
 	using const_initlist = std::add_const_t<initlist<value_t>>;
+	using derived_t = _Derived;
 	using loctn_t = Location;
 	using category = typename _Mytraits::category;
-	template<typename _Xop> 
-	using expr_type = Expr::Base_<_Xop>;
-	using scalar_type = Scalar<value_type>;
+	template<typename _Xop> using exp_base_type = Expr::Base_<_Xop>;
 	/**
 	 *\brief static properties
 	 */
@@ -708,6 +707,17 @@ public:
 		DGELOM_CHECK(_Myalloc, "This object is empty.");
 #endif // MATRICE_DEBUG
 		_Myalloc = (_Val);
+		return (this->derived());
+	}
+
+	/**
+	 * \assignment operator, fill Matrix_ from a scalar.
+	 */
+	MATRICE_GLOBAL_FINL _Derived& operator= (scalar_type _Val) noexcept {
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(_Myalloc, "This object is empty.");
+#endif // MATRICE_DEBUG
+		_Myalloc = value_type(_Val);
 		return (this->derived());
 	}
 
