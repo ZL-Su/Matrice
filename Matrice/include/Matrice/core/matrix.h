@@ -17,13 +17,13 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 #include <array>
-#include <private/_plain_base.hpp>
+#include "private/_plain_base.hpp"
 #ifdef MATRICE_ENABLE_CUDA
-#include <private/_dev_matrix_base.h>
+#include "private/_dev_matrix_base.h"
 #endif
 
-MATRICE_NAMESPACE_BEGIN_TYPES
-
+DGE_MATRICE_BEGIN
+_DETAIL_BEGIN
 #define MATRICE_MAKE_METHOD_CREATE(M, N) \
 MATRICE_GLOBAL void __create_impl(size_t M, size_t N)
 
@@ -61,12 +61,12 @@ public:
 	MATRICE_GLOBAL_FINL constexpr Matrix_(_Uy _val) noexcept
 		: _Mybase(rows_at_compiletime, cols_at_compiletime, _val) {};
 	template<typename _Uy>
-	MATRICE_HOST_FINL constexpr Matrix_(const nested_initlist<_Uy> _list) noexcept
+	MATRICE_HOST_FINL Matrix_(const nested_initlist<_Uy> _list) noexcept
 		: _Mybase(_list) {}
-	MATRICE_HOST_FINL constexpr Matrix_(const std::array<value_t, Size>& _array) noexcept
+	MATRICE_HOST_FINL Matrix_(const std::array<value_t, Size> _array) noexcept
 		: Matrix_(pointer(_array.data())) {}
 	template<typename... _Args> 
-	MATRICE_GLOBAL_FINL constexpr Matrix_(_Args&&... args)noexcept
+	MATRICE_GLOBAL_FINL Matrix_(_Args&&... args)noexcept
 		: _Mybase(forward<_Args>(args)...) {};
 
 	MATRICE_HOST_FINL _Myt& operator=(const_initlist _list)noexcept {
@@ -122,9 +122,9 @@ public:
 	using typename _Mybase::const_initlist;
 	using _Mybase::operator=;
 
-	MATRICE_HOST_INL Matrix_(diff_t cols)
+	MATRICE_HOST_INL Matrix_(size_t cols)
 		: _Mybase(_Mybase::rows_at_compiletime, cols) {};
-	MATRICE_HOST_INL Matrix_(diff_t, diff_t cols)
+	MATRICE_HOST_INL Matrix_(size_t, size_t cols)
 		: Matrix_(cols) {};
 	MATRICE_HOST_INL Matrix_(const _Myt& other)
 		: _Mybase(other) {};
@@ -166,9 +166,9 @@ public:
 	using typename _Mybase::const_initlist;
 	using _Mybase::operator=;
 
-	MATRICE_HOST_INL Matrix_(diff_t rows)
+	MATRICE_HOST_INL Matrix_(size_t rows)
 		: _Mybase(rows, _Mybase::cols_at_compiletime) {};
-	MATRICE_HOST_INL Matrix_(diff_t rows, diff_t)
+	MATRICE_HOST_INL Matrix_(size_t rows, size_t)
 		: Matrix_(rows) {};
 	MATRICE_HOST_INL Matrix_(const _Myt& other)
 		: _Mybase(other) {};
@@ -212,9 +212,9 @@ public:
 	using typename _Mybase::value_t;
 	using typename _Mybase::pointer;
 	using typename _Mybase::const_initlist;
-	//enum { Size = ::dynamic, rows_at_compiletime = ::dynamic, cols_at_compiletime = ::dynamic, };
+	using _Mybase::operator=;
 	
-	MATRICE_HOST_INL Matrix_(diff_t rows) noexcept
+	MATRICE_HOST_INL Matrix_(size_t rows) noexcept
 		: _Mybase(rows, 1) {};
 	MATRICE_HOST_INL Matrix_(const _Myt& other) noexcept
 		: _Mybase(other) {};
@@ -234,8 +234,6 @@ public:
 	MATRICE_HOST_INL _Myt& operator= (const_initlist list) {
 		return _Mybase::operator=(list); 
 	}
-	
-	using _Mybase::operator=;
 
 	MATRICE_MAKE_METHOD_CREATE(rows, cols = 1);
 };
@@ -373,38 +371,11 @@ public:
 
 #endif
 #undef MATRICE_MAKE_METHOD_CREATE
-MATRICE_NAMESPACE_END_TYPES
 
-DGE_MATRICE_BEGIN
-//\matrix type with host managed memory allocator
-template<typename T, int _M, int _N=_M, 
-	size_t _Options = rmaj|gene, 
-	MATRICE_ENABLE_IF(is_arithmetic_v<T>)>
-using Matrix_ = types::Matrix_<T, _M, _N>;
-
-//\matrix type with host dynamic memory allocator
-template<typename T, size_t _Options = rmaj | gene> using Matrix = Matrix_<T,
-	compile_time_size<>::RunTimeDeducedOnHost,
-	compile_time_size<>::RunTimeDeducedOnHost,
-	_Options>;
-
-//\matrix type with unified memory allocator
-template<typename T, size_t _Options = rmaj | gene> using Umatrix = Matrix_<T,
-	compile_time_size<>::RunTimeDeducedOnDevice,
-	compile_time_size<>::RunTimeDeducedOnHost,
-	_Options>;
-
-//\matrix type with device memory allocator
-template<typename T, size_t _Options = rmaj | gene> using Dmatrix = Matrix_<T,
-	compile_time_size<>::RunTimeDeducedOnDevice,
-	compile_time_size<>::RunTimeDeducedOnDevice,
-	_Options>;
-
-//\dynamic matrix type with single(32)/double(64) floating point type
-using matrix_f32 = Matrix<float>;
-using matrix_f64 = Matrix<double>;
-
-//\N-dimensional array with host managed memory
-template<typename T, int _N> using array_n = Matrix_<T, _N, 1>;
-
+_DETAIL_END
+template<typename _Ty>
+inline auto make_shared(const Matrix<_Ty>& mat) noexcept {
+	return std::make_shared<Matrix<_Ty>>(mat);
+}
 DGE_MATRICE_END
+#include "../forward.hpp"

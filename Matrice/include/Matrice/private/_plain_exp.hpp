@@ -22,9 +22,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_type_traits.h"
 #include "_size_traits.h"
 #include "_tag_defs.h"
-#include "private/math/_primitive_funcs.hpp"
+#include "forward.hpp"
+#include "math/_primitive_funcs.hpp"
 #if defined(MATRICE_SIMD_ARCH)
-#include "../arch/ixpacket.h"
+#include "arch/ixpacket.h"
 #endif
 
 #ifdef _MSC_VER
@@ -35,13 +36,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 DGE_MATRICE_BEGIN
 #pragma region <!-- Forward declarations and matrix traits supplements -->
 // \forward declarations 
-_TYPES_BEGIN
-template<typename _Ty> class Matrix;
-template<typename _Ty, int _Rows, int _cols> class Matrix_;
-template<typename _Derived, typename _Traits, typename _Ty> class Base_;
-_TYPES_END
 _DETAIL_BEGIN
-//template<typename _Ty> class _Tensor;
+//template<typename _Ty> class Matrix;
+//template<typename _Ty, int _Rows, int _cols> class Matrix_;
+template<typename _Derived, typename _Traits, typename _Ty> class Base_;
+
 template<typename _Ty, size_t _Depth> class _Tensor;
 struct _Blas_kernel_wrapper;
 _DETAIL_END
@@ -54,33 +53,33 @@ template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 constexpr static _Ty two = static_cast<_Ty>(2);
 
 template<typename _Ty, int _M, int _N> 
-struct is_matrix<types::Matrix_<_Ty, _M, _N>> : std::true_type {};
+struct is_matrix<Matrix_<_Ty, _M, _N>> : std::true_type {};
 
 template<typename _Ty, int _M>
-struct is_fxdvector<types::Matrix_<_Ty, _M, 1>> : std::true_type {};
+struct is_fxdvector<Matrix_<_Ty, _M, 1>> : std::true_type {};
 
-template<typename _Derived, typename _Traits, typename _Ty> 
-struct is_matrix<types::Base_<_Derived, _Traits, _Ty>> : std::true_type {};
+template<class _Derived, class _Traits, typename _Ty>
+struct is_matrix<detail::Base_<_Derived, _Traits, _Ty>> : std::true_type {};
 
 template<typename _Ty, size_t _Depth>
 struct is_tensor<detail::_Tensor<_Ty, _Depth>> : std::true_type {};
 
-template<typename _Derived, typename _Traits, typename _Ty>
-struct matrix_traits<types::Base_<_Derived, _Traits, _Ty>> {
-	using type = _Ty;
+template<class _Derived, class _Traits, typename _Ty>
+struct matrix_traits<detail::Base_<_Derived, _Traits, _Ty>> {
+	using type = remove_all_t<_Ty>;
 	enum { _M = _Traits::_M, _N = _Traits::_N };
 	static constexpr bool Is_base = std::true_type::value;
 };
 template<typename _Ty, int _Rows, int _Cols> 
-struct matrix_traits<types::Matrix_<_Ty, _Rows, _Cols>> {
-	using type = _Ty;
+struct matrix_traits<Matrix_<_Ty, _Rows, _Cols>> {
+	using type = remove_all_t<_Ty>;
 	using category = tag::_Matrix_tag;
 	enum { _M = _Rows, _N = _Cols };
 	static constexpr bool Is_base = std::false_type::value;
 };
 template<typename _Ty>
 struct matrix_traits<detail::_Tensor<_Ty, 0>> {
-	using type = _Ty;
+	using type = remove_all_t<_Ty>;
 	using category = tag::_Tensor_tag;
 	static constexpr auto _M = 0, _N = 0;
 	static constexpr auto Is_base = std::false_type::value;
@@ -89,13 +88,13 @@ struct matrix_traits<detail::_Tensor<_Ty, 0>> {
 #pragma endregion
 DGE_MATRICE_END
 
-MATRICE_NAMESPACE_EXPR_BEGIN
+MATRICE_EXPR_BEGIN
 template<typename _T, typename _U, typename _Op> class EwiseBinaryExpr;
 template<typename _T, typename _U, typename _Op> class MatBinaryExpr;
 template<typename _T, typename _Op> class MatUnaryExpr;
 
 struct Expr {
-#define _MATRICE_DEFEXP_EWISEUOP(NAME) \
+#define MATRICE_MAKE_EWISE_UNOP(NAME) \
 template<typename _Ty> struct _Ewise_##NAME { \
 	enum {flag = ewise}; \
 	using category = tag::_Ewise_##NAME##_tag; \
@@ -103,7 +102,7 @@ template<typename _Ty> struct _Ewise_##NAME { \
 		return (NAME(_Val)); \
 	}\
 };
-#define _MATRICE_DEFEXP_EWISEBOP(NAME) \
+#define MATRICE_MAKE_EWISE_BIOP(NAME) \
 template<typename _Ty> struct _Ewise_##NAME { \
 	enum {flag = ewise}; \
 	using category = tag::_Ewise_##NAME##_tag; \
@@ -112,7 +111,7 @@ template<typename _Ty> struct _Ewise_##NAME { \
 		return (NAME(_Left, _Right)); \
 	}\
 };
-#define _MATRICE_DEFEXP_ARITHOP(OP, NAME) \
+#define MATRICE_MAKE_ARITH_OP(OP, NAME) \
 template<typename _Rhs, MATRICE_ENABLE_IF(std::true_type::value)> \
 MATRICE_GLOBAL_FINL auto operator##OP(const _Rhs& _Right) { \
 	return EwiseBinaryExpr<derived_t, _Rhs, Op::_Ewise_##NAME<value_t>>(*_CDTHIS, _Right); \
@@ -148,19 +147,19 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 	 * \expression operators
 	 */
 	struct Op {
-		_MATRICE_DEFEXP_EWISEBOP(add);
-		_MATRICE_DEFEXP_EWISEBOP(sub);
-		_MATRICE_DEFEXP_EWISEBOP(mul);
-		_MATRICE_DEFEXP_EWISEBOP(div);
-		_MATRICE_DEFEXP_EWISEBOP(max);
-		_MATRICE_DEFEXP_EWISEBOP(min);
-		_MATRICE_DEFEXP_EWISEUOP(sqrt);
-		_MATRICE_DEFEXP_EWISEUOP(exp);
-		_MATRICE_DEFEXP_EWISEUOP(abs);
-		_MATRICE_DEFEXP_EWISEUOP(log);
-		_MATRICE_DEFEXP_EWISEUOP(log2);
-		_MATRICE_DEFEXP_EWISEUOP(log10);
-		_MATRICE_DEFEXP_EWISEUOP(floor);
+		MATRICE_MAKE_EWISE_BIOP(add);
+		MATRICE_MAKE_EWISE_BIOP(sub);
+		MATRICE_MAKE_EWISE_BIOP(mul);
+		MATRICE_MAKE_EWISE_BIOP(div);
+		MATRICE_MAKE_EWISE_BIOP(max);
+		MATRICE_MAKE_EWISE_BIOP(min);
+		MATRICE_MAKE_EWISE_UNOP(sqrt);
+		MATRICE_MAKE_EWISE_UNOP(exp);
+		MATRICE_MAKE_EWISE_UNOP(abs);
+		MATRICE_MAKE_EWISE_UNOP(log);
+		MATRICE_MAKE_EWISE_UNOP(log2);
+		MATRICE_MAKE_EWISE_UNOP(log10);
+		MATRICE_MAKE_EWISE_UNOP(floor);
 
 		/**
 		 * \accumulates all elements of input expression
@@ -214,24 +213,18 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 			enum { flag = mmul };
 			using category = tag::_Matrix_mul_tag;
 			using value_type = _Ty;
+#ifdef MATRICE_SIMD_ARCH
 			using packet_type = simd::Packet_<value_type, packet_size_v>;
+#endif
 
 			template<typename _Rhs> MATRICE_GLOBAL_FINL
-			value_type operator() (const _Ty* lhs, const _Rhs& rhs, int c, int _plh = 0) const noexcept
-			{
+			value_type operator() (const _Ty* lhs, const _Rhs& rhs, int c, int _plh = 0) const noexcept {
 				value_type val = value_type(0);
 				const int K = rhs.rows(), N = rhs.cols();
-				
-#ifdef MATRICE_SIMD_ARCH == MATRICE_SIMD_AVX
-				for (int k = 0; k < K; ++k) 
-					val += lhs[k] * rhs(k*N + c);
-#elif MATRICE_SIMD_ARCH == MATRICE_SIMD_AVX512
-
-#elif MATRICE_SIMD_ARCH == MATRICE_SIMD_SSE
-
+#ifdef MATRICE_SIMD_ARCH
+				for (int k = 0; k < K; ++k) val += lhs[k] * rhs(k*N + c);
 #else
-				for (int k = 0; k < K; ++k) 
-					val += lhs[k] * rhs(k*N + c);
+				for (int k = 0; k < K; ++k) val += lhs[k] * rhs(k*N + c);
 #endif
 				return (val);
 			}
@@ -272,9 +265,9 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		using value_t = value_type;
 		using matrix_type = typename myt_traits::auto_matrix_type;
 		using derived_t = typename myt_traits::type;
-		using derived_pointer = std::add_pointer_t<derived_t>;
-		using const_derived = std::add_const_t<derived_t>;
-		using const_derived_pointer = std::add_pointer_t<const_derived>;
+		using derived_pointer = derived_t*;
+		using const_derived = const derived_t;
+		using const_derived_pointer = const derived_pointer;
 		enum {options = myt_traits::options,
 			rows_at_compiletime = myt_traits::rows, 
 			cols_at_compiletime = myt_traits::cols};
@@ -283,32 +276,41 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		MATRICE_GLOBAL_FINL Base_(const basic_shape_t& _Shape) 
 			: Shape(_Shape), M(_Shape.rows()), N(_Shape.cols()) {}
 
-		// \evaluate the matrix expression
-		MATRICE_GLOBAL_INL auto eval() const {
+		/**
+		 * \method Base_<_Op>::eval()
+		 * \brief Evaluate this expression to the matrix type which is deduced according to the optimal type recorded by the expression.
+		 * Specially, this method returns Scalar<value_type> iff the shape of matrix_type is deduced as 1-by-1 in compile time.
+	     */
+		MATRICE_GLOBAL_INL decltype(auto) eval() const {
 			matrix_type _Ret(M, N);
-			_CDTHIS->assign_to(_Ret);
-			return std::forward<matrix_type>(_Ret);
+			derived_pointer(this)->assign_to(_Ret);
+			return (_Ret);
 		}
-		template<typename _Ret> 
-		MATRICE_GLOBAL_INL _Ret eval() const {
-			_Ret ret(_CDTHIS->rows(), _CDTHIS->cols());
-			return std::forward<_Ret>(ret = *_CDTHIS);
+
+		/** 
+		 * \method Base_<_Op>::eval<_Rety>()
+		 * \brief Evaluate this expression to the given type _Rety.
+		 * \param <_Rety> any Matrix_<> compatible type.
+		 */
+		template<typename _Rety> 
+		MATRICE_GLOBAL_INL _Rety eval() const {
+			_Rety ret(derived_pointer(this)->shape());
+			return forward<_Rety>(ret = *derived_pointer(this));
 		}
+
 		// \retrieve the evaluated result
 		template<typename _Ret>
 		MATRICE_GLOBAL_INL _Ret& assign(_Ret& res) const noexcept {
-#ifdef _DEBUG
 			if (res.size() == 0) res.create(M, N);
-#endif
-			_CDTHIS->assign_to(res);
+			derived_pointer(this)->assign_to(res);
 			return (res);
 		}
 
 		MATRICE_GLOBAL_INL derived_t& derived() noexcept {
-			return *static_cast<derived_pointer>(this);
+			return *derived_pointer(this);
 		}
 		MATRICE_GLOBAL_INL const derived_t& derived() const noexcept {
-			return *_CDTHIS;
+			return *derived_pointer(this);
 		}
 
 		// \formulate matmul expression
@@ -366,11 +368,13 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		 * \sum over all expression entries
 		 */
 		MATRICE_GLOBAL_INL auto sum() const noexcept {
-			auto _Ret = value_t(0); int _Size = _CDTHIS->size();
+			auto _Ret = value_t(0); 
+			int _Size = derived_pointer(this)->size();
 #pragma omp parallel if(_Size > 1000)
 		{
 #pragma omp for reduction(+:_Ret)
-			for (int i = 0; i < _Size; ++i) _Ret += _CDTHIS->operator()(i);
+			for (int i = 0; i < _Size; ++i) 
+				_Ret += derived_pointer(this)->operator()(i);
 		}
 			return (_Ret);
 		}
@@ -383,7 +387,12 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		/**
 		 * \variation of all entries
 		 */
-		MATRICE_GLOBAL_INL auto var() const;
+		MATRICE_GLOBAL_INL auto var() const {
+			const auto _Avg = this->avg();
+			auto _Diff = Expr::EwiseBinaryExpr< derived_t, decltype(_Avg),
+				Expr::Op::_Ewise_sub<value_t>>( *static_cast<const derived_t*>(this), _Avg);
+			return (_Diff * _Diff).avg();
+		}
 
 		/**
 		 * \operator for expression evaluation
@@ -391,7 +400,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		MATRICE_GLOBAL_INL auto operator()(tag::_Var_tag = tag::_Expression_eval_tag()) const {
 			matrix_type _Ret(M, N);
 			_CDTHIS->assign_to(_Ret);
-			return std::forward<matrix_type>(_Ret);
+			return forward<matrix_type>(_Ret);
 		}
 		/**
 		 * \2-d ewise evaluation operator
@@ -424,10 +433,10 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 			return (Shape);
 		}
 
-		_MATRICE_DEFEXP_ARITHOP(+, add)
-		_MATRICE_DEFEXP_ARITHOP(-, sub)
-		_MATRICE_DEFEXP_ARITHOP(*, mul)
-		_MATRICE_DEFEXP_ARITHOP(/, div)
+		MATRICE_MAKE_ARITH_OP(+, add)
+		MATRICE_MAKE_ARITH_OP(-, sub)
+		MATRICE_MAKE_ARITH_OP(*, mul)
+		MATRICE_MAKE_ARITH_OP(/, div)
 
 	protected:
 		size_t M, K, N;
@@ -438,7 +447,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 	// \matrix element-wise binary operation expression: +, -, *, /, ...
 	template<typename T, typename U, typename _BinaryOp, 
 		bool _T = is_scalar_v<T>, bool _U = is_scalar_v<U>> 
-		class EwiseBinaryExpr {};
+	class EwiseBinaryExpr {};
 
 	template<typename T, typename U, typename _BinaryOp>
 	class EwiseBinaryExpr<T, U, _BinaryOp, false, false> 
@@ -707,13 +716,13 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		}
 
 		template<typename _Mty>
-		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const noexcept {
+		MATRICE_GLOBAL_INL void assign_to(_Mty& res) noexcept {
 			if constexpr (options == inv) {
 				_Op(M, res.data(), _RHS.data());
 			}
 			if constexpr (options == trp) {
 				const int _Size = this->size();
-				if (&res == &_RHS) {
+				if (res.data() == _RHS.data()) {
 					_Mty _Res(res.shape());
 					for (int i = 0; i < _Size; ++i)
 							_Res(i) = (*this)(i);
@@ -742,15 +751,15 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		using _Mybase::size;
 	};
 
-#undef _MATRICE_DEFEXP_ARITHOP
-#undef _MATRICE_DEFEXP_EWISEUOP
-#undef _MATRICE_DEFEXP_EWISEBOP
+#undef MATRICE_MAKE_ARITH_OP
+#undef MATRICE_MAKE_EWISE_UNOP
+#undef MATRICE_MAKE_EWISE_BIOP
 };
 
 template<typename _Exp, MATRICE_ENABLE_IF(is_expression_v<_Exp>)>
 using _Matrix_exp = typename Expr::Base_<_Exp>;
 
-MATRICE_NAMESPACE_EXPR_END
+MATRICE_EXPR_END
 
 ///<-------------- I am the lovely seperate line -------------->
 
@@ -777,7 +786,7 @@ struct expression_traits<_Exp::EwiseBinaryExpr<T, U, _Op, false, false>> {
 	enum { options = _Exp::option<_Exp_tag::ewise>::value };
 	static constexpr auto rows = max_integer_v<T::rows_at_compiletime, U::rows_at_compiletime>;
 	static constexpr auto cols = max_integer_v<T::cols_at_compiletime, U::cols_at_compiletime>;
-	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
+	using auto_matrix_type = detail::Matrix_<value_type, rows, cols>;
 };
 template<typename T, typename U, typename _Op>
 struct expression_traits<_Exp::EwiseBinaryExpr<T, U, _Op, true, false>> {
@@ -786,7 +795,7 @@ struct expression_traits<_Exp::EwiseBinaryExpr<T, U, _Op, true, false>> {
 	enum { options = _Exp::option<_Exp_tag::ewise>::value };
 	static constexpr auto rows = U::rows_at_compiletime;
 	static constexpr auto cols = U::cols_at_compiletime;
-	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
+	using auto_matrix_type = detail::Matrix_<value_type, rows, cols>;
 };
 template<typename T, typename U, typename _Op>
 struct expression_traits<_Exp::EwiseBinaryExpr<T, U, _Op, false, true>> {
@@ -795,7 +804,7 @@ struct expression_traits<_Exp::EwiseBinaryExpr<T, U, _Op, false, true>> {
 	enum { options = _Exp::option<_Exp_tag::ewise>::value };
 	static constexpr auto rows = T::rows_at_compiletime;
 	static constexpr auto cols = T::cols_at_compiletime;
-	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
+	using auto_matrix_type = detail::Matrix_<value_type, rows, cols>;
 };
 
 template<typename T, typename _Op>
@@ -805,18 +814,16 @@ struct expression_traits<_Exp::EwiseUnaryExpr<T, _Op>> {
 	enum { options = expression_options<_Op>::value };
 	static constexpr auto rows = T::rows_at_compiletime;
 	static constexpr auto cols = T::cols_at_compiletime;
-	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
+	using auto_matrix_type = detail::Matrix_<value_type, rows, cols>;
 };
 template<typename T, typename U, typename _Op>
 struct expression_traits<_Exp::MatBinaryExpr<T, U, _Op>> {
 	using type = _Exp::MatBinaryExpr<T, U, _Op>;
 	using value_type = common_type_t<typename T::value_t, typename U::value_t>;
 	enum { options = expression_options<_Op>::value };
-	//static constexpr auto rows = conditional_size_v<T::rows_at_compiletime <= 0 || U::rows_at_compiletime <= 0, 0, max_integer_v<T::rows_at_compiletime, 0>>;
-	//static constexpr auto cols = conditional_size_v<T::cols_at_compiletime <= 0 || U::cols_at_compiletime <= 0, 0, max_integer_v<U::cols_at_compiletime, 0>>;
 	static constexpr auto rows = T::rows_at_compiletime;
 	static constexpr auto cols = U::cols_at_compiletime;
-	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
+	using auto_matrix_type = detail::Matrix_<value_type, rows, cols>;
 };
 template<typename T, typename _Op>
 struct expression_traits<_Exp::MatUnaryExpr<T, _Op>> {
@@ -825,7 +832,7 @@ struct expression_traits<_Exp::MatUnaryExpr<T, _Op>> {
 	enum { options = expression_options<_Op>::value };
 	static constexpr auto rows = conditional_size_v<(options & _Exp_tag::trp) == _Exp_tag::trp, T::cols_at_compiletime, T::rows_at_compiletime>;
 	static constexpr auto cols = conditional_size_v<(options & _Exp_tag::trp) == _Exp_tag::trp, T::rows_at_compiletime, T::cols_at_compiletime>;
-	using auto_matrix_type = types::Matrix_<value_type, rows, cols>;
+	using auto_matrix_type = detail::Matrix_<value_type, rows, cols>;
 };
 
 using exprs::Expr;
@@ -927,17 +934,6 @@ template<
 	typename _Op = _Exp_op::_Accum_exp<_Rhs>>
 	MATRICE_GLOBAL_FINL auto accum(const _Rhs& _right, _Op&& _op = _Op()) {
 	return _op(_right);
-}
-
-template<typename _Op>
-MATRICE_GLOBAL_INL auto _Exp::Base_<_Op>::var() const {
-	const auto _Avg = this->avg();
-	auto _Diff = _Exp::EwiseBinaryExpr<
-		derived_t, decltype(_Avg),
-		_Exp_op::_Ewise_sub<value_t>>(
-			*static_cast<const derived_t*>(this), 
-			_Avg);
-	return (_Diff*_Diff).avg();
 }
 
 #ifdef _MSC_VER

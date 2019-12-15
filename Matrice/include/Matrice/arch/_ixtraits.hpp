@@ -1,6 +1,6 @@
 #pragma once
-#include "../private/_type_traits.h"
-#include "../util/_macros.h"
+#include "private/_type_traits.h"
+#include "util/_macros.h"
 
 #ifdef MATRICE_SIMD_ARCH
 #include <mmintrin.h>    //_m64
@@ -55,7 +55,7 @@ template<> struct packet_size<double> {
 };
 
 template<typename T>
-MATRICE_HOST_INL constexpr int packet_size_v = packet_size<T>::value;
+MATRICE_HOST_INL constexpr auto packet_size_v = packet_size<T>::value;
 
 template<typename T, int _Elems> struct simd_traits
 {

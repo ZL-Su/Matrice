@@ -16,8 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
-#include "../../util/genalgs.h"
-#ifdef __AVX__
+#include "util/genalgs.h"
+#ifdef MATRICE_SIMD_ARCH
 #include "../ixpacket.h"
 MATRICE_ARCH_BEGIN
 template<typename T, int _Elems> MATRICE_HOST_FINL

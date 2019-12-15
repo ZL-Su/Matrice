@@ -62,7 +62,7 @@ template<size_t _P> struct _Matrix_norm_impl {
 
 		auto _Ret = typename _Mty::value_type(0);
 		for(const auto& _Val : _A){ 
-			_Ret += detail::_Powers_n<_P>::value(abs(_Val)); 
+			_Ret += detail::_Power_n<_P>::value(abs(_Val)); 
 		};
 		return (pow(_Ret, decltype(_Ret)(1)/_P));
 	}
@@ -100,4 +100,9 @@ template<> struct _Matrix_norm_impl<1> {
 
 _INTERNAL_END
 
+_DETAIL_BEGIN
+template<class _Mty, class _Tag> class _Matrix_fact {};
+_DETAIL_END
+
 DGE_MATRICE_END
+#include "inl/_matrix_op.inl"

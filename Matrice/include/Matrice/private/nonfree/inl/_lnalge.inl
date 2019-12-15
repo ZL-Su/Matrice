@@ -207,7 +207,7 @@ struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 	 */
 	MATRICE_HOST_INL static int spd(pointer _A, const size_type& _Size) {
 		const auto[M, N] = _Size;
-#ifdef _DEBUG
+#ifdef MATRICE_DEBUG
 		DGELOM_CHECK(M == N, "Non-sqaure matrix _A in _Lapack_kernel_impl<float>::spd(...).");
 #endif // _DEBUG
 
@@ -247,7 +247,7 @@ struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 	 * \Output: $_B := \text(solutions) X$
 	 */
 	MATRICE_HOST_INL static int slv(const plview_type& _A, const plview_type& _B) {
-#ifdef _DEBUG
+#ifdef MATRICE_DEBUG
 		DGELOM_CHECK(get<0>(_A) == get<1>(_A),"Non-sqaure matrix _A in _Lapack_kernel_impl<float>::slv(...).");
 		DGELOM_CHECK(get<1>(_A) == get<0>(_B),"Columns of _A .NEQ. rows of _B in _Lapack_kernel_impl<float>::slv(...).");
 #endif
@@ -323,7 +323,7 @@ template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double>
 	 * \Output: $_B := \text(solutions) X$
 	 */
 	MATRICE_HOST_INL static int slv(const plview_type& _A, const plview_type& _B) {
-#ifdef _DEBUG
+#ifdef MATRICE_DEBUG
 		DGELOM_CHECK(get<0>(_A) != get<1>(_A), "Non-sqaure matrix _A in _Lapack_kernel_impl<float>::slv(...).");
 		DGELOM_CHECK(get<1>(_A) != get<0>(_B), "Columns of _A .NEQ. rows of _B in _Lapack_kernel_impl<float>::slv(...).");
 #endif
@@ -348,7 +348,7 @@ template<> struct _Lapack_backward_impl<solver_type::CHD> {
 		using iterator = typename _Lhs::iterator;
 		using value_type = typename _Lhs::value_type;
 		const int M = _A.rows(), N = _A.cols(), NRhs = _X.cols();
-#ifdef _DEBUG
+#ifdef MATRICE_DEBUG
 		DGELOM_CHECK(M == N, "The coeff. _A in _Lapack_backward_impl<solver_type::CHD> must be a square matrix.");
 #endif
 

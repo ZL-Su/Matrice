@@ -17,11 +17,13 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 ****************************************************************************/
 #pragma once
 #include <type_traits>
-#include "../private/_range.h"
-#include "../algs/interpolation.h"
+#include <random>
+#include "../forward.hpp"
+#include "algs/forward.hpp"
+#include "private/_range.h"
 
 DGE_MATRICE_BEGIN
-
+_DETAIL_BEGIN
 template<typename _Pixty, MATRICE_ENABLE_IF(is_arithmetic_v<_Pixty>)>
 void _Grayscale_stretch(_Pixty* Img, size_t rows, size_t cols) {
 	using pixel_t = _Pixty;
@@ -31,14 +33,68 @@ void _Grayscale_stretch(_Pixty* Img, size_t rows, size_t cols) {
 	iterator _Begin = Img, _End = Img + N;
 
 	pixel_t _Max = pixel_t(0), _Min = pixel_t(255);
-	for (; _Begin != _End; ++_Begin) {
+	for (; _Begin != _End; (void)++_Begin) {
 		_Max = _Max > *_Begin ? _Max : *_Begin;
 		_Min = _Min < *_Begin ? _Min : *_Begin;
 	}
 
 	float_t _Scal = 255.f / float_t(_Max - _Min);
-	for (_Begin -= N; _Begin != _End; ++_Begin)
+	for (_Begin -= N; _Begin != _End; (void)++_Begin)
 		*_Begin = pixel_t(_Scal * (*_Begin - _Min));
+}
+template<typename _Pixty, MATRICE_ENABLE_IF(is_scalar_v<_Pixty>)>
+void _Add_gaussian_noise(Matrix_<_Pixty, ::dynamic>& _Img, float _Sig) {
+	std::random_device rd{}; std::mt19937 gen{ rd() };
+	normal_distribution<decltype(_Sig)> r{ 0, _Sig };
+	_Img.parallel_each([&r, &gen](auto& val) {
+		const auto _Noise = r(gen);
+		//if constexpr (is_integral_v<_Pixty>) _Noise *= 255;
+		val = round(val+_Noise);
+		if (val < 0) return zero<_Pixty>;
+		else if (val > conditional_size_v<is_integral_v<_Pixty>, 255, 1>)
+			return _Pixty(conditional_size_v<is_integral_v<_Pixty>, 255, 1>);
+		else return val;
+	});
+}
+template<class _ItpTag = bicerp_tag, typename _Pixty = uint8_t, MATRICE_ENABLE_IF(is_scalar_v<_Pixty>)>
+auto _Image_resize(const Matrix_<_Pixty, ::dynamic>& _Img, shape_t<size_t> _Size) {
+	using value_type = conditional_t<is_integral_v<_Pixty>, float, _Pixty>;
+	Matrix_<value_type, ::dynamic> _Space;
+	auto _Scale = one<value_type>;
+	if constexpr (is_floating_point_v<_Pixty>) {
+		_Space = decltype(space)(_Img.shape(), _Img.data());
+	}
+	else {
+		_Space.create(_Img.shape());
+		_Scale = 1 / value_type(255);
+		_Space.from(_Img.data(), [_Scale](auto _Val) {return _Val*_Scale; });
+	}
+	interpolation<value_type,_ItpTag> _Itp(_Space);
+
+	_Scale = 1 / _Scale;
+	const auto[_W, _H] = _Size;
+	const auto _Scale_x = _Img.cols() / value_type(_W);
+	const auto _Scale_y = _Img.rows() / value_type(_H);
+	Matrix_<_Pixty, ::dynamic> _Ret(_H, _W, 0);
+	for (auto y = 0; y < _H-1; ++y) {
+		auto _Rptr = _Ret[y];
+		for (auto x = 0; x < _W-1; ++x) {
+			_Rptr[x] = _Itp((x + 0.5f)*_Scale_x, (y + 0.5f)*_Scale_y)*_Scale;
+		}
+	}
+	return forward<decltype(_Ret)>(_Ret);
+}
+_DETAIL_END
+template<typename _Ty>
+inline auto imnoise(Matrix_<_Ty, ::dynamic>&& _Img, float _Sigma = 1) {
+	auto _Noise = forward<remove_all_t<decltype(_Img)>>(_Img);
+	detail::_Add_gaussian_noise(_Noise, _Sigma);
+	return forward<decltype(_Noise)>(_Noise);
+}
+
+template<class _ItpTag = bicerp_tag, typename _Ty = uint8_t>
+inline auto resize(const Matrix_<_Ty, ::dynamic>& _Img, shape_t<size_t> _Size) {
+	return detail::_Image_resize<_ItpTag>(_Img, _Size);
 }
 
 namespace types { 
@@ -67,8 +123,8 @@ template<typename _Ty, typename _Tag> class _Gradient_impl;
 template<typename _Ty, typename _Tag>
 struct gradient_traits<_Gradient_impl<_Ty, _Tag>> {
 	using value_type = _Ty;
-	using image_type = types::Matrix_<value_type, 0, 0>;
-	using matrix_type = types::Matrix_<value_type, 0, 0>;
+	using image_type = Matrix_<value_type, ::dynamic>;
+	using matrix_type = Matrix_<value_type, ::dynamic>;
 	using category = _Tag;
 };
 

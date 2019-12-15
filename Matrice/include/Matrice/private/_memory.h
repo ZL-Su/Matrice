@@ -20,6 +20,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <xutility>
 #include "_tag_defs.h"
 #include "_type_traits.h"
+#include "storage/forward.hpp"
 
 #if MATRICE_SIMD_ARCH == MATRICE_SIMD_AVX
 #define MATRICE_ALIGN_BYTES   0x0020
@@ -36,31 +37,31 @@ DGE_MATRICE_BEGIN
 #define MATRICE_ALIGNED(TYPE) alignas(MATRICE_ALIGN_BYTES)##TYPE
 #endif
 
-enum Location { 
-	UnSpecified = -1, 
-	OnStack = 0, 
-	OnHeap = 1, 
+enum Location {
+	UnSpecified = -1,
+	OnStack = 0,
+	OnHeap = 1,
 #ifdef MATRICE_ENABLE_CUDA
-	OnDevice = 2, 
+	OnDevice = 2,
 	OnGlobal = 3,
 #endif
 };
-using loctn_t = Location; using memloc_t = Location;
-
-enum { 
-	COPY = 1001, 
-	MOVE = 1002, 
-	SHARED = 1000 
+enum {
+	COPY = 1001,
+	MOVE = 1002,
+	SHARED = 1000
 };
-enum { 
+enum {
 	LINEAR = 8000,
 #ifdef MATRICE_ENABLE_CUDA
-	PITCHED = 8001, 
-	ARRTARR = 8002, 
-	FROMARR = 8003, 
+	PITCHED = 8001,
+	ARRTARR = 8002,
+	FROMARR = 8003,
 	TOARRAY = 8004,
 #endif
 };
+
+using loctn_t = Location; using memloc_t = Location;
 
 namespace privt {
 template<typename _Vty, typename _Ity> _Vty* aligned_malloc(_Ity size);
@@ -159,18 +160,6 @@ MATRICE_HOST_INL static _OutIt copy(_InIt _First, _InIt _Last, _OutIt _Dest) {
 
 };
 }
-
-struct stack_alloc_tag {};
-struct heap_alloc_tag {};
-#ifdef MATRICE_ENABLE_CUDA
-struct device_alloc_tag {};
-struct global_alloc_tag {};
-#endif
-
-struct plain_layout {
-	struct row_major { static constexpr auto value = 101; };
-	struct col_major { static constexpr auto value = 102; };
-};
 
 namespace internal {
 template<typename _Ty, class _Tag>

@@ -30,17 +30,13 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #define MATRICE_SHARED_STORAGE 0
 #endif //enable shared memory allocator
 
+#define MATRICE_SIMD_DISABLE 0
 #define MATRICE_SIMD_SSE    2 //*\SIMD-128
 #define MATRICE_SIMD_AVX    3 //*\SIMD-256
 #define MATRICE_SIMD_AVX512 4 //*\SIMD-512
 
-#ifndef MATRICE_SIMD_ARCH
-#define MATRICE_SIMD_ARCH MATRICE_SIMD_AVX
-#endif
-
 #define MATRICE_USE_NAT     0 //*\use native kernel code
 #define MATRICE_USE_MKL     1 //*\use intel mkl lib
-
 
 #ifdef MATRICE_USE_OPENCV
 #ifndef __use_ocv_as_view__
@@ -76,23 +72,26 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #define MATRICE_NAMESPACE_BEGIN_ namespace dgelom {
-#define _MATRICE_NAMESPACE_END                   }
+#define _MATRICE_NAMESPACE_END }
+
 #define DGE_MATRICE_BEGIN namespace dgelom {
 #define DGE_MATRICE_END }
-#define MATRICE_NAMESPACE_BEGIN_TYPES MATRICE_NAMESPACE_BEGIN_ namespace types {
-#define MATRICE_NAMESPACE_END_TYPES  } _MATRICE_NAMESPACE_END
-#define MATRICE_NAMESPACE_EXPR_BEGIN MATRICE_NAMESPACE_BEGIN_ namespace exprs {
-#define MATRICE_NAMESPACE_EXPR_END MATRICE_NAMESPACE_END_TYPES
-#define MATRICE_DEVICE_BEGIN MATRICE_NAMESPACE_BEGIN_ namespace device {
-#define MATRICE_DEVICE_END  } _MATRICE_NAMESPACE_END
-#define MATRICE_PRIVATE_BEGIN MATRICE_NAMESPACE_BEGIN_ namespace privt {
-#define MATRICE_PRIVATE_END  } _MATRICE_NAMESPACE_END
-#define MATRICE_ALGS_BEGIN MATRICE_NAMESPACE_BEGIN_ namespace algs {
-#define MATRICE_ALGS_END  } _MATRICE_NAMESPACE_END
-#define MATRICE_ARCH_BEGIN MATRICE_NAMESPACE_BEGIN_ namespace simd {
-#define MATRICE_ARCH_END   } _MATRICE_NAMESPACE_END
-#define _TYPES_BEGIN namespace types {
-#define _TYPES_END }
+
+#define MATRICE_EXPR_BEGIN DGE_MATRICE_BEGIN namespace exprs {
+#define MATRICE_EXPR_END } DGE_MATRICE_END
+
+#define MATRICE_DEVICE_BEGIN DGE_MATRICE_BEGIN namespace device {
+#define MATRICE_DEVICE_END  } DGE_MATRICE_END
+
+#define MATRICE_PRIVATE_BEGIN DGE_MATRICE_BEGIN namespace privt {
+#define MATRICE_PRIVATE_END  } DGE_MATRICE_END
+
+#define MATRICE_ALGS_BEGIN DGE_MATRICE_BEGIN namespace algs {
+#define MATRICE_ALGS_END  } DGE_MATRICE_END
+
+#define MATRICE_ARCH_BEGIN DGE_MATRICE_BEGIN namespace simd {
+#define MATRICE_ARCH_END   } DGE_MATRICE_END
+
 #define _CONDITIONS_BEGIN namespace conds {
 #define _CONDITIONS_END }
 #define _DETAIL_BEGIN namespace detail {
@@ -114,5 +113,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #ifndef MATRICE_DEBUG
 #ifdef _DEBUG
 #define MATRICE_DEBUG
+#endif
+#endif
+
+#ifdef _MSC_VER
+#ifndef _ENABLE_EXTENDED_ALIGNED_STORAGE
+#define _ENABLE_EXTENDED_ALIGNED_STORAGE
 #endif
 #endif

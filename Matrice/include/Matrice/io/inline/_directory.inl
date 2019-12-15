@@ -1,6 +1,7 @@
 /*********************************************************************
 	  About License Agreement of this file, see "../lic/license.h"
 *********************************************************************/
+#pragma once
 #include "../io.hpp"
 
 DGE_MATRICE_BEGIN namespace io { _DETAIL_BEGIN

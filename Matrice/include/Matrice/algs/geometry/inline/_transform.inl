@@ -20,34 +20,6 @@ template<> struct _Axis_type<2, 3> {
 	}
 };
 
-template<typename _Ty> struct _Avxmat4_ {
-	using type = simd::Packet_<_Ty, 4>;
-	using iterator = typename type::pointer;
-	MATRICE_HOST_INL _Avxmat4_(const iterator _Data)
-		:_pa(_Data), 
-		_pb(_Data + type::size), 
-		_pc(_Data + type::size*2),
-		_pd(_Data + type::size*3){}
-	MATRICE_HOST_INL _Avxmat4_(const iterator _Data, size_t)
-		: _pa(_Data), _pb(_Data + 3), _pc(_Data + 6), _pd({ 0,0,0,1 }) {}
-
-	template<size_t _N>
-	MATRICE_HOST_INL auto mul(iterator _Data) {
-		type pd(_Data);
-		if constexpr (_N == ~-type::size) {
-			pd[3] = typename type::value_t(1);
-		}
-		_Data[0] = simd::reduce(_pa*pd);
-		_Data[1] = simd::reduce(_pb*pd);
-		_Data[2] = simd::reduce(_pc*pd);
-		if constexpr (_N == type::size) {
-			_Data[3] = simd::reduce(_pd*pd);
-		}
-	}
-
-	type _pa, _pb, _pc, _pd;
-};
-
 template<typename _Ty> class _Axis_angle_rep<_Ty, 3> {
 public:
 	using angle_type = _Ty;
@@ -78,6 +50,35 @@ public:
 	}
 private:
 	tuple<axis_type, angle_type> _Data;
+};
+
+#ifdef MATRICE_SIMD_ARCH
+template<typename _Ty> struct _Avxmat4_ {
+	using type = simd::Packet_<_Ty, 4>;
+	using iterator = typename type::pointer;
+	MATRICE_HOST_INL _Avxmat4_(const iterator _Data)
+		:_pa(_Data),
+		_pb(_Data + type::size),
+		_pc(_Data + type::size * 2),
+		_pd(_Data + type::size * 3) {}
+	MATRICE_HOST_INL _Avxmat4_(const iterator _Data, size_t)
+		: _pa(_Data), _pb(_Data + 3), _pc(_Data + 6), _pd({ 0,0,0,1 }) {}
+
+	template<size_t _N>
+	MATRICE_HOST_INL auto mul(iterator _Data) {
+		type pd(_Data);
+		if constexpr (_N == ~- type::size) {
+			pd[3] = typename type::value_t(1);
+		}
+		_Data[0] = simd::reduce(_pa*pd);
+		_Data[1] = simd::reduce(_pb*pd);
+		_Data[2] = simd::reduce(_pc*pd);
+		if constexpr (_N == type::size) {
+			_Data[3] = simd::reduce(_pd*pd);
+		}
+	}
+
+	type _pa, _pb, _pc, _pd;
 };
 
 template<typename _Ty> struct _Geotf_base {
@@ -153,5 +154,6 @@ public:
 	using _Mybase::operator();
 private:
 };
+#endif
 
 DGE_MATRICE_END

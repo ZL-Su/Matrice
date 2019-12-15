@@ -16,9 +16,30 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
-#include <util/_macros.h>
+#include "util/_macros.h"
+
+namespace {
+	static constexpr int dynamic = 0;
+#ifdef MATRICE_ENABLE_CUDA
+	static constexpr int device = -1;
+	static constexpr int global = -2;
+#endif
+	static constexpr int extent_x = 0;
+	static constexpr int extent_y = 1;
+}
 
 DGE_MATRICE_BEGIN
+struct stack_alloc_tag {};
+struct heap_alloc_tag {};
+#ifdef MATRICE_ENABLE_CUDA
+struct device_alloc_tag {};
+struct global_alloc_tag {};
+#endif
+
+struct plain_layout {
+	struct row_major { static constexpr auto value = 101; };
+	struct col_major { static constexpr auto value = 102; };
+};
 _DETAIL_BEGIN
 template<typename _Ty, diff_t _M, diff_t _N, size_t _Opt, typename _Layout> class _Allocator;
 _DETAIL_END

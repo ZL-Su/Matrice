@@ -24,33 +24,45 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 DGE_MATRICE_BEGIN
 _CONDITIONS_BEGIN
 
+#ifndef MATRICE_REQUIRES(_Cond)
+#define MATRICE_REQUIRES(_Cond) \
+template<MATRICE_ENABLE_IF((_Cond))>
+#endif
+
 // \condition expression: _Test_val satisfies _Bool_exp, for exampe _My_val < _Test_val 
-#ifndef _COND_VAL(_Bool_exp)
-#define _COND_VAL(_Bool_exp) [](const auto& _My_val){return (_My_val _Bool_exp);}
+#ifndef MATRICE_COND_VAL(_Bool_exp)
+#define MATRICE_COND_VAL(_Bool_exp) \
+[](const auto& _My_val){return (_My_val _Bool_exp);}
 #endif
 
-#ifndef _COND_LT(_Test_val)
-#define _COND_LT(_Test_val) _COND_VAL(<_Test_val) //\less than _Test_val
+#ifndef MATRICE_COND_LT(_Test_val)
+#define MATRICE_COND_LT(_Test_val) \
+MATRICE_COND_VAL(<_Test_val) //\less than _Test_val
 #endif
 
-#ifndef _COND_LQ(_Test_val)
-#define _COND_LQ(_Test_val) _COND_VAL(<=_Test_val) //\less than or equal to _Test_val
+#ifndef MATRICE_COND_LQ(_Test_val)
+#define MATRICE_COND_LQ(_Test_val) \
+MATRICE_COND_VAL(<=_Test_val) //\less than or equal to _Test_val
 #endif
 
-#ifndef _COND_EQ(_Test_val)
-#define _COND_EQ(_Test_val) _COND_VAL(==_Test_val) //\equal to _Test_val
+#ifndef MATRICE_COND_EQ(_Test_val)
+#define MATRICE_COND_EQ(_Test_val) \
+MATRICE_COND_VAL(==_Test_val) //\equal to _Test_val
 #endif
 
-#ifndef _COND_GT(_Test_val)
-#define _COND_GT(_Test_val) _COND_VAL(>_Test_val) //\greater than _Test_val
+#ifndef MATRICE_COND_GT(_Test_val)
+#define MATRICE_COND_GT(_Test_val) \
+MATRICE_COND_VAL(>_Test_val) //\greater than _Test_val
 #endif
 
 #ifndef _COND_GQ(_Test_val)
-#define _COND_GQ(_Test_val) _COND_VAL(>=_Test_val) //\greater than or equal to _Test_val
+#define MATRICE_COND_GQ(_Test_val) \
+_COND_VAL(>=_Test_val) //\greater than or equal to _Test_val
 #endif
 
-#ifndef _COND_EXCEPTION(_Test, _Msg)
-#define _COND_EXCEPTION(_Test, _Msg) if(_Test)throw std::exception(_Msg);
+#ifndef MATRICE_COND_EXCEPTION(_Test, _Msg)
+#define MATRICE_COND_EXCEPTION(_Test, _Msg) \
+if(_Test)throw std::exception(_Msg);
 #endif
 
 _CONDITIONS_END

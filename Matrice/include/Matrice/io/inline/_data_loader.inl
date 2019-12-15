@@ -1,6 +1,7 @@
 /*********************************************************************
 	  About License Agreement of this file, see "../lic/license.h"
 *********************************************************************/
+#pragma once
 #include "../io.hpp"
 #include "../../util/_exception.h"
 #include "../../util/_std_wrapper.h"
@@ -76,8 +77,8 @@ public:
 	 */
 	MATRICE_HOST_INL decltype(auto) shift(index_t _Off) const {
 		_Mypos += _Off;
-#ifdef _DEBUG
-		_COND_EXCEPTION(end() || rend(),
+#ifdef MATRICE_DEBUG
+		MATRICE_COND_EXCEPTION(end() || rend(),
 			"_Off over range of loader depth")
 #endif
 			return (*this);
@@ -113,14 +114,14 @@ public:
 	 * \return all file names in _Idx-th subfolder for currenct work path
 	 */
 	MATRICE_HOST_FINL directory_type::container& file_names(size_t _Idx) {
-#ifdef _DEBUG
+#ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_Idx < _Mynames.size(), "_Idx over range of field ::_Mynames.");
 #endif // _DEBUG
 
 		return (_Mynames)[_Idx];
 	}
 	MATRICE_HOST_FINL const directory_type::container& file_names(size_t _Idx) const {
-#ifdef _DEBUG
+#ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_Idx < _Mynames.size(), "_Idx over range of field ::_Mynames.");
 #endif // _DEBUG
 		return (_Mynames)[_Idx];
@@ -251,8 +252,8 @@ public:
 	 */
 	MATRICE_HOST_INL decltype(auto) shift(index_t _Off) const {
 		_Mypos += _Off;
-#ifdef _DEBUG
-		_COND_EXCEPTION(end()||rend(),
+#ifdef MATRICE_DEBUG
+		MATRICE_COND_EXCEPTION(end()||rend(),
 			"_Off over range of loader depth")
 #endif
 			return (*this);
@@ -266,10 +267,14 @@ public:
 		const auto _Size = _Mydir.size() == 0 ? 1 : _Mydir.size();
 		for (const auto& _Idx : range(0, _Size)) {
 			const auto& _Names = _Mynames[_Idx];
-#ifdef _DEBUG
+#ifdef MATRICE_DEBUG
 			DGELOM_CHECK(_Mypos<_Names.size(), "file list subscript out of range.");
 #endif
-			_Data.emplace_back(_Myloader(_Mydir[_Idx] + _Names[_Mypos]));
+			auto _File = _Myloader(_Mydir[_Idx] + _Names[_Mypos]);
+			if (_File.size() != 0)
+				_Data.emplace_back(_File);
+			else
+				continue;
 		}
 		_Mypos++;
 		return std::forward<decltype(_Data)>(_Data);
@@ -284,7 +289,9 @@ public:
 		std::vector<remove_all_t<decltype(_First)>> _Data;
 		_Data.emplace_back(_First);
 		for (const auto& _Idx : range(1, _Mydir.size()-1)) {
-			_Data.emplace_back(_Op(_Idx));
+			auto _File = _Op(_Idx);
+			if(_File.size()!=0) _Data.emplace_back(_File);
+			else continue;
 		}
 		_Mypos++;
 		return std::forward<decltype(_Data)>(_Data);
@@ -333,10 +340,12 @@ public:
 		const auto _Size = _Mydir.size()==0?1:_Mydir.size();
 		for (const auto& _Idx : range(0, _Size)) {
 			const auto& _Names = _Mynames[_Idx];
-#ifdef _DEBUG
+#ifdef MATRICE_DEBUG
 			DGELOM_CHECK(i < _Names.size(), "file list subscript out of range.");
 #endif
-			_Data.emplace_back(_Myloader(_Mydir[_Idx]+_Names[i]));
+			auto _File = _Myloader(_Mydir[_Idx] + _Names[i]);
+			if(_File) 
+				_Data.push_back(_File);
 		}
 		return std::forward<decltype(_Data)>(_Data);
 	}
@@ -371,16 +380,16 @@ public:
 	 * \return all file names in _Idx-th subfolder for currenct work path
 	 */
 	MATRICE_HOST_FINL _Mydir_type::container& file_names(size_t _Idx) {
-#ifdef _DEBUG
-		DGELOM_CHECK(_Idx<_Mynames.size(), "_Idx over range of field ::_Mynames.");
-#endif // _DEBUG
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(_Idx < _Mynames.size(), "_Idx over range of field ::_Mynames.");
+#endif
 
 		return (_Mynames)[_Idx];
 	}
 	MATRICE_HOST_FINL const _Mydir_type::container& file_names(size_t _Idx) const {
-#ifdef _DEBUG
-		DGELOM_CHECK(_Idx<_Mynames.size(), "_Idx over range of field ::_Mynames.");
-#endif // _DEBUG
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(_Idx < _Mynames.size(), "_Idx over range of field ::_Mynames.");
+#endif
 		return (_Mynames)[_Idx];
 	}
 
@@ -427,7 +436,9 @@ struct _Loader_impl<_Ty, loader_tag::tiff> {
 	using category = loader_tag::tiff;
 
 	MATRICE_HOST_INL decltype(auto) operator()(std::string path) {
-		return read_tiff_file<value_type>(path.c_str());
+		if(string_helper::split(path, '.').back() == "tif")
+			return read_tiff_file<value_type>(path.c_str());
+		else return tiff_instance<value_type>();
 	}
 };
 _DETAIL_END } DGE_MATRICE_END

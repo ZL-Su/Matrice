@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -17,22 +17,22 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 #include <valarray>
-#include "../util/utils.h"
+#include "util/utils.h"
 
 DGE_MATRICE_BEGIN
-_TYPES_BEGIN
+_DETAIL_BEGIN
 #define _VIEW_EWISE_COPY_N(_LEFT, _N)\
-DGELOM_CHECK(_N <= size(), "matrix size over range of current view."); \
-size_t _Size = (_N==0) ? size() : _N; \
+const size_t _Size = min(size(),_N); \
 for(size_t _Idx = 0; _Idx < _Size; ++_Idx) { \
 	_LEFT(_Idx) = this->operator()(_Idx); \
 }
-template<typename _Ty, int _Rows, int _cols> class Matrix_;
+template<typename _Ty, int _Rows, int _Cols> class Matrix_;
 /**********************************************************************
 						       Matrix view base class 
 	    Copyright (c) : Zhilong (Dgelom) Su, since 25/Jul/2018
  **********************************************************************/
-template<typename _Ty, typename _Derived> class _View_base 
+template<typename _Ty, typename _Derived, int _M = 0, int _N = _M> 
+class _View_base 
 {
 #define _VIEW_EWISE_OP(_OPERATION) \
 for (difference_type i = 0; i < size(); ++i) {\
@@ -52,7 +52,7 @@ public:
 	using difference_type = std::ptrdiff_t;
 	using pointer = std::add_pointer_t<value_type>;
 	using reference = std::add_lvalue_reference_t<value_type>;
-	enum { rows_at_compiletime = 0, cols_at_compiletime = 0 };
+	enum { rows_at_compiletime = _M, cols_at_compiletime = _N };
 	struct range_type
 	{
 		// _Rang = {from_x, from_y, end_x, end_y} : [from_x, end_x), [from_y, end_y)
@@ -199,10 +199,10 @@ protected:
 						      Row view for Matrix 
 	    Copyright (c) : Zhilong (Dgelom) Su, since 25/Jul/2018
  **********************************************************************/
-template<typename _Ty, MATRICE_ENABLE_IF(is_arithmetic_v<_Ty>)>
-class _Matrix_rview MATRICE_NONHERITABLE : public _View_base<_Ty, _Matrix_rview<_Ty>>
+template<typename _Ty, int _Cols = ::dynamic>
+class _Matrix_rview MATRICE_NONHERITABLE : public _View_base<_Ty, _Matrix_rview<_Ty, _Cols>, 1, _Cols>
 {
-	using _Base = _View_base<_Ty, _Matrix_rview<_Ty>>;
+	using _Base = _View_base<_Ty, _Matrix_rview, 1, _Cols>;
 	using _Base::_My_data;
 	using _Base::_My_size;
 	using _Base::_My_stride;
@@ -227,10 +227,10 @@ public:
 	/**
 	 *\Retrieve the first _N element into a true static row-matrix.
 	 */
-	template<size_t _N=0> 
+	template<size_t N=_Base::cols_at_compiletime> 
 	MATRICE_GLOBAL_FINL auto eval() const {
-		Matrix_<value_t, min(_N, 1), _N> _Ret(1, _My_size);
-		_VIEW_EWISE_COPY_N(_Ret, _N)
+		Matrix_<value_t, 1, min_integer_v<N, _Base::cols_at_compiletime>> _Ret(1, cols());
+		_VIEW_EWISE_COPY_N(_Ret, N);
 		return forward<decltype(_Ret)>(_Ret);
 	}
 };
@@ -239,10 +239,10 @@ public:
 						     Column view for Matrix 
 	    Copyright (c) : Zhilong (Dgelom) Su, since 25/Jul/2018
  **********************************************************************/
-template<typename _Ty, MATRICE_ENABLE_IF(is_arithmetic_v<_Ty>)>
-class _Matrix_cview MATRICE_NONHERITABLE : public _View_base<_Ty, _Matrix_cview<_Ty>>
+template<typename _Ty, int _Rows = ::dynamic>
+class _Matrix_cview MATRICE_NONHERITABLE : public _View_base<_Ty, _Matrix_cview<_Ty, _Rows>, _Rows, 1>
 {
-	using _Base = _View_base<_Ty, _Matrix_cview<_Ty>>;
+	using _Base = _View_base<_Ty, _Matrix_cview, _Rows, 1>;
 	using _Base::_My_data;
 	using _Base::_My_size;
 	using _Base::_My_stride;
@@ -267,10 +267,10 @@ public:
 	/**
 	 *\Retrieve the first _N element into a true static column-matrix.
 	 */
-	template<size_t _N=0> 
+	template<size_t N= _Base::rows_at_compiletime>
 	MATRICE_GLOBAL_FINL auto eval() const {
-		Matrix_<value_t, _N, min(_N, 1)> _Ret(_My_size, 1);
-		_VIEW_EWISE_COPY_N(_Ret, _N)
+		Matrix_<value_t, min_integer_v<N, _Base::rows_at_compiletime>, 1> _Ret(rows(), 1);
+		_VIEW_EWISE_COPY_N(_Ret, N);
 		return std::forward<decltype(_Ret)>(_Ret);
 	}
 };
@@ -279,7 +279,7 @@ public:
 						      Block view for Matrix 
 	    Copyright (c) : Zhilong (Dgelom) Su, since 25/Jul/2018
  **********************************************************************/
-template<typename _Ty, MATRICE_ENABLE_IF(is_arithmetic_v<_Ty>)>
+template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 class _Matrix_block MATRICE_NONHERITABLE : public _View_base<_Ty, _Matrix_block<_Ty>>
 {
 	using _Base = _View_base<_Ty, _Matrix_block<_Ty>>;
@@ -384,5 +384,5 @@ private:
 };
 
 #undef _VIEW_EWISE_COPY_N
-_TYPES_END
+_DETAIL_END
 DGE_MATRICE_END

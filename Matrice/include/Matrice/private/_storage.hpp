@@ -19,7 +19,6 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <memory>
-#include "util/_macros.h"
 #include "private/_memory.h"
 #include "private/_unified_memory.h"
 #include "private/_type_traits.h"
@@ -34,18 +33,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #ifndef MATRICE_ALIGNED_STRUCT
 #define MATRICE_ALIGNED_STRUCT class alignas(MATRICE_ALIGN_BYTES)
 #endif
-namespace {
-	static constexpr int dynamic = 0;
-#ifdef MATRICE_ENABLE_CUDA
-	static constexpr int device = -1;
-	static constexpr int global = -2;
-#endif
-}
 
 DGE_MATRICE_BEGIN
-template<int _M, int _N=_M> struct allocator_traits {
+template<int _M, int _N = _M> struct allocator_traits {
 	enum {
-		value = 
+		value =
 #ifdef MATRICE_ENABLE_CUDA
 		(_M == ::global && _N == ::global) ? LINEAR :  // linear device allocator
 		(_M == ::device && _N == ::device) ? PITCHED :  // pitched device allocator
@@ -57,9 +49,7 @@ template<int _M, int _N=_M> struct allocator_traits {
 #endif      
 	};
 };
-
 _DETAIL_BEGIN
-
 /**
  *\brief base class of dense allocator for plain objects.
  *\param <_Altrs> allocator traits
@@ -70,7 +60,7 @@ MATRICE_ALIGNED_CLASS _Dense_allocator_base {
 	using _Mytraits = _Altrs;
 public:
 	using value_type = typename _Mytraits::value_type;
-	using pointer = add_pointer_t<value_type>;
+	using pointer = value_type*;
 	using allocator = typename _Mytraits::type;
 	using category = typename _Mytraits::category;
 	static constexpr auto rows_at_compiletime = _Mytraits::rows;
@@ -79,6 +69,11 @@ public:
 	MATRICE_GLOBAL_INL _Dense_allocator_base()
 		:m_rows(rows_at_compiletime), m_cols(cols_at_compiletime){
 		derived()._Alloc();
+	}
+	MATRICE_GLOBAL_INL _Dense_allocator_base(const pointer data)
+		:m_rows(rows_at_compiletime), m_cols(cols_at_compiletime) {
+		static_assert(rows_at_compiletime*cols_at_compiletime > 0, "The ctor in _Dense_allocator_base<_Altrs> is only valid for stack malloc.");
+		(*this) = data;
 	}
 	MATRICE_GLOBAL_INL _Dense_allocator_base(size_t rows, size_t cols)
 		:m_rows(rows), m_cols(cols) {
@@ -91,10 +86,14 @@ public:
 	MATRICE_GLOBAL_INL _Dense_allocator_base(_Myt&& other) noexcept {
 		_Alloc_move(move(other));
 	}
-	template<typename _Al>
+	template<typename _Al, enable_if_t<is_not_same_v<_Al, allocator>>>
 	MATRICE_GLOBAL_INL _Dense_allocator_base(const _Al& other)
 		:_Dense_allocator_base(other.rows(), other.cols()){
 		_Alloc_copy(other);
+	}
+	template<typename _Al, enable_if_t<is_not_same_v<_Al, allocator>>>
+	MATRICE_GLOBAL_INL _Dense_allocator_base(_Al&& other) noexcept {
+		_Alloc_move(move(other));
 	}
 
 	/**
@@ -590,7 +589,7 @@ public:
 	};
 
 	//<brief> Managed host memory allocator </brief>
-	template<int _M, int _N=_M, size_t _Opt = allocator_traits<_M, _N>::value>
+	template<int _M, int _N=_M, size_t _Opt = allocator_traits_v<_M, _N>>
 	MATRICE_ALIGNED_CLASS Allocator {
 		using _Myt = Allocator;
 	public:

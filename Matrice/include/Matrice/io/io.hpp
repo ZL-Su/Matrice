@@ -16,7 +16,7 @@
 #include "../core/vector.h"
 #include "../util/utils.h"
 #include "../util/genalgs.h"
-#include "../util/_macro_conditions.h"
+#include "../util/_conditional_macros.h"
 #include "../util/_exception.h"
 #include "../private/_range.h"
 
@@ -350,6 +350,18 @@ MATRICE_HOST_INL decltype(auto) defpath(const T local) {
 	return forward<std::string>(IO::workspace().string() + "\\" + IO::strf(local)); 
 };
 
+template<typename _Ty, int _M, int _N>
+void print(const Matrix_<_Ty, _M, _N>& m) {
+	std::cout << "[\n[rows: " << m.rows() << "; cols: " << m.cols() << "]\n";
+	for (auto _It = m.rwbegin(); _It != m.rwend(); ++_It) {
+		for (auto _Vl : _It)
+			std::cout << std::setiosflags(std::ios::left)
+			<< std::setprecision(8) << std::setw(15) << _Vl;
+		std::cout << "\n";
+	}
+	std::cout << "]\n";
+}
+
 // \Class: std::string helper  
 // \Coded by: dgelom su
 class string_helper MATRICE_NONHERITABLE {
@@ -369,7 +381,7 @@ public:
 		auto _Str2 = string_helper::value_type("2,3,5");
 		auto _Items2 = string_helper::split<float>(_Str2,',');//{2.f, 3.f, 5.f}
 	 */
-	MATRICE_HOST_INL auto split(const value_type& _Str, basic_value_type _Tok) {
+	MATRICE_HOST_INL std::vector<_Ty> split(const value_type& _Str, basic_value_type _Tok) {
 		std::vector<_Ty> _Res;
 		const_value_type _String = value_type(1, _Tok) + _Str;
 
@@ -446,7 +458,7 @@ using data_loader_uint8 = data_loader<uint8_t>;
 using data_loader_uint32 = data_loader<uint32_t>;
 using data_loader_f32 = data_loader<float_t>;
 
-template<typename _Ty = float>
+template<typename _Ty = uint8_t>
 using tiff = detail::_Loader_impl<_Ty, detail::loader_tag::tiff>;
 
 template<size_t _N, typename _Cont>
@@ -455,9 +467,9 @@ MATRICE_HOST_FINL auto serial(const _Cont& _L) {
 	DGELOM_CHECK(_N<=_L.size(), "The size _N being serialized over range of _L.");
 	return tuple_n<_N - 1>::_(_L.data());
 }
-template<typename _Ty, class _Op>
+template<class _Op, typename _Vty = typename _Op::value_type>
 decltype(auto) make_loader(std::string path, _Op&& loader)noexcept {
-	using loader_type = io::data_loader<_Ty>;
+	using loader_type = io::data_loader<_Vty>;
 	return loader_type(io::directory{ path, io::path_t() }, loader);
 }
 }

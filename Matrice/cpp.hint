@@ -7,3 +7,5 @@
 #define _DETAIL_END }
 #define _INTERNAL_BEGIN namespace internal {
 #define MATRICE_GLOBAL_INL
+#define _VIEW_EWISE_COPY_N(_LEFT, _N) DGELOM_CHECK(_N <= size(), "matrix size over range of current view."); size_t _Size = (_N==0) ? size() : _N; for(size_t _Idx = 0; _Idx < _Size; ++_Idx) { _LEFT(_Idx) = this->operator()(_Idx); }
+#define lapack_int

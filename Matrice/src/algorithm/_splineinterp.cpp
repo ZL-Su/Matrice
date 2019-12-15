@@ -91,7 +91,7 @@ namespace internal {
 
 template<typename _Ty> 
 void _Spline_interpolation<_Ty, bicerp_tag>::_Coeff_impl() {
-	const auto& _Data = _Mybase::_Mydata;
+	const auto& _Data = *_Mybase::_Mydata;
 	auto& _Mycoeff = _Mybase::_Mycoeff;
 
 	auto[_Height, _Width] = _Data.shape().tiled();
@@ -130,7 +130,7 @@ void _Spline_interpolation<_Ty, bicerp_tag>::_Coeff_impl() {
 }
 template<typename _Ty> 
 void _Spline_interpolation<_Ty, biqerp_tag>::_Coeff_impl() {
-	const auto& _Data = _Mybase::_Mydata;
+	const auto& _Data = *_Mybase::_Mydata;
 	auto& _Mycoeff = _Mybase::_Mycoeff;
 
 	const auto[_Height, _Width] = _Data.shape().tiled();
@@ -189,7 +189,7 @@ void _Spline_interpolation<_Ty, biqerp_tag>::_Coeff_impl() {
 }
 template<typename _Ty> 
 void _Spline_interpolation<_Ty, biserp_tag>::_Coeff_impl() {
-	const auto& _Data = _Mybase::_Mydata;
+	const auto& _Data = *_Mybase::_Mydata;
 	auto& _Mycoeff = _Mybase::_Mycoeff;
 
 	const auto[_Height, _Width] = _Data.shape().tiled();

@@ -2,7 +2,7 @@
 	  About License Agreement of this file, see "../lic/license.h"
 *********************************************************************/
 #pragma once
-#include "../_matrix_exp.hpp"
+#include "_plain_exp.hpp"
 
 ///<brief> construct computational expression system </brief>
 ///<method> exp::forward(): for expression evaluation </method>

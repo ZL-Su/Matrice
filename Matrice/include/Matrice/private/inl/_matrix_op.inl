@@ -16,20 +16,37 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
-#include "util/_std_wrapper.h"
-#include "private/_type_traits.h"
-#include "_config.h"
+#include "../_matrix_ops.hpp"
+#include "../math/_linear_fact.hpp"
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
-struct _Blas_kernel_wrapper;
-struct _Lapack_kernel_wrapper;
-_DETAIL_END
-using blas_kernel_t = detail::_Blas_kernel_wrapper;
-using lapack_kernel_t = detail::_Lapack_kernel_wrapper;
-DGE_MATRICE_END
-
-#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
-#include "..//nonfree//inl//blas_kernel_wrapper.inl"
-#include "..//nonfree//inl//lapack_kernel_wrapper.inl"
+template<class _Mty>
+class _Matrix_fact<_Mty, tag::_Linear_spd_tag> {
+	using matrix_type = _Mty;
+public:
+	_Matrix_fact(_Mty& a) : m_ret(a) {
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(a.rows() == a.cols(), "a must be a square matrix in _Matrix_linear_fact<>.");
 #endif
+		_Linear_spd_kernel(a.data(), a.rows());
+	}
+
+	MATRICE_GLOBAL_INL matrix_type& operator()() noexcept {
+		return (m_ret);
+	}
+	MATRICE_GLOBAL_INL const matrix_type& operator()() const noexcept {
+		return (m_ret);
+	}
+
+	MATRICE_GLOBAL_INL matrix_type inv() noexcept {
+		matrix_type inv(m_ret.shape());
+		_Linear_ispd_kernel(m_ret.data(), inv.data(), inv.rows());
+		return inv;
+	}
+
+private:
+	matrix_type& m_ret;
+};
+_DETAIL_END
+DGE_MATRICE_END

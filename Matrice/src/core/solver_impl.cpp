@@ -1,9 +1,9 @@
-
 #include "core/solver.h"
 #include "core/matrix.h"
 #include "private/nonfree/_lnalge.h"
 
-DGE_MATRICE_BEGIN _DETAIL_BEGIN
+DGE_MATRICE_BEGIN 
+_DETAIL_BEGIN
 
 /**
  *\Perform decomposition for coeff. matrix A.
@@ -18,7 +18,8 @@ template<typename _T> LinearOp::info_t LinearOp::OpBase<_T>::_Impl(view_t& A)
 	if (layout_traits<view_t>::is_symmetric(A.format)) {
 		info.alg = solver_type::CHD;
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
-		if (_M != _N) throw std::runtime_error("Support only for square matrix.");
+		DGELOM_CHECK(_M == _N, "Support only for square matrix.");
+
 		if constexpr (type_bytes<value_t>::value == 4)
 			info.status = LAPACKE_spotrf(layout, 'L', _N, (float*)pCoef, _N);
 		else if constexpr (type_bytes<value_t>::value == 8)

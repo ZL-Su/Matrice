@@ -73,23 +73,21 @@ auto _Corr_optim_base<_Derived>::_Cond()->matrix_type& {
 	// \sent eval. of Jacobian and Hessian to background.
 	auto _Eval_struct_mats = std::async(std::launch::async, [&] {
 		/*_Myjaco = */static_cast<_Derived*>(this)->_Diff();
-#if MATRICE_MATH_KERNEL==MATRICE_USE_NAT
-		_Myhess = _Myjaco.t().mul(_Myjaco);
-#else
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 		_Myhess = _Myjaco.t().mul_inplace(_Myjaco);
+#else
+		_Myhess = _Myjaco.t().mul(_Myjaco);
 #endif
 	});
 
-	// \create buf.s to hold reference and current patchs, 
-	// and the differences between them.
-	_Myref.create(_Mysize, _Mysize, zero<value_type>);
+	// \create buf.s to hold reference and current patchs
+	_Myref.create(_Mysize, _Mysize);
 	_Mycur.create(_Mysize, _Mysize);
 
 	// \fill reference image patch.
 	const auto& _Data = _Myref_ptr->data();
 	const auto[_Rows, _Cols] = _Data.shape().tiled();
 	const auto[_L, _R, _U, _D] = _Myopt.range<true>(_Mypos);
-
 	auto _Mean = zero<value_type>;
 	if (_Mypos.x == floor(_Mypos.x) && _Mypos.y == floor(_Mypos.y)) {
 		for (auto y = _U; y < _D; ++y) {
@@ -101,7 +99,7 @@ auto _Corr_optim_base<_Derived>::_Cond()->matrix_type& {
 				}
 			}
 		}
-	} else {
+	} else { //fill _Myref with interpolation for non-integer targets.
 		for (auto y = _U; y < _D; ++y) {
 			if (y >= 0 && y < _Rows) {
 				auto _Rp = _Myref[y - _U];
@@ -120,7 +118,11 @@ auto _Corr_optim_base<_Derived>::_Cond()->matrix_type& {
 
 	// \Hessian matrix computation.
 	if (_Eval_struct_mats.valid()) _Eval_struct_mats.get();
+
+	//const auto _Ev = lapack_kernel_t::syev(_Myhess);
+	
 	_Myhess = _Myhess * _Issd;
+
 	_Mysolver.forward();
 	_Myhess = _Myhess + matrix_fixed::diag(_Myopt._Coeff);
 

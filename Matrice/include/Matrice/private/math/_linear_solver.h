@@ -23,16 +23,14 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <type_traits>
 #include "_svd.h"
 #include "../_type_traits.h"
-#include "../../util/_type_defs.h"
-#include "../../util/utils.h"
-#include "../../util/genalgs.h"
+#include "util/_type_defs.h"
+#include "util/utils.h"
+#include "util/genalgs.h"
 
 DGE_MATRICE_BEGIN
-_TYPES_BEGIN
-template<typename _Ty, int _M, int _N> class Matrix_;
-_TYPES_END
-
 _DETAIL_BEGIN
+template<typename _Ty, int _M, int _N> class Matrix_;
+
 template<class _Derived> class SolverBase
 {
 	using derived_t = _Derived;
@@ -52,7 +50,7 @@ protected:
 struct LinearOp MATRICE_NONHERITABLE
 {
 	template<typename _Ty, int _M, int _N=_M>
-	using Matrix_ = types::Matrix_<_Ty, _M, _N>;
+	using Matrix_ = detail::Matrix_<_Ty, _M, _N>;
 	struct info_t { solver_type alg = AUTO; int status = 1; int sign = 1; };
 	template<typename _T> class OpBase 
 	{
@@ -67,7 +65,7 @@ struct LinearOp MATRICE_NONHERITABLE
 			}
 		}
 	public:
-		using value_t = typename conditional <std::is_scalar<_T>::value, _T, default_type>::type;
+		using value_t = typename conditional <is_scalar_v<_T>, _T, default_type>::type;
 		using view_t = Matrix_<value_t, ::dynamic>;
 
 	protected:
@@ -132,28 +130,25 @@ struct LinearOp MATRICE_NONHERITABLE
 
 		MATRICE_GLOBAL_FINL constexpr Svd(const _Mty& _Coeff) : U(_Coeff) {
 			S.create(U.cols(), 1), Vt.create(U.cols(), U.cols());
-			OpBase<value_t>::_Future = std::async(std::launch::async, [&] {
-				using Op = OpBase<value_t>;
-				return OpBase<value_t>::_Impl(Op::_Aview = U, Op::_Bview = S, Op::_Cview = Vt);
-			});
+			using Op = OpBase<value_t>;
+			Op::_Aview.ref(U), Op::_Bview.ref(S), Op::_Cview.ref(Vt);
+			Op::_Impl(Op::_Aview, Op::_Bview, Op::_Cview);
 		};
 		MATRICE_GLOBAL_FINL constexpr auto operator() (std::_Ph<0> _ph = {}) {
-			OpBase<value_t>::_Launch();
-			auto X = Vt.rview(Vt.rows() - 1).eval<_Mty::cols_at_compiletime>().transpose().eval();
+			Matrix_<value_t, N, 1> X(Vt.cols(), 1);
+			X.from(Vt[Vt.rows() - 1]);
 			return std::forward<decltype(X)>(X);
 		}
 		template<typename _Ret = Matrix_<value_t, N, min(N, 1)>> 
 		MATRICE_GLOBAL_FINL constexpr _Ret& operator() (_Ret& X){
-			OpBase<value_t>::_Launch();
-
 			Matrix_<value_t, _Mty::cols_at_compiletime, min(_Mty::cols_at_compiletime, 1)> Z(X.rows(), 1); //inverse of singular values
 
 			return (X);
 		}
 		//\return singular values
-		MATRICE_HOST_FINL auto& sv() { OpBase<value_t>::_Launch(); return (S); }
+		MATRICE_HOST_FINL auto& sv() { return (S); }
 		//\return V^{T} expression
-		MATRICE_HOST_FINL auto vt() { OpBase<value_t>::_Launch(); return (Vt); }
+		MATRICE_HOST_FINL auto vt() { return (Vt); }
 	private:
 		const _Mty& U;
 		Matrix_<value_t, _Mty::cols_at_compiletime, min(_Mty::cols_at_compiletime,1)> S;

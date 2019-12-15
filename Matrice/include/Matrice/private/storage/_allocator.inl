@@ -111,6 +111,7 @@ MATRICE_HOST_INL decltype(auto) MATRICE_ALLOCTOR_SIG(::dynamic, ::dynamic, ::dyn
 
 template<typename _Ty, typename _Layout>
 MATRICE_HOST_INL MATRICE_ALLOCTOR_SIG(::dynamic, ::dynamic, ::dynamic)::~_Allocator() {
+	if(this->size())
 	internal::free(this->data(), typename _Mybase::category());
 }
 
@@ -123,6 +124,7 @@ MATRICE_HOST_INL decltype(auto) MATRICE_ALLOCTOR_SIG(_Rows, ::dynamic, ::dynamic
 
 template<typename _Ty, diff_t _Rows, typename _Layout>
 MATRICE_HOST_INL MATRICE_ALLOCTOR_SIG(_Rows, ::dynamic, ::dynamic)::~_Allocator() {
+	if (this->size())
 	internal::free(this->data(), typename _Mybase::category());
 }
 
@@ -135,29 +137,34 @@ MATRICE_HOST_INL decltype(auto) MATRICE_ALLOCTOR_SIG(::dynamic, _Cols, ::dynamic
 
 template<typename _Ty, diff_t _Cols, typename _Layout>
 MATRICE_HOST_INL MATRICE_ALLOCTOR_SIG(::dynamic, _Cols, ::dynamic)::~_Allocator() {
+	if (this->size())
 	internal::free(this->data(), typename _Mybase::category());
 }
 
 #ifdef MATRICE_ENABLE_CUDA
-MATRICE_ALLOCATOR(GLOBAL, decltype(auto), ::device, ::device)::_Alloc() noexcept {
+template<typename _Ty, typename _Layout>
+MATRICE_GLOBAL_INL decltype(auto) MATRICE_ALLOCTOR_SIG(::device, ::device, ::device)::_Alloc() noexcept {
 	m_pitch = this->cols();
 	this->data() = internal::malloc<value_type>(this->rows(), m_pitch,
 		device_alloc_tag());
 	return (*this);
 }
 
-MATRICE_ALLOCATOR(GLOBAL, , ::device, ::device)::~_Allocator() {
+template<typename _Ty, typename _Layout>
+MATRICE_GLOBAL_INL MATRICE_ALLOCTOR_SIG(::device, ::device, ::device)::~_Allocator() {
 	internal::free(this->data(), typename _Mybase::category());
 }
 
-MATRICE_ALLOCATOR(GLOBAL, decltype(auto), ::global, ::global)::_Alloc() noexcept {
+template<typename _Ty, typename _Layout>
+MATRICE_GLOBAL_INL decltype(auto) MATRICE_ALLOCTOR_SIG(::global, ::global, ::global)::_Alloc() noexcept {
 	auto cols = this->cols();
 	this->data() = internal::malloc<value_type>(this->rows(), cols, 
 		global_alloc_tag());
 	return (*this);
 }
 
-MATRICE_ALLOCATOR(GLOBAL, , ::global, ::global)::~_Allocator() {
+template<typename _Ty, typename _Layout>
+MATRICE_GLOBAL_INL MATRICE_ALLOCTOR_SIG(::global, ::global, ::global)::~_Allocator() {
 	internal::free(this->data(), typename _Mybase::category());
 }
 #endif
@@ -223,10 +230,12 @@ MATRICE_HOST_INL decltype(auto) _Malloc(size_t rows, size_t cols, heap_alloc_tag
 
 template<typename _Ty>
 MATRICE_HOST_INL void _Free(_Ty* data, heap_alloc_tag) {
-	if (data) {
+	if (data != nullptr) {
 		auto void_ptr = reinterpret_cast<void*>(data);
-		std::free(*(reinterpret_cast<void**>(void_ptr)-1));
-		data = nullptr;
+		if (void_ptr) {
+			std::free(*(reinterpret_cast<void**>(void_ptr) - 1));
+			data = nullptr;
+		}
 	}
 }
 

@@ -18,6 +18,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include <cmath>
 #include "_config.h"
+#include "../_type_traits.h"
 #ifdef MATRICE_ENABLE_CUDA
 #include <device_functions.h>
 #include <thrust\complex.h>

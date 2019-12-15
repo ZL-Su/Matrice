@@ -76,14 +76,14 @@ public:
 	 *\brief rotation X with [x, y, z]^T = RX
 	 *\param [_X] input 3d point
 	 */
-	MATRICE_HOST_INL point_type rotation(const point_type& _X) noexcept{
+	MATRICE_HOST_INL point_type rotation(const point_type& _X)const noexcept{
 		return (m_rotm.mul(_X) + m_tran);
 	}
 	/**
 	 *\brief transform and normalize with [x, y, 1]^T = <RX + T>
 	 *\param [_X] input 3d point
 	 */
-	MATRICE_HOST_INL point_type forward(const point_type& _X) noexcept{
+	MATRICE_HOST_INL point_type forward(const point_type& _X)const noexcept{
 		point_type p = this->rotation(_X) + m_tran;
 		return (p.normalize(p.z));
 	}
@@ -91,7 +91,7 @@ public:
 	 *\brief back-projection
 	 *\param [_x] input 2d image point [x, y, d]^T, where d is the depth.
 	 */
-	MATRICE_HOST_INL point_type backward(const point_type& _x) noexcept {
+	MATRICE_HOST_INL point_type backward(const point_type& _x)const noexcept {
 		point_type& x = _x;
 		x.x *= x.z, x.y *= x.z;
 		x = x - m_tran;
@@ -121,14 +121,14 @@ public:
 	 *\brief compute the grad. of a re-projected point w.r.t. depth par.
 	 *\param [pd] re-projected point, where the first two elements are coordinates of a normalized, distortion-rectified image point, the last one is its depth value.
 	 */
-	MATRICE_HOST_INL point_type grad(const point_type& pd) noexcept {
+	MATRICE_HOST_INL point_type grad(const point_type& pd)const noexcept {
 		const auto X = _Mybase::rotation({ pd.x, pd.y, 1 });
 		const auto s = 1 / sqr(X.z*pd.z + m_tran.z);
 		const auto gx = (X.x*m_tran.z - X.z*m_tran.x)*s;
 		const auto gy = (X.y*m_tran.z - X.z*m_tran.y)*s;
 		return point_type{ gx, gy, 0 };
 	}
-	MATRICE_HOST_INL point_type grad(value_type x, value_type y, value_type depth) noexcept {
+	MATRICE_HOST_INL point_type grad(value_type x, value_type y, value_type depth)const noexcept {
 		const auto X = _Mybase::rotation({ x, y, 1 });
 		const auto s = 1 / sqr(X.z*depth + m_tran.z);
 		const auto gx = (X.x*m_tran.z - X.z*m_tran.x)*s;

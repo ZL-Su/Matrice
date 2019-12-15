@@ -16,9 +16,13 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #pragma once
-#include "../../../addin/libtiff/tiffio.h"
+//#include "../../../addin/libtiff/tiffio.h"
 #include "../util/_macros.h"
-#include "../util/_std_wrapper.h"
+#include "../private/_type_traits.h"
+#include "../forward.hpp"
+
+// TIFF forward declaration
+struct tiff;
 
 DGE_MATRICE_BEGIN
 using tiff_type = tiff;
@@ -28,7 +32,6 @@ template<typename _Ty> struct image_instance;
 
 template<typename _Ty = uint8_t> 
 struct tiff_instance : image_instance<_Ty> {
-
 	template<typename _Uy = _Ty>
 	MATRICE_HOST_INL tiff_matrix_t<_Uy> grayscale() const noexcept {
 		if (this->m_nchs == 1) if constexpr (is_same_v<_Ty, _Uy>)
@@ -55,37 +58,11 @@ struct tiff_instance : image_instance<_Ty> {
 	}
 };
 
-tiff_pointer open_tiff_file(const char* fname, const char* flag) {
-	return TIFFOpen(fname, flag);
-}
-
-template<typename _Ty=uint8_t, typename _Ret = tiff_instance<_Ty>>
-MATRICE_HOST_INL _Ret read_tiff_file(const char* fpath) {
-	_Ret inst;
-	if (const auto ptif = open_tiff_file(fpath, "r"); ptif) {
-		TIFFGetField(ptif, TIFFTAG_IMAGELENGTH, &inst.m_rows);
-		TIFFGetField(ptif, TIFFTAG_IMAGEWIDTH, &inst.m_cols);
-		const auto scanline = TIFFScanlineSize(ptif);
-		inst.create(scanline/inst.m_cols);
-
-		auto buf = (uint8_t*)_TIFFmalloc(scanline*sizeof(uint8_t));
-		for (auto row = 0; row < inst.m_rows; ++row) {
-			TIFFReadScanline(ptif, buf, row);
-			auto pd = inst.m_data[row];
-			for (auto col = 0; col < inst.m_cols; ++col) {
-				auto pb = buf + col * inst.m_nchs;
-				for (auto chn = 0; chn < inst.m_nchs; ++chn) {
-					auto& val = pd[col + chn * inst.m_cols] = pb[chn];
-					if constexpr (!is_same_v<_Ty, uint8_t>)
-						val /= (_Ty)(255);
-				}
-			}
-		}
-
-		_TIFFfree(buf);
-		TIFFClose(ptif);
-	}
-	return forward<_Ret>(inst);
-}
+/**
+ *\brief read tiff file to tiff instance with type of _Ty
+ *\param [fpath] file path input.
+ */
+template<typename _Ty=uint8_t>
+MATRICE_HOST_ONLY tiff_instance<_Ty> read_tiff_file(const char* fpath);
 
 DGE_MATRICE_END

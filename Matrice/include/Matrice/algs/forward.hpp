@@ -22,10 +22,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 DGE_MATRICE_BEGIN
 struct interpolation_tag {};
 struct lerp_tag   :interpolation_tag {}; //\sa. [l]inear int[erp]olation
-struct bilerp_tag :interpolation_tag {}; //\sa. [bil]inear interpolation
-struct bicerp_tag :interpolation_tag {}; //\sa. [bic]ubic interpolation
-struct biqerp_tag :interpolation_tag {}; //\sa. [biq]intic interpolation
-struct biserp_tag :interpolation_tag {}; //\sa. [bis]eptic interpolation
+struct bilerp_tag :interpolation_tag {}; //\sa. [bil]inear int[erp]olation
+struct cubconerp_tag :interpolation_tag {}; //\sa. [cub]ic [con]volution int[erp]olation
+struct bicerp_tag :interpolation_tag {}; //\sa. [bic]ubic int[erp]olation
+struct biqerp_tag :interpolation_tag {}; //\sa. [biq]intic int[erp]olation
+struct biserp_tag :interpolation_tag {}; //\sa. [bis]eptic int[erp]olation
 struct mbicerp_2d_tag :interpolation_tag {
 	static constexpr size_t dimension = 2;
 	static constexpr size_t max_levels = 8;

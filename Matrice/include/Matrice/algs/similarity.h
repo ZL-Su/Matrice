@@ -19,13 +19,12 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <type_traits>
-#include "../core/matrix.h"
+#include "core/matrix.h"
 
 MATRICE_ALGS_BEGIN
-using std::size_t;
 enum class metric_fn { L1, L2, ZNCC };
 
-template<metric_fn Fn, typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value>::type> class Metric_ {};
+template<metric_fn Fn, typename T, MATRICE_ENABLE_IF(is_scalar_v<T>)> class Metric_ {};
 template<typename T> class Metric_<metric_fn::L1, T> final
 {
 	using value_t = T;
@@ -76,7 +75,7 @@ template<typename T, size_t _M, size_t _N> struct SMBase
 	SMBase(size_t m, size_t n) : m_data(m, n) {}
 	const value_t avg() const { return m_data.sum()/m_data.size(); }
 private:
-	types::Matrix_<value_t, _M, _N> m_data;
+	Matrix_<value_t, _M, _N> m_data;
 };
 template<metric_fn _Mety, typename T, size_t N> 
 class Similarity

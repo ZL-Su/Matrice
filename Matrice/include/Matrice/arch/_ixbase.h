@@ -17,9 +17,20 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 #include <initializer_list>
-#include "../util/_macros.h"
-#include "../util/genalgs.h"
+#include "util/_macros.h"
+#include "util/genalgs.h"
 #if MATRICE_SIMD_ARCH
+
+// \default vector unit size for SIMD support
+MATRICE_HOST_INL constexpr auto packet_size_v =
+#if MATRICE_SIMD_ARCH==MATRICE_SIMD_SSE
+4;
+#elif MATRICE_SIMD_ARCH==MATRICE_SIMD_AVX
+8;
+#else
+1;
+#endif
+
 #include "./inl/_ixops.hpp"
 
 MATRICE_ARCH_BEGIN

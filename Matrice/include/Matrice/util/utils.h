@@ -88,6 +88,35 @@ template<typename T> MATRICE_HOST_INL
 std::string cast_to_string(T _Val) noexcept {
 	return std::to_string(_Val);
 }
+template<typename T> MATRICE_HOST_INL
+std::string cast_to_string(T _Val, uint8_t _Digits) noexcept {
+	std::string _Pref{};
+	switch (_Digits)
+	{
+	case 2: 
+		if (_Val < 10) _Pref = "0"; break;
+	case 3: 
+		if (_Val < 10)_Pref = "00"; break;
+		if (_Val < 100) _Pref = "0"; break;
+	case 4:
+		if (_Val < 10)_Pref = "000"; break;
+		if (_Val < 100) _Pref = "00"; break;
+		if (_Val < 1000) _Pref = "0"; break;
+	case 5:
+		if (_Val < 10)_Pref = "0000"; break;
+		if (_Val < 100) _Pref = "000"; break;
+		if (_Val < 1000) _Pref = "00"; break;
+		if (_Val < 10000) _Pref = "0"; break;
+	case 6:
+		if (_Val < 10)_Pref = "00000"; break;
+		if (_Val < 100) _Pref = "0000"; break;
+		if (_Val < 1000) _Pref = "000"; break;
+		if (_Val < 10000) _Pref = "00"; break;
+		if (_Val < 100000) _Pref = "0"; break;
+	default: break;
+	}
+	return (_Pref + cast_to_string(_Val));
+}
 
 /**
  * \brief  append a T-typed element into tuple _Tpl
@@ -178,14 +207,14 @@ MATRICE_GLOBAL_INL decltype(auto) unroll_linear_index(_Ity idx, _Ity width) noex
 struct transforms {
 	template<typename _Ty> struct scale {
 		using value_type = _Ty;
-		template<typename _Uy>
+		template<typename _Uy = value_type>
 		MATRICE_GLOBAL_INL scale(const _Uy& _Scale = _Uy(1)) : _Myscale(_Scale) {}
 		MATRICE_GLOBAL_INL auto operator()(const value_type& _Val)const { return (_Myscale*_Val); }
 		value_type _Myscale = 1.;
 	};
 	template<typename _Ty> struct clamp {
 		using value_type = _Ty;
-		template<typename _Uy>
+		template<typename _Uy = value_type>
 		MATRICE_GLOBAL_INL clamp(const _Uy& _Lower, const _Uy& _Upper) : _Mylower(_Lower),_Myupper(_Upper) {}
 		MATRICE_GLOBAL_INL auto operator()(const value_type& _Val)const { return min(max(_Val,_Mylower),_Myupper); }
 		value_type _Mylower = std::numeric_limits<value_type>::min();

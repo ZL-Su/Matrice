@@ -25,10 +25,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 MATRICE_ALGS_BEGIN _DETAIL_BEGIN namespace corr {
 
 struct _Correlation_options {
-	size_t _Radius = 10;  //patch radius
-	size_t _Maxits = 10;  //maximum iterations
+	size_t _Radius = 15;  //patch radius
+	size_t _Maxits = 50;  //maximum iterations
 	size_t _Stride =  7;  //node spacing
-	float_t _Znssd = 0.4; //correlation threshold
+	float_t _Znssd = 0.6; //correlation threshold
 	float_t _Coeff = 0.7; //damping coefficient
 
 	template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>

@@ -15,7 +15,7 @@
     <ProjectGuid>{E70FEE41-532B-437B-8129-F7F4E9E88BDB}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Matrice</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -54,7 +54,7 @@
     <OutDir>.\x64\Debug\</OutDir>
     <IntDir>.\IntDir\Debug\</IntDir>
     <TargetName>matrice</TargetName>
-    <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;.\include\Matrice;E:\Dgelo\Dropbox\Dgelom\Librares;$(IncludePath)</IncludePath>
+    <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;.\include\Matrice;.\include\Matrice\private;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -109,7 +109,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_LIB;MATRICE_THR=MATRICE_THR_OMP;MATRICE_MATH_KERNEL=MATRICE_USE_MKL;MATRICE_ENABLE_CUDA;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;_ENABLE_EXTENDED_ALIGNED_STORAGE;MATRICE_THR=MATRICE_THR_OMP;MATRICE_MATH_KERNEL=MATRICE_USE_MKL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>stdcpplatest</LanguageStandard>
@@ -177,7 +177,9 @@
     <ClInclude Include="include\Matrice\algs\dnn\models\_basic_model.hpp" />
     <ClInclude Include="include\Matrice\algs\erroranalysis\_common.h" />
     <ClInclude Include="include\Matrice\algs\forward.hpp" />
+    <ClInclude Include="include\Matrice\algs\geometry\geo_fwd.hpp" />
     <ClInclude Include="include\Matrice\algs\geometry\normalization.h" />
+    <ClInclude Include="include\Matrice\algs\geometry\quaternion.hpp" />
     <ClInclude Include="include\Matrice\algs\geometry\transform.h" />
     <ClInclude Include="include\Matrice\algs\geometry\_geo_utils.hpp" />
     <ClInclude Include="include\Matrice\algs\graphics\_distance.hpp" />
@@ -186,6 +188,7 @@
     <ClInclude Include="include\Matrice\algs\interpolation.h" />
     <ClInclude Include="include\Matrice\algs\interpolation\_base.h" />
     <ClInclude Include="include\Matrice\algs\interpolation\_bilinear.hpp" />
+    <ClInclude Include="include\Matrice\algs\interpolation\_cubic_conv_interp.hpp" />
     <ClInclude Include="include\Matrice\algs\interpolation\_mba.hpp" />
     <ClInclude Include="include\Matrice\algs\interpolation\_splineinterp.h" />
     <ClInclude Include="include\Matrice\algs\interpolation\_interpolation.h" />
@@ -210,14 +213,18 @@
     <ClInclude Include="include\Matrice\io\_png_wrapper.hpp" />
     <ClInclude Include="include\Matrice\io\_tiff_wrapper.hpp" />
     <ClInclude Include="include\Matrice\lic\license.h" />
-    <ClInclude Include="include\Matrice\private\autograd\_expression.h" />
-    <ClInclude Include="include\Matrice\private\autograd\_grad_ops.h" />
-    <ClInclude Include="include\Matrice\private\autograd\_grad_utils.h" />
+    <ClInclude Include="include\Matrice\math_forward.hpp" />
+    <ClInclude Include="include\Matrice\private\autograd\_ad_exps.h" />
+    <ClInclude Include="include\Matrice\private\autograd\_ad_ops.h" />
+    <ClInclude Include="include\Matrice\private\autograd\_ad_scalar.hpp" />
+    <ClInclude Include="include\Matrice\private\autograd\_ad_utils.h" />
     <ClInclude Include="include\Matrice\private\container\_multi_array.hpp" />
     <ClInclude Include="include\Matrice\private\math\kernel_wrapper.hpp" />
     <ClInclude Include="include\Matrice\private\math\_config.h" />
     <ClInclude Include="include\Matrice\private\math\_linear.h" />
     <ClInclude Include="include\Matrice\private\math\_linear_solver.h" />
+    <ClInclude Include="include\Matrice\private\math\_linear_fact.hpp" />
+    <ClInclude Include="include\Matrice\private\math\_linear_solver.hpp" />
     <ClInclude Include="include\Matrice\private\math\_primitive_funcs.hpp" />
     <ClInclude Include="include\Matrice\private\math\_svd.h" />
     <ClInclude Include="include\Matrice\private\nonfree\_lnalge.h" />
@@ -252,7 +259,7 @@
     <ClInclude Include="include\Matrice\util\genalgs.h" />
     <ClInclude Include="include\Matrice\util\utils.h" />
     <ClInclude Include="include\Matrice\util\_exception.h" />
-    <ClInclude Include="include\Matrice\util\_macro_conditions.h" />
+    <ClInclude Include="include\Matrice\util\_conditional_macros.h" />
     <ClInclude Include="include\Matrice\util\_macros.h" />
     <ClInclude Include="include\Matrice\util\_property.hpp" />
     <ClInclude Include="include\Matrice\util\_std_wrapper.h" />
@@ -323,6 +330,9 @@
     <ClCompile Include="src\core\matrix_expr_op_impl.cpp" />
     <ClCompile Include="src\core\solver_impl.cpp" />
     <ClCompile Include="src\core\storage_base_impl.cpp" />
+    <ClCompile Include="src\io\_tiff_wrapper.cpp" />
+    <ClCompile Include="src\private\math\_linear_fact.cpp" />
+    <ClCompile Include="src\private\math\_linear_solver_impl.cpp" />
     <ClCompile Include="src\private\nonfree\_blas_lapack_kernels.cpp" />
     <ClCompile Include="src\private\_memory.cpp" />
     <ClCompile Include="src\private\_unified_memory.cpp" />
@@ -371,6 +381,7 @@
     <None Include="include\Matrice\io\inline\_directory.inl" />
     <None Include="include\Matrice\io\inline\_image.inl" />
     <None Include="include\Matrice\private\inl\_base.inl" />
+    <None Include="include\Matrice\private\inl\_matrix_op.inl" />
     <None Include="include\Matrice\private\inl\_storage_base.inl" />
     <None Include="include\Matrice\private\nonfree\inl\blas_kernel_wrapper.inl" />
     <None Include="include\Matrice\private\nonfree\inl\lapack_kernel_wrapper.inl" />
