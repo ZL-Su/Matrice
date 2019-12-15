@@ -17,7 +17,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 #include "_type_traits.h"
-#include "forward.hpp"
+#include "core/matrix.h"
 
 DGE_MATRICE_BEGIN
 struct svd { enum { singular_value_decomposition = 4 }; };
@@ -31,7 +31,7 @@ _INTERNAL_BEGIN
 _INTERNAL_END
 
 _DETAIL_BEGIN
-// \brief 
+// \brief solver traits class
 template<class _Sty> struct _Solver_traits {};
 
 // \brief CLASS TEMPLATE for linear solver base
@@ -41,6 +41,8 @@ class _Linear_solver_base {
 	using _Mytraits = _Solver_traits<_Myderived>;
 public:
 	using matrix_type = typename _Mytraits::matrix_type;
+	using value_type = typename _Mytraits::value_type;
+
 	_Linear_solver_base(matrix_type& coeff) noexcept
 		:_Mycoeff(coeff) {
 		this->_Forward();
@@ -51,76 +53,90 @@ public:
 		return static_cast<_Myderived*>(this)->backward(rhs);
 	}
 
-protected:
+private:
 	/**
 	 *\brief perf. coeff matrix decomposition
 	 */
 	MATRICE_GLOBAL_INL void _Forward() {
-		auto derived = static_cast<_Myderived*>(this);
+		auto _Dptr = static_cast<_Myderived*>(this);
 		using kernel_t = typename _Mytraits::op_type;
 		if constexpr (is_same_v<kernel_t, void>) {
 			//_Mycoeff is a general square matrix, _Forward does nothing.
 		}
 		if constexpr (is_same_v<kernel_t, svd>) {
-			internal::_Lak_adapter<svd>(_Mycoeff, derived->s(), derived()->vt());
+			internal::_Lak_adapter<svd>(_Mycoeff, _Dptr->s(), _Dptr->v());
 		}
 		if constexpr (is_same_v<kernel_t, spt>) {
 			internal::_Lak_adapter<spt>(_Mycoeff);
 		}
 	}
 
+protected:
 	matrix_type& _Mycoeff;
 };
 
 // \brief CLASS TEMPLATE for linear solver
 // \param <_Mty> Matrice compatible matrix type
-// \param <_Op> lapack kernel operator
+// \param <_Op> lapack kernel operator, default is void
 template<class _Mty, typename _Op = void> 
 class _Linear_solver : public _Linear_solver_base<_Linear_solver<_Mty, _Op>> {
 	using _Myt = _Linear_solver;
 	using _Mybase = _Linear_solver_base <_Linear_solver<_Mty, _Op>>;
 public:
-	_Linear_solver(_Mty& coeff) : _Mybase(coeff) {
+	using typename _Mybase::value_type;
+	using typename _Mybase::matrix_type;
+	_Linear_solver(matrix_type& coeff) : _Mybase(coeff) {
 	}
 
 private:
 
 };
 
+// \brief CLASS TEMPLATE for SVD based linear solver
+// \param <_Mty> Matrice compatible matrix type
 template<class _Mty>
 class _Linear_solver<_Mty, svd> : 
 	public _Linear_solver_base<_Linear_solver<_Mty, svd>> {
 	using _Myt = _Linear_solver;
-	using _Mybase = _Linear_solver_base <_Linear_solver<_Mty, svd>>;
+	using _Mybase = _Linear_solver_base<_Linear_solver<_Mty, svd>>;
 public:
-	_Linear_solver(_Mty& coeff) : _Mybase(coeff) {
+	using typename _Mybase::value_type;
+	using typename _Mybase::matrix_type;
+
+	// \note: the input coeff will be overwritten by U
+	_Linear_solver(matrix_type& coeff) 
+		: _Mybase(coeff), 
+		_Mys(coeff.cols()), 
+		_Myv(coeff.cols(), coeff.cols()) {
 	}
 
 	MATRICE_GLOBAL_INL decltype(auto) u() const noexcept {
-		return _Mybase::_Mycoeff;
+		return (_Mybase::_Mycoeff);
 	}
 	MATRICE_GLOBAL_INL decltype(auto) u() noexcept {
-		return _Mybase::_Mycoeff;
+		return (_Mybase::_Mycoeff);
 	}
 	MATRICE_GLOBAL_INL decltype(auto) s() const noexcept {
-
+		return (_Mys);
 	}
 	MATRICE_GLOBAL_INL decltype(auto) s() noexcept {
-
+		return (_Mys);
 	}
-	MATRICE_GLOBAL_INL decltype(auto) vt() const noexcept {
-
+	MATRICE_GLOBAL_INL decltype(auto) v() const noexcept {
+		return (_Myv);
 	}
-	MATRICE_GLOBAL_INL decltype(auto) vt() noexcept {
-
+	MATRICE_GLOBAL_INL decltype(auto) v() noexcept {
+		return (_Myv);
 	}
 private:
-
+	Matrix_<value_type, _Mty::cols_at_compiletime, 1> _Mys;
+	Matrix_<value_type, _Mty::cols_at_compiletime> _Myv;
 };
 
 template<class _Mty, typename _Op> 
 struct _Solver_traits<_Linear_solver<_Mty, _Op>>{
 	using matrix_type = _Mty;
+	using value_type = typename matrix_type::value_type;
 	using op_type = _Op;
 };
 _DETAIL_END
