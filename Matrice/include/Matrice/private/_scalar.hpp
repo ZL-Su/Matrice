@@ -27,39 +27,53 @@ class Scalar {
 		"_Ty in Scalar must be a primitive scalar type.");
 	using _Myt = Scalar;
 public:
-	enum {
-		Size = 1,
-		rows_at_compiletime = 1,
-		cols_at_compiletime = 1,
-	};
+	enum { Size = 1, rows_at_compiletime = 1, cols_at_compiletime = 1 };
 	using value_type = remove_all_t<_Ty>;
 	using reference = value_type&;
 	using pointer = value_type*;
 
 	MATRICE_GLOBAL_FINL Scalar() noexcept
-		: m_value(0) {
+		: _Myval(0) {
 	}
 	template<typename _Uy>
-	MATRICE_GLOBAL_FINL inline Scalar(const _Uy s) noexcept 
-		: m_value(s) {
+	MATRICE_GLOBAL_FINL Scalar(const _Uy s) noexcept 
+		: _Myval(s) {
 	}
 
 	MATRICE_GLOBAL_FINL operator reference() const noexcept {
-		return (m_value);
+		return (_Myval);
 	}
 	MATRICE_GLOBAL_FINL operator reference() noexcept {
-		return (m_value);
+		return (_Myval);
 	}
 
 	MATRICE_GLOBAL_FINL operator pointer() const noexcept {
-		return (&m_value);
+		return (&_Myval);
 	}
 	MATRICE_GLOBAL_FINL operator pointer() noexcept {
-		return (&m_value);
+		return (&_Myval);
+	}
+
+	template<typename _Inty>
+	MATRICE_GLOBAL_INL _Myt& operator=(const _Inty arg) noexcept {
+		if constexpr (is_pointer_v<_Inty>) _Myval = *arg;
+		if constexpr (is_expression_v<_Inty>) _Myval = arg;
+		return (*this);
+	}
+
+	MATRICE_GLOBAL_INL decltype(auto)operator()(index_t)const noexcept {
+		return (_Myval);
+	}
+	MATRICE_GLOBAL_INL decltype(auto)operator()(index_t) noexcept {
+		return (_Myval);
+	}
+
+	MATRICE_GLOBAL_INL constexpr decltype(auto) size() const noexcept {
+		return 1;
 	}
 
 private:
-	value_type m_value;
+	value_type _Myval;
 };
 template<typename _Ty>
 struct is_scalar<Scalar<_Ty>> {
