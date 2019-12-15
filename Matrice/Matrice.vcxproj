@@ -214,9 +214,10 @@
     <ClInclude Include="include\Matrice\io\_tiff_wrapper.hpp" />
     <ClInclude Include="include\Matrice\lic\license.h" />
     <ClInclude Include="include\Matrice\math_forward.hpp" />
-    <ClInclude Include="include\Matrice\private\autograd\_expression.h" />
-    <ClInclude Include="include\Matrice\private\autograd\_grad_ops.h" />
-    <ClInclude Include="include\Matrice\private\autograd\_grad_utils.h" />
+    <ClInclude Include="include\Matrice\private\autograd\_ad_exps.h" />
+    <ClInclude Include="include\Matrice\private\autograd\_ad_ops.h" />
+    <ClInclude Include="include\Matrice\private\autograd\_ad_scalar.hpp" />
+    <ClInclude Include="include\Matrice\private\autograd\_ad_utils.h" />
     <ClInclude Include="include\Matrice\private\container\_multi_array.hpp" />
     <ClInclude Include="include\Matrice\private\math\kernel_wrapper.hpp" />
     <ClInclude Include="include\Matrice\private\math\_config.h" />

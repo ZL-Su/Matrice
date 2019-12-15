@@ -411,12 +411,6 @@
     <ClInclude Include="include\Matrice\private\math\_linear.h">
       <Filter>Header Files\Detail\math</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\private\autograd\_grad_ops.h">
-      <Filter>Header Files\Detail\autodiff</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Matrice\private\autograd\_grad_utils.h">
-      <Filter>Header Files\Detail\autodiff</Filter>
-    </ClInclude>
     <ClInclude Include="include\Matrice\algs\similarity\_iterative_conv_impl.h">
       <Filter>Header Files\Algs\Similarity</Filter>
     </ClInclude>
@@ -425,9 +419,6 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\correlation\_correlation_traits.h">
       <Filter>Header Files\Algs\Correlation</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Matrice\private\autograd\_expression.h">
-      <Filter>Header Files\Detail\autodiff</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\lic\license.h">
       <Filter>Header Files\License</Filter>
@@ -641,6 +632,18 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\math_forward.hpp">
       <Filter>Header Files\Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\autograd\_ad_utils.h">
+      <Filter>Header Files\Detail\autodiff</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\autograd\_ad_ops.h">
+      <Filter>Header Files\Detail\autodiff</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\autograd\_ad_exps.h">
+      <Filter>Header Files\Detail\autodiff</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\autograd\_ad_scalar.hpp">
+      <Filter>Header Files\Detail\autodiff</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
