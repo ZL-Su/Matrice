@@ -24,7 +24,8 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #define vec_global_inl constexpr MATRICE_GLOBAL_FINL
 #endif
 
-MATRICE_NAMESPACE_BEGIN_TYPES
+DGE_MATRICE_BEGIN
+_DETAIL_BEGIN
 template<typename _Ty, int _Dim = 2> 
 class Vec_ : public Matrix_<_Ty, _Dim, compile_time_size<>::val_1>
 {
@@ -168,34 +169,33 @@ public:
 	vec_global_inl void _w_setter(value_t _w) { data()[3] = _w; }
 };
 
-MATRICE_NAMESPACE_END_TYPES
+_DETAIL_END
 
-DGE_MATRICE_BEGIN
 // \a generic managed vector type
 template<typename _Ty, int _Dim,
 	typename = std::enable_if_t<std::is_arithmetic_v<_Ty>>>
-using Vec_ = types::Vec_<_Ty, _Dim>;
+using Vec_ = detail::Vec_<_Ty, _Dim>;
 template<typename _Ty, int _Dim>
 struct is_fxdvector<Vec_<_Ty, _Dim>> : std::true_type {};
 
 // \managed vector type with 2 entities: x, y
 template<typename _Ty, 
 	typename = std::enable_if_t<std::is_arithmetic_v<_Ty>>>
-using Vec2_ = types::Vec_<_Ty, 2>;
+using Vec2_ = detail::Vec_<_Ty, 2>;
 template<typename _Ty>
 struct is_fxdvector<Vec2_<_Ty>> : std::true_type {};
 
 // \managed vector type with 3 entities: x, y, z
 template<typename _Ty,
 	typename = std::enable_if_t<std::is_arithmetic_v<_Ty>>>
-using Vec3_ = types::Vec3_<_Ty>;
+using Vec3_ = detail::Vec3_<_Ty>;
 template<typename _Ty>
 struct is_fxdvector<Vec3_<_Ty>> : std::true_type {};
 
 // \managed vector type with 4 entities: x, y, z, w
 template<typename _Ty,
 	typename = std::enable_if_t<std::is_arithmetic_v<_Ty>>>
-using Vec4_ = types::Vec4_<_Ty>;
+using Vec4_ = detail::Vec4_<_Ty>;
 template<typename _Ty>
 struct is_fxdvector<Vec4_<_Ty>> : std::true_type {};
 
@@ -206,8 +206,8 @@ template<typename _Ty, int _Dim>
 struct is_fxdvector<std::array<_Ty,_Dim>> : std::true_type {};
 
 template<size_t _Dim, typename _Ty>
-vec_global_inl types::Matrix_<_Ty, _Dim, _Dim> cross_prod_matrix(const Vec3_<_Ty>& v) {
-	using return_t = types::Matrix_<_Ty, _Dim, _Dim>;
+vec_global_inl detail::Matrix_<_Ty, _Dim, _Dim> cross_prod_matrix(const Vec3_<_Ty>& v) {
+	using return_t = detail::Matrix_<_Ty, _Dim, _Dim>;
 	MATRICE_CONSTEXPR_IF(_Dim == 3)
 	return return_t{ 0, -v.z, v.y, v.z, 0, -v.x, -v.y, v.x, 0 };
 	else

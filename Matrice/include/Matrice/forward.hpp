@@ -16,20 +16,23 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
+#include "util/_std_wrapper.h"
 
 namespace dgelom {
-namespace types {
+namespace detail {
 	template<typename _Ty, int _M, int _N> class Matrix_;
 	template<typename _Ty, int _Dim> class Vec_;
 	template<typename _Ty> class Vec2_;
 }
 
 template<typename _Ty, int _RowsAtCompileTime, int _ColsAtCompileTime=_RowsAtCompileTime> 
-using Matrix_ = types::Matrix_<_Ty, _RowsAtCompileTime, _ColsAtCompileTime>;
+using Matrix_ = detail::Matrix_<_Ty, _RowsAtCompileTime, _ColsAtCompileTime>;
 
 //\matrix type with host dynamic memory allocator
 template<typename _Ty> 
 using Matrix = Matrix_<_Ty, 0>;
+
+template<typename _Ty> class Scalar;
 
 #ifdef MATRICE_ENABLE_CUDA
 //\matrix type with unified memory allocator
@@ -56,11 +59,6 @@ using array_n = Matrix_<T, _N, 1>;
 template<typename _Ty, int _Size>
 using Array_ = Matrix_<_Ty, _Size, (_Size > 0 ? 1 : _Size)> ;
 
-//\shared_matrix_t<_Ty> is a pure dynamic matrix type managed by std::shared_ptr.
-template<typename _Ty> 
-using shared_matrix_t = shared_ptr<Matrix<_Ty>>;
 template<typename _Ty>
-MATRICE_HOST_INL auto make_shared(const Matrix<_Ty>& mat) noexcept {
-	return std::make_shared<Matrix<_Ty>>(mat);
-}
+using shared_matrix_t = shared_ptr<Matrix<_Ty>>;
 }

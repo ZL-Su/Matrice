@@ -16,14 +16,15 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 *	*************************************************************************/
 #pragma once
+#include "forward.hpp"
 #include "private/math/_linear_solver.h"
 
 DGE_MATRICE_BEGIN
-_TYPES_BEGIN
+_DETAIL_BEGIN
 
 struct Solver MATRICE_NONHERITABLE
 {
-	template<typename _Op = detail::LinearOp::Auto<Matrix_<default_type, ::dynamic>>> 
+	template<typename _Op = detail::LinearOp::Auto<Matrix_<default_type, ::dynamic, ::dynamic>>> 
 	class Linear_ : public detail::SolverBase<Linear_<_Op>>
 	{
 		using _Mybase = detail::SolverBase<Linear_<_Op>>;
@@ -46,7 +47,7 @@ struct Solver MATRICE_NONHERITABLE
 		_Op m_op;
 	};
 };
-_TYPES_END
+_DETAIL_END
 
 /**
  *\Linear algebra system kernel.
@@ -57,8 +58,8 @@ using linear_alg_op = detail::LinearOp;
  *\Linear solver, default _Op is auto-solver-kernel.
  */
 template<
-	typename _Op = linear_alg_op::Auto<types::Matrix_<default_type,::dynamic>>,
-	typename = std::enable_if_t<is_matrix_v<typename _Op::_Mty>>>
-using linear_solver = types::Solver::Linear_<_Op>;
+	typename _Op = linear_alg_op::Auto<Matrix_<default_type,::dynamic, ::dynamic>>,
+	MATRICE_ENABLE_IF(is_matrix_v<typename _Op::_Mty>)>
+using linear_solver = detail::Solver::Linear_<_Op>;
 
 DGE_MATRICE_END

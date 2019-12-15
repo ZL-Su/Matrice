@@ -17,17 +17,19 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 #include <future>
-#include "../util/_macros.h"
-#include "../util/utils.h"
+#include "util/_macros.h"
+#include "util/utils.h"
 
 #ifdef MATRICE_ENABLE_CUDA
 #include "_decl_dev_funcs.h"
 #include "_devops.h"
 #include "_unified_memory.h"
 
-MATRICE_NAMESPACE_BEGIN_TYPES
+DGE_MATRICE_BEGIN
+_DETAIL_BEGIN
 template<typename _Ty, int _M, int _N> class Matrix_;
-MATRICE_NAMESPACE_END_TYPES
+_DETAIL_END
+DGE_MATRICE_END
 
 MATRICE_DEVICE_BEGIN
 
@@ -36,7 +38,7 @@ template<typename _Ty> class Base_
 {
 	using _Myt = Base_;
 	using value_t = _Ty;
-	using _Mydt = types::Matrix_<value_t, -1, -1>;
+	using _Mydt = detail::Matrix_<value_t, -1, -1>;
 	using int_ptr_t = std::add_pointer_t<int>;
 	using pointer = std::add_pointer_t<value_t>;
 public:
@@ -64,7 +66,7 @@ public:
  	 */
 	template<int _M = 0, int _N = _M>
 	MATRICE_HOST_INL auto fetch() {
-		using _Rety = types::Matrix_<value_t, _M, _N>;
+		using _Rety = detail::Matrix_<value_t, _M, _N>;
 		_Rety _Ret(*_H, *_W);
 
 		if (_Future.valid()) _Future.get();
