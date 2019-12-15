@@ -11,7 +11,7 @@
 template _Type* Expr::Op::_##_Desc##_##_Name<_Type>::operator()(\
 int, _Type*, _Type*) const;
 
-MATRICE_NAMESPACE_EXPR_BEGIN
+MATRICE_EXPR_BEGIN
 template<typename _Ty>
 _Ty * Expr::Op::_Mat_inv<_Ty>::operator()(int M, _Ty * Out, _Ty * In) const
 {
@@ -37,4 +37,4 @@ _Ty * Expr::Op::_Mat_inv<_Ty>::operator()(int M, _Ty * Out, _Ty * In) const
 
 _EXPOP_EXPLICIT_INSTANTIATION(float, Mat, inv)
 _EXPOP_EXPLICIT_INSTANTIATION(double, Mat, inv)
-MATRICE_NAMESPACE_EXPR_END
+MATRICE_EXPR_END
