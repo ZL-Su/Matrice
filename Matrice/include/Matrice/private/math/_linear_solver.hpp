@@ -25,9 +25,9 @@ struct spt { enum { spdtr_cholesky_decomposition = 2 }; };
 struct luf { enum { lower_upper_tr_decomposition = 1 }; };
 struct qrd { enum { ortho_upper_tr_decomposition = 3 }; };
 _INTERNAL_BEGIN
-	// \brief parse and invoke the linear algebra kernel to _Op.
-	template<typename _Op, typename... _Ts>
-	MATRICE_GLOBAL void _Lak_adapter(_Ts&... args);
+// \brief parse and invoke the linear algebra kernel to _Op.
+template<typename _Op, typename... _Ts>
+MATRICE_GLOBAL void _Lak_adapter(_Ts&... args);
 _INTERNAL_END
 
 _DETAIL_BEGIN

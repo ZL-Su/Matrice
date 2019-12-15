@@ -224,15 +224,18 @@ template<typename T> struct is_fxdvector : std::false_type {};
 /**
  *\brief is_fxdvector_v<T> is true iff T is dgelom::Vec_ or its derived type.
  */
-template<typename T> inline constexpr bool is_fxdvector_v = is_fxdvector<T>::value;
+template<typename T> 
+inline constexpr bool is_fxdvector_v = is_fxdvector<T>::value;
 
 /**
  *\brief is_matrix_convertible_v<T> is true type iff T is dgelom::Matrix_<...> or related matrix expression or view type.  
  */
-template<typename T> inline constexpr bool is_matrix_convertible_v = is_matrix_v<T> || is_expression_v<T> || is_mtxview_v<T>;
+template<typename T> 
+inline constexpr bool is_matrix_convertible_v = is_matrix_v<T> || is_expression_v<T> || is_mtxview_v<T>;
 
 template<int _M, int _N> struct allocator_traits;
-template<int _M, int _N=_M> inline constexpr auto allocator_traits_v = allocator_traits<_M, _N>::value;
+template<int _M, int _N=_M> 
+inline constexpr auto allocator_traits_v = allocator_traits<_M, _N>::value;
 
 /**
  *\brief internal type for accessing allocator traits.
