@@ -20,7 +20,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "util/utils.h"
 
 DGE_MATRICE_BEGIN
-_TYPES_BEGIN
+_DETAIL_BEGIN
 #define _VIEW_EWISE_COPY_N(_LEFT, _N)\
 const size_t _Size = min(size(),_N); \
 for(size_t _Idx = 0; _Idx < _Size; ++_Idx) { \
@@ -384,5 +384,5 @@ private:
 };
 
 #undef _VIEW_EWISE_COPY_N
-_TYPES_END
+_DETAIL_END
 DGE_MATRICE_END

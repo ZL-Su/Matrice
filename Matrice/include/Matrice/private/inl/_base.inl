@@ -9,7 +9,7 @@
 #include "private/math/kernel_wrapper.hpp"
 
 DGE_MATRICE_BEGIN
-_TYPES_BEGIN
+_DETAIL_BEGIN
 template<typename _Derived, typename _Traits, typename _Type>
 template<typename _Rhs> MATRICE_HOST_INL
 decltype(auto) Base_<_Derived, _Traits, _Type>::sub_inplace(const _Rhs& _Right) {
@@ -96,7 +96,7 @@ _Rhs Base_<_Derived, _Traits, _Type>::spreadmul(const _Rhs& _Right)const {
 	}
 	return forward<_Rhs>(_Ret);
 }
-_TYPES_END
+_DETAIL_END
 template<typename _Mty>
 MATRICE_HOST_INL decltype(auto) make_matrix_deleter(const _Mty& _M) noexcept {
 	return _M.deleter();
@@ -104,7 +104,7 @@ MATRICE_HOST_INL decltype(auto) make_matrix_deleter(const _Mty& _M) noexcept {
 
 template<typename _Ty, int _Rows, int _Cols, typename... _Args>
 MATRICE_GLOBAL_INL decltype(auto) make_matrix(_Args&&... params) {
-	return types::Matrix_<_Ty, _Rows, _Cols>(forward<_Args>(params)...);
+	return detail::Matrix_<_Ty, _Rows, _Cols>(forward<_Args>(params)...);
 };
 
 template<typename _Ty>

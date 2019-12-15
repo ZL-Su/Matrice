@@ -15,9 +15,9 @@ License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
-#include "../../include/Matrice/core/matrix.h"
+#include "core/matrix.h"
 
-MATRICE_NAMESPACE_BEGIN_
+DGE_MATRICE_BEGIN
 
 template<typename _Rhs, typename value_t> 
 value_t det_impl(const _Rhs & a) {
@@ -34,11 +34,11 @@ value_t det_impl(const _Rhs & a) {
 	return std::numeric_limits<value_t>::infinity();
 #endif
 }
-template float det_impl(const types::Matrix_<float, 2, 2>&);
-template float det_impl(const types::Matrix_<float, 3, 3>&);
-template float det_impl(const types::Matrix_<float, 0, 0>&);
-template double det_impl(const types::Matrix_<double, 2, 2>&);
-template double det_impl(const types::Matrix_<double, 3, 3>&);
-template double det_impl(const types::Matrix_<double, 0, 0>&);
+template float det_impl(const detail::Matrix_<float, 2, 2>&);
+template float det_impl(const detail::Matrix_<float, 3, 3>&);
+template float det_impl(const detail::Matrix_<float, 0, 0>&);
+template double det_impl(const detail::Matrix_<double, 2, 2>&);
+template double det_impl(const detail::Matrix_<double, 3, 3>&);
+template double det_impl(const detail::Matrix_<double, 0, 0>&);
 
-_MATRICE_NAMESPACE_END
+DGE_MATRICE_END
