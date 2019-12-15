@@ -23,14 +23,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_tensor_exp.hpp"
 
 DGE_MATRICE_BEGIN
-namespace types {
-template<typename _Ty, int _M, int _N> class Matrix_;
-}
-
 namespace detail {
+template<typename _Ty, int _M, int _N> class Matrix_;
 
 template<typename _Ty, int _M = 0, int _N = 0, size_t _K = 0,
-	typename matrix_type = types::Matrix_<_Ty, _M, _N>>
+	typename matrix_type = detail::Matrix_<_Ty, _M, _N>>
 class _Tensor_impl MATRICE_NONHERITABLE : public std::valarray<matrix_type> {
 	using _Myt = _Tensor_impl;
 	using _Mybase = std::valarray<matrix_type>;
@@ -188,9 +185,9 @@ struct tensor_traits< _Tensor_impl<_Ty, _M, _N, _K>> {
 
 template<typename _Ty, int _M = 0, int _N = _M>
 class _Multi_matrix MATRICE_NONHERITABLE
-	: public std::vector<types::Matrix_<_Ty, _M, _N>>
+	: public std::vector<detail::Matrix_<_Ty, _M, _N>>
 {
-	using _Mybase = std::vector<types::Matrix_<_Ty, _M, _N>>;
+	using _Mybase = std::vector<detail::Matrix_<_Ty, _M, _N>>;
 	using _Myt = _Multi_matrix;
 public:
 	using matrix_type = typename _Mybase::value_type;

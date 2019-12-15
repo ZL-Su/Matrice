@@ -41,11 +41,11 @@ struct index<_Ty, tag::_Tensor_tag> {
  */
 template<typename _Ty, size_t _Depth>
 class _Tensor 
-	: public types::Base_<_Tensor<_Ty, _Depth>, tensor_traits<_Tensor<_Ty, _Depth>>>
+	: public detail::Base_<_Tensor<_Ty, _Depth>, tensor_traits<_Tensor<_Ty, _Depth>>>
 {
 	using _Myt = _Tensor;
 	using _Mytraits = tensor_traits<_Myt>;
-	using _Mybase = types::Base_<_Myt, _Mytraits>;
+	using _Mybase = detail::Base_<_Myt, _Mytraits>;
 public:
 	enum { Size = 0, rows_at_compiletime = 0, cols_at_compiletime = 0 };
 	static constexpr auto depth = _Mytraits::depth;
@@ -164,10 +164,10 @@ private:
  *\param <_Ty> data type
  */
 template<typename _Ty>
-class _Tensor<_Ty, 0> : public types::Base_<_Tensor<_Ty, 0>>
+class _Tensor<_Ty, 0> : public detail::Base_<_Tensor<_Ty, 0>>
 {
 	using _Myt = _Tensor;
-	using _Mybase = types::Base_<_Myt>;
+	using _Mybase = detail::Base_<_Myt>;
 	using _Mytraits = matrix_traits<_Myt>;
 public:
 	enum { Size = 0, rows_at_compiletime = 0, cols_at_compiletime = 0, };
