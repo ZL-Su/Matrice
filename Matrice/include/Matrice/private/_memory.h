@@ -161,8 +161,6 @@ MATRICE_HOST_INL static _OutIt copy(_InIt _First, _InIt _Last, _OutIt _Dest) {
 };
 }
 
-
-
 namespace internal {
 template<typename _Ty, class _Tag>
 MATRICE_GLOBAL_INL decltype(auto) malloc(size_t rows, size_t& cols, _Tag);
