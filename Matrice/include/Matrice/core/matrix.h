@@ -17,13 +17,13 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 #include <array>
-#include <private/_plain_base.hpp>
+#include "private/_plain_base.hpp"
 #ifdef MATRICE_ENABLE_CUDA
-#include <private/_dev_matrix_base.h>
+#include "private/_dev_matrix_base.h"
 #endif
 
-MATRICE_NAMESPACE_BEGIN_TYPES
-
+DGE_MATRICE_BEGIN
+_DETAIL_BEGIN
 #define MATRICE_MAKE_METHOD_CREATE(M, N) \
 MATRICE_GLOBAL void __create_impl(size_t M, size_t N)
 
@@ -371,11 +371,11 @@ public:
 
 #endif
 #undef MATRICE_MAKE_METHOD_CREATE
-MATRICE_NAMESPACE_END_TYPES
 
-DGE_MATRICE_BEGIN
-
-
+_DETAIL_END
+template<typename _Ty>
+inline auto make_shared(const Matrix<_Ty>& mat) noexcept {
+	return std::make_shared<Matrix<_Ty>>(mat);
+}
 DGE_MATRICE_END
-
 #include "../forward.hpp"
