@@ -67,20 +67,20 @@ struct is_tensor<detail::_Tensor<_Ty, _Depth>> : std::true_type {};
 
 template<class _Derived, class _Traits, typename _Ty>
 struct matrix_traits<types::Base_<_Derived, _Traits, _Ty>> {
-	using type = _Ty;
+	using type = remove_all_t<_Ty>;
 	enum { _M = _Traits::_M, _N = _Traits::_N };
 	static constexpr bool Is_base = std::true_type::value;
 };
 template<typename _Ty, int _Rows, int _Cols> 
 struct matrix_traits<Matrix_<_Ty, _Rows, _Cols>> {
-	using type = _Ty;
+	using type = remove_all_t<_Ty>;
 	using category = tag::_Matrix_tag;
 	enum { _M = _Rows, _N = _Cols };
 	static constexpr bool Is_base = std::false_type::value;
 };
 template<typename _Ty>
 struct matrix_traits<detail::_Tensor<_Ty, 0>> {
-	using type = _Ty;
+	using type = remove_all_t<_Ty>;
 	using category = tag::_Tensor_tag;
 	static constexpr auto _M = 0, _N = 0;
 	static constexpr auto Is_base = std::false_type::value;
