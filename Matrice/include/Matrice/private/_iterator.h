@@ -152,7 +152,7 @@ MATRICE_GLOBAL_FINL iterator_base<_Ty> operator+ (typename iterator_base<_Ty>::d
 							Forward Range Iterator
 	    Copyright (c) : Zhilong (Dgelom) Su, since 12/Jul/2018
  **********************************************************************/
-template<typename _Ty, typename = std::enable_if_t<std::is_arithmetic_v<_Ty>>>
+template<typename _Ty, typename = std::enable_if_t<is_scalar_v<_Ty>>>
 class _Matrix_forward_iterator : public iterator_base<_Ty>
 {
 	using _Mybase = iterator_base<_Ty>;
@@ -168,7 +168,7 @@ private:
 							Row-wise Forward Range Iterator
 	    Copyright (c) : Zhilong (Dgelom) Su, since 12/Jul/2018
  **********************************************************************/
-template<typename _Ty, typename = std::enable_if_t<std::is_arithmetic_v<_Ty>>>
+template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 class _Matrix_rwise_iterator : public iterator_base<_Ty>
 {
 	/*<Note> 
@@ -223,7 +223,7 @@ private:
 						Column-wise Forward Range Iterator 
 	    Copyright (c) : Zhilong (Dgelom) Su, since 12/Jul/2018
  **********************************************************************/
-template<typename _Ty, typename = std::enable_if_t<std::is_arithmetic_v<_Ty>>>
+template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 class _Matrix_cwise_iterator : public iterator_base<_Ty>
 {
 	/*<Note> 
