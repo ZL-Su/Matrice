@@ -279,7 +279,7 @@ public:
 						      Block view for Matrix 
 	    Copyright (c) : Zhilong (Dgelom) Su, since 25/Jul/2018
  **********************************************************************/
-template<typename _Ty, MATRICE_ENABLE_IF(is_arithmetic_v<_Ty>)>
+template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 class _Matrix_block MATRICE_NONHERITABLE : public _View_base<_Ty, _Matrix_block<_Ty>>
 {
 	using _Base = _View_base<_Ty, _Matrix_block<_Ty>>;
