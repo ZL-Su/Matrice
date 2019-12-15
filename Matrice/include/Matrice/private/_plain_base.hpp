@@ -153,7 +153,7 @@ protected:
 	_Ty* m_data = nullptr;
 };
 
-_TYPES_BEGIN
+_DETAIL_BEGIN
 
 /*******************************************************************
 	              Generic Base for Matrix Class
@@ -1200,12 +1200,11 @@ public:
 #undef MATRICE_EVALEXP_TOTHIS
 #undef MATRICE_MAKE_ARITHOP
 #undef MATRICE_MAKE_EXP_ASSIGNOP
-}; _TYPES_END
+}; 
 
-_DETAIL_BEGIN
 struct _Matrix_padding {
 	template<typename _Ty, int _M, int _N>
-	using _Matrix_t = types::Matrix_<_Ty, _M, _N>;
+	using _Matrix_t = detail::Matrix_<_Ty, _M, _N>;
 
 	/**
 	 *\brief Make zero padding
