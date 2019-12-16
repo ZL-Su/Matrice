@@ -10,6 +10,14 @@ A libary for numerical computation, includes basic linear algebra (vector, matri
 * Automatic inference of optimal type according to the context.
 * Expression system enhanced lazy evaluation.
 
+## Visualizer
+Matrice supports runtime visualization for plain types, including Matrix_<>, Vec_<> and tensor<>. At present, the Matrice visualizer is a script for the extension, Image Watch, in Visual Studio 2017/2019.
+
+How-to:
+* Install Image Watch from the online visual studio marketplace;
+* Copy the visualizer script from "Matrice/Visualizers" to where the Visualizer folder of Visual Studio IDE on local computer;
+* Enjoy it.
+
 ## System Requirements
 Matrice supports Intel 64 architecture and compatible architectures.
 The library is optimized for the systems based on
