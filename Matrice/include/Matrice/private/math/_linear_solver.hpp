@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
-#include "_type_traits.h"
+#include "../_type_traits.h"
 #include "core/matrix.h"
 
 DGE_MATRICE_BEGIN
@@ -67,13 +67,26 @@ private:
 			internal::_Lak_adapter<svd>(_Mycoeff, _Dptr->s(), _Dptr->v());
 		}
 		if constexpr (is_same_v<kernel_t, spt>) {
-			internal::_Lak_adapter<spt>(_Mycoeff);
+			Matrix<value_type> view;
+			internal::_Lak_adapter<spt>(view.ref(_Mycoeff));
 		}
 	}
 
 protected:
 	matrix_type& _Mycoeff;
 };
+
+#define MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(OP) \
+template<class _Mty> \
+class _Linear_solver<_Mty, OP> : \
+	public _Linear_solver_base<_Linear_solver<_Mty, OP>> { \
+	using _Myt = _Linear_solver; \
+	using _Mybase = _Linear_solver_base<_Linear_solver<_Mty, OP>>; \
+public: \
+	using typename _Mybase::value_type; \
+	using typename _Mybase::matrix_type;
+
+#define MATRICE_MAKE_LINEAR_SOLVER_SPEC_END(OP) };
 
 // \brief CLASS TEMPLATE for linear solver
 // \param <_Mty> Matrice compatible matrix type
@@ -85,24 +98,35 @@ class _Linear_solver : public _Linear_solver_base<_Linear_solver<_Mty, _Op>> {
 public:
 	using typename _Mybase::value_type;
 	using typename _Mybase::matrix_type;
-	_Linear_solver(matrix_type& coeff) : _Mybase(coeff) {
+	_Linear_solver(matrix_type& coeff) noexcept 
+		: _Mybase(coeff) {
 	}
 
 private:
 
 };
 
+// \brief CLASS TEMPLATE for Chelosky decomposition based linear solver
+// \param <_Mty> Matrice compatible matrix type
+// \note This solver is only for symmetric positive definite systems. 
+MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(spt)
+public:
+	// \note The input coeff will be overwritten by U
+	_Linear_solver(matrix_type& coeff) noexcept
+		: _Mybase(coeff) {
+	}
+
+	// \brief Perform back substitution to solve Ax = b.
+	template<class _Rty>
+	MATRICE_GLOBAL_INL auto backward(_Rty& b) noexcept {
+
+	}
+MATRICE_MAKE_LINEAR_SOLVER_SPEC_END(spt)
+
 // \brief CLASS TEMPLATE for SVD based linear solver
 // \param <_Mty> Matrice compatible matrix type
-template<class _Mty>
-class _Linear_solver<_Mty, svd> : 
-	public _Linear_solver_base<_Linear_solver<_Mty, svd>> {
-	using _Myt = _Linear_solver;
-	using _Mybase = _Linear_solver_base<_Linear_solver<_Mty, svd>>;
+MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(svd)
 public:
-	using typename _Mybase::value_type;
-	using typename _Mybase::matrix_type;
-
 	// \note: the input coeff will be overwritten by U
 	_Linear_solver(matrix_type& coeff) 
 		: _Mybase(coeff), 
@@ -131,7 +155,8 @@ public:
 private:
 	Matrix_<value_type, _Mty::cols_at_compiletime, 1> _Mys;
 	Matrix_<value_type, _Mty::cols_at_compiletime> _Myv;
-};
+
+MATRICE_MAKE_LINEAR_SOLVER_SPEC_END(svd);
 
 template<class _Mty, typename _Op> 
 struct _Solver_traits<_Linear_solver<_Mty, _Op>>{
@@ -139,6 +164,9 @@ struct _Solver_traits<_Linear_solver<_Mty, _Op>>{
 	using value_type = typename matrix_type::value_type;
 	using op_type = _Op;
 };
+
+#undef MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN
+#undef MATRICE_MAKE_LINEAR_SOLVER_SPEC_END
 _DETAIL_END
 
 // \brief: linear solver factory function
