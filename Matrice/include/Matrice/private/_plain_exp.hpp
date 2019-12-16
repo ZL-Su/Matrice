@@ -281,10 +281,10 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		 * \brief Evaluate this expression to the matrix type which is deduced according to the optimal type recorded by the expression.
 		 * Specially, this method returns Scalar<value_type> iff the shape of matrix_type is deduced as 1-by-1 in compile time.
 	     */
-		MATRICE_GLOBAL_INL decltype(auto) eval() const {
+		MATRICE_GLOBAL_INL auto eval() const {
 			matrix_type _Ret(M, N);
 			derived_pointer(this)->assign_to(_Ret);
-			return (_Ret);
+			return forward<matrix_type>(_Ret);
 		}
 
 		/** 
