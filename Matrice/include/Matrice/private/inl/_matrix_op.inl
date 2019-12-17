@@ -17,7 +17,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 #include "../_matrix_ops.hpp"
-#include "../math/_linear_fact.hpp"
+#include "../math/_linear_kernel.hpp"
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
