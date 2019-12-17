@@ -60,6 +60,10 @@ public:
 		MATRICE_GLOBAL_FINL range_type(const initlist<_Idx> _Rang)
 			:_My_from_x(*_Rang.begin()), _My_from_y(*(_Rang.begin()+1)),
 			 _My_end_x(*(_Rang.begin()+2)), _My_end_y(*(_Rang.begin()+3)) {}
+		template<typename _Idx, MATRICE_ENABLE_IF(is_integral_v<_Idx>)>
+		MATRICE_GLOBAL_FINL range_type(_Idx _Bx, _Idx _By, _Idx _Ex, _Idx _Ey) noexcept
+			: _My_from_x(_Bx), _My_from_y(_By),
+			_My_end_x(_Ex), _My_end_y(_Ey) {}
 
 		template<typename _Idx, MATRICE_ENABLE_IF(is_integral_v<_Idx>)>
 		MATRICE_GLOBAL_FINL range_type& operator= (const initlist<_Idx> _Rang) {
@@ -299,11 +303,15 @@ public:
 	using _Base::operator/;
 	using _Base::operator=;
 
-	MATRICE_GLOBAL_FINL _Matrix_block(pointer _Ptr, size_t _Cols, const range_type _Range)
+	MATRICE_GLOBAL_FINL _Matrix_block(pointer _Ptr, size_t _Cols, const range_type _Range) noexcept
 		: _Base(_Ptr + _Range.begin_x() + _Range.begin_y()*_Cols, 
 			_Range.end_x() - _Range.begin_x(), _Cols, 
 			_Range.begin_x() + _Range.begin_y()*_Cols),
 			_My_origin(_Ptr), _My_range(_Range) {}
+	MATRICE_GLOBAL_FINL _Matrix_block(pointer _Ptr, size_t _Cols, size_t _Rows) noexcept 
+		: _Base(_Ptr, _Cols, _Cols, 0),  _My_origin(_Ptr), 
+		_My_range(size_t(0), size_t(0), _Cols, _Rows) {
+	}
 
 	//i zero-based local row index
 	MATRICE_GLOBAL_FINL pointer operator[] (difference_type i) {
