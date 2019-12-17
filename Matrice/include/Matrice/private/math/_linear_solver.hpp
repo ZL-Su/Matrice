@@ -54,7 +54,7 @@ public:
 	using value_type = typename _Mytraits::value_type;
 
 	_Linear_solver_base(matrix_type& coeff) noexcept
-		:_Mycoeff(coeff) {
+		:_Mycoeff(coeff), _Myeps(matrix_type::eps) {
 		this->_Forward();
 	}
 
@@ -62,7 +62,7 @@ public:
 	 *\brief Solve AX = B. The solver kernel is dispatched according to the solver operator specified to _Op.
 	 */
 	template<class _Rty>
-	MATRICE_GLOBAL_INL auto solve(_Rty& b) {
+	MATRICE_GLOBAL_INL decltype(auto) solve(_Rty& b) {
 		return ((_Myderived*)(this))->backward(b);
 	}
 
@@ -83,10 +83,10 @@ private:
 			//_Mycoeff is a general square matrix, _Forward does nothing.
 		}
 		if constexpr (is_same_v<kernel_t, svd>) {
-			internal::_Lak_adapter<svd>(_Mycoeff.view(), _Dptr->s().view(), _Dptr->v().view());
+			internal::_Lak_adapter<svd>(view(_Mycoeff), view(_Dptr->s()), view(_Dptr->v()));
 		}
 		if constexpr (is_same_v<kernel_t, spt>) {
-			internal::_Lak_adapter<spt>(_Mycoeff.view());
+			internal::_Lak_adapter<spt>(view(_Mycoeff));
 		}
 	}
 
@@ -97,21 +97,22 @@ private:
 			//general matrix inverse
 			matrix_type _Ret(_Mycoeff.rows(), _Mycoeff.cols());
 
-			return forward<decltype(_Ret)>(_Ret);
+			return move(_Ret);
 		}
 		if constexpr (is_same_v<kernel_t, svd>) {
 			Matrix_<value_type, matrix_type::rows_at_compiletime> _Ret(_Mycoeff.rows(), _Mycoeff.rows());
-			return forward<decltype(_Ret)>(_Ret);
+			return move(_Ret);
 		}
 		if constexpr (is_same_v<kernel_t, spt>) {
 			matrix_type _Ret(_Mycoeff.rows(), _Mycoeff.cols());
-			internal::_Inv_adapter<spt>(_Mycoeff.view(), _Ret.view());
-			return forward<decltype(_Ret)>(_Ret);
+			internal::_Inv_adapter<spt>(view(_Mycoeff), view(_Ret));
+			return move(_Ret);
 		}
 	}
 
 protected:
-	matrix_type& _Mycoeff;
+	matrix_type& _Mycoeff; //ref to the given coefficient matrix
+	value_type _Myeps;     //default roundoff threshold
 };
 
 #define MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(OP) \
@@ -157,7 +158,7 @@ public:
 
 	// \brief Perform back substitution to solve AX = B, where B allowed to have multi-cols and will be overwritten by X.
 	template<class _Rty>
-	MATRICE_GLOBAL_INL auto backward(_Rty& B) noexcept {
+	MATRICE_GLOBAL_INL _Rty& backward(_Rty& B) noexcept {
 		decltype(auto) _L = _Mybase::_Mycoeff;
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_L.rows() == B.rows(),
