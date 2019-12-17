@@ -78,23 +78,24 @@ MATRICE_GLOBAL void _Linear_ispd_kernel(double* data, double* inv, size_t n) noe
 
 template<typename _Ptr>
 MATRICE_GLOBAL_INL void __spd_bwd_kernel_impl(size_t n, const _Ptr lptr, _Ptr x, size_t stride) noexcept {
-	// \solve: L*y = b
-	for (auto r = 0; r < n; ++r) {
+	// \solve: $L \cdot y = b$
+	for (diff_t r = 0; r < n; ++r) {
 		const auto a_row = lptr + r * n;
-		auto& t_sum = *(x + r * stride);
+		const auto x_idx = r * stride;
+		auto t_sum = x[x_idx];
 		for (auto c = 0; c < r; ++c) {
 			t_sum -= a_row[c] * x[c * stride];
 		}
-		t_sum = safe_div(t_sum, a_row[r]);
+		x[x_idx] = safe_div(t_sum, a_row[r]);
 	}
-	// \solve: U*x = y, where U = L^T
+	// \solve: $L^T \cdot x = y$
 	for (diff_t r = n - 1; r >= 0; --r) {
-		const auto a_row = lptr + r * n;
-		auto& t_sum = *(x + r * stride);
+		const auto x_idx = r * stride;
+		auto t_sum = x[x_idx];
 		for (auto c = r + 1; c < n; ++c) {
-			t_sum -= a_row[c] * x[c * stride];
+			t_sum -= lptr[c * n + r] * x[c * stride];
 		}
-		t_sum = safe_div(t_sum, a_row[r]);
+		x[x_idx] = safe_div(t_sum, lptr[r * n + r]);
 	}
 }
 template<> MATRICE_GLOBAL 
