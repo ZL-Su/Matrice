@@ -126,4 +126,8 @@ MATRICE_GLOBAL_INL remove_all_t<_Ty>& make_zero(_Ty& data) noexcept {
 
 	return (data);
 }
+template<typename _Mty, MATRICE_ENABLE_IF(is_matrix_v<_Mty> || is_fxdvector_v<_Mty>)>
+MATRICE_GLOBAL_FINL auto view(_Mty& _M) noexcept {
+	return detail::_Matrix_block<typename _Mty::value_type>(_M.data(), _M.cols(), _M.rows());
+}
 DGE_MATRICE_END

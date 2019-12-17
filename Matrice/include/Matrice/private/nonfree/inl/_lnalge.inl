@@ -345,8 +345,6 @@ template<> struct _Lapack_backward_impl<solver_type::CHD> {
 	MATRICE_GLOBAL_INL static auto& eval(const _Lhs& _A, _Rhs& _X) {
 		static_assert(is_matrix_v<_Lhs>, "_A in _Lapack_backward_impl<solver_type::CHD> must be a matrix type.");
 
-		using iterator = typename _Lhs::iterator;
-		using value_type = typename _Lhs::value_type;
 		const int M = _A.rows(), N = _A.cols(), NRhs = _X.cols();
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(M == N, "The coeff. _A in _Lapack_backward_impl<solver_type::CHD> must be a square matrix.");
