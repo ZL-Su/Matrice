@@ -606,6 +606,15 @@ public:
 	MATRICE_GLOBAL_FINL const _Myt_cview_type cview(size_t i) const noexcept {
 		return _Myt_cview_type(m_data + i, m_rows, m_cols, i);
 	}
+
+	// \View of this object.
+	MATRICE_GLOBAL_INL const auto view() const noexcept {
+		return _Myt_blockview_type(m_data, m_cols, {0,0,m_cols,m_rows});
+	}
+	MATRICE_GLOBAL_INL auto view() noexcept {
+		return _Myt_blockview_type(m_data, m_cols, { 0,0,m_cols,m_rows });
+	}
+
 	// \View of submatrix: x \in [x0, x1) and y \in [y0, y1)
 	MATRICE_GLOBAL_INL auto block(index_t x0, index_t x1, index_t y0, index_t y1) {
 #ifdef MATRICE_DEBUG
@@ -1261,6 +1270,9 @@ MATRICE_GLOBAL_INL decltype(auto) make_matrix(_Args&&... params);
  */
 template<typename _Ty>
 MATRICE_GLOBAL_INL remove_all_t<_Ty>& make_zero(_Ty& data) noexcept;
+
+template<typename _Mty, MATRICE_ENABLE_IF(is_matrix_v<_Mty>||is_fxdvector_v<_Mty>)>
+MATRICE_GLOBAL_INL auto view(_Mty& _M) noexcept { return _M.view(); }
 
 DGE_MATRICE_END
 
