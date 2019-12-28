@@ -22,7 +22,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 DGE_MATRICE_BEGIN
 struct svd { enum { singular_value_decomposition = 4 }; };
 struct spt { enum { spdtr_cholesky_decomposition = 2 }; };
-struct luf { enum { lower_upper_tr_decomposition = 1 }; };
+struct lud { enum { lower_upper_tr_decomposition = 1 }; };
 struct qrd { enum { ortho_upper_tr_decomposition = 3 }; };
 struct solver_status {
 	int value = 1;
@@ -88,6 +88,9 @@ private:
 		if constexpr (is_same_v<kernel_t, spt>) {
 			internal::_Lak_adapter<spt>(view(_Mycoeff));
 		}
+		if constexpr (is_same_v<kernel_t, lud>) {
+			internal::_Lak_adapter<spt>(view(_Mycoeff));
+		}
 	}
 
 	MATRICE_GLOBAL_INL auto _Inverse() {
@@ -128,7 +131,7 @@ public: \
 
 #define MATRICE_MAKE_LINEAR_SOLVER_SPEC_END(OP) };
 
-// \brief CLASS TEMPLATE for linear solver
+// \brief CLASS TEMPLATE for linear solver with Gauss-Jordan alg.
 // \param <_Mty> Matrice compatible matrix type
 // \param <_Op> lapack kernel operator, default is void
 template<class _Mty, typename _Op = void> 
@@ -151,12 +154,12 @@ private:
 // \note This solver is only for symmetric positive definite systems. 
 MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(spt)
 public:
-	// \note The input coeff will be overwritten by U
+	// \note The input coeff will be overwritten by $L$
 	_Linear_solver(matrix_type& coeff) noexcept
 		: _Mybase(coeff) {
 	}
 
-	// \brief Perform back substitution to solve AX = B, where B allowed to have multi-cols and will be overwritten by X.
+	// \brief Perform back substitution to solve ${AX = B}$, where B allowed to have multi-cols and will be overwritten by X.
 	template<class _Rty>
 	MATRICE_GLOBAL_INL _Rty& backward(_Rty& B) noexcept {
 		decltype(auto) _L = _Mybase::_Mycoeff;
