@@ -46,6 +46,10 @@ public:
 		return _Kernel(dy, b);
 	}
 
+	MATRICE_HOST_INL auto grad(value_type x, value_type y) const noexcept {
+
+	}
+
 private:
 	MATRICE_HOST_INL value_type _Kernel(value_type dx, value_type* row) const noexcept {
 		value_type v[] = {
