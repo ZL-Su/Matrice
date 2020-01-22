@@ -178,6 +178,9 @@
     <ClInclude Include="include\Matrice\algs\erroranalysis\_common.h" />
     <ClInclude Include="include\Matrice\algs\forward.hpp" />
     <ClInclude Include="include\Matrice\algs\geometry\geo_fwd.hpp" />
+    <ClInclude Include="include\Matrice\algs\geometry\Lie\_Lie_fwd.hpp" />
+    <ClInclude Include="include\Matrice\algs\geometry\Lie\_Lie_group_base.hpp" />
+    <ClInclude Include="include\Matrice\algs\geometry\Lie\_Lie_traits.hpp" />
     <ClInclude Include="include\Matrice\algs\geometry\normalization.h" />
     <ClInclude Include="include\Matrice\algs\geometry\quaternion.hpp" />
     <ClInclude Include="include\Matrice\algs\geometry\transform.h" />

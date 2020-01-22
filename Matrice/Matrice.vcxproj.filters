@@ -223,6 +223,12 @@
     <Filter Include="Header Files\Detail\autodiff\inline">
       <UniqueIdentifier>{d3d722b3-ca0e-4472-81a9-001adf8cfbc6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Algs\Geometry\manifold">
+      <UniqueIdentifier>{eefb38d8-a31f-43e6-b75a-42c07bd4ed32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Algs\Geometry\manifold\Lie">
+      <UniqueIdentifier>{23b309b4-4b4c-4241-8e78-edc171b2fcd2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -644,6 +650,15 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\private\math\_linear_kernel.hpp">
       <Filter>Header Files\Detail\math\lapack</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\geometry\Lie\_Lie_group_base.hpp">
+      <Filter>Header Files\Algs\Geometry\manifold\Lie</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\geometry\Lie\_Lie_fwd.hpp">
+      <Filter>Header Files\Algs\Geometry\manifold\Lie</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\geometry\Lie\_Lie_traits.hpp">
+      <Filter>Header Files\Algs\Geometry\manifold\Lie</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
