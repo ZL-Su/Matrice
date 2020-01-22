@@ -621,9 +621,6 @@
     <ClInclude Include="include\Matrice\algs\geometry\geo_fwd.hpp">
       <Filter>Header Files\Algs\Geometry</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\private\math\_linear_fact.hpp">
-      <Filter>Header Files\Detail\math\lapack</Filter>
-    </ClInclude>
     <ClInclude Include="include\Matrice\private\math\_linear_solver.hpp">
       <Filter>Header Files\Detail\math</Filter>
     </ClInclude>
@@ -644,6 +641,9 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\private\autograd\_ad_scalar.hpp">
       <Filter>Header Files\Detail\autodiff</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\math\_linear_kernel.hpp">
+      <Filter>Header Files\Detail\math\lapack</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -839,13 +839,13 @@
     <ClCompile Include="src\private\nonfree\_blas_lapack_kernels.cpp">
       <Filter>Source Files\Details\Nonfree</Filter>
     </ClCompile>
-    <ClCompile Include="src\private\math\_linear_fact.cpp">
-      <Filter>Source Files\Details\math</Filter>
-    </ClCompile>
     <ClCompile Include="src\io\_tiff_wrapper.cpp">
       <Filter>Source Files\IO</Filter>
     </ClCompile>
     <ClCompile Include="src\private\math\_linear_solver_impl.cpp">
+      <Filter>Source Files\Details\math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\private\math\_linear_kernel.cpp">
       <Filter>Source Files\Details\math</Filter>
     </ClCompile>
   </ItemGroup>

@@ -87,7 +87,7 @@ namespace internal {
 	// \solve $L \cdot y = b$
 	template<typename _Ptr>
 	MATRICE_GLOBAL_INL void _tri_fwdsv_impl(size_t n, const _Ptr l, _Ptr y, size_t stride) noexcept {
-		y[0] = safe_div(y[0], L[0][0]);
+		y[0] = safe_div(y[0], l[0][0]);
 		for (diff_t i = 1; i < n; ++i) {
 			auto& y_i = y[i * stride];
 			const auto l_i = l + i * n;
