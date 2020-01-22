@@ -21,7 +21,9 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 namespace dgelom {
 
-namespace detail{template<class _Mty,typename _Op>class _Linear_solver;}
+namespace detail{
+	template<class _Mty,typename _Op> class _Linear_solver;
+}
 
 template<class _Mty, typename _Op>
 using linear_solver_t = detail::_Linear_solver<_Mty, _Op>;
