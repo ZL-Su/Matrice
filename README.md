@@ -33,10 +33,10 @@ The software dependencies are:
   * CUDA 8.0 or later
 ## Reference
 ### *BibTex*
-@misc{Su:2019,
+@misc{Su:2020,
   author = {Zhilong Su},
-  year = {2019},
+  year = {2020},
   url = {https://github.com/ZL-Su/Matrice},
-  urldate = {February 25, 2019},
+  urldate = {February 02, 2020},
   title = {Matrice Library}
 }
