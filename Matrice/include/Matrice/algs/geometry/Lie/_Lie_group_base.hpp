@@ -36,7 +36,37 @@ public:
     static constexpr auto dim = _Myprops::dim;
     static constexpr auto dof = _Myprops::dof;
 
+    using Lie_group_type = typename _Mytraits::group_type;
+    using vector_type = typename _Mytraits::vector_type;
+    using jacobian_type = typename _Mytraits::jacobian_type;
 
+    /**
+     *\brief Access the underlying data by pointer
+     */
+    MATRICE_GLOBAL_INL const auto data()const noexcept { 
+        return _Mydata.data(); 
+    }
+    MATRICE_GLOBAL_INL auto data() noexcept {
+        return _Mydata.data();
+    }
+
+    /**
+     *\brief Get the adjoint of the group element.
+     */
+    MATRICE_GLOBAL_INL jacobian_type adj() const {
+
+    }
+
+private:
+    MATRICE_GLOBAL_INL const _Myderived& derived() const { 
+        return*static_cast<const _Myderived*>(this); 
+    }
+    MATRICE_GLOBAL_INL _Myderived& derived() {
+        return*static_cast<_Myderived*>(this);
+    }
+
+protected:
+    vector_type _Mydata; //stores underlying data
 };
 
 _DETAIL_END
