@@ -651,9 +651,6 @@
     <ClInclude Include="include\Matrice\private\math\_linear_kernel.hpp">
       <Filter>Header Files\Detail\math\lapack</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\algs\geometry\Lie\_Lie_group_base.hpp">
-      <Filter>Header Files\Algs\Geometry\manifold\Lie</Filter>
-    </ClInclude>
     <ClInclude Include="include\Matrice\algs\geometry\Lie\_Lie_fwd.hpp">
       <Filter>Header Files\Algs\Geometry\manifold\Lie</Filter>
     </ClInclude>
@@ -661,6 +658,12 @@
       <Filter>Header Files\Algs\Geometry\manifold\Lie</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\geometry\Lie\_Lie_group.hpp">
+      <Filter>Header Files\Algs\Geometry\manifold\Lie</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\geometry\lie.hpp">
+      <Filter>Header Files\Algs\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\geometry\Lie\_Lie_base.hpp">
       <Filter>Header Files\Algs\Geometry\manifold\Lie</Filter>
     </ClInclude>
   </ItemGroup>
