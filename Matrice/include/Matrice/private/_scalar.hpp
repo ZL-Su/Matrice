@@ -21,7 +21,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 DGE_MATRICE_BEGIN
 
-template<typename _Ty>
+template<typename _Ty = default_type>
 class Scalar {
 	static_assert(is_scalar_v<remove_all_t<_Ty>>, 
 		"_Ty in Scalar must be a primitive scalar type.");
@@ -32,25 +32,25 @@ public:
 	using reference = value_type&;
 	using pointer = value_type*;
 
-	MATRICE_GLOBAL_FINL Scalar() noexcept
+	MATRICE_GLOBAL_INL Scalar() noexcept
 		: _Myval(0) {
 	}
 	template<typename _Uy>
-	MATRICE_GLOBAL_FINL Scalar(const _Uy s) noexcept 
+	MATRICE_GLOBAL_INL Scalar(const _Uy s) noexcept 
 		: _Myval(s) {
 	}
 
-	MATRICE_GLOBAL_FINL operator reference() const noexcept {
+	MATRICE_GLOBAL_INL operator reference() const noexcept {
 		return (_Myval);
 	}
-	MATRICE_GLOBAL_FINL operator reference() noexcept {
+	MATRICE_GLOBAL_INL operator reference() noexcept {
 		return (_Myval);
 	}
 
-	MATRICE_GLOBAL_FINL operator pointer() const noexcept {
+	MATRICE_GLOBAL_INL operator pointer() const noexcept {
 		return (&_Myval);
 	}
-	MATRICE_GLOBAL_FINL operator pointer() noexcept {
+	MATRICE_GLOBAL_INL operator pointer() noexcept {
 		return (&_Myval);
 	}
 
@@ -68,8 +68,21 @@ public:
 		return (_Myval);
 	}
 
-	MATRICE_GLOBAL_INL constexpr decltype(auto) size() const noexcept {
+	MATRICE_GLOBAL_INL constexpr decltype(auto)(size)() const noexcept {
 		return 1;
+	}
+
+	/**
+	 *\brief Compute scalar gradient.
+	 */
+	MATRICE_GLOBAL_INL const _Myt grad()const noexcept {
+		return _Myt(value_type(0));
+	}
+	/**
+	 *\brief Compute reciprocal of this scalar.
+	 */
+	MATRICE_GLOBAL_INL const _Myt inv()const noexcept {
+		return _Myt(_Myval == 0 ? 0 : 1 / _Myval);
 	}
 
 private:
