@@ -14,20 +14,28 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
-*	************************************************************************/
+*************************************************************************/
 #pragma once
 
-#include "../private/_type_traits.h"
+#include "private/_type_traits.h"
 #include "forward.hpp"
 #include "_Lie_fwd.hpp"
 
 DGE_MATRICE_BEGIN
-template<size_t _Dim, typename _Ty>
-struct traits<detail::_SO<_Dim, _Ty>> {
-	using value_type = _Ty;
-	using group_type = detail::_SO<_Dim, _Ty>;
-	using properties = internal::_Lie_group_prop<group_type>;
-	using vector_type = detail::Matrix_<value_type, _Dim, 1>;
-	using jacobian_type = detail::Matrix_<value_type, _Dim, _Dim>;
+#define MATRICE_MAKE_LIE_GROUP_TRAITS(GROUP, DIM) \
+template<typename _Ty> \
+struct traits<detail::_##GROUP##DIM<_Ty>> { \
+	using value_type = _Ty; \
+	using vector_type = detail::Vec_<value_type, DIM>; \
+	using jacobian_type = detail::Matrix_<value_type, DIM, DIM>; \
 };
+
+MATRICE_MAKE_LIE_GROUP_TRAITS(SO, 2);
+MATRICE_MAKE_LIE_GROUP_TRAITS(SO, 3);
+MATRICE_MAKE_LIE_GROUP_TRAITS(SE, 2);
+MATRICE_MAKE_LIE_GROUP_TRAITS(SE, 3);
+MATRICE_MAKE_LIE_GROUP_TRAITS(se, 2);
+MATRICE_MAKE_LIE_GROUP_TRAITS(se, 3);
+
+#undef MATRICE_MAKE_LIE_GROUP_TRAITS
 DGE_MATRICE_END
