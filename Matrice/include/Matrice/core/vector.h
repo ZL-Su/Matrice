@@ -77,6 +77,7 @@ public:
 	vec_global_inl void _y_setter(value_t _y) { data()[1] = _y; }
 
 };
+
 template<typename _Ty> 
 class Vec3_ MATRICE_NONHERITABLE : public Vec_<_Ty, 3>
 {
@@ -173,28 +174,28 @@ _DETAIL_END
 
 // \a generic managed vector type
 template<typename _Ty, int _Dim,
-	typename = std::enable_if_t<std::is_arithmetic_v<_Ty>>>
+	typename = std::enable_if_t<is_scalar_v<_Ty>>>
 using Vec_ = detail::Vec_<_Ty, _Dim>;
 template<typename _Ty, int _Dim>
 struct is_fxdvector<Vec_<_Ty, _Dim>> : std::true_type {};
 
 // \managed vector type with 2 entities: x, y
 template<typename _Ty, 
-	typename = std::enable_if_t<std::is_arithmetic_v<_Ty>>>
+	typename = std::enable_if_t<is_scalar_v<_Ty>>>
 using Vec2_ = detail::Vec_<_Ty, 2>;
 template<typename _Ty>
 struct is_fxdvector<Vec2_<_Ty>> : std::true_type {};
 
 // \managed vector type with 3 entities: x, y, z
 template<typename _Ty,
-	typename = std::enable_if_t<std::is_arithmetic_v<_Ty>>>
+	typename = std::enable_if_t<is_scalar_v<_Ty>>>
 using Vec3_ = detail::Vec3_<_Ty>;
 template<typename _Ty>
 struct is_fxdvector<Vec3_<_Ty>> : std::true_type {};
 
 // \managed vector type with 4 entities: x, y, z, w
 template<typename _Ty,
-	typename = std::enable_if_t<std::is_arithmetic_v<_Ty>>>
+	typename = std::enable_if_t<is_scalar_v<_Ty>>>
 using Vec4_ = detail::Vec4_<_Ty>;
 template<typename _Ty>
 struct is_fxdvector<Vec4_<_Ty>> : std::true_type {};
