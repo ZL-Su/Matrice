@@ -22,7 +22,8 @@ namespace dgelom {
 namespace detail {
 	template<typename _Ty, int _M, int _N> class Matrix_;
 	template<typename _Ty, int _Dim> class Vec_;
-	template<typename _Ty> class Vec2_;
+	template<typename _Ty> class Vec3_;
+	template<typename _Ty> class Vec4_;
 }
 
 template<typename _Ty, int _RowsAtCompileTime, int _ColsAtCompileTime=_RowsAtCompileTime> 

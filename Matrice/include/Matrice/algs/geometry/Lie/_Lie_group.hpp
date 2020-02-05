@@ -16,27 +16,21 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
+#include "_Lie_base.hpp"
+#include "../quaternion.hpp"
 
-//\note: forward declarations of math operations and kernels
+DGE_MATRICE_BEGIN
+_DETAIL_BEGIN
+/**
+ *\brief Class template for Special Orthogonal (Rotation) group.
+ *\param <_Dim> dimension of SO(_Dim) group.
+ */
+template<typename _Ty = default_type> 
+class _SO2 : public _Lie_group_base<_SO2<_Ty>> {
+	using _Myt = _SO2;
+	using _Mybase = _Lie_group_base<_SO2<_Ty>>;
+public:
 
-namespace dgelom {
-
-namespace detail{
-	template<class _Mty,typename _Op> class _Linear_solver;
-}
-
-template<class _Mty, typename _Op>
-using linear_solver_t = detail::_Linear_solver<_Mty, _Op>;
-
-#define MATRICE_MAKE_LINEARSV_TYPE(OP) \
-struct OP; \
-template<class _Mty> \
-using OP##_linear_solver_t = linear_solver_t<_Mty, OP>;
-
-// \brief: Linear solver with SVD kernel
-MATRICE_MAKE_LINEARSV_TYPE(svd);
-// \brief: Linear solver with SPT kernel
-MATRICE_MAKE_LINEARSV_TYPE(spt);
-
-#undef MATRICE_MAKE_LINEARSV_TYPE
-}
+};
+_DETAIL_END
+DGE_MATRICE_END

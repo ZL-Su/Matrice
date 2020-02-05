@@ -178,6 +178,11 @@
     <ClInclude Include="include\Matrice\algs\erroranalysis\_common.h" />
     <ClInclude Include="include\Matrice\algs\forward.hpp" />
     <ClInclude Include="include\Matrice\algs\geometry\geo_fwd.hpp" />
+    <ClInclude Include="include\Matrice\algs\geometry\lie.hpp" />
+    <ClInclude Include="include\Matrice\algs\geometry\Lie\_Lie_fwd.hpp" />
+    <ClInclude Include="include\Matrice\algs\geometry\Lie\_Lie_group.hpp" />
+    <ClInclude Include="include\Matrice\algs\geometry\Lie\_Lie_base.hpp" />
+    <ClInclude Include="include\Matrice\algs\geometry\Lie\_Lie_traits.hpp" />
     <ClInclude Include="include\Matrice\algs\geometry\normalization.h" />
     <ClInclude Include="include\Matrice\algs\geometry\quaternion.hpp" />
     <ClInclude Include="include\Matrice\algs\geometry\transform.h" />
@@ -223,7 +228,7 @@
     <ClInclude Include="include\Matrice\private\math\_config.h" />
     <ClInclude Include="include\Matrice\private\math\_linear.h" />
     <ClInclude Include="include\Matrice\private\math\_linear_solver.h" />
-    <ClInclude Include="include\Matrice\private\math\_linear_fact.hpp" />
+    <ClInclude Include="include\Matrice\private\math\_linear_kernel.hpp" />
     <ClInclude Include="include\Matrice\private\math\_linear_solver.hpp" />
     <ClInclude Include="include\Matrice\private\math\_primitive_funcs.hpp" />
     <ClInclude Include="include\Matrice\private\math\_svd.h" />
@@ -331,7 +336,7 @@
     <ClCompile Include="src\core\solver_impl.cpp" />
     <ClCompile Include="src\core\storage_base_impl.cpp" />
     <ClCompile Include="src\io\_tiff_wrapper.cpp" />
-    <ClCompile Include="src\private\math\_linear_fact.cpp" />
+    <ClCompile Include="src\private\math\_linear_kernel.cpp" />
     <ClCompile Include="src\private\math\_linear_solver_impl.cpp" />
     <ClCompile Include="src\private\nonfree\_blas_lapack_kernels.cpp" />
     <ClCompile Include="src\private\_memory.cpp" />
