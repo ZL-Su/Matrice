@@ -57,6 +57,9 @@ struct _Lie_group_prop<detail::_SE3<_Ty>> {
 	static constexpr auto dof = 3;
 	using type = detail::_SE2<_Ty>;
 };
-
 }
+template<typename _Ty> using SO2 = detail::_SO2<_Ty>;
+template<typename _Ty> using SO3 = detail::_SO3<_Ty>;
+template<typename _Ty> using SE2 = detail::_SE2<_Ty>;
+template<typename _Ty> using SE3 = detail::_SE3<_Ty>;
 }
