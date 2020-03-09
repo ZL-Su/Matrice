@@ -70,9 +70,21 @@ protected:
 
 /**
  *\brief Base class for Lie algebras, defines the common API.
+ *\note Created by Dgelom Su, modified by Dgelom Su (Feb/17/2020)
  */
 template<typename _Derived>
 class _Lie_algebra_base {
+    using _Myt = _Lie_algebra_base;
+    using _Myderived = _Derived;
+    using _Mytraits = traits<_Myderived>;
+    using _Myprops = internal::_Lie_algebra_prop<_Myderived>;
+public:
+    static constexpr auto dim = _Myprops::dim;
+    static constexpr auto dof = _Myprops::dof;
+
+    using group_type = typename _Myprops::type;
+    using vector_type = typename _Mytraits::vector_type;
+    using jacobian_type = typename _Mytraits::jacobian_type;
 
 };
 _DETAIL_END
