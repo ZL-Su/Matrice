@@ -21,16 +21,41 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
-/**
- *\brief Class template for Special Orthogonal (Rotation) group.
- *\param <_Dim> dimension of SO(_Dim) group.
- */
-template<typename _Ty = default_type> 
-class _SO2 : public _Lie_group_base<_SO2<_Ty>> {
-	using _Myt = _SO2;
-	using _Mybase = _Lie_group_base<_SO2<_Ty>>;
+#define MATRICE_MAKE_LIE_GROUP_BEGIN(NAME) \
+template<typename _Ty = default_type> \
+class NAME : public _Lie_group_base<NAME<_Ty>> { \
+    using _Myt = NAME; \
+    using _Mybase = _Lie_group_base<NAME<_Ty>>; \
 public:
+#define MATRICE_MAKE_LIE_GROUP_END(NAME) }
 
-};
+/**
+ *\brief Class template for 2D Special Orthogonal (Rotation) group.
+ */
+MATRICE_MAKE_LIE_GROUP_BEGIN(_SO2)
+
+MATRICE_MAKE_LIE_GROUP_END(_SO2);
+/**
+ *\brief Class template for 3D Special Orthogonal (Rotation) group.
+ */
+MATRICE_MAKE_LIE_GROUP_BEGIN(_SO3)
+
+MATRICE_MAKE_LIE_GROUP_END(_SO3);
+
+/**
+ *\brief Class template for 2D Special Euclidean (Rigid motion) group.
+ */
+MATRICE_MAKE_LIE_GROUP_BEGIN(_SE2)
+
+MATRICE_MAKE_LIE_GROUP_END(_SE2);
+/**
+ *\brief Class template for 3D Special Euclidean (Rigid motion) group.
+ */
+MATRICE_MAKE_LIE_GROUP_BEGIN(_SE3)
+
+MATRICE_MAKE_LIE_GROUP_END(_SE3);
+
+#undef MATRICE_MAKE_LIE_GROUP_BEGIN
+#undef MATRICE_MAKE_LIE_GROUP_END
 _DETAIL_END
 DGE_MATRICE_END
