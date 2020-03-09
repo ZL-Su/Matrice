@@ -51,4 +51,44 @@ public:
 		return (*this)[2];
 	}
 };
+
+template<size_t _Dim> struct shape {};
+template<> struct shape<3> {
+	using value_type = size_t;
+
+	const auto size() noexcept {
+		return height * width * depth;
+	}
+	auto reset() noexcept {
+		height = width = 0;
+		depth = 1;
+	}
+	size_t height = 0;
+	size_t width = 0;
+	size_t depth = 1;
+};
+template<> struct shape<2> {
+	using value_type = size_t;
+
+	const auto size() noexcept {
+		return height * width;
+	}
+	auto reset() noexcept {
+		height = width = 0;
+	}
+	size_t height = 0;
+	size_t width = 0;
+};
+template<> struct shape<1> {
+	using value_type = size_t;
+
+	const auto size() noexcept {
+		return height;
+	}
+	auto reset() noexcept {
+		height = 0;
+	}
+	size_t height = 0;
+};
+
 DGE_MATRICE_END
