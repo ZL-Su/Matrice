@@ -666,6 +666,9 @@
     <ClInclude Include="include\Matrice\algs\geometry\Lie\_Lie_base.hpp">
       <Filter>Header Files\Algs\Geometry\manifold\Lie</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\algs\stereovision\_spatial_transform.hpp">
+      <Filter>Header Files\Algs\Stereovision</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
