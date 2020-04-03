@@ -55,28 +55,28 @@ protected:
 
 template<typename _Ty, 
 	class _Altag = cs_alignment_tag::left>
-class _Stereo_icgn_estimator 
-	:public _Depth_estimation_base<_Stereo_icgn_estimator<_Ty, _Altag>> {
-	using _Myt = _Stereo_icgn_estimator;
+class _GCC_estimator 
+	:public _Depth_estimation_base<_GCC_estimator<_Ty, _Altag>> {
+	using _Myt = _GCC_estimator;
 	using _Mybase = _Depth_estimation_base<_Myt>;
 	enum _Mytask {INIT_JACOB = 0, UPDATE_JACOB = 1};
 public:
-	static constexpr auto order = 6; // shape function order
+	static constexpr auto order = 1; // shape function order
 	static constexpr auto size = 15; // subset size
 	using typename _Mybase::value_t;
 	using typename _Mybase::point_t;
 	using typename _Mybase::image_t;
 	
-	_Stereo_icgn_estimator()
+	_GCC_estimator()
 		:_Mybase(point_t(), point_t()), m_jacob(sqr<size_t>(size)) {
 	}
-	_Stereo_icgn_estimator(const point_t& r, const point_t& t)
+	_GCC_estimator(const point_t& r, const point_t& t)
 		:_Mybase(r, t), m_jacob(sqr<size_t>(size)) {
 	}
 
-	_Myt& set_image_pair(const image_t& ref, const image_t& mat) noexcept {
-		_Mybase::m_reference = ref;
-		_Mybase::m_matching = mat;
+	_Myt& set_stereo_pair(const image_t& left, const image_t& right) noexcept {
+		_Mybase::m_reference = left;
+		_Mybase::m_matching = right;
 		_Mybase::_Update_interpolator();
 
 		return (*this);
