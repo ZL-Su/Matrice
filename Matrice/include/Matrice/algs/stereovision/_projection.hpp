@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -122,11 +122,7 @@ public:
 	 *\param [pd] re-projected point, where the first two elements are coordinates of a normalized, distortion-rectified image point, the last one is its depth value.
 	 */
 	MATRICE_HOST_INL point_type grad(const point_type& pd)const noexcept {
-		const auto X = _Mybase::rotation({ pd.x, pd.y, 1 });
-		const auto s = 1 / sqr(X.z*pd.z + m_tran.z);
-		const auto gx = (X.x*m_tran.z - X.z*m_tran.x)*s;
-		const auto gy = (X.y*m_tran.z - X.z*m_tran.y)*s;
-		return point_type{ gx, gy, 0 };
+		return this->grad(pd.x, pd.y, pd.z);
 	}
 	MATRICE_HOST_INL point_type grad(value_type x, value_type y, value_type depth)const noexcept {
 		const auto X = _Mybase::rotation({ x, y, 1 });
