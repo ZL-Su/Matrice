@@ -214,8 +214,6 @@ public:
 	using typename _Mybase::const_initlist;
 	using _Mybase::operator=;
 	
-	MATRICE_HOST_INL Matrix_(size_t rows) noexcept
-		: _Mybase(rows, 1) {};
 	MATRICE_HOST_INL Matrix_(const _Myt& other) noexcept
 		: _Mybase(other) {};
 	template<typename _Arg>
