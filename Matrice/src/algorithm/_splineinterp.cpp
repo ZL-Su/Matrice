@@ -64,8 +64,8 @@ namespace internal {
 
 			const auto _Z1 = -0.4305753470999737919, _Z2 = -0.04309628820326465382;
 			const auto _A1 = _Z1 / (_Z1*_Z1 - 1), _A2 = _Z2 / (_Z2*_Z2 - 1);
-			const auto _K1 = static_cast<index_t>(log(_Myeps) / log(abs(_Z1))) + 2;
-			const auto _K2 = static_cast<index_t>(log(_Myeps) / log(abs(_Z2))) + 2;
+			const auto _K1 = static_cast<index_t>(log(_Myeps)/log(abs(_Z1)))+2;
+			const auto _K2 = static_cast<index_t>(log(_Myeps)/log(abs(_Z2)))+2;
 
 			return std::make_tuple(_Z1, _Z2, _A1, _A2, _K1, _K2);
 		}
@@ -80,9 +80,9 @@ namespace internal {
 			const auto _A1 = _Z1 / (_Z1*_Z1 - 1);
 			const auto _A2 = _Z2 / (_Z2*_Z2 - 1);
 			const auto _A3 = _Z3 / (_Z3*_Z3 - 1);
-			const auto _K1 = static_cast<index_t>(log(_Myeps) / log(abs(_Z1))) + 2;
-			const auto _K2 = static_cast<index_t>(log(_Myeps) / log(abs(_Z2))) + 2;
-			const auto _K3 = static_cast<index_t>(log(_Myeps) / log(abs(_Z3))) + 2;
+			const auto _K1 = static_cast<index_t>(log(_Myeps)/log(abs(_Z1)))+2;
+			const auto _K2 = static_cast<index_t>(log(_Myeps)/log(abs(_Z2)))+2;
+			const auto _K3 = static_cast<index_t>(log(_Myeps)/log(abs(_Z3)))+2;
 
 			return std::make_tuple(_Z1, _Z2, _Z3, _A1, _A2, _A3, _K1, _K2, _K3);
 		}
@@ -94,7 +94,7 @@ void _Spline_interpolation<_Ty, bicerp_tag>::_Coeff_impl() {
 	const auto& _Data = *_Mybase::_Mydata;
 	auto& _Mycoeff = _Mybase::_Mycoeff;
 
-	auto[_Height, _Width] = _Data.shape().tiled();
+	auto[_Height, _Width] = _Data.shape();
 	_Mycoeff.create(_Height, _Width, zero<value_type>);
 
 	//initialization
@@ -133,7 +133,7 @@ void _Spline_interpolation<_Ty, biqerp_tag>::_Coeff_impl() {
 	const auto& _Data = *_Mybase::_Mydata;
 	auto& _Mycoeff = _Mybase::_Mycoeff;
 
-	const auto[_Height, _Width] = _Data.shape().tiled();
+	const auto[_Height, _Width] = _Data.shape();
 	_Mycoeff.create(_Height, _Width, zero<value_type>);
 
 	//initialization
@@ -192,7 +192,7 @@ void _Spline_interpolation<_Ty, biserp_tag>::_Coeff_impl() {
 	const auto& _Data = *_Mybase::_Mydata;
 	auto& _Mycoeff = _Mybase::_Mycoeff;
 
-	const auto[_Height, _Width] = _Data.shape().tiled();
+	const auto[_Height, _Width] = _Data.shape();
 	_Mycoeff.create(_Height, _Width, zero<value_type>);
 
 	//initialization
