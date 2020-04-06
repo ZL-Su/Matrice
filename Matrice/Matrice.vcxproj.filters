@@ -585,9 +585,6 @@
     <ClInclude Include="include\Matrice\private\_plain_exp.hpp">
       <Filter>Header Files\Detail\core</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\private\_plain_shape.hpp">
-      <Filter>Header Files\Detail\core</Filter>
-    </ClInclude>
     <ClInclude Include="include\Matrice\private\_scalar.hpp">
       <Filter>Header Files\Detail\core</Filter>
     </ClInclude>
