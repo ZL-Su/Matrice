@@ -57,7 +57,7 @@ void _Add_gaussian_noise(Matrix_<_Pixty, ::dynamic>& _Img, float _Sig) {
 	});
 }
 template<class _ItpTag = bicerp_tag, typename _Pixty = uint8_t, MATRICE_ENABLE_IF(is_scalar_v<_Pixty>)>
-auto _Image_resize(const Matrix_<_Pixty, ::dynamic>& _Img, shape_t<size_t> _Size) {
+auto _Image_resize(const Matrix_<_Pixty, ::dynamic>& _Img, shape_t<2> _Size) {
 	using value_type = conditional_t<is_integral_v<_Pixty>, float, _Pixty>;
 	Matrix_<value_type, ::dynamic> _Space;
 	auto _Scale = one<value_type>;
@@ -72,7 +72,7 @@ auto _Image_resize(const Matrix_<_Pixty, ::dynamic>& _Img, shape_t<size_t> _Size
 	interpolation<value_type,_ItpTag> _Itp(_Space);
 
 	_Scale = 1 / _Scale;
-	const auto[_W, _H] = _Size;
+	const auto[_H, _W] = _Size;
 	const auto _Scale_x = _Img.cols() / value_type(_W);
 	const auto _Scale_y = _Img.rows() / value_type(_H);
 	Matrix_<_Pixty, ::dynamic> _Ret(_H, _W, 0);
@@ -93,7 +93,7 @@ inline auto imnoise(Matrix_<_Ty, ::dynamic>&& _Img, float _Sigma = 1) {
 }
 
 template<class _ItpTag = bicerp_tag, typename _Ty = uint8_t>
-inline auto resize(const Matrix_<_Ty, ::dynamic>& _Img, shape_t<size_t> _Size) {
+inline auto resize(const Matrix_<_Ty, ::dynamic>& _Img, shape_t<2> _Size) {
 	return detail::_Image_resize<_ItpTag>(_Img, _Size);
 }
 
