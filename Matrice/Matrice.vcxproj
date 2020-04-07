@@ -246,7 +246,6 @@
     <ClInclude Include="include\Matrice\private\_iterator.h" />
     <ClInclude Include="include\Matrice\private\_plain_base.hpp" />
     <ClInclude Include="include\Matrice\private\_plain_exp.hpp" />
-    <ClInclude Include="include\Matrice\private\_plain_shape.hpp" />
     <ClInclude Include="include\Matrice\private\_range.h" />
     <ClInclude Include="include\Matrice\private\_refs.hpp" />
     <ClInclude Include="include\Matrice\private\_scalar.hpp" />

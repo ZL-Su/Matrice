@@ -19,6 +19,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <functional>
 #include <cassert>
 #include "_plain_shape.hpp"
+#include "_shape.hpp"
 #include "_type_traits.h"
 #include "_size_traits.h"
 #include "_tag_defs.h"
@@ -273,7 +274,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 			cols_at_compiletime = myt_traits::cols};
 
 		MATRICE_GLOBAL_FINL Base_() {}
-		MATRICE_GLOBAL_FINL Base_(const basic_shape_t& _Shape) 
+		MATRICE_GLOBAL_FINL Base_(const shape_t<3>& _Shape) 
 			: Shape(_Shape), M(_Shape.rows()), N(_Shape.cols()) {}
 
 		/**
@@ -417,17 +418,17 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		MATRICE_GLOBAL_FINL constexpr size_t cols() const noexcept { return N; }
 
 		/**
-		 *\brief Get full shape of dst. {N, {D, {H, W}}}
+		 *\brief Get full shape of dst. {Height, Width, Depth}
 		 */
-		MATRICE_GLOBAL_FINL const basic_shape_t& shape() const noexcept {
+		MATRICE_GLOBAL_FINL const auto& shape() const noexcept {
 			return (Shape); 
 		}
-		MATRICE_GLOBAL_FINL basic_shape_t& shape() noexcept {
+		MATRICE_GLOBAL_FINL auto& shape() noexcept {
 			return (Shape);
 		}
 
 		/**
-		 *\brief Get full dims {N,{C,{H,W}}}
+		 *\brief Get full dims {Height, Width, Depth}
 		 */
 		MATRICE_GLOBAL_FINL constexpr auto& dims() const noexcept {
 			return (Shape);
@@ -440,7 +441,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 
 	protected:
 		size_t M, K, N;
-		basic_shape_t Shape;
+		shape_t<3> Shape;
 #undef _CDTHIS
 	};
 
@@ -464,7 +465,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		enum { options = option<ewise>::value };
 
 		MATRICE_GLOBAL_INL EwiseBinaryExpr(const T& _lhs, const U& _rhs)
-		 :_Mybase(union_shape(_lhs.shape(),_rhs.shape())),
+		 :_Mybase(detail::_Union(_lhs.shape(),_rhs.shape())),
 			_LHS(_lhs), _RHS(_rhs) {}
 
 		/*MATRICE_GLOBAL_FINL value_t operator()(size_t _idx) noexcept { 
@@ -676,16 +677,16 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 			:_Mybase(inout.shape()), _RHS(inout), _ANS(inout) {
 			if constexpr (options == trp) { 
 				std::swap(M, N); 
-				_Mybase::Shape.get(2) = M;
-				_Mybase::Shape.get(3) = N;
+				_Mybase::Shape.h = M;
+				_Mybase::Shape.w = N;
 			}
 		}
 		MATRICE_GLOBAL_INL MatUnaryExpr(const T& _rhs, T& _ans)
 			: _Mybase(_rhs.shape()), _RHS(_rhs), _ANS(_ans) {
 			if constexpr (options == trp) {
 				std::swap(M, N);
-				_Mybase::Shape.get(2) = M;
-				_Mybase::Shape.get(3) = N;
+				_Mybase::Shape.h = M;
+				_Mybase::Shape.w = N;
 			}
 		}
 		MATRICE_GLOBAL_INL MatUnaryExpr(MatUnaryExpr&& _other)

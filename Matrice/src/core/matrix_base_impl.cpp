@@ -27,7 +27,7 @@ value_t det_impl(const _Rhs & a) {
 	if (N == 3) return (p[0]*(p[4]*p[8] - p[5]*p[7]) - p[1]*(p[3]*p[8] - p[5]*p[6]) + p[2]*(p[3]*p[7] - p[4]*p[6]));
 
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
-	lapack_kernel<value_t>::lud(a.data(), a.shape().tiled());
+	lapack_kernel<value_t>::lud(a.data(), a.shape());
 	return a.trace();
 #else
 	DGELOM_ERROR("Undefined math kernel, matrice supports two types of kernels with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL");

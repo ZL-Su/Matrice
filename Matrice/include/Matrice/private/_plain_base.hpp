@@ -22,9 +22,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_type_traits.h"
 #include "_plain_exp.hpp"
 #include "_matrix_ops.hpp"
-#include "_iterator.h"
-#include "_view.h"
 #include "_storage.hpp"
+#include "_iterator.h"
+#include "_shape.hpp"
+#include "_view.h"
 #include "util/_type_defs.h"
 #include "util/_conditional_macros.h"
 #include "util/_exception.h"
@@ -54,49 +55,55 @@ class _Basic_plane_view_base {
 	enum { MAGIC_VAL = 0x42FF0000 };
 	size_t stride = type_bytes_v<_Ty>;
 	int type = _Type, flags = MAGIC_VAL | _Type; 
-	int nval = 1, cval = 1, hval = 1, wval = 1;
+	int nval = 1, hval = 1, wval = 1;
 public:
 	using plvt_type = tuple<int, int, std::add_pointer_t<_Ty>, bool>;
 
 	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base() = default;
 	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base(int _rows, int _cols, _Ty* _data = nullptr) noexcept
-		: m_shape{1,1,_rows,_cols}, m_data(_data) {
+		: m_shape(_rows,_cols), m_data(_data) {
+#ifdef MATRICE_DEBUG
 		this->_Flush_view_buf();
+#endif
 	};
-	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base(const basic_shape_t& _Shape, _Ty* _data) noexcept
+	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base(const shape_t<3>& _Shape, _Ty* _data) noexcept
 		: m_data(_data), m_shape(_Shape) {
+#ifdef MATRICE_DEBUG
 		this->_Flush_view_buf();
+#endif
 	};
-	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base(const basic_shape_t& _Shape) noexcept
+	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base(const shape_t<3>& _Shape) noexcept
 		: m_shape(_Shape) {
+#ifdef MATRICE_DEBUG
 		this->_Flush_view_buf();
+#endif
 	};
 
 	/**
 	 * \shape of a matrix or tensor
 	 * Example: 
-		auto [E, D, _Rows, _Cols] = _Matrix.shape();
-		auto [E, D, H, W] = _Tensor.shape();
+		auto [_Rows, _Cols, _Depth(=1)] = _Matrix.shape();
+		auto [_Rows, _Cols, _Depth] = _Tensor.shape();
 	 */
 	MATRICE_GLOBAL_FINL constexpr decltype(auto) shape() const noexcept {
 		return m_shape;
 	}
 	template<typename _T, MATRICE_ENABLE_IF(is_scalar_v<_T>)>
-	MATRICE_GLOBAL_FINL constexpr shape_t<size_t>  shape(_T _Scale) const noexcept {
-		return std::make_tuple(m_rows*_Scale, m_cols*_Scale);
+	MATRICE_GLOBAL_FINL constexpr auto shape(_T _Scale) const noexcept {
+		return shape_t<2>(m_rows*_Scale, m_cols*_Scale);
 	}
 	template<typename _T1, typename _T2 = _T1, 
 		MATRICE_ENABLE_IF(is_scalar_v<_T1>&&is_scalar_v<_T2>)>
-	MATRICE_GLOBAL_FINL constexpr shape_t<size_t> shape(_T1 _Rsf, _T2 _Csf) const noexcept {
-		return std::make_tuple(m_rows*_Rsf, m_cols*_Csf);
+	MATRICE_GLOBAL_FINL constexpr auto shape(_T1 _Rsf, _T2 _Csf) const noexcept {
+		return shape_t<2>(m_rows*_Rsf, m_cols*_Csf);
 	}
 
 	/**
 	 *\brief Get full dims {N,{C,{H,W}}}
 	 */
-	MATRICE_GLOBAL_FINL constexpr auto& dims() const noexcept {
-		return (m_shape);
-	}
+	//MATRICE_GLOBAL_FINL constexpr auto& dims() const noexcept {
+	//	return (m_shape);
+	//}
 
 	/**
 	 * \a tuple of plane view of the matrix for fast memory access.
@@ -138,18 +145,15 @@ public:
 
 protected:
 	MATRICE_GLOBAL_FINL constexpr void _Flush_view_buf() noexcept {
-#ifdef MATRICE_DEBUG
 		stride = m_cols * type_bytes_v<_Ty>;
-		nval = m_shape.get(0);
-		cval = m_shape.get(1);
-		hval = m_shape.get(2);
-		wval = m_shape.get(3);
-#endif
+		nval = m_shape.d;
+		hval = m_shape.h;
+		wval = m_shape.w;
 	}
 
-	basic_shape_t m_shape;
-	int m_rows = m_shape.rows();
-	int m_cols = m_shape.cols();
+	shape_t<3> m_shape;
+	size_t m_rows = m_shape.rows();
+	size_t m_cols = m_shape.cols();
 	_Ty* m_data = nullptr;
 };
 
@@ -175,7 +179,7 @@ class Base_ : public _Basic_plane_view_base<_Valty>
 }
 
 #define MATRICE_EXPAND_SHAPE \
-get<0>(_Shape), get<1>(_Shape)
+_Shape.h, _Shape.w
 
 #define MATRICE_MAKE_EXPOP_TYPE(DESC, NAME) \
 typename _Exp_op::_##DESC##_##NAME<_Valty>
@@ -270,28 +274,34 @@ public:
 		:_Mybase(max_integer_v<0, _M>, max_integer_v<0, _N>), _Myalloc() {
 		m_data = _Myalloc.data();
 	}
-	MATRICE_GLOBAL_INL constexpr Base_(int _rows, int _cols)noexcept
+	MATRICE_GLOBAL_INL constexpr Base_(size_t _rows)noexcept
+		:_Mybase(_rows < _M ? _M : _rows, _N > 1 ? _N : 1),
+		_Myalloc(_rows < _M ? _M : _rows, _N > 1 ? _N : 1) {
+		m_data = _Myalloc.data();
+	}
+	MATRICE_GLOBAL_INL constexpr Base_(size_t _rows, size_t _cols)noexcept
 		:_Mybase(_rows < _M ? _M : _rows, _cols < _N ? _N : _cols),
 		_Myalloc(_rows < _M ? _M : _rows, _cols < _N ? _N : _cols) {
 		m_data = _Myalloc.data();
 	}
-	MATRICE_GLOBAL_INL explicit Base_(const shape_t<size_t>& _Shape)noexcept
-		:Base_(MATRICE_EXPAND_SHAPE) {
-	}
-	MATRICE_GLOBAL_INL constexpr Base_(int _rows, int _cols, pointer data)noexcept
+	MATRICE_GLOBAL_INL explicit Base_(size_t _rows, size_t _cols, pointer data)noexcept
 		:_Mybase(_rows, _cols, data) {
 	}
-	MATRICE_GLOBAL_INL explicit Base_(const shape_t<size_t>& _Shape, pointer _Data)noexcept
-		:Base_(MATRICE_EXPAND_SHAPE, _Data) {
-	}
-	MATRICE_GLOBAL_INL constexpr Base_(int _rows, int _cols, value_t _val)noexcept
+	MATRICE_GLOBAL_INL explicit Base_(size_t _rows, size_t _cols, value_t _val)noexcept
 		:Base_(_rows, _cols) {
 		_Myalloc = (_val);
 	}
-	MATRICE_GLOBAL_INL explicit Base_(const shape_t<size_t>& _Shape, value_t _Val)noexcept
-		:Base_(MATRICE_EXPAND_SHAPE, _Val) {
+	MATRICE_GLOBAL_INL explicit Base_(shape_t<2>&& _Shape)noexcept
+		:Base_(MATRICE_EXPAND_SHAPE) {
 	}
-	MATRICE_GLOBAL_INL explicit Base_(const basic_shape_t& _Shape) noexcept
+	MATRICE_GLOBAL_INL explicit Base_(shape_t<2>&& _Shape, pointer _Data)noexcept
+		:_Mybase(MATRICE_EXPAND_SHAPE, _Data) {
+	}
+	MATRICE_GLOBAL_INL explicit Base_(shape_t<2>&& _Shape, value_t _Val)noexcept
+		:Base_(MATRICE_EXPAND_SHAPE) {
+		_Myalloc = (_Val);
+	}
+	MATRICE_GLOBAL_INL explicit Base_(shape_t<3>&& _Shape) noexcept
 		:_Mybase(_Shape), _Myalloc(_Shape.rows(), _Shape.cols()) {
 		m_data = _Myalloc.data();
 	}
@@ -300,11 +310,11 @@ public:
 		_Myalloc = ((pointer)_list.begin());
 	}
 	MATRICE_GLOBAL_INL constexpr Base_(const _Myt& _other) noexcept
-		:_Mybase(_other.m_shape), _Myalloc(_other._Myalloc) {
+		:_Mybase(_other.shape()), _Myalloc(_other._Myalloc) {
 		m_data = _Myalloc.data();
 	}
 	MATRICE_GLOBAL_INL constexpr Base_(_Myt&& _other) noexcept
-		:_Mybase(_other.m_shape), _Myalloc(move(_other._Myalloc)) {
+		:_Mybase(_other.shape()), _Myalloc(move(_other._Myalloc)) {
 		m_data = _Myalloc.data();
 	}
 	/**
@@ -393,13 +403,13 @@ public:
 		this->create(_Rows, _Cols);
 		return (*(this) = value_type(_Val));
 	};
-	MATRICE_HOST_INL decltype(auto)create(const shape_t<size_t>& _Shape) {
+	MATRICE_HOST_INL decltype(auto)create(const shape_t<2>& _Shape) {
 		if constexpr (_M <= 0 || _N <= 0) 
 			this->derived().__create_impl(MATRICE_EXPAND_SHAPE);
 		return (*static_cast<_Derived*>(this));
 	};
 	template<typename _Uy, MATRICE_ENABLE_IF(is_scalar_v<_Uy>)>
-	MATRICE_HOST_INL decltype(auto)create(const shape_t<size_t>& _Shape, _Uy _Val) {
+	MATRICE_HOST_INL decltype(auto)create(const shape_t<2>& _Shape, _Uy _Val) {
 		this->create(_Shape);
 		return (*(this) = value_type(_Val));
 	};
@@ -785,7 +795,7 @@ public:
 	MATRICE_GLOBAL_INL _Derived& operator=(const _Derived& _other) {
 		if (this != &_other) {
 			m_cols = _other.m_cols, m_rows = _other.m_rows;
-			m_shape = _other.shape();
+			m_shape = (_other.shape());
 			if (_other._Myalloc) m_data = _Myalloc =(_other._Myalloc);
 			else m_data = _other.data();
 			_Mybase::_Flush_view_buf();
@@ -1175,8 +1185,8 @@ protected:
 	using _Mybase::m_data;
 	using _Mybase::m_shape;
 
-	conditional_t<(rows_at_compiletime>=::dynamic||cols_at_compiletime >=::dynamic), _Myalloc_t, _Myalty> _Myalloc;
 	size_t _Myfmt = _Myalloc.fmt() | gene;
+	conditional_t<(rows_at_compiletime>=::dynamic||cols_at_compiletime >=::dynamic), _Myalloc_t, _Myalty> _Myalloc;
 
 	MATRICE_GLOBAL_INL _Myt& _Xfields(initlist<size_t> il) noexcept {
 		m_shape = il;

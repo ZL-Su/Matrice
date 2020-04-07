@@ -106,10 +106,7 @@ public:
 	MATRICE_GLOBAL_FINL size_t size() const { return (static_cast<const _Derived*>(this)->size()); }
 	MATRICE_GLOBAL_FINL size_t rows() const { return (static_cast<const _Derived*>(this)->rows()); }
 	MATRICE_GLOBAL_FINL size_t cols() const { return (static_cast<const _Derived*>(this)->cols()); }
-	MATRICE_GLOBAL_FINL constexpr auto shape() const { 
-		return basic_shape_t({ 1, 1, rows(), cols() });
-	}
-	MATRICE_GLOBAL_FINL constexpr auto dims() const { return basic_shape_t({ 1,1,rows(), cols() }); }
+	MATRICE_GLOBAL_FINL constexpr auto shape() const { return shape_t<3>{rows(), cols(), 1}; }
 	MATRICE_GLOBAL_FINL void create(size_t, size_t) {}
 	MATRICE_GLOBAL_FINL value_t sum() const {
 		value_t _Ret = 0;
