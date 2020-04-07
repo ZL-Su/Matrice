@@ -94,7 +94,7 @@ void _Spline_interpolation<_Ty, bicerp_tag>::_Coeff_impl() {
 	const auto& _Data = *_Mybase::_Mydata;
 	auto& _Mycoeff = _Mybase::_Mycoeff;
 
-	auto[_Height, _Width] = _Data.shape();
+	auto[_Height, _Width, _ph] = _Data.shape();
 	_Mycoeff.create(_Height, _Width, zero<value_type>);
 
 	//initialization
@@ -133,7 +133,7 @@ void _Spline_interpolation<_Ty, biqerp_tag>::_Coeff_impl() {
 	const auto& _Data = *_Mybase::_Mydata;
 	auto& _Mycoeff = _Mybase::_Mycoeff;
 
-	const auto[_Height, _Width] = _Data.shape();
+	const auto[_Height, _Width, _ph] = _Data.shape();
 	_Mycoeff.create(_Height, _Width, zero<value_type>);
 
 	//initialization
@@ -192,7 +192,7 @@ void _Spline_interpolation<_Ty, biserp_tag>::_Coeff_impl() {
 	const auto& _Data = *_Mybase::_Mydata;
 	auto& _Mycoeff = _Mybase::_Mycoeff;
 
-	const auto[_Height, _Width] = _Data.shape();
+	const auto[_Height, _Width, _ph] = _Data.shape();
 	_Mycoeff.create(_Height, _Width, zero<value_type>);
 
 	//initialization

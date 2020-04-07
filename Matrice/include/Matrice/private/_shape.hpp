@@ -119,6 +119,10 @@ template<> struct shape_t<3> {
 	shape_t(shape_t<1>&& _other) noexcept
 		:h(_other.h) {
 	}
+	shape_t<3>& operator=(const shape_t<3>& _other) noexcept {
+		h = _other.h, w = _other.w, d = _other.d;
+		return (*this);
+	}
 	shape_t<3>& operator=(shape_t<3>&& _other) noexcept {
 		h = _other.h, w = _other.w, d = _other.d;
 		return (*this);
