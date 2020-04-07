@@ -65,7 +65,7 @@ public:
 	 *\param [h, w] rows and cols of each tensor cell
 	 */
 	_Tensor(size_t h, size_t w) noexcept
-		:_Mybase(basic_shape_t{ depth, h, w }) {
+		:_Mybase(shape_t<3>{ h, w, depth }) {
 	}
 	/**
 	 *\brief constructor with a value initialization
@@ -107,14 +107,14 @@ public:
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(d < depth, "depth index over range.");
 #endif
-		const auto inner_size = m_shape.hw();
+		const auto inner_size = m_shape.h*m_shape.w;
 		return (_Mybase::operator[](d*inner_size+r*m_width)[c]);
 	}
 	MATRICE_HOST_INL value_type& operator()(size_t d, size_t r, size_t c) noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(d < _Depth, "depth index over range.");
 #endif
-		const auto inner_size = m_shape.hw();
+		const auto inner_size = m_shape.h * m_shape.w;
 		return (_Mybase::operator[](d*inner_size + r * m_width)[c]);
 	}
 
@@ -126,8 +126,8 @@ public:
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(d < _Depth, "depth index over range.");
 #endif
-		const auto w = m_shape.w();
-		const auto h = m_shape.h();
+		const auto w = m_shape.w;
+		const auto h = m_shape.h;
 		const auto r0 = d*h, r1 = (d+1) * h;
 		return _Mybase::block(0, w, r0, r1);
 	}
@@ -148,15 +148,15 @@ public:
 	 *\brief internal used method within CRTP. 
 	 */
 	MATRICE_HOST_INL void __create_impl(size_t h, size_t w) {
-		this->_Reset({ depth, h, w });
-		m_width = m_shape.w();
-		m_height = m_shape.h();
+		this->_Reset({ h, w, depth });
+		m_width = m_shape.w;
+		m_height = m_shape.h;
 	}
 
 private:
 	using _Mybase::m_shape;
-	size_t m_width = m_shape.w();
-	size_t m_height = m_shape.h();
+	size_t m_width = m_shape.w;
+	size_t m_height = m_shape.h;
 };
 
 /**
@@ -174,7 +174,7 @@ public:
 	using typename _Mybase::value_t;
 	using typename _Mybase::value_type;
 	using typename _Mybase::const_initlist;
-	using tensor_shape = basic_shape<size_t>;
+	using tensor_shape = shape_t<3>;
 	using _Mybase::dims;
 
 	/**
@@ -183,47 +183,34 @@ public:
 	_Tensor() noexcept
 		: _Mybase() {}
 	/**
-	 *\brief Construct a tensor with shape [1,[1,_Shape]]
+	 *\brief Construct a tensor with shape [_Shape, 1]
 	 */
-	_Tensor(shape_t<size_t>&& _Shape) noexcept
+	_Tensor(shape_t<2>&& _Shape) noexcept
 		: _Mybase(_Shape) {
 		m_shape = move(_Shape); _Mybase::_Flush_view_buf();
 	}
 	/**
-	 *\brief Construct a tensor with shape [1,[1,_Shape]] and fill with _Val
+	 *\brief Construct a tensor with shape [_Shape, 1] and fill with _Val
 	 */
-	_Tensor(shape_t<size_t>&& _Shape, value_t _Val) noexcept
+	_Tensor(shape_t<2>&& _Shape, value_t _Val) noexcept
 		: _Tensor(move(_Shape)) {
 		_Mybase::operator= ({ _Val });
 	}
 	/**
-	 *\brief Construct a tensor with shape [1,[_Shape]]
+	 *\brief Construct a tensor with shape [_Shape]
 	 */
-	_Tensor(shape3_t<size_t>&& _Shape) noexcept
-		: _Mybase(get<2>(_Shape), get<1>(_Shape)*get<0>(_Shape)) {
+	_Tensor(shape_t<3>&& _Shape) noexcept
+		: _Mybase(_Shape) {
 		m_shape = move(_Shape); _Mybase::_Flush_view_buf();
 	}
 	/**
-	 *\brief Construct a tensor with shape [1,[_Shape]] and fill with _Val
+	 *\brief Construct a tensor with shape [_Shape] and fill with _Val
 	 */
-	_Tensor(shape3_t<size_t>&& _Shape, value_t _Val) noexcept
+	_Tensor(shape_t<3>&& _Shape, value_t _Val) noexcept
 		: _Tensor(move(_Shape)) {
 		_Mybase::operator= ({ _Val });
 	}
-	/**
-	 *\brief Construct a tensor with shape _Shape
-	 */
-	_Tensor(shape4_t<size_t>&& _Shape) noexcept
-		: _Mybase(get<0>(_Shape)*get<2>(_Shape), get<1>(_Shape)*get<3>(_Shape)) {
-		m_shape = move(_Shape); _Mybase::_Flush_view_buf();
-	}
-	/**
-	 *\brief Construct a tensor with shape _Shape and fill with _Val
-	 */
-	_Tensor(shape4_t<size_t>&& _Shape, value_t _Val) noexcept
-		: _Tensor(move(_Shape)) {
-		_Mybase::operator= ({ _Val });
-	}
+
 	/**
 	 *\brief Move constructor
 	 */
