@@ -173,7 +173,7 @@ template<> struct _Blas_kernel_impl<double> : _Blas_kernel_impl_base<double> {
 
 template<typename _Ty> struct _Lapack_kernel_impl_base {
 	using pointer = std::add_pointer_t<_Ty>;
-	using size_type = tuple<int, int>;
+	using size_type = shape_t<2>;
 	using plview_type = tuple<int, int, pointer>;
 #if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
 	static constexpr int layout = LAPACK_ROW_MAJOR;
@@ -218,11 +218,11 @@ struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 #endif
 	}
 	MATRICE_HOST_INL static int spd(const plview_type& _A) {
-		return spd(get<2>(_A), {get<0>(_A), get<1>(_A) });
+		return spd(get<2>(_A), {size_t(get<0>(_A)), size_t(get<1>(_A))});
 	}
 	template<typename _Mty, MATRICE_ENABLE_IF(is_matrix_v<_Mty>)>
 	MATRICE_HOST_INL static int spd(const _Mty& _A) {
-		return spd(_A.data(), _A.shape().tiled());
+		return spd(_A.data(), _A.shape().tile());
 	}
 
 	/**
@@ -239,7 +239,7 @@ struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 #endif
 	}
 	MATRICE_HOST_INL static int lud(const plview_type& _A) {
-		return lud(get<2>(_A), { get<0>(_A), get<1>(_A) });
+		return lud(get<2>(_A), { size_t(get<0>(_A)), size_t(get<1>(_A)) });
 	}
 
 	/**
@@ -297,7 +297,7 @@ template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double>
 #endif
 	}
 	MATRICE_HOST_INL static int spd(const plview_type& _A) {
-		return spd(get<2>(_A), { get<0>(_A), get<1>(_A) });
+		return spd(get<2>(_A), { size_t(get<0>(_A)), size_t(get<1>(_A)) });
 	}
 
 	/**
@@ -315,7 +315,7 @@ template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double>
 #endif
 	}
 	MATRICE_HOST_INL static int lud(const plview_type& _A) {
-		return lud(get<2>(_A), { get<0>(_A), get<1>(_A) });
+		return lud(get<2>(_A), { size_t(get<0>(_A)), size_t(get<1>(_A)) });
 	}
 
 	/**
