@@ -1,9 +1,11 @@
 #pragma once
 #include "../transform.h"
+#ifdef MATRICE_SIMD_ARCH
 #include "../../../arch/ixpacket.h"
+#endif
 
 DGE_MATRICE_BEGIN
-namespace detail {
+_DETAIL_BEGIN
 template<> struct _Axis_type<0, 3> {
 	MATRICE_GLOBAL_FINL auto operator()() const {
 		return Vec3_<bool>(1, 0, 0);
@@ -80,6 +82,7 @@ template<typename _Ty> struct _Avxmat4_ {
 
 	type _pa, _pb, _pc, _pd;
 };
+#endif
 
 template<typename _Ty> struct _Geotf_base {
 public:
@@ -88,6 +91,7 @@ public:
 	using vec3_type = Vec3_<value_type>;
 	using matrix_type = Matrix_<value_type, 4, 4>;
 
+#ifdef MATRICE_SIMD_ARCH
 	/**
 	 *\brief Constructor from 4-by-4 transformation matrix
 	 *\param [m] 4-by-4 transformation matrix
@@ -121,7 +125,50 @@ public:
 		_Mymat.mul<p.Size>(p.data());
 		return (p);
 	}
+protected:
+	mutable _Avxmat4_<value_type> _Mymat;
+#else
+	/**
+	 *\brief Constructor from 4-by-4 transformation matrix
+	 *\param [m] 4-by-4 transformation matrix
+	 */
+	_Geotf_base(const matrix_type& m) noexcept
+		: _Mymat(m) {
+	}
+	/**
+	 *\brief Constructor from axis-angle representation
+	 *\param [a] axis-angle data
+	 */
+	_Geotf_base(const _Axis_angle_rep<value_type, 3>& a) noexcept
+		: _Geotf_base(a.matrix<4>()) {
+	}
+	/**
+	 *\brief Constructor from a rotation matrix and a translation vector
+	 *\param [R] 3-by-3 rotation matrix
+	 *\param [T] 3-translation vector
+	 */
+	_Geotf_base(const Matrix_<value_type, 3, 3>& R, const vec3_type& T) noexcept {
+		_Mymat.block(0, 3, 0, 3) = R;
+		_Mymat[0][3] = T[0];
+		_Mymat[1][3] = T[1];
+		_Mymat[2][3] = T[2];
+		_Mymat.rview(3) = { 0, 0, 0, 1 };
+	}
 
+	/**
+	 *\brief In-place transformation
+	 *\param [p] input point, overwritten by the transformed data
+	 */
+	template<typename _Vty, MATRICE_ENABLE_IF(is_fxdvector_v<_Vty>)>
+	MATRICE_HOST_INL auto& operator()(const _Vty& p) const {
+		p = _Mymat.mul(p);
+		return (p);
+	}
+protected:
+	matrix_type _Mymat;
+#endif
+
+public:
 	/**
 	 *\brief Compute rotation matrix between two 3d vectors
 	 *\param [v1, v2] the given two vectors
@@ -129,14 +176,11 @@ public:
 	static MATRICE_HOST_INL auto rotation(const vec3_type& v1, const vec3_type& v2) {
 		return std::move(_Rot_from(v1, v2));
 	}
-
-protected:
-	mutable _Avxmat4_<value_type> _Mymat;
 };
-}
+_DETAIL_END
 
 template<>
-class detail::_GeoTransform_isometry<float> 
+class detail::_Geotf_isometry<float> 
 	: public detail::_Geotf_base<float> {
 	using _Mybase = detail::_Geotf_base<float>;
 public:
@@ -146,7 +190,7 @@ private:
 };
 
 template<>
-class detail::_GeoTransform_isometry<double> 
+class detail::_Geotf_isometry<double> 
 	: public detail::_Geotf_base<double> {
 	using _Mybase = detail::_Geotf_base<double>;
 public:
@@ -154,6 +198,5 @@ public:
 	using _Mybase::operator();
 private:
 };
-#endif
 
 DGE_MATRICE_END
