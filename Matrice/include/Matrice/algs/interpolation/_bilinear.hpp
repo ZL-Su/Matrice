@@ -1,6 +1,6 @@
 /***********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -41,13 +41,13 @@ public:
 	 */
 	MATRICE_HOST_INL value_type operator()(value_type x, value_type y) const noexcept {
 		const auto x1 = max(floor<diff_t>(x), 0);
-		const auto x2 = min(x1 + 1, _Mydata.cols() - 1);
+		const auto x2 = min(x1 + 1, _Mydata->cols() - 1);
 		const auto y1 = max(floor<diff_t>(y), 0);
-		const auto y2 = min(y1 + 1, _Mydata.rows() - 1);
-		const auto f11 = _Mydata[y1][x1];
-		const auto f12 = _Mydata[y2][x1];
-		const auto f21 = _Mydata[y1][x2];
-		const auto f22 = _Mydata[y2][x2];
+		const auto y2 = min(y1 + 1, _Mydata->rows() - 1);
+		const auto f11 = (*_Mydata)[y1][x1];
+		const auto f12 = (*_Mydata)[y2][x1];
+		const auto f21 = (*_Mydata)[y1][x2];
+		const auto f22 = (*_Mydata)[y2][x2];
 
 		const auto dx1 = x - x1;
 		const auto dx2 = x2 - x;
@@ -59,13 +59,13 @@ public:
 	}
 	MATRICE_HOST_INL auto grad(value_type x, value_type y) const noexcept{
 		const auto x1 = max(floor<diff_t>(x), 0);
-		const auto x2 = min(x1 + 1, _Mydata.cols() - 1);
+		const auto x2 = min(x1 + 1, _Mydata->cols() - 1);
 		const auto y1 = max(floor<diff_t>(y), 0);
-		const auto y2 = min(y1 + 1, _Mydata.rows() - 1);
-		const auto f11 = _Mydata[y1][x1];
-		const auto f12 = _Mydata[y2][x1];
-		const auto f21 = _Mydata[y1][x2];
-		const auto f22 = _Mydata[y2][x2];
+		const auto y2 = min(y1 + 1, _Mydata->rows() - 1);
+		const auto f11 = (*_Mydata)[y1][x1];
+		const auto f12 = (*_Mydata)[y2][x1];
+		const auto f21 = (*_Mydata)[y1][x2];
+		const auto f22 = (*_Mydata)[y2][x2];
 
 		const auto dfdx = (f21 - f11) * (y2 - y) + (f22 - f12) * (y - y1);
 		const auto dfdy = (f12 - f11) * (x2 - x) + (f22 - f21) * (x - x1);

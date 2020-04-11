@@ -24,7 +24,7 @@ DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
 
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
-MATRICE_HOST_INL Vec3_<_Ty> _Rodrigues_impl(const Matrix_<_Ty, 3, 3>& _R) {
+MATRICE_HOST_INL Vec3_<_Ty> _Rodrigues_impl(const Matrix_<_Ty, 3>& _R) {
 	using value_t = _Ty;
 	constexpr const auto _Unit = value_t(1.0);
 	constexpr const auto _Half = value_t(0.5);
@@ -32,7 +32,7 @@ MATRICE_HOST_INL Vec3_<_Ty> _Rodrigues_impl(const Matrix_<_Ty, 3, 3>& _R) {
 
 	Vec3_<value_t> _Ret{_R[2][1]-_R[1][2], _R[0][2]-_R[2][0], _R[1][0]-_R[0][1]};
 
-	auto s = _Ret.norm<2>() * _Half;
+	const auto s = _Ret.norm<2>() * _Half;
 	auto c = (_R.trace() - _Unit)*_Half;
 	c = c > _Unit ? _Unit : c < -_Unit ? -_Unit : c;
 	auto a = std::acos(c);
@@ -57,6 +57,29 @@ MATRICE_HOST_INL Vec3_<_Ty> _Rodrigues_impl(const Matrix_<_Ty, 3, 3>& _R) {
 	}
 	
 	return (_Ret = (_Half * a / s)*_Ret);
+}
+template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
+MATRICE_HOST_INL Matrix_<_Ty, 3> _Rodrigues_impl(const Vec3_<_Ty>& _r) noexcept {
+	using value_t = _Ty;
+	auto _Ret = Matrix_<value_t, 3>::diag(1);
+
+	const auto theta = _r.norm();
+	if (theta != 0) {
+		auto u = (_r / theta).eval();
+		const auto [s, c] = sin_cos(theta);
+		_Ret(0) *= c, _Ret(4) *= c, _Ret(8) *= c;
+
+		_Ret[0][0] += (1 - c) * u(0) * u(0);
+		_Ret[0][1] += (1 - c) * u(0) * u(1) - s * u(2);
+		_Ret[0][2] += (1 - c) * u(0) * u(2) + s * u(1);
+		_Ret[1][0] += (1 - c) * u(1) * u(0) + s * u(2);
+		_Ret[1][1] += (1 - c) * u(1) * u(1);
+		_Ret[1][2] += (1 - c) * u(1) * u(2) - s * u(0);
+		_Ret[2][0] += (1 - c) * u(2) * u(0) - s * u(1);
+		_Ret[2][1] += (1 - c) * u(2) * u(1) + s * u(0);
+		_Ret[2][2] += (1 - c) * u(2) * u(2);
+	}
+	return (_Ret);
 }
 
 /**
@@ -83,21 +106,16 @@ template<typename, size_t> class _Axis_angle_rep {};
 /**
  *\brief TEMPLATE CLASS for rigid transformation
  */
-template<typename> class _GeoTransform_isometry {};
+template<typename> class _Geotf_isometry {};
 
 _DETAIL_END
 
-template<typename _Ty, size_t _Cols, typename _Outty>
-MATRICE_HOST_INL auto rodrigues(const Matrix_<_Ty, 3, _Cols>& _Left, _Outty _Right) {
-	if constexpr (_Cols == 1) {
-
-	}
-	else {
-		auto _Ret = detail::_Rodrigues_impl(_Left);
-		if constexpr (std::is_pointer_v<_Outty>)
-			dgelom::transform(_Ret.begin(), _Ret.end(), _Right);
-		else _Right = _Ret;
-	}
+template<typename _Input, typename _Output>
+MATRICE_HOST_INL auto rodrigues(const _Input& _In, _Output& _Out) noexcept {
+	const auto _Ret = detail::_Rodrigues_impl(_In);
+	if constexpr (is_pointer_v<_Output>)
+		dgelom::transform(_Ret.begin(), _Ret.end(), _Out);
+	else _Out = move(_Ret);
 }
 
 using axis_x_t = detail::_Axis_type<0, 3>;
@@ -106,7 +124,7 @@ using axis_z_t = detail::_Axis_type<2, 3>;
 
 template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
 // *\brief TEMPLATE CLASS for rigid transformation
-using isometry_t = detail::_GeoTransform_isometry<_Ty>;
+using isometry_t = detail::_Geotf_isometry<_Ty>;
 
 template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
 // *\brief TEMPLATE CLASS for axis-angle representation
