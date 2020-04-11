@@ -203,6 +203,7 @@
     <ClInclude Include="include\Matrice\algs\stereovision\_depth_estimation.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_projection.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_spatial_transform.hpp" />
+    <ClInclude Include="include\Matrice\algs\stereovision\_triangulation.hpp" />
     <ClInclude Include="include\Matrice\arch\inl\_ixops.hpp" />
     <ClInclude Include="include\Matrice\arch\inl\_ixop_impls.hpp" />
     <ClInclude Include="include\Matrice\arch\ixpacket.h" />
