@@ -69,4 +69,9 @@ template<int _N1, int _N2> struct min_integer {
 template<int _N1, int _N2> MATRICE_GLOBAL_INL 
 constexpr int min_integer_v = min_integer<_N1, _N2>::value;
 
+template<size_t _N1, size_t _N2> struct is_same_constval {
+	static constexpr auto value = (_N1 == _N2);
+};
+template<size_t _N1, size_t _N2> MATRICE_GLOBAL_INL
+constexpr bool is_same_constval_v = is_same_constval<_N1, _N2>::value;
 DGE_MATRICE_END
