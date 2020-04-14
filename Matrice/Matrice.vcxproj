@@ -200,6 +200,7 @@
     <ClInclude Include="include\Matrice\algs\similarity.h" />
     <ClInclude Include="include\Matrice\algs\similarity\_iterative_conv_impl.h" />
     <ClInclude Include="include\Matrice\algs\similarity\_similarity_traits.h" />
+    <ClInclude Include="include\Matrice\algs\stereovis.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_depth_estimation.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_projection.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_spatial_transform.hpp" />
