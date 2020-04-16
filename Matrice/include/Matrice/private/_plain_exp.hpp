@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include <functional>
 #include <cassert>
-#include "_plain_shape.hpp"
 #include "_shape.hpp"
 #include "_type_traits.h"
 #include "_size_traits.h"
@@ -295,7 +294,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		 */
 		template<typename _Rety> 
 		MATRICE_GLOBAL_INL _Rety eval() const {
-			_Rety ret(derived_pointer(this)->shape());
+			_Rety ret(M, N);
 			return forward<_Rety>(ret = *derived_pointer(this));
 		}
 
