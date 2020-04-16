@@ -17,10 +17,13 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #pragma once
 #include "core.hpp"
+#include "../geometry/transform.h"
 
 MATRICE_ALGS_BEGIN
 struct cs_alignment_tag { 
-	struct left {}; struct middle {}; struct right{};
+	struct left {}; 
+	struct middle {}; 
+	struct right{};
 };
 _DETAIL_BEGIN
 template<typename _Ty> class _Projection_base {
@@ -30,14 +33,18 @@ public:
 	using value_type = _Ty;
 	using point_type = Vec3_<value_type>;
 	using matrix_type = Matrix_<value_type, dim>;
+
 	template<typename _An> struct depth_paramterized_projection {
 		point_type point;
 		MATRICE_HOST_INL point_type grad() noexcept {
 			return point_type{};
 		}
 	};
+
 	_Projection_base() noexcept 
 		:m_tran(0) {
+		m_ints.rview(0) = 0;
+		m_ints.rview(1) = m_ints(0);
 	}
 	/**
 	 *\brief initialize the rotation and translation
@@ -45,26 +52,11 @@ public:
 	 */
 	_Projection_base(const array_n<value_type, dim<<1>& ext) noexcept
 		:m_tran(ext(3), ext(4), ext(5)) {
-		point_type r{ ext(0), ext(1), ext(2) };
-		const auto theta = sqrt(r.dot(r));
-		const auto sval = sin(theta);
-		auto cval = cos(theta);
+		//set internal paramters to default
+		m_ints.rview(0) = 0;
 
-		m_rotm.identity(); cval = 1 - cval; r = r / theta;
-
-		m_rotm(0) += cval * r[0] * r[0];
-		m_rotm(1) += cval * r[0] * r[1];
-		m_rotm(2) += cval * r[0] * r[2];
-		m_rotm(3) += cval * r[1] * r[0];
-		m_rotm(4) += cval * r[1] * r[1];
-		m_rotm(5) += cval * r[1] * r[2];
-		m_rotm(6) += cval * r[2] * r[0];
-		m_rotm(7) += cval * r[2] * r[1];
-		m_rotm(8) += cval * r[2] * r[2];
-
-		m_rotm(1) -= sval * r[2], m_rotm(2) += sval * r[1];
-		m_rotm(3) += sval * r[2], m_rotm(5) -= sval * r[0];
-		m_rotm(6) -= sval * r[1], m_rotm(7) += sval * r[0];
+		//cvt given external params to the rot. mat. and trans vec.
+		rodrigues(point_type{ ext(0), ext(1), ext(2) }, m_rotm);
 
 		m_irot = m_rotm.inv();
 	}
@@ -73,34 +65,50 @@ public:
 	}
 
 	/**
-	 *\brief rotation X with [x, y, z]^T = RX
-	 *\param [_X] input 3d point
+	 *\brief getter/setter to internal parameters
 	 */
-	MATRICE_HOST_INL point_type rotation(const point_type& _X)const noexcept{
-		return (m_rotm.mul(_X) + m_tran);
+	MATRICE_HOST_INL auto& internal_params() const noexcept {
+		return (m_ints);
+	}
+	MATRICE_HOST_INL auto& internal_params() noexcept {
+		return (m_ints);
+	}
+
+	/**
+	 *\brief Rotate $\mathbf{X}$ with $[x, y, z]^T = \mathbf{RX}$
+	 *\param [_X] input 3D point
+	 */
+	MATRICE_HOST_INL point_type rotate(const point_type& _X)const noexcept{
+		return (m_rotm.mul(_X));
 	}
 	/**
-	 *\brief transform and normalize with [x, y, 1]^T = <RX + T>
-	 *\param [_X] input 3d point
+	 *\brief Project a 3D point onto the image domain with: 
+			 $[x, y, 1]^T = \mathbf{K}'<\mathbf{RX + T}>$
+	 *\param [_X] input 3D point
 	 */
 	MATRICE_HOST_INL point_type forward(const point_type& _X)const noexcept{
-		point_type p = this->rotation(_X) + m_tran;
+		point_type p = this->rotate(_X) + m_tran;
 		return (p.normalize(p.z));
 	}
+
 	/**
-	 *\brief back-projection
-	 *\param [_x] input 2d image point [x, y, d]^T, where d is the depth.
+	 *\brief Inversely maps a given image point to its normalized counterpart.
+	 *\param [_x] input 2D image point $[x, y, d]^T$, where $d$ is the depth.
 	 */
-	MATRICE_HOST_INL point_type backward(const point_type& _x)const noexcept {
-		point_type& x = _x;
-		x.x *= x.z, x.y *= x.z;
-		x = x - m_tran;
-		return m_irot.mul(x);
+	MATRICE_HOST_INL point_type backward(const point_type& _pd)const noexcept {
+		return this->backward(_pd.x, _pd.y, _pd.z);
+	}
+	MATRICE_HOST_INL auto backward(value_type _x, value_type _y, value_type d)const noexcept {
+		const auto ptr = m_ints[0];
+		const auto fx = ptr[0], fy = ptr[1], cx = ptr[2], cy = ptr[3];
+		const auto x = (_x - cx) / fx * d, y = (_y - cy) / fy * d;
+		return point_type(x, y, d);
 	}
 
 protected:
 	matrix_type m_rotm, m_irot;
 	point_type m_tran;
+	Matrix_<value_type, 2, 4> m_ints;
 };
 
 template<typename _Ty, typename _An> class _Aligned_projection {
@@ -116,6 +124,27 @@ public:
 	using _Mybase::_Projection_base;
 	using typename _Mybase::point_type;
 	using typename _Mybase::value_type;
+
+	/**
+	 *\brief back-project a given image point with its depth
+	 *\param [pd] image coords with a depth in form of $[x, y, d]^T$
+	 */
+	template<typename... _Args>
+	MATRICE_HOST_INL auto backproj(_Args&&... pd)const noexcept {
+		return _Mybase::backward(pd...);
+	}
+
+	/**
+	 *\brief reproject a given 3D point to the matching camera
+	 *\param [_X] 3D coords
+	 */
+	MATRICE_HOST_INL auto reproj(const point_type& _X)const noexcept {
+		auto q = _Mybase::forward(_X);
+		const auto ptr = _Mybase::m_ints[1];
+		const auto fx = ptr[0], fy = ptr[1], cx = ptr[2], cy = ptr[3];
+		q.x = q.x * fx + cx, q.y = q.y * fy + cy;
+		return (q);
+	}
 
 	/**
 	 *\brief compute the grad. of a re-projected point w.r.t. depth par.
