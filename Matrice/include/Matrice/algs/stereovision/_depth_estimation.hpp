@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -43,8 +43,18 @@ public:
 		:m_projection(r,t){
 	}
 
+	/**
+	 *\brief getter/setter to the geometry of the stereovis. sys.
+	 */
+	MATRICE_HOST_INL decltype(auto) geometry() const noexcept {
+		return (m_projection);
+	}
+	MATRICE_HOST_INL decltype(auto) geometry() noexcept {
+		return (m_projection);
+	}
+
 protected:
-	void _Update_interpolator() noexcept {
+	MATRICE_HOST_INL void _Update_interpolator() noexcept {
 		m_materp.set(m_matching);
 		m_referp.set(m_reference);
 	}
@@ -123,17 +133,16 @@ private:
 	}
 
 private:
-
 	/**
-	 *\data arrangement:
-	 * [ f_x f_x*dx f_x*dy f_y f_y*dx f_y*dy e_d ]
+	 *\brief data arrangement:
+	 * $[ f_x f_x*dx f_x*dy f_y f_y*dx f_y*dy e_d ]$
 	 */
 	Matrix_<value_t, ::dynamic, order + 1> m_jacob;
 	point_t m_refpt, m_reppt;
 	value_t m_depth = zero<value_t>;
 };
 template<typename _Ty, class _Altag>
-struct _Estimator_traits<_Stereo_icgn_estimator<_Ty, _Altag>> {
+struct _Estimator_traits<_GCC_estimator<_Ty, _Altag>> {
 	using value_type = _Ty;
 	using alignment_tag = _Altag;
 	using projection_type = _Aligned_projection<value_type, alignment_tag>;
