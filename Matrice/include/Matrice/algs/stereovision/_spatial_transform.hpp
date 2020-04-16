@@ -20,11 +20,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 MATRICE_ALGS_BEGIN
 _DETAIL_BEGIN
-template<typename _Ty, size_t _Order, bool _Perfect> 
+template<typename _Ty, size_t _Order> 
 class _Spatial_transformer {};
 
 template<typename _Ty>
-class _Spatial_transformer<_Ty, 1, false> {
+class _Spatial_transformer<_Ty, 1> {
 public:
 	constexpr auto order = 0;
 	using value_type = _Ty;
@@ -35,19 +35,25 @@ public:
 		:_Mypar(param) {
 	}
 
+	/**
+	 *\brief Transform local coords (x, y) to a new position 
+	 */
 	MATRICE_GLOBAL_INL auto warp(value_type x, value_type y) noexcept {
-		return Vec2_<value_type>
-		{
+		return Vec2_<value_type>{
 			(1 + _Mypar[0])* x + _Mypar[1] * y, 
 			_Mypar[2] * x + (1 + _Mypar[3] * y)
 		};
 	}
+
+	/**
+	 *\brief Get the Jacobian of this transformer w.r.t. the parameters
+	 */
 	MATRICE_GLOBAL_INL auto jacob(value_type x, value_type y) noexcept {
 		return jacob_type{x, y, 0, 0, 0, 0, x, y};
 	}
 
 private:
-	param_type _Mypar; //$u_x, u_y, v_x, v_y$
+	param_type _Mypar; //parameters are stored as $u_x, u_y, v_x, v_y$
 };
 
 _DETAIL_END
