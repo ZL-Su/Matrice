@@ -35,11 +35,15 @@ using View_f64 = detail::_Matrix_block<double>;
 // specialization for svd_op
 template<> MATRICE_GLOBAL 
 solver_status _Lak_adapter<svd>(Matf_ref U, Matf_ref S, Matf_ref Vt) {
-	return solver_status();
+	auto [s, val] = detail::_Lapack_kernel_wrapper::gesvd(U, true);
+	S = s;
+	return solver_status{ val };
 }
 template<> MATRICE_GLOBAL
 solver_status _Lak_adapter<svd>(Matd_ref U, Matd_ref S, Matd_ref Vt) {
-	return solver_status();
+	auto [s, val] = detail::_Lapack_kernel_wrapper::gesvd(U, true);
+	S = s;
+	return solver_status{ val };
 }
 template<> MATRICE_GLOBAL
 solver_status _Lak_adapter<svd>(View_f32 U, View_f32 S, View_f32 Vt) {
