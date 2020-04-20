@@ -1,4 +1,4 @@
-/**************************************************************************
+/**********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
 Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
@@ -14,7 +14,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
-**************************************************************************/
+***********************************************************************/
 #pragma once
 #include "../_type_traits.h"
 #include "core/matrix.h"
@@ -55,7 +55,6 @@ public:
 
 	_Linear_solver_base(matrix_type& coeff) noexcept
 		:_Mycoeff(coeff), _Myeps(matrix_type::eps) {
-		this->_Forward();
 	}
 
 	/**
@@ -72,7 +71,8 @@ public:
 	MATRICE_GLOBAL_INL auto inv() {
 		return this->_Inverse();
 	}
-private:
+
+protected:
 	/**
 	 *\brief Perform coeff matrix decomposition
 	 */
@@ -83,7 +83,7 @@ private:
 			//_Mycoeff is a general square matrix, _Forward does nothing.
 		}
 		if constexpr (is_same_v<kernel_t, svd>) {
-			internal::_Lak_adapter<svd>(view(_Mycoeff), view(_Dptr->s()), view(_Dptr->v()));
+			internal::_Lak_adapter<svd>(view(_Mycoeff), view(_Dptr->s()), view(_Dptr->vt()));
 		}
 		if constexpr (is_same_v<kernel_t, spt>) {
 			internal::_Lak_adapter<spt>(view(_Mycoeff));
@@ -103,7 +103,9 @@ private:
 			return move(_Ret);
 		}
 		if constexpr (is_same_v<kernel_t, svd>) {
-			Matrix_<value_type, matrix_type::rows_at_compiletime> _Ret(_Mycoeff.rows(), _Mycoeff.rows());
+			Matrix_<value_type, matrix_type::cols_at_compiletime, matrix_type::rows_at_compiletime> _Ret(_Mycoeff.cols(), _Mycoeff.rows());
+			_Ret.cview(0) = _Dptr->s();
+			internal::_Inv_adapter<svd>(view(_Mycoeff), view(_Ret), view(_Dptr->vt()));
 			return move(_Ret);
 		}
 		if constexpr (is_same_v<kernel_t, spt>) {
@@ -143,6 +145,7 @@ public:
 	using typename _Mybase::matrix_type;
 	_Linear_solver(matrix_type& coeff) noexcept 
 		: _Mybase(coeff) {
+		_Mybase::_Forward();
 	}
 
 private:
@@ -157,6 +160,7 @@ public:
 	// \note The input coeff will be overwritten by $L$
 	_Linear_solver(matrix_type& coeff) noexcept
 		: _Mybase(coeff) {
+		_Mybase::_Forward();
 	}
 
 	// \brief Perform back substitution to solve ${AX = B}$, where B allowed to have multi-cols and will be overwritten by X.
@@ -189,7 +193,8 @@ public:
 	_Linear_solver(matrix_type& coeff) 
 		: _Mybase(coeff), 
 		_Mys(coeff.cols()), 
-		_Myv(coeff.cols(), coeff.cols()) {
+		_Myvt(coeff.cols(), coeff.cols()) {
+		_Mybase::_Forward();
 	}
 
 	MATRICE_GLOBAL_INL decltype(auto) u() const noexcept {
@@ -204,15 +209,27 @@ public:
 	MATRICE_GLOBAL_INL decltype(auto) s() noexcept {
 		return (_Mys);
 	}
-	MATRICE_GLOBAL_INL decltype(auto) v() const noexcept {
-		return (_Myv);
+	MATRICE_GLOBAL_INL decltype(auto) vt() const noexcept {
+		return (_Myvt);
 	}
-	MATRICE_GLOBAL_INL decltype(auto) v() noexcept {
-		return (_Myv);
+	MATRICE_GLOBAL_INL decltype(auto) vt() noexcept {
+		return (_Myvt);
+	}
+
+	template<typename _Rty>
+	MATRICE_GLOBAL_INL _Rty& backward(_Rty& b) noexcept {
+
+	}
+
+	/**
+	 *\brief Solve $\mathbf{A}\mathbf{x} = \mathbf{0}$, but the method returns the view of the solution rather than a vector.
+	 */
+	MATRICE_GLOBAL_INL auto solve() noexcept {
+		return _Myvt.rview(size_t(_Myvt.rows()) - 1);
 	}
 private:
 	Matrix_<value_type, _Mty::cols_at_compiletime, 1> _Mys;
-	Matrix_<value_type, _Mty::cols_at_compiletime> _Myv;
+	Matrix_<value_type, _Mty::cols_at_compiletime> _Myvt;
 
 MATRICE_MAKE_LINEAR_SOLVER_SPEC_END(svd);
 
@@ -228,8 +245,8 @@ struct _Solver_traits<_Linear_solver<_Mty, _Op>>{
 _DETAIL_END
 
 // \brief: linear solver factory function
-template<class _Mty, typename _Op>
-auto make_linear_solver(_Mty& A, _Op) noexcept {
+template<typename _Op, class _Mty>
+auto make_linear_solver(_Mty& A) noexcept {
 	return detail::_Linear_solver<_Mty, _Op>(A);
 }
 DGE_MATRICE_END
