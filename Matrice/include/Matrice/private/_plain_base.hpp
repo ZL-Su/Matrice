@@ -1170,8 +1170,13 @@ public:
 			_Val = _Rand(_Eng); }));
 	}
 
-	template<class _Mt, typename _Op, MATRICE_ENABLE_IF(is_matrix_v<_Mt>)>
-	static MATRICE_GLOBAL_INL _Derived make(const _Mt& m, _Op&& op) {
+	template<class _Mty, typename _Op, MATRICE_ENABLE_IF(is_matrix_v<_Mty>)>
+	static MATRICE_GLOBAL_INL _Derived make(_Mty&& m) {
+		_Derived _Ret(m.shape());
+		return forward<_Derived>(_Ret.from(m.data()));
+	}
+	template<class _Mty, typename _Op, MATRICE_ENABLE_IF(is_matrix_v<_Mty>)>
+	static MATRICE_GLOBAL_INL _Derived make(const _Mty& m, _Op&& op) {
 		_Derived _Ret(m.shape());
 		return forward<_Derived>(_Ret.from(m.data(), op));
 	}
