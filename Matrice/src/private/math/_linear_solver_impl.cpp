@@ -35,31 +35,41 @@ using View_f64 = detail::_Matrix_block<double>;
 // specialization for svd_op
 template<> MATRICE_GLOBAL 
 solver_status _Lak_adapter<svd>(Matf_ref U, Matf_ref S, Matf_ref Vt) {
-	auto [s, val] = detail::_Lapack_kernel_wrapper::gesvd(U, true);
-	S = s;
-	return solver_status{ val };
+	const auto lyt = U.allocator().fmt();
+	const auto ldu = min(U.rows(), U.cols());
+	remove_all_t<Matf_ref> supb(ldu);
+	auto ret = internal::_lapack_gesvd(lyt, 'S', 'S', U.rows(), U.cols(), U.data(), U.cols(), S.data(), U.data(), ldu, Vt.data(), Vt.cols(), supb.data());
+	return solver_status{ ret };
 }
 template<> MATRICE_GLOBAL
 solver_status _Lak_adapter<svd>(Matd_ref U, Matd_ref S, Matd_ref Vt) {
-	auto [s, val] = detail::_Lapack_kernel_wrapper::gesvd(U, true);
-	S = s;
-	return solver_status{ val };
+	const auto lyt = U.allocator().fmt();
+	const auto ldu = min(U.rows(), U.cols());
+	remove_all_t<Matd_ref> supb(ldu);
+	auto ret = internal::_lapack_gesvd(lyt, 'S', 'S', U.rows(), U.cols(), U.data(), U.cols(), S.data(), U.data(), ldu, Vt.data(), Vt.cols(), supb.data());
+	return solver_status{ ret };
 }
 template<> MATRICE_GLOBAL
 solver_status _Lak_adapter<svd>(View_f32 U, View_f32 S, View_f32 Vt) {
-	return solver_status();
+	const auto ldu = min(U.rows(), U.cols());
+	matrix_f32 supb(ldu);
+	auto ret = internal::_lapack_gesvd(101, 'S', 'S', U.rows(), U.cols(), U[0], U.cols(), S[0], U[0], ldu, Vt[0], Vt.cols(), supb.data());
+	return solver_status{ ret };
 }
 template<> MATRICE_GLOBAL
 solver_status _Lak_adapter<svd>(View_f64 U, View_f64 S, View_f64 Vt) {
-	return solver_status();
+	const auto ldu = min(U.rows(), U.cols());
+	matrix_f64 supb(ldu);
+	auto ret = internal::_lapack_gesvd(101, 'S', 'S', U.rows(), U.cols(), U[0], U.cols(), S[0], U[0], ldu, Vt[0], Vt.cols(), supb.data());
+	return solver_status{ ret };
 }
 template<> MATRICE_GLOBAL
-solver_status _Inv_adapter<svd>(View_f32 U, View_f32 S, View_f32 V) {
+solver_status _Inv_adapter<svd>(View_f32 U, View_f32 S, View_f32 Vt) {
 	
 	return solver_status();
 }
 template<> MATRICE_GLOBAL
-solver_status _Inv_adapter<svd>(View_f64 U, View_f64 S, View_f64 V) {
+solver_status _Inv_adapter<svd>(View_f64 U, View_f64 S, View_f64 Vt) {
 	
 	return solver_status();
 }
