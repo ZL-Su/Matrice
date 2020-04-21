@@ -107,6 +107,9 @@ public:
 	MATRICE_GLOBAL_FINL size_t rows() const { return (static_cast<const _Derived*>(this)->rows()); }
 	MATRICE_GLOBAL_FINL size_t cols() const { return (static_cast<const _Derived*>(this)->cols()); }
 	MATRICE_GLOBAL_FINL constexpr auto shape() const { return shape_t<3>{rows(), cols(), 1}; }
+	MATRICE_GLOBAL_FINL const auto data()const noexcept { return _My_data; }
+	MATRICE_GLOBAL_FINL auto data() noexcept { return _My_data; }
+
 	MATRICE_GLOBAL_FINL void create(size_t, size_t) {}
 	MATRICE_GLOBAL_FINL value_t sum() const {
 		value_t _Ret = 0;
@@ -310,14 +313,18 @@ public:
 		_My_range(size_t(0), size_t(0), _Cols, _Rows) {
 	}
 
-	//i zero-based local row index
-	MATRICE_GLOBAL_FINL pointer operator[] (difference_type i) {
+	/**
+	 *\brief Get the zero-based i-th row pointer
+	 */
+	MATRICE_GLOBAL_FINL pointer operator[] (difference_type i)noexcept {
 		return (_My_data + i * _My_stride);
 	}
-	MATRICE_GLOBAL_FINL const pointer operator[] (difference_type i) const {
+	MATRICE_GLOBAL_FINL const pointer operator[] (difference_type i)const noexcept {
 		return (_My_data + i * _My_stride);
 	}
-	//i zero-based local linear index
+	/**
+	 *\brief Get the entry with a zero-based linear index i
+	 */
 	MATRICE_GLOBAL_INL reference operator() (difference_type i) {
 		auto _Row = i / _My_size;
 		return this->operator[](_Row)[i - _My_size * _Row];
