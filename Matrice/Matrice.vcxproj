@@ -261,6 +261,7 @@
     <ClInclude Include="include\Matrice\private\_storage.hpp" />
     <ClInclude Include="include\Matrice\private\_unified_memory.h" />
     <ClInclude Include="include\Matrice\private\_view.h" />
+    <ClInclude Include="include\Matrice\solver.hpp" />
     <ClInclude Include="include\Matrice\thread\_thread.h" />
     <ClInclude Include="include\Matrice\thread\inline\_thread_parallel_nd.inl" />
     <ClInclude Include="include\Matrice\util\genalgs.h" />
