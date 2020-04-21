@@ -85,22 +85,32 @@ solver_status _Bwd_adapter<svd>(View_f64 U, View_f64 S, View_f64 Vt, View_f64 b,
 }
 template<> MATRICE_GLOBAL
 solver_status _Inv_adapter<svd>(View_f32 U, View_f32 S, View_f32 Vt, View_f32 Inv) {
-	auto V = transpose(Vt).eval();
-	const auto _Thresh = decltype(V)::eps * sqrt<float>(U.size()) * S(0) / 2;
-	V.rview(0) = V.rview(0) * safe_div(1, S(0), _Thresh);
-	V.rview(1) = V.rview(1) * safe_div(1, S(1), _Thresh);
-	V.rview(2) = V.rview(2) * safe_div(1, S(2), _Thresh);
-	Inv = V.mul(transpose(U));
+	const auto _Thresh = std::numeric_limits<float>::epsilon() * sqrt<float>(U.size()) * S(0) / 2;
+	for (auto r = 0; r < U.rows(); ++r) {
+		const auto pU = U[r];
+		for (auto c = 0; c < U.cols(); ++c) {
+			auto sum = View_f32::value_t(0);
+			for (auto k = 0; k < Vt.rows(); ++k) {
+				sum += pU[k] * safe_div(Vt[k][c], S(k), _Thresh);
+			}
+			Inv[c][r] = sum;
+		}
+	}
 	return solver_status{ 1 };
 }
 template<> MATRICE_GLOBAL
 solver_status _Inv_adapter<svd>(View_f64 U, View_f64 S, View_f64 Vt, View_f64 Inv) {
-	auto V = transpose(Vt).eval();
-	const auto _Thresh = decltype(V)::eps * sqrt<double>(U.size()) * S(0) / 2;
-	V.rview(0) = V.rview(0) * safe_div(1, S(0), _Thresh);
-	V.rview(1) = V.rview(1) * safe_div(1, S(1), _Thresh);
-	V.rview(2) = V.rview(2) * safe_div(1, S(2), _Thresh);
-	Inv = V.mul(transpose(U));
+	const auto _Thresh = std::numeric_limits<double>::epsilon() * sqrt<double>(U.size()) * S(0) / 2;
+	for (auto r = 0; r < U.rows(); ++r) {
+		const auto pU = U[r];
+		for (auto c = 0; c < U.cols(); ++c) {
+			auto sum = View_f64::value_t(0);
+			for (auto k = 0; k < Vt.rows(); ++k) {
+				sum += pU[k] * safe_div(Vt[k][c], S(k), _Thresh);
+			}
+			Inv[c][r] = sum;
+		}
+	}
 	return solver_status{ 1 };
 }
 
@@ -136,7 +146,7 @@ solver_status _Bwd_adapter<spt>(View_f32 L, View_f32 B) {
 		auto b = B[0] + _Off;
 		detail::_Linear_spd_bwd(L.rows(), L[0], b, _Stride);
 	}
-	return solver_status();
+	return solver_status{ 1 };
 }
 template<> MATRICE_GLOBAL
 solver_status _Bwd_adapter<spt>(View_f64 L, View_f64 B) {
@@ -145,17 +155,28 @@ solver_status _Bwd_adapter<spt>(View_f64 L, View_f64 B) {
 		auto b = B[0] + _Off;
 		detail::_Linear_spd_bwd(L.rows(), L[0], b, _Stride);
 	}
-	return solver_status();
+	return solver_status{ 1 };
 }
 template<> MATRICE_GLOBAL
 solver_status _Inv_adapter<spt>(View_f32 L, View_f32 INV) {
 	detail::_Linear_ispd_kernel(L[0], INV[0], L.rows());
-	return solver_status();
+	return solver_status{ 1 };
 }
 template<> MATRICE_GLOBAL
 solver_status _Inv_adapter<spt>(View_f64 L, View_f64 INV) {
 	detail::_Linear_ispd_kernel(L[0], INV[0], L.rows());
-	return solver_status();
+	return solver_status{ 1 };
+}
+
+template<> MATRICE_GLOBAL
+solver_status _Imp_adapter(View_f32 A, View_f32 b, View_f32 x) {
+	b = matmul(A, x) - b;
+	return solver_status{ 1 };
+}
+template<> MATRICE_GLOBAL
+solver_status _Imp_adapter(View_f64 A, View_f64 b, View_f64 x) {
+	b = matmul(A, x) - b;
+	return solver_status{ 1 };
 }
 _INTERNAL_END
 DGE_MATRICE_END
