@@ -919,6 +919,15 @@ template<
 	typename _Op = _Exp::MatUnaryExpr<_Rhs, _Exp_op::_Mat_trp<value_t>>>
 	MATRICE_GLOBAL_FINL auto transpose(const _Rhs& _right) { return _Op(_right); }
 
+// *\matmul expression
+template<
+	typename _Lhs, typename _Rhs,
+	typename value_t = common_type_t<typename _Lhs::value_t, typename _Rhs::value_t>,
+	typename _Op = _Exp::MatBinaryExpr<_Lhs, _Rhs, _Exp_op::_Mat_mul<value_t>>>
+	MATRICE_GLOBAL_FINL auto matmul(const _Lhs& _left, const _Rhs& _right) {
+	return _Op(_left, _right);
+}
+
 // *\outer product expression : xy^T
 template<
 	typename _Lhs, typename _Rhs,
