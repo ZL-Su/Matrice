@@ -17,6 +17,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 #include "core.hpp"
+#include "solver.hpp"
 #include "../geometry/transform.h"
 
 MATRICE_ALGS_BEGIN
