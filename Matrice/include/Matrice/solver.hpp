@@ -15,9 +15,5 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
-
-#include "core/matrix.h"
-#include "core/solver.h"
-#include "core/tensor.h"
-#include "core/vector.h"
-#include "private/_scalar.hpp"
+#pragma once
+#include "private/math/_linear_solver.hpp"
