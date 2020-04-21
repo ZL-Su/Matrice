@@ -28,90 +28,90 @@ DGE_MATRICE_BEGIN
 template<typename T1, typename T2, 
 	typename _Ret = common_type_t<T1, T2>, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
-MATRICE_GLOBAL_FINL constexpr _Ret add(const T1& a, const T2& b) { 
+MATRICE_GLOBAL_FINL constexpr _Ret add(const T1& a, const T2& b)noexcept {
 	return a + b;
 }
 template<typename T1, typename T2, 
 	typename _Ret = common_type_t<T1, T2>, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
-MATRICE_GLOBAL_FINL constexpr _Ret sub(const T1& a, const T2& b) { 
+MATRICE_GLOBAL_FINL constexpr _Ret sub(const T1& a, const T2& b)noexcept {
 	return a - b; 
 }
 template<typename T1, typename T2, 
 	typename _Ret = common_type_t<T1, T2>, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
-MATRICE_GLOBAL_FINL constexpr _Ret mul(const T1& a, const T2& b) { 
+MATRICE_GLOBAL_FINL constexpr _Ret mul(const T1& a, const T2& b)noexcept {
 	return a * b; 
 }
 template<typename T1, typename T2, 
 	typename _Ret = common_type_t<T1, T2>, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
-MATRICE_GLOBAL_FINL constexpr _Ret div(const T1& a, const T2& b) { 
+MATRICE_GLOBAL_FINL constexpr _Ret div(const T1& a, const T2& b)noexcept {
 	return a / b;
 }
 template<typename T1, typename T2, 
 	typename _Ret = common_type_t<T1, T2>, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
-MATRICE_GLOBAL_FINL constexpr _Ret max(const T1& a, const T2& b) { 
+MATRICE_GLOBAL_FINL constexpr _Ret max(const T1& a, const T2& b)noexcept {
 	return a < b ? b : a;
 }
 template<typename T1, typename T2, 
 	typename _Ret = common_type_t<T1, T2>, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
-MATRICE_GLOBAL_FINL constexpr _Ret min(const T1& a, const T2& b) { 
+MATRICE_GLOBAL_FINL constexpr _Ret min(const T1& a, const T2& b)noexcept { 
 	return a < b ? a : b;
 }
 template<typename T, typename _Ret = T, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
-MATRICE_GLOBAL_FINL constexpr _Ret sqrt(const T& x) { 
+MATRICE_GLOBAL_FINL constexpr _Ret sqrt(const T& x)noexcept {
 	return std::sqrt(T(x));
 }
 template<typename T, typename _Ret = T, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
-MATRICE_HOST_FINL constexpr _Ret abs(const T& x) { 
+MATRICE_HOST_FINL constexpr _Ret abs(const T& x)noexcept {
 	return std::abs(T(x));
 }
 template<typename T, typename _Ret = T, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
-MATRICE_HOST_FINL constexpr _Ret exp(const T& x) { 
+MATRICE_HOST_FINL constexpr _Ret exp(const T& x)noexcept {
 	return std::exp(T(x));
 }
 template<typename T, typename _Ret = T, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
-MATRICE_HOST_FINL constexpr _Ret log(const T& x) { 
+MATRICE_HOST_FINL constexpr _Ret log(const T& x)noexcept {
 	return std::log(T(x));
 }
 template<typename T, typename _Ret = T, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
-MATRICE_HOST_FINL constexpr _Ret log2(const T& x) { 
+MATRICE_HOST_FINL constexpr _Ret log2(const T& x)noexcept {
 	return std::log2(T(x));
 }
 template<typename T, typename _Ret = T, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
-MATRICE_HOST_FINL constexpr _Ret log10(const T& x) { 
+MATRICE_HOST_FINL constexpr _Ret log10(const T& x)noexcept {
 	return std::log10(T(x));
 }
 template<typename T, typename _Ret = T, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
-MATRICE_HOST_FINL constexpr _Ret floor(const T& x) { 
+MATRICE_HOST_FINL constexpr _Ret floor(const T& x)noexcept {
 	return static_cast<_Ret>(std::floor(T(x)));
 }
 template<typename T, typename _Ret = T, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
-MATRICE_HOST_FINL constexpr _Ret ceil(const T& x) { 
+MATRICE_HOST_FINL constexpr _Ret ceil(const T& x)noexcept {
 	return static_cast<_Ret>(std::ceil(T(x)));
 }
 template<typename T1, typename T2, 
 	typename _Ret = common_type_t<T1, T2>, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
-MATRICE_GLOBAL_FINL constexpr _Ret pow(const T1& x, const T2& y) { 
+MATRICE_GLOBAL_FINL constexpr _Ret pow(const T1& x, const T2& y)noexcept {
 	return std::pow(T1(x), T2(x));
 }
 template<typename T1, typename T2, 
 	typename _Ret = common_type_t<T1, T2>, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
-MATRICE_GLOBAL_FINL constexpr _Ret safe_div(const T1& a, const T2& b){
-	return b == T2(0) ? _Ret(0) : div(a, b);
+MATRICE_GLOBAL_FINL constexpr _Ret safe_div(const T1& a, const T2& b, T2 thresh = T2(0))noexcept {
+	return b <= thresh ? _Ret(0) : div(a, b);
 }
 
 ///<brief> trigonometric functions </brief>
