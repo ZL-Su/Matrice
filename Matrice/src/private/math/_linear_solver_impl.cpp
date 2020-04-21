@@ -64,14 +64,44 @@ solver_status _Lak_adapter<svd>(View_f64 U, View_f64 S, View_f64 Vt) {
 	return solver_status{ ret };
 }
 template<> MATRICE_GLOBAL
-solver_status _Inv_adapter<svd>(View_f32 U, View_f32 S, View_f32 Vt) {
-	
-	return solver_status();
+solver_status _Bwd_adapter<svd>(View_f32 U, View_f32 S, View_f32 Vt, View_f32 b, View_f32 x){
+	auto tmp = transpose(U).mul(b).eval();
+	const auto _Thresh = decltype(tmp)::eps * sqrt<float>(U.size()) * S(0) / 2;
+	for (auto n = 0; n < x.size(); ++n) {
+		tmp(n) = safe_div(tmp(n), S(n), _Thresh);
+	}
+	x = transpose(Vt).mul(tmp);
+	return solver_status{ 1 };
 }
 template<> MATRICE_GLOBAL
-solver_status _Inv_adapter<svd>(View_f64 U, View_f64 S, View_f64 Vt) {
-	
-	return solver_status();
+solver_status _Bwd_adapter<svd>(View_f64 U, View_f64 S, View_f64 Vt, View_f64 b, View_f64 x) {
+	auto tmp = transpose(U).mul(b).eval();
+	const auto _Thresh = decltype(tmp)::eps * sqrt<double>(U.size()) * S(0) / 2;
+	for (auto n = 0; n < x.size(); ++n) {
+		tmp(n) = safe_div(tmp(n), S(n), _Thresh);
+	}
+	x = transpose(Vt).mul(tmp);
+	return solver_status{ 1 };
+}
+template<> MATRICE_GLOBAL
+solver_status _Inv_adapter<svd>(View_f32 U, View_f32 S, View_f32 Vt, View_f32 Inv) {
+	auto V = transpose(Vt).eval();
+	const auto _Thresh = decltype(V)::eps * sqrt<float>(U.size()) * S(0) / 2;
+	V.rview(0) = V.rview(0) * safe_div(1, S(0), _Thresh);
+	V.rview(1) = V.rview(1) * safe_div(1, S(1), _Thresh);
+	V.rview(2) = V.rview(2) * safe_div(1, S(2), _Thresh);
+	Inv = V.mul(transpose(U));
+	return solver_status{ 1 };
+}
+template<> MATRICE_GLOBAL
+solver_status _Inv_adapter<svd>(View_f64 U, View_f64 S, View_f64 Vt, View_f64 Inv) {
+	auto V = transpose(Vt).eval();
+	const auto _Thresh = decltype(V)::eps * sqrt<double>(U.size()) * S(0) / 2;
+	V.rview(0) = V.rview(0) * safe_div(1, S(0), _Thresh);
+	V.rview(1) = V.rview(1) * safe_div(1, S(1), _Thresh);
+	V.rview(2) = V.rview(2) * safe_div(1, S(2), _Thresh);
+	Inv = V.mul(transpose(U));
+	return solver_status{ 1 };
 }
 
 // specialization for spt_op
