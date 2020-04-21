@@ -31,13 +31,15 @@ struct solver_status {
 	}
 };
 _INTERNAL_BEGIN
-// \brief parse and invoke the linear algebra kernel to _Op.
+// \brief Parse and invoke the linear algebra kernel according to _Op.
 template<typename _Op, typename... _Ts>
 MATRICE_GLOBAL solver_status _Lak_adapter(_Ts... args);
 template<typename _Op, typename... _Ts>
 MATRICE_GLOBAL solver_status _Bwd_adapter(_Ts... args);
 template<typename _Op, typename... _Ts>
 MATRICE_GLOBAL solver_status _Inv_adapter(_Ts... args);
+template<typename... _Ts>
+MATRICE_GLOBAL solver_status _Imp_adapter(_Ts... args);
 _INTERNAL_END
 
 _DETAIL_BEGIN
@@ -63,15 +65,24 @@ public:
 	 *\param [args...] variadic arguments that may empty or more than one inputs. If args... is empty, the method solves a homogeneous linear system with form of $\mathbf{Ax} = \mathbf{0}$.
 	 */
 	template<class... _Args>
-	MATRICE_GLOBAL_INL decltype(auto)solve(_Args&... args) {
+	MATRICE_GLOBAL_INL decltype(auto)solve(_Args&&... args) {
 		return ((_Myderived*)(this))->_Xbackward(args...);
+	}
+
+	/**
+	 *\brief Improve the solution of $\mathbf{Ax} = \mathbf{b}$ with an iterative error reduction. The method is recommended calling several times to refine the solution.
+	 *\param [args] := $[\mathbf{A, b, x}]$ where $\mathbf{A}$ must be the original coeff matrix, $\mathbf{b}$ the original RHS vector and $\mathbf{x}$ the solved solution to be refined in the method.
+	 */
+	template<class... _Args>
+	MATRICE_GLOBAL_INL decltype(auto)refine(_Args&... args) {
+		return (this->_Improve(args...));
 	}
 
 	/**
 	 *\brief Compute inverse of the coeff. matrix.
 	 */
 	MATRICE_GLOBAL_INL auto inv() {
-		return this->_Inverse();
+		return (this->_Inverse());
 	}
 
 protected:
@@ -119,6 +130,14 @@ protected:
 			internal::_Inv_adapter<kernel_t>(view(_Mycoeff), view(_Ret));
 			return move(_Ret);
 		}
+	}
+
+private:
+	template<typename _Bty, typename _Xty>
+	decltype(auto) _Improve(matrix_type& _A, _Bty& b, _Xty& x)noexcept {
+		internal::_Imp_adapter(view(_A), view(b), view(x));
+		const auto _Res = this->solve(b);
+		return (x = x - _Res);
 	}
 
 protected:
@@ -184,10 +203,10 @@ public:
 
 	/**
 	 * \brief Perform back substitution to solve $\mathbf{AX} = \mathbf{B}$, where $\mathbf{B}$ allowed to have multi-cols and will be overwritten by $\mathbf{X}$.
+	 * \note The method is for parsing by the base class of the linear solver rather than for external calling.
 	 */
 	template<class _Rty>
-	[[noextcall]]
-	MATRICE_GLOBAL_INL _Rty& _Xbackward(_Rty& B)const noexcept {
+	[[noextcall]] MATRICE_GLOBAL_INL _Rty& _Xbackward(_Rty& B)const noexcept {
 		decltype(auto) _L = _Mybase::_Mycoeff;
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_L.rows() == B.rows(),
@@ -256,10 +275,10 @@ public:
 
 	/**
      * \brief Solve the system $\mathbf{A}\mathbf{x} = \mathbf{b}$ with the pre-computed coeff. matrix, and $\mathbf{b}$ is overwritten by the solution $\mathbf{x}$.
+	 * \note The method is for parsing by the base class of the linear solver rather than for external calling.
      */
 	template<typename _Bty> 
-	[[noextcall]]
-	MATRICE_GLOBAL_INL auto _Xbackward(_Bty& b) noexcept {
+	[[noextcall]] MATRICE_GLOBAL_INL auto _Xbackward(_Bty& b) noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(b.size() == _Mybase::_Mycoeff.rows(), "Bad size in _Linear_solver<_Mty, svd>::backward(...).");
 #endif
@@ -268,10 +287,10 @@ public:
 		return forward<decltype(x)>(x);
 	}
 	/**
-	 *\brief Solve $\mathbf{A}\mathbf{x} = \mathbf{0}$, but the method returns the view of the solution rather than a vector.
+	 * \brief Solve $\mathbf{A}\mathbf{x} = \mathbf{0}$, but the method returns the view of the solution rather than a vector.
+	 * \note The method is for parsing by the base class of the linear solver rather than for external calling.
 	 */
-	[[noextcall]]
-	MATRICE_GLOBAL_INL auto _Xbackward()const noexcept {
+	[[noextcall]] MATRICE_GLOBAL_INL auto _Xbackward()const noexcept {
 		return _Myvt.rview(size_t(_Myvt.rows()) - 1);
 	}
 private:
