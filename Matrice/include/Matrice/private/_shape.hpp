@@ -66,6 +66,10 @@ template<> struct shape_t<1> {
 	constexpr auto rows() const noexcept { return h; }
 	constexpr auto cols() const noexcept { return 1; }
 
+	friend bool operator==(const shape_t<1>& _Left, const shape_t<1>& _Right) noexcept {
+		return std::tie(_Left.h) == std::tie(_Right.h);
+	}
+
 	size_t h = 0; //height of the stored data
 };
 template<> struct shape_t<2> {
@@ -95,6 +99,10 @@ template<> struct shape_t<2> {
 	 *\brief tile the 3d-shape to 2d-shape
 	 */
 	constexpr auto tile() const noexcept { return shape_t<1>{h*w}; }
+
+	friend bool operator==(const shape_t<2>& _Left, const shape_t<2>& _Right) noexcept {
+		return std::tie(_Left.h, _Left.w) == std::tie(_Right.h, _Right.w);
+	}
 
 	size_t h = 0; //height of the stored data
 	size_t w = 0; //width of the stored data
@@ -140,6 +148,10 @@ template<> struct shape_t<3> {
 	 *\brief tile the 3d-shape to 2d-shape
 	 */
 	auto tile() const noexcept { return shape_t<2>{h* d, w}; }
+
+	friend bool operator==(const shape_t<3>& _Left, const shape_t<3>& _Right) noexcept {
+		return std::tie(_Left.h, _Left.w, _Left.d) == std::tie(_Right.h, _Right.w, _Right.d);
+	}
 
 	size_t h = 0; //height of the stored data
 	size_t w = 0; //width of the stored data
