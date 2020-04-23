@@ -928,25 +928,14 @@ public:
 	 *\param [_Right] can be scalar or any compatible types
 	 */
 	template<typename _Rhs>
-	MATRICE_HOST_INL decltype(auto)sub_inplace(const _Rhs& _Right);
-	/**
-	 *\brief instant subtraction
-	 *\param [_Right] can be scalar or any compatible types
-	 */
-	template<typename _Rhs>
-	MATRICE_HOST_INL decltype(auto) sub_(const _Rhs& _Right);
-	/**
-	 *\brief in-place instant matrix-vector multiplication
-	 *\param [_Right] can be a matrix or a vector types
-	 */
-	template<typename _Rhs, MATRICE_ENABLE_IF(is_fxdvector_v<_Rhs>)>
-	MATRICE_HOST_INL decltype(auto)mul_(const _Rhs& _Right);
+	MATRICE_HOST_INL auto sub_inplace(const _Rhs& _Right);
+
 	/**
 	 *\brief in-place matrix-vector multiplication. Note that if the number of rows of this matrix A equals to the size of the right column vector x, this method returns (A^T)x.
 	 *\param [_Right] will be unrolled to a column vector x if it is not.
 	 */
 	template<typename _Rhs>
-	MATRICE_HOST_INL decltype(auto) mv_inplace(const _Rhs& _Right) const;
+	MATRICE_HOST_INL auto mv_inplace(const _Rhs& _Right) const;
 
 	/**
 	 * \in-place matmul with _Rhs. 
