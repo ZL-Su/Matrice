@@ -51,9 +51,9 @@ struct _Blas_kernel_wrapper {
 		return internal::_blas_asum(a.data(), a.size(), inc);
 	}
 
-	template<class _Xty, class _Yty = _Xty,
+	template<class _Yty, class _Xty = _Yty,
 		typename = enable_if_t<is_same_v<typename _Xty::value_type, typename _Yty::value_type>>>
-	static MATRICE_HOST_INL _Yty& axpy(const _Xty& x, _Yty& y, typename _Xty::value_type a = 1) noexcept {
+	static MATRICE_HOST_INL _Yty& axpy(_Yty& y, const _Xty& x, typename _Xty::value_type a = 1) noexcept {
 		internal::_blas_axpy(a, x.data(), y.data(), min(x.size(), y.size()), 1, 1);
 		return (y);
 	}
