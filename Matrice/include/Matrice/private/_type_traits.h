@@ -335,9 +335,21 @@ template<typename _Ty> struct solver_traits {};
 template<typename T, typename... _Args> struct has_method_##_Name { \
 	static constexpr bool value = std::is_same_v<decltype(_Check<T>(0)), std::true_type::value>; \
 private: \
-	template<typename _C> static auto _Check(int)->decltype(std::declval<_C>()._Name(std::declval<_Args>()...), std::true_type()); \
+	template<typename _C> \
+    static auto _Check(int)->decltype(std::declval<_C>()._Name(std::declval<_Args>()...), std::true_type()); \
 	template<typename _C> static std::false_type _Check(...); \
 };
+
+/**
+ *\brief has_method_data<T> is true_type iff T has the member T().data()
+ */
+template<class, typename T> 
+struct has_method_data :std::false_type {};
+template<typename T>
+struct has_method_data<decltype(void(std::declval<T>().data())), T> : std::true_type {};
+//*\alias has_data_v<T> is true_type iff T has the member T().data()
+template<typename T>
+inline constexpr auto has_data_v = has_method_data<void, T>::value;
 
  /**
   *\brief has_value_t<T> is true_type iff T has member value_t

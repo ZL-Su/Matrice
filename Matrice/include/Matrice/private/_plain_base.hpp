@@ -928,31 +928,21 @@ public:
 	 *\param [_Right] can be scalar or any compatible types
 	 */
 	template<typename _Rhs>
-	MATRICE_HOST_INL decltype(auto)sub_inplace(const _Rhs& _Right);
-	/**
-	 *\brief instant subtraction
-	 *\param [_Right] can be scalar or any compatible types
-	 */
-	template<typename _Rhs>
-	MATRICE_HOST_INL decltype(auto) sub_(const _Rhs& _Right);
-	/**
-	 *\brief in-place instant matrix-vector multiplication
-	 *\param [_Right] can be a matrix or a vector types
-	 */
-	template<typename _Rhs, MATRICE_ENABLE_IF(is_fxdvector_v<_Rhs>)>
-	MATRICE_HOST_INL decltype(auto)mul_(const _Rhs& _Right);
+	MATRICE_HOST_INL auto sub_inplace(const _Rhs& _Right);
+
 	/**
 	 *\brief in-place matrix-vector multiplication. Note that if the number of rows of this matrix A equals to the size of the right column vector x, this method returns (A^T)x.
 	 *\param [_Right] will be unrolled to a column vector x if it is not.
 	 */
 	template<typename _Rhs>
-	MATRICE_HOST_INL decltype(auto) mv_inplace(const _Rhs& _Right) const;
+	MATRICE_HOST_INL auto mv_inplace(const _Rhs& _Right) const;
 
 	/**
-	 * \in-place matmul with _Rhs. 
+	 * \brief in-place matmul with _Rhs.
 	 */
 	template<typename _Rhs = _Derived>
 	MATRICE_HOST_INL auto mul_inplace(const _Rhs& _Right) const;
+
 	/**
 	 *\brief spread to element-wisely multiplicate with an input
 	 *\param [_Right] input argument with a type of _Rhs.
@@ -961,7 +951,7 @@ public:
 	MATRICE_GLOBAL_INL _Rhs spreadmul(const _Rhs& _Right) const;
 
 	/**
-	 * \operate each entry via _Fn
+	 * \brief operate each entry via _Fn
 	 */
 	template<typename _Op>
 	MATRICE_GLOBAL_FINL _Derived& each(_Op&& _Fn) noexcept {
@@ -970,7 +960,7 @@ public:
 	}
 
 	/**
-	 * \operate each entry via _Fn in parallel.
+	 * \brief operate each entry via _Fn in parallel.
 	 */
 	template<typename _Ewop>
 	MATRICE_HOST_INL _Derived& parallel_each(_Ewop&& _Fn) {
@@ -982,7 +972,7 @@ public:
 	}
 
 	/**
-	 * \ref to another instance without malloc and copy.
+	 * \brief ref to another instance without malloc and copy.
 	 */
 	template<typename _Src, MATRICE_ENABLE_IF(Size==::dynamic)>
 	MATRICE_GLOBAL_INL _Derived& ref(_Src& _other) noexcept {
@@ -996,7 +986,7 @@ public:
 	}
 
 	/**
-	 * \copy from another data block
+	 * \brief copy from another data block
 	 */
 	template<typename _It>
 	MATRICE_GLOBAL_FINL _Derived& from(const _It _Data) {
@@ -1014,7 +1004,7 @@ public:
 		return (this->derived());
 	}
 	/**
-	 * \convert from another data block by function _Fn
+	 * \brief convert from another data block by function _Fn
 	 */
 	template<typename _It, typename _Op, 
 		MATRICE_ENABLE_IF(is_iterator_v<_It >)>
