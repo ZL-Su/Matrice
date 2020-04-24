@@ -117,11 +117,14 @@ MATRICE_GLOBAL_INL remove_all_t<_Ty>& make_zero(_Ty& data) noexcept {
 	else if constexpr (is_matrix_v<trivial_type>) {
 		data = zero<typename trivial_type::value_type>;
 	}
-	else {
+	else if constexpr (has_data_v<_Ty>) {
 		auto dp = data.data();
 		for (const auto& idx : range(0, data.size())) {
 			dp[idx] = zero<typename trivial_type::value_type>;
 		}
+	}
+	else {
+		// do nothing
 	}
 	return (data);
 }
