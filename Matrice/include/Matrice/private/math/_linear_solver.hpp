@@ -20,10 +20,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "core/matrix.h"
 
 DGE_MATRICE_BEGIN
-struct svd { enum { singular_value_decomposition = 4 }; };
-struct spt { enum { spdtr_cholesky_decomposition = 2 }; };
-struct lud { enum { lower_upper_tr_decomposition = 1 }; };
-struct qrd { enum { ortho_upper_tr_decomposition = 3 }; };
+struct svd { enum { singular_value_decomp = 4 }; };
+struct spt { enum { spdtr_cholesky_decomp = 2 }; };
+struct lud { enum { lower_upper_tr_decomp = 1 }; };
+struct qrd { enum { ortho_upper_tr_decomp = 3 }; };
+struct lls { enum { linear_least_squares = 0 }; };
 struct solver_status {
 	int value = 1;
 	MATRICE_GLOBAL_FINL bool success() noexcept {
@@ -173,9 +174,34 @@ public:
 		_Mybase::_Forward();
 	}
 
-private:
-
 };
+
+// \brief CLASS TEMPLATE for linear least sqaure solver
+// \param <_Mty> Matrice compatible matrix type
+MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(lls)
+public:
+	_Linear_solver(matrix_type& coeff) noexcept
+		:_Mybase(coeff) {
+	}
+
+	/**
+	 *\brief Compute inverse of the coeff. matrix.
+	 */
+	MATRICE_GLOBAL_INL auto inv() const {
+		auto _AtA = _Mybase::_Mycoeff.t().mul(_Mybase::_Mycoeff).eval();
+		return (_AtA.inv().eval());
+	}
+
+	/**
+	 *\brief Solve the linear system in form of
+	 //tex: $\mathbf{AX} = \mathbf{B}$
+	 */
+	template<class _Bty>
+	MATRICE_GLOBAL_INL auto solve(const _Bty& b) const {
+		const auto _Atb = _Mybase::_Mycoeff.t().mul(b).eval();
+		return (this->inv().mul(_Atb).eval());
+	}
+MATRICE_MAKE_LINEAR_SOLVER_SPEC_END(lls)
 
 // \brief CLASS TEMPLATE for Chelosky decomposition based linear solver
 // \param <_Mty> Matrice compatible matrix type
