@@ -195,7 +195,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		};
 		
 		/**
-		 * \matrix spread multiply
+		 * \matrix spread multiplication
 		 */
 		template<typename _Ty> struct _Mat_sprmul {
 			enum { flag = undef };
