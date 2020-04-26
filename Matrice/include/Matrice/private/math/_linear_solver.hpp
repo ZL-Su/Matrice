@@ -231,8 +231,8 @@ public:
 	 * \brief Perform back substitution to solve $\mathbf{AX} = \mathbf{B}$, where $\mathbf{B}$ allowed to have multi-cols and will be overwritten by $\mathbf{X}$.
 	 * \note The method is for parsing by the base class of the linear solver rather than for external calling.
 	 */
-	template<class _Rty>
-	[[noextcall]] MATRICE_GLOBAL_INL _Rty& _Xbackward(_Rty& B)const noexcept {
+	template<class _Rty> [[non_external_callable]]
+	MATRICE_GLOBAL_INL _Rty& _Xbackward(_Rty& B)const noexcept {
 		decltype(auto) _L = _Mybase::_Mycoeff;
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_L.rows() == B.rows(),
@@ -303,8 +303,8 @@ public:
      * \brief Solve the system $\mathbf{A}\mathbf{x} = \mathbf{b}$ with the pre-computed coeff. matrix, and $\mathbf{b}$ is overwritten by the solution $\mathbf{x}$.
 	 * \note The method is for parsing by the base class of the linear solver rather than for external calling.
      */
-	template<typename _Bty> 
-	[[noextcall]] MATRICE_GLOBAL_INL auto _Xbackward(_Bty& b) noexcept {
+	template<typename _Bty> [[non_external_callable]]
+	MATRICE_GLOBAL_INL auto _Xbackward(_Bty& b) noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(b.size() == _Mybase::_Mycoeff.rows(), "Bad size in _Linear_solver<_Mty, svd>::backward(...).");
 #endif
@@ -316,7 +316,8 @@ public:
 	 * \brief Solve $\mathbf{A}\mathbf{x} = \mathbf{0}$, but the method returns the view of the solution rather than a vector.
 	 * \note The method is for parsing by the base class of the linear solver rather than for external calling.
 	 */
-	[[noextcall]] MATRICE_GLOBAL_INL auto _Xbackward()const noexcept {
+	[[non_external_callable]]
+	MATRICE_GLOBAL_INL auto _Xbackward()const noexcept {
 		return _Myvt.rview(size_t(_Myvt.rows()) - 1);
 	}
 private:
