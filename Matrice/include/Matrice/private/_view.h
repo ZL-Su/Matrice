@@ -28,7 +28,7 @@ for(size_t _Idx = 0; _Idx < _Size; ++_Idx) { \
 }
 template<typename _Ty, int _Rows, int _Cols> class Matrix_;
 /**********************************************************************
-						       Matrix view base class 
+						   Matrix view base class 
 	    Copyright (c) : Zhilong (Dgelom) Su, since 25/Jul/2018
  **********************************************************************/
 template<typename _Ty, typename _Derived, int _M = 0, int _N = _M> 
@@ -58,57 +58,57 @@ public:
 		// _Rang = {from_x, from_y, end_x, end_y} : [from_x, end_x), [from_y, end_y)
 		template<typename _Idx, MATRICE_ENABLE_IF(is_integral_v<_Idx>)>
 		MATRICE_GLOBAL_FINL range_type(const initlist<_Idx> _Rang)
-			:_My_from_x(*_Rang.begin()), _My_from_y(*(_Rang.begin()+1)),
-			 _My_end_x(*(_Rang.begin()+2)), _My_end_y(*(_Rang.begin()+3)) {}
+			:_Myfrom_x(*_Rang.begin()), _Myfrom_y(*(_Rang.begin()+1)),
+			 _Myend_x(*(_Rang.begin()+2)), _Myend_y(*(_Rang.begin()+3)) {}
 		template<typename _Idx, MATRICE_ENABLE_IF(is_integral_v<_Idx>)>
 		MATRICE_GLOBAL_FINL range_type(_Idx _Bx, _Idx _By, _Idx _Ex, _Idx _Ey) noexcept
-			: _My_from_x(_Bx), _My_from_y(_By),
-			_My_end_x(_Ex), _My_end_y(_Ey) {}
+			: _Myfrom_x(_Bx), _Myfrom_y(_By),
+			_Myend_x(_Ex), _Myend_y(_Ey) {}
 
 		template<typename _Idx, MATRICE_ENABLE_IF(is_integral_v<_Idx>)>
 		MATRICE_GLOBAL_FINL range_type& operator= (const initlist<_Idx> _Rang) {
-			_My_from_x = *_Rang.begin(), _My_from_y = *(_Rang.begin() + 1);
-			_My_end_x = *(_Rang.begin() + 2), _My_end_y = *(_Rang.begin() + 3);
+			_Myfrom_x = *_Rang.begin(), _Myfrom_y = *(_Rang.begin() + 1);
+			_Myend_x = *(_Rang.begin() + 2), _Myend_y = *(_Rang.begin() + 3);
 		}
 
-		MATRICE_GLOBAL_FINL auto& begin_x() { return _My_from_x; }
-		MATRICE_GLOBAL_FINL auto& begin_y() { return _My_from_y; }
-		MATRICE_GLOBAL_FINL auto& end_x() { return _My_end_x; }
-		MATRICE_GLOBAL_FINL auto& end_y() { return _My_end_y; }
-		MATRICE_GLOBAL_FINL const auto& begin_x() const { return _My_from_x; }
-		MATRICE_GLOBAL_FINL const auto& begin_y() const { return _My_from_y; }
-		MATRICE_GLOBAL_FINL const auto& end_x() const { return _My_end_x; }
-		MATRICE_GLOBAL_FINL const auto& end_y() const { return _My_end_y; }
+		MATRICE_GLOBAL_FINL auto& begin_x() { return _Myfrom_x; }
+		MATRICE_GLOBAL_FINL auto& begin_y() { return _Myfrom_y; }
+		MATRICE_GLOBAL_FINL auto& end_x() { return _Myend_x; }
+		MATRICE_GLOBAL_FINL auto& end_y() { return _Myend_y; }
+		MATRICE_GLOBAL_FINL const auto& begin_x() const { return _Myfrom_x; }
+		MATRICE_GLOBAL_FINL const auto& begin_y() const { return _Myfrom_y; }
+		MATRICE_GLOBAL_FINL const auto& end_x() const { return _Myend_x; }
+		MATRICE_GLOBAL_FINL const auto& end_y() const { return _Myend_y; }
 		MATRICE_GLOBAL_FINL size_t size() const { 
-			return(_My_end_x - _My_from_x)*(_My_end_y - _My_from_y); 
+			return(_Myend_x - _Myfrom_x)*(_Myend_y - _Myfrom_y); 
 		}
 		
-		difference_type _My_from_x, _My_from_y;
-		difference_type _My_end_x, _My_end_y;
+		difference_type _Myfrom_x, _Myfrom_y;
+		difference_type _Myend_x, _Myend_y;
 	};
 
 	MATRICE_GLOBAL_INL _View_base(pointer _Ptr, size_t _Size, size_t _Stride, size_t _Offset)
-		:_My_data(_Ptr), _My_size(_Size), _My_stride(_Stride), _My_offset(_Offset) {}
+		:_Mydata(_Ptr), _Mysize(_Size), _Mystride(_Stride), _Myoffset(_Offset) {}
 
 	MATRICE_GLOBAL_FINL reference operator[] (size_t i) {
-		return _My_data[i*_My_stride];
+		return _Mydata[i*_Mystride];
 	}
 	MATRICE_GLOBAL_FINL const reference operator[] (size_t i) const {
-		return _My_data[i*_My_stride];
+		return _Mydata[i*_Mystride];
 	}
 	MATRICE_GLOBAL_FINL reference operator() (size_t i) {
-		return _My_data[i*_My_stride];
+		return _Mydata[i*_Mystride];
 	}
 	MATRICE_GLOBAL_FINL const reference operator() (size_t i) const {
-		return _My_data[i*_My_stride];
+		return _Mydata[i*_Mystride];
 	}
 
 	MATRICE_GLOBAL_FINL size_t size() const { return (static_cast<const _Derived*>(this)->size()); }
 	MATRICE_GLOBAL_FINL size_t rows() const { return (static_cast<const _Derived*>(this)->rows()); }
 	MATRICE_GLOBAL_FINL size_t cols() const { return (static_cast<const _Derived*>(this)->cols()); }
 	MATRICE_GLOBAL_FINL constexpr auto shape() const { return shape_t<3>{rows(), cols(), 1}; }
-	MATRICE_GLOBAL_FINL const auto data()const noexcept { return _My_data; }
-	MATRICE_GLOBAL_FINL auto data() noexcept { return _My_data; }
+	MATRICE_GLOBAL_FINL const auto data()const noexcept { return _Mydata; }
+	MATRICE_GLOBAL_FINL auto data() noexcept { return _Mydata; }
 
 	MATRICE_GLOBAL_FINL void create(size_t, size_t) {}
 	MATRICE_GLOBAL_FINL value_t sum() const {
@@ -191,10 +191,10 @@ public:
 	_MATRICE_DEFVIEW_ARITHOP(/, div)
 
 protected:
-	pointer _My_data;
-	size_t  _My_size;
-	size_t  _My_stride;
-	size_t  _My_offset;
+	pointer _Mydata;
+	size_t  _Mysize;
+	size_t  _Mystride;
+	size_t  _Myoffset;
 
 #undef _VIEW_EWISE_OP
 };
@@ -207,10 +207,10 @@ template<typename _Ty, int _Cols = ::dynamic>
 class _Matrix_rview MATRICE_NONHERITABLE : public _View_base<_Ty, _Matrix_rview<_Ty, _Cols>, 1, _Cols>
 {
 	using _Base = _View_base<_Ty, _Matrix_rview, 1, _Cols>;
-	using _Base::_My_data;
-	using _Base::_My_size;
-	using _Base::_My_stride;
-	using _Base::_My_offset;
+	using _Base::_Mydata;
+	using _Base::_Mysize;
+	using _Base::_Mystride;
+	using _Base::_Myoffset;
 public:
 	using typename _Base::pointer;
 	using typename _Base::reference;
@@ -225,8 +225,8 @@ public:
 		:_Base(_Ptr, _Size, _Stride, _Offset) {}
 
 	MATRICE_GLOBAL_FINL constexpr auto rows() const { return 1; }
-	MATRICE_GLOBAL_FINL constexpr auto cols() const { return _My_size; }
-	MATRICE_GLOBAL_FINL constexpr auto size() const { return _My_size; }
+	MATRICE_GLOBAL_FINL constexpr auto cols() const { return _Mysize; }
+	MATRICE_GLOBAL_FINL constexpr auto size() const { return _Mysize; }
 
 	/**
 	 *\Retrieve the first _N element into a true static row-matrix.
@@ -247,10 +247,10 @@ template<typename _Ty, int _Rows = ::dynamic>
 class _Matrix_cview MATRICE_NONHERITABLE : public _View_base<_Ty, _Matrix_cview<_Ty, _Rows>, _Rows, 1>
 {
 	using _Base = _View_base<_Ty, _Matrix_cview, _Rows, 1>;
-	using _Base::_My_data;
-	using _Base::_My_size;
-	using _Base::_My_stride;
-	using _Base::_My_offset;
+	using _Base::_Mydata;
+	using _Base::_Mysize;
+	using _Base::_Mystride;
+	using _Base::_Myoffset;
 public:
 	using typename _Base::pointer;
 	using typename _Base::reference;
@@ -264,9 +264,9 @@ public:
 	MATRICE_GLOBAL_FINL _Matrix_cview(pointer _Ptr, size_t _Size, size_t _Stride = 1, size_t _Offset = 1)
 		:_Base(_Ptr, _Size, _Stride, _Offset) {}
 
-	MATRICE_GLOBAL_FINL constexpr auto rows() const { return _My_size; }
+	MATRICE_GLOBAL_FINL constexpr auto rows() const { return _Mysize; }
 	MATRICE_GLOBAL_FINL constexpr auto cols() const { return 1; }
-	MATRICE_GLOBAL_FINL constexpr auto size() const { return _My_size; }
+	MATRICE_GLOBAL_FINL constexpr auto size() const { return _Mysize; }
 
 	/**
 	 *\Retrieve the first _N element into a true static column-matrix.
@@ -289,10 +289,10 @@ class _Matrix_block MATRICE_NONHERITABLE : public _View_base<_Ty, _Matrix_block<
 	using _Base = _View_base<_Ty, _Matrix_block<_Ty>>;
 	using typename _Base::range_type;
 	using typename _Base::difference_type;
-	using _Base::_My_data;   //begin of this block data
-	using _Base::_My_size;   //cols of this block
-	using _Base::_My_stride; //cols of source matrix
-	using _Base::_My_offset; //offset relative to original matrix data
+	using _Base::_Mydata;   //begin of this block data
+	using _Base::_Mysize;   //cols of this block
+	using _Base::_Mystride; //cols of source matrix
+	using _Base::_Myoffset; //offset relative to original matrix data
 public:
 	using typename _Base::pointer;
 	using typename _Base::reference;
@@ -307,39 +307,39 @@ public:
 		: _Base(_Ptr + _Range.begin_x() + _Range.begin_y()*_Cols, 
 			_Range.end_x() - _Range.begin_x(), _Cols, 
 			_Range.begin_x() + _Range.begin_y()*_Cols),
-			_My_origin(_Ptr), _My_range(_Range) {}
+			_Myorigin(_Ptr), _Myrange(_Range) {}
 	MATRICE_GLOBAL_FINL _Matrix_block(pointer _Ptr, size_t _Cols, size_t _Rows) noexcept 
-		: _Base(_Ptr, _Cols, _Cols, 0),  _My_origin(_Ptr), 
-		_My_range(size_t(0), size_t(0), _Cols, _Rows) {
+		: _Base(_Ptr, _Cols, _Cols, 0),  _Myorigin(_Ptr), 
+		_Myrange(size_t(0), size_t(0), _Cols, _Rows) {
 	}
 
 	/**
 	 *\brief Get the zero-based i-th row pointer
 	 */
 	MATRICE_GLOBAL_FINL pointer operator[] (difference_type i)noexcept {
-		return (_My_data + i * _My_stride);
+		return (_Mydata + i * _Mystride);
 	}
 	MATRICE_GLOBAL_FINL const pointer operator[] (difference_type i)const noexcept {
-		return (_My_data + i * _My_stride);
+		return (_Mydata + i * _Mystride);
 	}
 	/**
 	 *\brief Get the entry with a zero-based linear index i
 	 */
 	MATRICE_GLOBAL_INL reference operator() (difference_type i) {
-		auto _Row = i / _My_size;
-		return this->operator[](_Row)[i - _My_size * _Row];
+		auto _Row = i / _Mysize;
+		return this->operator[](_Row)[i - _Mysize * _Row];
 	}
 	MATRICE_GLOBAL_INL const reference operator() (difference_type i) const {
-		auto _Row = i / _My_size;
-		return this->operator[](_Row)[i - _My_size * _Row];
+		auto _Row = i / _Mysize;
+		return this->operator[](_Row)[i - _Mysize * _Row];
 	}
 
-	MATRICE_GLOBAL_FINL auto rows() const { return _My_range.end_y() - _My_range.begin_y(); }
-	MATRICE_GLOBAL_FINL auto cols() const { return _My_size; }
+	MATRICE_GLOBAL_FINL auto rows() const { return _Myrange.end_y() - _Myrange.begin_y(); }
+	MATRICE_GLOBAL_FINL auto cols() const { return _Mysize; }
 	MATRICE_GLOBAL_FINL auto size() const { return rows()*cols(); }
 
 	/**
-	 * \Evaluate a view to a true matrix.
+	 * \brief Evaluate a view to a true matrix.
 	 */
 	template<int _M = 0, int _N = _M>
 	MATRICE_GLOBAL_FINL auto eval() const {
@@ -348,12 +348,12 @@ public:
 		return forward<decltype(_Ret)>(_Ret);
 	}
 private:
-	pointer _My_origin;
-	range_type _My_range;
+	pointer _Myorigin;
+	range_type _Myrange;
 };
 
 /**********************************************************************
-								    Tensor CHW view
+								Tensor CHW view
 		 Copyright (c) : Zhilong (Dgelom) Su, since 24/Jan/2019
  **********************************************************************/
 template<typename _Ty, MATRICE_ENABLE_IF(is_arithmetic_v<_Ty>)>
@@ -361,10 +361,10 @@ class _Chw_view MATRICE_NONHERITABLE : public _View_base<_Ty, _Chw_view<_Ty>>
 {
 	using _Myt = _Chw_view;
 	using _Mybase = _View_base<_Ty, _Chw_view>;
-	using _Mybase::_My_data;   //begin of this block data
-	using _Mybase::_My_size;   //cols of this block
-	using _Mybase::_My_stride; //cols of source matrix
-	using _Mybase::_My_offset; //offset relative to original matrix data
+	using _Mybase::_Mydata;   //begin of this block data
+	using _Mybase::_Mysize;   //cols of this block
+	using _Mybase::_Mystride; //cols of source matrix
+	using _Mybase::_Myoffset; //offset relative to original matrix data
 public:
 	using typename _Mybase::range_type;
 	using typename _Mybase::difference_type;
@@ -380,7 +380,7 @@ public:
 	 */
 	MATRICE_GLOBAL_FINL auto operator()(size_t _C) const {
 		range_type _Range(_C*_Mywsize, 0, (_C +1)*_Mywsize, _Myhsize);
-		return _Matrix_block<value_t>(_My_data, _My_stride, _Range);
+		return _Matrix_block<value_t>(_Mydata, _Mystride, _Range);
 	}
 
 	/**

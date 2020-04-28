@@ -54,4 +54,11 @@ namespace dgelom
 	using deleter_type = std::function<void(std::add_pointer_t<_Ty>)>;
 
 	template<typename _Ty, typename _Tag> struct index {};
+
+	/**
+	 * \brief Define attributes
+	 */
+	enum {
+		non_external_callable,
+	};
 }

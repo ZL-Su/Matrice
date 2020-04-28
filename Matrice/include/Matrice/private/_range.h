@@ -18,27 +18,27 @@ public:
 	class _My_iterator {
 	public:
 		MATRICE_GLOBAL_INL _My_iterator(const_value_t& _Pos, const_stride_t&_Inc = 1) noexcept
-			: _My_pos(_Pos), _My_inc(_Inc) {}
+			: _Mypos(_Pos), _Myinc(_Inc) {}
 
 		MATRICE_GLOBAL_INL reference operator++() noexcept {
-			return _My_pos += _My_inc; 
+			return _Mypos += _Myinc; 
 		}
 		MATRICE_GLOBAL_INL const reference operator++() const noexcept {
-			return _My_pos += _My_inc; 
+			return _Mypos += _Myinc; 
 		}
 
-		MATRICE_GLOBAL_INL reference operator*() noexcept { return _My_pos; }
-		MATRICE_GLOBAL_INL const reference operator*() const noexcept { return _My_pos; }
+		MATRICE_GLOBAL_INL reference operator*() noexcept { return _Mypos; }
+		MATRICE_GLOBAL_INL const reference operator*() const noexcept { return _Mypos; }
 
 		MATRICE_GLOBAL_INL auto operator != (const _My_iterator& _Other)const noexcept {
-			return _My_pos < (_Other._My_pos);
+			return _Mypos < (_Other._Mypos);
 		}
 
-		MATRICE_GLOBAL_INL operator value_t() const noexcept { return _My_pos; }
+		MATRICE_GLOBAL_INL operator value_t() const noexcept { return _Mypos; }
 
 	private:
-		value_t _My_pos;
-		stride_t _My_inc;
+		value_t _Mypos;
+		stride_t _Myinc;
 	};
 
 	_Range_base(const_value_t& _Begin, const_value_t& _End, const_stride_t& _Stride = 1) noexcept
@@ -141,13 +141,15 @@ public:
 	_Rect_impl() noexcept {}
 	template<typename _U1, typename _U2>
 	_Rect_impl(const Vec_<_U1, 2>& _X, const _U2& _W, const _U2& _H)
-		:_Mybegin(_X.x, _X.y), _Mywidth(_W), _Myheight(_H) { _My_end(); }
+		:_Mybegin(_X.x, _X.y), _Mywidth(_W), _Myheight(_H) {
+		_Make_myend(); }
 	template<typename _U1, typename _U2>
 	_Rect_impl(const _U1& _X, const _U1& _Y, const _U2& _W, const _U2& _H)
-		:_Mybegin(_X, _Y), _Mywidth(_W), _Myheight(_H) { _My_end(); }
+		:_Mybegin(_X, _Y), _Mywidth(_W), _Myheight(_H) {
+		_Make_myend(); }
 
 	MATRICE_HOST_INL auto& operator()(const point_type& _X) {
-		_Mybegin = _X; _My_end(); return (*this);
+		_Mybegin = _X; _Make_myend(); return (*this);
 	}
 
 	MATRICE_HOST_INL point_type& begin() {
@@ -166,16 +168,16 @@ public:
 	MATRICE_HOST_INL void set(const point_type& p, value_type w, value_type h) noexcept {
 		_Mybegin = p;
 		_Mywidth = w, _Myheight = h;
-		_My_end();
+		_Make_myend();
 	}
 
 	MATRICE_HOST_INL void set_size(value_type w, value_type h) noexcept {
 		_Mywidth = w, _Myheight = h;
-		_My_end();
+		_Make_myend();
 	}
 
 private:
-	MATRICE_HOST_INL auto _My_end() {
+	MATRICE_HOST_INL auto _Make_myend() {
 		_Myend.x = _Mybegin.x + _Mywidth;
 		_Myend.y = _Mybegin.y + _Myheight;
 	}

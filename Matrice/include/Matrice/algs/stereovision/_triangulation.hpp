@@ -101,7 +101,8 @@ public:
 	}
 
 	/**
-	 * \brief compute 3D coords with given stereo correspondence p <-> q.
+	 * \brief compute 3D coords with given stereo correspondence:
+	 //tex:$\{\mathbf{p}\leftrightarrow \mathbf{q}\}$
 	 */
 	MATRICE_HOST_INL auto compute(Vec2_<value_type>&& p, Vec2_<value_type>&& q) noexcept {
 		Matrix_<value_type, 4, 3> A; Vec4_<value_type> b;
@@ -124,12 +125,8 @@ public:
 		b(2) = fx * _Mybase::m_trs[1].x - x * _Mybase::m_trs[1].z;
 		b(3) = fy * _Mybase::m_trs[1].y - y * _Mybase::m_trs[1].z;
 
-		auto ATA = A.t().mul(A).eval();
-		auto ATb = A.t().mul(b).eval();
-		auto PIA = ATA.inv().eval();
-		auto X = PIA.mul(ATb).eval<typename _Mybase::vector_type>();
-
-		return (X);
+		const auto solver = make_linear_solver<lls>(A);
+		return (solver.solve(b));
 	}
 };
 _DETAIL_END

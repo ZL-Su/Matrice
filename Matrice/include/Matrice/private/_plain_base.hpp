@@ -569,7 +569,7 @@ public:
 	}
 
 	/**
-	 *\brief column-wise iterator for accessing elements
+	 *\brief column-wise iterator to get all elements in i-th column
 	 */
 	MATRICE_GLOBAL_FINL _Myt_cwise_iterator cwbegin(size_t i = 0) noexcept {
 		return _Myt_cwise_iterator(m_data + i * m_rows, m_cols, m_rows);
@@ -585,7 +585,7 @@ public:
 	}
 
 	/**
-	 * \row-wise iterator for accessing elements
+	 * \row-wise iterator to get all elements in i-th row
 	 */
 	MATRICE_GLOBAL_FINL _Myt_rwise_iterator rwbegin(size_t i = 0) noexcept {
 		return _Myt_rwise_iterator(m_data + i * m_cols, m_rows, m_cols);
