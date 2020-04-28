@@ -94,9 +94,6 @@
     <Filter Include="Header Files\Detail\traits">
       <UniqueIdentifier>{a5b1a51a-45a9-4305-8e89-e42f8309e07d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Detail\iterator">
-      <UniqueIdentifier>{3e37ef73-5605-4977-8159-953c98b298be}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Examples">
       <UniqueIdentifier>{0654c52d-0bad-45dd-8f68-e5de533be0c1}</UniqueIdentifier>
     </Filter>
@@ -228,6 +225,9 @@
     </Filter>
     <Filter Include="Header Files\Algs\Geometry\manifold\Lie">
       <UniqueIdentifier>{23b309b4-4b4c-4241-8e78-edc171b2fcd2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Detail\accessors">
+      <UniqueIdentifier>{3e37ef73-5605-4977-8159-953c98b298be}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -361,10 +361,10 @@
       <Filter>Header Files\Detail\traits</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_iterator.h">
-      <Filter>Header Files\Detail\iterator</Filter>
+      <Filter>Header Files\Detail\accessors</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_view.h">
-      <Filter>Header Files\Detail\iterator</Filter>
+      <Filter>Header Files\Detail\accessors</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_range.h">
       <Filter>Header Files\Detail\range</Filter>
