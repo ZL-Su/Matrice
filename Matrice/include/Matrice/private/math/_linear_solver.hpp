@@ -105,7 +105,7 @@ protected:
 			internal::_Lak_adapter<spt>(view(_Mycoeff));
 		}
 		if constexpr (is_same_v<kernel_t, lud>) {
-			internal::_Lak_adapter<spt>(view(_Mycoeff));
+			internal::_Lak_adapter<lud>(view(_Mycoeff));
 		}
 	}
 
@@ -179,7 +179,6 @@ public:
 // \brief CLASS TEMPLATE for linear least sqaure solver
 // \param <_Mty> Matrice compatible matrix type
 MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(lls)
-public:
 	_Linear_solver(matrix_type& coeff) noexcept
 		:_Mybase(coeff) {
 	}
@@ -207,7 +206,6 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_END(lls)
 // \param <_Mty> Matrice compatible matrix type
 // \note This solver is only for symmetric positive definite systems. 
 MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(spt)
-public:
 	/**
 	 *\note The input coeff will be overwritten by $L$
 	 */
@@ -245,8 +243,31 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_END(spt)
 
 // \brief CLASS TEMPLATE for SVD based linear solver
 // \param <_Mty> Matrice compatible matrix type
+MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(lud)
+    /**
+	 *\note The input coeff will be overwritten by $L\U$
+	 */
+	_Linear_solver(matrix_type& coeff) noexcept
+	    : _Mybase(coeff) {
+	    _Mybase::_Forward();
+    }
+	
+	/**
+	 *\brief Perform back substitution to solve
+	 //tex:$\mathbf{Ax} = \mathbf{b}, \mathbf{b} \leftarrow \mathbf{x}$
+	 *\note The method is auto-parsed by the solver engine.
+	 */
+    template<typename _Bty> [[non_external_callable]]
+	MATRICE_GLOBAL_INL decltype(auto)_Xbackward(_Bty& b)const noexcept {
+
+		return (b);
+	}
+
+MATRICE_MAKE_LINEAR_SOLVER_SPEC_END(lud)
+
+// \brief CLASS TEMPLATE for SVD based linear solver
+// \param <_Mty> Matrice compatible matrix type
 MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(svd)
-public:
 	/**
 	 *  \note: the input coeff will be overwritten by $\mathbf{U}$
 	 */
