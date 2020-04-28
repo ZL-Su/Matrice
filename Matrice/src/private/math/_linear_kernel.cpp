@@ -4,14 +4,35 @@
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
 namespace internal {
+	using _Size_t = long long;
+	// \solve $L \cdot y = b$
 	template<typename _Ptr>
-	MATRICE_GLOBAL_INL int __spd_kernel_impl(_Ptr data, size_t n) noexcept {
-		using size_type = long long;
+	MATRICE_GLOBAL_INL void _tri_fwdsv_impl(_Size_t n, const _Ptr l, _Ptr y, _Size_t stride) noexcept {
+		y[0] = safe_div(y[0], l[0][0]);
+		for (_Size_t i = 1; i < n; ++i) {
+			auto& y_i = y[i * stride];
+			const auto l_i = l + i * n;
+			for (auto j = 0; j < i; ++j) {
+				y_i -= l_i[j] * y[j * stride];
+			}
+			y_i = safe_div(y_i, l_i[i]);
+		}
+	}
+
+	// \solve $u \cdot x = y$
+	template<typename _Ptr>
+	MATRICE_GLOBAL_INL void _tri_bwdsv_impl(_Size_t n, const _Ptr u, _Ptr x, _Size_t stride) noexcept {
+
+	}
+
+	// \Perform Cholesky decomposition
+	template<typename _Ptr>
+	MATRICE_GLOBAL_INL int __spd_kernel_impl(_Ptr data, _Size_t n)noexcept {
 		using value_type = primitive_type_t<_Ptr>;
 		int status = 1;
 		auto _Sum = value_type(0);
-		for (size_type r = 0; r < n; ++r) {
-			for (size_type c = r; c < n; ++c) {
+		for (_Size_t r = 0; r < n; ++r) {
+			for (_Size_t c = r; c < n; ++c) {
 				_Sum = data[r * n + c];
 				for (auto k = r - 1; k >= 0; --k) {
 					_Sum -= data[r * n + k] * data[c * n + k];
@@ -29,18 +50,16 @@ namespace internal {
 				}
 			}
 		}
-		for (size_type r = 0; r < n; ++r)
-			for (size_type c = 0; c < r; ++c)
+		for (_Size_t r = 0; r < n; ++r)
+			for (_Size_t c = 0; c < r; ++c)
 				data[c * n + r] = value_type(0);
 
 		return status;
 	}
 
 	template<typename _Ptr>
-	MATRICE_GLOBAL_INL void __ispd_kernel_impl(const _Ptr data, _Ptr inv, size_t _n) noexcept {
-		using size_type = long long;
+	MATRICE_GLOBAL_INL void __ispd_kernel_impl(const _Ptr data, _Ptr inv, _Size_t n) noexcept {
 		using value_type = primitive_type_t<_Ptr>;
-		const size_type n = _n;
 		value_type sum;
 		for (auto r = 0; r < n; ++r) {
 			for (auto c = 0; c <= r; ++c) {
@@ -62,9 +81,9 @@ namespace internal {
 	}
 
 	template<typename _Ptr>
-	MATRICE_GLOBAL_INL void __spd_bwdsv_impl(size_t n, const _Ptr lptr, _Ptr x, size_t stride) noexcept {
+	MATRICE_GLOBAL_INL void __spd_bwdsv_impl(_Size_t n, const _Ptr lptr, _Ptr x, _Size_t stride) noexcept {
 		// \solve: $L \cdot y = b$
-		for (diff_t r = 0; r < n; ++r) {
+		for (auto r = 0; r < n; ++r) {
 			const auto a_row = lptr + r * n;
 			const auto x_idx = r * stride;
 			auto t_sum = x[x_idx];
@@ -74,7 +93,7 @@ namespace internal {
 			x[x_idx] = safe_div(t_sum, a_row[r]);
 		}
 		// \solve: $L^T \cdot x = y$
-		for (diff_t r = n - 1; r >= 0; --r) {
+		for (auto r = n - 1; r >= 0; --r) {
 			const auto x_idx = r * stride;
 			auto t_sum = x[x_idx];
 			for (auto c = r + 1; c < n; ++c) {
@@ -84,24 +103,13 @@ namespace internal {
 		}
 	}
 
-	// \solve $L \cdot y = b$
+	// \Perform LU decomposition with pivoting
 	template<typename _Ptr>
-	MATRICE_GLOBAL_INL void _tri_fwdsv_impl(size_t n, const _Ptr l, _Ptr y, size_t stride) noexcept {
-		y[0] = safe_div(y[0], l[0][0]);
-		for (diff_t i = 1; i < n; ++i) {
-			auto& y_i = y[i * stride];
-			const auto l_i = l + i * n;
-			for (auto j = 0; j < i; ++j) {
-				y_i -= l_i[j] * y[j * stride];
-			}
-			y_i = safe_div(y_i, l_i[i]);
-		}
-	}
+	MATRICE_GLOBAL_INL int __lud_kernel_impl(_Ptr data, _Size_t n)noexcept {
+		using value_type = primitive_type_t<_Ptr>;
+		constexpr auto eps = std::numeric_limits<value_type>::epsilon();
 
-	// \solve $u \cdot x = y$
-	template<typename _Ptr>
-	MATRICE_GLOBAL_INL void _tri_bwdsv_impl(size_t n, const _Ptr u, _Ptr x, size_t stride) noexcept {
-
+		int status = 1;
 	}
 }
 
