@@ -251,12 +251,12 @@ public:
 	/**
 	 *\brief static properties
 	 */
-	enum { 
-		Size = _M*_N, 
-		rows_at_compiletime = _M, 
-		cols_at_compiletime = _N, 
+	enum {
 		options = _Myalty::location
 	};
+	static constexpr long long  Size = _M * _N;
+	static constexpr long long rows_at_compiletime = _M;
+	static constexpr long long cols_at_compiletime = _N;
 	/**
 	 *\brief for static querying memory location
 	 */
