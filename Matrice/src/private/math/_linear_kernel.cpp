@@ -1,4 +1,5 @@
 #include <type_traits>
+#include <core.hpp>
 #include "math/_linear_kernel.hpp"
 
 DGE_MATRICE_BEGIN
@@ -105,11 +106,45 @@ namespace internal {
 
 	// \Perform LU decomposition with pivoting
 	template<typename _Ptr>
-	MATRICE_GLOBAL_INL int __lud_kernel_impl(_Ptr data, _Size_t n)noexcept {
+	MATRICE_GLOBAL int __lud_kernel_impl(_Size_t n, _Ptr data, int* indx)noexcept {
 		using value_type = primitive_type_t<_Ptr>;
-		constexpr auto eps = std::numeric_limits<value_type>::epsilon();
+		constexpr auto _Epsi = std::numeric_limits<value_type>::epsilon();
 
-		int status = 1;
+		for (auto row = 0; row < n; ++row) indx[row] = row;
+		indx[n] = 1;
+
+		int status = 0;
+		for (auto k = 0; k < n; ++k) {
+			auto piv = zero<value_type>;
+			decltype(n) major_row = k;
+			for (auto row = k; row < n; ++row) {
+				auto tmp = abs(data[row * n + k]);
+				if (tmp > piv) {
+					piv = tmp; 
+					major_row = row;
+				}
+				if (abs(piv) < sqr(_Epsi)) status = -row;
+			}
+			if (k != major_row) {
+				// interchange the major row and the k-th row
+				for (auto col = 0; col < n; ++col) {
+					auto tmp = data[major_row * n + col];
+					data[major_row * n + col] = data[k * n + col];
+					data[k * n + col] = tmp;
+				}
+				std::swap(indx[major_row], indx[k]);
+				indx[n] = -indx[n];
+			}
+
+			if (abs(data[k * n + k]) < _Epsi) data[k * n + k] = _Epsi;
+
+			for (auto row = k + 1; row < n; ++row) {
+				auto tmp = data[row * n + k] /= data[k * n + k];
+				for (auto col = k + 1; col < n; ++col)
+					data[row * n + col] -= tmp * data[k * n + col];
+			}
+		}
+		return status;
 	}
 }
 
@@ -124,7 +159,7 @@ MATRICE_GLOBAL int _Linear_spd_kernel(double* data, size_t n) noexcept {
 
 template<>
 MATRICE_GLOBAL void _Linear_ispd_kernel(float* data, float* inv, size_t n) noexcept {
-	internal::__ispd_kernel_impl<float*>(data, inv, n);
+	internal::__ispd_kernel_impl(data, inv, n);
 }
 template<>
 MATRICE_GLOBAL void _Linear_ispd_kernel(double* data, double* inv, size_t n) noexcept {
@@ -138,6 +173,15 @@ void _Linear_spd_bwd(size_t n, float* data, float* x, int stride) noexcept {
 template<> MATRICE_GLOBAL
 void _Linear_spd_bwd(size_t n, double* data, double* x, int stride) noexcept {
 	internal::__spd_bwdsv_impl(n, data, x, stride);
+}
+
+template<>
+MATRICE_GLOBAL int _Linear_lud_kernel(size_t n, float* data, int* indx) noexcept {
+	return internal::__lud_kernel_impl(n, data, indx);
+}
+template<>
+MATRICE_GLOBAL int _Linear_lud_kernel(size_t n, double* data, int* indx) noexcept {
+	return internal::__lud_kernel_impl(n, data, indx);
 }
 _DETAIL_END
 DGE_MATRICE_END
