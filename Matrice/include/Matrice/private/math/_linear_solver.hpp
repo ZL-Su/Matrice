@@ -105,7 +105,7 @@ protected:
 			internal::_Lak_adapter<spt>(view(_Mycoeff));
 		}
 		if constexpr (is_same_v<kernel_t, lud>) {
-			internal::_Lak_adapter<lud>(view(_Mycoeff));
+			internal::_Lak_adapter<lud>(view(_Mycoeff), _Mdp->permut().data());
 		}
 	}
 
@@ -248,9 +248,26 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(lud)
 	 *\note The input coeff will be overwritten by $L\U$
 	 */
 	_Linear_solver(matrix_type& coeff) noexcept
-	    : _Mybase(coeff) {
+	    : _Mybase(coeff), _Myidx(coeff.rows()+1){
 	    _Mybase::_Forward();
     }
+    
+    /**
+	 *\brief Get the row permutation produced by the partial pivoting.
+	 */
+    MATRICE_GLOBAL_INL decltype(auto) permut() const noexcept{
+		return (_Myidx);
+	}
+	MATRICE_GLOBAL_INL decltype(auto) permut() noexcept {
+		return (_Myidx);
+	}
+
+	/**
+	 *\brief Get the parity produced by the partial pivoting.
+	 */
+	MATRICE_GLOBAL_INL decltype(auto) parity() const noexcept {
+		return (_Myidx(_Myidx.rows()-1));
+	}
 	
 	/**
 	 *\brief Perform back substitution to solve
@@ -262,7 +279,8 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(lud)
 
 		return (b);
 	}
-
+private:
+	array_n<int, _Mty::rows_at_compiletime + 1> _Myidx;
 MATRICE_MAKE_LINEAR_SOLVER_SPEC_END(lud)
 
 // \brief CLASS TEMPLATE for SVD based linear solver
