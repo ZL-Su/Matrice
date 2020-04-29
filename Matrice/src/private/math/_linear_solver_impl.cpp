@@ -71,7 +71,7 @@ solver_status _Bwd_adapter<svd>(View_f32 U, View_f32 S, View_f32 Vt, View_f32 b,
 		tmp(n) = safe_div(tmp(n), S(n), _Thresh);
 	}
 	x = transpose(Vt).mul(tmp);
-	return solver_status{ 1 };
+	return solver_status{ 0 };
 }
 template<> MATRICE_GLOBAL
 solver_status _Bwd_adapter<svd>(View_f64 U, View_f64 S, View_f64 Vt, View_f64 b, View_f64 x) {
@@ -81,7 +81,7 @@ solver_status _Bwd_adapter<svd>(View_f64 U, View_f64 S, View_f64 Vt, View_f64 b,
 		tmp(n) = safe_div(tmp(n), S(n), _Thresh);
 	}
 	x = transpose(Vt).mul(tmp);
-	return solver_status{ 1 };
+	return solver_status{ 0 };
 }
 template<> MATRICE_GLOBAL
 solver_status _Inv_adapter<svd>(View_f32 U, View_f32 S, View_f32 Vt, View_f32 Inv) {
@@ -96,7 +96,7 @@ solver_status _Inv_adapter<svd>(View_f32 U, View_f32 S, View_f32 Vt, View_f32 In
 			Inv[c][r] = sum;
 		}
 	}
-	return solver_status{ 1 };
+	return solver_status{ 0 };
 }
 template<> MATRICE_GLOBAL
 solver_status _Inv_adapter<svd>(View_f64 U, View_f64 S, View_f64 Vt, View_f64 Inv) {
@@ -111,7 +111,7 @@ solver_status _Inv_adapter<svd>(View_f64 U, View_f64 S, View_f64 Vt, View_f64 In
 			Inv[c][r] = sum;
 		}
 	}
-	return solver_status{ 1 };
+	return solver_status{ 0 };
 }
 
 // specialization for spt_op
@@ -146,7 +146,7 @@ solver_status _Bwd_adapter<spt>(View_f32 L, View_f32 B) {
 		auto b = B[0] + _Off;
 		detail::_Linear_spd_bwd(L.rows(), L[0], b, _Stride);
 	}
-	return solver_status{ 1 };
+	return solver_status{ 0 };
 }
 template<> MATRICE_GLOBAL
 solver_status _Bwd_adapter<spt>(View_f64 L, View_f64 B) {
@@ -155,28 +155,41 @@ solver_status _Bwd_adapter<spt>(View_f64 L, View_f64 B) {
 		auto b = B[0] + _Off;
 		detail::_Linear_spd_bwd(L.rows(), L[0], b, _Stride);
 	}
-	return solver_status{ 1 };
+	return solver_status{ 0 };
 }
 template<> MATRICE_GLOBAL
 solver_status _Inv_adapter<spt>(View_f32 L, View_f32 INV) {
 	detail::_Linear_ispd_kernel(L[0], INV[0], L.rows());
-	return solver_status{ 1 };
+	return solver_status{ 0 };
 }
 template<> MATRICE_GLOBAL
 solver_status _Inv_adapter<spt>(View_f64 L, View_f64 INV) {
 	detail::_Linear_ispd_kernel(L[0], INV[0], L.rows());
-	return solver_status{ 1 };
+	return solver_status{ 0 };
 }
 
 template<> MATRICE_GLOBAL
 solver_status _Imp_adapter(View_f32 A, View_f32 b, View_f32 x) {
 	b = matmul(A, x) - b;
-	return solver_status{ 1 };
+	return solver_status{0 };
 }
 template<> MATRICE_GLOBAL
 solver_status _Imp_adapter(View_f64 A, View_f64 b, View_f64 x) {
 	b = matmul(A, x) - b;
-	return solver_status{ 1 };
+	return solver_status{ 0 };
+}
+
+template<> MATRICE_GLOBAL
+solver_status _Lak_adapter<lud>(View_f32 A,  int* Idx) {
+	solver_status status;
+	status.value = detail::_Linear_lud_kernel(A.rows(), A.data(), Idx);
+	return status;
+}
+template<> MATRICE_GLOBAL
+solver_status _Lak_adapter<lud>(View_f64 A, View_f64::pointer D, int* Idx) {
+	solver_status status;
+	status.value = detail::_Linear_lud_kernel(A.rows(), A.data(), Idx);
+	return status;
 }
 _INTERNAL_END
 DGE_MATRICE_END
