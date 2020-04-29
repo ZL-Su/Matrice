@@ -29,7 +29,7 @@ template<typename _Ptr> MATRICE_GLOBAL
 void _Linear_spd_bwd(size_t n, _Ptr lptr, _Ptr x, int stride=1) noexcept;
 
 template<typename _Ptr> MATRICE_GLOBAL
-int _Linear_lud_kernel(_Ptr data, size_t n) noexcept;
+int _Linear_lud_kernel(size_t n, _Ptr data, int* idx) noexcept;
 
 _DETAIL_END
 DGE_MATRICE_END
