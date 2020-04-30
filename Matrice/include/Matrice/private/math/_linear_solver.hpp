@@ -360,7 +360,7 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(svd)
 		return _Myvt.rview(size_t(_Myvt.rows()) - 1);
 	}
 private:
-	Matrix_<value_type, _Mty::cols_at_compiletime, 1> _Mys;
+	array_n<value_type, _Mty::cols_at_compiletime> _Mys;
 	Matrix_<value_type, _Mty::cols_at_compiletime> _Myvt;
 MATRICE_MAKE_LINEAR_SOLVER_SPEC_END(svd);
 
