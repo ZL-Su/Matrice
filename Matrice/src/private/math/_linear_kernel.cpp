@@ -20,7 +20,7 @@ namespace internal {
 		}
 	}
 
-	// \solve $u \cdot x = y$
+	// \solve $U \cdot x = y$
 	template<typename _Ptr>
 	MATRICE_GLOBAL_INL void _tri_bwdsv_impl(_Size_t n, const _Ptr u, _Ptr x, _Size_t stride) noexcept {
 
@@ -30,30 +30,32 @@ namespace internal {
 	template<typename _Ptr>
 	MATRICE_GLOBAL_INL int __spd_kernel_impl(_Ptr data, _Size_t n)noexcept {
 		using value_type = primitive_type_t<_Ptr>;
+		matrix_index_adapter idx{ n };
+
 		int status = 1;
 		auto _Sum = value_type(0);
 		for (_Size_t r = 0; r < n; ++r) {
 			for (_Size_t c = r; c < n; ++c) {
-				_Sum = data[r * n + c];
+				_Sum = data[idx(r,c)];
 				for (auto k = r - 1; k >= 0; --k) {
-					_Sum -= data[r * n + k] * data[c * n + k];
+					_Sum -= data[idx(r, k)] * data[idx(c, k)];
 				}
 				if (r == c) {
 					if (_Sum > value_type(0)) {
-						data[r * n + r] = sqrt(_Sum);
+						data[idx(r, r)] = sqrt(_Sum);
 					}
 					else {
 						return status = -r;
 					}
 				}
 				else {
-					data[c * n + r] = _Sum / data[r * n + r];
+					data[idx(c, r)] = _Sum / data[idx(r, r)];
 				}
 			}
 		}
 		for (_Size_t r = 0; r < n; ++r)
 			for (_Size_t c = 0; c < r; ++c)
-				data[c * n + r] = value_type(0);
+				data[idx(c, r)] = value_type(0);
 
 		return status;
 	}
@@ -109,6 +111,7 @@ namespace internal {
 	MATRICE_GLOBAL int __lud_kernel_impl(_Size_t n, _Ptr data, int* indx)noexcept {
 		using value_type = primitive_type_t<_Ptr>;
 		constexpr auto _Epsi = std::numeric_limits<value_type>::epsilon();
+		matrix_index_adapter idx{ n };
 
 		for (auto row = 0; row < n; ++row) indx[row] = row;
 		indx[n] = 1;
@@ -118,7 +121,7 @@ namespace internal {
 			auto piv = zero<value_type>;
 			decltype(n) major_row = k;
 			for (auto row = k; row < n; ++row) {
-				auto tmp = abs(data[row * n + k]);
+				auto tmp = abs(data[idx(row,k)]);
 				if (tmp > piv) {
 					piv = tmp; 
 					major_row = row;
@@ -128,20 +131,20 @@ namespace internal {
 			if (k != major_row) {
 				// interchange the major row and the k-th row
 				for (auto col = 0; col < n; ++col) {
-					auto tmp = data[major_row * n + col];
-					data[major_row * n + col] = data[k * n + col];
-					data[k * n + col] = tmp;
+					auto tmp = data[major_row*n + col];
+					data[major_row * n + col] = data[idx(k, col)];
+					data[idx(k, col)] = tmp;
 				}
 				std::swap(indx[major_row], indx[k]);
 				indx[n] = -indx[n];
 			}
 
-			if (abs(data[k * n + k]) < _Epsi) data[k * n + k] = _Epsi;
+			if (abs(data[idx(k, k)]) < _Epsi) data[idx(k, k)] = _Epsi;
 
 			for (auto row = k + 1; row < n; ++row) {
-				auto tmp = data[row * n + k] /= data[k * n + k];
+				auto tmp = data[idx(row,k)] /= data[idx(k,k)];
 				for (auto col = k + 1; col < n; ++col)
-					data[row * n + col] -= tmp * data[k * n + col];
+					data[idx(row, col)] -= tmp * data[idx(k,col)];
 			}
 		}
 		return status;
