@@ -186,7 +186,7 @@ solver_status _Lak_adapter<lud>(View_f32 A,  int* Idx) {
 	return status;
 }
 template<> MATRICE_GLOBAL
-solver_status _Lak_adapter<lud>(View_f64 A, View_f64::pointer D, int* Idx) {
+solver_status _Lak_adapter<lud>(View_f64 A, int* Idx) {
 	solver_status status;
 	status.value = detail::_Linear_lud_kernel(A.rows(), A.data(), Idx);
 	return status;
