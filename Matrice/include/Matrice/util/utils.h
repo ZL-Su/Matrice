@@ -201,6 +201,25 @@ MATRICE_GLOBAL_INL decltype(auto) unroll_linear_index(_Ity idx, _Ity width) noex
 	return std::make_tuple(y, x);
 }
 
+struct matrix_index_adapter {
+	/**
+     * \unroll a linear index "idx" to 2d indices [y, x].
+     */
+	template<typename _Ity>
+	MATRICE_GLOBAL_FINL constexpr auto operator()(_Ity idx) noexcept {
+		return unroll_linear_index(idx, _Ity(width));
+	}
+	/**
+	 * \convert 2d indices [y, x] to linear index.
+	 */
+	template<typename _Ity>
+	MATRICE_GLOBAL_FINL constexpr auto operator()(_Ity y, _Ity x) noexcept {
+		return (y*width+x);
+	}
+
+	diff_t width;
+};
+
 /**
  * \transform functor definitions
  */

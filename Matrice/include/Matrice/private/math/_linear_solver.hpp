@@ -105,7 +105,7 @@ protected:
 			internal::_Lak_adapter<spt>(view(_Mycoeff));
 		}
 		if constexpr (is_same_v<kernel_t, lud>) {
-			internal::_Lak_adapter<spt>(view(_Mycoeff));
+			internal::_Lak_adapter<lud>(view(_Mycoeff), _Mdp->permut().data());
 		}
 	}
 
@@ -179,7 +179,6 @@ public:
 // \brief CLASS TEMPLATE for linear least sqaure solver
 // \param <_Mty> Matrice compatible matrix type
 MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(lls)
-public:
 	_Linear_solver(matrix_type& coeff) noexcept
 		:_Mybase(coeff) {
 	}
@@ -207,7 +206,6 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_END(lls)
 // \param <_Mty> Matrice compatible matrix type
 // \note This solver is only for symmetric positive definite systems. 
 MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(spt)
-public:
 	/**
 	 *\note The input coeff will be overwritten by $L$
 	 */
@@ -245,8 +243,49 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_END(spt)
 
 // \brief CLASS TEMPLATE for SVD based linear solver
 // \param <_Mty> Matrice compatible matrix type
+MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(lud)
+    /**
+	 *\note The input coeff will be overwritten by $L\U$
+	 */
+	_Linear_solver(matrix_type& coeff) noexcept
+	    : _Mybase(coeff), _Myidx(coeff.rows()+1){
+	    _Mybase::_Forward();
+    }
+    
+    /**
+	 *\brief Get the row permutation produced by the partial pivoting.
+	 */
+    MATRICE_GLOBAL_INL decltype(auto) permut() const noexcept{
+		return (_Myidx);
+	}
+	MATRICE_GLOBAL_INL decltype(auto) permut() noexcept {
+		return (_Myidx);
+	}
+
+	/**
+	 *\brief Get the parity produced by the partial pivoting.
+	 */
+	MATRICE_GLOBAL_INL decltype(auto) parity() const noexcept {
+		return (_Myidx(_Myidx.rows()-1));
+	}
+	
+	/**
+	 *\brief Perform back substitution to solve
+	 //tex:$\mathbf{Ax} = \mathbf{b}, \mathbf{b} \leftarrow \mathbf{x}$
+	 *\note The method is auto-parsed by the solver engine.
+	 */
+    template<typename _Bty> [[non_external_callable]]
+	MATRICE_GLOBAL_INL decltype(auto)_Xbackward(_Bty& b)const noexcept {
+
+		return (b);
+	}
+private:
+	array_n<int, _Mty::rows_at_compiletime + 1> _Myidx;
+MATRICE_MAKE_LINEAR_SOLVER_SPEC_END(lud)
+
+// \brief CLASS TEMPLATE for SVD based linear solver
+// \param <_Mty> Matrice compatible matrix type
 MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(svd)
-public:
 	/**
 	 *  \note: the input coeff will be overwritten by $\mathbf{U}$
 	 */
@@ -321,7 +360,7 @@ public:
 		return _Myvt.rview(size_t(_Myvt.rows()) - 1);
 	}
 private:
-	Matrix_<value_type, _Mty::cols_at_compiletime, 1> _Mys;
+	array_n<value_type, _Mty::cols_at_compiletime> _Mys;
 	Matrix_<value_type, _Mty::cols_at_compiletime> _Myvt;
 MATRICE_MAKE_LINEAR_SOLVER_SPEC_END(svd);
 

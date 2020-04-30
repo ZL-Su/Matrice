@@ -241,6 +241,7 @@
     <ClInclude Include="include\Matrice\private\tensor\_tensor_old.hpp" />
     <ClInclude Include="include\Matrice\private\tensor\_tensor_exp.hpp" />
     <ClInclude Include="include\Matrice\private\tensor\_tensor_wrapper.hpp" />
+    <ClInclude Include="include\Matrice\private\_bounded_pointer.hpp" />
     <ClInclude Include="include\Matrice\private\_decl_dev_funcs.h" />
     <ClInclude Include="include\Matrice\private\_devops.h" />
     <ClInclude Include="include\Matrice\private\_dev_matrix_base.h" />
