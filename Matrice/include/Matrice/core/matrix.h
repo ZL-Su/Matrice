@@ -45,26 +45,26 @@ public:
 	using _Mybase::cols_at_compiletime;
 
 	MATRICE_GLOBAL_FINL constexpr Matrix_() noexcept
-		: _Mybase() {};
+		: _Mybase{} {};
 	MATRICE_GLOBAL_FINL constexpr Matrix_(int, int) noexcept
-		: Matrix_() {};
+		: Matrix_{} {};
 	MATRICE_GLOBAL_FINL constexpr Matrix_(pointer data) noexcept
 		: _Mybase(rows_at_compiletime, cols_at_compiletime, data) {};
 	MATRICE_HOST_FINL constexpr Matrix_(const_initlist _list) noexcept
-		: _Mybase(_list) {}
+		: _Mybase{ _list } {}
 	MATRICE_GLOBAL_FINL constexpr Matrix_(_Myt&& _other) noexcept
-		: _Mybase((_other)) {}
+		: _Mybase{ _other } {}
 	MATRICE_GLOBAL_FINL constexpr Matrix_(const _Myt& _other) noexcept
-		: _Mybase(_other) {};
+		: _Mybase{ _other } {};
 
 	template<typename _Uy, MATRICE_ENABLE_IF(is_scalar_v<_Uy>)>
 	MATRICE_GLOBAL_FINL constexpr Matrix_(_Uy _val) noexcept
 		: _Mybase(rows_at_compiletime, cols_at_compiletime, _val) {};
 	template<typename _Uy>
 	MATRICE_HOST_FINL Matrix_(const nested_initlist<_Uy> _list) noexcept
-		: _Mybase(_list) {}
+		: _Mybase{ _list } {}
 	MATRICE_HOST_FINL Matrix_(const std::array<value_t, Size> _array) noexcept
-		: Matrix_(pointer(_array.data())) {}
+		: Matrix_{ pointer(_array.data()) } {}
 	template<typename... _Args> 
 	MATRICE_GLOBAL_FINL Matrix_(_Args&&... args)noexcept
 		: _Mybase(forward<_Args>(args)...) {};
@@ -104,10 +104,10 @@ public:
 		return internal::_Fill_array<value_t, Size>(_Mybase::begin());
 	}
 	MATRICE_GLOBAL_FINL operator Matrix_<value_t, ::dynamic>() const noexcept {
-		return Matrix_<value_t, ::dynamic>(rows(), cols(), _Mybase::m_data); 
+		return Matrix_<value_t, ::dynamic>{rows(), cols(), _Mybase::m_data};
 	}
 	MATRICE_GLOBAL_FINL operator Matrix_<value_t, ::dynamic>() noexcept {
-		return Matrix_<value_t, ::dynamic>(rows(), cols(), _Mybase::m_data); 
+		return Matrix_<value_t, ::dynamic>{rows(), cols(), _Mybase::m_data};
 	}
 
 	template<typename _Arg> _Myt& ref(_Arg& _) noexcept = delete;
@@ -124,7 +124,7 @@ public:
 	using typename _Mybase::const_initlist;
 	using _Mybase::operator=;
 
-	MATRICE_HOST_INL Matrix_(size_t cols)
+	MATRICE_HOST_INL explicit Matrix_(size_t cols)
 		: _Mybase(_Mybase::rows_at_compiletime, cols) {};
 	MATRICE_HOST_INL Matrix_(size_t, size_t cols)
 		: Matrix_(cols) {};
@@ -168,7 +168,7 @@ public:
 	using typename _Mybase::const_initlist;
 	using _Mybase::operator=;
 
-	MATRICE_HOST_INL Matrix_(size_t rows)
+	MATRICE_HOST_INL explicit Matrix_(size_t rows)
 		: _Mybase(rows, _Mybase::cols_at_compiletime) {};
 	MATRICE_HOST_INL Matrix_(size_t rows, size_t)
 		: Matrix_(rows) {};
