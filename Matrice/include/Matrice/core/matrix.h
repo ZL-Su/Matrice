@@ -82,8 +82,8 @@ public:
 	MATRICE_HOST_FINL _Myt& operator=(nested_initlist<_Uy> _list)noexcept {
 		return _Mybase::operator=(_list);
 	}
-	template<typename _Argt>
-	MATRICE_HOST_INL _Myt& operator=(const _Argt& _arg)noexcept {
+	template<typename _Arg>
+	MATRICE_HOST_INL _Myt& operator=(const _Arg& _arg)noexcept {
 		return _Mybase::operator=(_arg);
 	}
 	
@@ -148,8 +148,8 @@ public:
 	MATRICE_HOST_INL _Myt& operator= (_Myt&& other) noexcept {
 		return _Mybase::operator=(move(other));
 	}
-	template<typename _Argt>
-	MATRICE_HOST_INL _Myt& operator=(const _Argt& _arg) {
+	template<typename _Arg>
+	MATRICE_HOST_INL _Myt& operator=(const _Arg& _arg) {
 		return _Mybase::operator=(_arg);
 	}
 
@@ -175,10 +175,9 @@ public:
 	using _Mybase::operator=;
 
 	/**
-	 *\brief Decl a matrix with given rows must use the parentheses "()" 
-	         rather than the braces "{}"
+	 *\brief Decl a matrix with given rows must use the parentheses "()" rather than the braces "{}"
 	 */
-	MATRICE_HOST_INL explicit Matrix_(size_t rows)
+	MATRICE_HOST_INL Matrix_(size_t rows)
 		: _Mybase(rows, _Mybase::cols_at_compiletime) {};
 	MATRICE_HOST_INL Matrix_(size_t rows, size_t)
 		: Matrix_(rows) {};
@@ -188,9 +187,9 @@ public:
 		: _Mybase(move(other)) {};
 	MATRICE_HOST_INL Matrix_(const_initlist list)
 		: _Mybase{ list } {}
-	template<typename _Argt>
-	MATRICE_HOST_INL Matrix_(_Argt&& arg) noexcept
-		: _Mybase(forward<_Argt>(arg)) {};
+	template<typename _Arg>
+	MATRICE_HOST_INL Matrix_(_Arg&& arg) noexcept
+		: _Mybase(forward<_Arg>(arg)) {};
 
 	MATRICE_HOST_INL _Myt& operator= (const _Myt& other) {
 		return _Mybase::operator=(other);
