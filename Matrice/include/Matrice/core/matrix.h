@@ -124,6 +124,10 @@ public:
 	using typename _Mybase::const_initlist;
 	using _Mybase::operator=;
 
+	/**
+	 *\brief Decl a matrix with given cols must use the parentheses "()"
+	         rather than the braces "{}"
+	 */
 	MATRICE_HOST_INL explicit Matrix_(size_t cols)
 		: _Mybase(_Mybase::rows_at_compiletime, cols) {};
 	MATRICE_HOST_INL Matrix_(size_t, size_t cols)
@@ -132,6 +136,8 @@ public:
 		: _Mybase(other) {};
 	MATRICE_HOST_INL Matrix_(_Myt&& other) noexcept
 		: _Mybase(move(other)) {};
+	MATRICE_HOST_INL Matrix_(const_initlist list)
+		: _Mybase{ list } {}
 	template<typename _Argt>
 	MATRICE_HOST_INL Matrix_(_Argt&& arg) noexcept
 		: _Mybase(forward<_Argt>(arg)) {};
@@ -168,6 +174,10 @@ public:
 	using typename _Mybase::const_initlist;
 	using _Mybase::operator=;
 
+	/**
+	 *\brief Decl a matrix with given rows must use the parentheses "()" 
+	         rather than the braces "{}"
+	 */
 	MATRICE_HOST_INL explicit Matrix_(size_t rows)
 		: _Mybase(rows, _Mybase::cols_at_compiletime) {};
 	MATRICE_HOST_INL Matrix_(size_t rows, size_t)
@@ -176,6 +186,8 @@ public:
 		: _Mybase(other) {};
 	MATRICE_HOST_INL Matrix_(_Myt&& other) noexcept
 		: _Mybase(move(other)) {};
+	MATRICE_HOST_INL Matrix_(const_initlist list)
+		: _Mybase{ list } {}
 	template<typename _Argt>
 	MATRICE_HOST_INL Matrix_(_Argt&& arg) noexcept
 		: _Mybase(forward<_Argt>(arg)) {};
@@ -216,8 +228,14 @@ public:
 	using typename _Mybase::const_initlist;
 	using _Mybase::operator=;
 	
+	/**
+	 *\brief Decl a matrix with given rows and cols must use the 
+	         parentheses "()" rather than the braces "{}"
+	 */
 	MATRICE_HOST_INL Matrix_(const _Myt& other) noexcept
-		: _Mybase(other) {};
+		: _Mybase{ other } {};
+	MATRICE_HOST_INL Matrix_(const_initlist list)
+		: _Mybase{ list } {}
 	template<typename _Arg>
 	MATRICE_HOST_INL Matrix_(_Arg&& other) noexcept
 		: _Mybase(move(other)) {};
