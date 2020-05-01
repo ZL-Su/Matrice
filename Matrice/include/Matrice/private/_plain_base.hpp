@@ -306,7 +306,7 @@ public:
 		m_data = _Myalloc.data();
 	}
 	MATRICE_GLOBAL_INL constexpr Base_(const_initlist _list) noexcept
-		:Base_((_M <= 0) ? _list.size() : _M, (_N <= 0) ? 1 : _N) {
+		:Base_(_M > 0 ? _M : _N > 0 ? 1 : _list.size(), _N > 0 ? _N : 1) {
 		_Myalloc = ((pointer)_list.begin());
 	}
 	MATRICE_GLOBAL_INL constexpr Base_(const _Myt& _other) noexcept
@@ -358,21 +358,6 @@ public:
 	template<typename _Rhs, typename _Op>
 	MATRICE_GLOBAL_FINL Base_(const Expr::MatUnaryExpr<_Rhs, _Op>& exp)
 		:Base_(exp.shape()) MATRICE_EVALEXP_TOTHIS
-
-	/**
-	 *\from nested initializer list {{...},{...},...,{...}}
-	 */
-	template<typename _Ty>
-	MATRICE_HOST_INL constexpr Base_(const nested_initlist<_Ty> nil)
-		: Base_(nil.size(), nil.begin()->size()) {
-		size_t _Count = 0;
-		for (const auto It : nil) {
-			auto _Data = m_data + m_cols * _Count++;
-			for (auto i = 0; i < m_cols; ++i) {
-				_Data[i] = It.begin()[i];
-			}
-		}
-	}
 
 	/**
 	 *\interfaces for opencv if it is enabled
