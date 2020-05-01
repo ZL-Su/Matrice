@@ -248,7 +248,7 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(lud)
 	 *\note The input coeff will be overwritten by $L\U$
 	 */
 	_Linear_solver(matrix_type& coeff) noexcept
-	    : _Mybase{ coeff }, _Myidx{ int(coeff.rows() + 1) } {
+	    : _Mybase{ coeff }, _Myidx(coeff.rows() + 1) {
 	    _Mybase::_Forward();
     }
     
@@ -280,7 +280,7 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(lud)
 		return (b);
 	}
 private:
-	array_n<int, _Mty::rows_at_compiletime + 1> _Myidx;
+	array_n<int, conditional_size_v<(_Mty::rows_at_compiletime > 0), _Mty::rows_at_compiletime+1, _Mty::rows_at_compiletime>> _Myidx;
 MATRICE_MAKE_LINEAR_SOLVER_SPEC_END(lud)
 
 // \brief CLASS TEMPLATE for SVD based linear solver
