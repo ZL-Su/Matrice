@@ -1270,6 +1270,12 @@ MATRICE_GLOBAL_INL remove_all_t<_Ty>& make_zero(_Ty& data) noexcept;
 template<typename _Mty, MATRICE_ENABLE_IF(is_matrix_v<_Mty>||is_fxdvector_v<_Mty>)>
 MATRICE_GLOBAL_FINL auto view(_Mty& _M) noexcept;
 
+/**
+ *\func dgelom::swap<_Mty>(_Mty&, _Mty&)
+ *\brief Swap two matrices
+ */
+template<typename _Mty>
+MATRICE_HOST_INL void swap(_Mty& _L, _Mty& _R) noexcept;
 DGE_MATRICE_END
 
 #ifdef _MSC_VER

@@ -137,4 +137,15 @@ template<typename _Mty,
 MATRICE_GLOBAL_FINL auto view(_Mty& _M) noexcept {
 	return detail::_Matrix_block<typename _Mty::value_type>(_M.data(), _M.cols(), _M.rows());
 }
+
+/**
+ * \brief Swap matrice _L and _R
+ */
+template<typename _Mty>
+MATRICE_HOST_INL void swap(_Mty& _L, _Mty& _R) noexcept
+{
+	auto _Tmp = move(_L);
+	_L = move(_R);
+	_R = move(_Tmp);
+}
 DGE_MATRICE_END
