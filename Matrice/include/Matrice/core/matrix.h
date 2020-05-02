@@ -177,7 +177,7 @@ public:
 	/**
 	 *\brief Decl a matrix with given rows must use the parentheses "()" rather than the braces "{}"
 	 */
-	MATRICE_HOST_INL Matrix_(size_t rows)
+	MATRICE_HOST_INL explicit Matrix_(size_t rows)
 		: _Mybase(rows, _Mybase::cols_at_compiletime) {};
 	MATRICE_HOST_INL Matrix_(size_t rows, size_t)
 		: Matrix_(rows) {};
