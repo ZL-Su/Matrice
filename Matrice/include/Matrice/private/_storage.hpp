@@ -67,20 +67,21 @@ public:
 	static constexpr auto cols_at_compiletime = _Mytraits::cols;
 
 	MATRICE_GLOBAL_INL _Dense_allocator_base()
-		:m_rows(rows_at_compiletime), m_cols(cols_at_compiletime){
+		: m_rows{ rows_at_compiletime }, m_cols{ cols_at_compiletime } {
 		derived()._Alloc();
 	}
 	MATRICE_GLOBAL_INL _Dense_allocator_base(const pointer data)
-		:m_rows(rows_at_compiletime), m_cols(cols_at_compiletime) {
-		static_assert(rows_at_compiletime*cols_at_compiletime > 0, "The ctor in _Dense_allocator_base<_Altrs> is only valid for stack malloc.");
+		: m_rows{ rows_at_compiletime }, m_cols{ cols_at_compiletime } {
+		static_assert(rows_at_compiletime*cols_at_compiletime > 0, 
+			"The ctor in _Dense_allocator_base<_Altrs> is only valid for stack malloc.");
 		(*this) = data;
 	}
 	MATRICE_GLOBAL_INL _Dense_allocator_base(size_t rows, size_t cols)
-		:m_rows(rows), m_cols(cols) {
+		: m_rows{ rows }, m_cols{ cols } {
 		derived()._Alloc();
 	}
 	MATRICE_GLOBAL_INL _Dense_allocator_base(const _Myt& other)
-		:_Dense_allocator_base(other.rows(), other.cols()) {
+		: _Dense_allocator_base{ other.rows(), other.cols() } {
 		_Alloc_copy(other.derived());
 	}
 	MATRICE_GLOBAL_INL _Dense_allocator_base(_Myt&& other) noexcept {
@@ -88,7 +89,7 @@ public:
 	}
 	template<typename _Al, enable_if_t<is_not_same_v<_Al, allocator>>>
 	MATRICE_GLOBAL_INL _Dense_allocator_base(const _Al& other)
-		:_Dense_allocator_base(other.rows(), other.cols()){
+		:_Dense_allocator_base{ other.rows(), other.cols() } {
 		_Alloc_copy(other);
 	}
 	template<typename _Al, enable_if_t<is_not_same_v<_Al, allocator>>>

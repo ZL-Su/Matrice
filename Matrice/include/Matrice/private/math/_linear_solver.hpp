@@ -57,7 +57,7 @@ public:
 	using value_type = typename _Mytraits::value_type;
 
 	_Linear_solver_base(matrix_type& coeff) noexcept
-		:_Mycoeff(coeff), _Myeps(matrix_type::eps) {
+		:_Mycoeff{ coeff }, _Myeps{ matrix_type::eps } {
 	}
 
 	/**
@@ -170,7 +170,7 @@ public:
 	using typename _Mybase::value_type;
 	using typename _Mybase::matrix_type;
 	_Linear_solver(matrix_type& coeff) noexcept 
-		: _Mybase(coeff) {
+		: _Mybase{ coeff } {
 		_Mybase::_Forward();
 	}
 
@@ -180,7 +180,7 @@ public:
 // \param <_Mty> Matrice compatible matrix type
 MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(lls)
 	_Linear_solver(matrix_type& coeff) noexcept
-		:_Mybase(coeff) {
+	    :_Mybase{ coeff } {
 	}
 
 	/**
@@ -210,7 +210,7 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(spt)
 	 *\note The input coeff will be overwritten by $L$
 	 */
 	_Linear_solver(matrix_type& coeff) noexcept
-		: _Mybase(coeff) {
+	    : _Mybase{ coeff } {
 		_Mybase::_Forward();
 	}
 
@@ -219,7 +219,7 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(spt)
 	 */
 	MATRICE_GLOBAL_INL auto(det)()const noexcept {
 		decltype(auto) _L = _Mybase::_Mycoeff;
-		auto _Ret = one<value_type>;
+		auto _Ret{ one<value_type> };
 		for (auto _Idx = 0; _Idx < _L.rows(); ++_Idx)
 			_Ret *= _L[_Idx][_Idx];
 		return sqr(_Ret);
@@ -248,7 +248,7 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(lud)
 	 *\note The input coeff will be overwritten by $L\U$
 	 */
 	_Linear_solver(matrix_type& coeff) noexcept
-	    : _Mybase(coeff), _Myidx(coeff.rows()+1){
+	    : _Mybase{ coeff }, _Myidx(coeff.rows() + 1) {
 	    _Mybase::_Forward();
     }
     
@@ -280,7 +280,7 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(lud)
 		return (b);
 	}
 private:
-	array_n<int, _Mty::rows_at_compiletime + 1> _Myidx;
+	array_n<int, conditional_size_v<(_Mty::rows_at_compiletime > 0), _Mty::rows_at_compiletime+1, _Mty::rows_at_compiletime>> _Myidx;
 MATRICE_MAKE_LINEAR_SOLVER_SPEC_END(lud)
 
 // \brief CLASS TEMPLATE for SVD based linear solver

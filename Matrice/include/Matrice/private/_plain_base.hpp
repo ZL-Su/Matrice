@@ -254,9 +254,9 @@ public:
 	enum {
 		options = _Myalty::location
 	};
-	static constexpr long long  Size = _M * _N;
 	static constexpr long long rows_at_compiletime = _M;
 	static constexpr long long cols_at_compiletime = _N;
+	static constexpr long long Size = rows_at_compiletime * cols_at_compiletime;
 	/**
 	 *\brief for static querying memory location
 	 */
@@ -306,7 +306,7 @@ public:
 		m_data = _Myalloc.data();
 	}
 	MATRICE_GLOBAL_INL constexpr Base_(const_initlist _list) noexcept
-		:Base_((_M <= 0) ? _list.size() : _M, (_N <= 0) ? 1 : _N) {
+		:Base_(_M > 0 ? _M : _N > 0 ? 1 : _list.size(), _N > 0 ? _N : 1) {
 		_Myalloc = ((pointer)_list.begin());
 	}
 	MATRICE_GLOBAL_INL constexpr Base_(const _Myt& _other) noexcept
@@ -358,21 +358,6 @@ public:
 	template<typename _Rhs, typename _Op>
 	MATRICE_GLOBAL_FINL Base_(const Expr::MatUnaryExpr<_Rhs, _Op>& exp)
 		:Base_(exp.shape()) MATRICE_EVALEXP_TOTHIS
-
-	/**
-	 *\from nested initializer list {{...},{...},...,{...}}
-	 */
-	template<typename _Ty>
-	MATRICE_HOST_INL constexpr Base_(const nested_initlist<_Ty> nil)
-		: Base_(nil.size(), nil.begin()->size()) {
-		size_t _Count = 0;
-		for (const auto It : nil) {
-			auto _Data = m_data + m_cols * _Count++;
-			for (auto i = 0; i < m_cols; ++i) {
-				_Data[i] = It.begin()[i];
-			}
-		}
-	}
 
 	/**
 	 *\interfaces for opencv if it is enabled
@@ -1284,6 +1269,20 @@ MATRICE_GLOBAL_INL remove_all_t<_Ty>& make_zero(_Ty& data) noexcept;
  */
 template<typename _Mty, MATRICE_ENABLE_IF(is_matrix_v<_Mty>||is_fxdvector_v<_Mty>)>
 MATRICE_GLOBAL_FINL auto view(_Mty& _M) noexcept;
+
+/**
+ *\func dgelom::swap<_Mty>(_Mty&, _Mty&)
+ *\brief Swap two matrices
+ */
+template<typename _Mty>
+MATRICE_HOST_INL void swap(_Mty& _L, _Mty& _R) noexcept;
+
+/**
+ *\func dgelom::copy<_Mty>(_Mty&, _Mty&)
+ *\brief Copy a given matrix. Always wrap a matrix with the function If a deep copy is required.
+ */
+template<typename _Mty, MATRICE_ENABLE_IF(is_matrix_v<_Mty>)>
+MATRICE_HOST_INL _Mty copy(const _Mty& _M);
 
 DGE_MATRICE_END
 
