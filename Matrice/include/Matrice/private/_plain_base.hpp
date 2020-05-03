@@ -1276,6 +1276,14 @@ MATRICE_GLOBAL_FINL auto view(_Mty& _M) noexcept;
  */
 template<typename _Mty>
 MATRICE_HOST_INL void swap(_Mty& _L, _Mty& _R) noexcept;
+
+/**
+ *\func dgelom::copy<_Mty>(_Mty&, _Mty&)
+ *\brief Copy a given matrix. Always wrap a matrix with the function If a deep copy is required.
+ */
+template<typename _Mty, MATRICE_ENABLE_IF(is_matrix_v<_Mty>)>
+MATRICE_HOST_INL _Mty copy(const _Mty& _M);
+
 DGE_MATRICE_END
 
 #ifdef _MSC_VER
