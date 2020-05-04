@@ -51,7 +51,7 @@ public:
 	 *\param [ext] external geometry parameters: rx, ry, rz, tx, ty, tz
 	 */
 	_Projection_base(const array_n<value_type, dim<<1>& ext) noexcept
-		:m_tran(ext(3), ext(4), ext(5)) {
+		:m_tran{ ext(3), ext(4), ext(5) } {
 		//set internal paramters to default
 		m_ints.rview(0) = 0;
 
@@ -154,7 +154,7 @@ public:
 		return this->grad(pd.x, pd.y, pd.z);
 	}
 	MATRICE_HOST_INL point_type grad(value_type x, value_type y, value_type depth)const noexcept {
-		const auto X = _Mybase::rotation({ x, y, 1 });
+		const auto X = _Mybase::forward({ x, y, 1 });
 		const auto s = 1 / sqr(X.z*depth + m_tran.z);
 		const auto gx = (X.x*m_tran.z - X.z*m_tran.x)*s;
 		const auto gy = (X.y*m_tran.z - X.z*m_tran.y)*s;
