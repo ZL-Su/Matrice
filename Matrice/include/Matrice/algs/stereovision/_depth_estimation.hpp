@@ -40,7 +40,7 @@ public:
 	using image_t = Matrix<value_t>;
 
 	_Depth_estimation_base(const point_t& r, const point_t& t)
-		:m_projection(r,t){
+		:m_projection{ r,t } {
 	}
 
 	/**
@@ -69,21 +69,28 @@ class _GCC_estimator
 	:public _Depth_estimation_base<_GCC_estimator<_Ty, _Altag>> {
 	using _Myt = _GCC_estimator;
 	using _Mybase = _Depth_estimation_base<_Myt>;
+	using _Mypart = Vec_<typename _Mybase::value_t, 5>;
 	enum _Mytask {INIT_JACOB = 0, UPDATE_JACOB = 1};
 public:
-	static constexpr auto order = 1; // shape function order
-	static constexpr auto size = 15; // subset size
+	// Define the order of spatial transformer
+	static constexpr auto order = 1;
+	// Define the size of the subsets
+	static constexpr auto size = 15;
 	using typename _Mybase::value_t;
 	using typename _Mybase::point_t;
 	using typename _Mybase::image_t;
 	
 	_GCC_estimator()
-		:_Mybase(point_t(), point_t()), m_jacob(sqr<size_t>(size)) {
+		:_Mybase{ point_t(), point_t() }, m_jacob(sqr<size_t>(size)) {
 	}
 	_GCC_estimator(const point_t& r, const point_t& t)
-		:_Mybase(r, t), m_jacob(sqr<size_t>(size)) {
+		:_Mybase{ r, t }, m_jacob(sqr<size_t>(size)) {
 	}
 
+	/**
+	 *\brief Set a stereo pair to be processed
+	 *\param [left, right] left and right images of the stereo pair
+	 */
 	_Myt& set_stereo_pair(const image_t& left, const image_t& right) noexcept {
 		_Mybase::m_reference = left;
 		_Mybase::m_matching = right;
@@ -92,40 +99,58 @@ public:
 		return (*this);
 	}
 
+	/**
+	 *\brief Compute the depth for a given image point
+	 *\param [x, y] the coords of the image point in the left part of the stereo pair
+	 */
+	auto compute(value_t x, value_t y, value_t init_depth) {
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(!_Mybase::m_reference.empty, "Set a stereo pair with method ::set_stereo_pair(l,r) before computing depth.");
+#endif
+		_Mypart pars = { init_depth, 0, 0, 0, 0 };
+
+		m_jacob = this->_Diff<_Mytask::INIT_JACOB>(x, y, pars[0]);
+		auto hess = m_jacob.t().mul(m_jacob).eval();
+
+	}
+
 private:
 	/**
-	 *\brief computes and updates Jacobian matrix.
+	 *\brief Compute and update the Jacobian matrix.
 	 */
 	template<_Mytask _Task = _Mytask::INIT_JACOB>
-	void _Diff() noexcept {
+	decltype(auto) _Diff(value_t rx, value_t ry, value_t depth) noexcept {
 		constexpr auto radius = size >> 1;
 		for (diff_t dy = -radius; dy <= radius; ++dy) {
-			const auto y = m_refpt.y + dy;
+			const auto y = ry + dy;
 			for (diff_t dx = -radius; dx <= radius; ++dx) {
-				const auto x = m_refpt.x + dx;
+				const auto x = rx + dx;
 				const auto lidx = (dy + radius)*size + (dx + radius);
-				if constexpr (_Task = _Mytask::UPDATE_JACOB) {
-					m_jacob[lidx][6] = _Diff_d(x, y, m_depth);
+				auto J = m_jacob[lidx];
+				if constexpr (_Task == _Mytask::UPDATE_JACOB) {
+					J[0] = _Diff_d(x, y, depth);
 				}
-				else if constexpr (_Task = _Mytask::INIT_JACOB) {
+				else if constexpr (_Task == _Mytask::INIT_JACOB) {
+					J[0] = _Diff_d(x, y, depth);
+
 					const auto[dfdx, dfdy] = _Mybase::m_referp.grad(x, y);
-					auto J = m_jacob[lidx];
-					J[0] = dfdx, J[1] = dfdx * dx, J[2] = dfdx * dy;
-					J[3] = dfdy, J[4] = dfdy * dx, J[5] = dfdy * dy;
-					J[6] = _Diff_d(x, y, m_depth);
+					J[1] = dfdx * dx, J[2] = dfdx * dy;
+					J[3] = dfdy * dx, J[4] = dfdy * dy;
 				}
 				else { 
 					static_assert("_Task must be _Mytask::INIT_JACOB or _Mytask::UPDATE_JACOB in method _Diff<>()"); 
 				}
 			}
 		}
+		return (m_jacob);
 	}
 	/**
-	 *\brief computes derivative of the residual w.r.t. the depth.
+	 *\brief Compute derivative of the residual w.r.t. the depth, e.g. 
+	 //tex:$\dfrac{\partial\varepsilon}{\partial d}$
 	 */
 	value_t _Diff_d(value_t x, value_t y, value_t depth)const noexcept {
-		const auto X = _Mybase::m_projection.backward({ x, y, depth });
-		const auto xp = _Mybase::m_projection.forward(X);
+		const auto X = _Mybase::m_projection.backproj(x, y, depth);
+		const auto xp = _Mybase::m_projection.reproj(X);
 		const auto dxdp = _Mybase::m_projection.grad(x, y, depth);
 		const auto [dgdx, dgdy] = _Mybase::m_materp.grad(xp.x, xp.y);
 
@@ -135,9 +160,9 @@ private:
 private:
 	/**
 	 *\brief data arrangement:
-	 * $[ f_x f_x*dx f_x*dy f_y f_y*dx f_y*dy e_d ]$
+	 //tex: $[\dfrac{\partial\varepsilon}{\partial d}, f_x\times dx, f_x\times dy, f_y\times dx, f_y\times dy]$
 	 */
-	Matrix_<value_t, ::dynamic, order + 1> m_jacob;
+	Matrix_<value_t, ::dynamic, (order<<2) + 1> m_jacob;
 	point_t m_refpt, m_reppt;
 	value_t m_depth = zero<value_t>;
 };
@@ -149,4 +174,6 @@ struct _Estimator_traits<_GCC_estimator<_Ty, _Altag>> {
 };
 
 _DETAIL_END
+template<typename _Ty>
+using left_aligned_gcc_t = detail::_GCC_estimator<_Ty, cs_alignment_tag::left>;
 MATRICE_ALGS_END
