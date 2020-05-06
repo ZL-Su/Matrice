@@ -757,7 +757,7 @@ public:
 	/**
 	 * \assignment operator, from row-wise iterator
 	 */
-	MATRICE_GLOBAL_FINL _Derived& operator= (const _Myt_rwise_iterator& _It) {
+	MATRICE_GLOBAL_FINL _Derived& operator= (const _Myt_rwise_iterator& _It)noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_Myalloc, "This object is empty.");
 #endif // MATRICE_DEBUG
@@ -767,11 +767,23 @@ public:
 	/**
 	 * \assignment operator, from column-wise iterator
 	 */
-	MATRICE_GLOBAL_FINL _Derived& operator=(const _Myt_cwise_iterator& _It) {
+	MATRICE_GLOBAL_FINL _Derived& operator=(const _Myt_cwise_iterator& _It)noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_Myalloc, "This object is empty.");
 #endif // MATRICE_DEBUG
 		std::copy(_It.begin(), _It.end(), _Myalloc.data());
+		return (this->derived());
+	}
+	/**
+	 *\assignment operator=()
+	 *\brief copy from block view with O(min(this->size(), _Bv.size())
+	 */
+	template<typename _Ty>
+	MATRICE_GLOBAL_FINL _Derived& operator=(const _Matrix_block<_Ty>& _Bv) noexcept {
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(_Myalloc, "This object is empty.");
+#endif // MATRICE_DEBUG
+		_Bv.eval_to(*this);
 		return (this->derived());
 	}
 	/**
