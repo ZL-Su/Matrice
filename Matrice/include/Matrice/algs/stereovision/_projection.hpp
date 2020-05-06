@@ -153,12 +153,25 @@ public:
 	MATRICE_HOST_INL point_type grad(const point_type& pd)const noexcept {
 		return this->grad(pd.x, pd.y, pd.z);
 	}
+	/**
+	 *\brief Compute the derivaties:
+	 //tex: $\dfrac{\partial \mathbf{x}'}{\partial d} = \mathbf{K}'\dfrac{\partial<\mathbf{RX}(d) + \mathbf{T}>}{\partial d}$
+	 *\sa Eq.(3) in paper GCCA.
+	 */
 	MATRICE_HOST_INL point_type grad(value_type x, value_type y, value_type depth)const noexcept {
-		const auto X = _Mybase::forward({ x, y, 1 });
-		const auto s = 1 / sqr(X.z*depth + m_tran.z);
-		const auto gx = (X.x*m_tran.z - X.z*m_tran.x)*s;
-		const auto gy = (X.y*m_tran.z - X.z*m_tran.y)*s;
-		return point_type{ gx, gy, 0 };
+		//tex: $\dfrac{\partial (\mathbf{Rx}d + \mathbf{T})}{\partial d}= \mathbf{Rx} = \mathbf{R}[x, y, 1]^T$
+		const auto dXd = _Mybase::rotate({ x, y, 1 });
+		const auto x_d = dXd.x * depth + m_tran.x;
+		const auto y_d = dXd.y * depth + m_tran.y;
+		const auto z_d = dXd.z * depth + m_tran.z;
+
+		const auto s = 1 / sqr(z_d);
+		const auto _Gxd = (dXs.x * z_d - x_d * dXd.z) * s;
+		const auto _Gyd = (dXs.y * z_d - y_d * dXd.z) * s;
+
+		const auto ptr = _Mybase::m_ints[1];
+		const auto fx = ptr[0], fy = ptr[1], cx = ptr[2], cy = ptr[3];
+		return point_type{ fx * _Gxd + cx, fy * _Gyd + cy, 0 };
 	}
 private:
 	using _Mybase::m_tran;
