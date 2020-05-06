@@ -159,19 +159,15 @@ public:
 	 *\sa Eq.(3) in paper GCCA.
 	 */
 	MATRICE_HOST_INL point_type grad(value_type x, value_type y, value_type depth)const noexcept {
-		//tex: $\dfrac{\partial (\mathbf{Rx}d + \mathbf{T})}{\partial d}= \mathbf{Rx} = \mathbf{R}[x, y, 1]^T$
-		const auto dXd = _Mybase::rotate({ x, y, 1 });
-		const auto x_d = dXd.x * depth + m_tran.x;
-		const auto y_d = dXd.y * depth + m_tran.y;
-		const auto z_d = dXd.z * depth + m_tran.z;
+		const auto Rx = _Mybase::rotate({ x, y, 1 });
 
-		const auto s = 1 / sqr(z_d);
-		const auto _Gxd = (dXs.x * z_d - x_d * dXd.z) * s;
-		const auto _Gyd = (dXs.y * z_d - y_d * dXd.z) * s;
+		const auto Tx = m_tran.x, Ty = m_tran.y, Tz = m_tran.z;
+		const auto s = safe_div(1, sqr(Rx.z * depth + Tz));
+		const auto _Gxd = (Rx.x * Tz - Tx * Rx.z) * s;
+		const auto _Gyd = (Rx.y * Tz - Ty * Rx.z) * s;
 
 		const auto ptr = _Mybase::m_ints[1];
-		const auto fx = ptr[0], fy = ptr[1], cx = ptr[2], cy = ptr[3];
-		return point_type{ fx * _Gxd + cx, fy * _Gyd + cy, 0 };
+		return point_type{ ptr[0] * _Gxd, ptr[1] * _Gyd, 0 };
 	}
 private:
 	using _Mybase::m_tran;
