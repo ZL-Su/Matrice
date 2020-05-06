@@ -80,11 +80,10 @@ public:
 	using typename _Mybase::point_t;
 	using typename _Mybase::image_t;
 	
-	_GCC_estimator()
-		:_Mybase{ point_t(), point_t() }, m_jacob(sqr<size_t>(size)) {
-	}
 	_GCC_estimator(const point_t& r, const point_t& t)
-		:_Mybase{ r, t }, m_jacob(sqr<size_t>(size)) {
+		:_Mybase{ r, t }, 
+		m_jacob(sqr<size_t>(size)), m_resid(sqr<size_t>(size)), 
+		m_ref(size, size), m_rep(size, size){
 	}
 
 	/**
@@ -105,12 +104,19 @@ public:
 	 */
 	auto compute(value_t x, value_t y, value_t init_depth) {
 #ifdef MATRICE_DEBUG
-		DGELOM_CHECK(!_Mybase::m_reference.empty, "Set a stereo pair with method ::set_stereo_pair(l,r) before computing depth.");
+		DGELOM_CHECK(!_Mybase::m_reference.empty, "Set a stereo pair with method ::set_stereo_pair(l,r) before computing the depth in _GCC_estimator<>::compute(x, y, depth).");
 #endif
 		_Mypart pars = { init_depth, 0, 0, 0, 0 };
 
+		//eval Jacobian and Hessiam matrices
 		m_jacob = this->_Diff<_Mytask::INIT_JACOB>(x, y, pars[0]);
 		auto hess = m_jacob.t().mul(m_jacob).eval();
+		auto ihess = hess.spd().inv();
+		
+		//construct ref. subset surrounds (x, y)
+		m_ref = _Mybase::m_reference.block(diff_t(x), diff_t(y), size >> 1);
+
+		//compute the matching subset first time
 
 	}
 
@@ -121,9 +127,9 @@ private:
 	template<_Mytask _Task = _Mytask::INIT_JACOB>
 	decltype(auto) _Diff(value_t rx, value_t ry, value_t depth) noexcept {
 		constexpr auto radius = size >> 1;
-		for (diff_t dy = -radius; dy <= radius; ++dy) {
+		for (diff_t dy = -radius, r = 1; dy <= radius; ++dy, ++r) {
 			const auto y = ry + dy;
-			for (diff_t dx = -radius; dx <= radius; ++dx) {
+			for (diff_t dx = -radius, c = 1; dx <= radius; ++dx, ++c) {
 				const auto x = rx + dx;
 				const auto lidx = (dy + radius)*size + (dx + radius);
 				auto J = m_jacob[lidx];
@@ -151,18 +157,27 @@ private:
 	value_t _Diff_d(value_t x, value_t y, value_t depth)const noexcept {
 		const auto X = _Mybase::m_projection.backproj(x, y, depth);
 		const auto xp = _Mybase::m_projection.reproj(X);
-		const auto dxdp = _Mybase::m_projection.grad(x, y, depth);
 		const auto [dgdx, dgdy] = _Mybase::m_materp.grad(xp.x, xp.y);
+
+		const auto dxdp = _Mybase::m_projection.grad(x, y, depth);
 
 		return -(dgdx*dxdp.x + dgdy * dxdp.y);
 	}
 
+	auto _Residual() {
+
+	}
+
 private:
+	// m_ref for the reference subset in f 
+	// m_rep is the moving subset in g
+	Matrix_<value_t, ::dynamic> m_ref, m_rep;
 	/**
 	 *\brief data arrangement:
 	 //tex: $[\dfrac{\partial\varepsilon}{\partial d}, f_x\times dx, f_x\times dy, f_y\times dx, f_y\times dy]$
 	 */
 	Matrix_<value_t, ::dynamic, (order<<2) + 1> m_jacob;
+	Matrix_<value_t, ::dynamic, 1> m_resid;
 	point_t m_refpt, m_reppt;
 	value_t m_depth = zero<value_t>;
 };
