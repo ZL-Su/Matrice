@@ -613,20 +613,20 @@ public:
 	// \View of submatrix: x \in [x0, x1) and y \in [y0, y1)
 	MATRICE_GLOBAL_INL auto block(index_t x0, index_t x1, index_t y0, index_t y1) {
 #ifdef MATRICE_DEBUG
-		DGELOM_CHECK(x1<=m_cols, "Input var. x1 must be no greater than m_cols.")
-		DGELOM_CHECK(y1<=m_rows, "Input var. y1 must be no greater than m_rows.")
+		DGELOM_CHECK(x1<=m_cols, "Input var. 'x1' must not be greater than m_cols.")
+		DGELOM_CHECK(y1<=m_rows, "Input var. 'y1' must not be greater than m_rows.")
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, {x0, y0, x1, y1});
 	}
 	MATRICE_GLOBAL_INL const auto block(index_t x0, index_t x1, index_t y0, index_t y1) const {
 #ifdef MATRICE_DEBUG
-		DGELOM_CHECK(x1<=m_cols, "Input var. x1 must be no greater than m_cols.")
-		DGELOM_CHECK(y1<=m_rows, "Input var. y1 must be no greater than m_rows.")
+		DGELOM_CHECK(x1<=m_cols, "Input var. x1 must not be greater than m_cols.")
+		DGELOM_CHECK(y1<=m_rows, "Input var. y1 must not be greater than m_rows.")
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, { x0, y0, x1, y1 });
 	}
 	template<typename... _Ity, MATRICE_ENABLE_IF(sizeof...(_Ity) == 4)>
-	MATRICE_GLOBAL_INL const auto block(const tuple<_Ity...>& _R) const {
+	MATRICE_GLOBAL_INL const auto block(const tuple<_Ity...>& _R)const {
 		return this->block(get<0>(_R), get<1>(_R), get<2>(_R), get<3>(_R));
 	}
 
