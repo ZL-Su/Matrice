@@ -26,23 +26,39 @@ class _Spatial_transformer {};
 template<typename _Ty>
 class _Spatial_transformer<_Ty, 1> {
 public:
-	constexpr auto order = 0;
 	using value_type = _Ty;
 	using param_type = Vec_<value_type, 4>;
 	using jacob_type = Matrix_<value_type, 2, param_type::rows_at_compiletime>;
+	struct warped_coords { value_type x, y; };
 
-	_Spatial_transformer(const param_type& param) noexcept
-		:_Mypar(param) {
+	/**
+	 *\param [p] spatial deformation parameter
+	 */
+	_Spatial_transformer(const param_type& p) noexcept
+		:_Mypar(p) {
 	}
 
 	/**
-	 *\brief Transform local coords (x, y) to a new position 
+	 *\brief Transform local coords (x, y) to a new position.
 	 */
-	MATRICE_GLOBAL_INL auto warp(value_type x, value_type y) noexcept {
-		return Vec2_<value_type>{
-			(1 + _Mypar[0])* x + _Mypar[1] * y, 
-			_Mypar[2] * x + (1 + _Mypar[3] * y)
+	MATRICE_GLOBAL_INL auto operator()(value_type nx, value_type ny)const noexcept {
+		return warped_coords {
+			(1 + _Mypar[0])* nx + _Mypar[1] * ny, 
+			_Mypar[2] * nx + (1 + _Mypar[3]) * ny
 		};
+	}
+
+	/**
+	 *\brief Update this transformer with:
+	 //tex: $\mathbf{p}\leftarrow\mathbf{p}\circ\Delta\mathbf{p}^{-1}$
+	 */
+	MATRICE_GLOBAL_INL decltype(auto)update(const value_type* dp)noexcept {
+		const auto _Det = safe_div(1, (1+dp[0])*(1+dp[3])-dp[1]*dp[2]);
+		const auto idp11 = (1 + dp[3]) * _Det, idp12 = -dp[1] * _Det;
+		const auto idp21 = -dp[2] * _Det, idp22 = (1 + dp[0]) * _Det;
+
+
+		return (_Mypar);
 	}
 
 	/**

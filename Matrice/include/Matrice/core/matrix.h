@@ -197,8 +197,8 @@ public:
 	MATRICE_HOST_INL _Myt& operator= (_Myt&& other) noexcept {
 		return _Mybase::operator=(move(other));
 	}
-	template<typename _Argt>
-	MATRICE_HOST_INL _Myt& operator=(const _Argt& _arg) {
+	template<typename _Arg>
+	MATRICE_HOST_INL _Myt& operator=(const _Arg& _arg) {
 		return _Mybase::operator=(_arg);
 	}
 
@@ -248,8 +248,9 @@ public:
 	MATRICE_HOST_INL _Myt& operator= (_Myt&& other) noexcept {
 		return _Mybase::operator=(move(other)); 
 	}
-	MATRICE_HOST_INL _Myt& operator= (const_initlist list) {
-		return _Mybase::operator=(list); 
+	template<typename _Arg>
+	MATRICE_HOST_INL _Myt& operator=(const _Arg& _arg) {
+		return _Mybase::operator=(_arg);
 	}
 
 	MATRICE_MAKE_METHOD_CREATE(rows, cols = 1);

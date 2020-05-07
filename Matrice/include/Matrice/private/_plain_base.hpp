@@ -581,7 +581,7 @@ public:
 	MATRICE_GLOBAL_FINL const _Myt_rwise_iterator rwbegin(size_t i = 0) const noexcept {
 		return _Myt_rwise_iterator(m_data + i * m_cols, m_rows, m_cols);
 	}
-	MATRICE_GLOBAL_FINL const _Myt_rwise_iterator rwend() const noexcept {
+	MATRICE_GLOBAL_FINL const _Myt_rwise_iterator rwend()const noexcept{
 		return _Myt_rwise_iterator(_End(m_data, m_rows, m_cols));
 	}
 #pragma endregion
@@ -613,20 +613,20 @@ public:
 	// \View of submatrix: x \in [x0, x1) and y \in [y0, y1)
 	MATRICE_GLOBAL_INL auto block(index_t x0, index_t x1, index_t y0, index_t y1) {
 #ifdef MATRICE_DEBUG
-		DGELOM_CHECK(x1<=m_cols, "Input var. x1 must be no greater than m_cols.")
-		DGELOM_CHECK(y1<=m_rows, "Input var. y1 must be no greater than m_rows.")
+		DGELOM_CHECK(x1<=m_cols, "Input var. 'x1' must not be greater than m_cols.")
+		DGELOM_CHECK(y1<=m_rows, "Input var. 'y1' must not be greater than m_rows.")
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, {x0, y0, x1, y1});
 	}
 	MATRICE_GLOBAL_INL const auto block(index_t x0, index_t x1, index_t y0, index_t y1) const {
 #ifdef MATRICE_DEBUG
-		DGELOM_CHECK(x1<=m_cols, "Input var. x1 must be no greater than m_cols.")
-		DGELOM_CHECK(y1<=m_rows, "Input var. y1 must be no greater than m_rows.")
+		DGELOM_CHECK(x1<=m_cols, "Input var. x1 must not be greater than m_cols.")
+		DGELOM_CHECK(y1<=m_rows, "Input var. y1 must not be greater than m_rows.")
 #endif // _DEBUG
 		return _Myt_blockview_type(m_data, m_cols, { x0, y0, x1, y1 });
 	}
 	template<typename... _Ity, MATRICE_ENABLE_IF(sizeof...(_Ity) == 4)>
-	MATRICE_GLOBAL_INL const auto block(const tuple<_Ity...>& _R) const {
+	MATRICE_GLOBAL_INL const auto block(const tuple<_Ity...>& _R)const {
 		return this->block(get<0>(_R), get<1>(_R), get<2>(_R), get<3>(_R));
 	}
 
@@ -757,7 +757,7 @@ public:
 	/**
 	 * \assignment operator, from row-wise iterator
 	 */
-	MATRICE_GLOBAL_FINL _Derived& operator= (const _Myt_rwise_iterator& _It) {
+	MATRICE_GLOBAL_FINL _Derived& operator= (const _Myt_rwise_iterator& _It)noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_Myalloc, "This object is empty.");
 #endif // MATRICE_DEBUG
@@ -767,11 +767,23 @@ public:
 	/**
 	 * \assignment operator, from column-wise iterator
 	 */
-	MATRICE_GLOBAL_FINL _Derived& operator=(const _Myt_cwise_iterator& _It) {
+	MATRICE_GLOBAL_FINL _Derived& operator=(const _Myt_cwise_iterator& _It)noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_Myalloc, "This object is empty.");
 #endif // MATRICE_DEBUG
 		std::copy(_It.begin(), _It.end(), _Myalloc.data());
+		return (this->derived());
+	}
+	/**
+	 *\assignment operator=()
+	 *\brief copy from block view with O(min(this->size(), _Bv.size())
+	 */
+	template<typename _Ty>
+	MATRICE_GLOBAL_FINL _Derived& operator=(const _Matrix_block<_Ty>& _Bv) noexcept {
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(_Myalloc, "This object is empty.");
+#endif // MATRICE_DEBUG
+		_Bv.eval_to(*this);
 		return (this->derived());
 	}
 	/**
@@ -783,7 +795,9 @@ public:
 			m_shape = (_other.shape());
 			if (_other._Myalloc) m_data = _Myalloc =(_other._Myalloc);
 			else m_data = _other.data();
+#ifdef MATRICE_DEBUG
 			_Mybase::_Flush_view_buf();
+#endif // MATRICE_DEBUG
 		}
 		return (this->derived());
 	}
@@ -804,7 +818,10 @@ public:
 		else m_data = _other.data();
 
 		std::swap(_Mybase::m_shape, _other.m_shape);
+
+#ifdef MATRICE_DEBUG
 		_Mybase::_Flush_view_buf();
+#endif // MATRICE_DEBUG
 
 		return (this->derived());
 	}
@@ -818,7 +835,9 @@ public:
 		m_rows = _Myalloc.rows();
 		m_cols = _Myalloc.cols();
 		m_data = _Myalloc.data();
+#ifdef MATRICE_DEBUG
 		_Mybase::_Flush_view_buf();
+#endif // MATRICE_DEBUG
 		return (this->derived());
 	}
 	/**
@@ -1077,8 +1096,9 @@ public:
 	}
 
 	/**
-	 *\brief Cholesky decomposition 
+	 *\brief Perfom Cholesky decomposition:
 	  //tex:$A = {L}{L^T}$.
+	 *\return A proxy to spd instance which holds the "L" part of this matrix, so that the L part can be retrieved with "decltype (A) = A.spd()" and the inverse matrix is obtained with "auto Inv = A.spd().inv()". 
 	 */
 	MATRICE_GLOBAL_INL auto spd() noexcept {
 		return detail::_Matrix_fact<_Derived, tag::_Linear_spd_tag>(this->derived());
@@ -1279,7 +1299,7 @@ MATRICE_HOST_INL void swap(_Mty& _L, _Mty& _R) noexcept;
 
 /**
  *\func dgelom::copy<_Mty>(_Mty&, _Mty&)
- *\brief Copy a given matrix. Always wrap a matrix with the function If a deep copy is required.
+ *\brief Copy a given matrix. Always wrap a dynamic matrix with the function If a deep copy is required.
  */
 template<typename _Mty, MATRICE_ENABLE_IF(is_matrix_v<_Mty>)>
 MATRICE_HOST_INL _Mty copy(const _Mty& _M);

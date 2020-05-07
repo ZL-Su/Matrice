@@ -43,7 +43,7 @@ public:
 
 	_Projection_base() noexcept 
 		:m_tran(0) {
-		m_ints.rview(0) = 0;
+		m_ints.rview(0) = zero<value_type>;
 		m_ints.rview(1) = m_ints(0);
 	}
 	/**
@@ -51,9 +51,9 @@ public:
 	 *\param [ext] external geometry parameters: rx, ry, rz, tx, ty, tz
 	 */
 	_Projection_base(const array_n<value_type, dim<<1>& ext) noexcept
-		:m_tran(ext(3), ext(4), ext(5)) {
+		:m_tran{ ext(3), ext(4), ext(5) } {
 		//set internal paramters to default
-		m_ints.rview(0) = 0;
+		m_ints.rview(0) = zero<value_type>;
 
 		//cvt given external params to the rot. mat. and trans vec.
 		rodrigues(point_type{ ext(0), ext(1), ext(2) }, m_rotm);
@@ -147,18 +147,36 @@ public:
 	}
 
 	/**
+	 *\brief Compute the reprojection with a given depth augmented image point.
+	 *\param [pd] image coords with a depth in form of $[x, y, d]^T$
+	 */
+	template<typename... _Args>
+	MATRICE_HOST_INL auto operator()(_Args&& ...pd)const noexcept {
+		return reproj(backproj(pd...));
+	}
+
+	/**
 	 *\brief compute the grad. of a re-projected point w.r.t. depth par.
 	 *\param [pd] re-projected point, where the first two elements are coordinates of a normalized, distortion-rectified image point, the last one is its depth value.
 	 */
 	MATRICE_HOST_INL point_type grad(const point_type& pd)const noexcept {
 		return this->grad(pd.x, pd.y, pd.z);
 	}
+	/**
+	 *\brief Compute the derivaties:
+	 //tex: $\dfrac{\partial \mathbf{x}'}{\partial d} = \mathbf{K}'\dfrac{\partial<\mathbf{RX}(d) + \mathbf{T}>}{\partial d}$
+	 *\sa Eq.(3) in paper GCCA.
+	 */
 	MATRICE_HOST_INL point_type grad(value_type x, value_type y, value_type depth)const noexcept {
-		const auto X = _Mybase::rotation({ x, y, 1 });
-		const auto s = 1 / sqr(X.z*depth + m_tran.z);
-		const auto gx = (X.x*m_tran.z - X.z*m_tran.x)*s;
-		const auto gy = (X.y*m_tran.z - X.z*m_tran.y)*s;
-		return point_type{ gx, gy, 0 };
+		const auto Rx = _Mybase::rotate({ x, y, 1 });
+
+		const auto Tx = m_tran.x, Ty = m_tran.y, Tz = m_tran.z;
+		const auto s = safe_div(1, sqr(Rx.z * depth + Tz));
+		const auto _Gxd = (Rx.x * Tz - Tx * Rx.z) * s;
+		const auto _Gyd = (Rx.y * Tz - Ty * Rx.z) * s;
+
+		const auto ptr = _Mybase::m_ints[1];
+		return point_type{ ptr[0] * _Gxd, ptr[1] * _Gyd, 0 };
 	}
 private:
 	using _Mybase::m_tran;
