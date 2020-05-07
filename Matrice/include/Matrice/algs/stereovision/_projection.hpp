@@ -43,7 +43,7 @@ public:
 
 	_Projection_base() noexcept 
 		:m_tran(0) {
-		m_ints.rview(0) = 0;
+		m_ints.rview(0) = zero<value_type>;
 		m_ints.rview(1) = m_ints(0);
 	}
 	/**
@@ -53,7 +53,7 @@ public:
 	_Projection_base(const array_n<value_type, dim<<1>& ext) noexcept
 		:m_tran{ ext(3), ext(4), ext(5) } {
 		//set internal paramters to default
-		m_ints.rview(0) = 0;
+		m_ints.rview(0) = zero<value_type>;
 
 		//cvt given external params to the rot. mat. and trans vec.
 		rodrigues(point_type{ ext(0), ext(1), ext(2) }, m_rotm);
@@ -144,6 +144,15 @@ public:
 		const auto fx = ptr[0], fy = ptr[1], cx = ptr[2], cy = ptr[3];
 		q.x = q.x * fx + cx, q.y = q.y * fy + cy;
 		return (q);
+	}
+
+	/**
+	 *\brief Compute the reprojection with a given depth augmented image point.
+	 *\param [pd] image coords with a depth in form of $[x, y, d]^T$
+	 */
+	template<typename... _Args>
+	MATRICE_HOST_INL auto operator()(_Args&& ...pd)const noexcept {
+		return reproj(backproj(pd...));
 	}
 
 	/**
