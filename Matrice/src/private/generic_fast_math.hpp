@@ -25,7 +25,8 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #define __global_inl__ __forceinline
 #endif
 
-namespace dgelom { namespace privt {
+namespace dgelom { 
+namespace internal {
 template<typename _It, typename = std::enable_if_t<std::is_pointer_v<_It>>> 
 __global_inl__ int _inv2x2m(const _It A, _It Ainv) {
 	using value_type = typename std::pointer_traits<_It>::element_type;
