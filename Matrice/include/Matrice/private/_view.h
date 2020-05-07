@@ -127,29 +127,28 @@ public:
 	 *\brief Copy a scalar value to memory that the view maps to
 	 *\param [_Val] an input scalar
 	 */
-	template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
-	MATRICE_GLOBAL_INL auto& operator= (const _Ty _Val) {
-		_VIEW_EWISE_OP(static_cast<value_type>(_Val));
+	MATRICE_GLOBAL_INL auto& operator=(value_type _Val)noexcept {
+		_VIEW_EWISE_OP(_Val);
 	}
 	/**
 	 *\brief Copy from another view
 	 *\param [_Oth] another view input
 	 */
-	MATRICE_GLOBAL_FINL auto& operator= (const _Myt& _Oth) {
+	MATRICE_GLOBAL_FINL auto& operator=(const _Myt& _Oth)noexcept {
 		_VIEW_EWISE_OP(_Oth(i));
 	}
 	/**
 	 *\brief Fill view memory from a given pointer
 	 *\param [_Data] an input pointer, the size of the pointer pointed memory should not less than the size of the view 
 	 */
-	MATRICE_GLOBAL_FINL auto& operator= (const pointer _Data) {
+	MATRICE_GLOBAL_FINL auto& operator=(pointer _Data)noexcept {
 		_VIEW_EWISE_OP(_Data[i]);
 	}
 	/**
 	 *\brief Fill view memory from a initializer_list
 	 *\param [_L] the size of the list should not less than the size of the view
 	 */
-	MATRICE_GLOBAL_FINL auto& operator= (const initlist<value_type> _L) {
+	MATRICE_GLOBAL_FINL auto& operator=(const initlist<value_type> _L) {
 		_VIEW_EWISE_OP(*(_L.begin() + i));
 	}
 	/**
@@ -157,7 +156,7 @@ public:
 	 *\param [_M] _Mty should have element accessor ::operator(i)
 	 */
 	template<typename _Mty, MATRICE_ENABLE_IF(is_class_v<_Mty>)>
-	MATRICE_GLOBAL_INL auto& operator= (const _Mty& _M) {
+	MATRICE_GLOBAL_INL auto& operator= (const _Mty& _M)noexcept {
 		_VIEW_EWISE_OP(_M(i));
 	}
 	/**
