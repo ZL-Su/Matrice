@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,7 +18,9 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "../_optim.h"
+#ifdef MATRICE_SIMD_ARCH
 #include "arch/ixpacket.h"
+#endif
 
 MATRICE_ALGS_BEGIN _DETAIL_BEGIN namespace corr {
 
@@ -37,9 +39,7 @@ template<> struct _Corr_border_size<biserp_tag> {
 template<> struct _Param_update_strategy<_Alg_icgn<0>> {
 	template<typename _Ty>
 	static MATRICE_GLOBAL_FINL _Ty& eval(_Ty& x, const _Ty& y) {
-		
 		x[0] -= y[0], x[1] -= y[1];
-
 		return (x);
 	}
 };
