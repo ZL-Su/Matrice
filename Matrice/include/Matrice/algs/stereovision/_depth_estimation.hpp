@@ -19,6 +19,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "algs/correlation/_optim.h"
 #include "algs/interpolation/_cubic_conv_interp.hpp"
 #include "_projection.hpp"
+#include "_spatial_transform.hpp"
 
 MATRICE_ALGS_BEGIN
 _DETAIL_BEGIN
@@ -69,13 +70,14 @@ class _GCC_estimator
 	:public _Depth_estimation_base<_GCC_estimator<_Ty, _Altag>> {
 	using _Myt = _GCC_estimator;
 	using _Mybase = _Depth_estimation_base<_Myt>;
-	using _Mypart = Vec_<typename _Mybase::value_t, 5>;
+	using _Mystfer = _Spatial_transformer<_Ty, 1>;
+	using _Mypart = Vec_<typename _Mybase::value_t, 4>;
 	enum _Mytask {INIT_JACOB = 0, UPDATE_JACOB = 1};
 public:
 	// Define the order of spatial transformer
 	static constexpr auto order = 1;
 	// Define the size of the subsets
-	static constexpr auto size = 15;
+	static constexpr auto size = 31;
 	using typename _Mybase::value_t;
 	using typename _Mybase::point_t;
 	using typename _Mybase::image_t;
@@ -83,7 +85,7 @@ public:
 	_GCC_estimator(const point_t& r, const point_t& t)
 		:_Mybase{ r, t }, 
 		m_jacob(sqr<size_t>(size)), m_resid(sqr<size_t>(size)), 
-		m_ref(size, size), m_rep(size, size){
+		_Myle(size, size), _Myri(size, size){
 	}
 
 	/**
@@ -106,30 +108,44 @@ public:
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(!_Mybase::m_reference.empty, "Set a stereo pair with method ::set_stereo_pair(l,r) before computing the depth in _GCC_estimator<>::compute(x, y, depth).");
 #endif
-		_Mypart pars = { init_depth, 0, 0, 0, 0 };
 
-		//eval Jacobian and Hessiam matrices
-		m_jacob = this->_Diff<_Mytask::INIT_JACOB>(x, y, pars[0]);
+		auto depth{ init_depth };
+
+		//eval Jacobian and Hessian matrices
+		m_jacob = this->_Diff<_Mytask::INIT_JACOB>(x, y, depth);
 		auto hess = m_jacob.t().mul(m_jacob).eval();
 		auto ihess = hess.spd().inv();
 		
 		//construct ref. subset surrounds (x, y)
-		m_ref = _Mybase::m_reference.block(diff_t(x), diff_t(y), size >> 1);
+		_Myle = _Mybase::m_reference.block(diff_t(x), diff_t(y), size/2);
+
+		_Mystfer T{ _Mypart::zeros() };
 
 		//compute the matching subset first time
+		const auto xp = _Mybase::m_projection(x, y, depth);
+		_Myri = _Warp(T, xp.x, xp.y);
 
+		array_n<value_t, ::dynamic> _Errmap(m_jacob.rows());
+		_Errmap = _Myri - _Myle;
+		auto b = m_jacob.t().mul(_Errmap).eval();
+		auto dp = ihess.mul(b).eval();
+		depth += dp(0);
+		T.update(dp.data() + 1);
+
+		//m_jacob = this->_Diff<_Mytask::UPDATE_JACOB>();
 	}
 
 private:
+
 	/**
 	 *\brief Compute and update the Jacobian matrix.
 	 */
 	template<_Mytask _Task = _Mytask::INIT_JACOB>
 	decltype(auto) _Diff(value_t rx, value_t ry, value_t depth) noexcept {
 		constexpr auto radius = size >> 1;
-		for (diff_t dy = -radius, r = 1; dy <= radius; ++dy, ++r) {
+		for (diff_t dy = -radius; dy <= radius; ++dy) {
 			const auto y = ry + dy;
-			for (diff_t dx = -radius, c = 1; dx <= radius; ++dx, ++c) {
+			for (diff_t dx = -radius; dx <= radius; ++dx) {
 				const auto x = rx + dx;
 				const auto lidx = (dy + radius)*size + (dx + radius);
 				auto J = m_jacob[lidx];
@@ -164,17 +180,34 @@ private:
 		return -(dgdx*dxdp.x + dgdy * dxdp.y);
 	}
 
+	/**
+	 *\brief Warp the subset:
+	 //tex:$\Omega(\mathbf{x}'(d))$
+	 */
+	decltype(auto)_Warp(const _Mystfer& t, value_t xp, value_t yp)noexcept {
+		const diff_t _Radius = _Myle.rows() >> 1;
+		for (auto j = -_Radius; j <= _Radius; ++j) {
+			auto ptr = _Myri[j + _Radius];
+			for (auto i = -_Radius; i <= _Radius; ++i) {
+				const auto [dx, dy] = t(i, j);
+				ptr[i + _Radius] = _Mybase::m_materp(xp+dx, yp+dy);
+			}
+		}
+
+		return (_Myri);
+	}
+
 	auto _Residual() {
 
 	}
 
 private:
-	// m_ref for the reference subset in f 
-	// m_rep is the moving subset in g
-	Matrix_<value_t, ::dynamic> m_ref, m_rep;
+	// _Myle for the reference subset in the left image f 
+	// _Myri is the moving subset in the right image g
+	Matrix_<value_t, ::dynamic> _Myle, _Myri;
 	/**
 	 *\brief data arrangement:
-	 //tex: $[\dfrac{\partial\varepsilon}{\partial d}, f_x\times dx, f_x\times dy, f_y\times dx, f_y\times dy]$
+	 //tex: $[\frac{\partial\varepsilon}{\partial d}, f_x\times dx, f_x\times dy, f_y\times dx, f_y\times dy]$
 	 */
 	Matrix_<value_t, ::dynamic, (order<<2) + 1> m_jacob;
 	Matrix_<value_t, ::dynamic, 1> m_resid;
