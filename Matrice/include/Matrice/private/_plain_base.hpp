@@ -581,7 +581,7 @@ public:
 	MATRICE_GLOBAL_FINL const _Myt_rwise_iterator rwbegin(size_t i = 0) const noexcept {
 		return _Myt_rwise_iterator(m_data + i * m_cols, m_rows, m_cols);
 	}
-	MATRICE_GLOBAL_FINL const _Myt_rwise_iterator rwend() const noexcept {
+	MATRICE_GLOBAL_FINL const _Myt_rwise_iterator rwend()const noexcept{
 		return _Myt_rwise_iterator(_End(m_data, m_rows, m_cols));
 	}
 #pragma endregion
@@ -795,7 +795,9 @@ public:
 			m_shape = (_other.shape());
 			if (_other._Myalloc) m_data = _Myalloc =(_other._Myalloc);
 			else m_data = _other.data();
+#ifdef MATRICE_DEBUG
 			_Mybase::_Flush_view_buf();
+#endif // MATRICE_DEBUG
 		}
 		return (this->derived());
 	}
@@ -816,7 +818,10 @@ public:
 		else m_data = _other.data();
 
 		std::swap(_Mybase::m_shape, _other.m_shape);
+
+#ifdef MATRICE_DEBUG
 		_Mybase::_Flush_view_buf();
+#endif // MATRICE_DEBUG
 
 		return (this->derived());
 	}
@@ -830,7 +835,9 @@ public:
 		m_rows = _Myalloc.rows();
 		m_cols = _Myalloc.cols();
 		m_data = _Myalloc.data();
+#ifdef MATRICE_DEBUG
 		_Mybase::_Flush_view_buf();
+#endif // MATRICE_DEBUG
 		return (this->derived());
 	}
 	/**
