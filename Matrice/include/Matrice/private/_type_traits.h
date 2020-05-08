@@ -162,6 +162,12 @@ inline constexpr auto is_float64_v = is_float64<T>::value;
 template<typename T> 
 inline constexpr auto is_floating_point_v = is_float64_v<T> || is_float32_v<T>;
 
+/**
+ *\brief is_fpt_v<T> is true iff T is a floating point number.
+ */
+template<typename T>
+inline constexpr auto is_fpt_v = is_float64_v<T> || is_float32_v<T>;
+
 template<typename T> struct add_const_reference {
 	using type = std::add_lvalue_reference_t<std::add_const_t<T>>;
 };
