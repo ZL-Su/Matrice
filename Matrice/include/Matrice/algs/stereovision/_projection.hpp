@@ -67,10 +67,10 @@ public:
 	/**
 	 *\brief getter/setter to internal parameters
 	 */
-	MATRICE_HOST_INL auto& internal_params() const noexcept {
+	MATRICE_HOST_INL decltype(auto)internal_params()const noexcept {
 		return (m_ints);
 	}
-	MATRICE_HOST_INL auto& internal_params() noexcept {
+	MATRICE_HOST_INL decltype(auto)internal_params() noexcept {
 		return (m_ints);
 	}
 
@@ -109,6 +109,7 @@ protected:
 	matrix_type m_rotm, m_irot;
 	point_type m_tran;
 	Matrix_<value_type, 2, 4> m_ints;
+	value_type m_imx, m_imy;
 };
 
 template<typename _Ty, typename _An> class _Aligned_projection {
@@ -126,33 +127,21 @@ public:
 	using typename _Mybase::value_type;
 
 	/**
-	 *\brief back-project a given image point with its depth
-	 *\param [pd] image coords with a depth in form of $[x, y, d]^T$
+	 *\brief First time compute the reprojected counterpart of the reference image point with an initial depth.
+	 *\param [x, y] ref. image coords to be lifted to the 3D space.
+	 *\param [d] initially estimated depth value.
 	 */
-	template<typename... _Args>
-	MATRICE_HOST_INL auto backproj(_Args&&... pd)const noexcept {
-		return _Mybase::backward(pd...);
+	MATRICE_HOST_INL auto first(value_type x, value_type y, value_type d)noexcept {
+		_Mybase::m_imx = x, _Mybase::m_imy = y;
+		return reproj(backproj(_Mybase::m_imx, _Mybase::m_imy, d));
 	}
 
 	/**
-	 *\brief reproject a given 3D point to the matching camera
-	 *\param [_X] 3D coords
+	 *\brief Update the reprojection with current depth.
+	 *\param [depth] Current estimated depth value.
 	 */
-	MATRICE_HOST_INL auto reproj(const point_type& _X)const noexcept {
-		auto q = _Mybase::forward(_X);
-		const auto ptr = _Mybase::m_ints[1];
-		const auto fx = ptr[0], fy = ptr[1], cx = ptr[2], cy = ptr[3];
-		q.x = q.x * fx + cx, q.y = q.y * fy + cy;
-		return (q);
-	}
-
-	/**
-	 *\brief Compute the reprojection with a given depth augmented image point.
-	 *\param [pd] image coords with a depth in form of $[x, y, d]^T$
-	 */
-	template<typename... _Args>
-	MATRICE_HOST_INL auto operator()(_Args&& ...pd)const noexcept {
-		return reproj(backproj(pd...));
+	MATRICE_HOST_INL auto update(value_type depth) const noexcept {
+		return reproj(backproj(_Mybase::m_imx, _Mybase::m_imy, depth));
 	}
 
 	/**
@@ -177,6 +166,27 @@ public:
 
 		const auto ptr = _Mybase::m_ints[1];
 		return point_type{ ptr[0] * _Gxd, ptr[1] * _Gyd, 0 };
+	}
+
+	/**
+	 *\brief back-project a given image point with its depth
+	 *\param [pd] image coords with a depth in form of $[x, y, d]^T$
+	 */
+	template<typename... _Args>
+	MATRICE_HOST_INL auto backproj(_Args&&... pd)const noexcept {
+		return _Mybase::backward(pd...);
+	}
+
+	/**
+	 *\brief reproject a given 3D point to the matching camera
+	 *\param [_X] 3D coords
+	 */
+	MATRICE_HOST_INL auto reproj(const point_type& _X)const noexcept {
+		auto q = _Mybase::forward(_X);
+		const auto ptr = _Mybase::m_ints[1];
+		const auto fx = ptr[0], fy = ptr[1], cx = ptr[2], cy = ptr[3];
+		q.x = q.x * fx + cx, q.y = q.y * fy + cy;
+		return (q);
 	}
 private:
 	using _Mybase::m_tran;
