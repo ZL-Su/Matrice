@@ -1,6 +1,6 @@
-/**************************************************************************
+/*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
-**************************************************************************/
+**********************************************************************/
 #pragma once
 
 #ifdef MATRICE_SIMD_ARCH
@@ -32,23 +32,29 @@ template<typename T, int _Elems = packet_size_v<T>>
 class Packet_ MATRICE_NONHERITABLE : public simd::simd_base_<T, _Elems>
 {
 	using Myt = Packet_;
-	using xbase_t = simd::simd_base_<T, _Elems>;
-	using typename xbase_t::internal_t;
-	using typename xbase_t::initlist_t;
-	using typename xbase_t::op_t;
-	using xbase_t::m_data;
+	using _Mybase = simd::simd_base_<T, _Elems>;
+	using typename _Mybase::initlist_t;
+	using typename _Mybase::internal_t;
+	using typename _Mybase::op_t;
+	using _Mybase::m_data;
 public:
-	enum {size = xbase_t::size};
-	using typename xbase_t::value_t;
+	enum {size = _Mybase::size};
+	using typename _Mybase::value_t;
 	using pointer = std::add_pointer_t<value_t>;
 
-	MATRICE_HOST_FINL Packet_() noexcept : xbase_t() {}
-	MATRICE_HOST_FINL Packet_(const value_t _arg) noexcept : xbase_t(_arg) {}
-	MATRICE_HOST_FINL Packet_(const pointer _arg) noexcept : xbase_t(_arg) {}
-	MATRICE_HOST_FINL Packet_(const initlist_t _arg) noexcept : xbase_t(pointer(_arg.begin())) {}
-	MATRICE_HOST_FINL Packet_(const internal_t _arg) noexcept : xbase_t(_arg) {}
-	template<typename _Fwdty, typename = std::enable_if_t<std::is_class_v<_Fwdty>>>
-	MATRICE_HOST_FINL Packet_(const _Fwdty& _arg) noexcept : xbase_t(_arg.data()) {}
+	MATRICE_HOST_FINL Packet_() noexcept 
+		: _Mybase() {}
+	MATRICE_HOST_FINL Packet_(const value_t _arg) noexcept 
+		: _Mybase(_arg) {}
+	MATRICE_HOST_FINL Packet_(const pointer _arg) noexcept 
+		: _Mybase(_arg) {}
+	MATRICE_HOST_FINL Packet_(const initlist_t _arg) noexcept 
+		: _Mybase(pointer(_arg.begin())) {}
+	MATRICE_HOST_FINL Packet_(const internal_t _arg) noexcept 
+		: _Mybase(_arg) {}
+	template<typename _Fwdty, MATRICE_ENABLE_IF(has_data_v<_Fwdty>)>
+	MATRICE_HOST_FINL Packet_(const _Fwdty& _arg) noexcept 
+		: _Mybase(_arg.data()) {}
 
 	MATRICE_HOST_FINL auto& operator()() { return (m_data); }
 	MATRICE_HOST_FINL const auto& operator()() const { return (m_data); }
@@ -108,5 +114,5 @@ MATRICE_HOST_FINL Packet operator/ (T* _Left, const Packet_<T, _Elems>& _Right);
 #pragma endregion
 
 MATRICE_ARCH_END
-#endif
 #include "./inl/_ixpacket.inl"
+#endif
