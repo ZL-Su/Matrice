@@ -16,11 +16,11 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #include <complex>
-#include "../../include/Matrice/private/_storage.hpp"
-#include "../../include/Matrice/private/_type_traits.h"
-#include "../../include/Matrice/private/_unified_memory.h"
-#include "../../include/Matrice/private/_decl_dev_funcs.h"
-#include "../../include/Matrice/util/_exception.h"
+#include "private/_storage.hpp"
+#include "private/_type_traits.h"
+#include "private/_unified_memory.h"
+#include "private/_decl_dev_funcs.h"
+#include "util/_exception.h"
 
 #pragma warning(disable: 4715 4661 4224 4267 4244 4819 4199)
 
