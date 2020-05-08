@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ _DETAIL_BEGIN
 template<typename _Altrs>
 MATRICE_GLOBAL_INL typename _Dense_allocator_base<_Altrs>::allocator&
 _Dense_allocator_base<_Altrs>::operator=(const allocator& othr) noexcept {
-	if (!this->data()) {
+	if (!(this->rows() == othr.rows() && this->cols()==othr.cols())) {
 		alloc(othr.rows(), othr.cols());
 	}
 	if (this != &othr) {
