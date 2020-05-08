@@ -103,7 +103,7 @@ public:
 	MATRICE_GLOBAL_FINL operator std::array<value_t, Size>() noexcept {
 		return internal::_Fill_array<value_t, Size>(_Mybase::begin());
 	}
-	MATRICE_GLOBAL_FINL operator Matrix_<value_t, ::dynamic>() const noexcept {
+	MATRICE_GLOBAL_FINL operator Matrix_<value_t, ::dynamic>()const noexcept {
 		return Matrix_<value_t, ::dynamic>{rows(), cols(), _Mybase::m_data};
 	}
 	MATRICE_GLOBAL_FINL operator Matrix_<value_t, ::dynamic>() noexcept {
@@ -248,10 +248,10 @@ public:
 	MATRICE_HOST_INL _Myt& operator= (_Myt&& other) noexcept {
 		return _Mybase::operator=(move(other)); 
 	}
-	template<typename _Arg>
-	MATRICE_HOST_INL _Myt& operator=(const _Arg& _arg) {
-		return _Mybase::operator=(_arg);
-	}
+	//template<typename _Arg>
+	//MATRICE_HOST_INL _Myt& operator=(_Arg&& _arg) {
+	//	return _Mybase::operator=(_arg);
+	//}
 
 	MATRICE_MAKE_METHOD_CREATE(rows, cols = 1);
 };

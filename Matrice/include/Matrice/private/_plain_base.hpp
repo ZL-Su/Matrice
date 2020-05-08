@@ -717,6 +717,7 @@ public:
 	/**
 	 * \assignment operator, fill Matrix_ from a scalar.
 	 */
+	MATRICE_REQUIRES(is_scalar_v<scalar_type>)
 	MATRICE_GLOBAL_FINL _Derived& operator= (scalar_type _Val) noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_Myalloc, "This object is empty.");
@@ -791,10 +792,15 @@ public:
 	 */
 	MATRICE_GLOBAL_INL _Derived& operator=(const _Derived& _other) {
 		if (this != &_other) {
-			m_cols = _other.m_cols, m_rows = _other.m_rows;
-			m_shape = (_other.shape());
-			if (_other._Myalloc) m_data = _Myalloc =(_other._Myalloc);
-			else m_data = _other.data();
+			m_cols = _other.m_cols;
+			m_rows = _other.m_rows;
+			m_shape = _other.shape();
+			if (_other._Myalloc) {
+				m_data = _Myalloc = _other._Myalloc;
+			}
+			else {
+				m_data = _other.data();
+			}
 #ifdef MATRICE_DEBUG
 			_Mybase::_Flush_view_buf();
 #endif // MATRICE_DEBUG
@@ -805,24 +811,27 @@ public:
 	 * \homotype move assignment operator
 	 */
 	MATRICE_GLOBAL_INL _Derived& operator=(_Derived&& _other) noexcept {
-		m_cols = _other.m_cols, m_rows = _other.m_rows;
-		if (_other._Myalloc) {
-			if constexpr (Size > 0) { //copy if the mem allocated on stack
-				m_data = _Myalloc = (_other._Myalloc);
+		if (this != &_other) {
+			m_cols = _other.m_cols;
+			m_rows = _other.m_rows;
+			m_shape = _other.shape();
+			if (_other._Myalloc) {
+				if constexpr (Size > 0) {
+					//copy if they allocated on the stack
+					m_data = _Myalloc = (_other._Myalloc);
+				}
+				else {
+					m_data = _Myalloc = move(_other._Myalloc);
+					_other._Myalloc.destroy();
+				}
 			}
 			else {
-				m_data = _Myalloc = move(_other._Myalloc);
-				_other._Myalloc.destroy();
+				m_data = _other.data();
 			}
-		}
-		else m_data = _other.data();
-
-		std::swap(_Mybase::m_shape, _other.m_shape);
-
 #ifdef MATRICE_DEBUG
-		_Mybase::_Flush_view_buf();
+			_Mybase::_Flush_view_buf();
 #endif // MATRICE_DEBUG
-
+		}
 		return (this->derived());
 	}
 	/**
@@ -830,7 +839,7 @@ public:
 	 */
 	template<int _Rows, int _Cols,
 		typename _Maty = Matrix_<value_t, _Rows, _Cols>>
-	MATRICE_GLOBAL_FINL _Derived& operator= (const _Maty& _managed) {
+	MATRICE_GLOBAL_FINL _Derived& operator= (_Maty&& _managed) {
 		_Myalloc = _managed().allocator();
 		m_rows = _Myalloc.rows();
 		m_cols = _Myalloc.cols();
