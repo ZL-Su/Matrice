@@ -505,16 +505,16 @@ public:
 	/**
 	 *\brief returns STL-stype element-wise iterator
 	 */
+	MATRICE_GLOBAL_FINL const iterator begin()const noexcept {
+		return (m_data);
+	}
+	MATRICE_GLOBAL_FINL const iterator end()const noexcept {
+		return (m_data + size());
+	}
 	MATRICE_GLOBAL_FINL iterator begin()noexcept { 
 		return (m_data); 
 	}
 	MATRICE_GLOBAL_FINL iterator end()noexcept { 
-		return (m_data + size()); 
-	}
-	MATRICE_GLOBAL_FINL const iterator begin()const noexcept { 
-		return (m_data); 
-	}
-	MATRICE_GLOBAL_FINL const iterator end()const noexcept { 
 		return (m_data + size()); 
 	}
 	/**
