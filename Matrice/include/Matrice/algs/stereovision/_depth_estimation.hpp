@@ -106,7 +106,10 @@ public:
 	 */
 	auto compute(value_t x, value_t y, value_t init_depth) {
 #ifdef MATRICE_DEBUG
-		DGELOM_CHECK(!_Mybase::m_reference.empty, "Set a stereo pair with method ::set_stereo_pair(l,r) before computing the depth in _GCC_estimator<>::compute(x, y, depth).");
+	    DGELOM_CHECK(!_Mybase::m_reference.empty, 
+	    "_GCC_estimator<_Ty, _Altag> requires a valid stereo pair\n\
+        be set with the method ::set_stereo_pair(l,r)\n\
+        before computing the depth in ::compute(x, y, depth).");
 #endif
 
 		auto depth{ init_depth };
@@ -122,17 +125,39 @@ public:
 		_Mystfer T{ _Mypart::zeros() };
 
 		//compute the matching subset first time
-		const auto xp = _Mybase::m_projection(x, y, depth);
+		auto xp = _Mybase::m_projection.first(x, y, depth);
 		_Myri = _Warp(T, xp.x, xp.y);
 
 		array_n<value_t, ::dynamic> _Errmap(m_jacob.rows());
-		_Errmap = _Myri - _Myle;
+		_Errmap = _Myle - _Myri;
 		auto b = m_jacob.t().mul(_Errmap).eval();
 		auto dp = ihess.mul(b).eval();
 		depth += dp(0);
 		T.update(dp.data() + 1);
+		auto tol = dp.norm<2>();
 
-		//m_jacob = this->_Diff<_Mytask::UPDATE_JACOB>();
+		xp = _Mybase::m_projection.update(depth);
+		m_jacob = this->_Diff<_Mytask::UPDATE_JACOB>(xp.x, xp.y, depth);
+		hess = m_jacob.t().mul(m_jacob);
+		ihess = hess.spd().inv();
+		_Myri = _Warp(T, xp.x, xp.y);
+		_Errmap = _Myle - _Myri;
+		b = m_jacob.t().mul(_Errmap);
+		dp = ihess.mul(b);
+		depth += dp(0);
+		T.update(dp.data() + 1);
+		tol = dp.norm<2>();
+
+		xp = _Mybase::m_projection.update(depth);
+		m_jacob = this->_Diff<_Mytask::UPDATE_JACOB>(xp.x, xp.y, depth);
+		hess = m_jacob.t().mul(m_jacob);
+		ihess = hess.spd().inv();
+		_Myri = _Warp(T, xp.x, xp.y);
+		_Errmap = _Myle - _Myri;
+		b = m_jacob.t().mul(_Errmap);
+		dp = ihess.mul(b);
+		depth += dp(0);
+		T.update(dp.data() + 1);
 	}
 
 private:
