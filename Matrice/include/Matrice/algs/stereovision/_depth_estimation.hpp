@@ -222,10 +222,6 @@ private:
 		return (_Myri);
 	}
 
-	auto _Residual() {
-
-	}
-
 private:
 	// _Myle for the reference subset in the left image f 
 	// _Myri is the moving subset in the right image g
