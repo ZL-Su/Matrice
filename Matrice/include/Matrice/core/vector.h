@@ -37,7 +37,7 @@ public:
 	using _Mybase::data;
 	using typename _Mybase::value_t;
 	using typename _Mybase::value_type;
-	using reference = value_t & ;
+	using reference = value_type&;
 	using const_reference = const reference;
 
 	MATRICE_GLOBAL_FINL Vec_() noexcept
@@ -93,6 +93,10 @@ public:
 	MATRICE_GLOBAL_FINL reference _y_getter()const noexcept { return data()[1]; }
 	MATRICE_GLOBAL_FINL void _y_setter(value_t _y)noexcept { data()[1] = _y; }
 
+	template<int rows>
+	using lite = typename _Mybase::template lite<rows, cols_at_compiletime>;
+	template<int cols>
+	using extend = typename _Mybase::template lite<rows_at_compiletime, cols>;
 };
 
 template<typename _Ty> 
@@ -233,5 +237,15 @@ MATRICE_GLOBAL_FINL auto cross_prod_matrix(const Vec3_<_Ty>& v) noexcept {
 		return _Rety{ 0, -v.z, v.y, v.z, 0, -v.x, -v.y, v.x, 0 };
 	else
 		return _Rety{ 0, -v.z, v.y, 0, v.z, 0, -v.x, 0, -v.y, v.x, 0, 0, 0, 0, 0, 0 };
+}
+
+/**
+ *\brief Concatenate two vectors  to a matrix in column-by-column order.
+ */
+template<typename _Ty, size_t _N>
+auto concat(const Vec_<_Ty, _N>& x, const Vec_<_Ty, _N>& y) noexcept {
+	typename Vec_<_Ty, _N>::template extend<2> _Ret;
+	_Ret.cview(0) = x, _Ret.cview(1) = y;
+	return _Ret;
 }
 DGE_MATRICE_END
