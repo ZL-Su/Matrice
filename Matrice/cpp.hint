@@ -12,3 +12,5 @@
 #define MATRICE_MAKE_EXPOP_TYPE(DESC, NAME)
 #define DGELOM_CHECK(_Cond, __VA_ARGS__) if(!(_Cond)) { DGELOM_ERROR(::dgelom::exception::msg_type(__VA_ARGS__)); }
 #define MATRICE_EVALEXP_TOTHIS { m_data = _Myalloc.data(); exp.assign(*this); }
+#define MATRICE_EXPAND_SHAPE
+#define MATRICE_GLOBAL_FINL
