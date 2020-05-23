@@ -169,6 +169,7 @@ template<
 	typename _Valty = typename _Mytraits::type>
 class Base_ : public _Basic_plane_view_base<_Valty>
 {
+#pragma region MACRO DEFINITIONS
 #define MATRICE_LINK_PTR { \
 	m_data = _Myalloc.data(); \
 }
@@ -205,17 +206,15 @@ MATRICE_GLOBAL_INL \
 auto& operator=(const Expr##NAME##UnaryExpr<_Rhs, _Op>& _Ex) noexcept{ \
 return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 }
+#pragma endregion
 
 	enum { _M = _Mytraits::_M, _N = _Mytraits::_N };
 	using _Mylayout = plain_layout::row_major;
-	using _Myalty = typename detail::Storage_<_Valty>::template Allocator<_M, _N>;
 	using _Myalloc_t = Allocator<_Valty, _M, _N, allocator_traits_v<_M, _N>, _Mylayout>;
 
 	using _Myt = Base_;
 	using _Mybase = _Basic_plane_view_base<_Valty>;
-	using _Myconst = std::add_const_t<_Myt>;
-	using _Myref = std::add_lvalue_reference_t<_Myt>;
-	using _Myconstref = std::add_lvalue_reference_t<_Myconst>;
+	using _Myreference = std::add_lvalue_reference_t<_Myt>;
 	using _Myt_fwd_iterator = _Matrix_forward_iterator<_Valty>;
 	using _Myt_rwise_iterator = _Matrix_rwise_iterator<_Valty>;
 	using _Myt_cwise_iterator = _Matrix_cwise_iterator<_Valty>;
@@ -239,8 +238,8 @@ public:
 	using value_t = _Valty;
 	using value_type = value_t;
 	using scalar_type = Scalar<value_type>;
-	using pointer = std::add_pointer_t<value_t>;
-	using reference = std::add_lvalue_reference_t<value_t>;
+	using pointer = value_type*;
+	using reference = value_type&;
 	using iterator = pointer;
 	using const_iterator = std::add_const_t<iterator>;
 	using const_initlist = std::add_const_t<initlist<value_t>>;
@@ -251,24 +250,31 @@ public:
 	/**
 	 *\brief static properties
 	 */
-	enum {
-		options = _Myalty::location
-	};
+	enum { options = _Allocator_traits<_Myalloc_t>::options };
+	/**
+	 *\brief static property for querying the rows at compile-time
+	 */
 	static constexpr long long rows_at_compiletime = _M;
+	/**
+	 *\brief static property for querying the cols at compile-time
+	 */
 	static constexpr long long cols_at_compiletime = _N;
+	/**
+	 *\brief static property for querying the size at compile-time
+	 */
 	static constexpr long long Size = rows_at_compiletime * cols_at_compiletime;
 	/**
 	 *\brief for static querying memory location
 	 */
-	static constexpr auto location = _Myalty::location;
+	static constexpr auto location = options;
 	/**
 	 *\brief for querying infinity attribute of the value type
 	 */
-	static constexpr auto inf = std::numeric_limits<value_t>::infinity();
+	static constexpr auto inf = std::numeric_limits<value_type>::infinity();
 	/**
 	 *\brief for querying round error attribute of the value type
 	 */
-	static constexpr auto eps = std::numeric_limits<value_t>::epsilon();
+	static constexpr auto eps = std::numeric_limits<value_type>::epsilon();
 
 	MATRICE_GLOBAL_INL constexpr Base_()noexcept
 		:_Mybase(max_integer_v<0, _M>, max_integer_v<0, _N>), _Myalloc() {
@@ -451,8 +457,8 @@ public:
 	/**
 	 *\brief returns pointer to the object memory
 	 */
-	MATRICE_GLOBAL_FINL constexpr pointer data() noexcept { return (m_data); }
-	MATRICE_GLOBAL_FINL constexpr const pointer data() const noexcept { return (m_data); }
+	MATRICE_GLOBAL_FINL constexpr pointer data()noexcept { return (m_data); }
+	MATRICE_GLOBAL_FINL constexpr const pointer data()const noexcept { return (m_data); }
 
 	/**
 	 *\brief returns pointer to y-th row
@@ -878,7 +884,7 @@ public:
 	MATRICE_HOST_FINL auto inv() const { 
 		return Expr::MatUnaryExpr<_Myt, _Xop_mat_inv>(*this); 
 	}
-	MATRICE_HOST_FINL auto inv(_Myconstref _Right) {
+	MATRICE_HOST_FINL auto inv(const _Myt& _Right) {
 		return Expr::MatUnaryExpr<_Myt, _Xop_mat_inv>(_Right, *this);
 	}
 	MATRICE_HOST_FINL auto transpose() const { 
@@ -1195,7 +1201,7 @@ protected:
 	using _Mybase::m_shape;
 
 	size_t _Myfmt = _Myalloc.fmt() | gene;
-	conditional_t<(rows_at_compiletime>=::dynamic||cols_at_compiletime >=::dynamic), _Myalloc_t, _Myalty> _Myalloc;
+	conditional_t<(rows_at_compiletime>=::dynamic||cols_at_compiletime >=::dynamic), _Myalloc_t, typename detail::Storage_<value_type>::template Allocator<rows_at_compiletime, cols_at_compiletime>> _Myalloc;
 
 	MATRICE_GLOBAL_INL _Myt& _Xfields(initlist<size_t> il) noexcept {
 		m_shape = il;
