@@ -241,12 +241,13 @@ public:
 	using pointer = value_type*;
 	using reference = value_type&;
 	using iterator = pointer;
-	using const_iterator = std::add_const_t<iterator>;
+	using const_iterator = _Matrix_const_iterator<value_type>;
 	using const_initlist = std::add_const_t<initlist<value_t>>;
 	using derived_t = _Derived;
 	using loctn_t = Location;
 	using category = typename _Mytraits::category;
 	template<typename _Xop> using exp_base_type = Expr::Base_<_Xop>;
+
 	/**
 	 *\brief static properties
 	 */
@@ -511,11 +512,11 @@ public:
 	/**
 	 *\brief returns STL-stype element-wise iterator
 	 */
-	MATRICE_GLOBAL_FINL const iterator begin()const noexcept {
-		return (m_data);
+	MATRICE_GLOBAL_FINL const_iterator begin()const noexcept {
+		return { m_data, size() };
 	}
-	MATRICE_GLOBAL_FINL const iterator end()const noexcept {
-		return (m_data + size());
+	MATRICE_GLOBAL_FINL const_iterator end()const noexcept {
+		return { m_data + size(), size() };
 	}
 	MATRICE_GLOBAL_FINL iterator begin()noexcept { 
 		return (m_data); 
@@ -915,7 +916,7 @@ public:
 		return (det_impl(*static_cast<const _Derived*>(this))); 
 	}
 	MATRICE_GLOBAL_FINL auto(trace)() const { 
-		return (reduce(begin(), end(), cols() + 1)); 
+		return (reduce(begin().stride(cols()+1), end().stride(cols()+1), 1));
 	}
 
 	/**
