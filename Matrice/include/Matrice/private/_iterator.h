@@ -148,12 +148,6 @@ public:
 		return std::distance(_Mybegin, _Myptr)/_Mystep; 
 	}
 
-	MATRICE_GLOBAL_FINL _Myt& stride(size_t step) noexcept {
-		_Mystep = step;
-		_Myend = _End(_Myptr, _Mysize, _Mystep);
-		return (*this);
-	}
-
 protected:
 	size_t _Mysize;
 	size_t _Mystep;
@@ -185,7 +179,7 @@ public:
 		:_Mybase{ ptr, size } {
 	}
 
-	_Myt& operator=(const _Myt& other) noexcept {
+	MATRICE_GLOBAL_FINL _Myt& operator=(const _Myt& other) noexcept {
 		_Mybase::_Mysize = other._Mysize;
 		_Mybase::_Myptr = other._Myptr;
 		_Mybase::_Myend = other._Myend;
@@ -194,31 +188,35 @@ public:
 		return (*this);
 	}
 
-	const _Ty& operator*() const noexcept {
+	MATRICE_GLOBAL_FINL const _Ty& operator*() const noexcept {
 		return _Mybase::operator*();
 	}
-	_Myt& operator++() noexcept {
-		_Mybase::_Myptr += 1;
+	MATRICE_GLOBAL_FINL _Myt& operator++() noexcept {
+		_Mybase::_Myptr += _Mybase::_Mystep;
 		return (*this);
 	}
-	_Myt& operator++(int) noexcept {
+	MATRICE_GLOBAL_FINL _Myt& operator++(int) noexcept {
 		auto _Pre = (*this);
 		++(*this);
 		return (_Pre);
 	}
-	_Myt& operator--() noexcept {
-		_Mybase::_Myptr -= 1;
+	MATRICE_GLOBAL_FINL _Myt& operator--() noexcept {
+		_Mybase::_Myptr -= _Mybase::_Mystep;
 		return (*this);
 	}
-	_Myt& operator--(int) noexcept {
+	MATRICE_GLOBAL_FINL _Myt& operator--(int) noexcept {
 		auto _Pre = (*this);
 		--(*this);
 		return (_Pre);
 	}
-	inline operator pointer() noexcept {
+	MATRICE_GLOBAL_FINL operator pointer() noexcept {
 		return _Mybase::_Myptr;
 	}
-
+	MATRICE_GLOBAL_FINL _Myt& stride(size_t step) noexcept {
+		_Mybase::_Mystep = step;
+		_Mybase::_Myend = _End(_Myptr, _Mybase::_Mysize, _Mybase::_Mystep);
+		return (*this);
+	}
 	using _Mybase::operator+=;
 	using _Mybase::operator-=;
 	using _Mybase::operator!=;
