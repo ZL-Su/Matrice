@@ -9,3 +9,6 @@
 #define MATRICE_GLOBAL_INL
 #define _VIEW_EWISE_COPY_N(_LEFT, _N) DGELOM_CHECK(_N <= size(), "matrix size over range of current view."); size_t _Size = (_N==0) ? size() : _N; for(size_t _Idx = 0; _Idx < _Size; ++_Idx) { _LEFT(_Idx) = this->operator()(_Idx); }
 #define lapack_int
+#define MATRICE_MAKE_EXPOP_TYPE(DESC, NAME)
+#define DGELOM_CHECK(_Cond, __VA_ARGS__) if(!(_Cond)) { DGELOM_ERROR(::dgelom::exception::msg_type(__VA_ARGS__)); }
+#define MATRICE_EVALEXP_TOTHIS { m_data = _Myalloc.data(); exp.assign(*this); }
