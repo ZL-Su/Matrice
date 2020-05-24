@@ -62,6 +62,17 @@ auto Base_<_Derived, _Traits, _Type>::mul_inplace(const _Rhs& _Right) const{
 }
 
 template<typename _Derived, typename _Traits, typename _Type>
+template<int Rows, int Cols>
+MATRICE_GLOBAL_INL _Type Base_<_Derived, _Traits, _Type>::contract(const Matrix_<_Type, Rows, Cols>& other) const
+{
+#ifdef MATRICE_DEBUG
+	DGELOM_CHECK(rows() == other.rows() && cols() == other.cols(),
+		"Rows and columns must be matched in Base_<_Derived, _Traits, _Type>::contract(_Rhs).");
+#endif
+	return (this->const_derived()* other).sum();
+}
+
+template<typename _Derived, typename _Traits, typename _Type>
 template<typename _Rhs> MATRICE_GLOBAL_INL
 _Rhs Base_<_Derived, _Traits, _Type>::spreadmul(const _Rhs& _Right)const {
 	_Rhs _Ret(_Right.shape());
@@ -90,7 +101,7 @@ _DETAIL_END
  *\param [_M] instance of dgelom::Matrix_;
  */
 template<typename _Mty>
-MATRICE_HOST_INL decltype(auto) make_matrix_deleter(const _Mty& _M) noexcept {
+MATRICE_HOST_INL decltype(auto) make_matrix_deleter(const _Mty& _M)noexcept {
 	return _M.deleter();
 };
 
