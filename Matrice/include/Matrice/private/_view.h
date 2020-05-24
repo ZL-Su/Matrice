@@ -40,10 +40,10 @@ for (difference_type i = 0; i < size(); ++i) {\
 } return (*this)
 #define _MATRICE_DEFVIEW_ARITHOP(OP, NAME) \
 template<typename _Rhs> MATRICE_GLOBAL_FINL auto operator##OP(const _Rhs& _Right) { \
-	return Expr::EwiseBinaryExpr<_Derived, _Rhs, _Exp_op::_Ewise_##NAME<value_t>>(*static_cast<_Derived*>(this), _Right); \
+	return Exp::EwiseBinaryExp<_Derived, _Rhs, _Exp_op::_Ewise_##NAME<value_t>>(*static_cast<_Derived*>(this), _Right); \
 } \
 template<typename _Lhs> friend MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const _Derived& _Right) { \
-	return Expr::EwiseBinaryExpr<_Lhs, _Derived, _Exp_op::_Ewise_##NAME<value_t>>(_Left, _Right); \
+	return Exp::EwiseBinaryExp<_Lhs, _Derived, _Exp_op::_Ewise_##NAME<value_t>>(_Left, _Right); \
 }
 	using _Myt = _View_base;
 public:
@@ -90,16 +90,16 @@ public:
 	MATRICE_GLOBAL_INL _View_base(pointer _Ptr, size_t _Size, size_t _Stride, size_t _Offset)
 		:_Mydata(_Ptr), _Mysize(_Size), _Mystride(_Stride), _Myoffset(_Offset) {}
 
-	MATRICE_GLOBAL_FINL reference operator[] (size_t i) {
+	MATRICE_GLOBAL_FINL reference operator[](size_t i) {
 		return _Mydata[i*_Mystride];
 	}
-	MATRICE_GLOBAL_FINL const reference operator[] (size_t i) const {
+	MATRICE_GLOBAL_FINL const reference operator[](size_t i) const {
 		return _Mydata[i*_Mystride];
 	}
-	MATRICE_GLOBAL_FINL reference operator() (size_t i) {
+	MATRICE_GLOBAL_FINL reference operator()(size_t i) {
 		return _Mydata[i*_Mystride];
 	}
-	MATRICE_GLOBAL_FINL const reference operator() (size_t i) const {
+	MATRICE_GLOBAL_FINL const reference operator()(size_t i) const {
 		return _Mydata[i*_Mystride];
 	}
 
@@ -164,7 +164,7 @@ public:
 	 *\param [_Ex] input expression
 	 */
 	template<typename _Arg> 
-	MATRICE_GLOBAL_INL auto& operator= (const Expr::Base_<_Arg>& _Ex) { 
+	MATRICE_GLOBAL_INL auto& operator= (const Exp::Base_<_Arg>& _Ex) { 
 		return (_Ex.assign(*static_cast<_Derived*>(this))); 
 	}
 	/**

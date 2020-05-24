@@ -188,22 +188,22 @@ typename _Exp_op::_##DESC##_##NAME<_Valty>
 #define MATRICE_MAKE_ARITHOP(OP, NAME) \
 template<typename _Rhs> MATRICE_GLOBAL_INL \
 auto operator##OP(const _Rhs& _Right) const noexcept { \
-	return Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_##NAME>(*this, _Right); \
+	return Exp::EwiseBinaryExp<_Myt, _Rhs, _Xop_ewise_##NAME>(*this, _Right); \
 } \
 template<typename _Lhs, MATRICE_ENABLE_IF(is_scalar_v<_Lhs>)> friend \
 MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const _Derived& _Right) noexcept { \
-	return Expr::EwiseBinaryExpr<_Lhs, _Derived, _Xop_ewise_##NAME>(_Left, _Right); \
+	return Exp::EwiseBinaryExp<_Lhs, _Derived, _Xop_ewise_##NAME>(_Left, _Right); \
 }
 
 #define MATRICE_MAKE_EXP_ASSIGNOP(NAME) \
 template<typename _Lhs, typename _Rhs, typename _Op> \
 MATRICE_GLOBAL_INL \
-auto& operator=(const Expr##NAME##BinaryExpr<_Lhs,_Rhs,_Op>& _Ex)noexcept{ \
+auto& operator=(const Exp##NAME##BinaryExp<_Lhs,_Rhs,_Op>& _Ex)noexcept{ \
 return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 } \
 template<typename _Rhs, typename _Op> \
 MATRICE_GLOBAL_INL \
-auto& operator=(const Expr##NAME##UnaryExpr<_Rhs, _Op>& _Ex) noexcept{ \
+auto& operator=(const Exp##NAME##UnaryExp<_Rhs, _Op>& _Ex) noexcept{ \
 return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 }
 #pragma endregion
@@ -246,7 +246,7 @@ public:
 	using derived_t = _Derived;
 	using loctn_t = Location;
 	using category = typename _Mytraits::category;
-	template<typename _Xop> using exp_base_type = Expr::Base_<_Xop>;
+	template<typename _Xop> using exp_base_type = Exp::Base_<_Xop>;
 
 	/**
 	 *\brief static properties
@@ -357,13 +357,13 @@ public:
 	MATRICE_GLOBAL_FINL Base_(const exprs::_Matrix_exp<_Exp>& exp)
 		:Base_(exp.rows(), exp.cols()) MATRICE_EVALEXP_TOTHIS
 	template<typename _Lhs, typename _Rhs, typename _Op>
-	MATRICE_GLOBAL_FINL Base_(const Expr::EwiseBinaryExpr<_Lhs,_Rhs,_Op>& exp)
+	MATRICE_GLOBAL_FINL Base_(const Exp::EwiseBinaryExp<_Lhs,_Rhs,_Op>& exp)
 		:Base_(exp.shape()) MATRICE_EVALEXP_TOTHIS
 	template<typename _Lhs, typename _Rhs, typename _Op>
-	MATRICE_GLOBAL_FINL Base_(const Expr::MatBinaryExpr<_Lhs, _Rhs, _Op>& exp)
+	MATRICE_GLOBAL_FINL Base_(const Exp::MatBinaryExp<_Lhs, _Rhs, _Op>& exp)
 		:Base_(exp.shape()) MATRICE_EVALEXP_TOTHIS
 	template<typename _Rhs, typename _Op>
-	MATRICE_GLOBAL_FINL Base_(const Expr::MatUnaryExpr<_Rhs, _Op>& exp)
+	MATRICE_GLOBAL_FINL Base_(const Exp::MatUnaryExp<_Rhs, _Op>& exp)
 		:Base_(exp.shape()) MATRICE_EVALEXP_TOTHIS
 
 	/**
@@ -877,22 +877,22 @@ public:
 
 	template<typename _Rhs> 
 	MATRICE_GLOBAL_INL auto mul(const _Rhs& _Right) const { 
-		return Expr::MatBinaryExpr<_Myt, _Rhs, _Xop_mat_mul>(*this, _Right);
+		return Exp::MatBinaryExp<_Myt, _Rhs, _Xop_mat_mul>(*this, _Right);
 	}
 	MATRICE_GLOBAL_FINL auto sqrt() const { 
-		return Expr::EwiseUnaryExpr<_Myt, _Xop_ewise_sqrt>(*this); 
+		return Exp::EwiseUnaryExp<_Myt, _Xop_ewise_sqrt>(*this); 
 	}
 	MATRICE_HOST_FINL auto inv() const { 
-		return Expr::MatUnaryExpr<_Myt, _Xop_mat_inv>(*this); 
+		return Exp::MatUnaryExp<_Myt, _Xop_mat_inv>(*this); 
 	}
 	MATRICE_HOST_FINL auto inv(const _Myt& _Right) {
-		return Expr::MatUnaryExpr<_Myt, _Xop_mat_inv>(_Right, *this);
+		return Exp::MatUnaryExp<_Myt, _Xop_mat_inv>(_Right, *this);
 	}
 	MATRICE_HOST_FINL auto transpose() const { 
-		return Expr::MatUnaryExpr<_Myt, _Xop_mat_trp>(*this); 
+		return Exp::MatUnaryExp<_Myt, _Xop_mat_trp>(*this); 
 	}
 	MATRICE_GLOBAL_INL auto t() const {
-		return Expr::MatUnaryExpr<_Myt, _Xop_mat_trp>(*this);
+		return Exp::MatUnaryExp<_Myt, _Xop_mat_trp>(*this);
 	}
 	MATRICE_GLOBAL_FINL auto normalize(value_t _val = inf) const { 
 		return ((*this)*(abs(_val) < eps ? 1 : 1 / (_val == inf ? max() : _val))); 

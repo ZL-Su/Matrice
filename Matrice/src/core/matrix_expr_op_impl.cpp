@@ -8,12 +8,12 @@
 #include "../private/generic_fast_math.hpp"
 
 #define _EXPOP_EXPLICIT_INSTANTIATION(_Type, _Desc, _Name) \
-template _Type* Expr::Op::_##_Desc##_##_Name<_Type>::operator()(\
+template _Type* Exp::Op::_##_Desc##_##_Name<_Type>::operator()(\
 int, _Type*, _Type*) const;
 
 MATRICE_EXPR_BEGIN
 template<typename _Ty>
-_Ty * Expr::Op::_Mat_inv<_Ty>::operator()(int M, _Ty * Out, _Ty * In) const
+_Ty * Exp::Op::_Mat_inv<_Ty>::operator()(int M, _Ty * Out, _Ty * In) const
 {
 	if (!In) return (Out);
 	if (M == 2) { internal::_inv2x2m(In, Out); return (Out); };
