@@ -40,23 +40,23 @@ class _Iterator_base {
 public:
 	using iterator_category = std::random_access_iterator_tag;
 	using value_type = _Ty;
-	using pointer = std::add_pointer_t<value_type>;
-	using reference = std::add_lvalue_reference_t<typename std::pointer_traits<pointer>::element_type>;
+	using pointer = value_type*;
+	using reference = value_type&;
 	using difference_type = std::ptrdiff_t;
 	enum { rows_at_compiletime = 0, cols_at_compiletime = 0 };
 
 	MATRICE_GLOBAL_FINL _Iterator_base(pointer _Ptr) noexcept 
-		:_Myptr(_Ptr), _Mybegin(_Ptr), _Mysize(0), _Mystep(0) {}
+		:_Myptr(_Ptr), _Mybegin(_Ptr), _Mysize(0), _Mystep(1) {}
 	MATRICE_GLOBAL_FINL _Iterator_base(pointer _Ptr, size_t _Size, size_t _Step =  1) noexcept 
 		:_Myptr(_Ptr), _Mybegin(_Ptr), _Mysize(_Size), _Mystep(_Step) {}
 	
-	MATRICE_GLOBAL_FINL reference operator*() const { 
+	MATRICE_GLOBAL_FINL reference operator*() const noexcept { 
 		return ((reference)(*_Myptr));
 	}
 	MATRICE_GLOBAL_FINL pointer operator->() const { 
 		return (std::pointer_traits<pointer>::pointer_to(**this)); 
 	}
-	MATRICE_GLOBAL_FINL _Myt operator++() { //preincrement
+	MATRICE_GLOBAL_FINL _Myt& operator++() { //preincrement
 		_Myptr += _Mystep;
 		return (*this);
 	}
@@ -65,7 +65,7 @@ public:
 		*this += _Mystep;
 		return (_Tmp);
 	}
-	MATRICE_GLOBAL_FINL _Myt operator--() { //preincrement
+	MATRICE_GLOBAL_FINL _Myt& operator--() { //preincrement
 		_Myptr -= _Mystep;
 		return (*this);
 	}
@@ -79,7 +79,7 @@ public:
 #if _ITERATOR_DEBUG_LEVEL == 2
 		if (_Offset != 0) {
 			if (_Myptr + _Offset < _Myptr || _Myend < _Myptr + _Offset) {
-				throw std::runtime_error("iterator + offset out of range");
+				DGELOM_ERROR("iterator + offset out of range");
 			}
 		}
 #endif
@@ -129,11 +129,19 @@ public:
 	MATRICE_GLOBAL_FINL operator pointer() { return (_Myptr); }
 
 	// \forward range iteration methods for [this->_Myptr, this->_Myend)
-	MATRICE_GLOBAL_FINL auto& begin() { return (*this); }
-	MATRICE_GLOBAL_FINL auto end() { auto _Tmp = *this; return (_Tmp += _Mysize); }
-	MATRICE_GLOBAL_FINL const auto& begin() const { return (*this); }
+	MATRICE_GLOBAL_FINL decltype(auto) begin() { 
+		return (*this); 
+	}
+	MATRICE_GLOBAL_FINL auto end() { 
+		auto _Tmp = *this; 
+		return (_Tmp += _Mysize); 
+	}
+	MATRICE_GLOBAL_FINL decltype(auto) begin() const {
+		return (*this); 
+	}
 	MATRICE_GLOBAL_FINL const auto end() const { 
-		auto _Tmp = *this; return (_Tmp += _Mysize);
+		auto _Tmp = *this; 
+		return (_Tmp += _Mysize);
 	}
 	// \current iterator position
 	MATRICE_GLOBAL_FINL size_t pos() const noexcept { 
@@ -156,10 +164,82 @@ MATRICE_GLOBAL_FINL _Iterator_base<_Ty> operator+ (typename _Iterator_base<_Ty>:
 }
 
 /**********************************************************************
-							Forward Range Iterator
+						Matrix Const Iterator
+		Copyright (c) : Zhilong (Dgelom) Su, since May/23/2020
+ **********************************************************************/
+template<typename _Ty>
+class _Matrix_const_iterator : public _Iterator_base<_Ty>
+{
+	using _Mybase = _Iterator_base<_Ty>;
+	using _Myt = _Matrix_const_iterator;
+public:
+	using typename _Mybase::pointer;
+	using typename _Mybase::value_type;
+	_Matrix_const_iterator(pointer ptr, size_t size) noexcept 
+		:_Mybase{ ptr, size } {
+	}
+
+	MATRICE_GLOBAL_FINL _Myt& operator=(const _Myt& other) noexcept {
+		_Mybase::_Mysize = other._Mysize;
+		_Mybase::_Myptr = other._Myptr;
+		_Mybase::_Myend = other._Myend;
+		_Mybase::_Mystep = other._Mystep;
+		_Mybase::_Mylast = other._Mylast;
+		return (*this);
+	}
+
+	MATRICE_GLOBAL_FINL const _Ty& operator*() const noexcept {
+		return _Mybase::operator*();
+	}
+	MATRICE_GLOBAL_FINL _Myt& operator++() noexcept {
+		_Mybase::_Myptr += _Mybase::_Mystep;
+		return (*this);
+	}
+	MATRICE_GLOBAL_FINL _Myt& operator++(int) noexcept {
+		auto _Pre = (*this);
+		++(*this);
+		return (_Pre);
+	}
+	MATRICE_GLOBAL_FINL _Myt& operator--() noexcept {
+		_Mybase::_Myptr -= _Mybase::_Mystep;
+		return (*this);
+	}
+	MATRICE_GLOBAL_FINL _Myt& operator--(int) noexcept {
+		auto _Pre = (*this);
+		--(*this);
+		return (_Pre);
+	}
+	MATRICE_GLOBAL_FINL operator pointer() noexcept {
+		return _Mybase::_Myptr;
+	}
+	MATRICE_GLOBAL_FINL _Myt& stride(size_t step) noexcept {
+		_Mybase::_Mystep = step;
+		_Mybase::_Myend = _End(_Myptr, _Mybase::_Mysize, _Mybase::_Mystep);
+		return (*this);
+	}
+	using _Mybase::operator+=;
+	using _Mybase::operator-=;
+	using _Mybase::operator!=;
+	using _Mybase::operator==;
+	using _Mybase::operator<;
+	using _Mybase::operator<=;
+	using _Mybase::operator>;
+	using _Mybase::operator>=;
+	using _Mybase::operator[];
+	using _Mybase::operator+;
+	using _Mybase::operator-;
+	using _Mybase::operator bool;
+	using _Mybase::pos;
+
+private:
+	using _Mybase::_Myptr;
+};
+
+/**********************************************************************
+						Forward Range Iterator
 	    Copyright (c) : Zhilong (Dgelom) Su, since 12/Jul/2018
  **********************************************************************/
-template<typename _Ty, typename = std::enable_if_t<is_scalar_v<_Ty>>>
+template<typename _Ty>
 class _Matrix_forward_iterator : public _Iterator_base<_Ty>
 {
 	using _Mybase = _Iterator_base<_Ty>;
@@ -173,7 +253,7 @@ private:
 };
 
 /**********************************************************************
-							Row-wise Forward Range Iterator
+					Row-wise Forward Range Iterator
 	    Copyright (c) : Zhilong (Dgelom) Su, since 12/Jul/2018
  **********************************************************************/
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>

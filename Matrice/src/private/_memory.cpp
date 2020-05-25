@@ -8,7 +8,8 @@
 #endif
 
 DGE_MATRICE_BEGIN
-namespace internal { namespace impl {
+namespace internal { 
+namespace impl {
 #ifdef MATRICE_ENABLE_CUDA
 template<typename _Ty>
 MATRICE_GLOBAL _Ty* _Malloc(size_t rows, size_t& cols, device_alloc_tag) {
@@ -52,11 +53,7 @@ MATRICE_CUDA_MEMFUNC_INST(size_t)
 #undef MATRICE_CUDA_MEMFUNC_INST
 
 #endif //!MATRICE_ENABLE_CUDA
-
-}}
-DGE_MATRICE_END
-
-namespace dgelom { namespace privt {
+}
 
 template<typename _Ty, typename _Ity>
 _Ty* aligned_malloc(_Ity size) {
@@ -70,7 +67,7 @@ _Ty* aligned_malloc(_Ity size) {
 		return (reinterpret_cast<_Ty*>(aligned_ptr));
 	}
 	catch (std::bad_alloc) {
-		std::exception("Bad memory allocation.");
+		exception::error("Bad memory allocation in Func: aligned_malloc<_Ty>(_Ity size) on Line: 59 in File: _memory.cpp.\n");
 	};
 }
 template<typename _Ty>
@@ -86,26 +83,26 @@ bool is_aligned(_Ty* aligned_ptr) noexcept {
 }
 
 template int* aligned_malloc<int>(int);
-template int* aligned_malloc<int>(std::size_t);
-template int* aligned_malloc<int>(std::ptrdiff_t);
+template int* aligned_malloc<int>(size_t);
+template int* aligned_malloc<int>(diff_t);
 template char* aligned_malloc<char>(int);
-template char* aligned_malloc<char>(std::size_t);
-template char* aligned_malloc<char>(std::ptrdiff_t);
+template char* aligned_malloc<char>(size_t);
+template char* aligned_malloc<char>(diff_t);
 template bool* aligned_malloc<bool>(int);
-template bool* aligned_malloc<bool>(std::size_t);
-template bool* aligned_malloc<bool>(std::ptrdiff_t);
+template bool* aligned_malloc<bool>(size_t);
+template bool* aligned_malloc<bool>(diff_t);
 template float* aligned_malloc<float>(int);
-template float* aligned_malloc<float>(std::size_t);
-template float* aligned_malloc<float>(std::ptrdiff_t);
+template float* aligned_malloc<float>(size_t);
+template float* aligned_malloc<float>(diff_t);
 template double* aligned_malloc<double>(int);
-template double* aligned_malloc<double>(std::size_t);
-template double* aligned_malloc<double>(std::ptrdiff_t);
+template double* aligned_malloc<double>(size_t);
+template double* aligned_malloc<double>(diff_t);
 template unsigned char* aligned_malloc<unsigned char>(int);
-template unsigned char* aligned_malloc<unsigned char>(std::size_t);
-template unsigned char* aligned_malloc<unsigned char>(std::ptrdiff_t);
+template unsigned char* aligned_malloc<unsigned char>(size_t);
+template unsigned char* aligned_malloc<unsigned char>(diff_t);
 template size_t* aligned_malloc<size_t>(int);
-template size_t* aligned_malloc<size_t>(std::size_t);
-template size_t* aligned_malloc<size_t>(std::ptrdiff_t);
+template size_t* aligned_malloc<size_t>(size_t);
+template size_t* aligned_malloc<size_t>(diff_t);
 
 template void aligned_free(int*) noexcept;
 template void aligned_free(char*) noexcept;
@@ -113,12 +110,13 @@ template void aligned_free(bool*) noexcept;
 template void aligned_free(float*) noexcept;
 template void aligned_free(double*) noexcept;
 template void aligned_free(unsigned char*) noexcept;
-template void aligned_free(std::size_t*) noexcept;
-template void aligned_free(std::ptrdiff_t*) noexcept;
+template void aligned_free(size_t*) noexcept;
+template void aligned_free(diff_t*) noexcept;
 template bool is_aligned(int*) noexcept;
 template bool is_aligned(float*) noexcept;
 template bool is_aligned(double*) noexcept;
 template bool is_aligned(unsigned char*) noexcept;
-template bool is_aligned(std::size_t*) noexcept;
-template bool is_aligned(std::ptrdiff_t*) noexcept;
-}}
+template bool is_aligned(size_t*) noexcept;
+template bool is_aligned(diff_t*) noexcept;
+}
+DGE_MATRICE_END

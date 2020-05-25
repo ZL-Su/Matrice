@@ -17,13 +17,13 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
-#include "../_matrix_exp.hpp"
+#include "../_plain_exp.hpp"
 #include "../_range.h"
 
 DGE_MATRICE_BEGIN namespace detail {
 struct _Tensor_exp_op {
 	template<typename T, typename U>
-	using _Ewise_mmul = Expr::MatBinaryExpr<T, U, _Exp_op::_Mat_mul<common_value_t<T, U>>>;
+	using _Ewise_mmul = Exp::MatBinaryExp<T, U, _Exp_op::_Mat_mul<common_value_t<T, U>>>;
 };
 
 template<typename _Derived> class _Tensor_exp_base {

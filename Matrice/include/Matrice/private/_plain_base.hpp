@@ -169,6 +169,7 @@ template<
 	typename _Valty = typename _Mytraits::type>
 class Base_ : public _Basic_plane_view_base<_Valty>
 {
+#pragma region MACRO DEFINITIONS
 #define MATRICE_LINK_PTR { \
 	m_data = _Myalloc.data(); \
 }
@@ -187,35 +188,33 @@ typename _Exp_op::_##DESC##_##NAME<_Valty>
 #define MATRICE_MAKE_ARITHOP(OP, NAME) \
 template<typename _Rhs> MATRICE_GLOBAL_INL \
 auto operator##OP(const _Rhs& _Right) const noexcept { \
-	return Expr::EwiseBinaryExpr<_Myt, _Rhs, _Xop_ewise_##NAME>(*this, _Right); \
+	return Exp::EwiseBinaryExp<_Myt, _Rhs, _Xop_ewise_##NAME>(*this, _Right); \
 } \
 template<typename _Lhs, MATRICE_ENABLE_IF(is_scalar_v<_Lhs>)> friend \
 MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const _Derived& _Right) noexcept { \
-	return Expr::EwiseBinaryExpr<_Lhs, _Derived, _Xop_ewise_##NAME>(_Left, _Right); \
+	return Exp::EwiseBinaryExp<_Lhs, _Derived, _Xop_ewise_##NAME>(_Left, _Right); \
 }
 
 #define MATRICE_MAKE_EXP_ASSIGNOP(NAME) \
 template<typename _Lhs, typename _Rhs, typename _Op> \
 MATRICE_GLOBAL_INL \
-auto& operator=(const Expr##NAME##BinaryExpr<_Lhs,_Rhs,_Op>& _Ex)noexcept{ \
+auto& operator=(const Exp##NAME##BinaryExp<_Lhs,_Rhs,_Op>& _Ex)noexcept{ \
 return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 } \
 template<typename _Rhs, typename _Op> \
 MATRICE_GLOBAL_INL \
-auto& operator=(const Expr##NAME##UnaryExpr<_Rhs, _Op>& _Ex) noexcept{ \
+auto& operator=(const Exp##NAME##UnaryExp<_Rhs, _Op>& _Ex) noexcept{ \
 return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 }
+#pragma endregion
 
 	enum { _M = _Mytraits::_M, _N = _Mytraits::_N };
 	using _Mylayout = plain_layout::row_major;
-	using _Myalty = typename detail::Storage_<_Valty>::template Allocator<_M, _N>;
 	using _Myalloc_t = Allocator<_Valty, _M, _N, allocator_traits_v<_M, _N>, _Mylayout>;
 
 	using _Myt = Base_;
 	using _Mybase = _Basic_plane_view_base<_Valty>;
-	using _Myconst = std::add_const_t<_Myt>;
-	using _Myref = std::add_lvalue_reference_t<_Myt>;
-	using _Myconstref = std::add_lvalue_reference_t<_Myconst>;
+	using _Myreference = std::add_lvalue_reference_t<_Myt>;
 	using _Myt_fwd_iterator = _Matrix_forward_iterator<_Valty>;
 	using _Myt_rwise_iterator = _Matrix_rwise_iterator<_Valty>;
 	using _Myt_cwise_iterator = _Matrix_cwise_iterator<_Valty>;
@@ -239,36 +238,44 @@ public:
 	using value_t = _Valty;
 	using value_type = value_t;
 	using scalar_type = Scalar<value_type>;
-	using pointer = std::add_pointer_t<value_t>;
-	using reference = std::add_lvalue_reference_t<value_t>;
+	using pointer = value_type*;
+	using reference = value_type&;
 	using iterator = pointer;
-	using const_iterator = std::add_const_t<iterator>;
+	using const_iterator = _Matrix_const_iterator<value_type>;
 	using const_initlist = std::add_const_t<initlist<value_t>>;
 	using derived_t = _Derived;
 	using loctn_t = Location;
 	using category = typename _Mytraits::category;
-	template<typename _Xop> using exp_base_type = Expr::Base_<_Xop>;
+	template<typename _Xop> using exp_base_type = Exp::Base_<_Xop>;
+
 	/**
 	 *\brief static properties
 	 */
-	enum {
-		options = _Myalty::location
-	};
+	enum { options = _Allocator_traits<_Myalloc_t>::options };
+	/**
+	 *\brief static property for querying the rows at compile-time
+	 */
 	static constexpr long long rows_at_compiletime = _M;
+	/**
+	 *\brief static property for querying the cols at compile-time
+	 */
 	static constexpr long long cols_at_compiletime = _N;
+	/**
+	 *\brief static property for querying the size at compile-time
+	 */
 	static constexpr long long Size = rows_at_compiletime * cols_at_compiletime;
 	/**
 	 *\brief for static querying memory location
 	 */
-	static constexpr auto location = _Myalty::location;
+	static constexpr auto location = options;
 	/**
 	 *\brief for querying infinity attribute of the value type
 	 */
-	static constexpr auto inf = std::numeric_limits<value_t>::infinity();
+	static constexpr auto inf = std::numeric_limits<value_type>::infinity();
 	/**
 	 *\brief for querying round error attribute of the value type
 	 */
-	static constexpr auto eps = std::numeric_limits<value_t>::epsilon();
+	static constexpr auto eps = std::numeric_limits<value_type>::epsilon();
 
 	MATRICE_GLOBAL_INL constexpr Base_()noexcept
 		:_Mybase(max_integer_v<0, _M>, max_integer_v<0, _N>), _Myalloc() {
@@ -350,13 +357,13 @@ public:
 	MATRICE_GLOBAL_FINL Base_(const exprs::_Matrix_exp<_Exp>& exp)
 		:Base_(exp.rows(), exp.cols()) MATRICE_EVALEXP_TOTHIS
 	template<typename _Lhs, typename _Rhs, typename _Op>
-	MATRICE_GLOBAL_FINL Base_(const Expr::EwiseBinaryExpr<_Lhs,_Rhs,_Op>& exp)
+	MATRICE_GLOBAL_FINL Base_(const Exp::EwiseBinaryExp<_Lhs,_Rhs,_Op>& exp)
 		:Base_(exp.shape()) MATRICE_EVALEXP_TOTHIS
 	template<typename _Lhs, typename _Rhs, typename _Op>
-	MATRICE_GLOBAL_FINL Base_(const Expr::MatBinaryExpr<_Lhs, _Rhs, _Op>& exp)
+	MATRICE_GLOBAL_FINL Base_(const Exp::MatBinaryExp<_Lhs, _Rhs, _Op>& exp)
 		:Base_(exp.shape()) MATRICE_EVALEXP_TOTHIS
 	template<typename _Rhs, typename _Op>
-	MATRICE_GLOBAL_FINL Base_(const Expr::MatUnaryExpr<_Rhs, _Op>& exp)
+	MATRICE_GLOBAL_FINL Base_(const Exp::MatUnaryExp<_Rhs, _Op>& exp)
 		:Base_(exp.shape()) MATRICE_EVALEXP_TOTHIS
 
 	/**
@@ -451,8 +458,8 @@ public:
 	/**
 	 *\brief returns pointer to the object memory
 	 */
-	MATRICE_GLOBAL_FINL constexpr pointer data() noexcept { return (m_data); }
-	MATRICE_GLOBAL_FINL constexpr const pointer data() const noexcept { return (m_data); }
+	MATRICE_GLOBAL_FINL constexpr pointer data()noexcept { return (m_data); }
+	MATRICE_GLOBAL_FINL constexpr const pointer data()const noexcept { return (m_data); }
 
 	/**
 	 *\brief returns pointer to y-th row
@@ -505,16 +512,16 @@ public:
 	/**
 	 *\brief returns STL-stype element-wise iterator
 	 */
+	MATRICE_GLOBAL_FINL const_iterator begin()const noexcept {
+		return { m_data, size() };
+	}
+	MATRICE_GLOBAL_FINL const_iterator end()const noexcept {
+		return { m_data + size(), size() };
+	}
 	MATRICE_GLOBAL_FINL iterator begin()noexcept { 
 		return (m_data); 
 	}
 	MATRICE_GLOBAL_FINL iterator end()noexcept { 
-		return (m_data + size()); 
-	}
-	MATRICE_GLOBAL_FINL const iterator begin()const noexcept { 
-		return (m_data); 
-	}
-	MATRICE_GLOBAL_FINL const iterator end()const noexcept { 
 		return (m_data + size()); 
 	}
 	/**
@@ -706,7 +713,7 @@ public:
 	/**
 	 * \assignment operator, fill Matrix_ from a scalar.
 	 */
-	MATRICE_GLOBAL_FINL _Derived& operator= (value_t _Val) noexcept {
+	MATRICE_GLOBAL_FINL _Derived& operator=(value_t _Val) noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_Myalloc, "This object is empty.");
 #endif // MATRICE_DEBUG
@@ -717,7 +724,8 @@ public:
 	/**
 	 * \assignment operator, fill Matrix_ from a scalar.
 	 */
-	MATRICE_GLOBAL_FINL _Derived& operator= (scalar_type _Val) noexcept {
+	MATRICE_REQUIRES(is_scalar_v<scalar_type>)
+	MATRICE_GLOBAL_FINL _Derived& operator=(scalar_type _Val) noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_Myalloc, "This object is empty.");
 #endif // MATRICE_DEBUG
@@ -728,7 +736,7 @@ public:
 	/**
 	 * \assignment operator, fill Matrix_ from initializer list
 	 */
-	MATRICE_GLOBAL_FINL _Derived& operator= (const_initlist _list) noexcept {
+	MATRICE_GLOBAL_FINL _Derived& operator=(const_initlist _list) noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_Myalloc, "This object is empty.");
 #endif // MATRICE_DEBUG
@@ -739,7 +747,7 @@ public:
 	 * \assignment operator, from nested initializer list
 	 */
 	template<typename _Ty>
-	MATRICE_HOST_INL _Derived& operator=(nested_initlist<_Ty> _list) noexcept {
+	MATRICE_HOST_INL _Derived& operator=(nested_initlist<_Ty> _list)noexcept{
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_Myalloc, "This object is empty.");
 		DGELOM_CHECK(_list.size() == m_rows, "Inconsistent rows.");
@@ -757,7 +765,7 @@ public:
 	/**
 	 * \assignment operator, from row-wise iterator
 	 */
-	MATRICE_GLOBAL_FINL _Derived& operator= (const _Myt_rwise_iterator& _It)noexcept {
+	MATRICE_GLOBAL_FINL _Derived& operator=(const _Myt_rwise_iterator& _It)noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_Myalloc, "This object is empty.");
 #endif // MATRICE_DEBUG
@@ -791,10 +799,15 @@ public:
 	 */
 	MATRICE_GLOBAL_INL _Derived& operator=(const _Derived& _other) {
 		if (this != &_other) {
-			m_cols = _other.m_cols, m_rows = _other.m_rows;
-			m_shape = (_other.shape());
-			if (_other._Myalloc) m_data = _Myalloc =(_other._Myalloc);
-			else m_data = _other.data();
+			m_cols = _other.m_cols;
+			m_rows = _other.m_rows;
+			m_shape = _other.shape();
+			if (_other._Myalloc) {
+				m_data = _Myalloc = _other._Myalloc;
+			}
+			else {
+				m_data = _other.data();
+			}
 #ifdef MATRICE_DEBUG
 			_Mybase::_Flush_view_buf();
 #endif // MATRICE_DEBUG
@@ -805,24 +818,27 @@ public:
 	 * \homotype move assignment operator
 	 */
 	MATRICE_GLOBAL_INL _Derived& operator=(_Derived&& _other) noexcept {
-		m_cols = _other.m_cols, m_rows = _other.m_rows;
-		if (_other._Myalloc) {
-			if constexpr (Size > 0) { //copy if the mem allocated on stack
-				m_data = _Myalloc = (_other._Myalloc);
+		if (this != &_other) {
+			m_cols = _other.m_cols;
+			m_rows = _other.m_rows;
+			m_shape = _other.shape();
+			if (_other._Myalloc) {
+				if constexpr (Size > 0) {
+					//copy if they allocated on the stack
+					m_data = _Myalloc = (_other._Myalloc);
+				}
+				else {
+					m_data = _Myalloc = move(_other._Myalloc);
+					_other._Myalloc.destroy();
+				}
 			}
 			else {
-				m_data = _Myalloc = move(_other._Myalloc);
-				_other._Myalloc.destroy();
+				m_data = _other.data();
 			}
-		}
-		else m_data = _other.data();
-
-		std::swap(_Mybase::m_shape, _other.m_shape);
-
 #ifdef MATRICE_DEBUG
-		_Mybase::_Flush_view_buf();
+			_Mybase::_Flush_view_buf();
 #endif // MATRICE_DEBUG
-
+		}
 		return (this->derived());
 	}
 	/**
@@ -830,7 +846,7 @@ public:
 	 */
 	template<int _Rows, int _Cols,
 		typename _Maty = Matrix_<value_t, _Rows, _Cols>>
-	MATRICE_GLOBAL_FINL _Derived& operator= (const _Maty& _managed) {
+	MATRICE_GLOBAL_FINL _Derived& operator=(_Maty&& _managed) {
 		_Myalloc = _managed().allocator();
 		m_rows = _Myalloc.rows();
 		m_cols = _Myalloc.cols();
@@ -844,7 +860,7 @@ public:
 	 *\brief Check if this equals to _other or not
 	 *\param [_other] can be any derived type of matrix/array/vector 
 	 */
-	MATRICE_GLOBAL_INL bool operator== (const _Myt& _other) const noexcept {
+	MATRICE_GLOBAL_INL bool operator==(const _Myt& _other) const noexcept {
 		if(size() != _other.size()) return std::false_type::value;
 		if(m_data == _other.m_data) return std::true_type::value;
 		for (auto _Idx = 0; _Idx < size(); ++_Idx)
@@ -860,25 +876,25 @@ public:
 	MATRICE_MAKE_ARITHOP(/, div);
 
 	template<typename _Rhs> 
-	MATRICE_GLOBAL_INL auto mul(const _Rhs& _Right) const { 
-		return Expr::MatBinaryExpr<_Myt, _Rhs, _Xop_mat_mul>(*this, _Right);
+	MATRICE_GLOBAL_INL auto mul(const _Rhs& _Right)const noexcept { 
+		return Exp::MatBinaryExp<_Myt, _Rhs, _Xop_mat_mul>(*this, _Right);
 	}
-	MATRICE_GLOBAL_FINL auto sqrt() const { 
-		return Expr::EwiseUnaryExpr<_Myt, _Xop_ewise_sqrt>(*this); 
+	MATRICE_GLOBAL_FINL auto sqrt()const noexcept { 
+		return Exp::EwiseUnaryExp<_Myt, _Xop_ewise_sqrt>(*this); 
 	}
-	MATRICE_HOST_FINL auto inv() const { 
-		return Expr::MatUnaryExpr<_Myt, _Xop_mat_inv>(*this); 
+	MATRICE_HOST_FINL auto inv()const noexcept { 
+		return Exp::MatUnaryExp<_Myt, _Xop_mat_inv>(*this); 
 	}
-	MATRICE_HOST_FINL auto inv(_Myconstref _Right) {
-		return Expr::MatUnaryExpr<_Myt, _Xop_mat_inv>(_Right, *this);
+	MATRICE_HOST_FINL auto inv(const _Myt& _Right)const noexcept {
+		return Exp::MatUnaryExp<_Myt, _Xop_mat_inv>(_Right, *this);
 	}
-	MATRICE_HOST_FINL auto transpose() const { 
-		return Expr::MatUnaryExpr<_Myt, _Xop_mat_trp>(*this); 
+	MATRICE_HOST_FINL auto transpose()const noexcept { 
+		return Exp::MatUnaryExp<_Myt, _Xop_mat_trp>(*this); 
 	}
-	MATRICE_GLOBAL_INL auto t() const {
-		return Expr::MatUnaryExpr<_Myt, _Xop_mat_trp>(*this);
+	MATRICE_GLOBAL_INL auto t()const noexcept {
+		return Exp::MatUnaryExp<_Myt, _Xop_mat_trp>(*this);
 	}
-	MATRICE_GLOBAL_FINL auto normalize(value_t _val = inf) const { 
+	MATRICE_GLOBAL_FINL auto normalize(value_t _val = inf)const noexcept { 
 		return ((*this)*(abs(_val) < eps ? 1 : 1 / (_val == inf ? max() : _val))); 
 	}
 
@@ -887,26 +903,26 @@ public:
 #pragma endregion
 
 	///<brief> in-time matrix arithmetic </brief>
-	MATRICE_GLOBAL_FINL auto(max)() const { 
+	MATRICE_GLOBAL_FINL auto(max)()const noexcept { 
 		return (*std::max_element(begin(), end())); 
 	}
-	MATRICE_GLOBAL_FINL auto(min)() const { 
+	MATRICE_GLOBAL_FINL auto(min)()const noexcept {
 		return (*std::min_element(begin(), end())); 
 	}
-	MATRICE_GLOBAL_FINL auto(sum)() const { 
+	MATRICE_GLOBAL_FINL auto(sum)()const noexcept {
 		return (reduce(begin(), end())); 
 	}
 	MATRICE_GLOBAL_FINL auto(det)() const { 
 		return (det_impl(*static_cast<const _Derived*>(this))); 
 	}
-	MATRICE_GLOBAL_FINL auto(trace)() const { 
-		return (reduce(begin(), end(), cols() + 1)); 
+	MATRICE_GLOBAL_FINL auto(trace)()const noexcept {
+		return (reduce(begin().stride(cols()+1), end().stride(cols()+1), 1));
 	}
 
 	/**
 	 * \matrix Frobenius norm
 	 */
-	MATRICE_GLOBAL_FINL auto norm_2()->value_type const { 
+	MATRICE_GLOBAL_FINL value_type norm_2()const noexcept {
 		auto _Ans = dot(*this); 
 		return (_Ans > eps ? ::sqrt(_Ans) : inf); 
 	}
@@ -923,9 +939,15 @@ public:
 	 * \dot product of this matrix with _Rhs
 	 */
 	template<typename _Rhs> 
-	MATRICE_GLOBAL_FINL value_type dot(const _Rhs& _Rhs) const {
+	MATRICE_GLOBAL_FINL value_type dot(const _Rhs& _Rhs)const noexcept {
 		return this->operator*(_Rhs).sum(); 
 	}
+	/**
+	 * \contraction of two matrices (rank-2 tensors)
+	 //tex: $\text{res} = \mathbf{A}:\mathbf{B}$
+	 */
+	template<int Rows, int Cols>
+	MATRICE_GLOBAL_INL value_type contract(const Matrix_<value_type, Rows, Cols>& _Rhs)const;
 
 	/**
 	 *\brief in-place instant subtraction
@@ -1186,7 +1208,7 @@ protected:
 	using _Mybase::m_shape;
 
 	size_t _Myfmt = _Myalloc.fmt() | gene;
-	conditional_t<(rows_at_compiletime>=::dynamic||cols_at_compiletime >=::dynamic), _Myalloc_t, _Myalty> _Myalloc;
+	conditional_t<(rows_at_compiletime>=::dynamic||cols_at_compiletime >=::dynamic), _Myalloc_t, typename detail::Storage_<value_type>::template Allocator<rows_at_compiletime, cols_at_compiletime>> _Myalloc;
 
 	MATRICE_GLOBAL_INL _Myt& _Xfields(initlist<size_t> il) noexcept {
 		m_shape = il;

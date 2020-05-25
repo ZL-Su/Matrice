@@ -50,14 +50,20 @@ public:
 
 	/**
 	 *\brief Update this transformer with:
-	 //tex: $\mathbf{p}\leftarrow\mathbf{p}\circ\Delta\mathbf{p}^{-1}$
+	 //tex: $\mathcal{T}(\eta;\mathbf{p})\leftarrow\mathcal{T}(\eta;\mathbf{p})\circ\mathcal{T}^{-1}(\eta;\Delta\mathbf{p})$
 	 */
 	MATRICE_GLOBAL_INL decltype(auto)update(const value_type* dp)noexcept {
 		const auto _Det = safe_div(1, (1+dp[0])*(1+dp[3])-dp[1]*dp[2]);
-		const auto idp11 = (1 + dp[3]) * _Det, idp12 = -dp[1] * _Det;
-		const auto idp21 = -dp[2] * _Det, idp22 = (1 + dp[0]) * _Det;
+		const auto idp0 = (1 + dp[3]) * _Det, idp1 = -dp[1] * _Det;
+		const auto idp2 = -dp[2] * _Det, idp3 = (1 + dp[0]) * _Det;
 
+		auto p = _Mypar.data();
+		const auto p0 = (1 + p[0]) * idp0 + p[1] * idp2;
+		const auto p1 = (1 + p[0]) * idp1 + p[1] * idp3;
+		const auto p2 = p[2] * idp0 + (1 + p[3]) * idp2;
+		const auto p3 = p[2] * idp1 + (1 + p[3]) * idp3;
 
+		p[0] = p0, p[1] = p1, p[2] = p2, p[3] = p3;
 		return (_Mypar);
 	}
 

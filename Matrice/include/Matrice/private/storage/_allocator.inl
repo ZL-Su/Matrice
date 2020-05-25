@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -33,8 +33,10 @@ _DETAIL_BEGIN
 template<typename _Altrs>
 MATRICE_GLOBAL_INL typename _Dense_allocator_base<_Altrs>::allocator&
 _Dense_allocator_base<_Altrs>::operator=(const allocator& othr) noexcept {
-	if (this != &othr) {
+	if (!(this->rows() == othr.rows() && this->cols()==othr.cols())) {
 		alloc(othr.rows(), othr.cols());
+	}
+	if (this != &othr) {
 		_Alloc_copy(othr.derived());
 	}
 	return (this->derived());
@@ -195,7 +197,7 @@ MATRICE_HOST_INL decltype(auto) aligned_malloc(size_t size) {
 		return (reinterpret_cast<value_type*>(aligned_ptr));
 	}
 	catch (std::bad_alloc) {
-		std::exception("Bad memory allocation.");
+		exception::error("Bad memory allocation in Func: aligned_malloc<_Ty>(size_t) in File: _allocator.inl.\n");
 	};
 }
 

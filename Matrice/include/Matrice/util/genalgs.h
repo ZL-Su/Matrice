@@ -108,14 +108,14 @@ MATRICE_GLOBAL_FINL void fill(_Fwdty& _Cont, _Fn&& _Func) {
 template<typename _InIt>
 MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last) {
 	static_cast<void>(_First == _Last);
-	typename std::pointer_traits<_InIt>::element_type _Ret = 0;
+	remove_all_t<decltype(*_First)> _Ret{ 0 };
 #if MATRICE_SIMD_ARCH==MATRICE_SIMD_AVX
 	using packed_t = typename simd::template Packet_<decltype(_Ret)>;
 	decltype(auto) _Size = std::distance(_First, _Last);
 	decltype(auto) _Step = packed_t::size << 1;
 	decltype(auto) _N = _Size / _Step;
 	for (auto i = 0, j = 0; i < _N; j = (++i)*_Step) {
-		const auto _Pos = _First + j;
+		const auto _Pos = &*_First + diff_t(j);
 		_Ret += (packed_t(_Pos)+packed_t(_Pos+packed_t::size)).reduce();
 	}
 	for (_First += _N * _Step; _First != _Last; ++_First) _Ret += *_First;
@@ -126,11 +126,12 @@ MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last) {
 }
 
 // \return: sum of range [_First, _Last) with step := _Stride
-template<typename _InIt, MATRICE_ENABLE_IF(is_pointer_v<_InIt>)>
+template<typename _InIt>
 MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, index_t _Stride) {
 	static_cast<void>(_First == _Last);
-	remove_reference_t<decltype(*_First)> _Ret = 0;
-	for (; _First < _Last; _First += _Stride) _Ret += *(_First);
+	remove_all_t<decltype(*_First)> _Ret{ 0 };
+	for (; _First < _Last; _Stride == 1 ? ++_First : _First += _Stride)
+		_Ret += *(_First);
 	return (_Ret);
 }
 
@@ -141,7 +142,7 @@ MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, index_t _Stride) {
 template<typename _InIt, typename _Op, MATRICE_ENABLE_IF(is_pointer_v<_InIt>&&is_function_v<_Op>)>
 MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, _Op _op) {
 	static_cast<void>(_First == _Last);
-	remove_reference_t<decltype(_First[0])> _Ret = 0;
+	remove_all_t<decltype(_First[0])> _Ret = 0;
 	for (; _First != _Last; ++_First) _Ret += _op(*_First);
 	return (_Ret);
 }
@@ -150,7 +151,7 @@ template<template<typename> class _Op,
 MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, _Scalar _Value, _Func _Fn, _Op<_Scalar> _op = _Op<_Scalar>()) {
 	static_assert(is_arithmetic_v<_Scalar>, "Oops, template parameter '_Scalar' is illegal!");
 	static_cast<void>(_First == _Last);
-	remove_reference_t<decltype(_First[0])> _Ret = 0;
+	remove_all_t<decltype(_First[0])> _Ret = 0;
 	for (; _First != _Last; ++_First) _Ret += _Fn(_op(*_First, _Value));
 	return (_Ret);
 }

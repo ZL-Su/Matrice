@@ -43,6 +43,8 @@ public:
 	using _Mybase::Size;
 	using _Mybase::rows_at_compiletime;
 	using _Mybase::cols_at_compiletime;
+	template<int rows, int cols = rows> 
+	using lite = Matrix_<value_t, rows, cols>;
 
 	MATRICE_GLOBAL_FINL constexpr Matrix_() noexcept
 		: _Mybase{} {};
@@ -103,11 +105,11 @@ public:
 	MATRICE_GLOBAL_FINL operator std::array<value_t, Size>() noexcept {
 		return internal::_Fill_array<value_t, Size>(_Mybase::begin());
 	}
-	MATRICE_GLOBAL_FINL operator Matrix_<value_t, ::dynamic>() const noexcept {
-		return Matrix_<value_t, ::dynamic>{rows(), cols(), _Mybase::m_data};
+	MATRICE_GLOBAL_FINL operator lite<::dynamic>()const noexcept {
+		return lite<::dynamic>{rows(), cols(), _Mybase::m_data};
 	}
-	MATRICE_GLOBAL_FINL operator Matrix_<value_t, ::dynamic>() noexcept {
-		return Matrix_<value_t, ::dynamic>{rows(), cols(), _Mybase::m_data};
+	MATRICE_GLOBAL_FINL operator lite<::dynamic>() noexcept {
+		return lite<::dynamic>{rows(), cols(), _Mybase::m_data};
 	}
 
 	template<typename _Arg> _Myt& ref(_Arg& _) noexcept = delete;
@@ -248,10 +250,10 @@ public:
 	MATRICE_HOST_INL _Myt& operator= (_Myt&& other) noexcept {
 		return _Mybase::operator=(move(other)); 
 	}
-	template<typename _Arg>
-	MATRICE_HOST_INL _Myt& operator=(const _Arg& _arg) {
-		return _Mybase::operator=(_arg);
-	}
+	//template<typename _Arg>
+	//MATRICE_HOST_INL _Myt& operator=(_Arg&& _arg) {
+	//	return _Mybase::operator=(_arg);
+	//}
 
 	MATRICE_MAKE_METHOD_CREATE(rows, cols = 1);
 };

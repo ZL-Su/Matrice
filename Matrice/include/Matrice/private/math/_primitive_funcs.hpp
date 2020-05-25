@@ -105,7 +105,7 @@ template<typename T1, typename T2,
 	typename _Ret = common_type_t<T1, T2>, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_GLOBAL_FINL constexpr _Ret pow(const T1& x, const T2& y)noexcept {
-	return std::pow(T1(x), T2(x));
+	return std::pow(T1(x), T2(y));
 }
 template<typename T1, typename T2, 
 	typename _Ret = common_type_t<T1, T2>, 
