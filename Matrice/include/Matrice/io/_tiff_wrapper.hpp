@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #pragma once
-//#include "../../../addin/libtiff/tiffio.h"
 #include "../util/_macros.h"
 #include "../private/_type_traits.h"
 #include "../forward.hpp"
@@ -28,7 +27,6 @@ DGE_MATRICE_BEGIN
 using tiff_type = tiff;
 using tiff_pointer = std::add_pointer_t<tiff_type>;
 template<typename _Ty> using tiff_matrix_t = Matrix_<_Ty, 0, 0>;
-template<typename _Ty> struct image_instance;
 
 template<typename _Ty = uint8_t> 
 struct tiff_instance : image_instance<_Ty> {
@@ -64,5 +62,4 @@ struct tiff_instance : image_instance<_Ty> {
  */
 template<typename _Ty=uint8_t>
 MATRICE_HOST_ONLY tiff_instance<_Ty> read_tiff_file(const char* fpath);
-
 DGE_MATRICE_END
