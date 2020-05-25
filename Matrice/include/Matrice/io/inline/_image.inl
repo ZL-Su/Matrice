@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ _DETAIL_END
 
 template<typename _Ty, class _Pth>
 MATRICE_HOST_INL decltype(auto) imread(const _Pth path) {
-	//static_assert(is_any_of_v<std::decay_t<_Pth>, std::string, io::path_t, char*>,"Unknown path type in function imread().");
+	static_assert(is_any_of_v<remove_all_t<_Pth>, std::string, io::path_t, const char*>,"Unknown path type in function imread().");
 
 	if constexpr (is_same_v<remove_all_t<_Pth>, std::string>) {
 		return (detail::_Imread(path.c_str(), _Ty()));
