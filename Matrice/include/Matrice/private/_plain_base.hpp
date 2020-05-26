@@ -327,12 +327,12 @@ public:
 	/**
 	 *\from STD vector<value_t>, while no memory is copied.
 	 */
-	MATRICE_HOST_INL Base_(const std::vector<value_t>&_other, int _cols=1) noexcept
+	MATRICE_HOST_INL Base_(std::vector<value_t>&_other, int _cols=1) noexcept
 		:Base_(_other.size()/_cols, _cols, _other.data()) {}
 	/**
 	 *\from STD valarray<...>, while no memory is copied.
 	 */
-	MATRICE_HOST_INL Base_(const std::valarray<value_t>& _other, int _cols = 1) noexcept
+	MATRICE_HOST_INL Base_(std::valarray<value_t>& _other, int _cols = 1) noexcept
 		:Base_(_other.size() / _cols, _cols, &_other[0]) {}
 	/**
 	 *\from explicit specified matrix type
@@ -385,25 +385,23 @@ public:
 	/**
 	 *\create a matrix with dynamic (host or device) memory allocation
 	 */
-	MATRICE_HOST_INL decltype(auto)create(diff_t _Rows, diff_t _Cols = (1)) {
+	MATRICE_HOST_INL _Derived& create(diff_t _Rows, diff_t _Cols = (1)) {
 		if constexpr (_M <= 0 || _N <= 0) 
 			this->derived().__create_impl(_Rows, _Cols);
-		return (*static_cast<_Derived*>(this));
+		return this->derived();
 	};
 	template<typename _Uy, MATRICE_ENABLE_IF(is_scalar_v<_Uy>)>
-	MATRICE_HOST_INL decltype(auto)create(diff_t _Rows, diff_t _Cols, _Uy _Val) {
-		this->create(_Rows, _Cols);
-		return (*(this) = value_type(_Val));
+	MATRICE_HOST_INL _Derived& create(diff_t _Rows, diff_t _Cols, _Uy _Val) {
+		return this->create(_Rows, _Cols) = value_type(_Val);
 	};
-	MATRICE_HOST_INL decltype(auto)create(const shape_t<2>& _Shape) {
+	MATRICE_HOST_INL _Derived& create(const shape_t<2>& _Shape) {
 		if constexpr (_M <= 0 || _N <= 0) 
 			this->derived().__create_impl(MATRICE_EXPAND_SHAPE);
-		return (*static_cast<_Derived*>(this));
+		return this->derived();
 	};
 	template<typename _Uy, MATRICE_ENABLE_IF(is_scalar_v<_Uy>)>
-	MATRICE_HOST_INL decltype(auto)create(const shape_t<2>& _Shape, _Uy _Val) {
-		this->create(_Shape);
-		return (*(this) = value_type(_Val));
+	MATRICE_HOST_INL _Derived& create(const shape_t<2>& _Shape, _Uy _Val) {
+		return this->create(_Shape) = value_type(_Val);
 	};
 
 	/**
