@@ -3,8 +3,8 @@
 *********************************************************************/
 #pragma once
 #include "../io.hpp"
-#include "../../util/_exception.h"
-#include "../../util/_std_wrapper.h"
+#include "util/_exception.h"
+#include "util/_std_wrapper.h"
 
 DGE_MATRICE_BEGIN namespace io { _DETAIL_BEGIN
 
@@ -209,7 +209,7 @@ public:
 	}
 	template<typename _Fn>
 	_Data_loader_impl(const _Mydir_type& _Dir, _Fn&& _Op)
-		: _Mydir(_Dir), _Myloader(std::forward<_Fn>(_Op)) {
+		: _Mydir(_Dir), _Myloader(_Op) {
 		_Collect_fnames();
 	}
 	_Data_loader_impl(_Mydir_type&& _Dir)
@@ -226,25 +226,25 @@ public:
 	/**
 	 * \set loader iterator to begin (zero) pos
 	 */
-	MATRICE_HOST_INL bool begin() const {
+	MATRICE_HOST_INL bool begin() const noexcept {
 		return (_Mypos = -1);
 	}
 	/**
 	 * \set loader iterator to reverse begin (_Mydepth) pos
 	 */
-	MATRICE_HOST_INL bool rbegin() const {
+	MATRICE_HOST_INL bool rbegin() const noexcept {
 		return (_Mypos = _Mydepth);
 	}
 	/**
 	 * \check if loader iterator meets the upper bound
 	 */
-	MATRICE_HOST_INL bool end() const {
+	MATRICE_HOST_INL bool end() const noexcept {
 		return (_Mypos >= _Mydepth);
 	}
 	/**
 	 * \check if loader iterator meets the lower bound
 	 */
-	MATRICE_HOST_INL bool rend() const {
+	MATRICE_HOST_INL bool rend() const noexcept {
 		return (_Mypos < 0);
 	}
 	/**
@@ -260,7 +260,7 @@ public:
 	}
 
 	/**
-	 * \forward iterate to retrieve data paths with common loader.
+	 * \brief Load current file in each of subfolders in one folder
 	 */
 	MATRICE_HOST_INL auto forward() const {
 		std::vector<data_type> _Data;
@@ -271,16 +271,15 @@ public:
 			DGELOM_CHECK(_Mypos<_Names.size(), "file list subscript out of range.");
 #endif
 			auto _File = _Myloader(_Mydir[_Idx] + _Names[_Mypos]);
-			if (_File.size() != 0)
-				_Data.emplace_back(_File);
-			else
-				continue;
+			_Cond_push_file(_Data, _File);
 		}
 		_Mypos++;
 		return std::forward<decltype(_Data)>(_Data);
 	}
 	/**
-	 * \forward iterate to retrieve data paths with given _Loader. The data type depends on the return-type of _Loader.
+	 *\forward Iterate to retrieve data paths with given _Loader. 
+		The data type depends on the return-type of _Loader.
+	 *\note	Load the current file in each of subfolders in one folder
 	 */
 	template<typename _Fn>
 	MATRICE_HOST_INL auto forward(_Fn&& _Loader) const {
@@ -290,7 +289,8 @@ public:
 		_Data.emplace_back(_First);
 		for (const auto& _Idx : range(1, _Mydir.size()-1)) {
 			auto _File = _Op(_Idx);
-			if(_File.size()!=0) _Data.emplace_back(_File);
+			static_assert(is_same_v<data_type, remove_all_t<decltype(_File)>>, "Returned type of the user defined loader [_Fn] is not same with the [data_type].");
+			if(_File.size()!=0) _Data.push_back(_File);
 			else continue;
 		}
 		_Mypos++;
@@ -307,33 +307,35 @@ public:
 	}
 
 	/**
-	 *\brief load the first file
+	 *\brief Load the first file in each of subfolders in one folder
 	 */
 	MATRICE_HOST_INL auto front() const {
 		std::vector<data_type> _Data;
 		const auto _Size = _Mydir.size() == 0 ? 1 : _Mydir.size();
 		for (const auto& _Idx : range(0, _Size)) {
 			const auto& _Name = _Mynames[_Idx].front();
-			_Data.emplace_back(_Myloader(_Mydir[_Idx] + _Name));
+			auto _File = _Myloader(_Mydir[_Idx] + _Name);
+			_Cond_push_file(_Data, _File);
 		}
 		return std::forward<decltype(_Data)>(_Data);
 	}
 	/**
-	 *\brief load the last file
+	 *\brief Load the last file in each of subfolders in one folder.
 	 */
 	MATRICE_HOST_INL auto back() const {
 		std::vector<data_type> _Data;
 		const auto _Size = _Mydir.size() == 0 ? 1 : _Mydir.size();
 		for (const auto& _Idx : range(0, _Size)) {
 			const auto& _Name = _Mynames[_Idx].back();
-			_Data.emplace_back(_Myloader(_Mydir[_Idx] + _Name));
+			auto _File = _Myloader(_Mydir[_Idx] + _Name);
+			_Cond_push_file(_Data, _File);
 		}
 		return std::forward<decltype(_Data)>(_Data);
 	}
 
 	/**
-	 *\brief load file at i-th position
-	 *\param [i] index of a file name
+	 *\brief Load the i-th file in each of subfolders in one folder
+	 *\param [i] index of the file to be loaded
 	 */
 	MATRICE_HOST_INL auto at(size_t i) const {
 		std::vector<data_type> _Data;
@@ -344,8 +346,7 @@ public:
 			DGELOM_CHECK(i < _Names.size(), "file list subscript out of range.");
 #endif
 			auto _File = _Myloader(_Mydir[_Idx] + _Names[i]);
-			if(_File) 
-				_Data.push_back(_File);
+			_Cond_push_file(_Data, _File);
 		}
 		return std::forward<decltype(_Data)>(_Data);
 	}
@@ -423,11 +424,25 @@ private:
 		}
 	}
 
+	template<class _Dty, class _Fty>
+	MATRICE_HOST_INL void _Cond_push_file(_Dty& _Data, const _Fty& _File)const {
+		using file_type = remove_all_t<decltype(_File)>;
+		if (_File.size()) {
+			if constexpr (is_same_v<file_type, image_instance>) {
+				auto _Mat = _File.matrix<data_type::value_t>();
+				_Data.push_back(_Mat);
+			}
+			else {
+				_Data.push_back(_File);
+			}
+		}
+	}
+
 	_Mydir_type _Mydir;
 	mutable index_t _Mypos = 0;
 	index_t _Mydepth = std::numeric_limits<index_t>::max();
 	std::vector<_Mydir_type::container> _Mynames;
-	std::function<data_type(_Mydir_type::value_type&&)> _Myloader;
+	std::function<image_instance(_Mydir_type::value_type&&)> _Myloader;
 };
 
 template<typename _Ty>
@@ -435,10 +450,10 @@ struct _Loader_impl<_Ty, loader_tag::tiff> {
 	using value_type = _Ty;
 	using category = loader_tag::tiff;
 
-	MATRICE_HOST_INL decltype(auto) operator()(std::string path) {
+	MATRICE_HOST_INL image_instance operator()(std::string path) {
 		if(string_helper::split(path, '.').back() == "tif")
-			return read_tiff_file<value_type>(path.c_str());
-		else return tiff_instance<value_type>();
+			return read_tiff_file(path.c_str());
+		else return image_instance{};
 	}
 };
 _DETAIL_END } DGE_MATRICE_END
