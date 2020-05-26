@@ -27,29 +27,55 @@ DGE_MATRICE_BEGIN
 namespace fs = std::experimental::filesystem;
 enum is_skip_folder { N = 0, Y = 1 };
 
-template<typename _Ty = uint8_t>
 struct image_instance {
-	using value_type = _Ty;
-	using image_type = Matrix<value_type>;
+	using value_type = uint8_t;
+	using data_type = std::vector<value_type>;
 
-	MATRICE_HOST_INL operator Matrix_<value_type,0,0>() noexcept {
-		return (m_data);
+	template<typename _Ty>
+	MATRICE_HOST_INL Matrix_<_Ty, ::dynamic> matrix()const noexcept {
+		Matrix_<_Ty, ::dynamic> _Ret(m_rows, m_width);
+		_Ret.from(m_data.data());
+		return (_Ret);
 	}
-	MATRICE_HOST_INL image_instance& create(uint32_t nchs) noexcept {
+	MATRICE_HOST_INL image_instance& create(uint32_t nchs) {
 		m_nchs = nchs;
 		m_width = m_cols * m_nchs;
-		m_data.create(m_rows, m_width, zero<value_type>);
-
+		m_data.resize(m_rows * m_width);
 		return (*this);
 	}
 	template<typename _Op>
-	MATRICE_HOST_INL decltype(auto) operator()(_Op&& op) noexcept {
+	MATRICE_HOST_INL auto operator()(_Op&& op) noexcept {
 		return (op(m_data));
+	}
+
+	template<typename _Ty>
+	MATRICE_HOST_INL Matrix_<_Ty, ::dynamic> grayscale() const noexcept {
+		Matrix_<_Ty, ::dynamic> gc(this->m_rows, this->m_cols);
+		if (this->m_nchs == 1) {
+			gc.from(this->m_data.data());
+		}
+		else {
+			for (auto r = 0; r < this->m_rows; ++r) {
+				const auto pd = this->m_data.data()+r*m_width;
+				auto pg = gc[r];
+				for (auto c = 0; c < this->m_cols; ++c) {
+					pg[c] = pd[c] * 0.07 + pd[c + m_cols] * 0.72 + pd[c + 2 * m_cols] * 0.21;
+				}
+			}
+		}
+		if constexpr (is_floating_point_v<_Ty>)
+			gc = gc / 255;
+
+		return forward<decltype(gc)>(gc);
+	}
+
+	MATRICE_HOST_INL bool empty() const noexcept {
+		return m_data.empty();
 	}
 
 	uint32_t m_rows = 0, m_cols = 0;
 	uint32_t m_nchs = 1, m_width = 0;
-	image_type m_data;
+	data_type m_data;
 };
 
 class IO : std::ios {
@@ -439,7 +465,7 @@ _DETAIL_END
  *\param [path] the path of the image to be read.
  */
 template<typename _Ty = uint8_t, class _Pth = std::string> 
-MATRICE_HOST_INL decltype(auto) imread(const _Pth path);
+MATRICE_HOST_INL auto imread(const _Pth path);
 
 } DGE_MATRICE_END
 #include "inline\_directory.inl"
