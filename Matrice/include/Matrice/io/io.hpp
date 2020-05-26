@@ -69,8 +69,8 @@ struct image_instance {
 		return forward<decltype(gc)>(gc);
 	}
 
-	MATRICE_HOST_INL bool empty() const noexcept {
-		return m_data.empty();
+	MATRICE_HOST_INL size_t size() const noexcept {
+		return m_data.size();
 	}
 
 	uint32_t m_rows = 0, m_cols = 0;
