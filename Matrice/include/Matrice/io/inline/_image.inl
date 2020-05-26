@@ -29,7 +29,7 @@ const std::string _Get_image_fmt(const T fname) noexcept {
 	return str.substr(str.size() - 3);
 }
 
-MATRICE_HOST_INL decltype(auto) _Imread(const char* path, uint8_t) {
+MATRICE_HOST_INL auto _Imread(const char* path, uint8_t) {
 	const auto fmt = _Get_image_fmt(path);
 
 #ifdef MATRICE_DEBUG
@@ -37,11 +37,11 @@ MATRICE_HOST_INL decltype(auto) _Imread(const char* path, uint8_t) {
 #endif // MATRICE_DEBUG
 
 	if (fmt == "tif") {
-		return read_tiff_file<uint8_t>(path);
+		return read_tiff_file(path);
 	}
 }
 
-MATRICE_HOST_INL decltype(auto) _Imread(const char* path, float) {
+MATRICE_HOST_INL auto _Imread(const char* path, float) {
 	const auto fmt = _Get_image_fmt(path);
 
 #ifdef MATRICE_DEBUG
@@ -49,11 +49,11 @@ MATRICE_HOST_INL decltype(auto) _Imread(const char* path, float) {
 #endif // MATRICE_DEBUG
 
 	if (fmt == "tif") {
-		return read_tiff_file<float>(path);
+		return read_tiff_file(path);
 	}
 }
 
-MATRICE_HOST_INL decltype(auto) _Imread(const char* path, double) {
+MATRICE_HOST_INL auto _Imread(const char* path, double) {
 	const auto fmt = _Get_image_fmt(path);
 
 #ifdef MATRICE_DEBUG
@@ -61,14 +61,14 @@ MATRICE_HOST_INL decltype(auto) _Imread(const char* path, double) {
 #endif // MATRICE_DEBUG
 
 	if (fmt == "tif") {
-		return read_tiff_file<double>(path);
+		return read_tiff_file(path);
 	}
 }
 
 _DETAIL_END
 
 template<typename _Ty, class _Pth>
-MATRICE_HOST_INL decltype(auto) imread(const _Pth path) {
+MATRICE_HOST_INL auto imread(const _Pth path) {
 	static_assert(is_any_of_v<remove_all_t<_Pth>, std::string, io::path_t, const char*>,"Unknown path type in function imread().");
 
 	if constexpr (is_same_v<remove_all_t<_Pth>, std::string>) {
