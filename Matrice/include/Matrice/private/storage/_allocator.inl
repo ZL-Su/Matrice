@@ -46,7 +46,7 @@ template<typename _Altrs>
 MATRICE_GLOBAL_INL typename _Dense_allocator_base<_Altrs>::allocator&
 _Dense_allocator_base<_Altrs>::operator=(allocator&& othr) noexcept {
 	if (this != &othr) {
-		_Alloc_move(othr.derived());
+		_Alloc_move(move(othr.derived()));
 	}
 	return (this->derived());
 }
@@ -76,9 +76,11 @@ _Dense_allocator_base<_Altrs>::operator=(const pointer data) noexcept {
 template<typename _Altrs>
 MATRICE_GLOBAL_INL void _Dense_allocator_base<_Altrs>::destroy() noexcept {
 	if constexpr (is_not_same_v<category, stack_alloc_tag>) {
-		internal::free(m_data, category());
-		m_rows = size_t();
-		m_cols = size_t();
+		if (size() || m_data != nullptr) {
+			internal::free(m_data, category());
+			m_rows = size_t();
+			m_cols = size_t();
+		}
 	}
 }
 
@@ -88,20 +90,20 @@ MATRICE_GLOBAL_INL decltype(auto) _Dense_allocator_base<_Altrs>::deleter() const
 }
 
 template<typename _Altrs> template<typename _Al>
-MATRICE_GLOBAL_INL _Dense_allocator_base<_Altrs>& _Dense_allocator_base<_Altrs>::_Alloc_copy(const _Al& al) noexcept {
+MATRICE_GLOBAL_INL typename _Dense_allocator_base<_Altrs>::allocator& _Dense_allocator_base<_Altrs>::_Alloc_copy(const _Al& al) noexcept {
 	const auto _First = al.data();
 	const auto _Last = _First + min(size(), al.size());
 	internal::copy(_First, _Last, data(), MATRICE_MEMCPY_ADAPTER_1);
-	return (*this);
+	return (this->derived());
 }
 
 template<typename _Altrs> template<typename _Al>
-MATRICE_GLOBAL_INL _Dense_allocator_base<_Altrs>& _Dense_allocator_base<_Altrs>::_Alloc_move(_Al&& al) noexcept {
+MATRICE_GLOBAL_INL typename _Dense_allocator_base<_Altrs>::allocator& _Dense_allocator_base<_Altrs>::_Alloc_move(_Al&& al) noexcept {
 	m_data = al.data();
 	m_rows = al.rows();
 	m_cols = al.cols();
-	al.data() = nullptr;
-	return (*this);
+	al._Free_ownership();
+	return (this->derived());
 }
 
 template<typename _Ty, typename _Layout>
@@ -111,11 +113,11 @@ MATRICE_HOST_INL decltype(auto) MATRICE_ALLOCTOR_SIG(::dynamic, ::dynamic, ::dyn
 	return (*this);
 }
 
-template<typename _Ty, typename _Layout>
-MATRICE_HOST_INL MATRICE_ALLOCTOR_SIG(::dynamic, ::dynamic, ::dynamic)::~_Allocator() {
-	if(this->size())
-	internal::free(this->data(), typename _Mybase::category());
-}
+//template<typename _Ty, typename _Layout>
+//MATRICE_HOST_INL MATRICE_ALLOCTOR_SIG(::dynamic, ::dynamic, ::dynamic)::~_Allocator() {
+//	if(this->size())
+//	internal::free(this->data(), typename _Mybase::category());
+//}
 
 template<typename _Ty, diff_t _Rows, typename _Layout>
 MATRICE_HOST_INL decltype(auto) MATRICE_ALLOCTOR_SIG(_Rows, ::dynamic, ::dynamic)::_Alloc() noexcept {
@@ -124,11 +126,11 @@ MATRICE_HOST_INL decltype(auto) MATRICE_ALLOCTOR_SIG(_Rows, ::dynamic, ::dynamic
 	return (*this);
 }
 
-template<typename _Ty, diff_t _Rows, typename _Layout>
-MATRICE_HOST_INL MATRICE_ALLOCTOR_SIG(_Rows, ::dynamic, ::dynamic)::~_Allocator() {
-	if (this->size())
-	internal::free(this->data(), typename _Mybase::category());
-}
+//template<typename _Ty, diff_t _Rows, typename _Layout>
+//MATRICE_HOST_INL MATRICE_ALLOCTOR_SIG(_Rows, ::dynamic, ::dynamic)::~_Allocator() {
+//	if (this->size())
+//	internal::free(this->data(), typename _Mybase::category());
+//}
 
 template<typename _Ty, diff_t _Cols, typename _Layout>
 MATRICE_HOST_INL decltype(auto) MATRICE_ALLOCTOR_SIG(::dynamic, _Cols, ::dynamic)::_Alloc() noexcept {
@@ -137,11 +139,11 @@ MATRICE_HOST_INL decltype(auto) MATRICE_ALLOCTOR_SIG(::dynamic, _Cols, ::dynamic
 	return (*this);
 }
 
-template<typename _Ty, diff_t _Cols, typename _Layout>
-MATRICE_HOST_INL MATRICE_ALLOCTOR_SIG(::dynamic, _Cols, ::dynamic)::~_Allocator() {
-	if (this->size())
-	internal::free(this->data(), typename _Mybase::category());
-}
+//template<typename _Ty, diff_t _Cols, typename _Layout>
+//MATRICE_HOST_INL MATRICE_ALLOCTOR_SIG(::dynamic, _Cols, ::dynamic)::~_Allocator() {
+//	if (this->size())
+//	internal::free(this->data(), typename _Mybase::category());
+//}
 
 #ifdef MATRICE_ENABLE_CUDA
 template<typename _Ty, typename _Layout>
@@ -152,10 +154,10 @@ MATRICE_GLOBAL_INL decltype(auto) MATRICE_ALLOCTOR_SIG(::device, ::device, ::dev
 	return (*this);
 }
 
-template<typename _Ty, typename _Layout>
-MATRICE_GLOBAL_INL MATRICE_ALLOCTOR_SIG(::device, ::device, ::device)::~_Allocator() {
-	internal::free(this->data(), typename _Mybase::category());
-}
+//template<typename _Ty, typename _Layout>
+//MATRICE_GLOBAL_INL MATRICE_ALLOCTOR_SIG(::device, ::device, ::device)::~_Allocator() {
+//	internal::free(this->data(), typename _Mybase::category());
+//}
 
 template<typename _Ty, typename _Layout>
 MATRICE_GLOBAL_INL decltype(auto) MATRICE_ALLOCTOR_SIG(::global, ::global, ::global)::_Alloc() noexcept {
@@ -165,10 +167,10 @@ MATRICE_GLOBAL_INL decltype(auto) MATRICE_ALLOCTOR_SIG(::global, ::global, ::glo
 	return (*this);
 }
 
-template<typename _Ty, typename _Layout>
-MATRICE_GLOBAL_INL MATRICE_ALLOCTOR_SIG(::global, ::global, ::global)::~_Allocator() {
-	internal::free(this->data(), typename _Mybase::category());
-}
+//template<typename _Ty, typename _Layout>
+//MATRICE_GLOBAL_INL MATRICE_ALLOCTOR_SIG(::global, ::global, ::global)::~_Allocator() {
+//	internal::free(this->data(), typename _Mybase::category());
+//}
 #endif
 
 _DETAIL_END
