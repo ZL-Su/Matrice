@@ -9,7 +9,7 @@ template void Matrix_<TYPE, ALTYPE>::__create_impl(size_t, size_t);
 template<typename _Ty>
 void Matrix_<_Ty, ::dynamic>::__create_impl(size_t rows, size_t cols) {
 	_Mybase::_Myalloc.alloc(rows, cols);
-	this->_Xfields({ rows, cols });
+	this->_Xfields({ rows, cols, 1 });
 }
 
 MATRICE_INSTANTIATE_METHOD_CREATE(int, ::dynamic)
@@ -26,12 +26,12 @@ MATRICE_INSTANTIATE_METHOD_CREATE(uint64_t, ::dynamic)
 template<typename _Ty>
 void Matrix_<_Ty, ::global>::__create_impl(size_t rows, size_t cols) {
 	_Mybase::_Myalloc.alloc(rows, cols);
-	this->_Xfields({ rows, cols });
+	this->_Xfields({ rows, cols, 1 });
 }
 template<typename _Ty>
 void Matrix_<_Ty, ::device>::__create_impl(size_t rows, size_t cols) {
 	_Mybase::_Myalloc.alloc(rows, cols);
-	this->_Xfields({ rows, cols });
+	this->_Xfields({ rows, cols, 1 });
 }
 
 MATRICE_INSTANTIATE_METHOD_CREATE(int, ::global)
