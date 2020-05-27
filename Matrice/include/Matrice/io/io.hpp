@@ -25,8 +25,15 @@ DGE_MATRICE_BEGIN
  * \for filesystem namespace in STD library
  */
 namespace fs = std::experimental::filesystem;
+
+/**
+ * \is skip the folder
+ */
 enum is_skip_folder { N = 0, Y = 1 };
 
+/**
+ * \forward declaration for image_instance
+ */
 struct image_instance;
 
 class IO : std::ios {
