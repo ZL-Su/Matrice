@@ -352,7 +352,7 @@ private: \
 template<class, typename T> 
 struct has_method_data :std::false_type {};
 template<typename T>
-struct has_method_data<decltype(void(std::declval<T>().data())), T> : std::true_type {};
+struct has_method_data<decltype(void(std::declval<T>().data())),T>:std::true_type {};
 //*\alias has_data_v<T> is true_type iff T has the member T::data()
 template<typename T>
 inline constexpr auto has_data_v = has_method_data<void, T>::value;
@@ -363,7 +363,7 @@ inline constexpr auto has_data_v = has_method_data<void, T>::value;
 template<class, typename T>
 struct has_method_size :std::false_type {};
 template<typename T>
-struct has_method_size<decltype(void(std::declval<T>().size())), T> : std::true_type {};
+struct has_method_size<decltype(void(std::declval<T>().size())),T>:std::true_type{};
 //*\alias has_size_v<T> is true_type iff T has the member T::size()
 template<typename T>
 inline constexpr auto has_size_v = has_method_size<void, T>::value;
