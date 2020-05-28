@@ -200,6 +200,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		template<typename _Ty> struct _Mat_sprmul {
 			enum { flag = undef };
 			using value_type = _Ty;
+			using category = tag::_Expression_tag;
 			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
 			value_type operator() (const _Lhs& lhs, const _Rhs& rhs, int r, int c) const noexcept { 
 				return (lhs(r) * rhs(c)); 
@@ -929,12 +930,9 @@ template<
 }
 
 // *\outer product expression : xy^T
-template<
-	typename _Lhs, typename _Rhs,
-	typename value_t = common_type_t<typename _Lhs::value_t, typename _Rhs::value_t>,
-	typename _Op = _Exp::MatBinaryExp<_Lhs, _Rhs, _Exp_op::_Mat_sprmul<value_t>>>
+template<typename _Lhs, typename _Rhs>
 	MATRICE_GLOBAL_FINL auto outer_product(const _Lhs& _left, const _Rhs& _right) {
-	return _Op(_left, _right);
+	return _left.mul(_right.t()).eval();
 }
 
 // *\summation of expression
