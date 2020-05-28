@@ -347,15 +347,27 @@ private: \
 };
 
 /**
- *\brief has_method_data<T> is true_type iff T has the member T().data()
+ *\brief has_method_data<T> is true_type iff T has the member T::data()
  */
 template<class, typename T> 
 struct has_method_data :std::false_type {};
 template<typename T>
 struct has_method_data<decltype(void(std::declval<T>().data())), T> : std::true_type {};
-//*\alias has_data_v<T> is true_type iff T has the member T().data()
+//*\alias has_data_v<T> is true_type iff T has the member T::data()
 template<typename T>
 inline constexpr auto has_data_v = has_method_data<void, T>::value;
+
+/**
+ *\brief has_method_size<T> is true_type iff T has the member T::size()
+ */
+template<class, typename T>
+struct has_method_size :std::false_type {};
+template<typename T>
+struct has_method_size<decltype(void(std::declval<T>().size())), T> : std::true_type {};
+//*\alias has_size_v<T> is true_type iff T has the member T::size()
+template<typename T>
+inline constexpr auto has_size_v = has_method_size<void, T>::value;
+
 
  /**
   *\brief has_value_t<T> is true_type iff T has member value_t
@@ -398,7 +410,7 @@ inline constexpr auto is_same_v = std::is_same<T, U>::value;
  *\brief is_not_same_v<T,U> is true iff. T and U are not same type.
  */
 template<typename T, typename U>
-inline constexpr auto is_not_same_v = !std::is_same<T, U>::value;
+inline constexpr auto is_not_same_v = !is_same_v<T, U>;
 
 /**
  *\brief is_any_of_v<T, Ts...> is true iff. T is one of types encapsulated in Ts....
