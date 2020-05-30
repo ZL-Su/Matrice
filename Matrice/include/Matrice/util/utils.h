@@ -247,3 +247,4 @@ struct transforms {
 	};
 };
 DGE_MATRICE_END
+#include "../funcs/_functions.h"
