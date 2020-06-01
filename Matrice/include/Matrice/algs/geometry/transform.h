@@ -110,6 +110,17 @@ template<typename> class _Geotf_isometry {};
 
 _DETAIL_END
 
+/**
+ *\brief FUNCTION TEMPLATE, convert degree angle to radian.
+ */
+template<typename _Ty>
+MATRICE_HOST_INL constexpr _Ty radian(_Ty deg) noexcept {
+	return pi<_Ty> * deg / _Ty(180);
+}
+
+/**
+ *\brief FUNCTION TEMPLATE, conversion between the rotation vector and matrix.
+ */
 template<typename _Input, typename _Output>
 MATRICE_HOST_INL auto rodrigues(const _Input& _In, _Output& _Out) noexcept {
 	const auto _Ret = detail::_Rodrigues_impl(_In);
