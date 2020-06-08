@@ -58,6 +58,13 @@ MATRICE_HOST_INL Vec3_<_Ty> _Rodrigues_impl(const Matrix_<_Ty, 3>& _R) {
 	
 	return (_Ret = (_Half * a / s)*_Ret);
 }
+
+/// <summary>
+/// Rodrigues transform from a vector to a matrix in 3-dimensional.
+/// </summary>
+/// <typeparam name="_Ty"> scalar </typeparam>
+/// <param name="_r"> roration vector </param>
+/// <returns>rotation matrix </returns>
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 MATRICE_HOST_INL Matrix_<_Ty, 3> _Rodrigues_impl(const Vec3_<_Ty>& _r) noexcept {
 	using value_t = _Ty;
@@ -89,9 +96,9 @@ MATRICE_HOST_INL Matrix_<_Ty, 3> _Rodrigues_impl(const Vec3_<_Ty>& _r) noexcept 
 template<typename _Ty>
 MATRICE_HOST_INL Matrix_<_Ty, 3, 3> _Rot_from(const Vec3_<_Ty>& _V1, const Vec3_<_Ty>& _V2) {
 	const auto _A = _V1.cross(_V2);
-	const auto _R = Matrix_<_Ty, 3, 3>{0, _A[2],  _A[1], _A[2],     0, -_A[0],
-		-_A[1], _A[0],     0
-	};
+	const auto _R = Matrix_<_Ty, 3, 3>{0, _A[2],  _A[1], _A[2], 0, -_A[0],
+		-_A[1], _A[0], 0};
+
 	return decltype(_R)::diag(1) + _R + (_R*_R)*(1-_V1.dot(_V2)) / pow(_A.norm(), 2);
 }
 
