@@ -229,6 +229,9 @@
     <Filter Include="Header Files\Detail\accessors">
       <UniqueIdentifier>{3e37ef73-5605-4977-8159-953c98b298be}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Algs\Optimization">
+      <UniqueIdentifier>{39eda61b-1f71-48e6-84f8-407609565393}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -677,6 +680,9 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_bounded_pointer.hpp">
       <Filter>Header Files\Detail\accessors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\optimization\_intelli_optims.hpp">
+      <Filter>Header Files\Algs\Optimization</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
