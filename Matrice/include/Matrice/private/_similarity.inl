@@ -88,7 +88,7 @@ T Metric_<metric_fn::ZNCC, T>::eval(const pointer _Othr) const
 
 	auto _Begin = _Data;
 	_Toption[1] = reduce<value_t>(_Othr, _Othr + _Size, [&](auto It)->value_t{
-		auto _Diff = *It - _Toption[0];
+		const auto _Diff = *It - _Toption[0];
 		_Score += _Diff * *(_Begin++);
 		return _Diff*_Diff; 
 	});

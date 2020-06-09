@@ -55,9 +55,9 @@ private:
 template<typename T> class Metric_<metric_fn::ZNCC, T> final
 {
 	using value_t = T;
-	using pointer = T * ;
+	using pointer = value_t*;
 public:
-	MATRICE_GLOBAL_INL explicit Metric_(const pointer _data, int _radius) noexcept
+	MATRICE_GLOBAL_INL Metric_(const pointer _data, size_t _radius) noexcept
 		: _Data(_data), _Radius(_radius) { _Init(); }
 
 	MATRICE_GLOBAL_INL value_t eval(const pointer _oth) const;
