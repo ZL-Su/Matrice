@@ -228,6 +228,7 @@
     <ClInclude Include="include\Matrice\private\autograd\_ad_scalar.hpp" />
     <ClInclude Include="include\Matrice\private\autograd\_ad_utils.h" />
     <ClInclude Include="include\Matrice\private\container\_multi_array.hpp" />
+    <ClInclude Include="include\Matrice\private\math\fast_native_math_funcs.hpp" />
     <ClInclude Include="include\Matrice\private\math\kernel_wrapper.hpp" />
     <ClInclude Include="include\Matrice\private\math\_config.h" />
     <ClInclude Include="include\Matrice\private\math\_linear.h" />
