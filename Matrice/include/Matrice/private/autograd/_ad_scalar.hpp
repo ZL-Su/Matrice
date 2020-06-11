@@ -28,10 +28,9 @@ _DETAIL_BEGIN
  * \brief A scalar type with auto-differentiation capability
  * \param <_Dty> the matrix type used to hold the derivatives. 
 				The value type and the number of derivatives to compute
-				are determined from this type. _Dty can be: 
-				\c Matrix_<f,3,1> for 3 derivatives, or 
-				\c Matrix_<f,::dynamic,1> if the num of ders is deduced
-				at runtime.
+				are determined from this type. _Dty can be:
+				Matrix_<f,3,1> for 3 derivatives, or 
+				Matrix_<f,::dynamic,1> if the num of ders is deduced at runtime.
  * This class represents a scalar value while tracking its derivaties using Matrice's expression.
  * It supports almost all primitive math functions.
  * It also can be used as the scalar type of a Matrix_<> object, in this case, the expression mechanism only occurs at the top Matrix_ level, while the derivatives are computed right away.
@@ -42,8 +41,10 @@ class _Auto_diff_scalar
 {
 	using _Mybase = internal::_Auto_diff_spec_op<_Dty, is_matrix_v<remove_all_t<_Dty>>>;
 public:
-	using dervt_type = remove_all_t<_Dty>;
-	using value_type = typename dervt_type::value_type;
+	using grad_type = remove_all_t<_Dty>;
+	using value_type = typename grad_type::value_type;
+
+
 };
 _DETAIL_END
 
