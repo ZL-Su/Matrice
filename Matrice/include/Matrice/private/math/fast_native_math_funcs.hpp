@@ -21,7 +21,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
 /// <summary>
-/// A fast version for native matrix multiplication.
+/// A fast version for native matrix multiplication. This function is 5~6x faster than the original one.
 /// </summary>
 /// <typeparam name="T"> scalar value type </typeparam>
 /// <param name="C">: Matrix to be computed</param>
