@@ -18,6 +18,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "../_storage.hpp"
+#include "..\_memory.h"
 
 #define MATRICE_ALLOCTOR_SIG(M, N, OPT) \
 _Allocator<_Ty, M, N, allocator_traits_v<OPT>, _Layout>
@@ -28,6 +29,7 @@ typename _Al::category(), category()
 category(), typename _Al::category()
 
 DGE_MATRICE_BEGIN
+
 _DETAIL_BEGIN
 
 template<typename _Altrs>
@@ -75,13 +77,17 @@ _Dense_allocator_base<_Altrs>::operator=(const pointer data) noexcept {
 
 template<typename _Altrs>
 MATRICE_GLOBAL_INL void _Dense_allocator_base<_Altrs>::destroy() noexcept {
-	if constexpr (is_not_same_v<category, stack_alloc_tag>) {
+	if constexpr (is_same_v<category, heap_alloc_tag>) {
 		if (size() || m_data != nullptr) {
-			internal::free(m_data, category());
-			m_rows = size_t();
-			m_cols = size_t();
+			internal::free(m_data, size(), category());
 		}
 	}
+#ifdef MATRICE_ENABLE_CUDA
+	else if constexpr (is_any_of_v<category, device_alloc_tag, global_alloc_tag>) {
+		internal::free(m_data, size(), category());
+	}
+#endif
+	m_rows = m_cols = size_t{ 0 };
 }
 
 template<typename _Altrs>
@@ -177,8 +183,8 @@ _DETAIL_END
 
 namespace internal {
 template<typename _Ty, class _Tag>
-MATRICE_GLOBAL_INL decltype(auto) malloc(size_t rows, size_t& cols, _Tag) {
-	return impl::_Malloc<_Ty>(rows, cols, _Tag());
+MATRICE_GLOBAL_INL _Ty* malloc(size_t rows, size_t& cols, _Tag) {
+	return impl::_Malloc<_Ty>(rows*cols, _Tag());
 }
 
 template<typename _Ty, class _Tag>
@@ -186,9 +192,16 @@ MATRICE_GLOBAL_INL void free(_Ty* data, _Tag) {
 	return impl::_Free(data, _Tag());
 }
 
+template<typename _Ty, class _Tag>
+void free(_Ty* data, size_t size, _Tag)
+{
+	return impl::_Free(data, size, _Tag());
+}
+
 template<typename _Ty>
-MATRICE_HOST_INL decltype(auto) aligned_malloc(size_t size) {
+MATRICE_HOST_INL _Ty* aligned_malloc(size_t size) {
 	using value_type = _Ty;
+	using namespace std;
 	try {
 		auto raw_ptr = std::malloc(size * sizeof(value_type) + MATRICE_ALIGN_BYTES);
 		auto space = reinterpret_cast<size_t>(raw_ptr);
@@ -198,9 +211,10 @@ MATRICE_HOST_INL decltype(auto) aligned_malloc(size_t size) {
 
 		return (reinterpret_cast<value_type*>(aligned_ptr));
 	}
-	catch (std::bad_alloc) {
+	catch (bad_alloc) {
 		exception::error("Bad memory allocation in Func: aligned_malloc<_Ty>(size_t) in File: _allocator.inl.\n");
 	};
+	return static_cast<_Ty*>(_Allocate<_New_alignof<_Ty>>(_Get_size_of_n<sizeof(_Ty)>(size)));
 }
 
 template<typename _Ty>
@@ -213,7 +227,7 @@ MATRICE_HOST_INL void aligned_free(_Ty* aligned_ptr) noexcept {
 
 template<typename _Ty>
 MATRICE_HOST_INL bool is_aligned(_Ty* aligned_ptr) noexcept {
-	return !(reinterpret_cast<size_t>(reinterpret_cast<void*>(aligned_ptr)) % MATRICE_ALIGN_BYTES);
+	return !(reinterpret_cast<size_t>(reinterpret_cast<void*>(aligned_ptr)) % std::_Max_value<size_t>(std::_New_alignof<_Ty>, MATRICE_ALIGN_BYTES));
 }
 
 template<typename _InIt, typename _OutIt, class _InCat, class _OutCat>
@@ -228,8 +242,10 @@ MATRICE_GLOBAL_INL decltype(auto) make_alloc_deleter(_Tag) {
 
 namespace impl {
 template<typename _Ty>
-MATRICE_HOST_INL decltype(auto) _Malloc(size_t rows, size_t cols, heap_alloc_tag) {
-	return aligned_malloc<_Ty>(rows*cols);
+MATRICE_HOST_INL _Ty* _Malloc(size_t size, heap_alloc_tag) {
+	//return aligned_malloc<_Ty>(size);
+	constexpr auto _Align = std::_Max_value<size_t>(std::_New_alignof<_Ty>, MATRICE_ALIGN_BYTES);
+	return static_cast<_Ty*>(std::_Allocate<_Align>(size*sizeof(_Ty)));
 }
 
 template<typename _Ty>
@@ -243,14 +259,23 @@ MATRICE_HOST_INL void _Free(_Ty* data, heap_alloc_tag) {
 	}
 }
 
+template<typename _Ty>
+MATRICE_HOST_INL void _Free(_Ty* data, size_t size, heap_alloc_tag) {
+	constexpr auto _Align = std::_Max_value<size_t>(std::_New_alignof<_Ty>, MATRICE_ALIGN_BYTES);
+	std::_Deallocate<_Align>(data, size);
+}
+
 MATRICE_HOST_INL decltype(auto) _Deleter(stack_alloc_tag) noexcept {
 	return [](auto _dummy_) {};
 }
 
 MATRICE_HOST_INL decltype(auto) _Deleter(heap_alloc_tag) noexcept {
-	return [](auto _ptr_) {
+	/*return [](auto _ptr_) {
 		if (is_aligned(_ptr_)) aligned_free(_ptr_);
 		else std::free(_ptr_);
+	};*/
+	return [](auto _ptr_, auto _size_) {
+		_Free(_ptr_, _size_);
 	};
 }
 
