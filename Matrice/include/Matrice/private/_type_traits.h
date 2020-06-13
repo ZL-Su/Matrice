@@ -425,4 +425,14 @@ template<typename T, typename U = T>
 struct auto_matrix_type { using type = T; };
 template<typename T, typename U = T>
 using auto_matrix_type_t = typename auto_matrix_type<T, U>::type;
+
+/**
+ *\brief is_autodiff_exp<T> is true iff. T is an auto differential expression.
+ */
+template<typename T> struct is_autodiff_exp : std::false_type {};
+/**
+ *\brief is_autodiff_exp_v<T> is true iff. T is an auto differential expression.
+ */
+template<typename T>
+inline constexpr auto is_autodiff_exp_v = is_autodiff_exp<T>::value;
 DGE_MATRICE_END
