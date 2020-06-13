@@ -160,7 +160,7 @@ public:
 		const auto Rx = _Mybase::rotate({ x, y, 1 });
 
 		const auto Tx = m_tran.x, Ty = m_tran.y, Tz = m_tran.z;
-		const auto s = safe_div(1, sqr(Rx.z * depth + Tz));
+		const auto s = safe_div(1, sq(Rx.z * depth + Tz));
 		const auto _Gxd = (Rx.x * Tz - Tx * Rx.z) * s;
 		const auto _Gyd = (Rx.y * Tz - Ty * Rx.z) * s;
 

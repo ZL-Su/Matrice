@@ -84,7 +84,7 @@ public:
 	
 	_GCC_estimator(const point_t& r, const point_t& t)
 		:_Mybase{ r, t }, 
-		m_jacob(sqr<size_t>(size)), m_resid(sqr<size_t>(size)), 
+		m_jacob(sq<size_t>(size)), m_resid(sq<size_t>(size)), 
 		_Myle(size, size), _Myri(size, size){
 	}
 

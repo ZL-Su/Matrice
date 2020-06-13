@@ -121,7 +121,7 @@ public:
 		_Myref_ptr(std::make_shared<interp_type>(_Ref)),
 		_Mycur_ptr(std::make_shared<interp_type>(_Cur)),
 		_Mysolver(_Myhess), _Mysize(_Opt._Radius*2+1),
-		_Myjaco(sqr(_Mysize)), _Mydiff(sqr(_Mysize)){
+		_Myjaco(sq(_Mysize)), _Mydiff(sq(_Mysize)){
 	}
 
 	/**

@@ -126,7 +126,7 @@ namespace internal {
 					piv = tmp; 
 					major_row = row;
 				}
-				if (abs(piv) < sqr(_Epsi)) status = -row;
+				if (abs(piv) < sq(_Epsi)) status = -row;
 			}
 			if (k != major_row) {
 				// interchange the major row and the k-th row
