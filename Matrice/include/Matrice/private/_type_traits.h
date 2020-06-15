@@ -200,11 +200,7 @@ template<> struct _View_trait<float> { enum { value = 0x0032 }; };
 template<> struct _View_trait<double> { enum { value = 0x0064 }; };
 template<typename T> inline constexpr auto plane_view_v = _View_trait<T>::value;
 
-template<typename T>
-struct traits { 
-	using type =
-		conditional_t<is_class_v<T>, typename T::value_type, remove_all_t<T>>;
-};
+template<typename T> struct traits {};
 
 template<typename T> struct is_matrix : std::false_type {};
 template<typename T> inline constexpr 
@@ -218,6 +214,8 @@ template<typename Exp> inline constexpr
 bool is_expression_v = is_expression<Exp>::value;
 template<class Exp, typename = enable_if_t<is_expression_v<Exp>>>
 struct expression_traits : traits<Exp> {};
+template<class Ade>
+struct autodiff_exp_traits : traits<Ade> {};
 
 template<typename T> struct is_mtxview : std::false_type {};
 /**
