@@ -20,8 +20,8 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 DGE_MATRICE_BEGIN
 namespace ade {
-template<class _Derived, 
-	typename _Ty = typename _Derived::value_type>
+
+template<class _Derived, class _Traits = autodiff_exp_traits<_Derived>>
 class auto_diff_exp {
 	using _Myt = auto_diff_exp;
 
@@ -31,7 +31,7 @@ protected:
 
 public:
 	using derived_type = _Derived;
-	using value_type = _Ty;
+	using value_type = typename _Traits::value_type;
 
 	/// <summary>
 	/// Evaluate the value of this expression.
@@ -65,10 +65,11 @@ template<class T>
 struct is_autodiff_exp<auto_diff_exp<T>> : std::true_type {};
 
 template<typename _Ty>
-class auto_diff_variable : public auto_diff_exp<auto_diff_variable<_Ty>,_Ty> {
-	using _Mybase = auto_diff_exp<auto_diff_variable<_Ty>, _Ty>;
+class auto_diff_variable : public auto_diff_exp<auto_diff_variable<_Ty>> {
+	using _Mybase = auto_diff_exp<auto_diff_variable<_Ty>>;
 public:
-	using value_type = _Ty;
+	using typename _Mybase::value_type;
+
 	MATRICE_GLOBAL_INL auto_diff_variable() noexcept = default;
 	MATRICE_GLOBAL_INL auto_diff_variable(value_type x) noexcept
 		:_Myval(x) {}
@@ -79,13 +80,16 @@ public:
 			return _Myval;
 		if constexpr (is_same_v<_Ety, typename _Mybase::_Mydiff_tag>)
 			return value_type(1);
-		static_assert(is_any_of_v<_Ety, typename _Mybase::_Myval_tag, typename _Mybase::_Mydiff_tag>, "Invalid type parameter in ::_Eval<_Ety>.");
+		static_assert(is_any_of_v<_Ety, typename _Mybase::_Myval_tag, typename _Mybase::_Mydiff_tag>, 
+			"Invalid type parameter in ::_Eval<_Ety>.");
 	}
 private:
 	value_type _Myval = 0;
 };
 template<typename _Ty>
 struct is_autodiff_exp<auto_diff_variable<_Ty>> : std::true_type {};
+template<typename _Ty>
+struct autodiff_exp_traits<auto_diff_variable<_Ty>> { using value_type = remove_all_t<_Ty>; };
 
 /// <summary>
 /// Auto differential expression for binary addition.
@@ -93,20 +97,23 @@ struct is_autodiff_exp<auto_diff_variable<_Ty>> : std::true_type {};
 /// <typeparam name="_Lty">Type for left hand side operand</typeparam>
 /// <typeparam name="_Rty">Type for right hand side operand</typeparam>
 template<class _Lty, class _Rty>
-class diff_add_exp {
+class diff_add_exp : public auto_diff_exp<diff_add_exp<_Lty, _Rty>> {
+	using _Mybase = auto_diff_exp<diff_add_exp<_Lty, _Rty>>;
 public:
-	using value_type = std::common_type_t<typename _Lty::value_type, typename _Rty::value_type>;
+	using typename _Mybase::value_type;
 
 	MATRICE_GLOBAL_INL diff_add_exp(const _Lty& x, const _Rty& y)noexcept
 		:m_varx(x), m_vary(y) {
 	}
 
-	MATRICE_GLOBAL_FINL auto value()const noexcept {
-		return m_varx.value() + m_vary.value();
-	}
-
-	MATRICE_GLOBAL_FINL auto deriv() const noexcept {
-		return m_varx.deriv() + m_vary.deriv();
+	template<class _Ety>
+	MATRICE_GLOBAL_FINL constexpr auto _Eval() const noexcept {
+		if constexpr (is_same_v<_Ety, typename _Mybase::_Myval_tag>)
+			return  m_varx.value() + m_vary.value();;
+		if constexpr (is_same_v<_Ety, typename _Mybase::_Mydiff_tag>)
+			return m_varx.deriv() + m_vary.deriv();
+		static_assert(is_any_of_v<_Ety, typename _Mybase::_Myval_tag, typename _Mybase::_Mydiff_tag>, 
+			"Invalid type parameter in ::_Eval<_Ety>.");
 	}
 
 private:
@@ -114,19 +121,22 @@ private:
 	const _Rty& m_vary;
 };
 template<class _Lty>
-class diff_add_exp<_Lty, typename _Lty::value_type> {
+class diff_add_exp<_Lty, typename _Lty::value_type> : public auto_diff_exp<diff_add_exp<_Lty, typename _Lty::value_type>> {
+	using _Mybase = auto_diff_exp<diff_add_exp<_Lty, typename _Lty::value_type>>;
 public:
-	using value_type = typename _Lty::value_type;
-
+	using typename _Mybase::value_type;
 	MATRICE_GLOBAL_INL diff_add_exp(const _Lty& x, const value_type s)noexcept
 		:m_varx(x), m_const(s) {
 	}
 
-	MATRICE_GLOBAL_FINL auto value() const noexcept {
-		return m_varx.value() + m_const;
-	}
-	MATRICE_GLOBAL_FINL auto deriv()const noexcept {
-		return m_varx.deriv();
+	template<class _Ety>
+	MATRICE_GLOBAL_FINL constexpr auto _Eval() const noexcept {
+		if constexpr (is_same_v<_Ety, typename _Mybase::_Myval_tag>)
+			return  m_varx.value() + m_const;
+		if constexpr (is_same_v<_Ety, typename _Mybase::_Mydiff_tag>)
+			return m_varx.deriv();
+		static_assert(is_any_of_v<_Ety, typename _Mybase::_Myval_tag, typename _Mybase::_Mydiff_tag>,
+			"Invalid type parameter in ::_Eval<_Ety>.");
 	}
 private:
 	const _Lty& m_varx;
@@ -145,22 +155,31 @@ public:
 };
 template<typename T, typename U>
 struct is_autodiff_exp<diff_add_exp<T, U>> : std::true_type {};
+template<typename T, typename U>
+struct autodiff_exp_traits<diff_add_exp<T, U>> { 
+	using value_type = common_type_t<
+		conditional_t<is_scalar_v<T>, T, typename T::value_type>, 
+		conditional_t<is_scalar_v<U>, U, typename U::value_type>>;
+};
 
 template<class _Lty, class _Rty>
-class diff_sub_exp {
+class diff_sub_exp : public auto_diff_exp<diff_sub_exp<_Lty, _Rty>> {
+	using _Mybase = auto_diff_exp<diff_sub_exp<_Lty, _Rty>>;
 public:
-	using value_type = std::common_type_t<typename _Lty::value_type, typename _Rty::value_type>;
-
+	using typename _Mybase::value_type;
+	
 	MATRICE_GLOBAL_INL diff_sub_exp(const _Lty& x, const _Rty& y)noexcept
 		:m_varx(x), m_vary(y) {
 	}
 
-	MATRICE_GLOBAL_FINL auto value()const noexcept {
-		return m_varx.value() - m_vary.value();
-	}
-
-	MATRICE_GLOBAL_FINL auto deriv() const noexcept {
-		return m_varx.deriv() - m_vary.deriv();
+	template<class _Ety>
+	MATRICE_GLOBAL_FINL constexpr auto _Eval() const noexcept {
+		if constexpr (is_same_v<_Ety, typename _Mybase::_Myval_tag>)
+			return  m_varx.value() - m_vary.value();
+		if constexpr (is_same_v<_Ety, typename _Mybase::_Mydiff_tag>)
+			return m_varx.deriv() - m_vary.deriv();
+		static_assert(is_any_of_v<_Ety, typename _Mybase::_Myval_tag, typename _Mybase::_Mydiff_tag>,
+			"Invalid type parameter in ::_Eval<_Ety>.");
 	}
 
 private:
@@ -168,19 +187,23 @@ private:
 	const _Rty& m_vary;
 };
 template<class _Lty>
-class diff_sub_exp<_Lty, typename _Lty::value_type> {
+class diff_sub_exp<_Lty, typename _Lty::value_type> : public auto_diff_exp<diff_sub_exp<_Lty, typename _Lty::value_type>> {
+	using _Mybase = auto_diff_exp<diff_sub_exp<_Lty, typename _Lty::value_type>>;
 public:
-	using value_type = typename _Lty::value_type;
+	using typename _Mybase::value_type;
 
 	MATRICE_GLOBAL_INL diff_sub_exp(const _Lty& x, const value_type s)noexcept
 		:m_varx(x), m_const(s) {
 	}
 
-	MATRICE_GLOBAL_FINL auto value() const noexcept {
-		return m_varx.value() - m_const;
-	}
-	MATRICE_GLOBAL_FINL auto deriv()const noexcept {
-		return m_varx.deriv();
+	template<class _Ety>
+	MATRICE_GLOBAL_FINL constexpr auto _Eval() const noexcept {
+		if constexpr (is_same_v<_Ety, typename _Mybase::_Myval_tag>)
+			return  m_varx.value() - m_const;
+		if constexpr (is_same_v<_Ety, typename _Mybase::_Mydiff_tag>)
+			return m_varx.deriv();
+		static_assert(is_any_of_v<_Ety, typename _Mybase::_Myval_tag, typename _Mybase::_Mydiff_tag>,
+			"Invalid type parameter in ::_Eval<_Ety>.");
 	}
 private:
 	const _Lty& m_varx;
@@ -199,22 +222,29 @@ public:
 };
 template<typename T, typename U>
 struct is_autodiff_exp<diff_sub_exp<T, U>> : std::true_type {};
+template<typename T, typename U>
+struct autodiff_exp_traits<diff_sub_exp<T, U>> {
+	using value_type = conditional_t<is_scalar_v<T>, T, typename T::value_type>;
+};
 
 template<class _Lty, class _Rty>
-struct diff_mul_exp {
+class diff_mul_exp : public auto_diff_exp<diff_sub_exp<_Lty, _Rty>> {
+	using _Mybase = auto_diff_exp<diff_sub_exp<_Lty, _Rty>>;
 public:
-	using value_type = std::common_type_t<typename _Lty::value_type, typename _Rty::value_type>;
+	using typename _Mybase::value_type;
 
 	MATRICE_GLOBAL_INL diff_mul_exp(const _Lty& x, const _Rty& y)noexcept
 		:m_varx(x), m_vary(y) {
 	}
 
-	MATRICE_GLOBAL_FINL auto value()const noexcept {
-		return m_varx.value() * m_vary.value();
-	}
-
-	MATRICE_GLOBAL_FINL auto deriv() const noexcept {
-		return m_varx.deriv() * m_vary.value() + m_varx.value() * m_vary.deriv();
+	template<class _Ety>
+	MATRICE_GLOBAL_FINL constexpr auto _Eval() const noexcept {
+		if constexpr (is_same_v<_Ety, typename _Mybase::_Myval_tag>)
+			return  m_varx.value() * m_vary.value();
+		if constexpr (is_same_v<_Ety, typename _Mybase::_Mydiff_tag>)
+			return m_varx.deriv() * m_vary.value() + m_varx.value() * m_vary.deriv();
+		static_assert(is_any_of_v<_Ety, typename _Mybase::_Myval_tag, typename _Mybase::_Mydiff_tag>,
+			"Invalid type parameter in ::_Eval<_Ety>.");
 	}
 
 private:
@@ -222,18 +252,24 @@ private:
 	const _Rty& m_vary;
 };
 template<class _Lty>
-struct diff_mul_exp<_Lty, typename _Lty::value_type> {
-	using value_type = typename _Lty::value_type;
+class diff_mul_exp<_Lty, typename _Lty::value_type> : public auto_diff_exp<diff_sub_exp<_Lty, typename _Lty::value_type>> {
+	using _Mybase = auto_diff_exp<diff_sub_exp<_Lty, typename _Lty::value_type>>;
+public:
+	using typename _Mybase::value_type;
 	MATRICE_GLOBAL_FINL diff_mul_exp(const _Lty& x, const value_type s)noexcept
 		:m_varx(x), m_const(s) {
 	}
 
-	MATRICE_GLOBAL_FINL auto value() const noexcept {
-		return m_varx.value() * m_const;
+	template<class _Ety>
+	MATRICE_GLOBAL_FINL constexpr auto _Eval() const noexcept {
+		if constexpr (is_same_v<_Ety, typename _Mybase::_Myval_tag>)
+			return  m_varx.value() * m_const;
+		if constexpr (is_same_v<_Ety, typename _Mybase::_Mydiff_tag>)
+			return m_varx.deriv() * m_const;
+		static_assert(is_any_of_v<_Ety, typename _Mybase::_Myval_tag, typename _Mybase::_Mydiff_tag>,
+			"Invalid type parameter in ::_Eval<_Ety>.");
 	}
-	MATRICE_GLOBAL_FINL auto deriv()const noexcept {
-		return m_varx.deriv() * m_const;
-	}
+
 private:
 	const _Lty& m_varx;
 	value_type m_const;
@@ -250,24 +286,40 @@ public:
 };
 template<typename T, typename U>
 struct is_autodiff_exp<diff_mul_exp<T, U>> : std::true_type {};
+template<typename T, typename U>
+struct autodiff_exp_traits<diff_mul_exp<T, U>> {
+	using value_type = common_type_t<
+		conditional_t<is_scalar_v<T>, T, typename T::value_type>,
+		conditional_t<is_scalar_v<U>, U, typename U::value_type>>;
+};
 
 #define DGELOM_MAKE_UNARY_AUTODIFF_EXP(NAME, VEXP, DEXP) \
-	template<class _Lty> class diff_##NAME##_exp { \
+	template<class _Lty> class diff_##NAME##_exp \
+	: public auto_diff_exp<diff_##NAME##_exp<_Lty>> { \
+		using _Mybase = auto_diff_exp<diff_##NAME##_exp<_Lty>>; \
 	public: \
-		using value_type = typename _Lty::value_type; \
+		using _Mybase::value_type; \
 		MATRICE_GLOBAL_INL diff_##NAME##_exp(const _Lty& x) noexcept \
 			:m_varx(x) {} \
-		MATRICE_GLOBAL_FINL auto value() const noexcept { \
-			VEXP; \
-		} \
-		MATRICE_GLOBAL_FINL auto deriv()const noexcept { \
-			DEXP; \
-		} \
+		template<class _Ety> \
+	    MATRICE_GLOBAL_FINL constexpr auto _Eval() const noexcept { \
+	    if constexpr (is_same_v<_Ety, typename _Mybase::_Myval_tag>) \
+		    VEXP; \
+	    if constexpr (is_same_v<_Ety, typename _Mybase::_Mydiff_tag>) \
+		    DEXP; \
+	    static_assert(is_any_of_v<_Ety, typename _Mybase::_Myval_tag, \
+			typename _Mybase::_Mydiff_tag>, \
+		    "Invalid type parameter in ::_Eval<_Ety>."); \
+		}\
 	private: \
 		const _Lty& m_varx; \
 	}; \
 	template<typename T> \
 	struct is_autodiff_exp<diff_##NAME##_exp<T>> : std::true_type {}; \
+	template<typename T> \
+	struct autodiff_exp_traits<diff_##NAME##_exp<T>> { \
+		using value_type = conditional_t<is_scalar_v<T>, T, typename T::value_type>; \
+	}; \
 	template<class _Lty, MATRICE_ENABLE_IF(is_autodiff_exp_v<_Lty>)> \
 	MATRICE_GLOBAL_FINL auto NAME(const _Lty& x) noexcept { \
 		return diff_##NAME##_exp{ x }; \
@@ -275,7 +327,7 @@ struct is_autodiff_exp<diff_mul_exp<T, U>> : std::true_type {};
 
 DGELOM_MAKE_UNARY_AUTODIFF_EXP(sin,
 	return std::sin(m_varx.value()),
-	return value() * m_varx.deriv()
+	return this->value() * m_varx.deriv()
 );
 DGELOM_MAKE_UNARY_AUTODIFF_EXP(cos,
 	return std::cos(m_varx.value()),
@@ -283,7 +335,7 @@ DGELOM_MAKE_UNARY_AUTODIFF_EXP(cos,
 );
 DGELOM_MAKE_UNARY_AUTODIFF_EXP(exp,
 	return std::exp(m_varx.value()),
-	return value() * m_varx.deriv()
+	return this->value() * m_varx.deriv()
 );
 DGELOM_MAKE_UNARY_AUTODIFF_EXP(cube,
 	return std::pow(m_varx.value(), 3),
