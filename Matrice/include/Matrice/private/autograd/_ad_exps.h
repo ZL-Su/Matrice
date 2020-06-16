@@ -20,6 +20,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 DGE_MATRICE_BEGIN
 namespace ade {
+template<typename _Lty> class auto_diff_variable;
+template<typename _Lty, typename _Rty> class diff_add_exp;
+template<typename _Lty, typename _Rty> class diff_sub_exp;
+template<typename _Lty, typename _Rty> class diff_mul_exp;
 
 template<class _Derived, class _Traits = autodiff_exp_traits<_Derived>>
 class auto_diff_exp {
@@ -157,9 +161,7 @@ template<typename T, typename U>
 struct is_autodiff_exp<diff_add_exp<T, U>> : std::true_type {};
 template<typename T, typename U>
 struct autodiff_exp_traits<diff_add_exp<T, U>> { 
-	using value_type = common_type_t<
-		conditional_t<is_scalar_v<T>, T, typename T::value_type>, 
-		conditional_t<is_scalar_v<U>, U, typename U::value_type>>;
+	using value_type = conditional_t<is_scalar_v<T>, T, typename T::value_type>;
 };
 
 template<class _Lty, class _Rty>
@@ -228,8 +230,8 @@ struct autodiff_exp_traits<diff_sub_exp<T, U>> {
 };
 
 template<class _Lty, class _Rty>
-class diff_mul_exp : public auto_diff_exp<diff_sub_exp<_Lty, _Rty>> {
-	using _Mybase = auto_diff_exp<diff_sub_exp<_Lty, _Rty>>;
+class diff_mul_exp : public auto_diff_exp<diff_mul_exp<_Lty, _Rty>> {
+	using _Mybase = auto_diff_exp<diff_mul_exp<_Lty, _Rty>>;
 public:
 	using typename _Mybase::value_type;
 
@@ -252,8 +254,9 @@ private:
 	const _Rty& m_vary;
 };
 template<class _Lty>
-class diff_mul_exp<_Lty, typename _Lty::value_type> : public auto_diff_exp<diff_sub_exp<_Lty, typename _Lty::value_type>> {
-	using _Mybase = auto_diff_exp<diff_sub_exp<_Lty, typename _Lty::value_type>>;
+class diff_mul_exp<_Lty, typename _Lty::value_type> 
+	: public auto_diff_exp<diff_mul_exp<_Lty, typename _Lty::value_type>> {
+	using _Mybase = auto_diff_exp<diff_mul_exp<_Lty, typename _Lty::value_type>>;
 public:
 	using typename _Mybase::value_type;
 	MATRICE_GLOBAL_FINL diff_mul_exp(const _Lty& x, const value_type s)noexcept
@@ -288,9 +291,7 @@ template<typename T, typename U>
 struct is_autodiff_exp<diff_mul_exp<T, U>> : std::true_type {};
 template<typename T, typename U>
 struct autodiff_exp_traits<diff_mul_exp<T, U>> {
-	using value_type = common_type_t<
-		conditional_t<is_scalar_v<T>, T, typename T::value_type>,
-		conditional_t<is_scalar_v<U>, U, typename U::value_type>>;
+	using value_type = conditional_t<is_scalar_v<T>, T, typename T::value_type>;
 };
 
 #define DGELOM_MAKE_UNARY_AUTODIFF_EXP(NAME, VEXP, DEXP) \
