@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,10 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #pragma once
-#include "../../private/_type_traits.h"
+#include "private/_type_traits.h"
 
-MATRICE_ALGS_BEGIN _DETAIL_BEGIN namespace corr {
+MATRICE_ALG_BEGIN(corr)
+_DETAIL_BEGIN
 
 template<typename _Solver> struct _Corr_solver_traits {};
 
-} _DETAIL_END MATRICE_ALGS_END
+_DETAIL_END
+MATRICE_ALG_END(corr)
