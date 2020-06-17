@@ -92,6 +92,9 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #define MATRICE_ARCH_BEGIN DGE_MATRICE_BEGIN namespace simd {
 #define MATRICE_ARCH_END   } DGE_MATRICE_END
 
+#define MATRICE_ALG_BEGIN(ALG) DGE_MATRICE_BEGIN namespace ALG {
+#define MATRICE_ALG_END(ALG) } DGE_MATRICE_END
+
 #define _CONDITIONS_BEGIN namespace conds {
 #define _CONDITIONS_END }
 #define _DETAIL_BEGIN namespace detail {
