@@ -46,12 +46,24 @@ public:
 
 	/**
 	 *\brief getter/setter to the geometry of the stereovis. sys.
+	 *\returns stereo projection geometry [m_projection]
 	 */
-	MATRICE_HOST_INL decltype(auto) geometry() const noexcept {
+	MATRICE_HOST_INL decltype(auto)geometry() const noexcept {
 		return (m_projection);
 	}
-	MATRICE_HOST_INL decltype(auto) geometry() noexcept {
+	MATRICE_HOST_INL decltype(auto)geometry() noexcept {
 		return (m_projection);
+	}
+
+	/// <summary>
+	/// Set to output verbose information or not.
+	/// </summary>
+	/// <returns>reference of verbose value [true or false]</returns>
+	MATRICE_HOST_FINL decltype(auto)verbose()const noexcept {
+		return m_verbose;
+	}
+	MATRICE_HOST_FINL decltype(auto)verbose() noexcept {
+		return m_verbose;
 	}
 
 protected:
@@ -59,9 +71,25 @@ protected:
 		m_materp.set(m_matching);
 		m_referp.set(m_reference);
 	}
+
+	/// <summary>
+	/// Used to report some computation information.
+	/// </summary>
+	/// <param name="s">report string stream</param>
+	MATRICE_HOST_INL void _Report(std::stringstream&& s) {
+		/* 
+		 s << "it=" << std::setfill('0') << std::setw(4) << iterations
+		   << std::fixed << std::showpoint << std::setprecision(6)
+		   << "    name1=" << val_1 << "    name2=" << val_2;
+		 */
+		std::cout << s.str() << std::endl;
+	}
+
 	projection_t m_projection;
 	image_t m_reference, m_matching;
 	interp_t m_referp, m_materp;
+
+	bool m_verbose{ false };
 };
 
 template<typename _Ty, 
