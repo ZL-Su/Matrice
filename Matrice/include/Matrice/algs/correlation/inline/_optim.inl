@@ -22,7 +22,8 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "arch/ixpacket.h"
 #endif
 
-MATRICE_ALGS_BEGIN _DETAIL_BEGIN namespace corr {
+MATRICE_ALG_BEGIN(corr)
+_DETAIL_BEGIN
 
 // \retrieve border size for each interpolation alg.
 template<> struct _Corr_border_size<bicerp_tag> {
@@ -264,4 +265,5 @@ auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>::_Diff() {
 #undef _IF_WITHIN_RANGE
 #pragma endregion
 
-_DETAIL_END } MATRICE_ALGS_END
+_DETAIL_END
+MATRICE_ALG_END(corr)

@@ -22,7 +22,8 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_correlation_traits.h"
 #include "../interpolation.h"
 
-MATRICE_ALGS_BEGIN _DETAIL_BEGIN namespace corr {
+MATRICE_ALG_BEGIN(corr)
+_DETAIL_BEGIN
 
 struct _Correlation_options {
 	size_t _Radius = 15;  //patch radius
@@ -277,6 +278,7 @@ private:
 	using _Mybase::_Mypos;
 };
 
-_DETAIL_END } MATRICE_ALGS_END
+_DETAIL_END
+MATRICE_ALG_END(corr)
 
 #include "inline/_optim.inl"
