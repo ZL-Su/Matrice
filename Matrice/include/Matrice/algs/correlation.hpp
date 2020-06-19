@@ -21,7 +21,13 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 DGE_MATRICE_BEGIN
 struct correlation_optimizer {
 	using options = corr::detail::_Correlation_options;
-
+	/**
+	 *\brief N-th order IC-GN alg. with bilinear interpolation.
+	 *\param <_Ty> must be a scalar type of float or double.
+	 */
+	template<typename _Ty, uint8_t _Order = 1>
+	using icgn_bilinear = corr::detail::_Corr_solver_impl<_Ty,
+		bilerp_tag, corr::detail::_Alg_icgn<_Order>>;
 	/**
 	 *\brief N-th order IC-GN alg. with bicubic spline interpolation.
 	 *\param <_Ty> must be a scalar type of float or double.
