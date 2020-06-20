@@ -111,14 +111,15 @@ public:
 
 	/**
 	 *\brief This module is image-wise thread-safe. It allows us to eval. relative deformation of each point between current and reference state.
-	 *\param [_Ref] reference interpolated image;
-	 *\param [_Cur] current interpolated image;
-	 *\param [_Opt] options for the optimizer.
+	 *\param _Ref reference interpolated image;
+	 *\param _Cur current interpolated image;
+	 *\param _Opt options for the optimizer.
 	 */
 	_Corr_optim_base(
 		const interp_type& _Ref,
 		const interp_type& _Cur,
-		const option_type& _Opt) : _Myopt(_Opt),
+		const option_type& _Opt
+	) : _Myopt(_Opt),
 		_Myref_ptr(std::make_shared<interp_type>(_Ref)),
 		_Mycur_ptr(std::make_shared<interp_type>(_Cur)),
 		_Mysolver(_Myhess), _Mysize(_Opt._Radius*2+1),
@@ -139,6 +140,22 @@ public:
 		_Mypos.x = _ref_pos.x, _Mypos.y = _ref_pos.y;
 		/*_Myref = */this->_Cond();
 		return (*this);
+	}
+
+	/**
+	 *\brief Integer pixel level search.
+	 *\param roi region of interest
+	 */
+	MATRICE_HOST_INL point_type guess(const rect<size_t>& roi) const {
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(!_Myref.empty, "Call init(...) before calling method guess(...).");
+#endif
+		const auto _Start = roi.begin(), _End = roi.end();
+		for (auto y = _Start.y; y < _End.y; y += 5) {
+			for (auto x = _Start.x; y < _End.x; x += 5) {
+
+			}
+		}
 	}
 
 	/**
