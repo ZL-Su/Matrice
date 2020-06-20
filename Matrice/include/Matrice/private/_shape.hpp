@@ -98,7 +98,7 @@ template<> struct shape_t<2> {
 	/**
 	 *\brief tile the 3d-shape to 2d-shape
 	 */
-	constexpr auto tile() const noexcept { return shape_t<1>{h*w}; }
+	constexpr auto tile()const noexcept { return shape_t<1>{h*w}; }
 
 	friend bool operator==(const shape_t<2>& _Left, const shape_t<2>& _Right) noexcept {
 		return std::tie(_Left.h, _Left.w) == std::tie(_Right.h, _Right.w);
@@ -109,14 +109,14 @@ template<> struct shape_t<2> {
 };
 template<> struct shape_t<3> {
 	using value_type = size_t;
-
+	using _Myt = shape_t<3>;
 	shape_t(size_t _h, size_t _w, size_t _d=1) noexcept
 		:h(_h), w(_w), d(_d) {
 	}
-	shape_t(const shape_t<3>& _other) noexcept
+	shape_t(const _Myt& _other) noexcept
 		:h(_other.h), w(_other.w), d(_other.d) {
 	}
-	shape_t(shape_t<3>&& _other) noexcept
+	shape_t(_Myt&& _other) noexcept
 		:h(_other.h), w(_other.w), d(_other.d){
 	}
 	shape_t(initlist<size_t> _il) noexcept
@@ -128,15 +128,15 @@ template<> struct shape_t<3> {
 	shape_t(shape_t<1>&& _other) noexcept
 		:h(_other.h) {
 	}
-	shape_t<3>& operator=(const shape_t<3>& _other) noexcept {
+	MATRICE_GLOBAL_FINL _Myt& operator=(const _Myt& _other) noexcept {
 		h = _other.h, w = _other.w, d = _other.d;
 		return (*this);
 	}
-	shape_t<3>& operator=(shape_t<3>&& _other) noexcept {
+	MATRICE_GLOBAL_FINL _Myt& operator=(_Myt&& _other) noexcept {
 		h = _other.h, w = _other.w, d = _other.d;
 		return (*this);
 	}
-	operator shape_t<2>() const noexcept {
+	MATRICE_GLOBAL_FINL operator shape_t<2>() const noexcept {
 		return shape_t<2>(h*d, w);
 	}
 
@@ -147,9 +147,11 @@ template<> struct shape_t<3> {
 	/**
 	 *\brief tile the 3d-shape to 2d-shape
 	 */
-	auto tile() const noexcept { return shape_t<2>{h* d, w}; }
+	MATRICE_GLOBAL_FINL auto tile()const noexcept { 
+		return shape_t<2>{h* d, w}; 
+	}
 
-	friend bool operator==(const shape_t<3>& _Left, const shape_t<3>& _Right) noexcept {
+	friend bool operator==(const _Myt& _Left, const _Myt& _Right) noexcept {
 		return std::tie(_Left.h, _Left.w, _Left.d) == std::tie(_Right.h, _Right.w, _Right.d);
 	}
 
