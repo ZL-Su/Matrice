@@ -43,6 +43,9 @@ public:
 	_Depth_estimation_base(const point_t& r, const point_t& t)
 		:m_projection{ r,t } {
 	}
+	_Depth_estimation_base(const initlist<value_t> rt)
+		:m_projection{ rt } {
+	}
 
 	/**
 	 *\brief getter/setter to the geometry of the stereovis. sys.
@@ -112,8 +115,17 @@ public:
 	
 	_GCC_estimator(const point_t& r, const point_t& t)
 		:_Mybase{ r, t }, 
-		m_jacob(sq<size_t>(size)), m_resid(sq<size_t>(size)), 
-		_Myle(size, size), _Myri(size, size){
+		m_jacob(sq<size_t>(size)), 
+		m_resid(sq<size_t>(size)), 
+		_Myle(size, size), 
+		_Myri(size, size){
+	}
+	_GCC_estimator(const initlist<value_t> rt)
+		:_Mybase{ rt }, 
+		m_jacob(sq<size_t>(size)), 
+		m_resid(sq<size_t>(size)), 
+		_Myle(size, size), 
+		_Myri(size, size){
 	}
 
 	/**
