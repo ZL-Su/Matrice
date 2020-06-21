@@ -61,7 +61,7 @@
     <OutDir>.\x64\Release\</OutDir>
     <IntDir>.\IntDir\Release\</IntDir>
     <TargetName>matrice</TargetName>
-    <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;.\include\Matrice;$(IncludePath)</IncludePath>
+    <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;.\include\Matrice;.\include\Matrice\private;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
