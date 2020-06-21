@@ -121,7 +121,7 @@ _DETAIL_END
  *\brief FUNCTION TEMPLATE, convert degree angle to radian.
  */
 template<typename _Ty>
-MATRICE_HOST_INL constexpr _Ty radian(_Ty deg) noexcept {
+MATRICE_HOST_FINL constexpr _Ty radian(_Ty deg) noexcept {
 	return pi<_Ty> * deg / _Ty(180);
 }
 
