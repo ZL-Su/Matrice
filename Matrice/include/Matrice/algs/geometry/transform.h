@@ -20,6 +20,25 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "core/matrix.h"
 #include "core/vector.h"
 
+MATRICE_GLOBAL_FINL constexpr auto operator""mm(long double _Val) noexcept {
+	return (_Val);
+}
+MATRICE_GLOBAL_FINL constexpr auto operator""cm(long double _Val) noexcept {
+	return (_Val);
+}
+MATRICE_GLOBAL_FINL constexpr auto operator""m(long double _Val) noexcept {
+	return (_Val);
+}
+MATRICE_GLOBAL_FINL constexpr auto operator""s(long double _Val) noexcept {
+	return (_Val);
+}
+MATRICE_GLOBAL_FINL constexpr auto operator""degs(long double _Val) noexcept {
+	return (_Val);
+}
+MATRICE_GLOBAL_FINL constexpr auto operator""rads(long double _Val) noexcept {
+	return (_Val);
+}
+
 DGE_MATRICE_BEGIN 
 _DETAIL_BEGIN
 
@@ -121,8 +140,8 @@ _DETAIL_END
  *\brief FUNCTION TEMPLATE, convert degree angle to radian.
  */
 template<typename _Ty>
-MATRICE_HOST_FINL constexpr _Ty radian(_Ty deg) noexcept {
-	return pi<_Ty> * deg / _Ty(180);
+MATRICE_GLOBAL_FINL constexpr _Ty radian(_Ty deg) noexcept {
+	return pi<_Ty> * deg / _Ty(180.degs);
 }
 
 /**
@@ -148,5 +167,4 @@ template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
 // *\brief TEMPLATE CLASS for axis-angle representation
 using axisangle_t = detail::_Axis_angle_rep<_Ty, 3>;
 DGE_MATRICE_END
-
 #include "inline\_transform.inl"
