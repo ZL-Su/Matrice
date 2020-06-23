@@ -97,7 +97,7 @@ public:
 		auto _Tmp = *this;
 		return (_Tmp -= (_Offset));
 	}
-	MATRICE_GLOBAL_FINL _Myt operator-(const _Myt& _Right) const {
+	MATRICE_GLOBAL_FINL difference_type operator-(const _Myt& _Right) const {
 		return (_Myptr - _Right._Myptr);
 	}
 	MATRICE_GLOBAL_FINL reference operator[](difference_type _Offset) const {
