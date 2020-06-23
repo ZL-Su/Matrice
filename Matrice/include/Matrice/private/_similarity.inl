@@ -28,8 +28,8 @@ template<typename T> MATRICE_GLOBAL_INL
 T Metric_<metric_fn::L1, T>::eval(const pointer _Othr) const
 {
 	value_t _Score = value_t(0);
-#ifdef MATRICE_SIMD_ARCH
-	using Packet = simd::Packet_<value_t, 4>;
+#if MATRICE_SIMD_ARCH==MATRICE_SIMD_AVX
+	using Packet = simd::Packet_<value_t>;
 	const auto _N = _Size / Packet::size;
 	for (auto i = 0, j = 0; i < _N; j = (++i)*Packet::size) {
 		_Score += (Packet(_Data + j) - Packet(_Othr + j)).abs().reduce();
@@ -51,8 +51,8 @@ template<typename T> MATRICE_GLOBAL_INL
 T Metric_<metric_fn::L2, T>::eval(const pointer _Othr) const
 {
 	value_t _Score = value_t(0);
-#ifdef MATRICE_SIMD_ARCH
-	using Packet = simd::Packet_<value_t, 4>;
+#if MATRICE_SIMD_ARCH==MATRICE_SIMD_AVX
+	using Packet = simd::Packet_<value_t>;
 	const auto _N = _Size / Packet::size;
 	for (auto i = 0, j = 0; i < _N; j = (++i)*Packet::size) {
 		decltype(auto) _Diff = Packet(_Data + j) - Packet(_Othr + j);
