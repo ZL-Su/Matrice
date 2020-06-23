@@ -53,16 +53,16 @@ public:
 	MATRICE_HOST_FINL simd_base_() noexcept {}
 	MATRICE_HOST_FINL simd_base_(const_internal _arg) noexcept 
 		: m_data(_arg) {}
-	MATRICE_HOST_FINL simd_base_(const_value_t _arg) noexcept 
+	MATRICE_HOST_FINL simd_base_(const value_t _arg) noexcept 
 		: m_data(_Myop(_arg)) {}
-	MATRICE_HOST_FINL simd_base_(const_pointer _arg) noexcept 
+	MATRICE_HOST_FINL simd_base_(const pointer _arg) noexcept 
 		: m_data(_Myop(_arg)) {}
 
-	MATRICE_HOST_FINL auto& operator= (const_value_t _arg) { 
+	MATRICE_HOST_FINL auto& operator= (const value_t _arg) { 
 		m_data = _Myop(_arg); 
 		return(*this); 
 	}
-	MATRICE_HOST_FINL auto& operator= (const_pointer _arg) { 
+	MATRICE_HOST_FINL auto& operator= (const pointer _arg) { 
 		m_data = _Myop(_arg); 
 		return(*this); 
 	}

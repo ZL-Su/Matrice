@@ -45,28 +45,28 @@ struct Op_ MATRICE_NONHERITABLE {
 	template<size_t _Elems> struct plus : _base_type<_Elems> {
 		using type = typename _base_type<_Elems>::type;
 		enum { size = _base_type<_Elems>::num_of_elem };
-		MATRICE_HOST_INL decltype(auto) operator() (const type& _Left, const type& _Right) {
+		MATRICE_HOST_INL decltype(auto)operator()(const type& _Left, const type& _Right) {
 			return impl::simd_vop<value_t, size>::sum(_Left, _Right);
 		}
 	};
 	template<size_t _Elems> struct minus {
 		using type = typename _base_type<_Elems>::type;
 		enum { size = _base_type<_Elems>::num_of_elem };
-		MATRICE_HOST_INL decltype(auto) operator() (const type& _Left, const type& _Right) {
+		MATRICE_HOST_INL decltype(auto)operator()(const type& _Left, const type& _Right) {
 			return impl::simd_vop<value_t, size>::sub(_Left, _Right);
 		}
 	};
 	template<size_t _Elems> struct multiplies {
 		using type = typename _base_type<_Elems>::type;
 		enum { size = _base_type<_Elems>::num_of_elem };
-		MATRICE_HOST_INL decltype(auto) operator() (const type& _Left, const type& _Right) {
+		MATRICE_HOST_INL decltype(auto)operator()(const type& _Left, const type& _Right) {
 			return impl::simd_vop<value_t, size>::mul(_Left, _Right);
 		}
 	};
 	template<size_t _Elems> struct divides {
 		using type = typename _base_type<_Elems>::type;
 		enum { size = _base_type<_Elems>::num_of_elem };
-		MATRICE_HOST_INL decltype(auto) operator() (const type& _Left, const type& _Right) {
+		MATRICE_HOST_INL decltype(auto)operator()(const type& _Left, const type& _Right) {
 			return impl::simd_vop<value_t, size>::div(_Left, _Right);
 		}
 	};
@@ -77,7 +77,7 @@ struct Op_ MATRICE_NONHERITABLE {
 	template<size_t _Elems> struct abs {
 		using type = typename _base_type<_Elems>::type;
 		enum { size = _base_type<_Elems>::num_of_elem };
-		MATRICE_HOST_INL decltype(auto) operator() (const type& _Right) {
+		MATRICE_HOST_INL decltype(auto)operator()(const type& _Right)noexcept{
 			return impl::simd_vop<value_t, size>::abs(_Right);
 		}
 	};
@@ -88,13 +88,13 @@ struct Op_ MATRICE_NONHERITABLE {
 	template<size_t _Elems> using adaptor = impl::simd_hop<value_t, _Elems>;
 };
 template<typename _Fn, typename... _Args>
-MATRICE_HOST_INL decltype(auto) _Transform_impl(const _Args&... _args) {
+MATRICE_HOST_FINL decltype(auto)_Transform_impl(const _Args&... _args) {
 	//_Fn _Func;
 	return _Fn()(_args...);
 };
 }
 template<typename _Fn, typename... _Args>
-MATRICE_HOST_INL decltype(auto) transform(const _Args&... _args) {
+MATRICE_HOST_FINL decltype(auto) transform(const _Args&... _args) {
 	return (detail::_Transform_impl<_Fn>(_args.data()...)); 
 };
 MATRICE_ARCH_END
