@@ -89,4 +89,9 @@ private:
 	Op _Impl;
 };
 MATRICE_ALGS_END
+
+DGE_MATRICE_BEGIN
+template<typename _Ty>
+using zncc_metric_t = algs::Metric_<algs::metric_fn::ZNCC, _Ty>;
+DGE_MATRICE_END
 #include "../private/_similarity.inl"
