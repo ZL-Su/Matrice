@@ -21,11 +21,15 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #ifdef MATRICE_SIMD_ARCH
 #include "arch/ixpacket.h"
 #endif
+#include "similarity.h"
 
 MATRICE_ALG_BEGIN(corr)
 _DETAIL_BEGIN
 
 // \retrieve border size for each interpolation alg.
+template<> struct _Corr_border_size<bilerp_tag> {
+	static constexpr auto lower = 1, upper = 1;
+};
 template<> struct _Corr_border_size<bicerp_tag> {
 	static constexpr auto lower = 1, upper = 2;
 };
@@ -93,7 +97,8 @@ auto _Corr_optim_base<_Derived>::_Cond()->matrix_type& {
 	if (_Mypos.x == floor(_Mypos.x) && _Mypos.y == floor(_Mypos.y)) {
 		for (auto y = _U; y < _D; ++y) {
 			if (y >= 0 && y < _Rows) {
-				const auto _Dp = _Data[y]; auto _Rp = _Myref[y - _U];
+				const auto _Dp = _Data[y]; 
+				auto _Rp = _Myref[y - _U];
 				for (auto x = _L; x < _R; ++x) {
 					if (x >= 0 && x < _Cols)
 						_Mean += _Rp[x - _L] = _Dp[x];
@@ -130,6 +135,47 @@ auto _Corr_optim_base<_Derived>::_Cond()->matrix_type& {
 	return (_Myref);
 }
 
+template<typename _Derived> MATRICE_HOST_INL 
+auto _Corr_optim_base<_Derived>::_Guess(rect_type roi)->point_type {
+	const auto _Start = roi.begin(), _End = roi.end();
+	decltype(auto) _Data = _Mycur_ptr->data();
+	const auto _Stride = rect_type::value_type(_Myopt._Radius>>1);
+
+	//narrow the ROI if it hits the boundaries of the image
+	const auto _Off = _Myopt._Radius + 1;
+	transforms::clamp<rect_type::value_type> _Clamp(_Off, _Data.cols()-_Off);
+	_Start[0] = _Clamp(_Start.x), _End[0] = _Clamp(_End.x);
+	_Clamp._Myupper = _Data.rows() - _Off;
+	_Start[1] = _Clamp(_Start.y), _End[1] = _Clamp(_End.y);
+
+	zncc_metric_t<value_type> zncc(_Myref.data(), _Myopt._Radius);
+
+	point_type _Pos;
+	value_type _Max{ 0 };
+	for (auto y = _Start.y; y < _End.y; y += _Stride) {
+		for (auto x = _Start.x; x < _End.x; x += _Stride) {
+			_Mycur = _Data.block(x, y, _Myopt._Radius);
+			const auto _Coeff  = zncc.eval(_Mycur.data());
+			if (_Coeff > _Max) {
+				_Max = _Coeff;
+				_Pos.x = x, _Pos.y = y;
+			}
+		}
+	}
+	const auto _Hs = _Stride >> 1;
+	for (auto y = size_t(_Pos.y) - _Hs; y < size_t(_Pos.y) + _Hs; ++y){
+		for (auto x = size_t(_Pos.x) - _Hs; x < size_t(_Pos.x) + _Hs; ++x){
+			_Mycur = _Data.block(x, y, _Myopt._Radius);
+			const auto _Coeff = zncc.eval(_Mycur.data());
+			if (_Coeff > _Max) {
+				_Max = _Coeff;
+				_Pos.x = x, _Pos.y = y;
+			}
+		}
+	}
+	return _Pos;
+}
+
 template<typename _Derived> MATRICE_HOST_INL
 auto _Corr_optim_base<_Derived>::_Solve(param_type& Par) {
 	// \warp current image patch.
@@ -142,7 +188,7 @@ auto _Corr_optim_base<_Derived>::_Solve(param_type& Par) {
 #endif // MATRICE_DEBUG
 
 	// \steepest descent param. update
-	param_type _Sdp = _Myjaco.t().mul_inplace(_Mydiff);
+	param_type _Sdp = _Myjaco.t().mul(_Mydiff);
 
 	// \solve update to the warp parameter vector.
 	_Sdp = _Mysolver.backward(_Sdp);
@@ -151,7 +197,7 @@ auto _Corr_optim_base<_Derived>::_Solve(param_type& Par) {
 	Par = update_strategy::eval(Par, _Sdp);
 
 	// \report least square correlation coeff. and param. error.
-	return std::make_tuple(sqr(_Mydiff).sum(), _Sdp.dot(_Sdp));
+	return std::make_tuple(sq(_Mydiff).sum(), _Sdp.dot(_Sdp));
 }
 #pragma endregion
 
@@ -184,38 +230,36 @@ auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<0>>::_Warp(const param_type& _Par)
 		}
 	}
 
-	_Mycur = _Mycur - (_Mean /= sqr(_Mybase::_Mysize));
-	const auto _Issd = one<value_type>/sqrt(sqr(_Mycur).sum());
+	_Mycur = _Mycur - (_Mean /= sq(_Mybase::_Mysize));
+	const auto _Issd = one<value_type>/sqrt(sq(_Mycur).sum());
 	_Mycur = _Mycur * _Issd;
 	return (_Mycur);
 }
 template<typename _Ty, typename _Itag> MATRICE_HOST_INL
 auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>::_Warp(const param_type& _Par) {
-
-	const auto[_Rows, _Cols] = (*_Mycur_ptr)().shape().tile();
+	const auto[_Rows, _Cols] = _Mycur_ptr->data().shape().tile();
 	const auto _Radius = static_cast<index_t>(_Myopt._Radius);
-	const auto &u = _Par[0], &v = _Par[3];
-	const auto &dudx = _Par[1], &dudy = _Par[2];
-	const auto &dvdx = _Par[4], &dvdy = _Par[5];
+
+	const auto u = _Par[0], dudx = _Par[1], dudy = _Par[2];
+	const auto v = _Par[3], dvdx = _Par[4], dvdy = _Par[5];
 	const auto _Cur_x = _Mypos[0] + u, _Cur_y = _Mypos[1] + v;
 
 	auto _Mean = zero<value_type>;
-	const auto dvdyp1 = one<value_type> +_Par[5];
-	const auto dudxp1 = one<value_type> +_Par[1];
 	for (diff_t j = -_Radius, r = 0; j <= _Radius; ++j, ++r) {
 		const auto dy = static_cast<value_type>(j);
-		const auto tx = _Cur_x + _Par[2] * dy;
-		const auto ty = _Cur_y + dvdyp1 * dy;
+		const auto tx = _Cur_x + dudy * dy;
+		const auto ty = _Cur_y + (1 + dvdy) * dy;
 		auto _Rc = _Mycur[r];
 		for (diff_t i = -_Radius, c = 0; i <= _Radius; ++i, ++c) {
 			const auto dx = static_cast<value_type>(i);
-			const auto x = dudxp1 * dx + tx, y = _Par[4] * dx + ty;
+			const auto x = (1 + dudx)* dx + tx;
+			const auto y = dvdx * dx + ty;
 			_IF_WITHIN_RANGE(_Mean += _Rc[c] = (*_Mycur_ptr)(x, y));
 		}
 	}
 
-	_Mycur = _Mycur - (_Mean /= sqr(_Mybase::_Mysize));
-	const auto _Issd = one<value_type> / sqrt(sqr(_Mycur).sum());
+	_Mycur = _Mycur - (_Mean /= sq(_Mybase::_Mysize));
+	const auto _Issd = one<value_type> / sqrt(sq(_Mycur).sum());
 	_Mycur = _Mycur * _Issd;
 
 	return (_Mycur);
@@ -224,7 +268,7 @@ auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>::_Warp(const param_type& _Par)
 // \specialization of diff. to eval. Jacobian contributions.
 template<typename _Ty, typename _Itag> MATRICE_HOST_INL
 auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<0>>::_Diff() {
-	const auto& _Size = _Mybase::_Mysize;
+	const auto _Size = _Mybase::_Mysize;
 	const auto[_L, _R, _U, _D] = _Myopt.range<true>(_Mypos);
 	const auto _Off = -static_cast<value_type>(_Myopt._Radius);
 
@@ -243,14 +287,16 @@ auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<0>>::_Diff() {
 }
 template<typename _Ty, typename _Itag> MATRICE_HOST_INL
 auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>::_Diff() {
-	const auto& _Size = _Mybase::_Mysize;
+	const auto _Size = _Mybase::_Mysize;
 	const auto[_L, _R, _U, _D] = _Myopt.range<true>(_Mypos);
 	const auto _Off = -static_cast<value_type>(_Myopt._Radius);
 
 	for (index_t iy = _U, j = 0; iy < _D; ++iy, ++j) {
-		const auto dy = _Off + j, y = _Mypos.y + dy;
+		const auto dy = _Off + j;
+		const auto y = _Mypos.y + dy;
 		for (index_t ix = _L, i = 0; ix < _R; ++ix, ++i) {
-			const auto dx = _Off + i, x = _Mypos.x + dx;
+			const auto dx = _Off + i;
+			const auto x = _Mypos.x + dx;
 			const auto[dfdx, dfdy] = _Myref_ptr->grad({ x, y });
 
 			auto q = _Mybase::_Myjaco[j * _Size + i];
