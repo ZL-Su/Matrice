@@ -122,8 +122,11 @@ public:
 	/**
 	 * \get interpolation coeff. matrix.
 	 */
-	MATRICE_HOST_INL decltype(auto) operator()() const noexcept { 
-		return (_Mycoeff); 
+	MATRICE_HOST_INL decltype(auto) operator()() const noexcept {
+		if constexpr (require_coeff_lut<category>::value)
+			return (_Mycoeff);
+		else
+			return (*_Mydata);
 	}
 
 	/**
