@@ -20,7 +20,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../_tiff_wrapper.hpp"
 #include "../_png_wrapper.hpp"
 
-DGE_MATRICE_BEGIN 
+DGE_MATRICE_BEGIN
+struct image_constant {
+	template<typename _Ty> static constexpr auto max_value = _Ty(255);
+};
+
 struct image_instance {
 	using value_type = uint8_t;
 	using data_type = std::vector<value_type>;
@@ -29,6 +33,8 @@ struct image_instance {
 	MATRICE_HOST_INL Matrix_<_Ty, ::dynamic> matrix()const noexcept {
 		Matrix_<_Ty, ::dynamic> _Ret(m_rows, m_width);
 		_Ret.from(m_data.data());
+		if constexpr (is_floating_point_v<_Ty>)
+			_Ret = _Ret / image_constant::max_value<_Ty>;
 		return (_Ret);
 	}
 	MATRICE_HOST_INL image_instance& create(uint32_t nchs) {
@@ -58,7 +64,7 @@ struct image_instance {
 			}
 		}
 		if constexpr (is_floating_point_v<_Ty>)
-			gc = gc / 255;
+			gc = gc / image_constant::max_value<_Ty>;
 
 		return forward<decltype(gc)>(gc);
 	}
