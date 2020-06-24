@@ -108,6 +108,7 @@ public:
 	using interp_type = typename _Mytraits::interpolator;
 	using update_strategy = typename _Mytraits::update_strategy;
 	using linear_solver = matrix_decomp<matrix_fixed, _TAG _Linear_spd_tag>;
+	using rect_type = rect<size_t>;
 
 	/**
 	 *\brief This module is image-wise thread-safe. It allows us to eval. relative deformation of each point between current and reference state.
@@ -146,16 +147,11 @@ public:
 	 *\brief Integer pixel level search.
 	 *\param roi region of interest
 	 */
-	MATRICE_HOST_INL point_type guess(const rect<size_t>& roi) const {
+	MATRICE_HOST_INL point_type guess(rect_type&& roi) {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(!_Myref.empty, "Call init(...) before calling method guess(...).");
 #endif
-		const auto _Start = roi.begin(), _End = roi.end();
-		for (auto y = _Start.y; y < _End.y; y += 5) {
-			for (auto x = _Start.x; y < _End.x; x += 5) {
-
-			}
-		}
+		return this->_Guess(roi);
 	}
 
 	/**
@@ -186,6 +182,7 @@ public:
 
 protected:
 	///<methods>
+
 	/**
 	 *\brief Build refpatch, and buffs to hold curpatch and diffs.
 	 *\return the refpatch: this->_Myref.
@@ -193,10 +190,17 @@ protected:
 	MATRICE_HOST_INL auto _Cond()->matrix_type&;
 
 	/**
+	 *\brief Build refpatch, and buffs to hold curpatch and diffs.
+	 *\return the refpatch: this->_Myref.
+	 */
+	MATRICE_HOST_INL auto _Guess(rect_type roi)->point_type;
+
+	/**
 	 *\brief Solve new parameters
 	 *\param [_Par] in: old parameters, output: new parameters
 	 */
 	MATRICE_HOST_INL auto _Solve(param_type& _Pars);
+
 	///</methods>
 
 	///<fields>
