@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -86,11 +86,21 @@ struct _Blas_kernel_wrapper {
 		return (a);
 	}
 
+	/// <summary>
+	/// \brief General matrix-vector multiplication. The function performs y = Ax or A^Tx according to cols or rows of A equals the size of x.
+	/// </summary>
+	/// <typeparam name="_Aty">Input matrix type</typeparam>
+	/// <typeparam name="_Ity">Input vector type</typeparam>
+	/// <typeparam name="_Oty">Output vector type</typeparam>
+	/// <param name="a">Input matrix</param>
+	/// <param name="x">Input vector</param>
+	/// <param name="y">Output vector</param>
+	/// <returns>Output vector</returns>
 	template<class _Aty, typename _Ity, typename _Oty = _Ity>
-	static MATRICE_HOST_INL _Oty& gemv(_Aty&& a, const _Ity& x, _Oty& y) noexcept {
+	static MATRICE_HOST_INL _Oty& gemv(_Aty&& a, const _Ity& x, _Oty& y) {
 		constexpr auto _1 = typename _Ity::value_type(1);
 		constexpr auto _0 = typename _Ity::value_type(0);
-		if constexpr (is_ref_v<_Aty>) {
+		if constexpr (is_ref_v<remove_all_t<_Aty>>) {
 			decltype(auto) m = a.get();
 			if (a)
 				internal::_blas_gemtv(m.rows(), m.cols(), _1, m.data(), x.data(), 1, _0, y.data(), 1);
@@ -102,7 +112,8 @@ struct _Blas_kernel_wrapper {
 				internal::_blas_gemv(a.rows(), a.cols(), _1, a.data(), x.data(), 1, _0, y.data(), 1);
 			else if (a.rows() == x.size())
 				internal::_blas_gemtv(a.rows(), a.cols(), _1, a.data(), x.data(), 1, _0, y.data(), 1);
-			else DGELOM_ERROR("The shape of a and x in gemv is not compatible.");
+			else 
+				DGELOM_ERROR("The shape of a and x in gemv is not compatible.");
 		}
 		return (y);
 	}
