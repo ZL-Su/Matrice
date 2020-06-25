@@ -185,10 +185,14 @@ auto _Corr_optim_base<_Derived>::_Solve(param_type& Par) {
 	_Mydiff = _Mycur - _Myref;
 #ifdef MATRICE_DEBUG
 	matrix_type _Error_map(_Mycur.shape(), _Mydiff.data());
-#endif // MATRICE_DEBUG
+#endif
 
-	// \steepest descent param. update
+	// \steepest descent parameter update
+#if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
+	param_type _Sdp = _Myjaco.t().mul_inplace(_Mydiff);
+#else
 	param_type _Sdp = _Myjaco.t().mul(_Mydiff);
+#endif
 
 	// \solve update to the warp parameter vector.
 	_Sdp = _Mysolver.backward(_Sdp);
