@@ -937,8 +937,8 @@ public:
 	 * \dot product of this matrix with _Rhs
 	 */
 	template<typename _Rhs> 
-	MATRICE_GLOBAL_FINL value_type dot(const _Rhs& _Rhs)const noexcept {
-		return this->operator*(_Rhs).sum(); 
+	MATRICE_GLOBAL_FINL value_type dot(const _Rhs& _rhs)const noexcept {
+		return this->operator*(_rhs).sum(); 
 	}
 	/**
 	 * \contraction of two matrices (rank-2 tensors)

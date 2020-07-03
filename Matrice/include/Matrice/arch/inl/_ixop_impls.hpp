@@ -204,10 +204,10 @@ template<typename T, int _Elems> struct simd_vop {
 template<typename T, int _Elems, typename derived = simd_vop<T, _Elems>> struct simd_vop_base {
 	enum { N = _Elems }; using value_t = T;
 	using type = dgelom::simd::conditional_t<value_t, N>;
-	template<typename _Op> HOST_STATIC_INL_CXPR_T _Binary(_Op _Op) noexcept { 
-		return _Op(); }
-	template<typename _Op> HOST_STATIC_INL_CXPR_T _Unary(_Op _Op) noexcept { 
-		return _Op(); }
+	template<typename _Op> HOST_STATIC_INL_CXPR_T _Binary(_Op _op) noexcept { 
+		return _op(); }
+	template<typename _Op> HOST_STATIC_INL_CXPR_T _Unary(_Op _op) noexcept { 
+		return _op(); }
 };
 
 template<> struct simd_vop<size_t, 4> : public simd_vop_base<size_t, 4>
