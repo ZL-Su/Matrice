@@ -2,6 +2,7 @@
 	  About License Agreement of this file, see "../lic/license.h"
 *********************************************************************/
 #pragma once
+#include <iostream>
 #include <iosfwd>
 #include <fstream>
 #include <sstream>
@@ -11,7 +12,11 @@
 #include <map>
 #include <functional>
 #include <type_traits>
+#if _MSC_VER >= 1926
+#include <filesystem>
+#else
 #include <experimental/filesystem>
+#endif
 #include "../core/matrix.h"
 #include "../core/vector.h"
 #include "../util/utils.h"
@@ -24,7 +29,11 @@ DGE_MATRICE_BEGIN
 /**
  * \for filesystem namespace in STD library
  */
-namespace fs = std::experimental::filesystem;
+#if _MSC_VER >= 1926
+	namespace fs = std::filesystem;
+#else
+	namespace fs = std::experimental::filesystem;
+#endif
 
 /**
  * \is skip the folder
@@ -440,7 +449,7 @@ DGE_MATRICE_BEGIN namespace io {
 using directory = detail::_Dir_impl<detail::folder_tag>;
 using folder_collector = detail::_Collector<detail::folder_tag>;
 using file_collector = detail::_Collector<detail::file_tag>;
-using path_t = directory::path_type;
+using path_t = typename directory::path_type;
 
 template<typename _Ty = std::float_t>
 using data_loader = detail::_Data_loader_impl<_Ty, detail::loader_tag>;
