@@ -6,9 +6,11 @@
 #include<algorithm>
 #include "_macros.h"
 #include "_std_wrapper.h"
+#ifdef MATRICE_SIMD_ARCH
 #include "../arch/ixpacket.h"
+#endif
 
-MATRICE_NAMESPACE_BEGIN_
+DGE_MATRICE_BEGIN
 template<class _InIt, class _OutIt> MATRICE_HOST_FINL
 void transform(const _InIt _First, const _InIt _Last, _OutIt _Dest) {
 	static_cast<void>(_First == _Last);
@@ -110,24 +112,8 @@ MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last) {
 	static_cast<void>(_First == _Last);
 
 	double _Ret{ 0 };
-#if MATRICE_SIMD_ARCH==MATRICE_SIMD_AVX
-	using value_type = remove_all_t<decltype(*_First)>;
-	typename simd::template Packet_<value_type> _Sum(value_type(0));
-	const auto _Size = std::distance(_First, _Last);
-	constexpr auto _Step = decltype(_Sum)::size<<1;
-	const auto _N = _Size / _Step;
-	auto _Decayed = static_cast<value_type*>(_First);
-	for (auto i = 0; i < _N; ++i) {
-		auto _Pos = _Decayed + diff_t(i*_Step);
-		_Sum = _Sum + decltype(_Sum)(_Pos) + decltype(_Sum)(_Pos + decltype(_Sum)::size);
-	}
-	_Ret = _Sum.reduce();
-	for (_First += _N * _Step; _First != _Last; ++_First) 
-		_Ret += *_First;
-#else
 	for (; _First != _Last; (void)++_First) 
 		_Ret += *_First;
-#endif
 	return (_Ret);
 }
 
@@ -163,6 +149,7 @@ MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, _Scalar _Value, _Func 
 		_Ret += _Fn(_op(*_First, _Value));
 	return (_Ret);
 }
+
 _DETAIL_BEGIN
 template<size_t _N>  struct _Reduce_n {
 	template<typename _Ty> static
