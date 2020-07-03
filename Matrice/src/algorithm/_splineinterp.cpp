@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -41,53 +41,50 @@ for (index_t _Col = _Width - 2; _Col >= 0; --_Col) { \
 }
 #pragma endregion
 
-namespace internal {
-	template<typename _Ty> struct _Itpar_base {
-		static constexpr auto _Myeps = std::numeric_limits<_Ty>::epsilon();
-	};
-	template<typename _Ty, typename _Tag> struct _It_hypar {};
+template<typename _Ty> struct _Itpar_base {
+	static constexpr auto _Myeps = std::numeric_limits<_Ty>::epsilon();
+};
 
-	template<typename _Ty> struct _It_hypar<_Ty, bicerp_tag> : _Itpar_base<_Ty> {
-		MATRICE_HOST_INL static auto value() {
-			constexpr auto _Myeps = _Itpar_base<_Ty>::_Myeps;
+template<typename _Ty> struct _It_hypar_3 : _Itpar_base<_Ty> {
+	MATRICE_HOST_INL static auto value() {
+		constexpr auto _Myeps = _Itpar_base<_Ty>::_Myeps;
 
-			const auto _Z = -2. + sqrt(3.);
-			const auto _A = _Z / (_Z*_Z - 1);
-			const auto _K = static_cast<index_t>(log(_Myeps) / log(abs(_Z))) + 2;
+		const auto _Z = -2. + sqrt(3.);
+		const auto _A = _Z / (_Z * _Z - 1);
+		const auto _K = static_cast<index_t>(log(_Myeps) / log(abs(_Z))) + 2;
 
-			return std::make_tuple(_Z, _A, _K);
-		}
-	};
-	template<typename _Ty> struct _It_hypar<_Ty, biqerp_tag> : _Itpar_base<_Ty> {
-		MATRICE_HOST_INL static auto value() {
-			constexpr auto _Myeps = _Itpar_base<_Ty>::_Myeps;
+		return std::make_tuple(_Z, _A, _K);
+	}
+};
+template<typename _Ty> struct _It_hypar_5 : _Itpar_base<_Ty> {
+	MATRICE_HOST_INL static auto value() {
+		constexpr auto _Myeps = _Itpar_base<_Ty>::_Myeps;
 
-			const auto _Z1 = -0.4305753470999737919, _Z2 = -0.04309628820326465382;
-			const auto _A1 = _Z1 / (_Z1*_Z1 - 1), _A2 = _Z2 / (_Z2*_Z2 - 1);
-			const auto _K1 = static_cast<index_t>(log(_Myeps)/log(abs(_Z1)))+2;
-			const auto _K2 = static_cast<index_t>(log(_Myeps)/log(abs(_Z2)))+2;
+		constexpr auto _Z1 = -0.4305753470999737919, _Z2 = -0.04309628820326465382;
+		constexpr auto _A1 = _Z1 / (_Z1 * _Z1 - 1), _A2 = _Z2 / (_Z2 * _Z2 - 1);
+		const auto _K1 = static_cast<index_t>(log(_Myeps) / log(abs(_Z1))) + 2;
+		const auto _K2 = static_cast<index_t>(log(_Myeps) / log(abs(_Z2))) + 2;
 
-			return std::make_tuple(_Z1, _Z2, _A1, _A2, _K1, _K2);
-		}
-	};
-	template<typename _Ty> struct _It_hypar<_Ty, biserp_tag> : _Itpar_base<_Ty> {
-		MATRICE_HOST_INL static auto value() {
-			constexpr auto _Myeps = _Itpar_base<_Ty>::_Myeps;
+		return std::make_tuple(_Z1, _Z2, _A1, _A2, _K1, _K2);
+	}
+};
+template<typename _Ty> struct _It_hypar_7 : _Itpar_base<_Ty> {
+	MATRICE_HOST_INL static auto value() {
+		constexpr auto _Myeps = _Itpar_base<_Ty>::_Myeps;
 
-			const auto _Z1 = -0.5352804307964381655;
-			const auto _Z2 = -0.12255461519232669052;
-			const auto _Z3 = -0.009148694809608276929;
-			const auto _A1 = _Z1 / (_Z1*_Z1 - 1);
-			const auto _A2 = _Z2 / (_Z2*_Z2 - 1);
-			const auto _A3 = _Z3 / (_Z3*_Z3 - 1);
-			const auto _K1 = static_cast<index_t>(log(_Myeps)/log(abs(_Z1)))+2;
-			const auto _K2 = static_cast<index_t>(log(_Myeps)/log(abs(_Z2)))+2;
-			const auto _K3 = static_cast<index_t>(log(_Myeps)/log(abs(_Z3)))+2;
+		constexpr auto _Z1 = -0.5352804307964381655;
+		constexpr auto _Z2 = -0.12255461519232669052;
+		constexpr auto _Z3 = -0.009148694809608276929;
+		constexpr auto _A1 = _Z1 / (_Z1 * _Z1 - 1);
+		constexpr auto _A2 = _Z2 / (_Z2 * _Z2 - 1);
+		constexpr auto _A3 = _Z3 / (_Z3 * _Z3 - 1);
+		const auto _K1 = static_cast<index_t>(log(_Myeps) / log(abs(_Z1))) + 2;
+		const auto _K2 = static_cast<index_t>(log(_Myeps) / log(abs(_Z2))) + 2;
+		const auto _K3 = static_cast<index_t>(log(_Myeps) / log(abs(_Z3))) + 2;
 
-			return std::make_tuple(_Z1, _Z2, _Z3, _A1, _A2, _A3, _K1, _K2, _K3);
-		}
-	};
-}
+		return std::make_tuple(_Z1, _Z2, _Z3, _A1, _A2, _A3, _K1, _K2, _K3);
+	}
+};
 
 template<typename _Ty> 
 void _Spline_interpolation<_Ty, bicerp_tag>::_Coeff_impl() {
@@ -98,7 +95,7 @@ void _Spline_interpolation<_Ty, bicerp_tag>::_Coeff_impl() {
 	_Mycoeff.create(_Height, _Width, zero<value_type>);
 
 	//initialization
-	const auto[_Z, _A, _K] = internal::_It_hypar<value_type, _Mybase::category>::value();
+	const auto[_Z, _A, _K] = _It_hypar_3<value_type>::value();
 
 	matrix_type _Buff(_Height, _Width);
 
@@ -128,6 +125,7 @@ void _Spline_interpolation<_Ty, bicerp_tag>::_Coeff_impl() {
 	}
 	_SPLCOEFF_RWISE_RECURSION(_A, _Z);
 }
+
 template<typename _Ty> 
 void _Spline_interpolation<_Ty, biqerp_tag>::_Coeff_impl() {
 	const auto& _Data = *_Mybase::_Mydata;
@@ -137,7 +135,7 @@ void _Spline_interpolation<_Ty, biqerp_tag>::_Coeff_impl() {
 	_Mycoeff.create(_Height, _Width, zero<value_type>);
 
 	//initialization
-	const auto[_Z1, _Z2, _A1, _A2, _K1, _K2] = internal::_It_hypar<value_type, _Mybase::category>::value();
+	const auto[_Z1, _Z2, _A1, _A2, _K1, _K2] = _It_hypar_5<value_type>::value();
 
 	matrix_type _Buff(_Height, _Width);
 
@@ -196,7 +194,8 @@ void _Spline_interpolation<_Ty, biserp_tag>::_Coeff_impl() {
 	_Mycoeff.create(_Height, _Width, zero<value_type>);
 
 	//initialization
-	const auto[_Z1, _Z2, _Z3, _A1, _A2, _A3, _K1, _K2, _K3] = internal::_It_hypar<value_type, _Mybase::category>::value();
+	const auto[_Z1, _Z2, _Z3, _A1, _A2, _A3, _K1, _K2, _K3]=
+		_It_hypar_7<value_type>::value();
 
 	matrix_type _Buff(_Height, _Width);
 
