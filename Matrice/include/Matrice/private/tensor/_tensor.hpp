@@ -272,7 +272,7 @@ public:
 	 *\param [_Shape] any shape type compatible with tensor_shape
 	 */
 	static MATRICE_HOST_INL auto zero(tensor_shape&& _Shape) {
-		return (move(_Myt({ _Shape.get(0),_Shape.get(1),_Shape.get(2),_Shape.get(3) }, 0)));
+		return (move(_Myt(_Shape, 0)));
 	}
 	/**
 	 *\brief Generate a random filled tensor
