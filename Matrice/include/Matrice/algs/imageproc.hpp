@@ -62,7 +62,7 @@ auto _Image_resize(const Matrix_<_Pixty, ::dynamic>& _Img, shape_t<2> _Size) {
 	Matrix_<value_type, ::dynamic> _Space;
 	auto _Scale = one<value_type>;
 	if constexpr (is_floating_point_v<_Pixty>) {
-		_Space = decltype(space)(_Img.shape(), _Img.data());
+		_Space = decltype(_Space)(_Img.shape(), _Img.data());
 	}
 	else {
 		_Space.create(_Img.shape());
