@@ -20,7 +20,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "util/_macros.h"
 #include "util/genalgs.h"
 
-#if MATRICE_SIMD_ARCH
+#ifdef MATRICE_SIMD_ARCH
 // \default vector unit size for SIMD support
 MATRICE_HOST_INL constexpr auto packet_size_v =
 #if MATRICE_SIMD_ARCH==MATRICE_SIMD_SSE
