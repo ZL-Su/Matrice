@@ -21,7 +21,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #ifdef MATRICE_SIMD_ARCH
 #include "arch/ixpacket.h"
 #endif
-#include "similarity.h"
+#include "../../similarity.h"
 
 MATRICE_ALG_BEGIN(corr)
 _DETAIL_BEGIN
