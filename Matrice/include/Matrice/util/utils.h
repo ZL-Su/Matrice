@@ -18,6 +18,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <type_traits>
+#include <mutex>
 #include "_macros.h"
 #include "_std_wrapper.h"
 #include "_exception.h"
