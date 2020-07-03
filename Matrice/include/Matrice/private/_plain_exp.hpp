@@ -42,7 +42,12 @@ _DETAIL_BEGIN
 template<typename _Derived, typename _Traits, typename _Ty> class Base_;
 
 template<typename _Ty, size_t _Depth> class _Tensor;
-struct _Blas_kernel_wrapper;
+
+template<typename _Ty, typename> class _Blas_kernel_impl;
+
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
+class _Blas_kernel_wrapper;
+#endif
 _DETAIL_END
 
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
@@ -242,7 +247,13 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
 			value_type operator() (const _Lhs& _L, const _Rhs& _R, int r, int c, tag::_Matrix_tag, tag::_Matrix_tag) {
 				const int K = _R.rows(), N = _R.cols(), _Idx = r * _L.cols();
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 				return detail::template _Blas_kernel_impl<value_type>::dot(_L(_Idx), _R(c), K, 1, N);
+#else
+				value_type _Ret = value_type(0);
+				for (auto k = 0; k < K; ++k) _Ret += _L(_Idx + k) * _R(k * N + c);
+				return (_Ret);
+#endif
 			}
 			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
 			value_type operator() (const _Lhs& _L, const _Rhs& _R, int r, int c, tag::_Matrix_tag, tag::_Matrix_view_tag) {
@@ -398,7 +409,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		/**
 		 * \operator for expression evaluation
 		 */
-		MATRICE_GLOBAL_INL auto operator()(tag::_Var_tag = tag::_Expession_eval_tag()) const {
+		MATRICE_GLOBAL_INL auto operator()(tag::_Expression_eval_tag) const {
 			matrix_type _Ret(M, N);
 			_CDTHIS->assign_to(_Ret);
 			return forward<matrix_type>(_Ret);
