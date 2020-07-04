@@ -24,6 +24,7 @@ MATRICE_ALGS_BEGIN
 _DETAIL_BEGIN
 template<typename _Ty>
 class _Trig_base {
+	static_assert(is_floating_point_v<_Ty>, "_Ty in _Trig_base<_Ty> must be a floating point type.");
 	using _Myt = _Trig_base;
 public:
 	using value_type = _Ty;
@@ -40,6 +41,7 @@ public:
 		const auto tx = *(_It + 3), ty = *(_It + 4), tz = *(_It + 5);
 
 		rodrigues(vector_type{ rx, ry, rz }, m_rot[1]);
+
 		m_trs[1].x = tx, m_trs[1].y = ty, m_trs[1].z = tz;
 		
 		return (*this);
