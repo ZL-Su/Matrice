@@ -32,7 +32,7 @@ struct _Correlation_options {
 	float_t _Znssd = 0.6; //correlation threshold
 	float_t _Coeff = 0.7; //damping coefficient
 
-	template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
+	template<typename _Ty = default_type, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
 	static constexpr _Ty _Mytol = _Ty(1.0E-6); //iteration tolerance
 
 	/**
@@ -164,19 +164,19 @@ public:
 	}
 
 	// \for retrieving reference subset
-	MATRICE_HOST_INL decltype(auto)get_refpatch() const { 
+	MATRICE_HOST_INL decltype(auto)get_refpatch() const noexcept { 
 		return (_Myref); 
 	}
-	MATRICE_HOST_INL decltype(auto)options() const {
+	MATRICE_HOST_INL constexpr decltype(auto)options()const noexcept{
 		return (_Myopt);
 	}
-	MATRICE_HOST_INL decltype(auto)options() {
+	MATRICE_HOST_INL constexpr decltype(auto)options() noexcept {
 		return (_Myopt);
 	}
-	MATRICE_HOST_INL decltype(auto)refpos() { 
+	MATRICE_HOST_INL decltype(auto)refpos() noexcept { 
 		return _Mypos; 
 	}
-	MATRICE_HOST_INL decltype(auto)refpos() const { 
+	MATRICE_HOST_INL decltype(auto)refpos() const noexcept { 
 		return _Mypos; 
 	}
 
