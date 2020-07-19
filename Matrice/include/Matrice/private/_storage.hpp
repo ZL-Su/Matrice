@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -97,8 +97,10 @@ public:
 		_Alloc_move(move(other));
 	}
 
-	MATRICE_GLOBAL_INL ~_Dense_allocator_base() noexcept { 
-		destroy(); 
+	MATRICE_GLOBAL_INL ~_Dense_allocator_base() noexcept {
+		if (not m_moved) {
+			this->destroy();
+		}
 	}
 
 	/**
@@ -202,6 +204,7 @@ public:
 	 *\brief Release the ownership of the allocator
 	 */
 	MATRICE_GLOBAL_FINL void _Free_ownership() noexcept {
+		m_moved = true;
 		m_data = nullptr;
 		m_rows = m_cols = 0;
 	}
@@ -212,9 +215,11 @@ private:
 	template<typename _Al>
 	MATRICE_GLOBAL_INL allocator& _Alloc_move(_Al&& al) noexcept;
 
+	bool m_moved = false;
+
 protected:
 	pointer m_data = nullptr;
-	size_t m_rows, m_cols;
+	size_t m_rows = 0, m_cols = 0;
 };
 
 /**

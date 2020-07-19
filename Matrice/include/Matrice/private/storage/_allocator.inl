@@ -18,7 +18,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "../_storage.hpp"
-#include "..\_memory.h"
+#include "../_memory.h"
 
 #define MATRICE_ALLOCTOR_SIG(M, N, OPT) \
 _Allocator<_Ty, M, N, allocator_traits_v<OPT>, _Layout>
@@ -77,10 +77,9 @@ _Dense_allocator_base<_Altrs>::operator=(const pointer data) noexcept {
 
 template<typename _Altrs>
 MATRICE_GLOBAL_INL void _Dense_allocator_base<_Altrs>::destroy() noexcept {
+	if (m_data == nullptr) return;
 	if constexpr (is_same_v<category, heap_alloc_tag>) {
-		if (size() || m_data != nullptr) {
-			internal::free(m_data, size(), category());
-		}
+		internal::free(m_data, size(), category());
 	}
 #ifdef MATRICE_ENABLE_CUDA
 	else if constexpr (is_any_of_v<category, device_alloc_tag, global_alloc_tag>) {
@@ -108,7 +107,9 @@ MATRICE_GLOBAL_INL typename _Dense_allocator_base<_Altrs>::allocator& _Dense_all
 	m_data = al.data();
 	m_rows = al.rows();
 	m_cols = al.cols();
+
 	al._Free_ownership();
+
 	return (this->derived());
 }
 
@@ -261,8 +262,10 @@ MATRICE_HOST_INL void _Free(_Ty* data, heap_alloc_tag) {
 
 template<typename _Ty>
 MATRICE_HOST_INL void _Free(_Ty* data, size_t size, heap_alloc_tag) {
-	constexpr auto _Align = std::_Max_value<size_t>(std::_New_alignof<_Ty>, MATRICE_ALIGN_BYTES);
-	std::_Deallocate<_Align>(data, size);
+	if (data) {
+		constexpr auto _Align = std::_Max_value<size_t>(std::_New_alignof<_Ty>, MATRICE_ALIGN_BYTES);
+		std::_Deallocate<_Align>(data, size);
+	}
 }
 
 MATRICE_HOST_INL decltype(auto) _Deleter(stack_alloc_tag) noexcept {
