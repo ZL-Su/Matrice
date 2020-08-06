@@ -130,7 +130,7 @@ public:
 	}
 
 	/**
-	 * \get the interpolated value at _Pos. 
+	 * \get the interpolated value at position _Pos(x, y). 
 	 */
 	MATRICE_HOST_INL auto operator()(const point_type& pos) const {
 		return static_cast<const _Mydt*>(this)->_Value_at(pos);
@@ -142,7 +142,7 @@ public:
 	/**
 	 * \get the original data matrix.
 	 */
-	MATRICE_HOST_INL const matrix_type& data() const noexcept {
+	MATRICE_HOST_INL decltype(auto) data() const noexcept {
 		return (*_Mydata); 
 	}
 
@@ -155,15 +155,21 @@ public:
 	}
 
 	/**
-	 * \get the interpolated gradient value at _Pos.
+	 * \get the gradient at position _Pos.
 	 */
 	MATRICE_HOST_INL auto grad(const point_type& _Pos) const {
-		return std::make_tuple((this)->_Gradx_at(_Pos), (this)->_Grady_at(_Pos));
+		return std::make_tuple(
+			(this)->_Gradx_at(_Pos), 
+			(this)->_Grady_at(_Pos)
+		);
 	}
-	template<axis _Axis, typename = enable_if_t<_Axis==axis::x||_Axis==axis::y>>
+	template<axis _Axis, 
+		typename = enable_if_t<_Axis==axis::x||_Axis==axis::y>>
 	MATRICE_HOST_INL auto grad(const point_type& _Pos) const {
-		if constexpr (_Axis == axis::x) return (this)->_Gradx_at(_Pos);
-		if constexpr (_Axis == axis::y) return (this)->_Grady_at(_Pos);
+		if constexpr (_Axis == axis::x) 
+			return (this)->_Gradx_at(_Pos);
+		if constexpr (_Axis == axis::y) 
+			return (this)->_Grady_at(_Pos);
 	}
 
 protected:
