@@ -30,6 +30,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #define MATRICE_SHARED_STORAGE 0
 #endif //enable shared memory allocator
 
+#if _HAS_CXX20
+#define __cpp_concepts 202007L
+#endif
+
 #define MATRICE_SIMD_DISABLE 0
 #define MATRICE_SIMD_SSE    2 //*\SIMD-128
 #define MATRICE_SIMD_AVX    3 //*\SIMD-256
