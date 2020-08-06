@@ -40,9 +40,11 @@ public:
 	using typename _Mybase::value_t;
 	using typename _Mybase::pointer;
 	using typename _Mybase::const_initlist;
+
 	using _Mybase::Size;
 	using _Mybase::rows_at_compiletime;
 	using _Mybase::cols_at_compiletime;
+
 	template<int rows, int cols = rows> 
 	using lite = Matrix_<value_t, rows, cols>;
 

@@ -1,6 +1,6 @@
 /*  *************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,10 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 *	*************************************************************************/
 #pragma once
-#include <type_traits>
 #include "util/_macros.h"
 #include "util/_type_defs.h"
 #include "util/_std_wrapper.h"
+#ifdef __cpp_concepts
+#include <concepts>
+#endif
 
 DGE_MATRICE_BEGIN
 
@@ -237,6 +239,8 @@ inline constexpr bool is_fxdvector_v = is_fxdvector<T>::value;
 template<typename T> 
 inline constexpr bool is_matrix_convertible_v = is_matrix_v<T> || is_expression_v<T> || is_mtxview_v<T>;
 
+//template<typename T> concept matrix_convertible = is_matrix_convertible_v<T>;
+
 template<int _M, int _N> struct allocator_traits;
 template<int _M, int _N=_M> 
 inline constexpr auto allocator_traits_v = allocator_traits<_M, _N>::value;
@@ -372,6 +376,10 @@ inline constexpr auto has_size_v = has_method_size<void, T>::value;
   */
 template<typename T>
 struct has_value_t<T> { static constexpr auto value = is_expression_v<T> || is_matrix_v<T> || is_mtxview_v<T>; };
+
+//template<typename T> concept _Has_value_t = requires{typename T::value_t; };
+//template<typename T> concept _Has_value_type = requires{typename T::value_type;};
+//template<typename T> concept has_value_type = _Has_value_type<T> || _Has_value_t<T>;
 
 /**
  *\brief is_tensor<T> is true_type iff T is dgelom::tensor<...>
