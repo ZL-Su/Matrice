@@ -105,6 +105,41 @@ public:
 		return point_type(x, y, d);
 	}
 
+	/// <summary>
+	/// *\brief: Eval the fundamental matrix F.
+	/// </summary>
+	/// <returns>3x3 fundamental matrix</returns>
+	MATRICE_HOST_INL auto fundamental() noexcept {
+		auto fx = m_ints[0][0], fy = m_ints[0][1];
+		auto cx = m_ints[0][2], cy = m_ints[0][3];
+		matrix_type K_inv{1/fx, 0, -cx/fx, 0, 1/fy, -cy/fy, 0, 0, 1};
+
+		const auto RKi = m_rotm.mul(K_inv).eval();
+		K_inv = {
+			0, -m_tran.x, m_tran.y, 
+			m_tran.z, 0, -m_tran.x,
+			-m_tran.y, m_tran.x, 0
+		};
+		const auto TxRKi = K_inv.mul(RKi).eval();
+
+		fx = m_ints[1][0], fy = m_ints[1][1];
+		cx = m_ints[1][2], cy = m_ints[1][3];
+		matrix_type Kt_inv{1/fx, 0, 0, 0, 1/fy, 0, -cx/fx, -cy/fy, 1};
+
+		auto F = Kt_inv.mul(TxRKi);
+
+		return (F);
+	}
+
+	/// <summary>
+	/// *\brief: Comp the epipolar line for a given point in left image.
+	/// </summary>
+	/// <param name="x">: left image point with [x, y, 1]^T </param>
+	/// <returns> Epipolar line expression </returns>
+	MATRICE_HOST_INL auto epline(point_type x) noexcept {
+		return fundamental().mul(x);
+	}
+
 protected:
 	matrix_type m_rotm, m_irot;
 	point_type m_tran;
@@ -155,6 +190,8 @@ public:
 	 *\brief Compute the derivaties:
 	 //tex: $\dfrac{\partial \mathbf{x}'}{\partial d} = \mathbf{K}'\dfrac{\partial<\mathbf{RX}(d) + \mathbf{T}>}{\partial d}$
 	 *\sa Eq.(3) in paper GCCA.
+	 *\param x, y: coordinates of the computation point $\mathbf{x}$
+	 *\param depth: current depth value of the point (x, y).
 	 */
 	MATRICE_HOST_INL point_type grad(value_type x, value_type y, value_type depth)const noexcept {
 		const auto Rx = _Mybase::rotate({ x, y, 1 });
