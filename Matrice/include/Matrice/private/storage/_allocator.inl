@@ -262,7 +262,8 @@ MATRICE_HOST_INL void _Free(_Ty* data, heap_alloc_tag) {
 
 template<typename _Ty>
 MATRICE_HOST_INL void _Free(_Ty* data, size_t size, heap_alloc_tag) {
-	if (data) {
+	constexpr size_t _Big_allocation_sentinel = 0xFAFAFAFAFAFAFAFAULL;
+	if (data && size < _Big_allocation_sentinel) {
 		constexpr auto _Align = std::_Max_value<size_t>(std::_New_alignof<_Ty>, MATRICE_ALIGN_BYTES);
 		std::_Deallocate<_Align>(data, size);
 	}
