@@ -104,7 +104,7 @@ public:
 	using param_type = Vec_<value_type, npar>;
 	using jacob_type = Matrix_<value_type, ::dynamic, npar>;
 	using vector_type = Matrix_<value_type, ::dynamic, 1>;
-	using option_type = _Correlation_options;
+	using options_type = _Correlation_options;
 	using interp_type = typename _Mytraits::interpolator;
 	using update_strategy = typename _Mytraits::update_strategy;
 	using linear_solver = matrix_decomp<matrix_fixed, _TAG _Linear_spd_tag>;
@@ -119,7 +119,7 @@ public:
 	_Corr_optim_base(
 		const interp_type& _Ref,
 		const interp_type& _Cur,
-		const option_type& _Opt
+		const options_type& _Opt
 	) : _Myopt(_Opt),
 		_Myref_ptr(std::make_shared<interp_type>(_Ref)),
 		_Mycur_ptr(std::make_shared<interp_type>(_Cur)),
@@ -205,7 +205,7 @@ protected:
 
 	///<fields>
 	diff_t       _Mysize;
-	option_type  _Myopt;
+	options_type  _Myopt;
 	point_type   _Mypos;
 	matrix_type  _Myref, _Mycur;
 	vector_type  _Mydiff;
@@ -231,7 +231,7 @@ class _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<0>>
 	using typename _Mybase::_Mytraits;
 public:
 	static constexpr auto order = _Mytraits::order;
-	using typename _Mybase::option_type;
+	using typename _Mybase::options_type;
 	using typename _Mybase::param_type;
 	using typename _Mybase::point_type;
 	using typename _Mybase::value_type;
@@ -270,7 +270,7 @@ class _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>
 	using typename _Mybase::_Mytraits;
 public:
 	static constexpr auto order = _Alg_icgn<1>::order;
-	using typename _Mybase::option_type;
+	using typename _Mybase::options_type;
 	using typename _Mybase::param_type;
 	using typename _Mybase::point_type;
 	using typename _Mybase::value_type;
