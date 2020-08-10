@@ -106,23 +106,25 @@ public:
 	using vector_type = Matrix_<value_type, ::dynamic, 1>;
 	using options_type = _Correlation_options;
 	using interp_type = typename _Mytraits::interpolator;
+	using smooth_image_t = interp_type;
 	using update_strategy = typename _Mytraits::update_strategy;
 	using linear_solver = matrix_decomp<matrix_fixed, _TAG _Linear_spd_tag>;
 	using rect_type = rect<size_t>;
 
 	/**
-	 *\brief This module is image-wise thread-safe. It allows us to eval. relative deformation of each point between current and reference state.
+	 *\brief This module is image-wise thread-safe.
+	         It allows us to eval. relative deformation of each point between current and reference state.
 	 *\param _Ref reference interpolated image;
 	 *\param _Cur current interpolated image;
 	 *\param _Opt options for the optimizer.
 	 */
 	_Corr_optim_base(
-		const interp_type& _Ref,
-		const interp_type& _Cur,
+		const smooth_image_t& _Ref,
+		const smooth_image_t& _Cur,
 		const options_type& _Opt
 	) : _Myopt(_Opt),
-		_Myref_ptr(std::make_shared<interp_type>(_Ref)),
-		_Mycur_ptr(std::make_shared<interp_type>(_Cur)),
+		_Myref_ptr(new interp_type(_Ref)),
+		_Mycur_ptr(new interp_type(_Cur)),
 		_Mysolver(_Myhess), _Mysize(_Opt._Radius*2+1),
 		_Myjaco(sq(_Mysize)), _Mydiff(sq(_Mysize)){
 	}
@@ -205,7 +207,7 @@ protected:
 
 	///<fields>
 	diff_t       _Mysize;
-	options_type  _Myopt;
+	options_type _Myopt;
 	point_type   _Mypos;
 	matrix_type  _Myref, _Mycur;
 	vector_type  _Mydiff;
@@ -235,11 +237,14 @@ public:
 	using typename _Mybase::param_type;
 	using typename _Mybase::point_type;
 	using typename _Mybase::value_type;
+	using typename _Mybase::jacob_type;
+	using typename _Mybase::linear_solver;
 
 	_Corr_solver_impl(const _Myt& _Other) = delete;
 	_Corr_solver_impl(_Myt&& _Other) = delete;
 	template<typename... _Args>
-	_Corr_solver_impl(const _Args&..._args) : _Mybase(_args...) {}
+	_Corr_solver_impl(const _Args&..._args) 
+		: _Mybase(_args...) {}
 
 	/**
 	 *\brief Evaluate Jacobian contribution at ref. patch.
@@ -274,6 +279,8 @@ public:
 	using typename _Mybase::param_type;
 	using typename _Mybase::point_type;
 	using typename _Mybase::value_type;
+	using typename _Mybase::jacob_type;
+	using typename _Mybase::linear_solver;
 
 	_Corr_solver_impl(const _Myt& _Other) = delete;
 	_Corr_solver_impl(_Myt&& _Other) = delete;
@@ -285,6 +292,14 @@ public:
 	 *\brief evaluate Jacobian contribution at refpatch.
 	 */
 	MATRICE_HOST_INL auto& _Diff();
+
+	/**
+	 *\brief Thread-safe version of method _Diff().
+	 *\param "x, y" The coordinates of a computation point.
+	 *\returns Jacobian matrix.
+	 */
+	MATRICE_HOST_INL auto _Diff(value_type x, value_type y);
+
 	/**
 	 *\brief Construct current image patch.
 	 *\param [_Par] {u, dudx, dudy, v, dvdx, dvdy}
