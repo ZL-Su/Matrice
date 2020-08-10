@@ -396,9 +396,6 @@
     <ClInclude Include="include\Matrice\private\math\_svd.h">
       <Filter>Header Files\Detail\math</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\private\nonfree\_lnalge.h">
-      <Filter>Header Files\Detail\math\nonfree</Filter>
-    </ClInclude>
     <ClInclude Include="include\Matrice\private\math\_linear_solver.h">
       <Filter>Header Files\Detail\math</Filter>
     </ClInclude>
@@ -686,6 +683,9 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\private\math\fast_native_math_funcs.hpp">
       <Filter>Header Files\Detail\math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\nonfree\blas_lapack_kernel.h">
+      <Filter>Header Files\Detail\math\nonfree</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -991,9 +991,6 @@
     <None Include="include\Matrice\private\_similarity.inl">
       <Filter>Header Files\Detail\inline</Filter>
     </None>
-    <None Include="include\Matrice\private\nonfree\inl\_lnalge.inl">
-      <Filter>Header Files\Detail\math\nonfree\inl</Filter>
-    </None>
     <None Include="include\Matrice\algs\similarity\inline\_iterative_conv_impl.inl">
       <Filter>Header Files\Algs\Similarity\inl</Filter>
     </None>
@@ -1042,6 +1039,9 @@
     </None>
     <None Include="include\Matrice\private\inl\_matrix_op.inl">
       <Filter>Header Files\Detail\core\inline</Filter>
+    </None>
+    <None Include="include\Matrice\private\nonfree\inl\blas_lapack_impl.inl">
+      <Filter>Header Files\Detail\math\nonfree\inl</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
