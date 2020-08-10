@@ -312,6 +312,31 @@ auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>::_Diff() {
 	return (_Mybase::_Myjaco);
 }
 
+template<typename _Ty, typename _Itag> MATRICE_HOST_INL 
+auto _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>::_Diff(value_type x, value_type y)
+{
+	const auto _Size = _Mybase::_Mysize;
+	const auto [_L, _R, _U, _D] = _Myopt.range<true>(point_type{ x,y });
+	const auto _Off = -static_cast<value_type>(_Myopt._Radius);
+
+	typename _Mybase::jacob_type _Jacbian(sq(_Size));
+	for (index_t iy = _U, j = 0; iy < _D; ++iy, ++j) {
+		const auto dy = _Off + j;
+		const auto y = _Mypos.y + dy;
+		for (index_t ix = _L, i = 0; ix < _R; ++ix, ++i) {
+			const auto dx = _Off + i;
+			const auto x = _Mypos.x + dx;
+			const auto [dfdx, dfdy] = _Myref_ptr->grad({ x, y });
+
+			auto q = _Jacbian[j * _Size + i];
+			q[0] = dfdx, q[1] = dfdx * dx, q[2] = dfdx * dy;
+			q[3] = dfdy, q[4] = dfdy * dx, q[5] = dfdy * dy;
+		}
+	}
+
+	return move(_Jacbian);
+}
+
 #undef _IF_WITHIN_RANGE
 #pragma endregion
 
