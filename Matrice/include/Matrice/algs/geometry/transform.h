@@ -20,22 +20,22 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "core/matrix.h"
 #include "core/vector.h"
 
-MATRICE_GLOBAL_FINL constexpr auto operator""mm(long double _Val) noexcept {
+MATRICE_GLOBAL_FINL constexpr auto operator""_mm(long double _Val) noexcept {
 	return (_Val);
 }
-MATRICE_GLOBAL_FINL constexpr auto operator""cm(long double _Val) noexcept {
+MATRICE_GLOBAL_FINL constexpr auto operator""_cm(long double _Val) noexcept {
 	return (_Val);
 }
-MATRICE_GLOBAL_FINL constexpr auto operator""m(long double _Val) noexcept {
+MATRICE_GLOBAL_FINL constexpr auto operator""_m(long double _Val) noexcept {
 	return (_Val);
 }
-MATRICE_GLOBAL_FINL constexpr auto operator""s(long double _Val) noexcept {
+MATRICE_GLOBAL_FINL constexpr auto operator""_s(long double _Val) noexcept {
 	return (_Val);
 }
-MATRICE_GLOBAL_FINL constexpr auto operator""degs(long double _Val) noexcept {
+MATRICE_GLOBAL_FINL constexpr auto operator""_degs(long double _Val) noexcept {
 	return (_Val);
 }
-MATRICE_GLOBAL_FINL constexpr auto operator""rads(long double _Val) noexcept {
+MATRICE_GLOBAL_FINL constexpr auto operator""_rads(long double _Val) noexcept {
 	return (_Val);
 }
 
