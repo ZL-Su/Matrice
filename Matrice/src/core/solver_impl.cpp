@@ -1,6 +1,6 @@
 #include "core/solver.h"
 #include "core/matrix.h"
-#include "private/nonfree/_lnalge.h"
+#include "private/nonfree/blas_lapack_kernel.h"
 
 DGE_MATRICE_BEGIN 
 _DETAIL_BEGIN

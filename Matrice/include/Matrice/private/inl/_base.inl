@@ -5,7 +5,7 @@
 #include "../_plain_base.hpp"
 #include "../_range.h"
 #include "../../thread/_thread.h"
-#include "private/nonfree/_lnalge.h"
+#include "private/nonfree/blas_lapack_kernel.h"
 #include "private/math/kernel_wrapper.hpp"
 
 DGE_MATRICE_BEGIN

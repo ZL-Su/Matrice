@@ -17,7 +17,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 *	*************************************************************************/
 #pragma once
 #include <stdexcept>
-#include "../_lnalge.h"
+#include "../blas_lapack_kernel.h"
 #include "../../math/_config.h"
 
 DGE_MATRICE_BEGIN _DETAIL_BEGIN
