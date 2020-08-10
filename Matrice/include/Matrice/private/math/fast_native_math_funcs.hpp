@@ -32,10 +32,11 @@ _DETAIL_BEGIN
 /// <param name="K">: Column dimension for A, row dimension for B</param>
 /// <returns>Pointer to the resulted matrix C</returns>
 template<typename T>
-MATRICE_GLOBAL_INL T* _Fast_native_matmul(T* C, const T* A, const T* B, size_t M, size_t N, size_t K) noexcept {
+MATRICE_GLOBAL_INL T* _Fast_native_matmul(T* C, const T* A, const T* B, int M, int N, int K) noexcept {
 	for (auto i = 0; i < M; ++i) {
 		const auto A_i = A + i * K;
 		auto C_i = C + i * N;
+#pragma omp for simd
 		for (auto k = 0; k < K; ++k) {
 			const auto A_ik = A_i[k];
 			const auto B_k = B + k * N;
