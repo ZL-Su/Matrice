@@ -350,12 +350,15 @@ MATRICE_HOST_INL decltype(auto) defpath(const T local) {
 /// <typeparam name="_Ty"></typeparam>
 /// <param name="m">a matrix with type of dgelom::Matrix_</param>
 template<typename _Ty, int _M, int _N>
-void print(const Matrix_<_Ty, _M, _N>& m) {
-	std::cout << "[\n[rows: " << m.rows() << ", cols: " << m.cols() << "]\n";
+void print(const Matrix_<_Ty, _M, _N>& m, const std::string& name = "\n") {
+	std::cout << "[" << name
+		<< " [rows: " << m.rows() 
+		<< ", cols: " << m.cols() << "]\n";
 	for (auto _It = m.rwbegin(); _It != m.rwend(); ++_It) {
 		std::cout << " ";
 		for (auto _Vl : _It)
-			std::cout << std::setiosflags(std::ios::left) << std::setprecision(8) << std::setw(15)
+			std::cout << std::setiosflags(std::ios::left) 
+			<< std::setprecision(8) << std::setw(15)
 			<< _Vl;
 		std::cout << "\n";
 	}
