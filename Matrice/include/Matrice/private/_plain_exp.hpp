@@ -263,7 +263,6 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 				return (_Ret);
 			}
 		};
-
 	};
 
 	/**
@@ -583,7 +582,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		using _Mybase::N;
 	};
 
-	// \matrix element-wise unary operation expression: abs(), log(), sqrt() ....
+	// \matrix element-wise unary operation expression: abs, log, sqrt...
 	template<typename T, typename _UnaryOp> 
 	class EwiseUnaryExp : public Base_<EwiseUnaryExp<T, _UnaryOp>>
 	{
@@ -607,7 +606,6 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 
 		template<typename _Mty> 
 		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const noexcept {
-//#pragma omp parallel for
 			for (index_t i = 0; i < res.size(); ++i) 
 				res(i) = this->operator()(i);
 		}
@@ -717,8 +715,10 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 				_idx = _idx * M + _idx / N * (1 - N * M);
 			return _ANS(_idx);
 		}
+
 		MATRICE_GLOBAL_FINL T& ans() { return _ANS; }
 		MATRICE_GLOBAL_FINL const T& ans() const { return _ANS; }
+
 		template<typename _Rhs, 
 			typename _Ret = MatBinaryExp<MatUnaryExp, _Rhs, Op::_Mat_mul<value_t>>> 
 		MATRICE_GLOBAL_INL _Ret mul(const _Rhs& _rhs) {
