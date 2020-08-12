@@ -57,7 +57,7 @@ public:
 	MATRICE_HOST_FINL constexpr Matrix_(const_initlist _list) noexcept
 		: _Mybase{ _list } {}
 	MATRICE_GLOBAL_FINL constexpr Matrix_(_Myt&& _other) noexcept
-		: _Mybase{ _other } {}
+		: _Mybase{ move(_other) } {}
 	MATRICE_GLOBAL_FINL constexpr Matrix_(const _Myt& _other) noexcept
 		: _Mybase{ _other } {};
 
