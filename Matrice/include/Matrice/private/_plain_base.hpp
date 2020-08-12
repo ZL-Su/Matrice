@@ -293,6 +293,8 @@ public:
 	}
 	MATRICE_GLOBAL_INL explicit Base_(size_t _rows, size_t _cols, pointer data)noexcept
 		:_Mybase(_rows, _cols, data) {
+		if constexpr (rows_at_compiletime && cols_at_compiletime)
+			_Myalloc = (data);
 	}
 	MATRICE_GLOBAL_INL explicit Base_(size_t _rows, size_t _cols, value_t _val)noexcept
 		:Base_(_rows, _cols) {
@@ -1020,7 +1022,8 @@ public:
 		}
 		else {
 #ifdef MATRICE_DEBUG
-			DGELOM_CHECK(_Data + this->size() - 1, "Input length of _Data must be greater or equal to this->size().");
+			DGELOM_CHECK(_Data + this->size() - 1, 
+				"Input length of _Data must be greater or equal to this->size().");
 #endif
 			for (diff_t _Idx = 0; _Idx < size(); ++_Idx)
 				m_data[_Idx] = static_cast<value_type>(_Data[_Idx]);
@@ -1034,7 +1037,8 @@ public:
 		MATRICE_ENABLE_IF(is_iterator_v<_It >)>
 	MATRICE_GLOBAL_FINL _Derived& from(const _It _Data, _Op&& _Fn) {
 #ifdef MATRICE_DEBUG
-		DGELOM_CHECK(_Data + this->size() - 1, "Input length of _Data must be greater or equal to this->size().");
+		DGELOM_CHECK(_Data + this->size() - 1, 
+			"Input length of _Data must be greater or equal to this->size().");
 #endif
 #pragma omp parallel for if (size()>1000)
 		for(diff_t _Idx = 0; _Idx < size(); ++_Idx)
@@ -1043,7 +1047,8 @@ public:
 		return (this->derived());
 	}
 	/**
-	 * \brief Stack from a sequence of vectors with same size, _Vecty can be any type that has members .size() and .data()
+	 * \brief Stack from a sequence of vectors with same size, 
+	          _Vecty can be any type that has members .size() and .data().
 	 * \param [_L] the input _Vecty-typed vector list
 	 * \param [_Dim] = 0 for row-wise stacking, = 1 for column-wise stacking 
 	 */
@@ -1096,11 +1101,13 @@ public:
 	 *\param [_Lower, _Upper] the range boundary
 	 */
 	MATRICE_GLOBAL_INL bool in_range(const _Myt& _Lower, const _Myt& _Upper) const {
+		MATRICE_USE_STD(false_type);
 		for (const auto idx : range(0, size())) {
 			if (m_data[idx] < _Lower.m_data[idx] || m_data[idx] > _Upper.m_data[idx])
-				return std::false_type::value;
+				return false_type::value;
 		}
-		return std::true_type::value;
+		MATRICE_USE_STD(true_type);
+		return true_type::value;
 	}
 
 	/**
