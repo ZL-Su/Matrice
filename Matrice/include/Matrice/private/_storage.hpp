@@ -85,7 +85,7 @@ public:
 		_Alloc_copy(other.derived());
 	}
 	MATRICE_GLOBAL_INL _Dense_allocator_base(_Myt&& other) noexcept {
-		_Alloc_move(move(other));
+		_Alloc_move(other);
 	}
 	template<typename _Al, enable_if_t<is_not_same_v<_Al, allocator>>>
 	MATRICE_GLOBAL_INL _Dense_allocator_base(const _Al& other)
@@ -94,11 +94,11 @@ public:
 	}
 	template<typename _Al, enable_if_t<is_not_same_v<_Al, allocator>>>
 	MATRICE_GLOBAL_INL _Dense_allocator_base(_Al&& other) noexcept {
-		_Alloc_move(move(other));
+		_Alloc_move(other);
 	}
 
 	MATRICE_GLOBAL_INL ~_Dense_allocator_base() noexcept {
-		if (not m_moved) {
+		if (m_data) {
 			this->destroy();
 		}
 	}
@@ -204,7 +204,6 @@ public:
 	 *\brief Release the ownership of the allocator
 	 */
 	MATRICE_GLOBAL_FINL void _Free_ownership() noexcept {
-		m_moved = true;
 		m_data = nullptr;
 		m_rows = m_cols = 0;
 	}
@@ -213,9 +212,7 @@ private:
 	template<typename _Al>
 	MATRICE_GLOBAL_INL allocator& _Alloc_copy(const _Al& al) noexcept;
 	template<typename _Al>
-	MATRICE_GLOBAL_INL allocator& _Alloc_move(_Al&& al) noexcept;
-
-	bool m_moved = false;
+	MATRICE_GLOBAL_INL allocator& _Alloc_move(_Al& al) noexcept;
 
 protected:
 	pointer m_data = nullptr;
@@ -246,7 +243,7 @@ public:
 	}
 	template<typename _Argt>
 	MATRICE_HOST_INL _Allocator(_Argt&& arg) noexcept
-		:_Mybase(forward<_Argt>(arg)) {
+		:_Mybase(arg) {
 	}
 
 	MATRICE_HOST_INL _Myt& operator=(const _Myt& othr) noexcept {
