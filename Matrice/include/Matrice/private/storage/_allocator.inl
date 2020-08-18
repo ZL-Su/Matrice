@@ -29,9 +29,7 @@ typename _Al::category(), category()
 category(), typename _Al::category()
 
 DGE_MATRICE_BEGIN
-
 _DETAIL_BEGIN
-
 template<typename _Altrs>
 MATRICE_GLOBAL_INL typename _Dense_allocator_base<_Altrs>::allocator&
 _Dense_allocator_base<_Altrs>::operator=(const allocator& othr) noexcept {
@@ -191,10 +189,14 @@ MATRICE_ALLOCTOR_SIG(::global, ::global, ::global)::_Alloc() noexcept {
 //	internal::free(this->data(), typename _Mybase::category());
 //}
 #endif
-
 _DETAIL_END
 
 namespace internal {
+template<typename _Ty>
+MATRICE_GLOBAL_INL constexpr const _Ty& _Maxval(const _Ty& left, const _Ty& right) noexcept {
+	return left < right ? right : left;
+}
+
 template<typename _Ty, class _Tag>
 MATRICE_GLOBAL_INL _Ty* malloc(size_t rows, size_t& cols, _Tag) {
 	return impl::_Malloc<_Ty>(rows*cols, _Tag());
@@ -225,7 +227,11 @@ MATRICE_HOST_INL _Ty* aligned_malloc(size_t size) {
 		return (reinterpret_cast<_Ty*>(aligned_ptr));
 	}
 	catch (bad_alloc) {
+#ifdef MATRICE_DEBUG
 		exception::error("Bad memory allocation in Func: aligned_malloc<_Ty>(size_t) in File: _allocator.inl.\n");
+#else
+		throw("Bad memory allocation in Func: aligned_malloc<_Ty>(size_t) in File: _allocator.inl.\n");
+#endif
 	};
 	MATRICE_USE_STD(_Allocate);
 	MATRICE_USE_STD(_New_alignof);
@@ -245,9 +251,8 @@ MATRICE_HOST_INL void aligned_free(_Ty* aligned_ptr) noexcept {
 template<typename _Ty>
 MATRICE_HOST_INL bool is_aligned(_Ty* aligned_ptr) noexcept {
 	MATRICE_USE_STD(_New_alignof);
-	MATRICE_USE_STD(_Max_value);
 	return !(reinterpret_cast<size_t>(reinterpret_cast<void*>(aligned_ptr)) % 
-		_Max_value<size_t>(_New_alignof<_Ty>, MATRICE_ALIGN_BYTES));
+		_Maxval<size_t>(_New_alignof<_Ty>, MATRICE_ALIGN_BYTES));
 }
 
 template<typename _InIt, typename _OutIt, class _InCat, class _OutCat>
@@ -264,8 +269,7 @@ namespace impl {
 template<typename _Ty>
 MATRICE_HOST_INL _Ty* _Malloc(size_t size, heap_alloc_tag) {
 	MATRICE_USE_STD(_New_alignof);
-	MATRICE_USE_STD(_Max_value);
-	constexpr auto _Align = _Max_value<size_t>(_New_alignof<_Ty>, MATRICE_ALIGN_BYTES);
+	constexpr auto _Align = _Maxval<size_t>(_New_alignof<_Ty>, MATRICE_ALIGN_BYTES);
 	return static_cast<_Ty*>(std::_Allocate<_Align>(size*sizeof(_Ty)));
 }
 
@@ -274,7 +278,8 @@ MATRICE_HOST_INL void _Free(_Ty* data, heap_alloc_tag) {
 	if (data != nullptr) {
 		auto void_ptr = reinterpret_cast<void*>(data);
 		if (void_ptr) {
-			std::free(*(reinterpret_cast<void**>(void_ptr) - 1));
+			MATRICE_USE_STD(free);
+			free(*(reinterpret_cast<void**>(void_ptr) - 1));
 			data = nullptr;
 		}
 	}
@@ -284,9 +289,8 @@ template<typename _Ty>
 MATRICE_HOST_INL void _Free(_Ty* data, size_t size, heap_alloc_tag) {
 	constexpr size_t _Big_allocation_sentinel = 0xFAFAFAFAFAFAFAFAULL;
 	MATRICE_USE_STD(_New_alignof);
-	MATRICE_USE_STD(_Max_value);
 	if (data && size < _Big_allocation_sentinel) {
-		constexpr auto _Align = _Max_value<size_t>(_New_alignof<_Ty>, MATRICE_ALIGN_BYTES);
+		constexpr auto _Align = _Maxval<size_t>(_New_alignof<_Ty>, MATRICE_ALIGN_BYTES);
 		std::_Deallocate<_Align>(data, size);
 	}
 }
