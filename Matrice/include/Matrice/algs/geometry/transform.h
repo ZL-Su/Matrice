@@ -141,7 +141,7 @@ _DETAIL_END
  */
 template<typename _Ty>
 MATRICE_GLOBAL_FINL constexpr _Ty radian(_Ty deg) noexcept {
-	return pi<_Ty> * deg / _Ty(180.degs);
+	return pi<_Ty> * deg / _Ty(180._degs);
 }
 
 /**
