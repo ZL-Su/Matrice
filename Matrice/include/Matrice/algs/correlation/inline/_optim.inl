@@ -313,10 +313,10 @@ auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>::_Diff() {
 }
 
 template<typename _Ty, typename _Itag> MATRICE_HOST_INL 
-auto _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>::_Diff(value_type x, value_type y)
+auto _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>::_Diff(value_type cx, value_type cy)
 {
 	const auto _Size = _Mybase::_Mysize;
-	const auto [_L, _R, _U, _D] = _Myopt.range<true>(point_type{ x,y });
+	const auto [_L, _R, _U, _D] = _Myopt.range<true>(point_type{ cx,cy });
 	const auto _Off = -static_cast<value_type>(_Myopt._Radius);
 
 	typename _Mybase::jacob_type _Jacbian(sq(_Size));
