@@ -451,7 +451,8 @@ struct _Loader_impl<_Ty, loader_tag::tiff> {
 	using category = loader_tag::tiff;
 
 	MATRICE_HOST_INL image_instance operator()(std::string path) {
-		if(string_helper::split(path, '.').back() == "tif")
+		if( string_helper::split(path, '.').back() == "tif" ||
+			string_helper::split(path, '.').back() == "tiff" )
 			return read_tiff_file(path.c_str());
 		else return image_instance{};
 	}
