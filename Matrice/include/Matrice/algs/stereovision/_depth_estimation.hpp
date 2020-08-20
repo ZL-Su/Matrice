@@ -88,7 +88,8 @@ protected:
 		   << std::fixed << std::showpoint << std::setprecision(6)
 		   << "    name1=" << val_1 << "    name2=" << val_2;
 		 */
-		std::cout << s.str() << std::endl;
+		MATRICE_USE_STD(cout);
+		cout << s.str() << "\n";
 	}
 
 	projection_t m_projection;
