@@ -1,6 +1,6 @@
 #include <functional>
 #include <numeric>
-#ifdef MATRICE_MATH_KERNEL==MATRICE_USE_MKL
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 #include <mkl.h>
 #endif
 #include "private/_plain_exp.hpp"

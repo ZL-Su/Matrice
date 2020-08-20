@@ -21,25 +21,25 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../ixpacket.h"
 MATRICE_ARCH_BEGIN
 template<typename T, int _Elems> MATRICE_HOST_FINL
-Packet_<T, _Elems>& Packet_<T, _Elems>::operator+ (const Packet_<T, _Elems>& _other)
+Packet_<T, _Elems>& Packet_<T, _Elems>::operator+(const Packet_<T, _Elems>& _other)
 {
 	m_data = transform<op_t::plus<size>>(*this, _other);
 	return (*this);
 }
 template<typename T, int _Elems> MATRICE_HOST_FINL 
-Packet_<T, _Elems>& Packet_<T, _Elems>::operator- (const Packet_<T, _Elems>& _other)
+Packet_<T, _Elems>& Packet_<T, _Elems>::operator-(const Packet_<T, _Elems>& _other)
 {
 	m_data = transform<op_t::minus<size>>(*this, _other);
 	return (*this);
 }
 template<typename T, int _Elems> MATRICE_HOST_FINL
-Packet_<T, _Elems>& Packet_<T, _Elems>::operator* (const Packet_<T, _Elems>& _other)
+Packet_<T, _Elems>& Packet_<T, _Elems>::operator*(const Packet_<T, _Elems>& _other)
 {
 	m_data = transform<op_t::multiplies<size>>(*this, _other);
 	return (*this);
 }
 template<typename T, int _Elems> MATRICE_HOST_FINL
-Packet_<T, _Elems>& Packet_<T, _Elems>::operator/ (const Packet_<T, _Elems>& _other)
+Packet_<T, _Elems>& Packet_<T, _Elems>::operator/(const Packet_<T, _Elems>& _other)
 {
 	m_data = transform<op_t::divides<size>>(*this, _other);
 	return (*this);
@@ -51,22 +51,22 @@ Packet_<T, _Elems> Packet_<T, _Elems>::abs() const
 }
 
 template<typename T, int _N, typename Packet>
-MATRICE_HOST_FINL Packet operator+ (const Packet_<T, _N>& _Left, const Packet_<T, _N>& _Right)
+MATRICE_HOST_FINL Packet operator+(const Packet_<T, _N>& _Left, const Packet_<T, _N>& _Right)
 {
 	return (transform<Packet::op_t::plus<_N>>(_Left, _Right));
 }
 template<typename T, int _N, typename Packet>
-MATRICE_HOST_FINL Packet operator- (const Packet_<T, _N>& _Left, const Packet_<T, _N>& _Right)
+MATRICE_HOST_FINL Packet operator-(const Packet_<T, _N>& _Left, const Packet_<T, _N>& _Right)
 {
 	return (transform<Packet::op_t::minus<_N>>(_Left, _Right));
 }
 template<typename T, int _N, typename Packet>
-MATRICE_HOST_FINL Packet operator* (const Packet_<T, _N>& _Left, const Packet_<T, _N>& _Right)
+MATRICE_HOST_FINL Packet operator*(const Packet_<T, _N>& _Left, const Packet_<T, _N>& _Right)
 {
 	return (transform<Packet::op_t::multiplies<_N>>(_Left, _Right));
 }
 template<typename T, int _N, typename Packet>
-MATRICE_HOST_FINL Packet operator/ (const Packet_<T, _N>& _Left, const Packet_<T, _N>& _Right)
+MATRICE_HOST_FINL Packet operator/(const Packet_<T, _N>& _Left, const Packet_<T, _N>& _Right)
 {
 	return (transform<Packet::op_t::divides<_N>>(_Left, _Right));
 }
@@ -168,8 +168,8 @@ void transform(const _InIt _Begin, const _InIt _End, _OutIt _Dst, _Op _Fn) {
 	enum { _Elems = 4 };
 	using value_t = remove_reference_t<decltype(*_Begin)>;
 
-	auto _N = std::distance(_Begin, _End);
-	auto _Packed_size = vsize<_Elems>(_N);
+	const auto _N = std::distance(_Begin, _End);
+	const auto _Packed_size = vsize<_Elems>(_N);
 	for (size_t i = 0; i < _Packed_size; i += _Elems) {
 		_Fn(Packet_<value_t, _Elems>(_Begin + i)).unpack(_Dst + i);
 	}

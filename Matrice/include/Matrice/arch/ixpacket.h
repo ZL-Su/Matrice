@@ -40,7 +40,7 @@ class Packet_ MATRICE_NONHERITABLE : public simd::simd_base_<T, _Elems>
 public:
 	enum {size = _Mybase::size};
 	using typename _Mybase::value_t;
-	using pointer = std::add_pointer_t<value_t>;
+	using typename _Mybase::pointer;
 
 	MATRICE_HOST_FINL Packet_() noexcept 
 		: _Mybase() {}

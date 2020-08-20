@@ -229,6 +229,9 @@
     <Filter Include="Header Files\Detail\accessors">
       <UniqueIdentifier>{3e37ef73-5605-4977-8159-953c98b298be}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Algs\Optimization">
+      <UniqueIdentifier>{39eda61b-1f71-48e6-84f8-407609565393}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -392,9 +395,6 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\private\math\_svd.h">
       <Filter>Header Files\Detail\math</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Matrice\private\nonfree\_lnalge.h">
-      <Filter>Header Files\Detail\math\nonfree</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\math\_linear_solver.h">
       <Filter>Header Files\Detail\math</Filter>
@@ -677,6 +677,15 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_bounded_pointer.hpp">
       <Filter>Header Files\Detail\accessors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\optimization\_intelli_optims.hpp">
+      <Filter>Header Files\Algs\Optimization</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\math\fast_native_math_funcs.hpp">
+      <Filter>Header Files\Detail\math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\nonfree\blas_lapack_kernel.h">
+      <Filter>Header Files\Detail\math\nonfree</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -982,9 +991,6 @@
     <None Include="include\Matrice\private\_similarity.inl">
       <Filter>Header Files\Detail\inline</Filter>
     </None>
-    <None Include="include\Matrice\private\nonfree\inl\_lnalge.inl">
-      <Filter>Header Files\Detail\math\nonfree\inl</Filter>
-    </None>
     <None Include="include\Matrice\algs\similarity\inline\_iterative_conv_impl.inl">
       <Filter>Header Files\Algs\Similarity\inl</Filter>
     </None>
@@ -1034,6 +1040,9 @@
     <None Include="include\Matrice\private\inl\_matrix_op.inl">
       <Filter>Header Files\Detail\core\inline</Filter>
     </None>
+    <None Include="include\Matrice\private\nonfree\inl\blas_lapack_impl.inl">
+      <Filter>Header Files\Detail\math\nonfree\inl</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="src\private\_dev_funcs.cu">
@@ -1048,15 +1057,5 @@
     <CudaCompile Include="src\private\_dev_memory.cpp">
       <Filter>Source Files\Details\CUDA</Filter>
     </CudaCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Matrice.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="..\..\..\..\..\Pictures\MyIcons\ivm_logo.png">
-      <Filter>Resource Files</Filter>
-    </Image>
   </ItemGroup>
 </Project>

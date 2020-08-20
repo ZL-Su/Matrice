@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,6 +29,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #define __CXX11_SHARED__
 #define MATRICE_SHARED_STORAGE 0
 #endif //enable shared memory allocator
+
+#if _HAS_CXX20
+#define __cpp_concepts 202007L
+#endif
 
 #define MATRICE_SIMD_DISABLE 0
 #define MATRICE_SIMD_SSE    2 //*\SIMD-128
@@ -77,20 +81,29 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #define DGE_MATRICE_BEGIN namespace dgelom {
 #define DGE_MATRICE_END }
 
-#define MATRICE_EXPR_BEGIN DGE_MATRICE_BEGIN namespace exprs {
+#define MATRICE_EXPR_BEGIN DGE_MATRICE_BEGIN \
+namespace exprs {
 #define MATRICE_EXPR_END } DGE_MATRICE_END
 
-#define MATRICE_DEVICE_BEGIN DGE_MATRICE_BEGIN namespace device {
+#define MATRICE_DEVICE_BEGIN DGE_MATRICE_BEGIN \
+namespace device {
 #define MATRICE_DEVICE_END  } DGE_MATRICE_END
 
-#define MATRICE_PRIVATE_BEGIN DGE_MATRICE_BEGIN namespace privt {
+#define MATRICE_PRIVATE_BEGIN DGE_MATRICE_BEGIN \
+namespace privt {
 #define MATRICE_PRIVATE_END  } DGE_MATRICE_END
 
-#define MATRICE_ALGS_BEGIN DGE_MATRICE_BEGIN namespace algs {
+#define MATRICE_ALGS_BEGIN DGE_MATRICE_BEGIN \
+namespace algs {
 #define MATRICE_ALGS_END  } DGE_MATRICE_END
 
-#define MATRICE_ARCH_BEGIN DGE_MATRICE_BEGIN namespace simd {
+#define MATRICE_ARCH_BEGIN DGE_MATRICE_BEGIN \
+namespace simd {
 #define MATRICE_ARCH_END   } DGE_MATRICE_END
+
+#define MATRICE_ALG_BEGIN(ALG) DGE_MATRICE_BEGIN \
+namespace ALG {
+#define MATRICE_ALG_END(ALG) } DGE_MATRICE_END
 
 #define _CONDITIONS_BEGIN namespace conds {
 #define _CONDITIONS_END }
@@ -101,13 +114,16 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef MATRICE_CONSTEXPR_IF
 #if defined (_HAS_CXX17)
-#define MATRICE_CONSTEXPR_IF(_COND) if constexpr (_COND)
+#define MATRICE_CONSTEXPR_IF(_COND) \
+ if constexpr (_COND)
 #else
-#define MATRICE_CONSTEXPR_IF(_COND) if           (_COND)
+#define MATRICE_CONSTEXPR_IF(_COND) \
+ if           (_COND)
 #endif
 #endif
 #ifndef MATRICE_ENABLE_IF
-#define MATRICE_ENABLE_IF(_COND) typename = std::enable_if_t<_COND>
+#define MATRICE_ENABLE_IF(_COND) \
+typename = std::enable_if_t<_COND>
 #endif
 
 #ifndef MATRICE_DEBUG
@@ -120,4 +136,9 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #ifndef _ENABLE_EXTENDED_ALIGNED_STORAGE
 #define _ENABLE_EXTENDED_ALIGNED_STORAGE
 #endif
+#endif
+
+#ifndef MATRICE_USE_STD
+#define MATRICE_USE_STD(NAME) \
+using std::NAME;
 #endif

@@ -17,7 +17,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 *	*************************************************************************/
 #pragma once
 #include <stdexcept>
-#include "../_lnalge.h"
+#include "../blas_lapack_kernel.h"
 #include "../../math/_config.h"
 
 DGE_MATRICE_BEGIN _DETAIL_BEGIN
@@ -37,7 +37,8 @@ template<> struct transp_tag<ttag::Y> {
 	static constexpr auto value = 112;
 #endif
 };
-template<ttag _Tag> MATRICE_HOST_INL constexpr auto transp_tag_v = transp_tag<_Tag>::value;
+template<ttag _Tag> MATRICE_HOST_INL 
+constexpr auto transp_tag_v = transp_tag<_Tag>::value;
 
 template<typename _Ty> struct _Blas_kernel_impl_base {
 	using pointer = std::add_pointer_t<_Ty>;
@@ -298,6 +299,10 @@ template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double>
 	}
 	MATRICE_HOST_INL static int spd(const plview_type& _A) {
 		return spd(get<2>(_A), { size_t(get<0>(_A)), size_t(get<1>(_A)) });
+	}
+	template<typename _Mty, MATRICE_ENABLE_IF(is_matrix_v<_Mty>)>
+	MATRICE_HOST_INL static int spd(const _Mty& _A) {
+		return spd(_A.data(), _A.shape().tile());
 	}
 
 	/**

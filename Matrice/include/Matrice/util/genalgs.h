@@ -6,9 +6,11 @@
 #include<algorithm>
 #include "_macros.h"
 #include "_std_wrapper.h"
+#ifdef MATRICE_SIMD_ARCH
 #include "../arch/ixpacket.h"
+#endif
 
-MATRICE_NAMESPACE_BEGIN_
+DGE_MATRICE_BEGIN
 template<class _InIt, class _OutIt> MATRICE_HOST_FINL
 void transform(const _InIt _First, const _InIt _Last, _OutIt _Dest) {
 	static_cast<void>(_First == _Last);
@@ -108,20 +110,10 @@ MATRICE_GLOBAL_FINL void fill(_Fwdty& _Cont, _Fn&& _Func) {
 template<typename _InIt>
 MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last) {
 	static_cast<void>(_First == _Last);
-	remove_all_t<decltype(*_First)> _Ret{ 0 };
-#if MATRICE_SIMD_ARCH==MATRICE_SIMD_AVX
-	using packed_t = typename simd::template Packet_<decltype(_Ret)>;
-	decltype(auto) _Size = std::distance(_First, _Last);
-	decltype(auto) _Step = packed_t::size << 1;
-	decltype(auto) _N = _Size / _Step;
-	for (auto i = 0, j = 0; i < _N; j = (++i)*_Step) {
-		const auto _Pos = &*_First + diff_t(j);
-		_Ret += (packed_t(_Pos)+packed_t(_Pos+packed_t::size)).reduce();
-	}
-	for (_First += _N * _Step; _First != _Last; ++_First) _Ret += *_First;
-#else
-	for (; _First != _Last; (void)++_First) _Ret += *_First;
-#endif
+
+	double _Ret{ 0 };
+	for (; _First != _Last; (void)++_First) 
+		_Ret += *_First;
 	return (_Ret);
 }
 
@@ -129,8 +121,8 @@ MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last) {
 template<typename _InIt>
 MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, index_t _Stride) {
 	static_cast<void>(_First == _Last);
-	remove_all_t<decltype(*_First)> _Ret{ 0 };
-	for (; _First < _Last; _Stride == 1 ? ++_First : _First += _Stride)
+	double _Ret{ 0 };
+	for (; _First < _Last; _First += _Stride)
 		_Ret += *(_First);
 	return (_Ret);
 }
@@ -139,11 +131,12 @@ MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, index_t _Stride) {
  *\brief sum over range [_First, _Last) with operator _Op
  *\param [_op] function operator.
  */
-template<typename _InIt, typename _Op, MATRICE_ENABLE_IF(is_pointer_v<_InIt>&&is_function_v<_Op>)>
+template<typename _InIt, typename _Op, MATRICE_ENABLE_IF(is_pointer_v<_InIt>)>
 MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, _Op _op) {
 	static_cast<void>(_First == _Last);
-	remove_all_t<decltype(_First[0])> _Ret = 0;
-	for (; _First != _Last; ++_First) _Ret += _op(*_First);
+	double _Ret = 0;
+	for (; _First != _Last; ++_First) 
+		_Ret += _op(*_First);
 	return (_Ret);
 }
 template<template<typename> class _Op, 
@@ -151,10 +144,12 @@ template<template<typename> class _Op,
 MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last, _Scalar _Value, _Func _Fn, _Op<_Scalar> _op = _Op<_Scalar>()) {
 	static_assert(is_arithmetic_v<_Scalar>, "Oops, template parameter '_Scalar' is illegal!");
 	static_cast<void>(_First == _Last);
-	remove_all_t<decltype(_First[0])> _Ret = 0;
-	for (; _First != _Last; ++_First) _Ret += _Fn(_op(*_First, _Value));
+	double _Ret = 0;
+	for (; _First != _Last; ++_First) 
+		_Ret += _Fn(_op(*_First, _Value));
 	return (_Ret);
 }
+
 _DETAIL_BEGIN
 template<size_t _N>  struct _Reduce_n {
 	template<typename _Ty> static

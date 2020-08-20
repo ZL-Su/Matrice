@@ -24,6 +24,7 @@ MATRICE_ALGS_BEGIN
 _DETAIL_BEGIN
 template<typename _Ty>
 class _Trig_base {
+	static_assert(is_floating_point_v<_Ty>, "_Ty in _Trig_base<_Ty> must be a floating point type.");
 	using _Myt = _Trig_base;
 public:
 	using value_type = _Ty;
@@ -40,6 +41,7 @@ public:
 		const auto tx = *(_It + 3), ty = *(_It + 4), tz = *(_It + 5);
 
 		rodrigues(vector_type{ rx, ry, rz }, m_rot[1]);
+
 		m_trs[1].x = tx, m_trs[1].y = ty, m_trs[1].z = tz;
 		
 		return (*this);
@@ -73,6 +75,7 @@ class _LSTrig : public _Trig_base<_Ty>
 	using _Myt = _LSTrig;
 public:
 	using value_type = typename _Mybase::value_type;
+	using vector_type = typename _Mybase::vector_type;
 	
 	_LSTrig() noexcept {
 		_Mybase::m_rot[0].identity();
@@ -89,7 +92,7 @@ public:
 		const auto rx = *_It, ry = *(_It + 1), rz = *(_It + 2);
 		const auto tx = *(_It + 3), ty = *(_It + 4), tz = *(_It + 5);
 
-		rodrigues(_Mybase::vector_type{ rx, ry, rz }, _Mybase::m_rot[0]);
+		rodrigues(vector_type{ rx, ry, rz }, _Mybase::m_rot[0]);
 		_Mybase::m_trs[0].x = tx, _Mybase::m_trs[0].y = ty, _Mybase::m_trs[0].z = tz;
 
 		//compute the geometry bewtween the object and right cam frames.

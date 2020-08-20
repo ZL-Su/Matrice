@@ -20,6 +20,25 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "core/matrix.h"
 #include "core/vector.h"
 
+MATRICE_GLOBAL_FINL constexpr auto operator""_mm(long double _Val) noexcept {
+	return (_Val);
+}
+MATRICE_GLOBAL_FINL constexpr auto operator""_cm(long double _Val) noexcept {
+	return (_Val);
+}
+MATRICE_GLOBAL_FINL constexpr auto operator""_m(long double _Val) noexcept {
+	return (_Val);
+}
+MATRICE_GLOBAL_FINL constexpr auto operator""_s(long double _Val) noexcept {
+	return (_Val);
+}
+MATRICE_GLOBAL_FINL constexpr auto operator""_degs(long double _Val) noexcept {
+	return (_Val);
+}
+MATRICE_GLOBAL_FINL constexpr auto operator""_rads(long double _Val) noexcept {
+	return (_Val);
+}
+
 DGE_MATRICE_BEGIN 
 _DETAIL_BEGIN
 
@@ -58,6 +77,13 @@ MATRICE_HOST_INL Vec3_<_Ty> _Rodrigues_impl(const Matrix_<_Ty, 3>& _R) {
 	
 	return (_Ret = (_Half * a / s)*_Ret);
 }
+
+/// <summary>
+/// Rodrigues transform from a vector to a matrix in 3-dimensional.
+/// </summary>
+/// <typeparam name="_Ty"> scalar </typeparam>
+/// <param name="_r"> roration vector </param>
+/// <returns>rotation matrix </returns>
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 MATRICE_HOST_INL Matrix_<_Ty, 3> _Rodrigues_impl(const Vec3_<_Ty>& _r) noexcept {
 	using value_t = _Ty;
@@ -89,9 +115,9 @@ MATRICE_HOST_INL Matrix_<_Ty, 3> _Rodrigues_impl(const Vec3_<_Ty>& _r) noexcept 
 template<typename _Ty>
 MATRICE_HOST_INL Matrix_<_Ty, 3, 3> _Rot_from(const Vec3_<_Ty>& _V1, const Vec3_<_Ty>& _V2) {
 	const auto _A = _V1.cross(_V2);
-	const auto _R = Matrix_<_Ty, 3, 3>{0, _A[2],  _A[1], _A[2],     0, -_A[0],
-		-_A[1], _A[0],     0
-	};
+	const auto _R = Matrix_<_Ty, 3, 3>{0, _A[2],  _A[1], _A[2], 0, -_A[0],
+		-_A[1], _A[0], 0};
+
 	return decltype(_R)::diag(1) + _R + (_R*_R)*(1-_V1.dot(_V2)) / pow(_A.norm(), 2);
 }
 
@@ -110,12 +136,35 @@ template<typename> class _Geotf_isometry {};
 
 _DETAIL_END
 
+/**
+ *\brief FUNCTION TEMPLATE, convert degree angle to radian.
+ */
+template<typename _Ty>
+MATRICE_GLOBAL_FINL constexpr _Ty radian(_Ty deg) noexcept {
+	return pi<_Ty> * deg / _Ty(180._degs);
+}
+
+/**
+ * \brief FUNCTION TEMPLATE, conversion between the rotation vector and matrix.
+ * \param "_In" an input 3d rotation vector or 3x3 rotation matrix.
+ * \param "_Out" return type of this function.
+ */
 template<typename _Input, typename _Output>
 MATRICE_HOST_INL auto rodrigues(const _Input& _In, _Output& _Out) noexcept {
 	const auto _Ret = detail::_Rodrigues_impl(_In);
 	if constexpr (is_pointer_v<_Output>)
 		dgelom::transform(_Ret.begin(), _Ret.end(), _Out);
 	else _Out = move(_Ret);
+}
+
+/**
+ * \brief FUNCTION TEMPLATE, conversion between the rotation vector and matrix.
+ * \param "_In" an input 3d rotation vector or 3x3 rotation matrix.
+ * \return Rotation matrix or vector according to the input "_In".
+ */
+template<typename _Input>
+MATRICE_HOST_INL auto rodrigues(const _Input& _In) noexcept {
+	return detail::_Rodrigues_impl(_In);
 }
 
 using axis_x_t = detail::_Axis_type<0, 3>;
@@ -130,5 +179,4 @@ template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
 // *\brief TEMPLATE CLASS for axis-angle representation
 using axisangle_t = detail::_Axis_angle_rep<_Ty, 3>;
 DGE_MATRICE_END
-
 #include "inline\_transform.inl"

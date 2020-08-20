@@ -1,6 +1,6 @@
 /*  *************************************************************************
 	This file is an Open Source C++ High Resolution Clock.
-	Copyright(C) 2017, Zhilong Su, all rights reserved.
+	Copyright(C) 2017-2020, Zhilong Su, all rights reserved.
 
 	This program is free software : you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -22,12 +22,13 @@
 #include <iomanip>
 #include <string>
 
-/* 
- * @Name: _HRC -- High Resolution Clock
- * @Calling pipeline: _HRC.start -> "target block" -> _HRC_stop -> elapsed_time()
- * @Copyright(c): Zhilong Su (su-zl@seu.edu.cn) 2017
+/**
+ * \name: _HRC -- High Resolution Clock
+ * \pipeline: _HRC.start -> "target block" -> _HRC_stop -> elapsed_time()
+ * \copyright(c): Zhilong Su (su-zl@seu.edu.cn) 2017
  */
-template<typename _Clock = std::chrono::high_resolution_clock> class HRC_ final
+template<typename _Clock = std::chrono::high_resolution_clock> 
+class HRC_ final
 {
 	using time_point_type =  std::chrono::time_point<_Clock>;
 public:

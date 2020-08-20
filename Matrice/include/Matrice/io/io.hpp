@@ -2,7 +2,9 @@
 	  About License Agreement of this file, see "../lic/license.h"
 *********************************************************************/
 #pragma once
+#include <iostream>
 #include <iosfwd>
+#include <iomanip>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -11,7 +13,11 @@
 #include <map>
 #include <functional>
 #include <type_traits>
+#if _MSC_VER >= 1926
+#include <filesystem>
+#else
 #include <experimental/filesystem>
+#endif
 #include "../core/matrix.h"
 #include "../core/vector.h"
 #include "../util/utils.h"
@@ -24,33 +30,21 @@ DGE_MATRICE_BEGIN
 /**
  * \for filesystem namespace in STD library
  */
-namespace fs = std::experimental::filesystem;
+#if _MSC_VER >= 1926
+	namespace fs = std::filesystem;
+#else
+	namespace fs = std::experimental::filesystem;
+#endif
+
+/**
+ * \is skip the folder
+ */
 enum is_skip_folder { N = 0, Y = 1 };
 
-template<typename _Ty = uint8_t>
-struct image_instance {
-	using value_type = _Ty;
-	using image_type = Matrix<value_type>;
-
-	MATRICE_HOST_INL operator Matrix_<value_type,0,0>() noexcept {
-		return (m_data);
-	}
-	MATRICE_HOST_INL image_instance& create(uint32_t nchs) noexcept {
-		m_nchs = nchs;
-		m_width = m_cols * m_nchs;
-		m_data.create(m_rows, m_width, zero<value_type>);
-
-		return (*this);
-	}
-	template<typename _Op>
-	MATRICE_HOST_INL decltype(auto) operator()(_Op&& op) noexcept {
-		return (op(m_data));
-	}
-
-	uint32_t m_rows = 0, m_cols = 0;
-	uint32_t m_nchs = 1, m_width = 0;
-	image_type m_data;
-};
+/**
+ * \forward declaration for image_instance
+ */
+struct image_instance;
 
 class IO : std::ios {
 	using _Mybase = std::ios;
@@ -350,13 +344,22 @@ MATRICE_HOST_INL decltype(auto) defpath(const T local) {
 	return forward<std::string>(IO::workspace().string() + "\\" + IO::strf(local)); 
 };
 
+/// <summary>
+/// \brief Print a given matrix
+/// </summary>
+/// <typeparam name="_Ty"></typeparam>
+/// <param name="m">a matrix with type of dgelom::Matrix_</param>
 template<typename _Ty, int _M, int _N>
-void print(const Matrix_<_Ty, _M, _N>& m) {
-	std::cout << "[\n[rows: " << m.rows() << "; cols: " << m.cols() << "]\n";
+void print(const Matrix_<_Ty, _M, _N>& m, const std::string& name = "\n") {
+	std::cout << "[" << name
+		<< " [rows: " << m.rows() 
+		<< ", cols: " << m.cols() << "]\n";
 	for (auto _It = m.rwbegin(); _It != m.rwend(); ++_It) {
+		std::cout << " ";
 		for (auto _Vl : _It)
-			std::cout << std::setiosflags(std::ios::left)
-			<< std::setprecision(8) << std::setw(15) << _Vl;
+			std::cout << std::setiosflags(std::ios::left) 
+			<< std::setprecision(8) << std::setw(15)
+			<< _Vl;
 		std::cout << "\n";
 	}
 	std::cout << "]\n";
@@ -439,7 +442,7 @@ _DETAIL_END
  *\param [path] the path of the image to be read.
  */
 template<typename _Ty = uint8_t, class _Pth = std::string> 
-MATRICE_HOST_INL decltype(auto) imread(const _Pth path);
+MATRICE_HOST_INL auto imread(const _Pth path);
 
 } DGE_MATRICE_END
 #include "inline\_directory.inl"
@@ -450,7 +453,7 @@ DGE_MATRICE_BEGIN namespace io {
 using directory = detail::_Dir_impl<detail::folder_tag>;
 using folder_collector = detail::_Collector<detail::folder_tag>;
 using file_collector = detail::_Collector<detail::file_tag>;
-using path_t = directory::path_type;
+using path_t = typename directory::path_type;
 
 template<typename _Ty = std::float_t>
 using data_loader = detail::_Data_loader_impl<_Ty, detail::loader_tag>;
@@ -469,8 +472,13 @@ MATRICE_HOST_FINL auto serial(const _Cont& _L) {
 }
 template<class _Op, typename _Vty = typename _Op::value_type>
 decltype(auto) make_loader(std::string path, _Op&& loader)noexcept {
-	using loader_type = io::data_loader<_Vty>;
-	return loader_type(io::directory{ path, io::path_t() }, loader);
+	using loader_type = data_loader<_Vty>;
+	return loader_type(directory{ path, path_t() }, loader);
+}
+template<class _Op>
+decltype(auto) make_loader(path_t path, _Op&& loader)noexcept {
+	using loader_type = data_loader<typename _Op::value_type>;
+	return loader_type(directory{ path.generic_string(), path_t() }, loader);
 }
 }
 

@@ -293,6 +293,8 @@ public:
 	}
 	MATRICE_GLOBAL_INL explicit Base_(size_t _rows, size_t _cols, pointer data)noexcept
 		:_Mybase(_rows, _cols, data) {
+		if constexpr (rows_at_compiletime && cols_at_compiletime)
+			_Myalloc = (data);
 	}
 	MATRICE_GLOBAL_INL explicit Base_(size_t _rows, size_t _cols, value_t _val)noexcept
 		:Base_(_rows, _cols) {
@@ -327,12 +329,12 @@ public:
 	/**
 	 *\from STD vector<value_t>, while no memory is copied.
 	 */
-	MATRICE_HOST_INL Base_(const std::vector<value_t>&_other, int _cols=1) noexcept
+	MATRICE_HOST_INL Base_(std::vector<value_t>&_other, int _cols=1) noexcept
 		:Base_(_other.size()/_cols, _cols, _other.data()) {}
 	/**
 	 *\from STD valarray<...>, while no memory is copied.
 	 */
-	MATRICE_HOST_INL Base_(const std::valarray<value_t>& _other, int _cols = 1) noexcept
+	MATRICE_HOST_INL Base_(std::valarray<value_t>& _other, int _cols = 1) noexcept
 		:Base_(_other.size() / _cols, _cols, &_other[0]) {}
 	/**
 	 *\from explicit specified matrix type
@@ -385,25 +387,23 @@ public:
 	/**
 	 *\create a matrix with dynamic (host or device) memory allocation
 	 */
-	MATRICE_HOST_INL decltype(auto)create(diff_t _Rows, diff_t _Cols = (1)) {
+	MATRICE_HOST_INL _Derived& create(diff_t _Rows, diff_t _Cols = (1)) {
 		if constexpr (_M <= 0 || _N <= 0) 
 			this->derived().__create_impl(_Rows, _Cols);
-		return (*static_cast<_Derived*>(this));
+		return this->derived();
 	};
 	template<typename _Uy, MATRICE_ENABLE_IF(is_scalar_v<_Uy>)>
-	MATRICE_HOST_INL decltype(auto)create(diff_t _Rows, diff_t _Cols, _Uy _Val) {
-		this->create(_Rows, _Cols);
-		return (*(this) = value_type(_Val));
+	MATRICE_HOST_INL _Derived& create(diff_t _Rows, diff_t _Cols, _Uy _Val) {
+		return this->create(_Rows, _Cols) = value_type(_Val);
 	};
-	MATRICE_HOST_INL decltype(auto)create(const shape_t<2>& _Shape) {
+	MATRICE_HOST_INL _Derived& create(const shape_t<2>& _Shape) {
 		if constexpr (_M <= 0 || _N <= 0) 
 			this->derived().__create_impl(MATRICE_EXPAND_SHAPE);
-		return (*static_cast<_Derived*>(this));
+		return this->derived();
 	};
 	template<typename _Uy, MATRICE_ENABLE_IF(is_scalar_v<_Uy>)>
-	MATRICE_HOST_INL decltype(auto)create(const shape_t<2>& _Shape, _Uy _Val) {
-		this->create(_Shape);
-		return (*(this) = value_type(_Val));
+	MATRICE_HOST_INL _Derived& create(const shape_t<2>& _Shape, _Uy _Val) {
+		return this->create(_Shape) = value_type(_Val);
 	};
 
 	/**
@@ -939,8 +939,8 @@ public:
 	 * \dot product of this matrix with _Rhs
 	 */
 	template<typename _Rhs> 
-	MATRICE_GLOBAL_FINL value_type dot(const _Rhs& _Rhs)const noexcept {
-		return this->operator*(_Rhs).sum(); 
+	MATRICE_GLOBAL_FINL value_type dot(const _Rhs& _rhs)const noexcept {
+		return this->operator*(_rhs).sum(); 
 	}
 	/**
 	 * \contraction of two matrices (rank-2 tensors)
@@ -1022,7 +1022,8 @@ public:
 		}
 		else {
 #ifdef MATRICE_DEBUG
-			DGELOM_CHECK(_Data + this->size() - 1, "Input length of _Data must be greater or equal to this->size().");
+			DGELOM_CHECK(_Data + this->size() - 1, 
+				"Input length of _Data must be greater or equal to this->size().");
 #endif
 			for (diff_t _Idx = 0; _Idx < size(); ++_Idx)
 				m_data[_Idx] = static_cast<value_type>(_Data[_Idx]);
@@ -1036,7 +1037,8 @@ public:
 		MATRICE_ENABLE_IF(is_iterator_v<_It >)>
 	MATRICE_GLOBAL_FINL _Derived& from(const _It _Data, _Op&& _Fn) {
 #ifdef MATRICE_DEBUG
-		DGELOM_CHECK(_Data + this->size() - 1, "Input length of _Data must be greater or equal to this->size().");
+		DGELOM_CHECK(_Data + this->size() - 1, 
+			"Input length of _Data must be greater or equal to this->size().");
 #endif
 #pragma omp parallel for if (size()>1000)
 		for(diff_t _Idx = 0; _Idx < size(); ++_Idx)
@@ -1045,7 +1047,8 @@ public:
 		return (this->derived());
 	}
 	/**
-	 * \brief Stack from a sequence of vectors with same size, _Vecty can be any type that has members .size() and .data()
+	 * \brief Stack from a sequence of vectors with same size, 
+	          _Vecty can be any type that has members .size() and .data().
 	 * \param [_L] the input _Vecty-typed vector list
 	 * \param [_Dim] = 0 for row-wise stacking, = 1 for column-wise stacking 
 	 */
@@ -1098,11 +1101,13 @@ public:
 	 *\param [_Lower, _Upper] the range boundary
 	 */
 	MATRICE_GLOBAL_INL bool in_range(const _Myt& _Lower, const _Myt& _Upper) const {
+		MATRICE_USE_STD(false_type);
 		for (const auto idx : range(0, size())) {
 			if (m_data[idx] < _Lower.m_data[idx] || m_data[idx] > _Upper.m_data[idx])
-				return std::false_type::value;
+				return false_type::value;
 		}
-		return std::true_type::value;
+		MATRICE_USE_STD(true_type);
+		return true_type::value;
 	}
 
 	/**

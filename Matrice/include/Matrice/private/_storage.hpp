@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -85,7 +85,7 @@ public:
 		_Alloc_copy(other.derived());
 	}
 	MATRICE_GLOBAL_INL _Dense_allocator_base(_Myt&& other) noexcept {
-		_Alloc_move(move(other));
+		_Alloc_move(other);
 	}
 	template<typename _Al, enable_if_t<is_not_same_v<_Al, allocator>>>
 	MATRICE_GLOBAL_INL _Dense_allocator_base(const _Al& other)
@@ -94,7 +94,13 @@ public:
 	}
 	template<typename _Al, enable_if_t<is_not_same_v<_Al, allocator>>>
 	MATRICE_GLOBAL_INL _Dense_allocator_base(_Al&& other) noexcept {
-		_Alloc_move(move(other));
+		_Alloc_move(other);
+	}
+
+	MATRICE_GLOBAL_INL ~_Dense_allocator_base() noexcept {
+		if (m_data) {
+			this->destroy();
+		}
 	}
 
 	/**
@@ -171,38 +177,46 @@ public:
 	MATRICE_GLOBAL_INL allocator& operator=(const pointer data) noexcept;
 
 	/**
-	 *\brief returns if the allocator is empty or not.
+	 *\brief return if the allocator is empty or not.
 	 */
 	MATRICE_GLOBAL_INL operator bool() const noexcept {
 		return m_data ? true : false;
 	}
 
 	/**
-	 *\brief returns the pointer of the allocator.
+	 *\brief return the pointer of the allocator.
 	 */
 	MATRICE_GLOBAL_INL operator pointer() noexcept {
 		return m_data;
 	}
 
 	/**
-	 *\brief releases the allocator.
+	 *\brief release the allocator.
 	 */
 	MATRICE_GLOBAL_INL void destroy() noexcept;
 
 	/**
-	 *\brief gets deleter of the allocator, this method is reserved for smart pointers.
+	 *\brief get deleter of the allocator, this method is reserved for smart pointers.
 	 */
 	MATRICE_GLOBAL_INL decltype(auto) deleter() const noexcept;
 
+	/**
+	 *\brief Release the ownership of the allocator
+	 */
+	MATRICE_GLOBAL_FINL void _Free_ownership() noexcept {
+		m_data = nullptr;
+		m_rows = m_cols = 0;
+	}
+
 private:
 	template<typename _Al>
-	MATRICE_GLOBAL_INL _Myt&_Alloc_copy(const _Al& al) noexcept;
+	MATRICE_GLOBAL_INL allocator& _Alloc_copy(const _Al& al) noexcept;
 	template<typename _Al>
-	MATRICE_GLOBAL_INL _Myt&_Alloc_move(_Al&& al) noexcept;
+	MATRICE_GLOBAL_INL allocator& _Alloc_move(_Al& al) noexcept;
 
 protected:
 	pointer m_data = nullptr;
-	size_t m_rows, m_cols;
+	size_t m_rows = 0, m_cols = 0;
 };
 
 /**
@@ -229,7 +243,7 @@ public:
 	}
 	template<typename _Argt>
 	MATRICE_HOST_INL _Allocator(_Argt&& arg) noexcept
-		:_Mybase(forward<_Argt>(arg)) {
+		:_Mybase(arg) {
 	}
 
 	MATRICE_HOST_INL _Myt& operator=(const _Myt& othr) noexcept {
@@ -292,7 +306,7 @@ public:
 	MATRICE_HOST_INL _Allocator(_Argt&& arg) noexcept
 		:_Mybase(forward<_Argt>(arg)){
 	}
-	MATRICE_HOST_INL ~_Allocator();
+	//MATRICE_HOST_INL ~_Allocator();
 
 	MATRICE_HOST_INL _Myt& operator=(const _Myt& othr) noexcept {
 		return _Mybase::operator=(othr);
@@ -335,7 +349,7 @@ public:
 	MATRICE_HOST_INL _Allocator(_Argt&& arg) noexcept
 		:_Mybase(forward<_Argt>(arg)) {
 	}
-	MATRICE_HOST_INL ~_Allocator();
+	//MATRICE_HOST_INL ~_Allocator();
 
 	MATRICE_HOST_INL _Myt& operator=(const _Myt& othr) noexcept {
 		return _Mybase::operator=(othr);
@@ -382,7 +396,7 @@ public:
 	MATRICE_HOST_INL _Allocator(_Argt&& arg) noexcept
 		:_Mybase(forward<_Argt>(arg)) {
 	}
-	MATRICE_HOST_INL ~_Allocator();
+	//MATRICE_HOST_INL ~_Allocator();
 
 	MATRICE_HOST_INL _Myt& operator=(const _Myt& othr) noexcept {
 		return _Mybase::operator=(othr);
@@ -818,6 +832,12 @@ template<typename _Ty, /*data type*/
 	class _Ly=plain_layout::row_major /*storage order*/
 >
 using dense_allocator = detail::_Allocator<_Ty, _RowsAtCT, _ColsAtCT, allocator_traits_v<_RowsAtCT, _ColsAtCT>, _Ly>;
+
+namespace internal {
+template<typename _Ty>
+using _Dynamic_buffer = detail::_Allocator<_Ty, ::dynamic, ::dynamic, allocator_traits_v<::dynamic, ::dynamic>, plain_layout::row_major>;
+}
+
 DGE_MATRICE_END
 
 #ifdef _MSC_VER

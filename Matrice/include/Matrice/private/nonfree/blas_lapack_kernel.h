@@ -66,4 +66,4 @@ template<solver_type _Tag>
 using lapack_backward = detail::_Lapack_backward_impl<_Tag>;
 DGE_MATRICE_END
 
-#include "inl\_lnalge.inl"
+#include "inl\blas_lapack_impl.inl"

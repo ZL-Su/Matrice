@@ -163,13 +163,15 @@ MATRICE_HOST_INL static _OutIt copy(_InIt _First, _InIt _Last, _OutIt _Dest) {
 
 namespace internal {
 template<typename _Ty, class _Tag>
-MATRICE_GLOBAL_INL decltype(auto) malloc(size_t rows, size_t& cols, _Tag);
+MATRICE_GLOBAL_INL _Ty* malloc(size_t rows, size_t& cols, _Tag);
 
 template<typename _Ty, class _Tag>
 MATRICE_GLOBAL_INL void free(_Ty* data, _Tag);
+template<typename _Ty, class _Tag>
+MATRICE_GLOBAL_INL void free(_Ty* data, size_t size, _Tag);
 
 template<typename _Ty>
-MATRICE_HOST_INL decltype(auto) aligned_malloc(size_t size);
+MATRICE_HOST_INL _Ty* aligned_malloc(size_t size);
 
 template<typename _Ty>
 MATRICE_HOST_INL void aligned_free(_Ty* aligned_ptr) noexcept;
@@ -185,10 +187,13 @@ MATRICE_GLOBAL_INL decltype(auto) make_alloc_deleter(_Tag);
 
 namespace impl {
 template<typename _Ty>
-MATRICE_HOST_INL decltype(auto) _Malloc(size_t rows, size_t cols, heap_alloc_tag);
+MATRICE_HOST_INL _Ty* _Malloc(size_t size, heap_alloc_tag);
 
 template<typename _Ty>
 MATRICE_HOST_INL void _Free(_Ty* data, heap_alloc_tag);
+
+template<typename _Ty>
+MATRICE_HOST_INL void _Free(_Ty* data, size_t size, heap_alloc_tag);
 
 MATRICE_HOST_INL decltype(auto) _Deleter(stack_alloc_tag) noexcept;
 MATRICE_HOST_INL decltype(auto) _Deleter(heap_alloc_tag) noexcept;

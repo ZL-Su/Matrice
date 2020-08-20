@@ -1,6 +1,6 @@
 /*  *************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,10 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 *	*************************************************************************/
 #pragma once
-#include <type_traits>
 #include "util/_macros.h"
 #include "util/_type_defs.h"
 #include "util/_std_wrapper.h"
+#ifdef __cpp_concepts
+#include <concepts>
+#endif
 
 DGE_MATRICE_BEGIN
 
@@ -200,11 +202,7 @@ template<> struct _View_trait<float> { enum { value = 0x0032 }; };
 template<> struct _View_trait<double> { enum { value = 0x0064 }; };
 template<typename T> inline constexpr auto plane_view_v = _View_trait<T>::value;
 
-template<typename T>
-struct traits { 
-	using type =
-		conditional_t<is_class_v<T>, typename T::value_type, remove_all_t<T>>;
-};
+template<typename T> struct traits {};
 
 template<typename T> struct is_matrix : std::false_type {};
 template<typename T> inline constexpr 
@@ -218,6 +216,8 @@ template<typename Exp> inline constexpr
 bool is_expression_v = is_expression<Exp>::value;
 template<class Exp, typename = enable_if_t<is_expression_v<Exp>>>
 struct expression_traits : traits<Exp> {};
+template<class Ade>
+struct autodiff_exp_traits : traits<Ade> {};
 
 template<typename T> struct is_mtxview : std::false_type {};
 /**
@@ -238,6 +238,8 @@ inline constexpr bool is_fxdvector_v = is_fxdvector<T>::value;
  */
 template<typename T> 
 inline constexpr bool is_matrix_convertible_v = is_matrix_v<T> || is_expression_v<T> || is_mtxview_v<T>;
+
+//template<typename T> concept matrix_convertible = is_matrix_convertible_v<T>;
 
 template<int _M, int _N> struct allocator_traits;
 template<int _M, int _N=_M> 
@@ -347,21 +349,37 @@ private: \
 };
 
 /**
- *\brief has_method_data<T> is true_type iff T has the member T().data()
+ *\brief has_method_data<T> is true_type iff T has the member T::data()
  */
 template<class, typename T> 
 struct has_method_data :std::false_type {};
 template<typename T>
-struct has_method_data<decltype(void(std::declval<T>().data())), T> : std::true_type {};
-//*\alias has_data_v<T> is true_type iff T has the member T().data()
+struct has_method_data<decltype(void(std::declval<T>().data())),T>:std::true_type {};
+//*\alias has_data_v<T> is true_type iff T has the member T::data()
 template<typename T>
 inline constexpr auto has_data_v = has_method_data<void, T>::value;
+
+/**
+ *\brief has_method_size<T> is true_type iff T has the member T::size()
+ */
+template<class, typename T>
+struct has_method_size :std::false_type {};
+template<typename T>
+struct has_method_size<decltype(void(std::declval<T>().size())),T>:std::true_type{};
+//*\alias has_size_v<T> is true_type iff T has the member T::size()
+template<typename T>
+inline constexpr auto has_size_v = has_method_size<void, T>::value;
+
 
  /**
   *\brief has_value_t<T> is true_type iff T has member value_t
   */
 template<typename T>
 struct has_value_t<T> { static constexpr auto value = is_expression_v<T> || is_matrix_v<T> || is_mtxview_v<T>; };
+
+//template<typename T> concept _Has_value_t = requires{typename T::value_t; };
+//template<typename T> concept _Has_value_type = requires{typename T::value_type;};
+//template<typename T> concept has_value_type = _Has_value_type<T> || _Has_value_t<T>;
 
 /**
  *\brief is_tensor<T> is true_type iff T is dgelom::tensor<...>
@@ -398,7 +416,7 @@ inline constexpr auto is_same_v = std::is_same<T, U>::value;
  *\brief is_not_same_v<T,U> is true iff. T and U are not same type.
  */
 template<typename T, typename U>
-inline constexpr auto is_not_same_v = !std::is_same<T, U>::value;
+inline constexpr auto is_not_same_v = !is_same_v<T, U>;
 
 /**
  *\brief is_any_of_v<T, Ts...> is true iff. T is one of types encapsulated in Ts....
@@ -413,4 +431,14 @@ template<typename T, typename U = T>
 struct auto_matrix_type { using type = T; };
 template<typename T, typename U = T>
 using auto_matrix_type_t = typename auto_matrix_type<T, U>::type;
+
+/**
+ *\brief is_autodiff_exp<T> is true iff. T is an auto differential expression.
+ */
+template<typename T> struct is_autodiff_exp : std::false_type {};
+/**
+ *\brief is_autodiff_exp_v<T> is true iff. T is an auto differential expression.
+ */
+template<typename T>
+inline constexpr auto is_autodiff_exp_v = is_autodiff_exp<T>::value;
 DGE_MATRICE_END

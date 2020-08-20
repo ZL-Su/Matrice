@@ -20,6 +20,9 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "algs/interpolation/_cubic_conv_interp.hpp"
 #include "_projection.hpp"
 #include "_spatial_transform.hpp"
+#ifdef MATRICE_DEBUG
+#include "../../io/io.hpp"
+#endif
 
 MATRICE_ALGS_BEGIN
 _DETAIL_BEGIN
@@ -43,15 +46,30 @@ public:
 	_Depth_estimation_base(const point_t& r, const point_t& t)
 		:m_projection{ r,t } {
 	}
+	_Depth_estimation_base(const initlist<value_t> rt)
+		:m_projection{ rt } {
+	}
 
 	/**
 	 *\brief getter/setter to the geometry of the stereovis. sys.
+	 *\returns stereo projection geometry [m_projection]
 	 */
-	MATRICE_HOST_INL decltype(auto) geometry() const noexcept {
+	MATRICE_HOST_INL decltype(auto)geometry() const noexcept {
 		return (m_projection);
 	}
-	MATRICE_HOST_INL decltype(auto) geometry() noexcept {
+	MATRICE_HOST_INL decltype(auto)geometry() noexcept {
 		return (m_projection);
+	}
+
+	/// <summary>
+	/// Set to output verbose information or not.
+	/// </summary>
+	/// <returns>reference of verbose value [true or false]</returns>
+	MATRICE_HOST_FINL decltype(auto)verbose()const noexcept {
+		return m_verbose;
+	}
+	MATRICE_HOST_FINL decltype(auto)verbose() noexcept {
+		return m_verbose;
 	}
 
 protected:
@@ -59,9 +77,26 @@ protected:
 		m_materp.set(m_matching);
 		m_referp.set(m_reference);
 	}
+
+	/// <summary>
+	/// Used to report some computation information.
+	/// </summary>
+	/// <param name="s">report string stream</param>
+	MATRICE_HOST_INL void _Report(std::stringstream&& s) {
+		/* 
+		 s << "it=" << std::setfill('0') << std::setw(4) << iterations
+		   << std::fixed << std::showpoint << std::setprecision(6)
+		   << "    name1=" << val_1 << "    name2=" << val_2;
+		 */
+		MATRICE_USE_STD(cout);
+		cout << s.str() << "\n";
+	}
+
 	projection_t m_projection;
 	image_t m_reference, m_matching;
 	interp_t m_referp, m_materp;
+
+	bool m_verbose{ false };
 };
 
 template<typename _Ty, 
@@ -77,15 +112,24 @@ public:
 	// Define the order of spatial transformer
 	static constexpr auto order = 1;
 	// Define the size of the subsets
-	static constexpr auto size = 31;
+	static constexpr auto size = 41;
 	using typename _Mybase::value_t;
 	using typename _Mybase::point_t;
 	using typename _Mybase::image_t;
 	
 	_GCC_estimator(const point_t& r, const point_t& t)
 		:_Mybase{ r, t }, 
-		m_jacob(sqr<size_t>(size)), m_resid(sqr<size_t>(size)), 
-		_Myle(size, size), _Myri(size, size){
+		m_jacob(sq<size_t>(size)), 
+		m_resid(sq<size_t>(size)), 
+		_Myle(size, size), 
+		_Myri(size, size){
+	}
+	_GCC_estimator(const initlist<value_t> rt)
+		:_Mybase{ rt }, 
+		m_jacob(sq<size_t>(size)), 
+		m_resid(sq<size_t>(size)), 
+		_Myle(size, size), 
+		_Myri(size, size){
 	}
 
 	/**
@@ -102,83 +146,91 @@ public:
 
 	/**
 	 *\brief Compute the depth for a given image point
-	 *\param [x, y] the coords of the image point in the left part of the stereo pair
+	 *\param [x, y]: the coords of the image point in the left part of the stereo pair
 	 */
 	auto compute(value_t x, value_t y, value_t init_depth) {
 #ifdef MATRICE_DEBUG
 	    DGELOM_CHECK(!_Mybase::m_reference.empty, 
 	    "_GCC_estimator<_Ty, _Altag> requires a valid stereo pair\n\
         be set with the method ::set_stereo_pair(l,r)\n\
-        before computing the depth in ::compute(x, y, depth).");
+        before computing the depth with ::compute(x, y, depth).");
 #endif
 
 		auto depth{ init_depth };
-
-		//eval Jacobian and Hessian matrices
-		m_jacob = this->_Diff<_Mytask::INIT_JACOB>(x, y, depth);
-		auto hess = m_jacob.t().mul(m_jacob).eval();
-		auto ihess = hess.spd().inv();
+		_Mystfer T{ _Mypart::zeros() };
 		
 		//construct ref. subset surrounds (x, y)
 		_Myle = _Mybase::m_reference.block(diff_t(x), diff_t(y), size/2);
 
-		_Mystfer T{ _Mypart::zeros() };
-
 		//compute the matching subset first time
 		auto xp = _Mybase::m_projection.first(x, y, depth);
 		_Myri = _Warp(T, xp.x, xp.y);
-
 		array_n<value_t, ::dynamic> _Errmap(m_jacob.rows());
 		_Errmap = _Myle - _Myri;
+
+		//eval Jacobian and Hessian matrices
+		m_jacob = _Diff<_Mytask::INIT_JACOB>(x, y, depth);
+		auto hess = m_jacob.t().mul(m_jacob).eval();
+		auto ihess = hess.spd().inv();
+
+		//solve and update
 		auto b = m_jacob.t().mul(_Errmap).eval();
 		auto dp = ihess.mul(b).eval();
+		dp = -1 * dp;
+		auto residual = dp.norm<2>();
 		depth += dp(0);
 		T.update(dp.data() + 1);
-		auto tol = dp.norm<2>();
 
-		xp = _Mybase::m_projection.update(depth);
-		m_jacob = this->_Diff<_Mytask::UPDATE_JACOB>(xp.x, xp.y, depth);
-		hess = m_jacob.t().mul(m_jacob);
-		ihess = hess.spd().inv();
-		_Myri = _Warp(T, xp.x, xp.y);
-		_Errmap = _Myle - _Myri;
-		b = m_jacob.t().mul(_Errmap);
-		dp = ihess.mul(b);
-		depth += dp(0);
-		T.update(dp.data() + 1);
-		tol = dp.norm<2>();
+		for (size_t k = 1; k < 50; ++k) {
+			if (residual > 1.E-6) {
+				xp = _Mybase::m_projection.update(depth);
+#ifdef MATRICE_DEBUG
+				print(xp);
+#endif
+				_Myri = _Warp(T, xp.x, xp.y);
+				_Errmap = _Myle - _Myri;
 
-		xp = _Mybase::m_projection.update(depth);
-		m_jacob = this->_Diff<_Mytask::UPDATE_JACOB>(xp.x, xp.y, depth);
-		hess = m_jacob.t().mul(m_jacob);
-		ihess = hess.spd().inv();
-		_Myri = _Warp(T, xp.x, xp.y);
-		_Errmap = _Myle - _Myri;
-		b = m_jacob.t().mul(_Errmap);
-		dp = ihess.mul(b);
-		depth += dp(0);
-		T.update(dp.data() + 1);
+				m_jacob = _Diff<_Mytask::UPDATE_JACOB>(x, y, depth);
+				hess = m_jacob.t().mul(m_jacob);
+				ihess = hess.spd().inv();
+				
+				b = m_jacob.t().mul(_Errmap);
+				dp = ihess.mul(b);
+				dp = -1 * dp;
+				depth += dp(0);
+				T.update(dp.data() + 1);
+				residual = dp.norm<2>();
+			}
+		}
+
+		return (depth);
 	}
 
 private:
 
 	/**
 	 *\brief Compute and update the Jacobian matrix.
+	 *\param cx, cy: the x- and y-coordinates of the computation point.
+	 *\param depth: the updated depth of (cx, cy).
 	 */
 	template<_Mytask _Task = _Mytask::INIT_JACOB>
-	decltype(auto) _Diff(value_t rx, value_t ry, value_t depth) noexcept {
+	decltype(auto) _Diff(value_t cx, value_t cy, value_t depth) noexcept {
+		const auto dxdp = _Mybase::m_projection.grad(cx, cy, depth);
+
 		constexpr auto radius = size >> 1;
 		for (diff_t dy = -radius; dy <= radius; ++dy) {
-			const auto y = ry + dy;
+			const auto y = cy + dy;
 			for (diff_t dx = -radius; dx <= radius; ++dx) {
-				const auto x = rx + dx;
+				const auto x = cx + dx;
 				const auto lidx = (dy + radius)*size + (dx + radius);
 				auto J = m_jacob[lidx];
 				if constexpr (_Task == _Mytask::UPDATE_JACOB) {
-					J[0] = _Diff_d(x, y, depth);
+					const auto [dgdx, dgdy] = _Diff_g(x, y, depth);
+					J[0] = -(dgdx * dxdp.x + dgdy * dxdp.y);
 				}
 				else if constexpr (_Task == _Mytask::INIT_JACOB) {
-					J[0] = _Diff_d(x, y, depth);
+					const auto [dgdx, dgdy] = _Diff_g(x, y, depth);
+					J[0] = -(dgdx * dxdp.x + dgdy * dxdp.y);
 
 					const auto[dfdx, dfdy] = _Mybase::m_referp.grad(x, y);
 					J[1] = dfdx * dx, J[2] = dfdx * dy;
@@ -195,14 +247,21 @@ private:
 	 *\brief Compute derivative of the residual w.r.t. the depth, e.g. 
 	 //tex:$\dfrac{\partial\varepsilon}{\partial d}$
 	 */
-	value_t _Diff_d(value_t x, value_t y, value_t depth)const noexcept {
-		const auto X = _Mybase::m_projection.backproj(x, y, depth);
-		const auto xp = _Mybase::m_projection.reproj(X);
-		const auto [dgdx, dgdy] = _Mybase::m_materp.grad(xp.x, xp.y);
+	value_t _Diff_d(value_t cx, value_t cy, value_t depth)const noexcept {
+		const auto X = _Mybase::m_projection.backproj(cx, cy, depth);
+		const auto p = _Mybase::m_projection.reproj(X);
 
-		const auto dxdp = _Mybase::m_projection.grad(x, y, depth);
+		const auto [dgdx, dgdy] = _Mybase::m_materp.grad(p.x, p.y);
+		const auto dxdp = _Mybase::m_projection.grad(cx, cy, depth);
 
 		return -(dgdx*dxdp.x + dgdy * dxdp.y);
+	}
+
+	auto _Diff_g(value_t cx, value_t cy, value_t depth)const noexcept {
+		const auto X = _Mybase::m_projection.backproj(cx, cy, depth);
+		const auto p = _Mybase::m_projection.reproj(X);
+
+		return _Mybase::m_materp.grad(p.x, p.y);
 	}
 
 	/**

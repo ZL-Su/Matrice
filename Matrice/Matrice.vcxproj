@@ -21,7 +21,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseIntelMKL>Parallel</UseIntelMKL>
     <UseILP64Interfaces>false</UseILP64Interfaces>
@@ -30,7 +30,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <UseIntelMKL>Parallel</UseIntelMKL>
@@ -61,7 +61,7 @@
     <OutDir>.\x64\Release\</OutDir>
     <IntDir>.\IntDir\Release\</IntDir>
     <TargetName>matrice</TargetName>
-    <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;.\include\Matrice;$(IncludePath)</IncludePath>
+    <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;.\include\Matrice;.\include\Matrice\private;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -82,7 +82,7 @@
       <EnableModules>false</EnableModules>
       <AdditionalOptions>/std:c++latest /bigobj %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <MinimalRebuild>true</MinimalRebuild>
+      <MinimalRebuild>false</MinimalRebuild>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <BrowseInformation>true</BrowseInformation>
     </ClCompile>
@@ -111,11 +111,11 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_LIB;_ENABLE_EXTENDED_ALIGNED_STORAGE;MATRICE_THR=MATRICE_THR_OMP;MATRICE_MATH_KERNEL=MATRICE_USE_MKL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <OpenMPSupport>true</OpenMPSupport>
+      <OpenMPSupport>false</OpenMPSupport>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <MinimalRebuild>true</MinimalRebuild>
+      <MinimalRebuild>false</MinimalRebuild>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
     </ClCompile>
     <Link>
@@ -197,6 +197,7 @@
     <ClInclude Include="include\Matrice\algs\interpolation\_mba.hpp" />
     <ClInclude Include="include\Matrice\algs\interpolation\_splineinterp.h" />
     <ClInclude Include="include\Matrice\algs\interpolation\_interpolation.h" />
+    <ClInclude Include="include\Matrice\algs\optimization\_intelli_optims.hpp" />
     <ClInclude Include="include\Matrice\algs\similarity.h" />
     <ClInclude Include="include\Matrice\algs\similarity\_iterative_conv_impl.h" />
     <ClInclude Include="include\Matrice\algs\similarity\_similarity_traits.h" />
@@ -227,6 +228,7 @@
     <ClInclude Include="include\Matrice\private\autograd\_ad_scalar.hpp" />
     <ClInclude Include="include\Matrice\private\autograd\_ad_utils.h" />
     <ClInclude Include="include\Matrice\private\container\_multi_array.hpp" />
+    <ClInclude Include="include\Matrice\private\math\fast_native_math_funcs.hpp" />
     <ClInclude Include="include\Matrice\private\math\kernel_wrapper.hpp" />
     <ClInclude Include="include\Matrice\private\math\_config.h" />
     <ClInclude Include="include\Matrice\private\math\_linear.h" />
@@ -404,12 +406,6 @@
     <CudaCompile Include="src\private\_dev_funcs.cu" />
     <CudaCompile Include="src\private\_dev_memory.cpp" />
     <CudaCompile Include="src\private\_dev_ops.cu" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Matrice.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="..\..\..\..\..\Pictures\MyIcons\ivm_logo.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

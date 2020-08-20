@@ -55,9 +55,9 @@ private:
 template<typename T> class Metric_<metric_fn::ZNCC, T> final
 {
 	using value_t = T;
-	using pointer = T * ;
+	using pointer = value_t*;
 public:
-	MATRICE_GLOBAL_INL explicit Metric_(const pointer _data, int _radius) noexcept
+	MATRICE_GLOBAL_INL Metric_(const pointer _data, size_t _radius) noexcept
 		: _Data(_data), _Radius(_radius) { _Init(); }
 
 	MATRICE_GLOBAL_INL value_t eval(const pointer _oth) const;
@@ -89,4 +89,9 @@ private:
 	Op _Impl;
 };
 MATRICE_ALGS_END
+
+DGE_MATRICE_BEGIN
+template<typename _Ty>
+using zncc_metric_t = algs::Metric_<algs::metric_fn::ZNCC, _Ty>;
+DGE_MATRICE_END
 #include "../private/_similarity.inl"

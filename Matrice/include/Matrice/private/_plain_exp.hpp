@@ -42,7 +42,12 @@ _DETAIL_BEGIN
 template<typename _Derived, typename _Traits, typename _Ty> class Base_;
 
 template<typename _Ty, size_t _Depth> class _Tensor;
-struct _Blas_kernel_wrapper;
+
+template<typename _Ty, typename> class _Blas_kernel_impl;
+
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
+class _Blas_kernel_wrapper;
+#endif
 _DETAIL_END
 
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
@@ -200,6 +205,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		template<typename _Ty> struct _Mat_sprmul {
 			enum { flag = undef };
 			using value_type = _Ty;
+			using category = tag::_Expression_tag;
 			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
 			value_type operator() (const _Lhs& lhs, const _Rhs& rhs, int r, int c) const noexcept { 
 				return (lhs(r) * rhs(c)); 
@@ -241,7 +247,13 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
 			value_type operator() (const _Lhs& _L, const _Rhs& _R, int r, int c, tag::_Matrix_tag, tag::_Matrix_tag) {
 				const int K = _R.rows(), N = _R.cols(), _Idx = r * _L.cols();
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 				return detail::template _Blas_kernel_impl<value_type>::dot(_L(_Idx), _R(c), K, 1, N);
+#else
+				value_type _Ret = value_type(0);
+				for (auto k = 0; k < K; ++k) _Ret += _L(_Idx + k) * _R(k * N + c);
+				return (_Ret);
+#endif
 			}
 			template<typename _Lhs, typename _Rhs> MATRICE_GLOBAL_FINL
 			value_type operator() (const _Lhs& _L, const _Rhs& _R, int r, int c, tag::_Matrix_tag, tag::_Matrix_view_tag) {
@@ -251,7 +263,6 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 				return (_Ret);
 			}
 		};
-
 	};
 
 	/**
@@ -397,7 +408,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		/**
 		 * \operator for expression evaluation
 		 */
-		MATRICE_GLOBAL_INL auto operator()(tag::_Var_tag = tag::_Expession_eval_tag()) const {
+		MATRICE_GLOBAL_INL auto operator()(tag::_Expression_eval_tag) const {
 			matrix_type _Ret(M, N);
 			_CDTHIS->assign_to(_Ret);
 			return forward<matrix_type>(_Ret);
@@ -571,7 +582,7 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 		using _Mybase::N;
 	};
 
-	// \matrix element-wise unary operation expression: abs(), log(), sqrt() ....
+	// \matrix element-wise unary operation expression: abs, log, sqrt...
 	template<typename T, typename _UnaryOp> 
 	class EwiseUnaryExp : public Base_<EwiseUnaryExp<T, _UnaryOp>>
 	{
@@ -595,7 +606,6 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 
 		template<typename _Mty> 
 		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const noexcept {
-//#pragma omp parallel for
 			for (index_t i = 0; i < res.size(); ++i) 
 				res(i) = this->operator()(i);
 		}
@@ -705,8 +715,10 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 				_idx = _idx * M + _idx / N * (1 - N * M);
 			return _ANS(_idx);
 		}
+
 		MATRICE_GLOBAL_FINL T& ans() { return _ANS; }
 		MATRICE_GLOBAL_FINL const T& ans() const { return _ANS; }
+
 		template<typename _Rhs, 
 			typename _Ret = MatBinaryExp<MatUnaryExp, _Rhs, Op::_Mat_mul<value_t>>> 
 		MATRICE_GLOBAL_INL _Ret mul(const _Rhs& _rhs) {
@@ -841,25 +853,25 @@ template<
 	typename _Lhs, typename _Rhs,
 	typename value_t = conditional_t<is_scalar_v<_Rhs>, typename _Lhs::value_t, typename _Rhs::value_t>,
 	typename _Op = _Exp::EwiseBinaryExp<_Lhs, _Rhs, _Exp_op::_Ewise_add<value_t>>>
-	MATRICE_GLOBAL_FINL auto operator+ (const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
+	MATRICE_GLOBAL_FINL auto operator+(const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
 // *\element-wise subtraction
 template<
 	typename _Lhs, class _Rhs,
 	typename value_t = conditional_t<is_scalar_v<_Rhs>, typename _Lhs::value_t, typename _Rhs::value_t>,
 	typename     _Op = _Exp::EwiseBinaryExp<_Lhs, _Rhs, _Exp_op::_Ewise_sub<value_t>>>
-	MATRICE_GLOBAL_FINL auto operator- (const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
+	MATRICE_GLOBAL_FINL auto operator-(const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
 // *\element-wise multiplication
 template<
 	typename _Lhs, typename _Rhs,
 	typename value_t = conditional_t<is_scalar_v<_Rhs>, typename _Lhs::value_t, typename _Rhs::value_t>,
 	typename _Op = _Exp::EwiseBinaryExp<_Lhs, _Rhs, _Exp_op::_Ewise_mul<value_t>>>
-	MATRICE_GLOBAL_FINL auto operator* (const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
+	MATRICE_GLOBAL_FINL auto operator*(const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
 // *\element-wise division
 template<
 	typename _Lhs, typename _Rhs,
 	typename value_t = conditional_t<is_scalar_v<_Rhs>, _Rhs, typename _Rhs::value_t>,
 	typename _Op = _Exp::EwiseBinaryExp<_Lhs, _Rhs, _Exp_op::_Ewise_div<value_t>>>
-	MATRICE_GLOBAL_FINL auto operator/ (const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
+	MATRICE_GLOBAL_FINL auto operator/(const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
 // *\element-wise maximum
 template<
 	typename _Lhs, typename _Rhs,
@@ -873,11 +885,11 @@ template<
 	typename _Op = _Exp::EwiseBinaryExp<_Lhs, _Rhs, _Exp_op::_Ewise_min<value_t>>>
 	MATRICE_GLOBAL_FINL auto min(const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
 
-// *\element-wise sqr()
+// *\element-wise square operation
 template<typename _Rhs>
-	MATRICE_GLOBAL_FINL auto sqr(const _Rhs& _right) { return (_right*_right); }
+	MATRICE_GLOBAL_FINL auto sq(const _Rhs& _right) { return (_right*_right); }
 
-// *\element-wise sqrt()
+// *\element-wise squar root operation
 template<
 	typename _Rhs,
 	typename value_t = enable_if_t<is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>,
@@ -929,12 +941,9 @@ template<
 }
 
 // *\outer product expression : xy^T
-template<
-	typename _Lhs, typename _Rhs,
-	typename value_t = common_type_t<typename _Lhs::value_t, typename _Rhs::value_t>,
-	typename _Op = _Exp::MatBinaryExp<_Lhs, _Rhs, _Exp_op::_Mat_sprmul<value_t>>>
+template<typename _Lhs, typename _Rhs>
 	MATRICE_GLOBAL_FINL auto outer_product(const _Lhs& _left, const _Rhs& _right) {
-	return _Op(_left, _right);
+	return _left.mul(_right.t()).eval();
 }
 
 // *\summation of expression

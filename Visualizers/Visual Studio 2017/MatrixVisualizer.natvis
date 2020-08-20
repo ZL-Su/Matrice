@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
-  <UIVisualizer ServiceId="{A452AFEA-3DF6-46BB-9177-C0B08F318025}" Id="1" MenuName="Add to Matrix Watch"/>
+  <UIVisualizer ServiceId="{A452AFEA-3DF6-46BB-9177-C0B08F318025}" Id="1" MenuName="Matrix Visualizer"/>
 
    <!-- Matrice dgelom::_Basic_plane_view_base -->
    <Type Name="dgelom::_Basic_plane_view_base&lt;*&gt;">
       <UIVisualizer ServiceId="{A452AFEA-3DF6-46BB-9177-C0B08F318025}" Id="1" />
    </Type>
    <Type Name="dgelom::_Basic_plane_view_base&lt;*&gt;">
-      <DisplayString Condition="(type)==0x0008">{{UINT8,   {nval} x {cval} x {hval} x {wval}}}</DisplayString>
-      <DisplayString Condition="(type)==0x0016">{{INT32,   {nval} x {cval} x {hval} x {wval}}}</DisplayString>
-      <DisplayString Condition="(type)==0x0032">{{FLOAT32, {nval} x {cval} x {hval} x {wval}}}</DisplayString>
-      <DisplayString Condition="(type)==0x0064">{{FLOAT64, {nval} x {cval} x {hval} x {wval}}}</DisplayString>
+      <DisplayString Condition="(type)==0x0008">{{UINT8,   {nval} x {hval} x {wval}}}</DisplayString>
+      <DisplayString Condition="(type)==0x0016">{{INT32,   {nval} x {hval} x {wval}}}</DisplayString>
+      <DisplayString Condition="(type)==0x0032">{{FLOAT32, {nval} x {hval} x {wval}}}</DisplayString>
+      <DisplayString Condition="(type)==0x0064">{{FLOAT64, {nval} x {hval} x {wval}}}</DisplayString>
       <Expand>
          <Synthetic Name="[type]" Condition="(type)==0x0008">
             <DisplayString>UINT8</DisplayString>
@@ -24,7 +24,7 @@
          <Synthetic Name="[type]" Condition="(type)==0x0064">
             <DisplayString>FLOAT64</DisplayString>
          </Synthetic>
-         <Item Name="[batchs]">nval</Item>
+        <Item Name="[nbatchs]">nval</Item>
          <Item Name="[channels]">1</Item>
          <Item Name="[width]">m_cols</Item>
          <Item Name="[height]">m_rows</Item>
@@ -71,10 +71,10 @@
    
    <Type Name="dgelom::detail::tensor&lt;*&gt;">
       <DisplayString>{$T1, c}</DisplayString>
-      <DisplayString Condition='strcmp("unsigned char", "$T1") == 0'>{{UINT8, {nval} x {cval} x {hval} x {wval}}}</DisplayString>
-      <DisplayString Condition='strcmp("int", "$T1") == 0'>{{INT32, {nval} x {cval} x {hval} x {wval}}}</DisplayString>
-      <DisplayString Condition='strcmp("float", "$T1") == 0'>{{FLOAT32, {nval} x {cval} x {hval} x {wval}}}</DisplayString>
-      <DisplayString Condition='strcmp("double", "$T1") == 0'>{{FLOAT64, {nval} x {cval} x {hval} x {wval}}}</DisplayString>
+      <DisplayString Condition='strcmp("unsigned char", "$T1") == 0'>{{UINT8, {nval} x {hval} x {wval}}}</DisplayString>
+      <DisplayString Condition='strcmp("int", "$T1") == 0'>{{INT32, {nval} x {hval} x {wval}}}</DisplayString>
+      <DisplayString Condition='strcmp("float", "$T1") == 0'>{{FLOAT32, {nval} x {hval} x {wval}}}</DisplayString>
+      <DisplayString Condition='strcmp("double", "$T1") == 0'>{{FLOAT64, {nval} x {hval} x {wval}}}</DisplayString>
       <Expand>
          <Synthetic Name="[type]" Condition="(type)==0x0008">
             <DisplayString>UINT8</DisplayString>
@@ -89,7 +89,7 @@
             <DisplayString>FLOAT64</DisplayString>
          </Synthetic>
          <Item Name="[batchs]">nval</Item>
-         <Item Name="[channels]">cval</Item>
+         <Item Name="[channels]">1</Item>
          <Item Name="[width]">wval</Item>
          <Item Name="[height]">hval</Item>
          <Item Name="[data]">m_data</Item>

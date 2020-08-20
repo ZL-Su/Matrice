@@ -31,6 +31,9 @@ public:
 	using jacob_type = Matrix_<value_type, 2, param_type::rows_at_compiletime>;
 	struct warped_coords { value_type x, y; };
 
+	using param_v6 = Vec_<value_type, 6>;
+	using jacob_v6 = Matrix_<value_type, 2, 5>;
+
 	/**
 	 *\param [p] spatial deformation parameter
 	 */
@@ -53,15 +56,19 @@ public:
 	 //tex: $\mathcal{T}(\eta;\mathbf{p})\leftarrow\mathcal{T}(\eta;\mathbf{p})\circ\mathcal{T}^{-1}(\eta;\Delta\mathbf{p})$
 	 */
 	MATRICE_GLOBAL_INL decltype(auto)update(const value_type* dp)noexcept {
-		const auto _Det = safe_div(1, (1+dp[0])*(1+dp[3])-dp[1]*dp[2]);
-		const auto idp0 = (1 + dp[3]) * _Det, idp1 = -dp[1] * _Det;
-		const auto idp2 = -dp[2] * _Det, idp3 = (1 + dp[0]) * _Det;
-
+		const auto idp0 = 1 + dp[3], idp1 = -dp[1];
+		const auto idp2 = -dp[2], idp3 = 1 + dp[0];
+		const auto _Det = safe_div(1, idp0*idp3-idp1*idp2);
+		
 		auto p = _Mypar.data();
-		const auto p0 = (1 + p[0]) * idp0 + p[1] * idp2;
-		const auto p1 = (1 + p[0]) * idp1 + p[1] * idp3;
-		const auto p2 = p[2] * idp0 + (1 + p[3]) * idp2;
-		const auto p3 = p[2] * idp1 + (1 + p[3]) * idp3;
+
+		const auto p0p1 = 1 + p[0];
+		const auto p0 = _Det*(p0p1 * idp0 + p[1] * idp2) - 1;
+		const auto p1 = _Det*(p0p1 * idp1 + p[1] * idp3);
+
+		const auto p3p1 = 1 + p[3];
+		const auto p2 = _Det*(p[2] * idp0 + p3p1 * idp2);
+		const auto p3 = _Det*(p[2] * idp1 + p3p1 * idp3) - 1;
 
 		p[0] = p0, p[1] = p1, p[2] = p2, p[3] = p3;
 		return (_Mypar);

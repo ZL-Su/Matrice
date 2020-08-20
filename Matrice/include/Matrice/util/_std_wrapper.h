@@ -6,6 +6,7 @@
 #include <queue>
 #include <random>
 #include <tuple>
+#include <memory>
 #include <type_traits>
 
 namespace dgelom {

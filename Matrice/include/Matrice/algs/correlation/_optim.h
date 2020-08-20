@@ -22,7 +22,8 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_correlation_traits.h"
 #include "../interpolation.h"
 
-MATRICE_ALGS_BEGIN _DETAIL_BEGIN namespace corr {
+MATRICE_ALG_BEGIN(corr)
+_DETAIL_BEGIN
 
 struct _Correlation_options {
 	size_t _Radius = 15;  //patch radius
@@ -31,7 +32,7 @@ struct _Correlation_options {
 	float_t _Znssd = 0.6; //correlation threshold
 	float_t _Coeff = 0.7; //damping coefficient
 
-	template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
+	template<typename _Ty = default_type, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
 	static constexpr _Ty _Mytol = _Ty(1.0E-6); //iteration tolerance
 
 	/**
@@ -103,25 +104,29 @@ public:
 	using param_type = Vec_<value_type, npar>;
 	using jacob_type = Matrix_<value_type, ::dynamic, npar>;
 	using vector_type = Matrix_<value_type, ::dynamic, 1>;
-	using option_type = _Correlation_options;
+	using options_type = _Correlation_options;
 	using interp_type = typename _Mytraits::interpolator;
+	using smooth_image_t = interp_type;
 	using update_strategy = typename _Mytraits::update_strategy;
 	using linear_solver = matrix_decomp<matrix_fixed, _TAG _Linear_spd_tag>;
+	using rect_type = rect<size_t>;
 
 	/**
-	 *\brief This module is image-wise thread-safe. It allows us to eval. relative deformation of each point between current and reference state.
-	 *\param [_Ref] reference interpolated image;
-	 *\param [_Cur] current interpolated image;
-	 *\param [_Opt] options for the optimizer.
+	 *\brief This module is image-wise thread-safe.
+	         It allows us to eval. relative deformation of each point between current and reference state.
+	 *\param _Ref reference interpolated image;
+	 *\param _Cur current interpolated image;
+	 *\param _Opt options for the optimizer.
 	 */
 	_Corr_optim_base(
-		const interp_type& _Ref,
-		const interp_type& _Cur,
-		const option_type& _Opt) : _Myopt(_Opt),
-		_Myref_ptr(std::make_shared<interp_type>(_Ref)),
-		_Mycur_ptr(std::make_shared<interp_type>(_Cur)),
+		const smooth_image_t& _Ref,
+		const smooth_image_t& _Cur,
+		const options_type& _Opt
+	) : _Myopt(_Opt),
+		_Myref_ptr(new interp_type(_Ref)),
+		_Mycur_ptr(new interp_type(_Cur)),
 		_Mysolver(_Myhess), _Mysize(_Opt._Radius*2+1),
-		_Myjaco(sqr(_Mysize)), _Mydiff(sqr(_Mysize)){
+		_Myjaco(sq(_Mysize)), _Mydiff(sq(_Mysize)){
 	}
 
 	/**
@@ -141,6 +146,17 @@ public:
 	}
 
 	/**
+	 *\brief Integer pixel level search.
+	 *\param roi region of interest
+	 */
+	MATRICE_HOST_INL point_type guess(rect_type&& roi) {
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(!_Myref.empty, "Call init(...) before calling method guess(...).");
+#endif
+		return this->_Guess(roi);
+	}
+
+	/**
 	 *\brief solve Gauss-Newton normal equations
 	 *\param (_pars) warp parameters.
 	 *\return [znssd, error := dot(dp, dp)]
@@ -150,24 +166,25 @@ public:
 	}
 
 	// \for retrieving reference subset
-	MATRICE_HOST_INL decltype(auto)get_refpatch() const { 
+	MATRICE_HOST_INL decltype(auto)get_refpatch() const noexcept { 
 		return (_Myref); 
 	}
-	MATRICE_HOST_INL decltype(auto)options() const {
+	MATRICE_HOST_INL constexpr decltype(auto)options()const noexcept{
 		return (_Myopt);
 	}
-	MATRICE_HOST_INL decltype(auto)options() {
+	MATRICE_HOST_INL constexpr decltype(auto)options() noexcept {
 		return (_Myopt);
 	}
-	MATRICE_HOST_INL decltype(auto)refpos() { 
+	MATRICE_HOST_INL decltype(auto)refpos() noexcept { 
 		return _Mypos; 
 	}
-	MATRICE_HOST_INL decltype(auto)refpos() const { 
+	MATRICE_HOST_INL decltype(auto)refpos() const noexcept { 
 		return _Mypos; 
 	}
 
 protected:
 	///<methods>
+
 	/**
 	 *\brief Build refpatch, and buffs to hold curpatch and diffs.
 	 *\return the refpatch: this->_Myref.
@@ -175,15 +192,22 @@ protected:
 	MATRICE_HOST_INL auto _Cond()->matrix_type&;
 
 	/**
+	 *\brief Build refpatch, and buffs to hold curpatch and diffs.
+	 *\return the refpatch: this->_Myref.
+	 */
+	MATRICE_HOST_INL auto _Guess(rect_type roi)->point_type;
+
+	/**
 	 *\brief Solve new parameters
 	 *\param [_Par] in: old parameters, output: new parameters
 	 */
 	MATRICE_HOST_INL auto _Solve(param_type& _Pars);
+
 	///</methods>
 
 	///<fields>
 	diff_t       _Mysize;
-	option_type  _Myopt;
+	options_type _Myopt;
 	point_type   _Mypos;
 	matrix_type  _Myref, _Mycur;
 	vector_type  _Mydiff;
@@ -209,15 +233,18 @@ class _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<0>>
 	using typename _Mybase::_Mytraits;
 public:
 	static constexpr auto order = _Mytraits::order;
-	using typename _Mybase::option_type;
+	using typename _Mybase::options_type;
 	using typename _Mybase::param_type;
 	using typename _Mybase::point_type;
 	using typename _Mybase::value_type;
+	using typename _Mybase::jacob_type;
+	using typename _Mybase::linear_solver;
 
 	_Corr_solver_impl(const _Myt& _Other) = delete;
 	_Corr_solver_impl(_Myt&& _Other) = delete;
 	template<typename... _Args>
-	_Corr_solver_impl(const _Args&..._args) : _Mybase(_args...) {}
+	_Corr_solver_impl(const _Args&..._args) 
+		: _Mybase(_args...) {}
 
 	/**
 	 *\brief Evaluate Jacobian contribution at ref. patch.
@@ -248,10 +275,12 @@ class _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>
 	using typename _Mybase::_Mytraits;
 public:
 	static constexpr auto order = _Alg_icgn<1>::order;
-	using typename _Mybase::option_type;
+	using typename _Mybase::options_type;
 	using typename _Mybase::param_type;
 	using typename _Mybase::point_type;
 	using typename _Mybase::value_type;
+	using typename _Mybase::jacob_type;
+	using typename _Mybase::linear_solver;
 
 	_Corr_solver_impl(const _Myt& _Other) = delete;
 	_Corr_solver_impl(_Myt&& _Other) = delete;
@@ -263,6 +292,14 @@ public:
 	 *\brief evaluate Jacobian contribution at refpatch.
 	 */
 	MATRICE_HOST_INL auto& _Diff();
+
+	/**
+	 *\brief Thread-safe version of method _Diff().
+	 *\param "x, y" The coordinates of a computation point.
+	 *\returns Jacobian matrix.
+	 */
+	MATRICE_HOST_INL auto _Diff(value_type x, value_type y);
+
 	/**
 	 *\brief Construct current image patch.
 	 *\param [_Par] {u, dudx, dudy, v, dvdx, dvdy}
@@ -277,6 +314,7 @@ private:
 	using _Mybase::_Mypos;
 };
 
-_DETAIL_END } MATRICE_ALGS_END
+_DETAIL_END
+MATRICE_ALG_END(corr)
 
 #include "inline/_optim.inl"

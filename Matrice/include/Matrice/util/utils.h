@@ -18,6 +18,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <type_traits>
+#include <mutex>
 #include "_macros.h"
 #include "_std_wrapper.h"
 #include "_exception.h"
@@ -229,21 +230,22 @@ struct transforms {
 		template<typename _Uy = value_type>
 		MATRICE_GLOBAL_INL scale(const _Uy& _Scale = _Uy(1)) : _Myscale(_Scale) {}
 		MATRICE_GLOBAL_INL auto operator()(const value_type& _Val)const { return (_Myscale*_Val); }
-		value_type _Myscale = 1.;
+		value_type _Myscale = { 1 };
 	};
 	template<typename _Ty> struct clamp {
 		using value_type = _Ty;
 		template<typename _Uy = value_type>
 		MATRICE_GLOBAL_INL clamp(const _Uy& _Lower, const _Uy& _Upper) : _Mylower(_Lower),_Myupper(_Upper) {}
-		MATRICE_GLOBAL_INL auto operator()(const value_type& _Val)const { return min(max(_Val,_Mylower),_Myupper); }
-		value_type _Mylower = std::numeric_limits<value_type>::min();
-		value_type _Myupper = std::numeric_limits<value_type>::max();
+		MATRICE_GLOBAL_INL auto operator()(const value_type _Val)const { return min(max(_Val,_Mylower),_Myupper); }
+		value_type _Mylower{ std::numeric_limits<value_type>::min() };
+		value_type _Myupper{ std::numeric_limits<value_type>::max() };
 	};
 	template<typename _Ty> struct relu {
 		using value_type = _Ty;
 		MATRICE_GLOBAL_INL relu() {}
 		MATRICE_GLOBAL_INL auto operator()(const value_type& _Val)const { return max(_Myzero,_Val); }
-		value_type _Myzero = (value_type)(0);
+		value_type _Myzero{ value_type(0) };
 	};
 };
 DGE_MATRICE_END
+#include "../funcs/_functions.h"

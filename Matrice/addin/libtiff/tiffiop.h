@@ -267,6 +267,10 @@ struct tiff {
 
 #define TIFFArrayCount(a) (sizeof (a) / sizeof ((a)[0]))
 
+#ifndef TIF_PLATFORM_CONSOLE
+#define TIF_PLATFORM_CONSOLE
+#endif
+
 /*
   Support for large files.
 

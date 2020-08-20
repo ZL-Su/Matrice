@@ -17,7 +17,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #include "../_iterative_conv_impl.h"
 #include "../../../private/_range.h"
-#include "../../../private/nonfree/_lnalge.h"
+#include "../../../private/nonfree/blas_lapack_kernel.h"
 
 MATRICE_ALGS_BEGIN namespace detail {
 namespace conv_internal {
