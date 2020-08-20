@@ -52,51 +52,86 @@ public:
 		: _Mybase(_list) {}
 	MATRICE_GLOBAL_FINL Vec_(const _Mybase& _mtx) noexcept
 		: _Mybase(_mtx) {}
-	template<typename _Exp, MATRICE_ENABLE_IF(is_expression_v<_Exp>)>
+	template<typename _Exp, 
+		MATRICE_ENABLE_IF(is_expression_v<_Exp>)>
 	MATRICE_GLOBAL_FINL Vec_(const _Exp& _exp) noexcept {
 		_exp.assign(*this); 
 	}
 
-	MATRICE_GLOBAL_FINL reference operator[](size_t i) noexcept {
+	MATRICE_GLOBAL_FINL 
+		reference operator[](size_t i) noexcept {
 		return data()[i]; 
 	}
-	MATRICE_GLOBAL_FINL const_reference operator[](size_t i)const noexcept {
+	MATRICE_GLOBAL_FINL 
+		const_reference operator[](size_t i)const noexcept {
 		return data()[i]; 
 	}
-	MATRICE_GLOBAL_FINL _Myt& operator= (const_initlist _list) noexcept {
+	MATRICE_GLOBAL_FINL 
+		_Myt& operator= (const_initlist _list) noexcept {
 		return static_cast<_Myt&>(_Mybase::operator= (_list)); 
 	}
-	MATRICE_GLOBAL_FINL _Myt& operator= (const _Myt& _other) noexcept {
+	MATRICE_GLOBAL_FINL 
+		_Myt& operator= (const _Myt& _other) noexcept {
 		return static_cast<_Myt&>(_Mybase::operator=(_other)); 
 	}
 	template<typename _Rval>
-	MATRICE_GLOBAL_FINL _Myt& operator= (const _Rval& _rval) noexcept {
+	MATRICE_GLOBAL_FINL 
+		_Myt& operator= (const _Rval& _rval) noexcept {
 		return static_cast<_Myt&>(_Mybase::operator= (_rval)); 
 	}
 	
-	MATRICE_GLOBAL_FINL operator typename _Mybase::pointer() noexcept {
+	MATRICE_GLOBAL_FINL 
+		operator typename _Mybase::pointer() noexcept {
 		return data(); 
 	}
 
-	MATRICE_GLOBAL_FINL _Myt&normalize(value_t _val = _Mybase::inf) noexcept {
-		return static_cast<_Myt&>(_Mybase::operator = (_Mybase::normalize(_val))); 
+	MATRICE_GLOBAL_FINL 
+		_Myt& normalize(value_t _val = _Mybase::inf) noexcept {
+		return static_cast<_Myt&>(
+			_Mybase::operator = (_Mybase::normalize(_val))); 
 	}
-	MATRICE_GLOBAL_FINL value_t dot(const _Myt& _other) const noexcept {
+	MATRICE_GLOBAL_FINL 
+		value_t dot(const _Myt& _other) const noexcept {
 		return _Mybase::dot(_other); 
 	}
 	
+#ifdef _MSVC_LANG
 	///<brief> properties </brief>
-	__declspec(property(get = _x_getter, put = _x_setter)) reference x;
-	MATRICE_GLOBAL_FINL reference _x_getter()const noexcept { return data()[0]; }
-	MATRICE_GLOBAL_FINL void _x_setter(value_t _x)noexcept { data()[0] =_x; }
-	__declspec(property(get = _y_getter, put = _y_setter)) reference y;
-	MATRICE_GLOBAL_FINL reference _y_getter()const noexcept { return data()[1]; }
-	MATRICE_GLOBAL_FINL void _y_setter(value_t _y)noexcept { data()[1] = _y; }
+	__declspec(
+		property(get = _x_getter, put = _x_setter)
+		) reference x;
+	MATRICE_GLOBAL_FINL 
+		reference _x_getter()const noexcept { return data()[0]; }
+	MATRICE_GLOBAL_FINL 
+		void _x_setter(value_t _x)noexcept { data()[0] =_x; }
+	__declspec(
+		property(get = _y_getter, put = _y_setter)
+		) reference y;
+	MATRICE_GLOBAL_FINL 
+		reference _y_getter()const noexcept { return data()[1]; }
+	MATRICE_GLOBAL_FINL 
+		void _y_setter(value_t _y)noexcept { data()[1] = _y; }
+#else
+	MATRICE_GLOBAL_INL const reference x() const noexcept {
+		return data()[0];
+	}
+	MATRICE_GLOBAL_INL reference x() noexcept {
+		return data()[0];
+	}
+	MATRICE_GLOBAL_INL const reference y() const noexcept {
+		return data()[1];
+	}
+	MATRICE_GLOBAL_INL reference y() noexcept {
+		return data()[1];
+	}
+#endif
 
 	template<int rows>
-	using lite = typename _Mybase::template lite<rows, cols_at_compiletime>;
+	using lite = typename _Mybase::template 
+		lite<rows, cols_at_compiletime>;
 	template<int cols>
-	using extend = typename _Mybase::template lite<rows_at_compiletime, cols>;
+	using extend = typename _Mybase::template 
+		lite<rows_at_compiletime, cols>;
 };
 
 template<typename _Ty> 
@@ -118,35 +153,69 @@ public:
 	using _Mybase::operator=;
 	using _Mybase::operator[];
 
-	MATRICE_GLOBAL_FINL Vec3_()noexcept {}
-	MATRICE_GLOBAL_FINL Vec3_(value_t _x, value_t _y, value_t _z)noexcept
+	MATRICE_GLOBAL_FINL 
+		Vec3_()noexcept {}
+	MATRICE_GLOBAL_FINL 
+		Vec3_(value_t _x, value_t _y, value_t _z)noexcept
 		: _Mybase({_x, _y, _z}) {}
 	template<typename _Uy>
-	MATRICE_GLOBAL_FINL Vec3_(const Vec3_<_Uy>& _other)noexcept
+	MATRICE_GLOBAL_FINL 
+		Vec3_(const Vec3_<_Uy>& _other)noexcept
 		: Vec3_(_other.x, _other.y, _other.z) {}
 
-	MATRICE_GLOBAL_FINL _Myt& operator=(const _Myt& _other)noexcept { 
+	MATRICE_GLOBAL_FINL 
+		_Myt& operator=(const _Myt& _other)noexcept { 
 		return static_cast<_Myt&>(_Mybase::operator=(_other)); 
 	}
 	template<typename _Rval>
-	MATRICE_GLOBAL_FINL _Myt& operator=(const _Rval& _rval)noexcept { 
+	MATRICE_GLOBAL_FINL 
+		_Myt& operator=(const _Rval& _rval)noexcept { 
 		return static_cast<_Myt&>(_Mybase::operator= (_rval)); 
 	}
 
-	MATRICE_GLOBAL_FINL _Myt& normalize(value_t _val = _Mybase::inf)noexcept {
+	MATRICE_GLOBAL_FINL 
+		_Myt& normalize(value_t _val = _Mybase::inf)noexcept {
 		return static_cast<_Myt&>(_Mybase::normalize(_val)); 
 	}
-	MATRICE_GLOBAL_FINL value_t dot(const _Myt& _other)const noexcept { 
+	MATRICE_GLOBAL_FINL 
+		value_t dot(const _Myt& _other)const noexcept { 
 		return _Mybase::dot(_other); 
 	}
-	MATRICE_GLOBAL_FINL _Myt cross(const _Myt& _rhs) const noexcept { 
-		return _Myt(y*_rhs[2] - z*_rhs[1], z*_rhs[0] - x * _rhs[2], x*_rhs[1] - y * _rhs[0]); 
+	MATRICE_GLOBAL_FINL 
+		_Myt cross(const _Myt& _rhs) const noexcept { 
+		return _Myt(
+			y*_rhs[2] - z*_rhs[1], 
+			z*_rhs[0] - x * _rhs[2], 
+			x*_rhs[1] - y * _rhs[0]
+		);
 	}
 
+	/// <summary>
+	/// \brief Span a 3-vector to a 3-by-3 skew-symmetric matrix.
+	/// </summary>
+	/// <returns> A 3-by-3 skew-symmetric matrix </returns>
+	MATRICE_GLOBAL_INL 
+		typename _Mybase::template extend<3>skew()const noexcept {
+		return {0, -z, y, z, 0, -x, -y, x, 0};
+	}
+
+#ifdef _MSVC_LANG
 	///<brief> properties </brief>
-	__declspec(property(get = _z_getter, put = _z_setter)) reference z;
-	MATRICE_GLOBAL_FINL reference _z_getter()const noexcept { return data()[2]; }
-	MATRICE_GLOBAL_FINL void _z_setter(value_t _z)noexcept { data()[2] = _z; }
+	__declspec(
+		property(get = _z_getter, put = _z_setter)
+		) reference z;
+	MATRICE_GLOBAL_FINL 
+		reference _z_getter()const noexcept { return data()[2]; }
+	MATRICE_GLOBAL_FINL 
+		void _z_setter(value_t _z)noexcept { data()[2] = _z; }
+#else
+	MATRICE_GLOBAL_INL const reference z() const noexcept {
+		return data()[2];
+}
+	MATRICE_GLOBAL_INL reference z() noexcept {
+		return data()[2];
+	}
+#endif
 
 };
 
@@ -169,32 +238,59 @@ public:
 	using _Mybase::operator=;
 	using _Mybase::operator[];
 
-	MATRICE_GLOBAL_FINL Vec4_(value_t _x, value_t _y, value_t _z) noexcept
+	MATRICE_GLOBAL_FINL 
+		Vec4_(value_t _x, value_t _y, value_t _z) noexcept
 		: _Mybase({ _x, _y, _z, 1}) {}
-	MATRICE_GLOBAL_FINL Vec4_(value_t _x,value_t _y,value_t _z,value_t _w) noexcept
+	MATRICE_GLOBAL_FINL 
+		Vec4_(value_t _x,value_t _y,value_t _z,value_t _w) noexcept
 		: _Mybase({ _x, _y, _z, _w }) {}
 	template<typename _Uy>
-	MATRICE_GLOBAL_FINL Vec4_(const Vec4_<_Uy>& _other) noexcept
+	MATRICE_GLOBAL_FINL 
+		Vec4_(const Vec4_<_Uy>& _other) noexcept
 		: Vec4_(_other.x, _other.y, _other.z, _other.w) {}
 
 	template<typename _Rval>
-	MATRICE_GLOBAL_FINL _Myt& operator= (const _Rval& _rval) noexcept { 
+	MATRICE_GLOBAL_FINL 
+		_Myt& operator= (const _Rval& _rval) noexcept { 
 		return static_cast<_Myt&>(_Mybase::operator= (_rval)); 
 	}
 
-	MATRICE_GLOBAL_FINL _Myt&normalize(value_t _val = _Mybase::inf) noexcept {
+	MATRICE_GLOBAL_FINL 
+		_Myt& normalize(value_t _val = _Mybase::inf) noexcept {
 		return static_cast<_Myt&>(_Mybase::normalize(_val)); 
 	}
 
+#ifdef _MSVC_LANG
 	///<brief> properties </brief>
-	__declspec(property(get = _z_getter, put = _z_setter)) reference z;
-	MATRICE_GLOBAL_FINL reference _z_getter()const noexcept { return data()[2]; }
-	MATRICE_GLOBAL_FINL void _z_setter(value_t _z) noexcept { data()[2] = _z; }
-	__declspec(property(get = _w_getter, put = _w_setter)) reference w;
-	MATRICE_GLOBAL_FINL reference _w_getter()const noexcept { return data()[3]; }
-	MATRICE_GLOBAL_FINL void _w_setter(value_t _w) noexcept { data()[3] = _w; }
+	__declspec(
+		property(get = _z_getter, put = _z_setter)
+		) reference z;
+	MATRICE_GLOBAL_FINL 
+		reference _z_getter()const noexcept { return data()[2]; }
+	MATRICE_GLOBAL_FINL 
+		void _z_setter(value_t _z) noexcept { data()[2] = _z; }
+	__declspec(
+		property(get = _w_getter, put = _w_setter)
+		) reference w;
+	MATRICE_GLOBAL_FINL 
+		reference _w_getter()const noexcept { return data()[3]; }
+	MATRICE_GLOBAL_FINL 
+		void _w_setter(value_t _w) noexcept { data()[3] = _w; }
+#else
+	MATRICE_GLOBAL_INL const reference z() const noexcept {
+		return data()[2];
+	}
+	MATRICE_GLOBAL_INL reference z() noexcept {
+		return data()[2];
+	}
+	MATRICE_GLOBAL_INL const reference w() const noexcept {
+		return data()[3];
+	}
+	MATRICE_GLOBAL_INL reference w() noexcept {
+		return data()[3];
+	}
+#endif
 };
-
 _DETAIL_END
 
 // \a generic managed vector type
@@ -227,8 +323,8 @@ struct is_fxdvector<Vec4_<_Ty>> : std::true_type {};
 template<typename _Ty, int _Dim>
 struct is_fxdvector<std::array<_Ty,_Dim>> : std::true_type {};
 
-template<size_t _Dim, typename _Ty>
-MATRICE_GLOBAL_FINL auto cross_prod_matrix(const Vec3_<_Ty>& v) noexcept {
+template<size_t _Dim, typename _Ty> MATRICE_GLOBAL_INL 
+auto cross_prod_matrix(const Vec3_<_Ty>& v) noexcept {
 	static_assert(_Dim != 3 || _Dim != 4,
 		"The _Dim in function cross_prod_matrix<_Dim, _Ty> must be 3 or 4.");
 	using _Rety = detail::Matrix_<_Ty, _Dim, _Dim>;
@@ -240,12 +336,27 @@ MATRICE_GLOBAL_FINL auto cross_prod_matrix(const Vec3_<_Ty>& v) noexcept {
 }
 
 /**
- *\brief Concatenate two vectors  to a matrix in column-by-column order.
+ * \brief Concatenate two vectors as a matrix in column-by-column order.
  */
-template<typename _Ty, size_t _N>
-auto concat(const Vec_<_Ty, _N>& x, const Vec_<_Ty, _N>& y) noexcept {
+template<typename _Ty, size_t _N> MATRICE_GLOBAL_INL
+auto concat(const Vec_<_Ty, _N>& prev, const Vec_<_Ty, _N>& next) noexcept {
 	typename Vec_<_Ty, _N>::template extend<2> _Ret;
-	_Ret.cview(0) = x, _Ret.cview(1) = y;
+	_Ret.cview(0) = prev, _Ret.cview(1) = next;
 	return _Ret;
 }
+
+/**
+ * \brief Span a 3-vector to a skew-symmetric matrix.
+ * \param "v" the input 3d vector.
+ * \returns A matrix with type of Matrix_<_Ty, 3, 3>.
+ */
+template<typename _Ty> MATRICE_GLOBAL_INL
+auto skew(const Vec3_<_Ty>& v) noexcept {
+	return v.skew();
+}
+template<typename _Ty> MATRICE_GLOBAL_INL
+auto skew(const initlist<_Ty> v) noexcept {
+	return Vec3_<_Ty>(v).skew();
+}
+
 DGE_MATRICE_END
