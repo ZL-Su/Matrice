@@ -24,7 +24,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
-template<typename _Pixty, MATRICE_ENABLE_IF(is_arithmetic_v<_Pixty>)>
+template<typename _Pixty, 
+	MATRICE_ENABLE_IF(is_arithmetic_v<_Pixty>)>
 void _Grayscale_stretch(_Pixty* Img, size_t rows, size_t cols) {
 	using pixel_t = _Pixty;
 	using iterator = std::add_pointer_t<pixel_t>;
@@ -42,7 +43,8 @@ void _Grayscale_stretch(_Pixty* Img, size_t rows, size_t cols) {
 	for (_Begin -= N; _Begin != _End; (void)++_Begin)
 		*_Begin = pixel_t(_Scal * (*_Begin - _Min));
 }
-template<typename _Pixty, MATRICE_ENABLE_IF(is_scalar_v<_Pixty>)>
+template<typename _Pixty, 
+	MATRICE_ENABLE_IF(is_scalar_v<_Pixty>)>
 void _Add_gaussian_noise(Matrix_<_Pixty, ::dynamic>& _Img, float _Sig) {
 	std::random_device rd{}; std::mt19937 gen{ rd() };
 	normal_distribution<decltype(_Sig)> r{ 0, _Sig };
@@ -56,7 +58,8 @@ void _Add_gaussian_noise(Matrix_<_Pixty, ::dynamic>& _Img, float _Sig) {
 		else return val;
 	});
 }
-template<class _ItpTag = bicerp_tag, typename _Pixty = uint8_t, MATRICE_ENABLE_IF(is_scalar_v<_Pixty>)>
+template<class _ItpTag = bicerp_tag, typename _Pixty = uint8_t, 
+	MATRICE_ENABLE_IF(is_scalar_v<_Pixty>)>
 auto _Image_resize(const Matrix_<_Pixty, ::dynamic>& _Img, shape_t<2> _Size) {
 	using value_type = conditional_t<is_integral_v<_Pixty>, float, _Pixty>;
 	Matrix_<value_type, ::dynamic> _Space;
@@ -84,6 +87,13 @@ auto _Image_resize(const Matrix_<_Pixty, ::dynamic>& _Img, shape_t<2> _Size) {
 	}
 	return forward<decltype(_Ret)>(_Ret);
 }
+
+//template<typename _Ty>
+//Matrix_<int, ::dynamic, 1<<8> _Histogram(const _Ty* _Img, size_t _M, size_t _N){
+//	MATRICE_USE_STD(vector);
+//	vector<vector<int>> _Data(1 << 8);
+//}
+
 _DETAIL_END
 template<typename _Ty>
 inline auto imnoise(Matrix_<_Ty, ::dynamic>&& _Img, float _Sigma = 1) {
