@@ -145,7 +145,9 @@ MATRICE_GLOBAL_FINL constexpr _Ty radian(_Ty deg) noexcept {
 }
 
 /**
- *\brief FUNCTION TEMPLATE, conversion between the rotation vector and matrix.
+ * \brief FUNCTION TEMPLATE, conversion between the rotation vector and matrix.
+ * \param "_In" an input 3d rotation vector or 3x3 rotation matrix.
+ * \param "_Out" return type of this function.
  */
 template<typename _Input, typename _Output>
 MATRICE_HOST_INL auto rodrigues(const _Input& _In, _Output& _Out) noexcept {
@@ -153,6 +155,16 @@ MATRICE_HOST_INL auto rodrigues(const _Input& _In, _Output& _Out) noexcept {
 	if constexpr (is_pointer_v<_Output>)
 		dgelom::transform(_Ret.begin(), _Ret.end(), _Out);
 	else _Out = move(_Ret);
+}
+
+/**
+ * \brief FUNCTION TEMPLATE, conversion between the rotation vector and matrix.
+ * \param "_In" an input 3d rotation vector or 3x3 rotation matrix.
+ * \return Rotation matrix or vector according to the input "_In".
+ */
+template<typename _Input>
+MATRICE_HOST_INL auto rodrigues(const _Input& _In) noexcept {
+	return detail::_Rodrigues_impl(_In);
 }
 
 using axis_x_t = detail::_Axis_type<0, 3>;
