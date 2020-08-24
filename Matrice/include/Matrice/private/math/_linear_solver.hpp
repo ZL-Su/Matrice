@@ -47,7 +47,10 @@ _DETAIL_BEGIN
 // \brief solver traits class
 template<class _Sty> struct _Solver_traits {};
 
-// \brief CLASS TEMPLATE for linear solver base
+/// <summary>
+/// CLASS TEMPLATE to define common interface to solve a linear system.
+/// </summary>
+/// <typeparam name="_Derived"></typeparam>
 template<typename _Derived>
 class _Linear_solver_base {
 	using _Myderived = _Derived;
@@ -56,12 +59,16 @@ public:
 	using matrix_type = typename _Mytraits::matrix_type;
 	using value_type = typename _Mytraits::value_type;
 
-	_Linear_solver_base(matrix_type& coeff) noexcept
+	/**
+	 * \brief Ctor
+	 * \param 'coeff' Coefficient matrix of the system.
+	 */
+	_Linear_solver_base(const matrix_type& coeff) noexcept
 		:_Mycoeff{ coeff }, _Myeps{ matrix_type::eps } {
 	}
 
 	/**
-	 *\brief Solve $\mathbf{AX} = \mathbf{B}$. The solver kernel is dispatched according to the solver operator specified to _Op.
+	 *\brief Solve linear system $\mathbf{AX} = \mathbf{B}$. The solver kernel is dispatched according to the solver operator specified to _Op.
 	   The right-hand term $\mathbf{B}$ is allowed to hold more than one column when the linear kernel _Op is dgelom::spt.
 	 *\param [args...] variadic arguments that may empty or more than one inputs. If args... is empty, the method solves a homogeneous linear system with form of $\mathbf{Ax} = \mathbf{0}$.
 	 */
@@ -84,6 +91,13 @@ public:
 	 */
 	MATRICE_GLOBAL_INL auto inv() {
 		return (this->_Inverse());
+	}
+
+	MATRICE_GLOBAL_INL decltype(auto) lambda() const noexcept {
+		return (_Mylamb);
+	}
+	MATRICE_GLOBAL_INL decltype(auto) lambda() noexcept {
+		return (_Mylamb);
 	}
 
 protected:
@@ -134,6 +148,13 @@ protected:
 	}
 
 private:
+	/**
+	 * \brief Improve the solution with a possible iterative method.
+	 * \param '_A' The coeff matrix.
+	 * \param ' b' The right-hand side vector or matrix.
+	 * \param ' x' The initial solution and will be overwritten.
+	 * \return The refined solution, which is stored in 'x'.
+	 */
 	template<typename _Bty, typename _Xty>
 	decltype(auto) _Improve(matrix_type& _A, _Bty& b, _Xty& x)noexcept {
 		internal::_Imp_adapter(view(_A), view(b), view(x));
@@ -142,8 +163,9 @@ private:
 	}
 
 protected:
-	matrix_type& _Mycoeff; //ref to the given coefficient matrix
-	value_type _Myeps;     //default roundoff threshold
+	const matrix_type& _Mycoeff; //ref to the given coefficient matrix
+	value_type _Myeps; //default roundoff threshold
+	value_type _Mylamb{ 0 }; //reserved for holding a multifier or damping factor
 };
 
 #define MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(OP) \
