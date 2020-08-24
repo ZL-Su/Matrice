@@ -280,6 +280,7 @@ public:
 	using typename _Mybase::point_type;
 	using typename _Mybase::value_type;
 	using typename _Mybase::jacob_type;
+	using typename _Mybase::matrix_fixed;
 	using typename _Mybase::linear_solver;
 
 	_Corr_solver_impl(const _Myt& _Other) = delete;
