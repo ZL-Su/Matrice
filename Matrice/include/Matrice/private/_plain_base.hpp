@@ -281,9 +281,15 @@ public:
 		:_Mybase(max_integer_v<0, _M>, max_integer_v<0, _N>), _Myalloc() {
 		m_data = _Myalloc.data();
 	}
-	MATRICE_GLOBAL_INL constexpr Base_(size_t _rows)noexcept
-		:_Mybase(_rows < _M ? _M : _rows, _N > 1 ? _N : 1),
-		_Myalloc(_rows < _M ? _M : _rows, _N > 1 ? _N : 1) {
+	MATRICE_GLOBAL_INL constexpr Base_(size_t _size)noexcept
+		:_Mybase(
+			_M > 0 ? _M : _size, _N > 0 ? _N : _size
+			// _size < _M ? _M : _size, _N > 1 ? _N : 1
+		),
+		_Myalloc(
+			_M > 0 ? _M : _size, _N > 0 ? _N : _size
+			//_size < _M ? _M : _size, _N > 1 ? _N : 1
+		) {
 		m_data = _Myalloc.data();
 	}
 	MATRICE_GLOBAL_INL constexpr Base_(size_t _rows, size_t _cols)noexcept
@@ -895,7 +901,8 @@ public:
 		return Exp::MatUnaryExp<_Myt, _Xop_mat_trp>(*this);
 	}
 	MATRICE_GLOBAL_FINL auto normalize(value_t _val = inf)const noexcept { 
-		return ((*this)*(abs(_val) < eps ? 1 : 1 / (_val == inf ? max() : _val))); 
+		return ((*this)*(
+			abs(_val) < eps ? 1 : 1 / (_val == inf ? max() : _val))); 
 	}
 
 	MATRICE_MAKE_EXP_ASSIGNOP(::Ewise);
