@@ -257,7 +257,7 @@ public:
 	 */
 	MATRICE_HOST_INL auto& _Warp(const param_type& _Par);
 
-private:
+protected:
 	using _Mybase::_Myref_ptr;
 	using _Mybase::_Mycur_ptr;
 	using _Mybase::_Mycur;
@@ -307,7 +307,7 @@ public:
 	 */
 	MATRICE_HOST_INL auto& _Warp(const param_type& _Par);
 
-private:
+protected:
 	using _Mybase::_Myref_ptr;
 	using _Mybase::_Mycur_ptr;
 	using _Mybase::_Mycur;
