@@ -21,7 +21,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseIntelMKL>Parallel</UseIntelMKL>
     <UseILP64Interfaces>false</UseILP64Interfaces>
@@ -51,15 +51,15 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>.\x64\Debug\</OutDir>
-    <IntDir>.\IntDir\Debug\</IntDir>
+    <OutDir>x64\Debug\</OutDir>
+    <IntDir>IntDir\Debug\</IntDir>
     <TargetName>matrice</TargetName>
     <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;.\include\Matrice;.\include\Matrice\private;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>.\x64\Release\</OutDir>
-    <IntDir>.\IntDir\Release\</IntDir>
+    <OutDir>x64\Release\</OutDir>
+    <IntDir>IntDir\Release\</IntDir>
     <TargetName>matrice</TargetName>
     <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;.\include\Matrice;.\include\Matrice\private;$(IncludePath)</IncludePath>
   </PropertyGroup>
@@ -109,7 +109,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_LIB;_ENABLE_EXTENDED_ALIGNED_STORAGE;MATRICE_THR=MATRICE_THR_OMP;MATRICE_MATH_KERNEL=MATRICE_USE_MKL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;_ENABLE_EXTENDED_ALIGNED_STORAGE;MATRICE_DEBUG;MATRICE_THR=MATRICE_THR_OMP;MATRICE_MATH_KERNEL=MATRICE_USE_MKL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <OpenMPSupport>false</OpenMPSupport>
       <LanguageStandard>stdcpplatest</LanguageStandard>
@@ -237,7 +237,7 @@
     <ClInclude Include="include\Matrice\private\math\_linear_solver.hpp" />
     <ClInclude Include="include\Matrice\private\math\_primitive_funcs.hpp" />
     <ClInclude Include="include\Matrice\private\math\_svd.h" />
-    <ClInclude Include="include\Matrice\private\nonfree\_lnalge.h" />
+    <ClInclude Include="include\Matrice\private\nonfree\blas_lapack_kernel.h" />
     <ClInclude Include="include\Matrice\private\storage\forward.hpp" />
     <ClInclude Include="include\Matrice\private\tensor\_tensor.hpp" />
     <ClInclude Include="include\Matrice\private\tensor\_tensor_old.hpp" />
@@ -396,7 +396,7 @@
     <None Include="include\Matrice\private\inl\_storage_base.inl" />
     <None Include="include\Matrice\private\nonfree\inl\blas_kernel_wrapper.inl" />
     <None Include="include\Matrice\private\nonfree\inl\lapack_kernel_wrapper.inl" />
-    <None Include="include\Matrice\private\nonfree\inl\_lnalge.inl" />
+    <None Include="include\Matrice\private\nonfree\inl\blas_lapack_impl.inl" />
     <None Include="include\Matrice\private\storage\_allocator.inl" />
     <None Include="include\Matrice\private\_similarity.inl" />
     <None Include="include\core" />
