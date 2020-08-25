@@ -62,11 +62,18 @@ public:
 
 	MATRICE_GLOBAL_INL value_t eval(const pointer _oth) const;
 
+	MATRICE_GLOBAL_INL decltype(auto)(max)()const noexcept {
+		return (_Maxval);
+	}
+	MATRICE_GLOBAL_INL decltype(auto)(max)()noexcept {
+		return (_Maxval);
+	}
 private:
 	MATRICE_GLOBAL_INL void _Init();
 	pointer _Data;
 	size_t  _Radius, _Size;
 	value_t _Option[2];
+	value_t _Maxval{0};
 };
 
 template<typename T, size_t _M, size_t _N> struct SMBase
