@@ -404,4 +404,13 @@ private:
 
 #undef _VIEW_EWISE_COPY_N
 _DETAIL_END
+/**
+ * \brief Make a full view to the given matrix or vector _M.
+ */
+template<typename _Mty,
+MATRICE_ENABLE_IF(is_matrix_v<_Mty> || is_fxdvector_v<_Mty>)>
+MATRICE_GLOBAL_INL auto view(const _Mty& _M) noexcept
+->detail::_Matrix_block<typename _Mty::value_type> {
+	return { _M.data(), size_t(_M.cols()), size_t(_M.rows()) };
+}
 DGE_MATRICE_END
