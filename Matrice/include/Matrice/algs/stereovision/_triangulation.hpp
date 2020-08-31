@@ -24,7 +24,8 @@ MATRICE_ALGS_BEGIN
 _DETAIL_BEGIN
 template<typename _Ty>
 class _Trig_base {
-	static_assert(is_floating_point_v<_Ty>, "_Ty in _Trig_base<_Ty> must be a floating point type.");
+	static_assert(is_floating_point_v<_Ty>, 
+		"_Ty in _Trig_base<_Ty> must be a floating point type.");
 	using _Myt = _Trig_base;
 public:
 	using value_type = _Ty;
@@ -33,7 +34,9 @@ public:
 	using matrix_3x3t = Matrix_<value_type, 3, 3>;
 
 	/**
-	 * \brief set relative geometry between the two. cams.
+	 * \brief Set relative geometry between the two. cams.
+	 * \param 'ext' a 6-vector holds the external parameters as {rx,ry,rz,tx,ty,tz}.
+	 * \return the mutable reference of this object. 
 	 */
 	MATRICE_HOST_INL _Myt& set_relat_geo(initlist<value_type> ext) noexcept {
 		decltype(auto) _It = ext.begin();
@@ -46,6 +49,13 @@ public:
 		
 		return (*this);
 	}
+
+	/**
+	 * \brief Set internal geometry for each of the two. cams.
+	 * \param 'kk' passes the internal parameters with a nested initializer list
+	 * {{fx, fy, cx, cy}, {fx, fy, cx, cy}}.
+	 * \return the mutable reference of this object.
+	 */
 	MATRICE_HOST_INL _Myt& set_inter_params(nested_initlist<value_type> kk) noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(kk.size() > 0 && kk.size() < 3, 
@@ -104,8 +114,10 @@ public:
 	}
 
 	/**
-	 * \brief compute 3D coords with given stereo correspondence:
+	 * \brief Compute 3D coords with given stereo correspondence:
 	 //tex:$\{\mathbf{p}\leftrightarrow \mathbf{q}\}$
+	 * \param "p" and "q" the input point correspondence.
+	 * \return the 3d point associated to the pair "p <--> q".
 	 */
 	MATRICE_HOST_INL auto compute(Vec2_<value_type>&& p, Vec2_<value_type>&& q) noexcept {
 		Matrix_<value_type, 4, 3> A; Vec4_<value_type> b;
@@ -114,8 +126,8 @@ public:
 		auto cx = _Mybase::m_inpars[0][2], cy = _Mybase::m_inpars[0][3];
 		auto x = p.x - cx, y = p.y - cy;
 		auto R = _Mybase::m_rot[0];
-		A.rview(0) = { x * R[2][0] - fx * R[0][0], x * R[2][1] - fx * R[0][1], x * R[2][2] - fx * R[0][2] };
-		A.rview(1) = { y * R[2][0] - fy * R[1][0], y * R[2][1] - fy * R[1][1], y * R[2][2] - fy * R[1][2] };
+		A.rview(0) = { x*R[2][0] - fx*R[0][0], x*R[2][1] - fx*R[0][1], x*R[2][2] - fx*R[0][2] };
+		A.rview(1) = { y*R[2][0] - fy*R[1][0], y*R[2][1] - fy*R[1][1], y*R[2][2] - fy*R[1][2] };
 		b(0) = fx * _Mybase::m_trs[0].x - x * _Mybase::m_trs[0].z;
 		b(1) = fy * _Mybase::m_trs[0].y - y * _Mybase::m_trs[0].z;
 
@@ -123,13 +135,16 @@ public:
 		cx = _Mybase::m_inpars[1][2], cy = _Mybase::m_inpars[1][3];
 		x = q.x - cx, y = q.y - cy;
 		R = _Mybase::m_rot[1];
-		A.rview(2) = { x * R[2][0] - fx * R[0][0], x * R[2][1] - fx * R[0][1], x * R[2][2] - fx * R[0][2] };
-		A.rview(3) = { y * R[2][0] - fy * R[1][0], y * R[2][1] - fy * R[1][1], y * R[2][2] - fy * R[1][2] };
+		A.rview(2) = { x*R[2][0] - fx*R[0][0], x*R[2][1] - fx*R[0][1], x*R[2][2] - fx*R[0][2] };
+		A.rview(3) = { y*R[2][0] - fy*R[1][0], y*R[2][1] - fy*R[1][1], y*R[2][2] - fy*R[1][2] };
 		b(2) = fx * _Mybase::m_trs[1].x - x * _Mybase::m_trs[1].z;
 		b(3) = fy * _Mybase::m_trs[1].y - y * _Mybase::m_trs[1].z;
 
 		const auto solver = make_linear_solver<lls>(A);
 		return (solver.solve(b));
+	}
+	MATRICE_HOST_INL auto compute(pair_t<Vec2_<value_type>>&& cpd) noexcept {
+		return compute(move(cpd.first), move(cpd.second));
 	}
 };
 _DETAIL_END
