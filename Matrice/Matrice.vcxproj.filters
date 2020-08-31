@@ -687,6 +687,9 @@
     <ClInclude Include="include\Matrice\private\nonfree\blas_lapack_kernel.h">
       <Filter>Header Files\Detail\math\nonfree</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\algs\geometry.hpp">
+      <Filter>Header Files\Algs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
