@@ -90,7 +90,7 @@ auto _Corr_optim_base<_Derived>::_Cond()->matrix_type& {
 	_Mycur.create(_Mysize, _Mysize);
 
 	// \fill reference image patch.
-	const auto& _Data = _Myref_ptr->data();
+	const auto& _Data = _Myimref->data();
 	const auto[_Rows, _Cols] = _Data.shape().tile();
 	const auto[_L, _R, _U, _D] = _Myopt.range<true>(_Mypos);
 	auto _Mean = zero<value_type>;
@@ -111,7 +111,7 @@ auto _Corr_optim_base<_Derived>::_Cond()->matrix_type& {
 				auto _Rp = _Myref[y - _U];
 				for (auto x = _L; x < _R; ++x) {
 					if (x >= 0 && x < _Cols)
-						_Mean += _Rp[x - _L] = (*_Myref_ptr)(x, y);
+						_Mean += _Rp[x - _L] = (*_Myimref)(x, y);
 				}
 			}
 		}
@@ -138,7 +138,7 @@ auto _Corr_optim_base<_Derived>::_Cond()->matrix_type& {
 template<typename _Derived> MATRICE_HOST_INL 
 auto _Corr_optim_base<_Derived>::_Guess(rect_type roi)->point_type {
 	const auto _Start = roi.begin(), _End = roi.end();
-	decltype(auto) _Data = _Mycur_ptr->data();
+	decltype(auto) _Data = _Myimcur->data();
 	const auto _Stride = rect_type::value_type(_Myopt._Radius>>1);
 
 	//narrow the ROI if it hits the boundaries of the image
@@ -218,7 +218,7 @@ auto _Corr_optim_base<_Derived>::_Solve(param_type& Par) {
 template<typename _Ty, typename _Itag> MATRICE_HOST_INL
 auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<0>>::_Warp(const param_type& _Par) {
 
-	const auto[_Rows, _Cols] = (*_Mycur_ptr)().shape().tile();
+	const auto[_Rows, _Cols] = (*_Myimcur)().shape().tile();
 	const auto _Radius = static_cast<index_t>(_Myopt._Radius);
 
 	const auto _Cur_x = _Mypos[0] + _Par[0];
@@ -230,7 +230,7 @@ auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<0>>::_Warp(const param_type& _Par)
 		auto _Rc = _Mycur[r];
 		for (diff_t i = -_Radius, c = 0; i <= _Radius; ++i, ++c) {
 			const auto x = static_cast<value_type>(i) + _Cur_x;
-			_IF_WITHIN_RANGE(_Mean += _Rc[c] = (*_Mycur_ptr)(x, y));
+			_IF_WITHIN_RANGE(_Mean += _Rc[c] = (*_Myimcur)(x, y));
 		}
 	}
 
@@ -241,7 +241,7 @@ auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<0>>::_Warp(const param_type& _Par)
 }
 template<typename _Ty, typename _Itag> MATRICE_HOST_INL
 auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>::_Warp(const param_type& _Par) {
-	const auto[_Rows, _Cols] = _Mycur_ptr->data().shape().tile();
+	const auto[_Rows, _Cols] = _Myimcur->data().shape().tile();
 	const auto _Radius = static_cast<index_t>(_Myopt._Radius);
 
 	const auto u = _Par[0], dudx = _Par[1], dudy = _Par[2];
@@ -258,7 +258,7 @@ auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>::_Warp(const param_type& _Par)
 			const auto dx = static_cast<value_type>(i);
 			const auto x = (1 + dudx)* dx + tx;
 			const auto y = dvdx * dx + ty;
-			_IF_WITHIN_RANGE(_Mean += _Rc[c] = (*_Mycur_ptr)(x, y));
+			_IF_WITHIN_RANGE(_Mean += _Rc[c] = (*_Myimcur)(x, y));
 		}
 	}
 
@@ -280,7 +280,7 @@ auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<0>>::_Diff() {
 		const auto y = _Mypos.y + _Off + j;
 		for (index_t ix = _L, i = 0; ix < _R; ++ix, ++i) {
 			const auto x = _Mypos.x + _Off + i;
-			const auto[dfdx, dfdy] = _Myref_ptr->grad({ x, y });
+			const auto[dfdx, dfdy] = _Myimref->grad({ x, y });
 
 			auto q = _Mybase::_Myjaco[j * _Size + i];
 			q[0] = dfdx, q[1] = dfdy;
@@ -301,7 +301,7 @@ auto& _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>::_Diff() {
 		for (index_t ix = _L, i = 0; ix < _R; ++ix, ++i) {
 			const auto dx = _Off + i;
 			const auto x = _Mypos.x + dx;
-			const auto[dfdx, dfdy] = _Myref_ptr->grad({ x, y });
+			const auto[dfdx, dfdy] = _Myimref->grad({ x, y });
 
 			auto q = _Mybase::_Myjaco[j * _Size + i];
 			q[0] = dfdx, q[1] = dfdx * dx, q[2] = dfdx * dy;
@@ -326,7 +326,7 @@ auto _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>::_Diff(value_type cx, value_typ
 		for (index_t ix = _L, i = 0; ix < _R; ++ix, ++i) {
 			const auto dx = _Off + i;
 			const auto x = cx + dx;
-			const auto [dfdx, dfdy] = _Myref_ptr->grad({ x, y });
+			const auto [dfdx, dfdy] = _Myimref->grad({ x, y });
 
 			auto q = _Jacobian[j * _Size + i];
 			q[0] = dfdx, q[1] = dfdx * dx, q[2] = dfdx * dy;
