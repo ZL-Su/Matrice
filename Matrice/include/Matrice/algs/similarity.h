@@ -22,7 +22,11 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #include "core/matrix.h"
 
 MATRICE_ALGS_BEGIN
-enum class metric_fn { L1, L2, ZNCC };
+enum class metric_fn { 
+	L1, 
+	L2, 
+	ZNCC 
+};
 
 template<metric_fn Fn, typename T, MATRICE_ENABLE_IF(is_scalar_v<T>)> class Metric_ {};
 template<typename T> class Metric_<metric_fn::L1, T> final
