@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -121,6 +121,8 @@ namespace tag {
 	struct _Linear_lud_tag : _Solver_tag {/*LU decomp.*/ };
 	struct _Linear_svd_tag : _Solver_tag {/*SVD decomp.*/ };
 	struct _Linear_evd_tag : _Solver_tag {/*Eigen decomp.*/ };
+
+	struct scalar {};
 } 
 #ifndef _TAG
 #define _TAG tag::
