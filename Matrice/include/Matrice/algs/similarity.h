@@ -58,13 +58,15 @@ private:
 };
 template<typename T> class Metric_<metric_fn::ZNCC, T> final
 {
+	using block_t = detail::_Matrix_block<T>;
+public:
 	using value_t = T;
 	using pointer = value_t*;
-public:
 	MATRICE_GLOBAL_INL Metric_(const pointer _data, size_t _radius) noexcept
 		: _Data(_data), _Radius(_radius) { _Init(); }
 
 	MATRICE_GLOBAL_INL value_t eval(const pointer _oth) const;
+	MATRICE_GLOBAL_INL value_t eval(const block_t _other) const;
 
 	MATRICE_GLOBAL_INL decltype(auto)(max)()const noexcept {
 		return (_Maxval);
