@@ -59,20 +59,24 @@ class _Basic_plane_view_base {
 public:
 	using plvt_type = tuple<int, int, std::add_pointer_t<_Ty>, bool>;
 
-	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base() = default;
-	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base(int _rows, int _cols, _Ty* _data = nullptr) noexcept
+	MATRICE_GLOBAL_FINL constexpr 
+		_Basic_plane_view_base() = default;
+	MATRICE_GLOBAL_FINL constexpr 
+		_Basic_plane_view_base(int _rows, int _cols, _Ty* _data = nullptr) noexcept
 		: m_shape(_rows,_cols), m_data(_data) {
 #ifdef MATRICE_DEBUG
 		this->_Flush_view_buf();
 #endif
 	};
-	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base(const shape_t<3>& _Shape, _Ty* _data) noexcept
+	MATRICE_GLOBAL_FINL constexpr 
+		_Basic_plane_view_base(const shape_t<3>& _Shape, _Ty* _data) noexcept
 		: m_data(_data), m_shape(_Shape) {
 #ifdef MATRICE_DEBUG
 		this->_Flush_view_buf();
 #endif
 	};
-	MATRICE_GLOBAL_FINL constexpr _Basic_plane_view_base(const shape_t<3>& _Shape) noexcept
+	MATRICE_GLOBAL_FINL constexpr 
+		_Basic_plane_view_base(const shape_t<3>& _Shape) noexcept
 		: m_shape(_Shape) {
 #ifdef MATRICE_DEBUG
 		this->_Flush_view_buf();
