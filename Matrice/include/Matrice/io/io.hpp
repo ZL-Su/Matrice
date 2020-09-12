@@ -207,7 +207,7 @@ public:
 	 *\brief read data from a file
 	 *\param <_N0, _N1> are the 1-based indices of the begin and end columns to be read. 
 	 */
-	template<typename _Ty, size_t _N0, size_t _N1 = _N0>
+	template<typename _Ty, diff_t _N0, diff_t _N1 = _N0>
 	static MATRICE_HOST_INL auto read(std::string _Path, size_t _Skips = 0) {
 		static_assert(_N0 <= _N1, "_N1 must be greater than or equal to _N0");
 		using value_type = _Ty;
