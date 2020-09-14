@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -17,10 +17,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 #include <array>
-#include "../util/_macros.h"
-#include "../util/_std_wrapper.h"
-#include "../util/_exception.h"
-#include "../private/math/_primitive_funcs.hpp"
+#include "util/_macros.h"
+#include "util/_std_wrapper.h"
+#include "util/_exception.h"
+#include "private/math/_primitive_funcs.hpp"
 #include "_size_traits.h"
 
 DGE_MATRICE_BEGIN
@@ -67,7 +67,8 @@ template<> struct shape_t<1> {
 	constexpr auto cols() const noexcept { return 1; }
 
 	friend bool operator==(const shape_t<1>& _Left, const shape_t<1>& _Right) noexcept {
-		return std::tie(_Left.h) == std::tie(_Right.h);
+		MATRICE_USE_STD(tie);
+		return tie(_Left.h) == tie(_Right.h);
 	}
 
 	size_t h = 0; //height of the stored data
@@ -101,7 +102,8 @@ template<> struct shape_t<2> {
 	constexpr auto tile()const noexcept { return shape_t<1>{h*w}; }
 
 	friend bool operator==(const shape_t<2>& _Left, const shape_t<2>& _Right) noexcept {
-		return std::tie(_Left.h, _Left.w) == std::tie(_Right.h, _Right.w);
+		MATRICE_USE_STD(tie);
+		return tie(_Left.h, _Left.w) == tie(_Right.h, _Right.w);
 	}
 
 	size_t h = 0; //height of the stored data
@@ -152,7 +154,8 @@ template<> struct shape_t<3> {
 	}
 
 	friend bool operator==(const _Myt& _Left, const _Myt& _Right) noexcept {
-		return std::tie(_Left.h, _Left.w, _Left.d) == std::tie(_Right.h, _Right.w, _Right.d);
+		MATRICE_USE_STD(tie);
+		return tie(_Left.h, _Left.w, _Left.d) == tie(_Right.h, _Right.w, _Right.d);
 	}
 
 	size_t h = 0; //height of the stored data
@@ -161,8 +164,8 @@ template<> struct shape_t<3> {
 };
 
 _DETAIL_BEGIN
-template<size_t _N>
-MATRICE_GLOBAL_INL shape_t<_N> _Union(const shape_t<_N>& _1, const shape_t<_N>& _2) noexcept {
+template<size_t _N> MATRICE_GLOBAL_INL 
+shape_t<_N> _Union(const shape_t<_N>& _1, const shape_t<_N>& _2) noexcept {
 	if constexpr (_N == 1) 
 		return shape_t<_N>{max(_1.h, _2.h)};
 	if constexpr (_N == 2) 
@@ -170,8 +173,8 @@ MATRICE_GLOBAL_INL shape_t<_N> _Union(const shape_t<_N>& _1, const shape_t<_N>& 
 	if constexpr (_N == 3) 
 		return shape_t<_N>{max(_1.h, _2.h), max(_1.w, _2.w), max(_1.d, _2.d)};
 }
-template<size_t _N1, size_t _N2>
-MATRICE_GLOBAL_INL shape_t<max_integer_v<_N1, _N2>> _Union(const shape_t<_N1>& _1, const shape_t<_N2>& _2) noexcept {
+template<size_t _N1, size_t _N2> MATRICE_GLOBAL_INL 
+shape_t<max_integer_v<_N1, _N2>> _Union(const shape_t<_N1>& _1, const shape_t<_N2>& _2) noexcept {
 	return _Union<max_integer_v<_N1, _N2>>(_1, _2);
 }
 _DETAIL_END
