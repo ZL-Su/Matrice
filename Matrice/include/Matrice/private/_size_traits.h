@@ -1,6 +1,6 @@
 /*  *************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,9 +23,16 @@ DGE_MATRICE_BEGIN
 
 template<int _Rows = 0, int _Cols = _Rows>
 struct compile_time_size {
-	enum { val_1 = 0x0001, val_2 = 0x0002, val_3 = 0x0003, val_4 = 0x0004 };
-	enum { rows_at_compiletime = _Rows,  cols_at_compiletime = _Cols,
-			 RunTimeDeducedOnHost = 0, RunTimeDeducedOnDevice = -1 };
+	enum { 
+		val_1 = 0x0001, val_2 = 0x0002, 
+		val_3 = 0x0003, val_4 = 0x0004 
+	};
+	enum {
+		rows_at_compiletime = _Rows,
+		cols_at_compiletime = _Cols,
+		RunTimeDeducedOnHost = 0,
+		RunTimeDeducedOnDevice = -1 
+	};
 	static constexpr auto _1 = 0x0001;
 	static constexpr auto _2 = 0x0002;
 	static constexpr auto _3 = 0x0003;
@@ -45,7 +52,6 @@ constexpr int rs_host_v = compile_time_size<_M, _N>::RunTimeDeducedOnHost;
 // \statically deduced runtime-size on device
 template<int _M, int _N> MATRICE_GLOBAL_INL 
 constexpr int rs_device_v = compile_time_size<_M, _N>::RunTimeDeducedOnDevice;
-
 
 template<bool _Test, int _N1, int _N2> struct conditional_size {};
 template<int _N1, int _N2 > struct conditional_size<std::true_type::value, _N1, _N2> { 
