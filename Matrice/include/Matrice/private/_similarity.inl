@@ -27,7 +27,7 @@ MATRICE_ALGS_BEGIN
 template<typename T> MATRICE_GLOBAL_INL
 T Metric_<metric_fn::L1, T>::eval(const pointer _Othr) const
 {
-	value_t _Score = value_t(0);
+	auto _Score = value_t(0);
 #if MATRICE_SIMD_ARCH==MATRICE_SIMD_AVX
 	using Packet = simd::Packet_<value_t>;
 	const auto _N = _Size / Packet::size;
@@ -50,7 +50,7 @@ T Metric_<metric_fn::L1, T>::eval(const pointer _Othr) const
 template<typename T> MATRICE_GLOBAL_INL
 T Metric_<metric_fn::L2, T>::eval(const pointer _Othr) const
 {
-	value_t _Score = value_t(0);
+	auto _Score = value_t(0);
 #if MATRICE_SIMD_ARCH==MATRICE_SIMD_AVX
 	using Packet = simd::Packet_<value_t>;
 	const auto _N = _Size / Packet::size;
@@ -98,5 +98,17 @@ T Metric_<metric_fn::ZNCC, T>::eval(const pointer _Othr) const
 	});
 
 	return (_Score/sqrt(_Option[1]*_Toption[1]));
+}
+template<typename T> MATRICE_GLOBAL_INL
+T Metric_<metric_fn::ZNCC, T>::eval(const block_t _Other) const
+{
+	const auto _Avg = _Other.sum() / _Other.size();
+	auto _Var = zero<value_t>, _Score = zero<value_t>;
+	for (auto _Idx = 0; _Idx < _Size; ++_Idx) {
+		const auto _Diff = _Other(_Idx) - _Avg;
+		_Score += _Diff * _Data[_Idx];
+		_Var += _Diff * _Diff;
+	}
+	return (_Score/sqrt(_Var*_Option[1]));
 }
 MATRICE_ALGS_END
