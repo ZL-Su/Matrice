@@ -73,7 +73,7 @@ public:
 	 *\param [args...] variadic arguments that may empty or more than one inputs. If args... is empty, the method solves a homogeneous linear system with form of $\mathbf{Ax} = \mathbf{0}$.
 	 */
 	template<class... _Args>
-	MATRICE_GLOBAL_INL decltype(auto)solve(_Args&&... args)const noexcept {
+	MATRICE_GLOBAL_INL auto solve(_Args&&... args)const noexcept {
 		return _Derived()->_Xbackward(args...);
 	}
 
@@ -112,8 +112,8 @@ protected:
 			//_Mycoeff is a general square matrix, _Forward does nothing.
 		}
 		if constexpr (is_same_v<kernel_t, svd>) {
-			internal::_Lak_adapter<svd>(view(_Mycoeff), view(_Mdp->s()),
-				view(_Mdp->vt()));
+			internal::_Lak_adapter<svd>(_Mycoeff.view(), _Mdp->s().view(),
+				_Mdp->vt().view());
 		}
 		if constexpr (is_same_v<kernel_t, spt>) {
 			internal::_Lak_adapter<spt>(view(_Mycoeff));
@@ -372,12 +372,14 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(svd)
 	 * \note The method is for parsing by the base class of the linear solver rather than for external calling.
      */
 	template<typename _Bty> [[non_external_callable]]
-	MATRICE_GLOBAL_INL auto _Xbackward(_Bty& b) noexcept {
+	MATRICE_GLOBAL_INL auto _Xbackward(_Bty& b)const noexcept {
 #ifdef MATRICE_DEBUG
-		DGELOM_CHECK(b.size() == _Mybase::_Mycoeff.rows(), "Bad size in _Linear_solver<_Mty, svd>::backward(...).");
+		DGELOM_CHECK(b.size() == _Mybase::_Mycoeff.rows(), 
+			"Bad size in _Linear_solver<_Mty, svd>::backward(...).");
 #endif
 		decltype(_Mys) x;
-		internal::_Bwd_adapter<_Myop>(view(_Mybase::_Mycoeff), view(_Mys), view(_Myvt), view(b), view(x));
+		internal::_Bwd_adapter<_Myop>(view(_Mybase::_Mycoeff), 
+			view(_Mys), view(_Myvt), b.view(), x.view());
 		return forward<decltype(x)>(x);
 	}
 	/**
