@@ -47,7 +47,10 @@ _DETAIL_BEGIN
 // \brief solver traits class
 template<class _Sty> struct _Solver_traits {};
 
-// \brief CLASS TEMPLATE for linear solver base
+/// <summary>
+/// CLASS TEMPLATE to define common interface to solve a linear system.
+/// </summary>
+/// <typeparam name="_Derived"></typeparam>
 template<typename _Derived>
 class _Linear_solver_base {
 	using _Myderived = _Derived;
@@ -56,18 +59,22 @@ public:
 	using matrix_type = typename _Mytraits::matrix_type;
 	using value_type = typename _Mytraits::value_type;
 
-	_Linear_solver_base(matrix_type& coeff) noexcept
+	/**
+	 * \brief Ctor
+	 * \param 'coeff' Coefficient matrix of the system.
+	 */
+	_Linear_solver_base(const matrix_type& coeff) noexcept
 		:_Mycoeff{ coeff }, _Myeps{ matrix_type::eps } {
 	}
 
 	/**
-	 *\brief Solve $\mathbf{AX} = \mathbf{B}$. The solver kernel is dispatched according to the solver operator specified to _Op.
+	 *\brief Solve linear system $\mathbf{AX} = \mathbf{B}$. The solver kernel is dispatched according to the solver operator specified to _Op.
 	   The right-hand term $\mathbf{B}$ is allowed to hold more than one column when the linear kernel _Op is dgelom::spt.
 	 *\param [args...] variadic arguments that may empty or more than one inputs. If args... is empty, the method solves a homogeneous linear system with form of $\mathbf{Ax} = \mathbf{0}$.
 	 */
 	template<class... _Args>
-	MATRICE_GLOBAL_INL decltype(auto)solve(_Args&&... args) {
-		return ((_Myderived*)(this))->_Xbackward(args...);
+	MATRICE_GLOBAL_INL auto solve(_Args&&... args)const noexcept {
+		return _Derived()->_Xbackward(args...);
 	}
 
 	/**
@@ -86,6 +93,13 @@ public:
 		return (this->_Inverse());
 	}
 
+	MATRICE_GLOBAL_INL decltype(auto) lambda() const noexcept {
+		return (_Mylamb);
+	}
+	MATRICE_GLOBAL_INL decltype(auto) lambda() noexcept {
+		return (_Mylamb);
+	}
+
 protected:
 	/**
 	 *\brief Perform coeff matrix decomposition
@@ -93,13 +107,13 @@ protected:
 	MATRICE_GLOBAL_INL void _Forward() {
 		using kernel_t = typename _Mytraits::op_type;
 
-		auto _Mdp = static_cast<_Myderived*>(this);
+		auto _Mdp = _Derived();
 		if constexpr (is_same_v<kernel_t, void>) {
 			//_Mycoeff is a general square matrix, _Forward does nothing.
 		}
 		if constexpr (is_same_v<kernel_t, svd>) {
-			internal::_Lak_adapter<svd>(view(_Mycoeff), view(_Mdp->s()),
-				view(_Mdp->vt()));
+			internal::_Lak_adapter<svd>(_Mycoeff.view(), _Mdp->s().view(),
+				_Mdp->vt().view());
 		}
 		if constexpr (is_same_v<kernel_t, spt>) {
 			internal::_Lak_adapter<spt>(view(_Mycoeff));
@@ -112,7 +126,7 @@ protected:
 	MATRICE_GLOBAL_INL auto _Inverse() {
 		using kernel_t = typename _Mytraits::op_type;
 
-		auto _Mdp = (_Myderived*)(this);
+		auto _Mdp = _Derived();
 		if constexpr (is_same_v<kernel_t, void>) {
 			//general matrix inverse
 			matrix_type _Ret(_Mycoeff.rows(), _Mycoeff.cols());
@@ -133,17 +147,32 @@ protected:
 		}
 	}
 
+	MATRICE_GLOBAL_FINL decltype(auto) _Derived() const noexcept {
+		return static_cast<const _Myderived*>(this);
+	}
+	MATRICE_GLOBAL_FINL decltype(auto) _Derived() noexcept {
+		return static_cast<_Myderived*>(this);
+	}
+
 private:
+	/**
+	 * \brief Improve the solution with a possible iterative method.
+	 * \param '_A' The coeff matrix.
+	 * \param ' b' The right-hand side vector or matrix.
+	 * \param ' x' The initial solution and will be overwritten.
+	 * \return The refined solution, which is stored in 'x'.
+	 */
 	template<typename _Bty, typename _Xty>
-	decltype(auto) _Improve(matrix_type& _A, _Bty& b, _Xty& x)noexcept {
+	decltype(auto)_Improve(matrix_type& _A, _Bty& b, _Xty& x)noexcept {
 		internal::_Imp_adapter(view(_A), view(b), view(x));
 		const auto _Res = this->solve(b);
 		return (x = x - _Res);
 	}
 
 protected:
-	matrix_type& _Mycoeff; //ref to the given coefficient matrix
-	value_type _Myeps;     //default roundoff threshold
+	const matrix_type& _Mycoeff; //ref to the given coefficient matrix
+	value_type _Myeps; //default roundoff threshold
+	value_type _Mylamb{ 0 }; //reserved for holding a multifier or damping factor
 };
 
 #define MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(OP) \
@@ -151,7 +180,7 @@ template<class _Mty> \
 class _Linear_solver<_Mty, OP> : \
 	public _Linear_solver_base<_Linear_solver<_Mty, OP>> { \
 	using _Myt = _Linear_solver; \
-	using _Mybase = _Linear_solver_base<_Linear_solver<_Mty, OP>>; \
+	using _Mybase = _Linear_solver_base<_Myt>; \
 	using _Myop = OP; \
 public: \
 	using typename _Mybase::value_type; \
@@ -231,12 +260,12 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(spt)
 	 */
 	template<class _Rty> [[non_external_callable]]
 	MATRICE_GLOBAL_INL _Rty& _Xbackward(_Rty& B)const noexcept {
-		decltype(auto) _L = _Mybase::_Mycoeff;
+		const auto& _L = _Mybase::_Mycoeff;
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(_L.rows() == B.rows(),
 			"The number of rows of the right-hand vector(s) is not identical to that of the coeff. matrix.");
 #endif
-		internal::_Bwd_adapter<_Myop>(view(_L), view(B));
+		internal::_Bwd_adapter<_Myop>(_L.view(), B.view());
 		return (B);
 	}
 MATRICE_MAKE_LINEAR_SOLVER_SPEC_END(spt)
@@ -343,12 +372,14 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(svd)
 	 * \note The method is for parsing by the base class of the linear solver rather than for external calling.
      */
 	template<typename _Bty> [[non_external_callable]]
-	MATRICE_GLOBAL_INL auto _Xbackward(_Bty& b) noexcept {
+	MATRICE_GLOBAL_INL auto _Xbackward(_Bty& b)const noexcept {
 #ifdef MATRICE_DEBUG
-		DGELOM_CHECK(b.size() == _Mybase::_Mycoeff.rows(), "Bad size in _Linear_solver<_Mty, svd>::backward(...).");
+		DGELOM_CHECK(b.size() == _Mybase::_Mycoeff.rows(), 
+			"Bad size in _Linear_solver<_Mty, svd>::backward(...).");
 #endif
 		decltype(_Mys) x;
-		internal::_Bwd_adapter<_Myop>(view(_Mybase::_Mycoeff), view(_Mys), view(_Myvt), view(b), view(x));
+		internal::_Bwd_adapter<_Myop>(view(_Mybase::_Mycoeff), 
+			view(_Mys), view(_Myvt), b.view(), x.view());
 		return forward<decltype(x)>(x);
 	}
 	/**

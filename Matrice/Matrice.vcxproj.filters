@@ -687,6 +687,15 @@
     <ClInclude Include="include\Matrice\private\nonfree\blas_lapack_kernel.h">
       <Filter>Header Files\Detail\math\nonfree</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\algs\geometry.hpp">
+      <Filter>Header Files\Algs</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\_index.hpp">
+      <Filter>Header Files\Detail\core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\container\_queue.hpp">
+      <Filter>Header Files\Detail\container</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
@@ -892,9 +901,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="include\Matrice\core\cpp.hint">
-      <Filter>Header Files\Core</Filter>
-    </None>
     <None Include="include\Matrice\arch\inl\_ixpacket.inl">
       <Filter>Header Files\Arch\Inl</Filter>
     </None>

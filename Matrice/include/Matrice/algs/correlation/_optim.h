@@ -123,9 +123,9 @@ public:
 		const smooth_image_t& _Cur,
 		const options_type& _Opt
 	) : _Myopt(_Opt),
-		_Myref_ptr(new interp_type(_Ref)),
-		_Mycur_ptr(new interp_type(_Cur)),
-		_Mysolver(_Myhess), _Mysize(_Opt._Radius*2+1),
+		_Myimref(new interp_type(_Ref)),
+		_Myimcur(new interp_type(_Cur)),
+		_Mysolver(_Myhess), _Mysize(_Opt._Radius<<1|1),
 		_Myjaco(sq(_Mysize)), _Mydiff(sq(_Mysize)){
 	}
 
@@ -216,10 +216,10 @@ protected:
 
 	linear_solver _Mysolver;
 
-	// \hold interpolated reference image
-	std::shared_ptr<interp_type> _Myref_ptr;
-	// \hold interpolated current image 
-	std::shared_ptr<interp_type> _Mycur_ptr;
+	// reconstructed reference image with a specified interpolator
+	shared_ptr<smooth_image_t> _Myimref;
+	// reconstructed current image with a specified interpolator
+	shared_ptr<smooth_image_t> _Myimcur;
 	///</fields>
 };
 
@@ -257,9 +257,11 @@ public:
 	 */
 	MATRICE_HOST_INL auto& _Warp(const param_type& _Par);
 
-private:
-	using _Mybase::_Myref_ptr;
-	using _Mybase::_Mycur_ptr;
+protected:
+	using typename _Mybase::update_strategy;
+
+	using _Mybase::_Myimref;
+	using _Mybase::_Myimcur;
 	using _Mybase::_Mycur;
 	using _Mybase::_Myopt;
 	using _Mybase::_Mypos;
@@ -280,6 +282,7 @@ public:
 	using typename _Mybase::point_type;
 	using typename _Mybase::value_type;
 	using typename _Mybase::jacob_type;
+	using typename _Mybase::matrix_fixed;
 	using typename _Mybase::linear_solver;
 
 	_Corr_solver_impl(const _Myt& _Other) = delete;
@@ -306,9 +309,11 @@ public:
 	 */
 	MATRICE_HOST_INL auto& _Warp(const param_type& _Par);
 
-private:
-	using _Mybase::_Myref_ptr;
-	using _Mybase::_Mycur_ptr;
+protected:
+	using typename _Mybase::update_strategy;
+
+	using _Mybase::_Myimref;
+	using _Mybase::_Myimcur;
 	using _Mybase::_Mycur;
 	using _Mybase::_Myopt;
 	using _Mybase::_Mypos;

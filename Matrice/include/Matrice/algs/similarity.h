@@ -22,7 +22,11 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #include "core/matrix.h"
 
 MATRICE_ALGS_BEGIN
-enum class metric_fn { L1, L2, ZNCC };
+enum class metric_fn { 
+	L1, 
+	L2, 
+	ZNCC 
+};
 
 template<metric_fn Fn, typename T, MATRICE_ENABLE_IF(is_scalar_v<T>)> class Metric_ {};
 template<typename T> class Metric_<metric_fn::L1, T> final
@@ -54,19 +58,28 @@ private:
 };
 template<typename T> class Metric_<metric_fn::ZNCC, T> final
 {
+	using block_t = detail::_Matrix_block<T>;
+public:
 	using value_t = T;
 	using pointer = value_t*;
-public:
 	MATRICE_GLOBAL_INL Metric_(const pointer _data, size_t _radius) noexcept
 		: _Data(_data), _Radius(_radius) { _Init(); }
 
 	MATRICE_GLOBAL_INL value_t eval(const pointer _oth) const;
+	MATRICE_GLOBAL_INL value_t eval(const block_t _other) const;
 
+	MATRICE_GLOBAL_INL decltype(auto)(max)()const noexcept {
+		return (_Maxval);
+	}
+	MATRICE_GLOBAL_INL decltype(auto)(max)()noexcept {
+		return (_Maxval);
+	}
 private:
 	MATRICE_GLOBAL_INL void _Init();
 	pointer _Data;
 	size_t  _Radius, _Size;
 	value_t _Option[2];
+	value_t _Maxval{0};
 };
 
 template<typename T, size_t _M, size_t _N> struct SMBase

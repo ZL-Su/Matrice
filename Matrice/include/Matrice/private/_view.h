@@ -36,14 +36,18 @@ class _View_base
 {
 #define _VIEW_EWISE_OP(_OPERATION) \
 for (difference_type i = 0; i < size(); ++i) {\
-	static_cast<_Derived*>(this)->operator()(i) = _OPERATION;\
+static_cast<_Derived*>(this)->operator()(i) = _OPERATION;\
 } return (*this)
 #define _MATRICE_DEFVIEW_ARITHOP(OP, NAME) \
-template<typename _Rhs> MATRICE_GLOBAL_FINL auto operator##OP(const _Rhs& _Right) { \
-	return Exp::EwiseBinaryExp<_Derived, _Rhs, _Exp_op::_Ewise_##NAME<value_t>>(*static_cast<_Derived*>(this), _Right); \
+template<typename _Rhs> MATRICE_GLOBAL_FINL \
+auto operator##OP(const _Rhs& _Right) { \
+return Exp::EwiseBinaryExp<_Derived, _Rhs, _Exp_op::_Ewise_##NAME<value_t>>(\
+*static_cast<_Derived*>(this), _Right); \
 } \
-template<typename _Lhs> friend MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const _Derived& _Right) { \
-	return Exp::EwiseBinaryExp<_Lhs, _Derived, _Exp_op::_Ewise_##NAME<value_t>>(_Left, _Right); \
+template<typename _Lhs> friend MATRICE_GLOBAL_FINL \
+auto operator##OP(const _Lhs& _Left, const _Derived& _Right) { \
+return Exp::EwiseBinaryExp<_Lhs, _Derived, _Exp_op::_Ewise_##NAME<value_t>>(\
+_Left, _Right); \
 }
 	using _Myt = _View_base;
 public:
@@ -235,7 +239,7 @@ public:
 	 *\Retrieve the first _N element into a true static row-matrix.
 	 */
 	template<size_t N=_Base::cols_at_compiletime> 
-	MATRICE_GLOBAL_FINL auto eval() const {
+	MATRICE_GLOBAL_INL auto eval() const {
 		Matrix_<value_t, 1, min_integer_v<N, _Base::cols_at_compiletime>> _Ret(1, cols());
 		_VIEW_EWISE_COPY_N(_Ret, N);
 		return forward<decltype(_Ret)>(_Ret);
@@ -275,7 +279,7 @@ public:
 	 *\Retrieve the first _N element into a true static column-matrix.
 	 */
 	template<size_t N= _Base::rows_at_compiletime>
-	MATRICE_GLOBAL_FINL auto eval() const {
+	MATRICE_GLOBAL_INL auto eval() const {
 		Matrix_<value_t, min_integer_v<N, _Base::rows_at_compiletime>, 1> _Ret(rows(), 1);
 		_VIEW_EWISE_COPY_N(_Ret, N);
 		return std::forward<decltype(_Ret)>(_Ret);
@@ -345,7 +349,7 @@ public:
 	 * \brief Evaluate a view to a true matrix.
 	 */
 	template<int _M = 0, int _N = _M>
-	MATRICE_GLOBAL_FINL auto eval() const {
+	MATRICE_GLOBAL_INL auto eval() const {
 		Matrix_<value_t, _M, _N> _Ret(rows(), cols());
 		_VIEW_EWISE_COPY_N(_Ret, _Ret.size());
 		return forward<decltype(_Ret)>(_Ret);
@@ -381,7 +385,7 @@ public:
 	 *\brief Get the view for matrix at (_Myidx, _C)
 	 *\param [_C] channel index
 	 */
-	MATRICE_GLOBAL_FINL auto operator()(size_t _C) const {
+	MATRICE_GLOBAL_INL auto operator()(size_t _C) const {
 		range_type _Range(_C*_Mywsize, 0, (_C +1)*_Mywsize, _Myhsize);
 		return _Matrix_block<value_t>(_Mydata, _Mystride, _Range);
 	}
@@ -389,7 +393,7 @@ public:
 	/**
 	 *\brief Evaluate to a tensor
 	 */
-	MATRICE_GLOBAL_FINL auto eval() const {
+	MATRICE_GLOBAL_INL auto eval() const {
 		detail::_Tensor<value_t> _Ret{ 1, _Mycsize, _Myhsize, _Mywsize };
 		return std::move(_Ret);
 	}
@@ -400,4 +404,13 @@ private:
 
 #undef _VIEW_EWISE_COPY_N
 _DETAIL_END
+/**
+ * \brief Make a full view to the given matrix or vector _M.
+ */
+template<typename _Mty,
+MATRICE_ENABLE_IF(is_matrix_v<_Mty> || is_fxdvector_v<_Mty>)>
+MATRICE_GLOBAL_INL auto view(const _Mty& _M) noexcept
+->detail::_Matrix_block<typename _Mty::value_type> {
+	return { _M.data(), size_t(_M.cols()), size_t(_M.rows()) };
+}
 DGE_MATRICE_END

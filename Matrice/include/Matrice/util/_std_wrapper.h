@@ -34,6 +34,9 @@ namespace dgelom {
 	template<typename _Ty> 
 	using nested_initlist = initlist<initlist<_Ty>>;
 
+	template<typename _Ty, typename _Uy = _Ty>
+	using pair_t = std::pair<_Ty, _Uy>;
+
 #if defined(_HAS_CXX14) || defined(_HAS_CXX17)
 	using std::enable_if_t;
 	using std::common_type_t;

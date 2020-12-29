@@ -1,6 +1,6 @@
-/*  *************************************************************************
+/*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
-*	*************************************************************************/
+********************************************************************/
 #pragma once
 #include "../_tag_defs.h"
 #include "../nonfree/blas_lapack_kernel.h"
@@ -30,20 +30,45 @@ class _Matrix_decomposition<_Mty, _TAG _Linear_spd_tag> {
 public:
 	using category = _TAG _Linear_spd_tag;
 
+	/**
+	 * \brief Declare a matrix decomposition instance.
+	 * \param "_A" The coeff matrix to be processed. We take a reference of the matrix such that the decomposition is built inplace.
+	 */
 	MATRICE_HOST_INL _Matrix_decomposition(const _Mty& _A) 
 		: _Mycoef(_A) {}
 
+	/**
+	 * \brief Forward to perform matrix decomposition with specified linear kernel.
+	 * \return A reference to the overwritten coefficient matrix A.
+	 */
 	MATRICE_HOST_INL decltype(auto) forward() {
 		_Lapack_kernel_impl<typename _Mty::value_type>::spd(_Mycoef);
 		return (_Mycoef);
 	}
+
+	/**
+	 * \brief In-place solve linear system AX=B with the factorized A.
+	 * \param "_X" A vector or matrix holds the right-hand side B of the linear system.
+	 * \return The solution, which is stored in _X.
+	 */
 	template<typename _Rhs>
 	MATRICE_HOST_INL auto& backward(const _Rhs& _X) const {
 		return _Lapack_backward_impl<CHD>::eval(_Mycoef, _X);
 	}
 
+	/**
+	 * \brief Accessor for the multiplier or damping factor $\lambda$.
+	 */
+	MATRICE_HOST_INL decltype(auto) lambda() const noexcept {
+		return _Mylamb;
+	}
+	MATRICE_HOST_INL decltype(auto) lambda() noexcept {
+		return _Mylamb;
+	}
+
 private:
 	const _Mty& _Mycoef;
+	typename _Mty::value_type _Mylamb{ 0 };
 };
 
 struct _Linear {

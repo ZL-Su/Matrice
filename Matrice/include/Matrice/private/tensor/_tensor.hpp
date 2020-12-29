@@ -21,10 +21,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
 template<typename _Ty>
-struct index<_Ty, tag::_Tensor_tag> {
+struct Index<_Ty, tag::_Tensor_tag> {
 	static_assert(is_integral_v<_Ty>, "_Ty must be an integer type");
 
-	MATRICE_GLOBAL_INL index(_Ty d, _Ty h, _Ty w) noexcept {
+	MATRICE_GLOBAL_INL Index(_Ty d, _Ty h, _Ty w) noexcept {
 		data[0] = d, data[1] = h, data[2] = w;
 	}
 	MATRICE_GLOBAL_INL _Ty value() noexcept {

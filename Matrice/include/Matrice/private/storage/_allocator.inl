@@ -227,7 +227,7 @@ MATRICE_HOST_INL _Ty* aligned_malloc(size_t size) {
 		return (reinterpret_cast<_Ty*>(aligned_ptr));
 	}
 	catch (bad_alloc) {
-#ifdef MATRICE_DEBUG
+#if defined(MATRICE_DEBUG) && defined(_DEBUG)
 		exception::error("Bad memory allocation in Func: aligned_malloc<_Ty>(size_t) in File: _allocator.inl.\n");
 #else
 		throw("Bad memory allocation in Func: aligned_malloc<_Ty>(size_t) in File: _allocator.inl.\n");
