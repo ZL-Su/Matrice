@@ -379,7 +379,7 @@ public:
 		:Base_(exp.shape()) MATRICE_EVALEXP_TOTHIS
 
 	/**
-	 *\interfaces for opencv if it is enabled
+	 *\interfaces for opencv if it is enabled.
 	 */
 #ifdef MATRICE_USE_OPENCV
 	MATRICE_HOST_INL Base_(cv::Mat&& mat):Base_(mat.rows, mat.cols, mat.ptr<value_t>()){
@@ -395,7 +395,7 @@ public:
 #endif
 public:
 	/**
-	 *\create a matrix with dynamic (host or device) memory allocation
+	 *\create a matrix with dynamic (host or device) memory allocation.
 	 */
 	MATRICE_HOST_INL _Derived& create(diff_t _Rows, diff_t _Cols = (1)) {
 		if constexpr (_M <= 0 || _N <= 0) 
@@ -417,7 +417,7 @@ public:
 	};
 
 	/**
-	 *\returns pointer to y-th row
+	 *\returns pointer to y-th row.
 	 *\sa ptr()
 	 */
 	MATRICE_GLOBAL_FINL pointer operator[](index_t y) noexcept {
@@ -433,7 +433,7 @@ public:
 		return (m_data + y * m_cols); 
 	}
 	/**
-	 *\1D index random accessor to get i-th element reference
+	 *\1D index random accessor to get i-th element reference.
 	 */
 	MATRICE_GLOBAL_FINL reference operator()(index_t i) noexcept {
 #ifdef MATRICE_DEBUG
@@ -466,14 +466,20 @@ public:
 	}
 
 	/**
-	 *\brief returns pointer to the object memory
+	 * \brief returns pointer to the object memory.
 	 */
 	MATRICE_GLOBAL_FINL constexpr pointer data()noexcept { return (m_data); }
 	MATRICE_GLOBAL_FINL constexpr const pointer data()const noexcept { return (m_data); }
 
 	/**
-	 *\brief returns pointer to y-th row
-	 *\sa operator[]
+	 * \brief convert this object to a pointer where it is necessary.
+	 */
+	MATRICE_GLOBAL_FINL operator pointer()const noexcept { return data(); }
+	MATRICE_GLOBAL_FINL operator pointer()noexcept { return data(); }
+
+	/**
+	 * \brief returns pointer to y-th row.
+	 * \sa operator[]
 	 */
 	MATRICE_GLOBAL_FINL pointer ptr(int y = 0) {
 #ifdef MATRICE_DEBUG
@@ -489,7 +495,7 @@ public:
 	}
 
 	/**
-	 *\brief returns a reference to the derived object
+	 * \brief returns a reference to the derived object.
 	 */
 	MATRICE_GLOBAL_INL const _Derived& derived() const noexcept {
 		return *static_cast<_Derived*>(this);
@@ -499,20 +505,20 @@ public:
 	}
 
 	/**
-	 *\brief returns a const reference to the derived object
+	 * \brief returns a const reference to the derived object.
 	 */
 	MATRICE_GLOBAL_INL const _Derived& const_derived() const noexcept {
 		return *static_cast<const _Derived*>(this);
 	}
 
 	/**
-	 * \brief returns reference to the derived object
+	 * \brief returns reference to the derived object.
 	 */
 	MATRICE_GLOBAL_FINL _Derived& eval() noexcept {
 		return (this->derived());
 	}
 	/**
-	 * \brief returns const reference to the derived object
+	 * \brief returns const reference to the derived object.
 	 */
 	MATRICE_GLOBAL_FINL constexpr const _Derived& eval()const noexcept {
 		return (this->derived());
@@ -520,7 +526,7 @@ public:
 
 #pragma region <!-- iterators -->
 	/**
-	 *\brief returns STL-stype element-wise iterator
+	 * \brief returns STL-stype element-wise iterator.
 	 */
 	MATRICE_GLOBAL_FINL const_iterator begin()const noexcept {
 		return { m_data, size() };
@@ -535,8 +541,8 @@ public:
 		return (m_data + size()); 
 	}
 	/**
-	 *\brief column iterator for accessing elements in i-th column
-	 *\example:
+	 * \brief column iterator for accessing elements in i-th column.
+	 * \example:
 	 *		auto _A = Matrix_<float,3,3>::rand();
 	 *		auto _Fwd_col = _A.cbegin(1); //get 1-th column iterator
 	 *		for(auto& _It : _Fwd_col) _It = float(0); //set this column to zero
@@ -555,7 +561,7 @@ public:
 	}
 
 	/**
-	 *\brief row iterator for accessing elements in i-th row
+	 * \brief row iterator for accessing elements in i-th row.
 	 */
 	MATRICE_GLOBAL_FINL _Myt_fwd_iterator rbegin(size_t i) noexcept {
 		return _Myt_fwd_iterator(m_data + i * m_cols, m_cols);
@@ -571,7 +577,7 @@ public:
 	}
 
 	/**
-	 *\brief column-wise iterator to get all elements in i-th column
+	 * \brief column-wise iterator to get all elements in i-th column.
 	 */
 	MATRICE_GLOBAL_FINL _Myt_cwise_iterator cwbegin(size_t i = 0) noexcept {
 		return _Myt_cwise_iterator(m_data + i * m_rows, m_cols, m_rows);
@@ -587,7 +593,7 @@ public:
 	}
 
 	/**
-	 * \row-wise iterator to get all elements in i-th row
+	 * \row-wise iterator to get all elements in i-th row.
 	 */
 	MATRICE_GLOBAL_FINL _Myt_rwise_iterator rwbegin(size_t i = 0) noexcept {
 		return _Myt_rwise_iterator(m_data + i * m_cols, m_rows, m_cols);
@@ -604,14 +610,14 @@ public:
 #pragma endregion
 
 #pragma region <!-- views -->
-	// \View of i-th row 
+	// \View of i-th row.
 	MATRICE_GLOBAL_FINL _Myt_rview_type rview(size_t i) noexcept {
 		return _Myt_rview_type(m_data + m_cols * i, m_cols);
 	}
 	MATRICE_GLOBAL_FINL const _Myt_rview_type rview(size_t i) const noexcept {
 		return _Myt_rview_type(m_data + m_cols * i, m_cols);
 	}
-	// \View of i-th column
+	// \View of i-th column.
 	MATRICE_GLOBAL_FINL _Myt_cview_type cview(size_t i) noexcept {
 		return _Myt_cview_type(m_data + i, m_rows, m_cols, i);
 	}
@@ -632,14 +638,14 @@ public:
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(x1<=m_cols, "Input var. 'x1' must not be greater than m_cols.")
 		DGELOM_CHECK(y1<=m_rows, "Input var. 'y1' must not be greater than m_rows.")
-#endif // _DEBUG
+#endif
 		return _Myt_blockview_type(m_data, m_cols, {x0, y0, x1, y1});
 	}
 	MATRICE_GLOBAL_INL const auto block(index_t x0, index_t x1, index_t y0, index_t y1) const {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(x1<=m_cols, "Input var. x1 must not be greater than m_cols.")
 		DGELOM_CHECK(y1<=m_rows, "Input var. y1 must not be greater than m_rows.")
-#endif // _DEBUG
+#endif
 		return _Myt_blockview_type(m_data, m_cols, { x0, y0, x1, y1 });
 	}
 	template<typename... _Ity, MATRICE_ENABLE_IF(sizeof...(_Ity) == 4)>
@@ -647,26 +653,27 @@ public:
 		return this->block(get<0>(_R), get<1>(_R), get<2>(_R), get<3>(_R));
 	}
 
-	// \View of submatrix: x \in [x0, x1) and y \in [y0, y1)
+	// \View of submatrix: x \in [x0, x1) and y \in [y0, y1).
 	template<int _Extent>
 	MATRICE_GLOBAL_INL auto block(index_t start, size_t num) {
 		if constexpr (_Extent == ::extent_x) {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(start + num - 1 <= m_rows, "Over range in the row direction.");
-#endif // _DEBUG
+#endif
 		return this->block(0, m_cols, start, start + num);
 		}
 		if constexpr (_Extent == ::extent_y) {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(start + num - 1 <= m_cols, "Over range in the col direction.");
-#endif // _DEBUG
+#endif
 		return this->block(start, start + num, 0, m_rows);
 		}
 	}
 
 	/** 
 	 * \brief View of a square submatrix.
-	 * \param [_Cx, _Cy]: central pos, _Rs: radius size 
+	 * \param '_Cx, _Cy' central pos.
+	 * \param '_Rs' radius size. 
 	 */
 	template<typename _Ity, MATRICE_ENABLE_IF(is_integral_v<_Ity>)>
 	MATRICE_GLOBAL_INL auto block(_Ity _Cx, _Ity _Cy, size_t _Rs = 0) const {
@@ -674,7 +681,8 @@ public:
 	}
 	/**
 	 * \brief View of a square submatrix.
-	 * \param [_Ctr]: central pos, which type _Cty must has forward iterator begin(), _Rs: radius size
+	 * \param '_Ctr' central pos, which type _Cty must has forward iterator begin().
+	 * \param '_Rs' radius size.
 	 */
 	template<typename _Cty>
 	MATRICE_GLOBAL_INL auto block(const _Cty& _Ctr, int _Rs = 0)const {
