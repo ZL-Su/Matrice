@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -41,12 +41,11 @@ struct _Layer_tag {
  *\param <_Derived> derived layer type
  */
 template<typename _Derived, typename _Traits = _Layer_traits<_Derived>>
-class _Layer : public detail::_Model<typename _Traits::value_type, _Traits::depth, _Traits::extent, _Traits::has_bias> {
+class _Layer : public detail::_Model<typename _Traits::value_type, _Traits::depth, _Traits::has_bias> {
 	using _Myt = _Layer;
 	using _Mydt = _Derived;
 	using _Mytraits = _Traits;
-	using _Mybase = detail::_Model<typename _Traits::value_type, 
-		_Traits::depth, _Traits::extent, _Traits::has_bias>;
+	using _Mybase = detail::_Model<typename _Traits::value_type, _Traits::depth, _Traits::has_bias>;
 public:
 	using typename _Mybase::value_type;
 	using typename _Mybase::tensor_type;
