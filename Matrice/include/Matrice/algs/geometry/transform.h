@@ -1,6 +1,6 @@
 /***********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -137,11 +137,23 @@ template<typename> class _Geotf_isometry {};
 _DETAIL_END
 
 /**
- *\brief FUNCTION TEMPLATE, convert degree angle to radian.
+ * \brief FUNCTION TEMPLATE, convert degree angle to radian.
+ * \param 'deg' input value with degree unit.
+ * \return the angle value with the unit of radian.
  */
 template<typename _Ty>
 MATRICE_GLOBAL_FINL constexpr _Ty radian(_Ty deg) noexcept {
 	return pi<_Ty> * deg / _Ty(180._degs);
+}
+
+/**
+ * \brief FUNCTION TEMPLATE, convert degree angle to radian.
+ * \param 'degs' input 3-vector with degree unit.
+ * \return the angle vector with the unit of radian.
+ */
+template<typename _Ty>
+MATRICE_GLOBAL_FINL constexpr Vec3_<_Ty> radian(Vec3_<_Ty> degs) noexcept {
+	return { radian(degs[0]), radian(degs[1]), radian(degs[2]) };
 }
 
 /**
