@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,9 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #pragma once
-#include "../../core/matrix.h"
+#include <core/matrix.h>
 
-MATRICE_NAMESPACE_BEGIN_
+DGE_MATRICE_BEGIN
 namespace dnn { namespace kernel {
 // \alias template for dynamic vector type
 template<typename _Ty> using vector_type = Matrix<_Ty>;
@@ -32,4 +32,4 @@ MATRICE_HOST_FINL _Ty _Gaussian(const vector_type<_Ty>& x, const vector_type<_Ty
 
 
 } }
-_MATRICE_NAMESPACE_END
+DGE_MATRICE_END
