@@ -125,7 +125,7 @@ public:
 	) : _Myopt(_Opt),
 		_Myimref(new interp_type(_Ref)),
 		_Myimcur(new interp_type(_Cur)),
-		_Mysolver(_Myhess), _Mysize(_Opt._Radius*2+1),
+		_Mysolver(_Myhess), _Mysize(_Opt._Radius<<1|1),
 		_Myjaco(sq(_Mysize)), _Mydiff(sq(_Mysize)){
 	}
 
