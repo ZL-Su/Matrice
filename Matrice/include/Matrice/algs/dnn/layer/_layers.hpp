@@ -30,6 +30,13 @@ namespace dnn {
 		uint32_t value = 1;
 	};
 
+	/// <summary>
+	/// 2D convolutional layer
+	/// </summary>
+	/// <param name = "_D">: Depth of feature map </param>
+	/// <param name = "_FH, _FW">: Height and width of input feature map </param>
+	/// <param name = "_Sy, _Sx">: Convolution stride in y- and x-direction </param>
+	/// <param name = "_Py, _Px">: Padding size in y- and x-direction </param>
 	template<uint32_t _D,
 		uint32_t _FH, uint32_t _FW = _FH,
 		uint32_t _Sy = 1, uint32_t _Sx = _Sy,
@@ -70,6 +77,11 @@ namespace dnn {
 		static constexpr auto extent = 1;
 	};
 
+	/// <summary>
+	/// Relu layer
+	/// </summary>
+	/// <param name = "_D">: Depth of feature map </param>
+	/// <param name = "_E">: Extent of feature map, reserved </param>
 	template<uint32_t _D, uint32_t _E = 1>
 	class _Relu_layer : public _Layer<_Relu_layer<_D, _E>>
 	{

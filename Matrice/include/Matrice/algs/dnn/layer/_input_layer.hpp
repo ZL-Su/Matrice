@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ namespace dnn {
 
 	template<typename _Ity> class _Input_layer {
 		static_assert(sizeof(_Ity) != sizeof(_Ity),
-			"Unsupported type given to _Input_layer<>, which only supports dgelom::Matrix_, dgelom::tensor or array of dgelom::Matrix_.");
+			"Unsupported type given to _Input_layer<>, which only supports dgelom::Matrix_, dgelom::Tensor or array of dgelom::Matrix_.");
 	};
 
 	template<typename _Ty, int _M, int _N>
