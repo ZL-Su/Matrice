@@ -332,8 +332,12 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 
 		template<typename _Rhs>
 		MATRICE_HOST_INL auto mul_inplace(const _Rhs& _rhs) const {
+#if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
 			typename expression_traits<MatBinaryExp<Base_,_Rhs, Op::_Mat_mul<value_type>>>::auto_matrix_type _Ret(rows(), _rhs.cols());
 			return detail::_Blas_kernel_wrapper::gemm(derived(), _rhs, _Ret);
+#else
+			return mul(_rhs).eval();
+#endif
 		}
 
 		/**
