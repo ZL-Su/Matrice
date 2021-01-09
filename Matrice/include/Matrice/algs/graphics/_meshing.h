@@ -3,19 +3,20 @@
 *********************************************************************/
 #pragma once
 #include <memory>
-#include "../../core/matrix.h"
+#include "core/matrix.h"
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
 template<typename _Pty = Vec3_<float>>
-class _Meshgrid_impl 
-	: std::enable_shared_from_this<_Meshgrid_impl<_Pty>> {
+class _Meshgrid_based
+	: std::enable_shared_from_this<_Meshgrid_based<_Pty>> {
+	using _Myt = _Meshgrid_based<_Pty>;
 public:
 	using point_type = _Pty;
 	using value_type = typename point_type::value_t;
 	using ptlist_type = std::vector<point_type>;
 
-	_Meshgrid_impl(const ptlist_type& _Pts)
+	_Meshgrid_based(const ptlist_type& _Pts)
 		:_Mypts(std::make_shared(_Pts)) {}
 
 	const decltype(auto) mesh_size() const {
