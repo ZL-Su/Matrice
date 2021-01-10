@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "arch/ixpacket.h"
 #endif
 #include "../../similarity.h"
+#include "private/math/_linear_solver.hpp"
 
 MATRICE_ALG_BEGIN(corr)
 _DETAIL_BEGIN
@@ -202,6 +203,58 @@ auto _Corr_optim_base<_Derived>::_Solve(param_type& Par) {
 
 	// \report least square correlation coeff. and param. error.
 	return std::make_tuple(sq(_Mydiff).sum(), _Sdp.dot(_Sdp));
+}
+template<typename _Derived> MATRICE_HOST_INL 
+auto _Corr_optim_base<_Derived>::robust_sol(param_type& Par)
+{
+	// \warp current image patch.
+	_Mycur = static_cast<_Derived*>(this)->_Warp(Par);
+
+	// \error map
+	_Mydiff = _Mycur - _Myref;
+#ifdef MATRICE_DEBUG
+	matrix_type _Error_map(_Mycur.shape(), _Mydiff.data());
+#endif
+
+	// \compute robustness and weight Jacobian
+	for (auto i = 0; i < _Myweight.size(); ++i) {
+		const auto wi = _Myloss.phi(_Mydiff(i));
+		_Myweight(i) = wi;
+		for (auto j = 0; j < _Myjaco.cols(); ++j) {
+			_Myjaco_tw.cview(i)(j) = _Myjaco[i][j] * wi;
+		}
+	}
+
+	// \compute weighted Gauss-Newton Hessian matrix
+	const auto _Issd = one<value_type> / sqrt(sq(_Myref).sum());
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
+	_Myhess = _Myjaco_tw.mul_inplace(_Myjaco);
+#else
+	_Myhess = _Myjaco_tw.mul(_Myjaco);
+#endif
+	_Myhess = _Myhess * _Issd;
+
+	// \steepest descent parameter update
+#if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
+	param_type _Sdp = _Myjaco_tw.mul_inplace(_Mydiff);
+#else
+	param_type _Sdp = _Myjaco_tw.mul(_Mydiff);
+#endif
+
+	// \solve update to the warp parameter vector.
+	auto solver = make_linear_solver<spt>(_Myhess);
+	auto _Dp = solver.solve(_Sdp);
+
+	// \inverse composition to update param.
+	Par = update_strategy::eval(Par, _Dp);
+
+	auto _Loss = value_type(0);
+	for (auto i = 0; i < _Mydiff.size(); ++i) {
+		_Loss += _Myloss.rho(_Mydiff(i));
+	}
+
+	// \report least square correlation coeff., param. error, and loss.
+	return std::make_tuple(sq(_Mydiff).sum(), _Loss, _Dp.dot(_Dp));
 }
 #pragma endregion
 

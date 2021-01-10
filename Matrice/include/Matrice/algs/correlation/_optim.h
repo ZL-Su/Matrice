@@ -111,6 +111,16 @@ public:
 	using linear_solver = matrix_decomp<matrix_fixed, _TAG _Linear_spd_tag>;
 	using rect_type = rect<size_t>;
 
+	struct loss_fn {
+		value_type rho(value_type x) noexcept {
+			return sq(scale) / 2 * (1 - exp(-sq(x / scale)));
+		}
+		value_type phi(value_type x) noexcept {
+			return x * exp(-sq(x / scale));
+		}
+		value_type scale = one<value_type>;
+	};
+
 	/**
 	 *\brief This module is image-wise thread-safe.
 	         It allows us to eval. relative deformation of each point between current and reference state.
@@ -126,7 +136,9 @@ public:
 		_Myimref(new interp_type(_Ref)),
 		_Myimcur(new interp_type(_Cur)),
 		_Mysolver(_Myhess), _Mysize(_Opt._Radius<<1|1),
-		_Myjaco(sq(_Mysize)), _Mydiff(sq(_Mysize)){
+		_Myjaco(sq(_Mysize)), _Mydiff(sq(_Mysize)),
+		// for robust estimation, Dec/30/2020
+		_Myweight(sq(_Mysize)), _Myjaco_tw(sq(_Mysize)) {
 	}
 
 	/**
@@ -182,6 +194,14 @@ public:
 		return _Mypos; 
 	}
 
+	// \brief for robust estimation, Dec/30/2020
+	MATRICE_HOST_INL void set_loss_scale(value_type s) noexcept {
+		_Myloss.scale = s;
+	}
+	// \brief for robust estimation, Dec/30/2020
+	// \return [squared_loss, rho_loss, norm2_of_pars] = robust_sol(pars);
+	MATRICE_HOST_INL auto robust_sol(param_type& pars);
+
 protected:
 	///<methods>
 
@@ -215,6 +235,11 @@ protected:
 	matrix_fixed _Myhess;
 
 	linear_solver _Mysolver;
+
+	// for robust estimation, Dec/30/2020
+	vector_type  _Myweight;
+	loss_fn      _Myloss;
+	Matrix_<value_type, npar, ::dynamic> _Myjaco_tw;
 
 	// reconstructed reference image with a specified interpolator
 	shared_ptr<smooth_image_t> _Myimref;
