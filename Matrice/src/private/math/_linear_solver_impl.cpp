@@ -21,7 +21,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #else
 #include "math/_linear_kernel.hpp"
 #endif
-#include "math/_linear_kernel.hpp"
+#include "math/_linear_kernel.hpp" // for debug
 
 #include "core/matrix.h"
 
