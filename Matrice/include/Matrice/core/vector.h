@@ -41,9 +41,9 @@ public:
 	using const_reference = const reference;
 
 	MATRICE_GLOBAL_FINL Vec_() noexcept
-		: _Mybase({ 0 }) {}
+		: _Mybase(0) {}
 	MATRICE_GLOBAL_FINL Vec_(value_t _v) noexcept
-		: _Mybase({ _v }) {}
+		: _Mybase(_v) {}
 	MATRICE_GLOBAL_FINL Vec_(value_t _x, value_t _y) noexcept
 		: _Mybase({ _x, _y }) {}
 	MATRICE_GLOBAL_FINL Vec_(const _Myt& _other) noexcept
@@ -52,8 +52,7 @@ public:
 		: _Mybase(_list) {}
 	MATRICE_GLOBAL_FINL Vec_(const _Mybase& _mtx) noexcept
 		: _Mybase(_mtx) {}
-	template<typename _Exp, 
-		MATRICE_ENABLE_IF(is_expression_v<_Exp>)>
+	template<typename _Exp, MATRICE_ENABLE_IF(is_expression_v<_Exp>)>
 	MATRICE_GLOBAL_FINL Vec_(const _Exp& _exp) noexcept {
 		_exp.assign(*this); 
 	}
@@ -90,9 +89,32 @@ public:
 		return static_cast<_Myt&>(
 			_Mybase::operator = (_Mybase::normalize(_val))); 
 	}
-	MATRICE_GLOBAL_FINL 
-		value_t dot(const _Myt& _other) const noexcept {
+
+	MATRICE_GLOBAL_FINL
+	/// <summary>
+	/// \brief Compute dot-product with other vector. 
+	/// </summary>
+	/// <param name="'_other'">Other vector with the same type.</param>
+	/// <returns></returns>
+	value_t dot(const _Myt& _other) const noexcept {
 		return _Mybase::dot(_other); 
+	}
+
+	MATRICE_GLOBAL_INL
+	/// <summary>
+	/// \brief Return evenly spaced values within a given interval. 
+	/// The step is automatically according to the interval span and the vector dim.
+	/// </summary>
+	/// <param name= "'start'">Start of interval. The interval includes this value.</param>
+	/// <param name= "'stop'">End of interval. The interval does not include this value.</param>
+	/// <returns>Values are generated within the half-open interval [start, stop).</returns>
+	static _Myt arange(value_t start, value_t end) noexcept {
+		_Myt ret;
+		const auto step = (end - start) / rows_at_compiletime;
+		for (auto idx = 0; idx < rows_at_compiletime; ++idx) {
+			ret[idx] = start + idx * step;
+		}
+		return ret;
 	}
 	
 #ifdef _MSVC_LANG
@@ -155,7 +177,7 @@ public:
 
 	MATRICE_GLOBAL_FINL 
 		Vec3_()noexcept {}
-	MATRICE_GLOBAL_FINL 
+	MATRICE_GLOBAL_FINL
 		Vec3_(value_t _x, value_t _y, value_t _z)noexcept
 		: _Mybase({_x, _y, _z}) {}
 	template<typename _Uy>
