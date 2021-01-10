@@ -1,6 +1,6 @@
 /**********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -68,9 +68,11 @@ public:
 	}
 
 	/**
-	 *\brief Solve linear system $\mathbf{AX} = \mathbf{B}$. The solver kernel is dispatched according to the solver operator specified to _Op.
-	   The right-hand term $\mathbf{B}$ is allowed to hold more than one column when the linear kernel _Op is dgelom::spt.
-	 *\param [args...] variadic arguments that may empty or more than one inputs. If args... is empty, the method solves a homogeneous linear system with form of $\mathbf{Ax} = \mathbf{0}$.
+	 *\brief Solve linear system 'AX = B'. 
+	   The solver kernel is dispatched according to the solver operator specified to '_Op'.
+	   The right-hand term 'B' is allowed for holding more than one columns when the linear kernel '_Op' is dgelom::spt.
+	 *\param 'args...' Variadic arguments that may empty or more than one inputs. 
+	   If 'args...' is empty, the method solves a homogeneous linear system with form of 'Ax = 0'.
 	 */
 	template<class... _Args>
 	MATRICE_GLOBAL_INL auto solve(_Args&&... args)const noexcept {
@@ -78,8 +80,11 @@ public:
 	}
 
 	/**
-	 *\brief Improve the solution of $\mathbf{Ax} = \mathbf{b}$ with an iterative error reduction. The method is recommended calling several times to refine the solution.
-	 *\param [args] := $[\mathbf{A, b, x}]$ where $\mathbf{A}$ must be the original coeff matrix, $\mathbf{b}$ the original RHS vector and $\mathbf{x}$ the solved solution to be refined in the method.
+	 *\brief Improve the solution of 'Ax = b' with an iterative error reduction. 
+	   The method is recommended calling several times to refine the solution.
+	 *\param 'args...' := 'A, b, x',
+	   where 'A' must be the original coeff matrix, 'b' the original RHS vector,
+	   and 'x' the solved solution to be refined in the method.
 	 */
 	template<class... _Args>
 	MATRICE_GLOBAL_INL decltype(auto)refine(_Args&... args) {
@@ -255,7 +260,8 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(spt)
 	}
 
 	/**
-	 * \brief Perform back substitution to solve $\mathbf{AX} = \mathbf{B}$, where $\mathbf{B}$ allowed to have multi-cols and will be overwritten by $\mathbf{X}$.
+	 * \brief Perform back substitution to solve 'AX = B',
+	    where 'B' is allowed for having multi-cols and will be overwritten by 'X'.
 	 * \note The method is for parsing by the base class of the linear solver rather than for external calling.
 	 */
 	template<class _Rty> [[non_external_callable]]
@@ -309,7 +315,8 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(lud)
 		return (b);
 	}
 private:
-	array_n<int, conditional_size_v<(_Mty::rows_at_compiletime > 0), _Mty::rows_at_compiletime+1, _Mty::rows_at_compiletime>> _Myidx;
+	array_n<int, conditional_size_v<(_Mty::rows_at_compiletime > 0), 
+		_Mty::rows_at_compiletime+1, _Mty::rows_at_compiletime>> _Myidx;
 MATRICE_MAKE_LINEAR_SOLVER_SPEC_END(lud)
 
 // \brief CLASS TEMPLATE for SVD based linear solver
@@ -368,7 +375,8 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(svd)
 	}
 
 	/**
-     * \brief Solve the system $\mathbf{A}\mathbf{x} = \mathbf{b}$ with the pre-computed coeff. matrix, and $\mathbf{b}$ is overwritten by the solution $\mathbf{x}$.
+     * \brief Solve the system 'Ax = b' with the pre-computed coeff. matrix 'A', 
+	    and 'b' is overwritten by the solution 'x'.
 	 * \note The method is for parsing by the base class of the linear solver rather than for external calling.
      */
 	template<typename _Bty> [[non_external_callable]]
