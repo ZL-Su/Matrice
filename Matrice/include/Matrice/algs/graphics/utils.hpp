@@ -128,7 +128,7 @@ public:
 	MATRICE_GLOBAL_INL row_vector_type operator()(bool endpoint = true) const {
 		row_vector_type _Ret(endpoint ? m_num : m_num - 1);
 		for (auto i = 0; i < _Ret.size(); ++i)
-			_Ret(i) = i * m_step;
+			_Ret(i) = i * m_step + m_begin;
 		return _Ret;
 	}
 
