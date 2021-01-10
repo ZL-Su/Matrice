@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -17,8 +17,13 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 
+#include "util/_exception.h"
 #include "../_storage.hpp"
 #include "../_memory.h"
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#endif
 
 #define MATRICE_ALLOCTOR_SIG(M, N, OPT) \
 _Allocator<_Ty, M, N, allocator_traits_v<OPT>, _Layout>
@@ -373,3 +378,7 @@ DGE_MATRICE_END
 #undef MATRICE_ALLOCTOR_SIG
 #undef MATRICE_MEMCPY_ADAPTER_1
 #undef MATRICE_MEMCPY_ADAPTER_2
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
