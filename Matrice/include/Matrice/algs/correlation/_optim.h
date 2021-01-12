@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -17,8 +17,6 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #pragma once
 #include <variant>
-#include "core/solver.h"
-#include "private/math/_linear.h"
 #include "_correlation_traits.h"
 #include "../interpolation.h"
 
@@ -30,7 +28,7 @@ struct _Correlation_options {
 	size_t _Maxits = 50;  //maximum iterations
 	size_t _Stride =  7;  //node spacing
 	float_t _Znssd = 0.6; //correlation threshold
-	float_t _Coeff = 0.7; //damping coefficient
+	float_t _Coeff = 0.0; //damping coefficient
 
 	template<typename _Ty = default_type, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
 	static constexpr _Ty _Mytol = _Ty(1.0E-6); //iteration tolerance
@@ -108,7 +106,6 @@ public:
 	using interp_type = typename _Mytraits::interpolator;
 	using smooth_image_t = interp_type;
 	using update_strategy = typename _Mytraits::update_strategy;
-	using linear_solver = matrix_decomp<matrix_fixed, _TAG _Linear_spd_tag>;
 	using rect_type = rect<size_t>;
 
 	struct loss_fn {
@@ -135,7 +132,7 @@ public:
 	) : _Myopt(_Opt),
 		_Myimref(new interp_type(_Ref)),
 		_Myimcur(new interp_type(_Cur)),
-		_Mysolver(_Myhess), _Mysize(_Opt._Radius<<1|1),
+		_Mysize(_Opt._Radius<<1|1),
 		_Myjaco(sq(_Mysize)), _Mydiff(sq(_Mysize)),
 		// for robust estimation, Dec/30/2020
 		_Myweight(sq(_Mysize)), _Myjaco_tw(sq(_Mysize)) {
@@ -234,8 +231,6 @@ protected:
 	jacob_type   _Myjaco;
 	matrix_fixed _Myhess;
 
-	linear_solver _Mysolver;
-
 	// for robust estimation, Dec/30/2020
 	vector_type  _Myweight;
 	loss_fn      _Myloss;
@@ -263,7 +258,6 @@ public:
 	using typename _Mybase::point_type;
 	using typename _Mybase::value_type;
 	using typename _Mybase::jacob_type;
-	using typename _Mybase::linear_solver;
 
 	_Corr_solver_impl(const _Myt& _Other) = delete;
 	_Corr_solver_impl(_Myt&& _Other) = delete;
@@ -308,7 +302,6 @@ public:
 	using typename _Mybase::value_type;
 	using typename _Mybase::jacob_type;
 	using typename _Mybase::matrix_fixed;
-	using typename _Mybase::linear_solver;
 
 	_Corr_solver_impl(const _Myt& _Other) = delete;
 	_Corr_solver_impl(_Myt&& _Other) = delete;
