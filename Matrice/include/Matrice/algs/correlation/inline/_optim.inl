@@ -76,16 +76,6 @@ template<> struct _Param_update_strategy<_Alg_icgn<1>> {
 #pragma region <-- base class implementation -->
 template<typename _Derived> MATRICE_HOST_INL 
 auto _Corr_optim_base<_Derived>::_Cond()->matrix_type& {
-	// \sent eval. of Jacobian and Hessian to background.
-	auto _Eval_struct_mats = std::async(std::launch::async, [&] {
-		/*_Myjaco = */static_cast<_Derived*>(this)->_Diff();
-#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
-		_Myhess = _Myjaco.t().mul_inplace(_Myjaco);
-#else
-		_Myhess = _Myjaco.t().mul(_Myjaco);
-#endif
-	});
-
 	// \create buf.s to hold reference and current patchs
 	_Myref.create(_Mysize, _Mysize);
 	_Mycur.create(_Mysize, _Mysize);
@@ -118,20 +108,24 @@ auto _Corr_optim_base<_Derived>::_Cond()->matrix_type& {
 		}
 	}
 
+	// \comp. Jacobian and Hessian
+	static_cast<_Derived*>(this)->_Diff();
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
+	_Myhess = _Myjaco.t().mul_inplace(_Myjaco);
+#else
+	_Myhess = _Myjaco.t().mul(_Myjaco);
+#endif
+
 	// \zero mean normalization.
 	_Myref = _Myref - (_Mean /= _Mysize*_Mysize);
 	const auto _Issd = one<value_type> / sqrt(sq(_Myref).sum());
 	_Myref = _Myref * _Issd;
-
-	// \Hessian matrix computation.
-	if (_Eval_struct_mats.valid()) _Eval_struct_mats.get();
-
-	//const auto _Ev = lapack_kernel_t::syev(_Myhess);
 	
 	_Myhess = _Myhess * _Issd;
-
-	_Mysolver.forward();
 	_Myhess = _Myhess + matrix_fixed::diag(_Myopt._Coeff);
+	internal::_Lak_adapter<spt>(_Myhess.view());
+	//const auto solver = make_linear_solver<spt>(_Myhess);
+	//_Myhess = solver.inv();
 
 	return (_Myref);
 }
@@ -196,7 +190,9 @@ auto _Corr_optim_base<_Derived>::_Solve(param_type& Par) {
 #endif
 
 	// \solve update to the warp parameter vector.
-	_Sdp = _Mysolver.backward(_Sdp);
+	//param_type _Dp = _Myhess.mul(_Sdp);
+	//_Sdp = _Dp;
+	internal::_Bwd_adapter<spt>(_Myhess.view(), _Sdp.view());
 
 	// \inverse composition to update param.
 	Par = update_strategy::eval(Par, _Sdp);
@@ -213,7 +209,7 @@ auto _Corr_optim_base<_Derived>::robust_sol(param_type& Par)
 	// \error map
 	_Mydiff = _Mycur - _Myref;
 #ifdef MATRICE_DEBUG
-	matrix_type _Error_map(_Mycur.shape(), _Mydiff.data());
+	const matrix_type _Error_map(_Mycur.shape(), _Mydiff.data());
 #endif
 
 	// \compute robustness and weight Jacobian
@@ -227,23 +223,15 @@ auto _Corr_optim_base<_Derived>::robust_sol(param_type& Par)
 
 	// \compute weighted Gauss-Newton Hessian matrix
 	const auto _Issd = one<value_type> / sqrt(sq(_Myref).sum());
-#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
-	_Myhess = _Myjaco_tw.mul_inplace(_Myjaco);
-#else
 	_Myhess = _Myjaco_tw.mul(_Myjaco);
-#endif
 	_Myhess = _Myhess * _Issd;
 
 	// \steepest descent parameter update
-#if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
-	param_type _Sdp = _Myjaco_tw.mul_inplace(_Mydiff);
-#else
 	param_type _Sdp = _Myjaco_tw.mul(_Mydiff);
-#endif
 
 	// \solve update to the warp parameter vector.
-	auto solver = make_linear_solver<spt>(_Myhess);
-	auto _Dp = solver.solve(_Sdp);
+	const auto solver = make_linear_solver<lud>(_Myhess);
+	const auto _Dp = solver.solve(_Sdp);
 
 	// \inverse composition to update param.
 	Par = update_strategy::eval(Par, _Dp);
