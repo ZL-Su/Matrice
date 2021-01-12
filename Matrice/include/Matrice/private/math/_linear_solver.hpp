@@ -94,7 +94,7 @@ public:
 	/**
 	 *\brief Compute inverse of the coeff. matrix.
 	 */
-	MATRICE_GLOBAL_INL auto inv() {
+	MATRICE_GLOBAL_INL auto inv() const {
 		return (this->_Inverse());
 	}
 
@@ -128,7 +128,7 @@ protected:
 		}
 	}
 
-	MATRICE_GLOBAL_INL auto _Inverse() {
+	MATRICE_GLOBAL_INL auto _Inverse() const {
 		using kernel_t = typename _Mytraits::op_type;
 
 		auto _Mdp = _Derived();
@@ -147,7 +147,7 @@ protected:
 		}
 		if constexpr (is_same_v<kernel_t, spt>) {
 			matrix_type _Ret(_Mycoeff.rows(), _Mycoeff.cols());
-			internal::_Inv_adapter<kernel_t>(view(_Mycoeff), view(_Ret));
+			internal::_Inv_adapter<kernel_t>(view(_Mycoeff), _Ret.view());
 			return move(_Ret);
 		}
 	}
@@ -261,8 +261,8 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(spt)
 
 	/**
 	 * \brief Perform back substitution to solve 'AX = B',
-	    where 'B' is allowed for having multi-cols and will be overwritten by 'X'.
-	 * \note The method is for parsing by the base class of the linear solver rather than for external calling.
+	    where 'B' is allowed for having multi-cols and will be overwritten with the solution 'X'.
+	 * (Note: the method is for parsing by the solver engine rather than for external calling.)
 	 */
 	template<class _Rty> [[non_external_callable]]
 	MATRICE_GLOBAL_INL _Rty& _Xbackward(_Rty& B)const noexcept {
@@ -303,16 +303,43 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(lud)
 	MATRICE_GLOBAL_INL decltype(auto) parity() const noexcept {
 		return (_Myidx(_Myidx.rows()-1));
 	}
+
+	/**
+	 *\brief Unpack L and U matrices from the compact LU coeff. matrix.
+	 * The diagonal entries of U matrix are 1.
+	 */
+	MATRICE_GLOBAL_INL auto unpack() const noexcept {
+		const auto& LU = _Mybase::_Mycoeff;
+		matrix_type L(LU.shape());
+		auto U = matrix_type::diag(L.rows());
+		for (auto r = 0; r < LU.rows(); ++r) {
+			const auto pLU = LU[r];
+			auto pL = L[r], pU = U[r];
+			for (auto c = 0; c <= r; ++c) {
+				pL[c] = pLU[c];
+			}
+			for (auto c = r + 1; c < LU.cols(); ++c) {
+				pU[c] = pLU[c];
+			}
+		}
+		return std::make_tuple(L, U);
+	}
 	
 	/**
-	 *\brief Perform back substitution to solve
-	 //tex:$\mathbf{Ax} = \mathbf{b}, \mathbf{b} \leftarrow \mathbf{x}$
-	 *\note The method is auto-parsed by the solver engine.
+	 * \brief Perform back substitution to solve 'AX=B', 
+	   'B' will be overwritten with the solution 'X'.
+	 * (Note: the method is for parsing by the solver engine rather than for external calling.)
+	 * \param 'B' the right-hand side vector, multi-column is allowed.
 	 */
     template<typename _Bty> [[non_external_callable]]
-	MATRICE_GLOBAL_INL decltype(auto)_Xbackward(_Bty& b)const noexcept {
-
-		return (b);
+	MATRICE_GLOBAL_INL decltype(auto)_Xbackward(_Bty& B)const noexcept {
+		const auto& LU = _Mybase::_Mycoeff;
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(LU.rows() == B.rows(),
+			"The number of rows of the right-hand vector is not identical to that of the coeff. matrix.");
+#endif
+		internal::_Bwd_adapter<_Myop>(LU.view(), B.view());
+		return (B);
 	}
 private:
 	array_n<int, conditional_size_v<(_Mty::rows_at_compiletime > 0), 
