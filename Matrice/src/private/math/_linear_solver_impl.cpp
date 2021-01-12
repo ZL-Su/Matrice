@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -33,34 +33,67 @@ using View_f32 = detail::_Matrix_block<float>;
 using View_f64 = detail::_Matrix_block<double>;
 
 // specialization for svd_op
+
+/// <summary>
+/// Perform Singular Value Decomposition (SVD).
+/// </summary>
+/// <param name="'U'">Source data matrix, overwritten with the U-matrix.</param>
+/// <param name="'S'">Vector holds the singular values in descending order.</param>
+/// <param name="'Vt'">Transpose of the V-matrix.</param>
+/// <returns> '0' for success </returns>
 template<> MATRICE_GLOBAL 
 solver_status _Lak_adapter<svd>(Matf_ref U, Matf_ref S, Matf_ref Vt) {
 	const auto lyt = U.allocator().fmt();
 	const auto ldu = min(U.rows(), U.cols());
 	remove_all_t<Matf_ref> supb(ldu);
-	int ret = internal::_lapack_gesvd(lyt, 'S', 'S', U.rows(), U.cols(), U.data(), U.cols(), S.data(), U.data(), ldu, Vt.data(), Vt.cols(), supb.data());
+	int ret = internal::_lapack_gesvd(lyt, 'S', 'S', U.rows(), U.cols(), U.data(), U.cols(), 
+		S.data(), U.data(), ldu, Vt.data(), Vt.cols(), supb.data());
 	return solver_status{ ret };
 }
+/// <summary>
+/// Perform Singular Value Decomposition (SVD).
+/// </summary>
+/// <param name="'U'">Source data matrix, overwritten with the U-matrix.</param>
+/// <param name="'S'">Vector holds the singular values in descending order.</param>
+/// <param name="'Vt'">Transpose of the V-matrix.</param>
+/// <returns> '0' for success </returns>
 template<> MATRICE_GLOBAL
 solver_status _Lak_adapter<svd>(Matd_ref U, Matd_ref S, Matd_ref Vt) {
 	const auto lyt = U.allocator().fmt();
 	const auto ldu = min(U.rows(), U.cols());
 	remove_all_t<Matd_ref> supb(ldu);
-	int ret = internal::_lapack_gesvd(lyt, 'S', 'S', U.rows(), U.cols(), U.data(), U.cols(), S.data(), U.data(), ldu, Vt.data(), Vt.cols(), supb.data());
+	int ret = internal::_lapack_gesvd(lyt, 'S', 'S', U.rows(), U.cols(), U.data(), U.cols(), 
+		S.data(), U.data(), ldu, Vt.data(), Vt.cols(), supb.data());
 	return solver_status{ ret };
 }
+/// <summary>
+/// Perform Singular Value Decomposition (SVD).
+/// </summary>
+/// <param name="'U'">Source data matrix, overwritten with the U-matrix.</param>
+/// <param name="'S'">Vector holds the singular values in descending order.</param>
+/// <param name="'Vt'">Transpose of the V-matrix.</param>
+/// <returns> '0' for success </returns>
 template<> MATRICE_GLOBAL
 solver_status _Lak_adapter<svd>(View_f32 U, View_f32 S, View_f32 Vt) {
 	const auto ldu = min(U.rows(), U.cols());
 	matrix_f32 supb(ldu);
-	int ret = internal::_lapack_gesvd(101, 'S', 'S', U.rows(), U.cols(), U[0], U.cols(), S[0], U[0], ldu, Vt[0], Vt.cols(), supb.data());
+	int ret = internal::_lapack_gesvd(101, 'S', 'S', U.rows(), U.cols(), U[0], U.cols(), 
+		S[0], U[0], ldu, Vt[0], Vt.cols(), supb.data());
 	return solver_status{ ret };
 }
+/// <summary>
+/// Perform Singular Value Decomposition (SVD).
+/// </summary>
+/// <param name="'U'">Source data matrix, overwritten with the U-matrix.</param>
+/// <param name="'S'">Vector holds the singular values in descending order.</param>
+/// <param name="'Vt'">Transpose of the V-matrix.</param>
+/// <returns> '0' for success </returns>
 template<> MATRICE_GLOBAL
 solver_status _Lak_adapter<svd>(View_f64 U, View_f64 S, View_f64 Vt) {
 	const auto ldu = min(U.rows(), U.cols());
 	matrix_f64 supb(ldu);
-	int ret = internal::_lapack_gesvd(101, 'S', 'S', U.rows(), U.cols(), U[0], U.cols(), S[0], U[0], ldu, Vt[0], Vt.cols(), supb.data());
+	int ret = internal::_lapack_gesvd(101, 'S', 'S', U.rows(), U.cols(), U[0], U.cols(), 
+		S[0], U[0], ldu, Vt[0], Vt.cols(), supb.data());
 	return solver_status{ ret };
 }
 template<> MATRICE_GLOBAL
@@ -85,7 +118,7 @@ solver_status _Bwd_adapter<svd>(View_f64 U, View_f64 S, View_f64 Vt, View_f64 b,
 }
 template<> MATRICE_GLOBAL
 solver_status _Inv_adapter<svd>(View_f32 U, View_f32 S, View_f32 Vt, View_f32 Inv) {
-	const auto _Thresh = std::numeric_limits<float>::epsilon() * sqrt<float>(U.size()) * S(0) / 2;
+	const auto _Thresh = std::numeric_limits<float>::epsilon()*sqrt<float>(U.size())*S(0) / 2;
 	for (auto r = 0; r < U.rows(); ++r) {
 		const auto pU = U[r];
 		for (auto c = 0; c < U.cols(); ++c) {
@@ -100,7 +133,7 @@ solver_status _Inv_adapter<svd>(View_f32 U, View_f32 S, View_f32 Vt, View_f32 In
 }
 template<> MATRICE_GLOBAL
 solver_status _Inv_adapter<svd>(View_f64 U, View_f64 S, View_f64 Vt, View_f64 Inv) {
-	const auto _Thresh = std::numeric_limits<double>::epsilon() * sqrt<double>(U.size()) * S(0) / 2;
+	const auto _Thresh = std::numeric_limits<double>::epsilon()*sqrt<double>(U.size())*S(0) / 2;
 	for (auto r = 0; r < U.rows(); ++r) {
 		const auto pU = U[r];
 		for (auto c = 0; c < U.cols(); ++c) {
@@ -190,6 +223,36 @@ solver_status _Lak_adapter<lud>(View_f64 A, int* Idx) {
 	solver_status status;
 	status.value = detail::_Linear_lud_kernel(A.rows(), A.data(), Idx);
 	return status;
+}
+/// <summary>
+/// Solve LU factorized linear system 'LU*X=B' with data type "float".
+/// </summary>
+/// <param name="LU">Compact LU matrix after factorization.</param>
+/// <param name="B">Right-hand side vector, with multi-columns optionally.</param>
+/// <returns>'solver_status.value = 0'</returns>
+template<> MATRICE_GLOBAL
+solver_status _Bwd_adapter<lud>(View_f32 LU, View_f32 B) {
+	const auto _Stride = B.cols();
+	for (auto _Off = 0; _Off < _Stride; ++_Off) {
+		auto b = B[0] + _Off;
+		detail::_Linear_lud_sv(LU.rows(), LU[0], b, _Stride);
+	}
+	return solver_status{ 0 };
+}
+/// <summary>
+/// Solve LU factorized linear system 'LU*X=B' with data type "double".
+/// </summary>
+/// <param name="LU">Compact LU matrix after factorization.</param>
+/// <param name="B">Right-hand side vector, with multi-columns optionally.</param>
+/// <returns>'solver_status.value = 0'</returns>
+template<> MATRICE_GLOBAL
+solver_status _Bwd_adapter<lud>(View_f64 LU, View_f64 B) {
+	const auto _Stride = B.cols();
+	for (auto _Off = 0; _Off < _Stride; ++_Off) {
+		auto b = B[0] + _Off;
+		detail::_Linear_lud_sv(LU.rows(), LU[0], b, _Stride);
+	}
+	return solver_status{ 0 };
 }
 _INTERNAL_END
 DGE_MATRICE_END
