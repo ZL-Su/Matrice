@@ -1144,7 +1144,9 @@ public:
 	/**
 	 *\brief Perfom Cholesky decomposition:
 	  //tex:$A = {L}{L^T}$.
-	 *\return A proxy to spd instance which holds the "L" part of this matrix, so that the L part can be retrieved with "decltype (A) = A.spd()" and the inverse matrix is obtained with "auto Inv = A.spd().inv()". 
+	 *\return A proxy to spd instance which holds the "L" part of this matrix, 
+	  so that the L part can be retrieved with "decltype (A) = A.spd()" and 
+	  the inverse matrix is obtained with "auto Inv = A.spd().inv()". 
 	 */
 	MATRICE_GLOBAL_INL auto spd() noexcept {
 		return detail::_Matrix_fact<_Derived, tag::_Linear_spd_tag>(this->derived());
