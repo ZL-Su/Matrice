@@ -44,6 +44,21 @@ MATRICE_GLOBAL_INL void __tri_fwdsv_impl(_Size_t n, const _Ptr l, _Ptr y, _Size_
 	}
 }
 
+template<typename _Ptr>
+MATRICE_GLOBAL_INL void __tri_fwdsv_impl(_Size_t n, const _Ptr l, _Ptr y, int* p, _Size_t stride) noexcept {
+	using value_type = primitive_type_t<_Ptr>;
+	auto x = new value_type[n];
+	for (auto i = 0; i < n; ++i) {
+		x[i] = y[p[i] * stride];
+	}
+	for (auto i = 0; i < n; ++i) {
+		y[i * stride] = x[i];
+	}
+	delete[] x;
+
+	__tri_fwdsv_impl(n, l, y, stride);
+}
+
 /// <summary>
 /// Solve linear system 'U*x=b', where 'U' an upper triangular matrix with unit diagonals.
 /// </summary>
@@ -138,15 +153,6 @@ MATRICE_GLOBAL_INL void __ispd_kernel_impl(const _Ptr data, _Ptr inv, _Size_t n)
 template<typename _Ptr>
 MATRICE_GLOBAL_INL void __spd_bwdsv_impl(_Size_t n, const _Ptr lptr, _Ptr x, _Size_t stride) noexcept {
 	// \solve: $L \cdot y = b$
-	/*for (auto r = 0; r < n; ++r) {
-		const auto a_row = lptr + r * n;
-		const auto x_idx = r * stride;
-		auto t_sum = x[x_idx];
-		for (auto c = 0; c < r; ++c) {
-			t_sum -= a_row[c] * x[c * stride];
-		}
-		x[x_idx] = safe_div(t_sum, a_row[r]);
-	}*/
 	__tri_fwdsv_impl(n, lptr, x, stride);
 	// \solve: $L^T \cdot x = y$
 	for (auto r = n - 1; r >= 0; --r) {
@@ -161,45 +167,50 @@ MATRICE_GLOBAL_INL void __spd_bwdsv_impl(_Size_t n, const _Ptr lptr, _Ptr x, _Si
 
 // \Perform LU decomposition with pivoting
 template<typename _Ptr>
-MATRICE_GLOBAL int __lud_kernel_impl(_Size_t n, _Ptr data, int* indx)noexcept {
+MATRICE_GLOBAL int __lud_kernel_impl(_Size_t n, _Ptr data, int* piv) noexcept
+{
 	using value_type = primitive_type_t<_Ptr>;
-	constexpr auto _Epsi = std::numeric_limits<value_type>::epsilon();
+	constexpr auto _Epsi{ std::numeric_limits<value_type>::epsilon() };
 	matrix_index_adapter idx{ n };
 
-	for (auto row = 0; row < n; ++row) indx[row] = row;
-	indx[n] = 1;
+	for (auto i = 0; i < n; ++i) {
+		piv[i] = i;
+	}
+	auto& pivsign = piv[n] = { 1 };
 
-	int status = 0;
-	for (auto k = 0; k < n; ++k) {
-		auto piv = zero<value_type>;
-		decltype(n) major_row = k;
-		for (auto row = k; row < n; ++row) {
-			auto tmp = abs(data[idx(row,k)]);
-			if (tmp > piv) {
-				piv = tmp; 
-				major_row = row;
+	auto status{ 0 };
+	auto pivot{ zero<value_type> };
+	//loop over rows and columns...
+	for (auto j = 0; j < n; j++) {
+		auto p = j;
+		pivot = data[idx(p, p)];
+		for (auto i = j+1; i < n; i++) {
+			if (auto tmp = abs(data[idx(i, j)]); tmp > pivot) {
+				pivot = tmp; 
+				p = i;
 			}
-			if (abs(piv) < sq(_Epsi)) status = -row;
 		}
-		if (k != major_row) {
-			// interchange the major row and the k-th row
+		if (abs(pivot) < sq(_Epsi)) {
+			return status = -1;
+		}
+		if (j != p) {
+			// interchange the pivot row and the current row
 			for (auto col = 0; col < n; ++col) {
-				auto tmp = data[major_row*n + col];
-				data[major_row * n + col] = data[idx(k, col)];
-				data[idx(k, col)] = tmp;
+				swap(data[idx(j, col)], data[idx(p,col)]);
 			}
-			std::swap(indx[major_row], indx[k]);
-			indx[n] = -indx[n];
+			pivsign = -pivsign;
+			swap(piv[j], piv[p]);
 		}
 
-		if (abs(data[idx(k, k)]) < _Epsi) data[idx(k, k)] = _Epsi;
+		if (abs(data[idx(j, j)]) < _Epsi) data[idx(j, j)] = _Epsi;
 
-		for (auto row = k + 1; row < n; ++row) {
-			auto tmp = data[idx(row,k)] /= data[idx(k,k)];
-			for (auto col = k + 1; col < n; ++col)
-				data[idx(row, col)] -= tmp * data[idx(k,col)];
+		for (auto row = j + 1; row < n; ++row) {
+			const auto tmp = data[idx(row,j)] /= data[idx(j,j)];
+			for (auto col = j + 1; col < n; ++col)
+				data[idx(row, col)] -= tmp * data[idx(j,col)];
 		}
 	}
+	
 	return status;
 }
 
@@ -249,13 +260,13 @@ MATRICE_GLOBAL int _Linear_lud_kernel(size_t n, double* data, int* indx) noexcep
 }
 
 template<> MATRICE_GLOBAL
-void _Linear_lud_sv(size_t n, float* lu, float* x, int stride) noexcept {
-	internal::__tri_fwdsv_impl(n, lu, x, stride);
+void _Linear_lud_sv(size_t n, float* lu, float* x, int* p, int stride) noexcept {
+	internal::__tri_fwdsv_impl(n, lu, x, p, stride);
 	internal::__tri_bwdsv_impl(n, lu, x, stride);
 }
 template<> MATRICE_GLOBAL
-void _Linear_lud_sv(size_t n, double* lu, double* x, int stride) noexcept {
-	internal::__tri_fwdsv_impl(n, lu, x, stride);
+void _Linear_lud_sv(size_t n, double* lu, double* x, int*p, int stride) noexcept {
+	internal::__tri_fwdsv_impl(n, lu, x, p, stride);
 	internal::__tri_bwdsv_impl(n, lu, x, stride);
 }
 _DETAIL_END

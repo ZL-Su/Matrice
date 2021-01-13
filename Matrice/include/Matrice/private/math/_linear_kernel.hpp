@@ -67,9 +67,10 @@ template<typename _Ptr> MATRICE_GLOBAL
 /// <param name="n"></param>
 /// <param name="lu"></param>
 /// <param name="x"></param>
+/// <param name="p">Pointer to permutation indices</param>
 /// <param name="stride"></param>
 /// <returns></returns>
-void _Linear_lud_sv(size_t n, _Ptr lu, _Ptr x, int stride = 1) noexcept;
+void _Linear_lud_sv(size_t n, _Ptr lu, _Ptr x, int* p, int stride = 1) noexcept;
 
 _DETAIL_END
 DGE_MATRICE_END
