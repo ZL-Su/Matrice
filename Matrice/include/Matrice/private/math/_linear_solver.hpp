@@ -104,7 +104,6 @@ public:
 	MATRICE_GLOBAL_INL decltype(auto) lambda() noexcept {
 		return (_Mylamb);
 	}
-
 protected:
 	/**
 	 *\brief Perform coeff matrix decomposition
@@ -124,7 +123,7 @@ protected:
 			internal::_Lak_adapter<spt>(view(_Mycoeff));
 		}
 		if constexpr (is_same_v<kernel_t, lud>) {
-			internal::_Lak_adapter<lud>(view(_Mycoeff), _Mdp->permut().data());
+			internal::_Lak_adapter<lud>(view(_Mycoeff), _Mdp->piv().view());
 		}
 	}
 
@@ -247,7 +246,6 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(spt)
 	    : _Mybase{ coeff } {
 		_Mybase::_Forward();
 	}
-
 	/**
 	 *  \brief Returns the determinant of the given coeff matrix.
 	 */
@@ -258,7 +256,6 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(spt)
 			_Ret *= _L[_Idx][_Idx];
 		return sqr(_Ret);
 	}
-
 	/**
 	 * \brief Perform back substitution to solve 'AX = B',
 	    where 'B' is allowed for having multi-cols and will be overwritten with the solution 'X'.
@@ -286,30 +283,27 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(lud)
 	    : _Mybase{ coeff }, _Myidx(coeff.rows() + 1) {
 	    _Mybase::_Forward();
     }
-    
     /**
-	 *\brief Get the row permutation produced by the partial pivoting.
+	 *\brief Get the pivot index vector by the partial pivoting.
 	 */
-    MATRICE_GLOBAL_INL decltype(auto) permut() const noexcept{
+    MATRICE_GLOBAL_INL decltype(auto) piv() const noexcept{
 		return (_Myidx);
 	}
-	MATRICE_GLOBAL_INL decltype(auto) permut() noexcept {
+	MATRICE_GLOBAL_INL decltype(auto) piv() noexcept {
 		return (_Myidx);
 	}
-
 	/**
 	 *\brief Get the parity produced by the partial pivoting.
 	 */
 	MATRICE_GLOBAL_INL decltype(auto) parity() const noexcept {
 		return (_Myidx(_Myidx.rows()-1));
 	}
-
 	/**
 	 *\brief Unpack L and U matrices from the compact LU coeff. matrix.
 	 * The diagonal entries of U matrix are 1.
 	 */
 	MATRICE_GLOBAL_INL auto unpack() const noexcept {
-		const auto& LU = _Mybase::_Mycoeff;
+		decltype(auto) LU = _Mybase::_Mycoeff;
 		matrix_type L(LU.shape());
 		auto U = matrix_type::diag(L.rows());
 		for (auto r = 0; r < LU.rows(); ++r) {
@@ -324,7 +318,19 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(lud)
 		}
 		return std::make_tuple(L, U);
 	}
-	
+	/**
+	 *  \brief Returns the determinant of the given coeff matrix.
+	 */
+	MATRICE_GLOBAL_INL auto det() const noexcept {
+		decltype(auto) LU = _Mybase::_Mycoeff;
+		auto _Det{ one<value_type> };
+		for (auto _Idx = 0; _Idx < LU.rows(); ++_Idx) {
+			_Det *= LU[_Idx][_Idx];
+			if (_Myidx(_Idx) != _Idx)
+				_Det *= value_type(-1);
+		}
+		return _Det;
+	}
 	/**
 	 * \brief Perform back substitution to solve 'AX=B', 
 	   'B' will be overwritten with the solution 'X'.
@@ -338,7 +344,7 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(lud)
 		DGELOM_CHECK(LU.rows() == B.rows(),
 			"The number of rows of the right-hand vector is not identical to that of the coeff. matrix.");
 #endif
-		internal::_Bwd_adapter<_Myop>(LU.view(), B.view());
+		internal::_Bwd_adapter<_Myop>(LU.view(), B.view(), _Myidx.view());
 		return (B);
 	}
 private:
