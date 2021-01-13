@@ -31,6 +31,7 @@ using Matf_ref = Matrix<float>&;
 using Matd_ref = Matrix<double>&;
 using View_f32 = detail::_Matrix_block<float>;
 using View_f64 = detail::_Matrix_block<double>;
+using View_int = detail::_Matrix_block<int>;
 
 // specialization for svd_op
 
@@ -96,8 +97,8 @@ solver_status _Lak_adapter<svd>(View_f64 U, View_f64 S, View_f64 Vt) {
 		S[0], U[0], ldu, Vt[0], Vt.cols(), supb.data());
 	return solver_status{ ret };
 }
-template<> MATRICE_GLOBAL
-solver_status _Bwd_adapter<svd>(View_f32 U, View_f32 S, View_f32 Vt, View_f32 b, View_f32 x){
+template<> MATRICE_GLOBAL solver_status 
+_Bwd_adapter<svd>(View_f32 U, View_f32 S, View_f32 Vt, View_f32 b, View_f32 x){
 	auto tmp = transpose(U).mul(b).eval();
 	const auto _Thresh = decltype(tmp)::eps * sqrt<float>(U.size()) * S(0) / 2;
 	for (auto n = 0; n < x.size(); ++n) {
@@ -106,8 +107,8 @@ solver_status _Bwd_adapter<svd>(View_f32 U, View_f32 S, View_f32 Vt, View_f32 b,
 	x = transpose(Vt).mul(tmp);
 	return solver_status{ 0 };
 }
-template<> MATRICE_GLOBAL
-solver_status _Bwd_adapter<svd>(View_f64 U, View_f64 S, View_f64 Vt, View_f64 b, View_f64 x) {
+template<> MATRICE_GLOBAL solver_status 
+_Bwd_adapter<svd>(View_f64 U, View_f64 S, View_f64 Vt, View_f64 b, View_f64 x) {
 	auto tmp = transpose(U).mul(b).eval();
 	const auto _Thresh = decltype(tmp)::eps * sqrt<double>(U.size()) * S(0) / 2;
 	for (auto n = 0; n < x.size(); ++n) {
@@ -212,47 +213,87 @@ solver_status _Imp_adapter(View_f64 A, View_f64 b, View_f64 x) {
 	return solver_status{ 0 };
 }
 
+/// <summary>
+/// Computes the LU factorization of a general m-by-n matrix.
+/// </summary>
+/// <param name="'A'">View to matrix A.</param>
+/// <param name="'piv'">View to permutation vector.</param>
+/// <returns>Status with value '0' for sucess.</returns>
 template<> MATRICE_GLOBAL
-solver_status _Lak_adapter<lud>(View_f32 A,  int* Idx) {
-	solver_status status;
-	status.value = detail::_Linear_lud_kernel(A.rows(), A.data(), Idx);
-	return status;
+solver_status _Lak_adapter<lud>(View_f32 A, View_int piv) {
+	return solver_status{
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
+		LAPACKE_sgetrf(MKL_ROW_MAJOR, 
+		A.rows(), A.cols(), A.data(), A.cols(), piv.data())
+#else
+		detail::_Linear_lud_kernel(A.rows(), A.data(), piv.data())
+#endif
+	};
 }
+/// <summary>
+/// Computes the LU factorization of a general m-by-n matrix.
+/// </summary>
+/// <param name="'A'">View to matrix A.</param>
+/// <param name="'piv'">View to permutation vector.</param>
+/// <returns>Status with value '0' for sucess.</returns>
 template<> MATRICE_GLOBAL
-solver_status _Lak_adapter<lud>(View_f64 A, int* Idx) {
-	solver_status status;
-	status.value = detail::_Linear_lud_kernel(A.rows(), A.data(), Idx);
-	return status;
+solver_status _Lak_adapter<lud>(View_f64 A, View_int piv) {
+	return solver_status{
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
+		LAPACKE_dgetrf(MKL_ROW_MAJOR, 
+		A.rows(), A.cols(), A.data(), A.cols(), piv.data())
+#else
+		detail::_Linear_lud_kernel(A.rows(), A.data(), piv.data())
+#endif
+	};
 }
+
 /// <summary>
 /// Solve LU factorized linear system 'LU*X=B' with data type "float".
 /// </summary>
-/// <param name="LU">Compact LU matrix after factorization.</param>
-/// <param name="B">Right-hand side vector, with multi-columns optionally.</param>
+/// <param name="'LU'">LU-factorized coeff. matrix.</param>
+/// <param name="'B'">Right-hand side vector, with multi-columns optionally.</param>
+/// <param name="'p'">Permutation vector.</param>
 /// <returns>'solver_status.value = 0'</returns>
 template<> MATRICE_GLOBAL
-solver_status _Bwd_adapter<lud>(View_f32 LU, View_f32 B) {
+solver_status _Bwd_adapter<lud>(View_f32 LU, View_f32 B, View_int p) {
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
+	return solver_status{
+		LAPACKE_sgetrs(MKL_ROW_MAJOR, 'N', LU.rows(), B.cols(), LU.data(),
+		LU.cols(), p.data(), B.data(), B.cols())
+	};
+#else
 	const auto _Stride = B.cols();
 	for (auto _Off = 0; _Off < _Stride; ++_Off) {
 		auto b = B[0] + _Off;
-		detail::_Linear_lud_sv(LU.rows(), LU[0], b, _Stride);
+		detail::_Linear_lud_sv(LU.rows(), LU[0], b, p[0], _Stride);
 	}
 	return solver_status{ 0 };
+#endif
 }
+
 /// <summary>
 /// Solve LU factorized linear system 'LU*X=B' with data type "double".
 /// </summary>
-/// <param name="LU">Compact LU matrix after factorization.</param>
-/// <param name="B">Right-hand side vector, with multi-columns optionally.</param>
+/// <param name="'LU'">LU-factorized coeff. matrix.</param>
+/// <param name="'B'">Right-hand side vector, with multi-columns optionally.</param>
+/// <param name="'p'">Permutation vector.</param>
 /// <returns>'solver_status.value = 0'</returns>
 template<> MATRICE_GLOBAL
-solver_status _Bwd_adapter<lud>(View_f64 LU, View_f64 B) {
+solver_status _Bwd_adapter<lud>(View_f64 LU, View_f64 B, View_int p) {
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
+	return solver_status{
+		LAPACKE_dgetrs(MKL_ROW_MAJOR, 'N', LU.rows(), B.cols(), LU.data(),
+		LU.cols(), p.data(), B.data(), B.cols())
+	};
+#else
 	const auto _Stride = B.cols();
 	for (auto _Off = 0; _Off < _Stride; ++_Off) {
 		auto b = B[0] + _Off;
-		detail::_Linear_lud_sv(LU.rows(), LU[0], b, _Stride);
+		detail::_Linear_lud_sv(LU.rows(), LU[0], b, p[0], _Stride);
 	}
 	return solver_status{ 0 };
+#endif
 }
 _INTERNAL_END
 DGE_MATRICE_END
