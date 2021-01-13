@@ -111,7 +111,7 @@ template<typename T1, typename T2,
 	typename _Ret = common_type_t<T1, T2>, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
 MATRICE_GLOBAL_FINL constexpr _Ret safe_div(const T1& a, const T2& b, T2 thresh = T2(0))noexcept {
-	return b <= thresh ? _Ret(0) : div(a, b);
+	return fabs(b) <= thresh ? _Ret(0) : div(a, b);
 }
 
 ///<brief> trigonometric functions </brief>
