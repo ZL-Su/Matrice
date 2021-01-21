@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,17 +25,32 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 DGE_MATRICE_BEGIN
-template<typename T1, typename T2, 
-	typename _Ret = common_type_t<T1, T2>, 
-	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
-MATRICE_GLOBAL_FINL constexpr _Ret add(const T1& a, const T2& b)noexcept {
-	return a + b;
+/// <summary>
+/// \brief Sum of a scalar number sequence.
+/// </summary>
+/// <typeparam name="...Ts"></typeparam>
+/// <param name="...args">Must be scalar types.</param>
+/// <returns> \e.g. 
+/// constexpr auto sum = dgelom::add(1, 2, 3.); // 6.0
+/// </returns>
+template<typename ...Ts>
+MATRICE_GLOBAL_FINL constexpr auto add(const Ts&... args)noexcept {
+	return (...+ args);
 }
-template<typename T1, typename T2, 
-	typename _Ret = common_type_t<T1, T2>, 
-	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
-MATRICE_GLOBAL_FINL constexpr _Ret sub(const T1& a, const T2& b)noexcept {
-	return a - b; 
+
+/// <summary>
+/// \brief Subtract a scalar sequence from a given value.
+/// </summary>
+/// <typeparam name="T">Must be a scalar type.</typeparam>
+/// <typeparam name="...Ts">Must be scalar types.</typeparam>
+/// <param name="a">Minuend.</param>
+/// <param name="...args">Subtraend sequence.</param>
+/// <returns>\e.g.
+/// constexpr auto res = dgelom::sub(2., 1, 2); // -1.0 = 2 - 1 - 2
+/// </returns>
+template<typename T, typename... Ts, MATRICE_ENABLE_IF(is_scalar_v<T>)>
+MATRICE_GLOBAL_FINL constexpr auto sub(const T& a, const Ts&... args)noexcept {
+	return a - (args + ...);
 }
 template<typename T1, typename T2, 
 	typename _Ret = common_type_t<T1, T2>, 
@@ -123,6 +138,15 @@ template<typename T, MATRICE_ENABLE_IF(is_scalar_v<T>)>
 MATRICE_GLOBAL_FINL constexpr T cos(const T& x) noexcept {
 	return std::cos(T(x));
 }
+
+/// <summary>
+/// \brief Return sine and cose values of a given scalar number.
+/// </summary>
+/// <typeparam name="T">Must be a scalar type.</typeparam>
+/// <param name="x">Any scalar number.</param>
+/// <returns>
+/// \e.g. auto [sin_x, cos_x] = dgelom::sin_cos(x);
+/// </returns>
 template<typename T, MATRICE_ENABLE_IF(is_scalar_v<T>)>
 MATRICE_GLOBAL_FINL constexpr decltype(auto)sin_cos(const T& x)noexcept {
 	return std::make_tuple(sin(x), cos(x));
@@ -142,6 +166,20 @@ MATRICE_GLOBAL_FINL constexpr T arccos(const T& x) noexcept {
 template<typename T, MATRICE_ENABLE_IF(is_scalar_v<T>)>
 MATRICE_GLOBAL_FINL constexpr T arctan(const T& x) noexcept {
 	return std::atan(T(x));
+}
+
+/// <summary>
+/// \brief Sum of squares for an input scalar sequence.
+/// (Require C++ 17 support.)
+/// </summary>
+/// <typeparam name="...Ts">Scalar types</typeparam>
+/// <param name="...args">A scalar number sequence, such as 'x, y, ...'.</param>
+/// <returns>
+/// \e.g. auto sum_of_squares = dgelom::sqsum(x, y, ...);
+/// </returns>
+template<typename ...Ts>
+MATRICE_GLOBAL_FINL constexpr auto sqsum(const Ts&... args) noexcept {
+	return (... + (args * args));
 }
 
 DGE_MATRICE_END
