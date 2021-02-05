@@ -891,7 +891,7 @@ template<
 
 // *\element-wise square operation
 template<typename _Rhs>
-	MATRICE_GLOBAL_FINL auto sq(const _Rhs& _right) { return (_right*_right); }
+	MATRICE_GLOBAL_FINL constexpr auto sq(const _Rhs& _right) { return (_right*_right); }
 
 // *\element-wise squar root operation
 template<

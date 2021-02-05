@@ -60,16 +60,16 @@ public:
 		_Myptr += _Mystep;
 		return (*this);
 	}
-	MATRICE_GLOBAL_FINL _Myt operator++(int) { //postincrement
+	MATRICE_GLOBAL_FINL _Myt operator++(int) noexcept { //postincrement
 		auto _Tmp = *this;
 		*this += _Mystep;
 		return (_Tmp);
 	}
-	MATRICE_GLOBAL_FINL _Myt& operator--() { //preincrement
+	MATRICE_GLOBAL_FINL _Myt& operator--() noexcept { //preincrement
 		_Myptr -= _Mystep;
 		return (*this);
 	}
-	MATRICE_GLOBAL_FINL _Myt operator--(int) { //postincrement
+	MATRICE_GLOBAL_FINL _Myt operator--(int) noexcept { //postincrement
 		auto _Tmp = *this;
 		*this += _Mystep;
 		return (_Tmp);
@@ -93,53 +93,53 @@ public:
 	MATRICE_GLOBAL_FINL _Myt& operator-=(difference_type _Offset) {
 		return (*this += -(_Offset * _Mystep));
 	}
-	MATRICE_GLOBAL_FINL _Myt operator-(difference_type _Offset) const {
+	MATRICE_GLOBAL_FINL _Myt operator-(difference_type _Offset) const noexcept {
 		auto _Tmp = *this;
 		return (_Tmp -= (_Offset));
 	}
-	MATRICE_GLOBAL_FINL difference_type operator-(const _Myt& _Right) const {
+	MATRICE_GLOBAL_FINL difference_type operator-(const _Myt& _Right) const noexcept {
 		return (_Myptr - _Right._Myptr);
 	}
-	MATRICE_GLOBAL_FINL reference operator[](difference_type _Offset) const {
+	MATRICE_GLOBAL_FINL reference operator[](difference_type _Offset) const noexcept {
 		return (*(*this + _Offset * _Mystep));
 	}
-	MATRICE_GLOBAL_FINL bool operator==(const _Myt& _Right) const {
+	MATRICE_GLOBAL_FINL bool operator==(const _Myt& _Right) const noexcept {
 		return (_Myptr == _Right._Myptr);
 	}
-	MATRICE_GLOBAL_FINL bool operator!=(const _Myt& _Right) const {
+	MATRICE_GLOBAL_FINL bool operator!=(const _Myt& _Right) const noexcept {
 		return (!(*this == _Right));
 	}
-	MATRICE_GLOBAL_FINL bool operator<(const _Myt& _Right) const {
+	MATRICE_GLOBAL_FINL bool operator<(const _Myt& _Right) const noexcept {
 		return (_Myptr < _Right._Myptr);
 	}
-	MATRICE_GLOBAL_FINL bool operator>(const _Myt& _Right) const {
+	MATRICE_GLOBAL_FINL bool operator>(const _Myt& _Right) const noexcept {
 		return (_Right < *this);
 	}
-	MATRICE_GLOBAL_FINL bool operator<=(const _Myt& _Right) const {
+	MATRICE_GLOBAL_FINL bool operator<=(const _Myt& _Right) const noexcept {
 		return (!(_Right < *this));
 	}
-	MATRICE_GLOBAL_FINL bool operator>=(const _Myt& _Right) const {
+	MATRICE_GLOBAL_FINL bool operator>=(const _Myt& _Right) const noexcept {
 		return (!(_Right > *this));
 	}
 
 	// \test for iterator end condition
-	MATRICE_GLOBAL_FINL operator bool() { return (_Myptr != _Myend); }
+	MATRICE_GLOBAL_FINL operator bool() const noexcept { return (_Myptr != _Myend); }
 
 	// \return pointer to current object
-	MATRICE_GLOBAL_FINL operator pointer() { return (_Myptr); }
+	MATRICE_GLOBAL_FINL operator pointer() noexcept { return (_Myptr); }
 
 	// \forward range iteration methods for [this->_Myptr, this->_Myend)
-	MATRICE_GLOBAL_FINL decltype(auto) begin() { 
+	MATRICE_GLOBAL_FINL decltype(auto) begin() noexcept {
 		return (*this); 
 	}
-	MATRICE_GLOBAL_FINL auto end() { 
+	MATRICE_GLOBAL_FINL auto end() noexcept {
 		auto _Tmp = *this; 
 		return (_Tmp += _Mysize); 
 	}
-	MATRICE_GLOBAL_FINL decltype(auto) begin() const {
+	MATRICE_GLOBAL_FINL decltype(auto) begin() const noexcept {
 		return (*this); 
 	}
-	MATRICE_GLOBAL_FINL const auto end() const { 
+	MATRICE_GLOBAL_FINL const auto end() const noexcept {
 		auto _Tmp = *this; 
 		return (_Tmp += _Mysize);
 	}

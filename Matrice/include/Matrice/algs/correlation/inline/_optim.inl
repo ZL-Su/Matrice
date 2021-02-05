@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "arch/ixpacket.h"
 #endif
 #include "../../similarity.h"
+#include "private/math/_linear_solver.hpp"
 
 MATRICE_ALG_BEGIN(corr)
 _DETAIL_BEGIN
@@ -75,16 +76,6 @@ template<> struct _Param_update_strategy<_Alg_icgn<1>> {
 #pragma region <-- base class implementation -->
 template<typename _Derived> MATRICE_HOST_INL 
 auto _Corr_optim_base<_Derived>::_Cond()->matrix_type& {
-	// \sent eval. of Jacobian and Hessian to background.
-	auto _Eval_struct_mats = std::async(std::launch::async, [&] {
-		/*_Myjaco = */static_cast<_Derived*>(this)->_Diff();
-#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
-		_Myhess = _Myjaco.t().mul_inplace(_Myjaco);
-#else
-		_Myhess = _Myjaco.t().mul(_Myjaco);
-#endif
-	});
-
 	// \create buf.s to hold reference and current patchs
 	_Myref.create(_Mysize, _Mysize);
 	_Mycur.create(_Mysize, _Mysize);
@@ -117,20 +108,24 @@ auto _Corr_optim_base<_Derived>::_Cond()->matrix_type& {
 		}
 	}
 
+	// \comp. Jacobian and Hessian
+	static_cast<_Derived*>(this)->_Diff();
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
+	_Myhess = _Myjaco.t().mul_inplace(_Myjaco);
+#else
+	_Myhess = _Myjaco.t().mul(_Myjaco);
+#endif
+
 	// \zero mean normalization.
 	_Myref = _Myref - (_Mean /= _Mysize*_Mysize);
 	const auto _Issd = one<value_type> / sqrt(sq(_Myref).sum());
 	_Myref = _Myref * _Issd;
-
-	// \Hessian matrix computation.
-	if (_Eval_struct_mats.valid()) _Eval_struct_mats.get();
-
-	//const auto _Ev = lapack_kernel_t::syev(_Myhess);
 	
 	_Myhess = _Myhess * _Issd;
-
-	_Mysolver.forward();
 	_Myhess = _Myhess + matrix_fixed::diag(_Myopt._Coeff);
+	internal::_Lak_adapter<spt>(_Myhess.view());
+	//const auto solver = make_linear_solver<spt>(_Myhess);
+	//_Myhess = solver.inv();
 
 	return (_Myref);
 }
@@ -195,13 +190,59 @@ auto _Corr_optim_base<_Derived>::_Solve(param_type& Par) {
 #endif
 
 	// \solve update to the warp parameter vector.
-	_Sdp = _Mysolver.backward(_Sdp);
+	//param_type _Dp = _Myhess.mul(_Sdp);
+	//_Sdp = _Dp;
+	internal::_Bwd_adapter<spt>(_Myhess.view(), _Sdp.view());
 
 	// \inverse composition to update param.
 	Par = update_strategy::eval(Par, _Sdp);
 
 	// \report least square correlation coeff. and param. error.
 	return std::make_tuple(sq(_Mydiff).sum(), _Sdp.dot(_Sdp));
+}
+template<typename _Derived> MATRICE_HOST_INL 
+auto _Corr_optim_base<_Derived>::robust_sol(param_type& Par)
+{
+	// \warp current image patch.
+	_Mycur = static_cast<_Derived*>(this)->_Warp(Par);
+
+	// \error map
+	_Mydiff = _Mycur - _Myref;
+#ifdef MATRICE_DEBUG
+	const matrix_type _Error_map(_Mycur.shape(), _Mydiff.data());
+#endif
+
+	// \compute robustness and weight Jacobian
+	for (auto i = 0; i < _Myweight.size(); ++i) {
+		const auto wi = _Myloss.phi(_Mydiff(i));
+		_Myweight(i) = wi;
+		for (auto j = 0; j < _Myjaco.cols(); ++j) {
+			_Myjaco_tw.cview(i)(j) = _Myjaco[i][j] * wi;
+		}
+	}
+
+	// \compute weighted Gauss-Newton Hessian matrix
+	const auto _Issd = one<value_type> / sqrt(sq(_Myref).sum());
+	_Myhess = _Myjaco_tw.mul(_Myjaco);
+	_Myhess = _Myhess * _Issd;
+
+	// \steepest descent parameter update
+	param_type _Sdp = _Myjaco_tw.mul(_Mydiff);
+
+	// \solve update to the warp parameter vector.
+	const auto solver = make_linear_solver<lud>(_Myhess);
+	const auto _Dp = solver.solve(_Sdp);
+
+	// \inverse composition to update param.
+	Par = update_strategy::eval(Par, _Dp);
+
+	auto _Loss = value_type(0);
+	for (auto i = 0; i < _Mydiff.size(); ++i) {
+		_Loss += _Myloss.rho(_Mydiff(i));
+	}
+
+	// \report least square correlation coeff., param. error, and loss.
+	return std::make_tuple(sq(_Mydiff).sum(), _Loss, _Dp.dot(_Dp));
 }
 #pragma endregion
 

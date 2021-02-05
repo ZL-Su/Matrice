@@ -1,6 +1,6 @@
 /*  *************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -194,9 +194,10 @@ struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 	MATRICE_HOST_INL static int svd(pointer _A, pointer _S, pointer _Vt, const size_type& _Size) {
 		const auto[M, N] = _Size;
 #if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
-		float* _Superb = new float[(M < N ? M : N) - 1];
+		auto _Superb = new float[(M < N ? M : N) - 1];
 		return LAPACKE_sgesvd(layout, 'O', 'A',
 			M, N, _A, N, _S, nullptr, 1, _Vt, N, _Superb);
+		delete[] _Superb;
 #else
 		DGELOM_ERROR("Undefined math kernel, matrice supports two types of kernels with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL");
 #endif
@@ -235,6 +236,7 @@ struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 #if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
 		auto _P = new MKL_INT[max(1, min(M, N))];
 		return LAPACKE_sgetrf(layout, M, N, _A, max(1, N), _P);
+		delete[] _P;
 #else
 		DGELOM_ERROR("Undefined math kernel, matrice supports two types of kernels with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL");
 #endif
@@ -256,6 +258,7 @@ struct _Lapack_kernel_impl<float> : _Lapack_kernel_impl_base<float> {
 		const auto N = get<0>(_A), M = get<1>(_B);
 		auto _Ipiv = new MKL_INT[max(1, N)];
 		return LAPACKE_sgesv(layout, N, M, get<2>(_A), N, _Ipiv, get<2>(_B), M);
+		delete[] _Ipiv;
 #else
 		DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
 #endif
@@ -273,9 +276,10 @@ template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double>
 	MATRICE_HOST_INL static int svd(pointer _A, pointer _S, pointer _Vt, const size_type& _Size) {
 		const auto[M, N] = _Size;
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
-		double* _Superb = new double[M < N ? M : N - 1];
+		auto _Superb = new double[M < N ? M : N - 1];
 		return LAPACKE_dgesvd(layout, 'O', 'A',
 			M, N, _A, N, _S, nullptr, 1, _Vt, N, _Superb);
+		delete[] _Superb;
 #else
 		DGELOM_ERROR("Undefined math kernel, matrice supports two types of kernels with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL");
 #endif
@@ -315,6 +319,7 @@ template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double>
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 		auto _P = new MKL_INT[max(1, min(M, N))];
 		return LAPACKE_dgetrf(layout, M, N, _A, max(1, N), _P);
+		delete[] _P;
 #else
 		DGELOM_ERROR("Undefined math kernel, matrice supports two types of kernels with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL");
 #endif
@@ -336,6 +341,7 @@ template<> struct _Lapack_kernel_impl<double> : _Lapack_kernel_impl_base<double>
 		const auto N = get<0>(_A), M = get<1>(_B);
 		auto _Ipiv = new MKL_INT[max(1, N)];
 		return LAPACKE_dgesv(layout, N, M, get<2>(_A), N, _Ipiv, get<2>(_B), M);
+		delete[] _Ipiv;
 #else
 		DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
 #endif

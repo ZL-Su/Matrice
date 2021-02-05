@@ -1,6 +1,6 @@
 /**********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -68,9 +68,11 @@ public:
 	}
 
 	/**
-	 *\brief Solve linear system $\mathbf{AX} = \mathbf{B}$. The solver kernel is dispatched according to the solver operator specified to _Op.
-	   The right-hand term $\mathbf{B}$ is allowed to hold more than one column when the linear kernel _Op is dgelom::spt.
-	 *\param [args...] variadic arguments that may empty or more than one inputs. If args... is empty, the method solves a homogeneous linear system with form of $\mathbf{Ax} = \mathbf{0}$.
+	 *\brief Solve linear system 'AX = B'. 
+	   The solver kernel is dispatched according to the solver operator specified to '_Op'.
+	   The right-hand term 'B' is allowed for holding more than one columns when the linear kernel '_Op' is dgelom::spt.
+	 *\param 'args...' Variadic arguments that may empty or more than one inputs. 
+	   If 'args...' is empty, the method solves a homogeneous linear system with form of 'Ax = 0'.
 	 */
 	template<class... _Args>
 	MATRICE_GLOBAL_INL auto solve(_Args&&... args)const noexcept {
@@ -78,8 +80,11 @@ public:
 	}
 
 	/**
-	 *\brief Improve the solution of $\mathbf{Ax} = \mathbf{b}$ with an iterative error reduction. The method is recommended calling several times to refine the solution.
-	 *\param [args] := $[\mathbf{A, b, x}]$ where $\mathbf{A}$ must be the original coeff matrix, $\mathbf{b}$ the original RHS vector and $\mathbf{x}$ the solved solution to be refined in the method.
+	 *\brief Improve the solution of 'Ax = b' with an iterative error reduction. 
+	   The method is recommended calling several times to refine the solution.
+	 *\param 'args...' := 'A, b, x',
+	   where 'A' must be the original coeff matrix, 'b' the original RHS vector,
+	   and 'x' the solved solution to be refined in the method.
 	 */
 	template<class... _Args>
 	MATRICE_GLOBAL_INL decltype(auto)refine(_Args&... args) {
@@ -89,7 +94,7 @@ public:
 	/**
 	 *\brief Compute inverse of the coeff. matrix.
 	 */
-	MATRICE_GLOBAL_INL auto inv() {
+	MATRICE_GLOBAL_INL auto inv() const {
 		return (this->_Inverse());
 	}
 
@@ -99,7 +104,6 @@ public:
 	MATRICE_GLOBAL_INL decltype(auto) lambda() noexcept {
 		return (_Mylamb);
 	}
-
 protected:
 	/**
 	 *\brief Perform coeff matrix decomposition
@@ -119,11 +123,11 @@ protected:
 			internal::_Lak_adapter<spt>(view(_Mycoeff));
 		}
 		if constexpr (is_same_v<kernel_t, lud>) {
-			internal::_Lak_adapter<lud>(view(_Mycoeff), _Mdp->permut().data());
+			internal::_Lak_adapter<lud>(view(_Mycoeff), _Mdp->piv().view());
 		}
 	}
 
-	MATRICE_GLOBAL_INL auto _Inverse() {
+	MATRICE_GLOBAL_INL auto _Inverse() const {
 		using kernel_t = typename _Mytraits::op_type;
 
 		auto _Mdp = _Derived();
@@ -142,7 +146,7 @@ protected:
 		}
 		if constexpr (is_same_v<kernel_t, spt>) {
 			matrix_type _Ret(_Mycoeff.rows(), _Mycoeff.cols());
-			internal::_Inv_adapter<kernel_t>(view(_Mycoeff), view(_Ret));
+			internal::_Inv_adapter<kernel_t>(view(_Mycoeff), _Ret.view());
 			return move(_Ret);
 		}
 	}
@@ -242,7 +246,6 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(spt)
 	    : _Mybase{ coeff } {
 		_Mybase::_Forward();
 	}
-
 	/**
 	 *  \brief Returns the determinant of the given coeff matrix.
 	 */
@@ -253,10 +256,10 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(spt)
 			_Ret *= _L[_Idx][_Idx];
 		return sqr(_Ret);
 	}
-
 	/**
-	 * \brief Perform back substitution to solve $\mathbf{AX} = \mathbf{B}$, where $\mathbf{B}$ allowed to have multi-cols and will be overwritten by $\mathbf{X}$.
-	 * \note The method is for parsing by the base class of the linear solver rather than for external calling.
+	 * \brief Perform back substitution to solve 'AX = B',
+	    where 'B' is allowed for having multi-cols and will be overwritten with the solution 'X'.
+	 * (Note: the method is for parsing by the solver engine rather than for external calling.)
 	 */
 	template<class _Rty> [[non_external_callable]]
 	MATRICE_GLOBAL_INL _Rty& _Xbackward(_Rty& B)const noexcept {
@@ -280,36 +283,73 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(lud)
 	    : _Mybase{ coeff }, _Myidx(coeff.rows() + 1) {
 	    _Mybase::_Forward();
     }
-    
     /**
-	 *\brief Get the row permutation produced by the partial pivoting.
+	 *\brief Get the pivot index vector by the partial pivoting.
 	 */
-    MATRICE_GLOBAL_INL decltype(auto) permut() const noexcept{
+    MATRICE_GLOBAL_INL decltype(auto) piv() const noexcept{
 		return (_Myidx);
 	}
-	MATRICE_GLOBAL_INL decltype(auto) permut() noexcept {
+	MATRICE_GLOBAL_INL decltype(auto) piv() noexcept {
 		return (_Myidx);
 	}
-
 	/**
 	 *\brief Get the parity produced by the partial pivoting.
 	 */
 	MATRICE_GLOBAL_INL decltype(auto) parity() const noexcept {
 		return (_Myidx(_Myidx.rows()-1));
 	}
-	
 	/**
-	 *\brief Perform back substitution to solve
-	 //tex:$\mathbf{Ax} = \mathbf{b}, \mathbf{b} \leftarrow \mathbf{x}$
-	 *\note The method is auto-parsed by the solver engine.
+	 *\brief Unpack L and U matrices from the compact LU coeff. matrix.
+	 * The diagonal entries of U matrix are 1.
+	 */
+	MATRICE_GLOBAL_INL auto unpack() const noexcept {
+		decltype(auto) LU = _Mybase::_Mycoeff;
+		matrix_type L(LU.shape());
+		auto U = matrix_type::diag(L.rows());
+		for (auto r = 0; r < LU.rows(); ++r) {
+			const auto pLU = LU[r];
+			auto pL = L[r], pU = U[r];
+			for (auto c = 0; c <= r; ++c) {
+				pL[c] = pLU[c];
+			}
+			for (auto c = r + 1; c < LU.cols(); ++c) {
+				pU[c] = pLU[c];
+			}
+		}
+		return std::make_tuple(L, U);
+	}
+	/**
+	 *  \brief Returns the determinant of the given coeff matrix.
+	 */
+	MATRICE_GLOBAL_INL auto det() const noexcept {
+		decltype(auto) LU = _Mybase::_Mycoeff;
+		auto _Det{ one<value_type> };
+		for (auto _Idx = 0; _Idx < LU.rows(); ++_Idx) {
+			_Det *= LU[_Idx][_Idx];
+			if (_Myidx(_Idx) != _Idx)
+				_Det *= value_type(-1);
+		}
+		return _Det;
+	}
+	/**
+	 * \brief Perform back substitution to solve 'AX=B', 
+	   'B' will be overwritten with the solution 'X'.
+	 * (Note: the method is for parsing by the solver engine rather than for external calling.)
+	 * \param 'B' the right-hand side vector, multi-column is allowed.
 	 */
     template<typename _Bty> [[non_external_callable]]
-	MATRICE_GLOBAL_INL decltype(auto)_Xbackward(_Bty& b)const noexcept {
-
-		return (b);
+	MATRICE_GLOBAL_INL decltype(auto)_Xbackward(_Bty& B)const noexcept {
+		const auto& LU = _Mybase::_Mycoeff;
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(LU.rows() == B.rows(),
+			"The number of rows of the right-hand vector is not identical to that of the coeff. matrix.");
+#endif
+		internal::_Bwd_adapter<_Myop>(LU.view(), B.view(), _Myidx.view());
+		return (B);
 	}
 private:
-	array_n<int, conditional_size_v<(_Mty::rows_at_compiletime > 0), _Mty::rows_at_compiletime+1, _Mty::rows_at_compiletime>> _Myidx;
+	array_n<int, conditional_size_v<(_Mty::rows_at_compiletime > 0), 
+		_Mty::rows_at_compiletime+1, _Mty::rows_at_compiletime>> _Myidx;
 MATRICE_MAKE_LINEAR_SOLVER_SPEC_END(lud)
 
 // \brief CLASS TEMPLATE for SVD based linear solver
@@ -368,7 +408,8 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(svd)
 	}
 
 	/**
-     * \brief Solve the system $\mathbf{A}\mathbf{x} = \mathbf{b}$ with the pre-computed coeff. matrix, and $\mathbf{b}$ is overwritten by the solution $\mathbf{x}$.
+     * \brief Solve the system 'Ax = b' with the pre-computed coeff. matrix 'A', 
+	    and 'b' is overwritten by the solution 'x'.
 	 * \note The method is for parsing by the base class of the linear solver rather than for external calling.
      */
 	template<typename _Bty> [[non_external_callable]]

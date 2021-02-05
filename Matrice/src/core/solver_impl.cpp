@@ -34,7 +34,6 @@ template<typename _T> LinearOp::info_t LinearOp::OpBase<_T>::_Impl(view_t& A)
 
 	{ //general dense matrix
 		info.alg = solver_type::LUF;
-		
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 		Matrix_<MKL_INT, view_t::cols_at_compiletime, min(view_t::cols_at_compiletime, 1)> iwp(_N, 1);
 		if constexpr (type_bytes<value_t>::value == 4)
@@ -44,7 +43,8 @@ template<typename _T> LinearOp::info_t LinearOp::OpBase<_T>::_Impl(view_t& A)
 		else
 			DGELOM_ERROR("Unsupported data type _T in LinearOp::OpBase<_T>::_Impl.");
 #else
-			DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
+		Matrix_<int, view_t::cols_at_compiletime, min(view_t::cols_at_compiletime, 1)> iwp(_N, 1);
+		DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
 #endif
 		for (int i = 1; i <= _N; ++i) if (i != iwp(i)) info.sign *= -1;
 		return info;

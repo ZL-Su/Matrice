@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,16 +20,57 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
-
-template<typename _Ptr> MATRICE_GLOBAL 
+template<typename _Ptr> MATRICE_GLOBAL
+/// <summary>
+/// Cholesky decomposition.
+/// </summary>
+/// <param name="data"></param>
+/// <param name="n"></param>
+/// <returns></returns>
 int _Linear_spd_kernel(_Ptr data, size_t n) noexcept;
-template<typename _Ptr> MATRICE_GLOBAL 
-void _Linear_ispd_kernel(_Ptr data, _Ptr inv, size_t n) noexcept;
-template<typename _Ptr> MATRICE_GLOBAL
-void _Linear_spd_bwd(size_t n, _Ptr lptr, _Ptr x, int stride=1) noexcept;
 
 template<typename _Ptr> MATRICE_GLOBAL
+/// <summary>
+/// Matrix inversion with Cholesky decomposition.
+/// </summary>
+/// <param name="data"></param>
+/// <param name="inv"></param>
+/// <param name="n"></param>
+/// <returns></returns>
+void _Linear_ispd_kernel(_Ptr data, _Ptr inv, size_t n) noexcept;
+
+template<typename _Ptr> MATRICE_GLOBAL
+/// <summary>
+/// Solve Cholesky factorized linear system 'L^T*L*x = x'.
+/// </summary>
+/// <param name="n"></param>
+/// <param name="l"></param>
+/// <param name="x"></param>
+/// <param name="stride"></param>
+/// <returns></returns>
+void _Linear_spd_bwd(size_t n, _Ptr l, _Ptr x, int stride=1) noexcept;
+
+template<typename _Ptr> MATRICE_GLOBAL
+/// <summary>
+/// Perform LU factorization.
+/// </summary>
+/// <param name="n"></param>
+/// <param name="data"></param>
+/// <param name="idx"></param>
+/// <returns></returns>
 int _Linear_lud_kernel(size_t n, _Ptr data, int* idx) noexcept;
+
+template<typename _Ptr> MATRICE_GLOBAL
+/// <summary>
+/// Solve LU factorized linear system 'lu*x = x'.
+/// </summary>
+/// <param name="n"></param>
+/// <param name="lu"></param>
+/// <param name="x"></param>
+/// <param name="p">Pointer to permutation indices</param>
+/// <param name="stride"></param>
+/// <returns></returns>
+void _Linear_lud_sv(size_t n, _Ptr lu, _Ptr x, int* p, int stride = 1) noexcept;
 
 _DETAIL_END
 DGE_MATRICE_END

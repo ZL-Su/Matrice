@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -99,6 +99,33 @@ public:
 	}
 	MATRICE_GLOBAL_FINL constexpr auto(cols)() const noexcept { 
 		return (cols_at_compiletime);
+	}
+
+	/// <summary>
+	/// \brief Compute matrix reduction along a given axis.
+	/// 'axis' can be '0' for row direction and '1' for column direction.
+	/// </summary>
+	/// <returns>
+	/// 1-by-N matrix for 'axis = 0'; 
+	/// M-by-1 matrix for 'axis = 1'.
+	/// </returns>
+	template<uint8_t axis> 
+	MATRICE_GLOBAL_INL auto reduce() const noexcept {
+		if constexpr (axis == 0) {
+			lite<1, cols_at_compiletime> _Ret;
+			for (auto _Idx = 0; _Idx < cols(); ++_Idx) {
+				_Ret(_Idx) = (*this).cview(_Idx).sum();
+			}
+			return _Ret;
+		}
+		else if constexpr (axis == 1) {
+			lite<rows_at_compiletime, 1> _Ret;
+			for (auto _Idx = 0; _Idx < rows(); ++_Idx) {
+				_Ret(_Idx) = (*this).rview(_Idx).sum();
+			}
+			return _Ret;
+		}
+		else return _Mybase::sum();
 	}
 
 	MATRICE_GLOBAL_FINL operator std::array<value_t, Size>() const noexcept {
