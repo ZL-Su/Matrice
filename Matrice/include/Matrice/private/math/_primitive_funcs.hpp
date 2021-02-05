@@ -52,12 +52,20 @@ template<typename T, typename... Ts, MATRICE_ENABLE_IF(is_scalar_v<T>)>
 MATRICE_GLOBAL_FINL constexpr auto sub(const T& a, const Ts&... args)noexcept {
 	return a - (args + ...);
 }
-template<typename T1, typename T2, 
-	typename _Ret = common_type_t<T1, T2>, 
-	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
-MATRICE_GLOBAL_FINL constexpr _Ret mul(const T1& a, const T2& b)noexcept {
-	return a * b; 
+
+/// <summary>
+/// \brief Multiplication of a scalar sequence.
+/// </summary>
+/// <typeparam name="...Ts">Must be scalar types.</typeparam>
+/// <param name="...args">A scalar number sequence.</param>
+/// <returns> \e.g.
+/// constexpr auto res = dgelom::mul(1, 2, 3.); // 6.0 = 1*2*3
+/// </returns>
+template<typename... Ts>
+MATRICE_GLOBAL_FINL constexpr auto mul(const Ts&... args)noexcept {
+	return (args * ...);
 }
+
 template<typename T1, typename T2, 
 	typename _Ret = common_type_t<T1, T2>, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ret>)>
