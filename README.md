@@ -1,9 +1,8 @@
-<img src="../master/ivm.svg" width="800">
 
-# IVM(R) Matrice Library 
+# DPU(R) Matrice Library 
 <img src="https://img.shields.io/github/v/release/ZL-Su/Matrice?include_prereleases&label=version"/>
 
-A libary for numerical computation, includes basic linear algebra (vector, matrix, linear system) operations, auto-differentiation, and non-linear optimization, etc. The library contains two parts, the first part is a Fortran kernel library which supplies the basic linear arithmatic operations; the second part is a modern C++ library which aims to implement efficient and elegant numeric computation.
+A general numeric computation libary for 2/3-dimensional deformation perception and understanding, with modern C++ programming language. The library, referred to as Matrice, covers the fundamental differentiable algebraic containers (including Scalar, Vector, Matrix and Tensor) and the associated algorithms (e.g., linear algebra operations), expression system, geometric algorithms, nonlinear optimization, and network building blocks.
 
 ## Features
 * Unified memory and basic type management.
