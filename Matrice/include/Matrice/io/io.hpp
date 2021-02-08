@@ -18,13 +18,13 @@
 #else
 #include <experimental/filesystem>
 #endif
-#include "../core/matrix.h"
-#include "../core/vector.h"
-#include "../util/utils.h"
-#include "../util/genalgs.h"
-#include "../util/_conditional_macros.h"
-#include "../util/_exception.h"
-#include "../private/_range.h"
+#include "core/matrix.h"
+#include "core/vector.h"
+#include "util/utils.h"
+#include "util/genalgs.h"
+#include "util/_conditional_macros.h"
+#include "util/_exception.h"
+#include "private/_range.h"
 
 DGE_MATRICE_BEGIN
 /**
@@ -245,7 +245,7 @@ public:
 	/**
 	 *\brief read data from a file at _Path
 	 *\param [_Path] refers to the location of target file
-			   [_Skips] indicates how many lines to skip over
+			 [_Skips] indicates how many lines to skip over
 	 */
 	template<typename _Ty>
 	static MATRICE_HOST_INL auto read(std::string _Path, size_t _Skips = 0) {
@@ -260,7 +260,8 @@ public:
 		}
 		std::vector<std::vector<value_type>> _Data;
 		while (std::getline(_Fin, _Line)) {
-			_Data.push_back(split<value_type>(_Line, ','));
+			if(!_Line.empty())
+				_Data.push_back(split<value_type>(_Line, ','));
 		}
 
 		Matrix<value_type> _Res(_Data.size(),_Data.front().size());
@@ -308,9 +309,17 @@ public:
 
 	// \split a string with the given token
 	template<typename _Ty = std::string> static 
-	MATRICE_HOST_FINL auto split(const std::string& _str, char _tok) {
-		std::vector<_Ty> _Res;
-
+	MATRICE_HOST_FINL auto split(const std::string& _str, char _tok = ',') {
+		MATRICE_USE_STD(vector);
+		MATRICE_USE_STD(distance);
+		if constexpr (std::is_arithmetic_v<_Ty>) {
+			const auto _Tok = std::find_if(_str.begin(), _str.end(), 
+				[](const auto _Val) {
+					return !(std::isdigit(_Val) || _Val == '.' || _Val == '-');
+				});
+			_tok = *_Tok;
+		}
+		vector<_Ty> _Res;
 		const auto _String = std::string(1, _tok) + _str;
 		auto _Pos = _String.begin(), _End = _String.end();
 		if (_String.back() == _tok) --_End;
@@ -318,7 +327,8 @@ public:
 		while (_Pos != _End) {
 			auto _Pos_last = _Pos+1;
 			_Pos = std::find(_Pos_last, _End, _tok);
-			_Res.push_back(stonv<_Ty>(_String.substr(std::distance(_String.begin(), _Pos_last), std::distance(_Pos_last, _Pos))));
+			_Res.push_back(stonv<_Ty>(_String.substr(distance(_String.begin(), _Pos_last), 
+				distance(_Pos_last, _Pos))));
 		}
 
 		return (_Res);
@@ -327,9 +337,9 @@ public:
 };
 
 // \read interface
-template<typename... _Args>
-MATRICE_HOST_INL auto read(_Args...args)->decltype(IO::read(args...)){
-	try { return IO::read(args...); } 
+template<typename _Ty, typename... _Args>
+MATRICE_HOST_INL auto read(_Args...args){
+	try { return IO::read<_Ty>(args...); } 
 	catch (std::exception& _E) { throw _E; } 
 };
 // \write interface
@@ -350,7 +360,7 @@ MATRICE_HOST_INL decltype(auto) defpath(const T local) {
 /// <typeparam name="_Ty"></typeparam>
 /// <param name="m">a matrix with type of dgelom::Matrix_</param>
 template<typename _Ty, int _M, int _N>
-void print(const Matrix_<_Ty, _M, _N>& m, const std::string& name = "Anon.") {
+void print(const Matrix_<_Ty, _M, _N>& m, const std::string& name = "Array") {
 	std::cout << "[" << name <<", dim:" << m.rows() << "x" << m.cols() << "\n";
 	for (auto _It = m.rwbegin(); _It != m.rwend(); ++_It) {
 		std::cout << " ";
@@ -361,6 +371,13 @@ void print(const Matrix_<_Ty, _M, _N>& m, const std::string& name = "Anon.") {
 		std::cout << "\n";
 	}
 	std::cout << "]\n";
+}
+template<typename _Ty>
+void print(const _Ty& m, const std::string& name = "Scalar") {
+	std::cout << "[" << name << ", dim:" << 1 << "x" << 1 << "\n";
+	std::cout << " " << std::setiosflags(std::ios::left)
+			<< std::setprecision(8) << std::setw(15) << m;
+	std::cout << "\n]\n";
 }
 
 // \Class: std::string helper  
