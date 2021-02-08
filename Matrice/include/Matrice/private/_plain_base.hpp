@@ -938,10 +938,34 @@ public:
 		return (reduce(begin().stride(cols()+1), end().stride(cols()+1), 1));
 	}
 
+	/// <summary>
+	/// \brief Reduction along a given axis.
+	/// </summary>
+	/// <param name="keep_dims"></param>
+	/// <returns></returns>
+	template<char Axis = -1> 
+	MATRICE_GLOBAL_INL auto sum(bool keep_dims = false) const {
+		if constexpr (Axis == -1) {
+			return reduce(begin(), end());
+		}
+		if constexpr (Axis == 0) {
+			_Derived _Ret(shape_t<3>(1, m_shape.w, m_shape.d));
+			return _Ret;
+		}
+		if constexpr (Axis == 1) {
+			_Derived _Ret(shape_t<3>(m_shape.h, 1, m_shape.d));
+			return _Ret;
+		}
+		if constexpr (Axis == 2) {
+			_Derived _Ret(shape_t<3>(m_shape.h, m_shape.w, 1));
+			return _Ret;
+		}
+	}
+
 	/**
-	 * \matrix Frobenius norm
+	 * \brief Frobenius norm, i.e. L2 norm.
 	 */
-	MATRICE_GLOBAL_FINL value_type norm_2()const noexcept {
+	MATRICE_GLOBAL_FINL value_type norm()const noexcept {
 		auto _Ans = dot(*this); 
 		return (_Ans > eps ? ::sqrt(_Ans) : inf); 
 	}
