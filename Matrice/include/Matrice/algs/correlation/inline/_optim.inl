@@ -124,8 +124,9 @@ auto _Corr_optim_base<_Derived>::_Cond()->matrix_type& {
 	_Myhess = _Myhess * _Issd;
 	_Myhess = _Myhess + matrix_fixed::diag(_Myopt._Coeff);
 	internal::_Lak_adapter<spt>(_Myhess.view());
-	//const auto solver = make_linear_solver<spt>(_Myhess);
-	//_Myhess = solver.inv();
+	
+	// ad hoc for robust eval.
+	_Myissd = _Issd;
 
 	return (_Myref);
 }
@@ -133,11 +134,11 @@ auto _Corr_optim_base<_Derived>::_Cond()->matrix_type& {
 template<typename _Derived> MATRICE_HOST_INL 
 auto _Corr_optim_base<_Derived>::_Guess(rect_type roi)->point_type {
 	const auto _Start = roi.begin(), _End = roi.end();
-	decltype(auto) _Data = _Myimcur->data();
+	const auto _Data = _Myimcur->data();
 	const auto _Stride = rect_type::value_type(_Myopt._Radius>>1);
 
 	//narrow the ROI if it hits the boundaries of the image
-	const auto _Off = _Myopt._Radius + 1;
+	const auto _Off{ _Myopt._Radius + 1 };
 	transforms::clamp<rect_type::value_type> _Clamp(_Off, _Data.cols()-_Off);
 	_Start[0] = _Clamp(_Start.x), _End[0] = _Clamp(_End.x);
 	_Clamp._Myupper = _Data.rows() - _Off;
@@ -190,8 +191,6 @@ auto _Corr_optim_base<_Derived>::_Solve(param_type& Par) {
 #endif
 
 	// \solve update to the warp parameter vector.
-	//param_type _Dp = _Myhess.mul(_Sdp);
-	//_Sdp = _Dp;
 	internal::_Bwd_adapter<spt>(_Myhess.view(), _Sdp.view());
 
 	// \inverse composition to update param.
@@ -214,7 +213,7 @@ auto _Corr_optim_base<_Derived>::robust_sol(param_type& Par)
 
 	// \compute robustness and weight Jacobian
 	for (auto i = 0; i < _Myweight.size(); ++i) {
-		const auto wi = _Myloss.phi(_Mydiff(i));
+		const auto wi = _Myloss.phi(sq(_Mydiff(i)));
 		_Myweight(i) = wi;
 		for (auto j = 0; j < _Myjaco.cols(); ++j) {
 			_Myjaco_tw.cview(i)(j) = _Myjaco[i][j] * wi;
@@ -222,9 +221,8 @@ auto _Corr_optim_base<_Derived>::robust_sol(param_type& Par)
 	}
 
 	// \compute weighted Gauss-Newton Hessian matrix
-	const auto _Issd = one<value_type> / sqrt(sq(_Myref).sum());
 	_Myhess = _Myjaco_tw.mul(_Myjaco);
-	_Myhess = _Myhess * _Issd;
+	_Myhess = _Myhess * _Myissd;
 
 	// \steepest descent parameter update
 	param_type _Sdp = _Myjaco_tw.mul(_Mydiff);
@@ -238,7 +236,7 @@ auto _Corr_optim_base<_Derived>::robust_sol(param_type& Par)
 
 	auto _Loss = value_type(0);
 	for (auto i = 0; i < _Mydiff.size(); ++i) {
-		_Loss += _Myloss.rho(_Mydiff(i));
+		_Loss += _Myloss.rho(sq(_Mydiff(i)));
 	}
 
 	// \report least square correlation coeff., param. error, and loss.
@@ -382,4 +380,31 @@ auto _Corr_solver_impl<_Ty, _Itag, _Alg_icgn<1>>::_Diff(value_type cx, value_typ
 #pragma endregion
 
 _DETAIL_END
+
+/// <summary>
+/// \brief Evaluate performance in terms of mean and standard deviation errors.
+/// </summary>
+/// <typeparam name="_FwdIt">Require forward iterator type</typeparam>
+/// <param name="_Begin">: Start iterator of measurements.</param>
+/// <param name="_End'">: End iterator of measurements.</param>
+/// <param name="_Gt">: Ground-truth.</param>
+/// <returns>Tuple with {mean, SD}</returns>
+template<typename _FwdIt>
+MATRICE_GLOBAL_INL auto eval_perf(const _FwdIt _Begin, const _FwdIt _End, primitive_type_t<_FwdIt> _Gt) noexcept {
+	decltype(_Gt) _Mean = 0;
+	for (auto _It = _Begin; _It != _End; ++_It) {
+		_Mean += *_It;
+	}
+	const auto _Count = _End - _Begin;
+	_Mean = (_Mean - _Gt) / _Count;
+
+	decltype(_Mean) _Stdv = 0;
+	for (auto _It = _Begin; _It != _End; ++_It) {
+		_Stdv += sq(abs(*_It - _Gt) - _Mean);
+	}
+	_Stdv = sqrt(_Stdv / (_Count - 1));
+
+	return tuple{ _Mean, _Stdv };
+}
+
 MATRICE_ALG_END(corr)
