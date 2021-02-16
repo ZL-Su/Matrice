@@ -1,6 +1,6 @@
-/**************************************************************************
+/*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
-**************************************************************************/
+*********************************************************************/
 #pragma once
 
 #include <type_traits>
@@ -26,9 +26,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 DGE_MATRICE_BEGIN
 
 static_assert(sizeof(void *) == 8, "MATRICE supports 64 bit only.");
+static_assert(_HAS_CXX20, "MATRICE requires to be compiled with C++ 20.");
 
-template<typename _Ty = long double>
-inline constexpr _Ty pi{ static_cast<_Ty>(3.14159265358979323846264338327950288419716939937510582097494459) };
+template<typename _Ty = long double> requires is_scalar_v<_Ty>
+MATRICE_GLOBAL_INL constexpr _Ty pi{ static_cast<_Ty>(3.14159265358979323846264338327950288419716939937510582097494459) };
 
 namespace detail {
 template<typename _Ty> struct string_to_numval {
