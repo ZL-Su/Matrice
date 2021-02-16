@@ -90,7 +90,7 @@ T cast_string_to(std::string&& _Str) noexcept {
 }
 
 /**
- * \brief  cast T-typed numeric to std::string
+ * \brief Cast T-typed (numeric) value to std::string.
  * \example: 
 		const auto str = dgelom::cast_to_string(3.14159); //str = "3.14159"
  */
@@ -98,10 +98,16 @@ template<typename T> MATRICE_HOST_INL
 std::string cast_to_string(T _Val) noexcept {
 	return std::to_string(_Val);
 }
+/**
+ * \brief Cast T-typed (numeric) value to std::string with a given bit number.
+ *	If the character bit is less than the bit number, zeros are filled in the vacancy at the left side.
+ * \example:
+		const auto str = dgelom::cast_to_string(10, 4); //str = "0010"
+ */
 template<typename T> MATRICE_HOST_INL
-std::string cast_to_string(T _Val, uint8_t _Digits) noexcept {
+std::string cast_to_string(T _Val, uint8_t _Ndigs) noexcept {
 	std::string _Pref{};
-	switch (_Digits)
+	switch (_Ndigs)
 	{
 	case 2: 
 		if (_Val < 10) _Pref = "0"; break;
@@ -127,9 +133,16 @@ std::string cast_to_string(T _Val, uint8_t _Digits) noexcept {
 	}
 	return (_Pref + cast_to_string(_Val));
 }
+/**
+ * \brief Driver of the above two functions cast_to_string(...).
+ */
+template<typename... Ts>
+MATRICE_HOST_INL auto str(Ts&&... _Args) noexcept {
+	return cast_to_string(_Args...);
+}
 
 /**
- * \brief  append a T-typed element into tuple _Tpl
+ * \brief Append a T-typed element into tuple _Tpl.
  */
 template<typename T, typename... U> MATRICE_HOST_FINL
 tuple<U..., T> tuple_append(const tuple<U...>& _Tpl, const T& _Val) {
@@ -137,7 +150,7 @@ tuple<U..., T> tuple_append(const tuple<U...>& _Tpl, const T& _Val) {
 }
 
 /**
- * \packs the first _N element from _E into a tuple
+ * \brief Packs the first _N element from _E into a tuple.
  */
 template<size_t _N> struct tuple_n {
 	template<typename U> MATRICE_HOST_FINL static auto _(const U& _E) {
