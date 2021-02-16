@@ -25,43 +25,52 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 DGE_MATRICE_BEGIN
 
-static_assert(sizeof(void *) == 8, "MATRICE supports 64 bit only");
+static_assert(sizeof(void *) == 8, "MATRICE supports 64 bit only.");
 
 template<typename _Ty = long double>
 inline constexpr _Ty pi{ static_cast<_Ty>(3.14159265358979323846264338327950288419716939937510582097494459) };
 
 namespace detail {
-	template<typename _Ty> struct string_to_numval {
-		static MATRICE_HOST_FINL auto value(const std::string& _Str) { return (_Str); }
-	};
-	template<> struct string_to_numval<int> {
-		static MATRICE_HOST_FINL auto value(const std::string& _Str) { return std::stoi(_Str); }
-	};
-	template<> struct string_to_numval<long> {
-		static MATRICE_HOST_FINL auto value(const std::string& _Str) { return std::stol(_Str); }
-	};
-	template<> struct string_to_numval<float> {
-		static MATRICE_HOST_FINL auto value(const std::string& _Str) { return std::stof(_Str); }
-	};
-	template<> struct string_to_numval<double> {
-		static MATRICE_HOST_FINL auto value(const std::string& _Str) { return std::stod(_Str); }
-	};
-	template<> struct string_to_numval<long double> {
-		static MATRICE_HOST_FINL auto value(const std::string& _Str) { return std::stold(_Str); }
-	};
-	template<> struct string_to_numval<long long> {
-		static MATRICE_HOST_FINL auto value(const std::string& _Str) { return std::stoll(_Str); }
-	};
-	template<> struct string_to_numval<unsigned long> {
-		static MATRICE_HOST_FINL auto value(const std::string& _Str) { return std::stoul(_Str); }
-	};
-	template<> struct string_to_numval<unsigned long long> {
-		static MATRICE_HOST_FINL auto value(const std::string& _Str) { return std::stoull(_Str); }
-	};
+template<typename _Ty> struct string_to_numval {
+	static MATRICE_HOST_FINL auto value(const std::string& _Str)noexcept { 
+		return (_Str); }
+};
+template<> struct string_to_numval<int> {
+	static MATRICE_HOST_FINL auto value(const std::string& _Str)noexcept {
+		return std::stoi(_Str); }
+};
+template<> struct string_to_numval<long> {
+	static MATRICE_HOST_FINL auto value(const std::string& _Str)noexcept {
+		return std::stol(_Str); }
+};
+template<> struct string_to_numval<float> {
+	static MATRICE_HOST_FINL auto value(const std::string& _Str)noexcept {
+		return std::stof(_Str); }
+};
+template<> struct string_to_numval<double> {
+	static MATRICE_HOST_FINL auto value(const std::string& _Str)noexcept {
+		return std::stod(_Str); }
+};
+template<> struct string_to_numval<long double> {
+	static MATRICE_HOST_FINL auto value(const std::string& _Str)noexcept {
+		return std::stold(_Str); }
+};
+template<> struct string_to_numval<long long> {
+	static MATRICE_HOST_FINL auto value(const std::string& _Str)noexcept {
+		return std::stoll(_Str); }
+};
+template<> struct string_to_numval<unsigned long> {
+	static MATRICE_HOST_FINL auto value(const std::string& _Str)noexcept {
+		return std::stoul(_Str); }
+};
+template<> struct string_to_numval<unsigned long long> {
+	static MATRICE_HOST_FINL auto value(const std::string& _Str)noexcept {
+		return std::stoull(_Str); }
+};
 }
 
 /**
- * \brief  cast a string to a user specified type T.
+ * \brief Cast a string to a user specified type T.
  * \example: 
 		const auto val = dgelom::stonv<float>("1.0"); //val = 1.0f;
  */
@@ -77,7 +86,7 @@ T cast_string_to(std::string&& _Str) noexcept {
 #ifdef MATRICE_DEBUG
 	DGELOM_CHECK(!_Str.empty(), "_Str should not be empty.")
 #endif
-		return detail::string_to_numval<T>::value(_Str);
+	return detail::string_to_numval<T>::value(_Str);
 }
 
 /**
@@ -154,28 +163,28 @@ template<> struct tuple_n<0> {
 };
 
 /**
- *\brief get size of built-in array
+ *\brief Get size of built-in array
  */
 template<typename _Ty, size_t _N>
 MATRICE_GLOBAL_INL constexpr size_t size(_Ty(&)[_N]) noexcept { 
 	return (_N); 
 }
 /**
- *\brief get size of std::array
+ *\brief Get size of std::array
  */
 template<typename _Ty, size_t _N>
 MATRICE_HOST_INL constexpr size_t size(std::array<_Ty, _N>&) noexcept {
 	return (_N); 
 }
 /**
- *\brief get compile-time size of a matrix_<,,>
+ *\brief Get compile-time size of a matrix_<,,>
  */
 template<template<typename,int,int>class _My, typename _Ty, int _M, int _N>
 MATRICE_HOST_INL constexpr size_t size(const _My<_Ty, _M, _N>&) noexcept {
 	return (_M*_N);
 }
 /**
- *\brief get size of container which must has method size()
+ *\brief Get size of container which must has method size()
  */
 template<typename _Cont>
 MATRICE_HOST_INL constexpr size_t size(const _Cont& _) noexcept {
@@ -183,11 +192,11 @@ MATRICE_HOST_INL constexpr size_t size(const _Cont& _) noexcept {
 }
 
 /**
- *\brief call func[_Fn] in a lock guarded way.
+ *\brief Call func[_Fn] in a lock guarded way.
  *\param [args] variadic argument(s) in function "func".
  */
 template<typename _Mtx, typename _Fn, typename... _Args>
-MATRICE_HOST_INL decltype(auto)locked_call(_Mtx& mtx, _Fn&& func, _Args...args){
+MATRICE_HOST_INL auto locked_call(_Mtx& mtx, _Fn&& func, _Args...args){
 	std::lock_guard<_Mtx> __guard__(mtx);
 	return func(args...);
 }
@@ -196,7 +205,7 @@ MATRICE_HOST_INL decltype(auto)locked_call(_Mtx& mtx, _Fn&& func, _Args...args){
  * \unroll a linear index "idx" to 2d indices [y, x].
  */
 template<typename _Ity>
-MATRICE_GLOBAL_INL decltype(auto) unroll_linear_index(_Ity idx, _Ity width) noexcept {
+MATRICE_GLOBAL_INL auto unroll_linear_index(_Ity idx, _Ity width) noexcept {
 	const auto y = safe_div(idx, width);
 	const auto x = idx - y * width;
 	return std::make_tuple(y, x);
