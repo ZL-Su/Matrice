@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
-#define _VIEW_EWISE_COPY_N(_LEFT, _N)\
+#define MATRICE_VIEW_EWISE_COPY_N(_LEFT, _N)\
 const size_t _Size = min(size(),_N); \
 for(size_t _Idx = 0; _Idx < _Size; ++_Idx) { \
 	_LEFT(_Idx) = this->operator()(_Idx); \
@@ -34,7 +34,7 @@ template<typename _Ty, int _Rows, int _Cols> class Matrix_;
 template<typename _Ty, typename _Derived, int _M = 0, int _N = _M> 
 class _View_base 
 {
-#define _VIEW_EWISE_OP(_OPERATION) \
+#define MATRICE_VIEW_EWISE_OP(_OPERATION) \
 for (difference_type i = 0; i < size(); ++i) {\
 static_cast<_Derived*>(this)->operator()(i) = _OPERATION;\
 } return (*this)
@@ -132,21 +132,21 @@ public:
 	 *\param [_Val] an input scalar
 	 */
 	MATRICE_GLOBAL_INL _Myt& operator=(value_type _Val)noexcept {
-		_VIEW_EWISE_OP(_Val);
+		MATRICE_VIEW_EWISE_OP(_Val);
 	}
 	/**
 	 *\brief Copy from another view
 	 *\param [_Oth] another view input
 	 */
 	MATRICE_GLOBAL_FINL _Myt& operator=(const _Myt& _Oth)noexcept {
-		_VIEW_EWISE_OP(_Oth(i));
+		MATRICE_VIEW_EWISE_OP(_Oth(i));
 	}
 	/**
 	 *\brief Fill view memory from a given pointer
 	 *\param [_Data] an input pointer, the size of the pointer pointed memory should not less than the size of the view 
 	 */
 	MATRICE_GLOBAL_FINL _Myt& operator=(pointer _Data)noexcept {
-		_VIEW_EWISE_OP(_Data[i]);
+		MATRICE_VIEW_EWISE_OP(_Data[i]);
 	}
 	/**
 	 *\brief Fill view memory from a initializer_list
@@ -157,7 +157,7 @@ public:
 		DGELOM_CHECK(size() <= _L.size(), 
 			"Size of the input list _L must not less than ::size() of this view.");
 #endif
-		_VIEW_EWISE_OP(*(_L.begin() + i));
+		MATRICE_VIEW_EWISE_OP(*(_L.begin() + i));
 	}
 	/**
 	 *\brief Fill view memory from a customer class type
@@ -165,7 +165,7 @@ public:
 	 */
 	template<typename _Mty, MATRICE_ENABLE_IF(is_class_v<_Mty>)>
 	MATRICE_GLOBAL_INL _Myt& operator=(const _Mty& _M)noexcept {
-		_VIEW_EWISE_OP(_M(i));
+		MATRICE_VIEW_EWISE_OP(_M(i));
 	}
 	/**
 	 *\brief Evaluation from an expression
@@ -203,7 +203,7 @@ protected:
 	size_t  _Mystride;
 	size_t  _Myoffset;
 
-#undef _VIEW_EWISE_OP
+#undef MATRICE_VIEW_EWISE_OP
 };
 
 /**********************************************************************
@@ -241,7 +241,7 @@ public:
 	template<size_t N=_Base::cols_at_compiletime> 
 	MATRICE_GLOBAL_INL auto eval() const {
 		Matrix_<value_t, 1, min_integer_v<N, _Base::cols_at_compiletime>> _Ret(1, cols());
-		_VIEW_EWISE_COPY_N(_Ret, N);
+		MATRICE_VIEW_EWISE_COPY_N(_Ret, N);
 		return forward<decltype(_Ret)>(_Ret);
 	}
 };
@@ -276,13 +276,15 @@ public:
 	MATRICE_GLOBAL_FINL constexpr auto size() const { return _Mysize; }
 
 	/**
-	 *\Retrieve the first _N element into a true static column-matrix.
+	 *\Restore the first N element into a column-matrix.
 	 */
 	template<size_t N= _Base::rows_at_compiletime>
 	MATRICE_GLOBAL_INL auto eval() const {
-		Matrix_<value_t, min_integer_v<N, _Base::rows_at_compiletime>, 1> _Ret(rows(), 1);
-		_VIEW_EWISE_COPY_N(_Ret, N);
-		return std::forward<decltype(_Ret)>(_Ret);
+		Matrix_<value_t, 
+			min_integer_v<N, _Base::rows_at_compiletime>, 
+			1> _Ret(rows(), 1);
+		MATRICE_VIEW_EWISE_COPY_N(_Ret, N);
+		return forward<decltype(_Ret)>(_Ret);
 	}
 };
 
@@ -351,7 +353,7 @@ public:
 	template<int _M = 0, int _N = _M>
 	MATRICE_GLOBAL_INL auto eval() const {
 		Matrix_<value_t, _M, _N> _Ret(rows(), cols());
-		_VIEW_EWISE_COPY_N(_Ret, _Ret.size());
+		MATRICE_VIEW_EWISE_COPY_N(_Ret, _Ret.size());
 		return forward<decltype(_Ret)>(_Ret);
 	}
 private:
@@ -402,7 +404,7 @@ private:
 	size_t _Myhsize, _Mywsize;
 };
 
-#undef _VIEW_EWISE_COPY_N
+#undef MATRICE_VIEW_EWISE_COPY_N
 _DETAIL_END
 /**
  * \brief Make a full view to the given matrix or vector _M.
