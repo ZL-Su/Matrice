@@ -633,6 +633,23 @@ public:
 		return _Myt_blockview_type(m_data, m_cols, m_rows);
 	}
 
+	/// <summary>
+	/// \brief View of a plan object with a given axis.
+	/// </summary>
+	/// <param name="_Axis"> := 0 for row axis and := 1 for column axis. </param>
+	/// <param name="i">-th row and column for _Axis := 0 and 1, respectively.</param>
+	/// <returns></returns>
+	template<unsigned char _Axis>
+	MATRICE_GLOBAL_INL const auto view(size_t i) const noexcept {
+		if constexpr (_Axis == 0) return rview(i);
+		if constexpr (_Axis == 1) return cview(i);
+	}
+	template<unsigned char _Axis>
+	MATRICE_GLOBAL_INL auto view(size_t i) noexcept {
+		if constexpr (_Axis == 0) return rview(i);
+		if constexpr (_Axis == 1) return cview(i);
+	}
+
 	// \View of submatrix: x \in [x0, x1) and y \in [y0, y1)
 	MATRICE_GLOBAL_INL auto block(index_t x0, index_t x1, index_t y0, index_t y1) {
 #ifdef MATRICE_DEBUG
