@@ -211,7 +211,8 @@ protected:
 	    Copyright (c) : Zhilong (Dgelom) Su, since 25/Jul/2018
  **********************************************************************/
 template<typename _Ty, int _Cols = ::dynamic>
-class _Matrix_rview MATRICE_NONHERITABLE : public _View_base<_Ty, _Matrix_rview<_Ty, _Cols>, 1, _Cols>
+class _Matrix_rview MATRICE_NONHERITABLE 
+	: public _View_base<_Ty, _Matrix_rview<_Ty, _Cols>, 1, _Cols>
 {
 	using _Base = _View_base<_Ty, _Matrix_rview, 1, _Cols>;
 	using _Base::_Mydata;
@@ -240,8 +241,9 @@ public:
 	 */
 	template<size_t N=_Base::cols_at_compiletime> 
 	MATRICE_GLOBAL_INL auto eval() const {
-		Matrix_<value_t, 1, min_integer_v<N, _Base::cols_at_compiletime>> _Ret(1, cols());
-		MATRICE_VIEW_EWISE_COPY_N(_Ret, N);
+		Matrix_<value_t, 1, 
+			min_integer_v<N, _Base::cols_at_compiletime>> _Ret(1, cols());
+		MATRICE_VIEW_EWISE_COPY_N(_Ret, _Ret.size());
 		return forward<decltype(_Ret)>(_Ret);
 	}
 };
@@ -283,7 +285,7 @@ public:
 		Matrix_<value_t, 
 			min_integer_v<N, _Base::rows_at_compiletime>, 
 			1> _Ret(rows(), 1);
-		MATRICE_VIEW_EWISE_COPY_N(_Ret, N);
+		MATRICE_VIEW_EWISE_COPY_N(_Ret, _Ret.size());
 		return forward<decltype(_Ret)>(_Ret);
 	}
 };
