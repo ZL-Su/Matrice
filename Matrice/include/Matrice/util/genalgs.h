@@ -1,9 +1,23 @@
 /*********************************************************************
-	  About License Agreement of this file, see "../lic/license.h"
-*********************************************************************/
+This file is part of Matrice, an effcient and elegant C++ library.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
+
+This program is free software : you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.If not, see <http://www.gnu.org/licenses/>.
+***********************************************************************/
 #pragma once
 #include <xutility>
-#include<algorithm>
+#include <algorithm>
 #include "_macros.h"
 #include "_std_wrapper.h"
 #ifdef MATRICE_SIMD_ARCH
@@ -62,8 +76,8 @@ auto transform(const _Fwd1& _Src, _Fwd2& _Dst)->_Fwd2& {
 
 /**
  *\brief Process container entry with a unary functor.
- *\param [_Cont] a container with forward iterator
- *\param [_Func] a unary functor to be applied to every dereferenced iterator
+ *\param [_Cont] a container with forward iterator.
+ *\param [_Func] a unary functor to be applied to every dereferenced iterator.
  */
 template<typename _Fwdty, typename _Fn, 
 	MATRICE_ENABLE_IF(is_class_v<_Fwdty>)>
@@ -95,9 +109,9 @@ MATRICE_GLOBAL_FINL void fill(_FwdIt _First, _FwdIt _Last, size_t _Stride, const
 	for (; _UFirst < _ULast; _UFirst += _Stride) *_UFirst = _Val;
 }
 /**
- *\brief Fill a container with the return of a given functor
- *\param [_Cont] container with forward iterator
- *\param [_Func] a given functor with signature ~~~_Ty _Func()~~~
+ *\brief Fill a container with the return of a given functor.
+ *\param [_Cont] container with forward iterator.
+ *\param [_Func] a given functor with signature "_Ty _Func()".
  */
 template<typename _Fwdty, typename _Fn>
 MATRICE_GLOBAL_FINL void fill(_Fwdty& _Cont, _Fn&& _Func) {
@@ -106,11 +120,10 @@ MATRICE_GLOBAL_FINL void fill(_Fwdty& _Cont, _Fn&& _Func) {
 	for (; _UFirst < _ULast; ++_UFirst) *_UFirst = _Func();
 }
 
-// \return summation of the range [_First, _Last) with SIMD
+// \return summation of the range [_First, _Last) with SIMD.
 template<typename _InIt>
 MATRICE_GLOBAL_INL auto reduce(_InIt _First, _InIt _Last) {
 	static_cast<void>(_First == _Last);
-
 	double _Ret{ 0 };
 	for (; _First != _Last; (void)++_First) 
 		_Ret += *_First;
@@ -165,9 +178,11 @@ template<> struct _Reduce_n<0> {
 };
 
 template<size_t N, size_t M>
-struct _Power_nm : std::integral_constant<size_t,N*_Power_nm<N,M-1>::value> {};
+struct _Power_nm : 
+	std::integral_constant<size_t,N*_Power_nm<N,M-1>::value> {};
 template<size_t N>
-struct _Power_nm<N,0> : std::integral_constant<size_t, 1> {};
+struct _Power_nm<N,0> : 
+	std::integral_constant<size_t, 1> {};
 
 template<size_t N> struct _Power_n {
 	template<typename _Ty> static
@@ -188,8 +203,9 @@ template<size_t _Expo = 1>
 using power_n_t = detail::_Power_n<_Expo>;
 
 /**
- *\brief Compile time power operation
-//tex: $$N^M$$
+ * \brief Power operation $N^M$ at compile time.
+ * \param <_N> Base number.
+ * \param <_M> Exponent number.
  */
 template<size_t _N, size_t _M>
 constexpr auto power_nm_v = detail::_Power_nm<_N, _M>::value;

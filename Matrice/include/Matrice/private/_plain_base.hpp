@@ -633,6 +633,23 @@ public:
 		return _Myt_blockview_type(m_data, m_cols, m_rows);
 	}
 
+	/// <summary>
+	/// \brief View of a plan object with a given axis.
+	/// </summary>
+	/// <param name="_Axis"> := 0 for row axis and := 1 for column axis. </param>
+	/// <param name="i">-th row and column for _Axis := 0 and 1, respectively.</param>
+	/// <returns></returns>
+	template<unsigned char _Axis>
+	MATRICE_GLOBAL_INL const auto view(size_t i) const noexcept {
+		if constexpr (_Axis == 0) return rview(i);
+		if constexpr (_Axis == 1) return cview(i);
+	}
+	template<unsigned char _Axis>
+	MATRICE_GLOBAL_INL auto view(size_t i) noexcept {
+		if constexpr (_Axis == 0) return rview(i);
+		if constexpr (_Axis == 1) return cview(i);
+	}
+
 	// \View of submatrix: x \in [x0, x1) and y \in [y0, y1)
 	MATRICE_GLOBAL_INL auto block(index_t x0, index_t x1, index_t y0, index_t y1) {
 #ifdef MATRICE_DEBUG
@@ -938,10 +955,34 @@ public:
 		return (reduce(begin().stride(cols()+1), end().stride(cols()+1), 1));
 	}
 
+	/// <summary>
+	/// \brief Reduction along a given axis.
+	/// </summary>
+	/// <param name="keep_dims"></param>
+	/// <returns></returns>
+	template<char Axis = -1> 
+	MATRICE_GLOBAL_INL auto sum(bool keep_dims = false) const {
+		if constexpr (Axis == -1) {
+			return reduce(begin(), end());
+		}
+		if constexpr (Axis == 0) {
+			_Derived _Ret(shape_t<3>(1, m_shape.w, m_shape.d));
+			return _Ret;
+		}
+		if constexpr (Axis == 1) {
+			_Derived _Ret(shape_t<3>(m_shape.h, 1, m_shape.d));
+			return _Ret;
+		}
+		if constexpr (Axis == 2) {
+			_Derived _Ret(shape_t<3>(m_shape.h, m_shape.w, 1));
+			return _Ret;
+		}
+	}
+
 	/**
-	 * \matrix Frobenius norm
+	 * \brief Frobenius norm, i.e. L2 norm.
 	 */
-	MATRICE_GLOBAL_FINL value_type norm_2()const noexcept {
+	MATRICE_GLOBAL_FINL value_type norm()const noexcept {
 		auto _Ans = dot(*this); 
 		return (_Ans > eps ? ::sqrt(_Ans) : inf); 
 	}

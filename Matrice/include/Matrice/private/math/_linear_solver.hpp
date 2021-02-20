@@ -20,17 +20,37 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "core/matrix.h"
 
 DGE_MATRICE_BEGIN
+/// <summary>
+/// \brief Singular value decomposition tag.
+/// </summary>
 struct svd { enum { singular_value_decomp = 4 }; };
+/// <summary>
+/// \brief Symmetric positive-definite triangulation tag.
+/// </summary>
 struct spt { enum { spdtr_cholesky_decomp = 2 }; };
+/// <summary>
+/// \brief General LU factorization tag. 
+/// </summary>
 struct lud { enum { lower_upper_tr_decomp = 1 }; };
+/// <summary>
+/// \brief General QR decomposition tag. 
+/// </summary>
 struct qrd { enum { ortho_upper_tr_decomp = 3 }; };
+/// <summary>
+/// \brief Linear least squares solver tag. 
+/// </summary>
 struct lls { enum { linear_least_squares = 0 }; };
+
+/// <summary>
+/// \brief Store linear solver status.
+/// </summary>
 struct solver_status {
 	int value = 1;
 	MATRICE_GLOBAL_FINL bool success() noexcept {
 		return value == 0;
 	}
 };
+
 _INTERNAL_BEGIN
 // \brief Parse and invoke the linear algebra kernel according to _Op.
 template<typename _Op, typename... _Ts>
@@ -65,6 +85,13 @@ public:
 	 */
 	_Linear_solver_base(const matrix_type& coeff) noexcept
 		:_Mycoeff{ coeff }, _Myeps{ matrix_type::eps } {
+	}
+
+	/**
+	 * \brief Perform coeff matrix forward preprocessing.
+	 */
+	MATRICE_GLOBAL_INL void forward() {
+		this->_Forward();
 	}
 
 	/**
@@ -202,11 +229,12 @@ class _Linear_solver : public _Linear_solver_base<_Linear_solver<_Mty, _Op>> {
 public:
 	using typename _Mybase::value_type;
 	using typename _Mybase::matrix_type;
-	_Linear_solver(matrix_type& coeff) noexcept 
+	_Linear_solver(matrix_type& coeff, bool lazy_fwd = false) noexcept 
 		: _Mybase{ coeff } {
-		_Mybase::_Forward();
+		if (!lazy_fwd) {
+			_Mybase::_Forward();
+		}
 	}
-
 };
 
 // \brief CLASS TEMPLATE for linear least sqaure solver
@@ -242,9 +270,11 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(spt)
 	/**
 	 *\note The input coeff will be overwritten by $L$
 	 */
-	_Linear_solver(matrix_type& coeff) noexcept
-	    : _Mybase{ coeff } {
-		_Mybase::_Forward();
+	_Linear_solver(matrix_type& coeff, bool lazy_fwd = false) noexcept
+		: _Mybase{ coeff } {
+		if (!lazy_fwd) {
+			_Mybase::_Forward();
+		}
 	}
 	/**
 	 *  \brief Returns the determinant of the given coeff matrix.
@@ -279,9 +309,11 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(lud)
     /**
 	 *\note The input coeff will be overwritten by $L\U$
 	 */
-	_Linear_solver(matrix_type& coeff) noexcept
+	_Linear_solver(matrix_type& coeff, bool lazy_fwd = false) noexcept
 	    : _Mybase{ coeff }, _Myidx(coeff.rows() + 1) {
-	    _Mybase::_Forward();
+		if (!lazy_fwd) {
+			_Mybase::_Forward();
+		}
     }
     /**
 	 *\brief Get the pivot index vector by the partial pivoting.
@@ -358,11 +390,13 @@ MATRICE_MAKE_LINEAR_SOLVER_SPEC_BEGIN(svd)
 	/**
 	 *  \note: the input coeff will be overwritten by $\mathbf{U}$
 	 */
-	_Linear_solver(matrix_type& coeff) 
+	_Linear_solver(matrix_type& coeff, bool lazy_fwd = false) 
 		: _Mybase(coeff), 
 		_Mys(coeff.cols()), _Myvt(coeff.cols(), coeff.cols()) {
 		_Mybase::_Myeps *= value_type(0.5) * sqrt<value_type>(coeff.size());
-		_Mybase::_Forward();
+		if (!lazy_fwd) {
+			_Mybase::_Forward();
+		}
 	}
 
 	MATRICE_GLOBAL_INL decltype(auto)u()const noexcept {
@@ -451,5 +485,9 @@ _DETAIL_END
 template<typename _Op, class _Mty>
 auto make_linear_solver(_Mty& A) noexcept {
 	return detail::_Linear_solver<_Mty, _Op>(A);
+}
+template<typename _Op, class _Mty>
+auto make_linear_solver(_Mty& A, bool lazy_fwd) noexcept {
+	return detail::_Linear_solver<_Mty, _Op>(A, lazy_fwd);
 }
 DGE_MATRICE_END
