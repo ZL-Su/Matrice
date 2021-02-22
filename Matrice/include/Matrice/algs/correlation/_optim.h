@@ -23,10 +23,57 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 MATRICE_ALG_BEGIN(corr)
 _DETAIL_BEGIN
 
+// \solver tag declarations
+/// <summary>
+/// \brief IC-GN algorithm tag for internal solver
+/// </summary>
+template<size_t _Order> 
+struct _Alg_icgn : _TAG _Solver_tag {
+	static constexpr auto order = _Order;
+	static_assert(order < 3, "_Order must be 0, 1 or 2");
+};
+
+/// <summary>
+/// \brief FA-NR algorithm tag for internal solver
+/// </summary>
+template<size_t _Order> 
+struct _Alg_fanr : _TAG _Solver_tag {
+	static constexpr auto order = _Order;
+	static_assert(order < 3, "_Order must be 0, 1 or 2");
+};
+
+// \forward solver declaration 
+template<typename _Ty, typename _Itag, typename _Atag>
+class _Corr_solver_impl {};
+
+// \update on warp parameters
+template<typename _Alg_tag> struct _Param_update_strategy {};
+template<typename _Itp_tag> struct _Corr_border_size {};
+
+/// <summary>
+/// \brief TRAITS CLASS, correlation optimizer traits
+/// </summary>
+/// <typeparam name="_Ty">Scalar, primitive value type</typeparam>
+/// <typeparam name="_Itag">Interpolation function tag</typeparam>
+/// <typeparam name="_Atag">Internal solver tag</typeparam>
+template<typename _Ty, typename _Itag, typename _Atag>
+struct _Corr_solver_traits<_Corr_solver_impl<_Ty, _Itag, _Atag>> {
+	using value_type = _Ty;
+	using itp_category = _Itag;
+	using alg_category = _Atag;
+	using interpolator = interpolation<value_type, itp_category>;
+	using update_strategy = _Param_update_strategy<alg_category>;
+	using border_size = _Corr_border_size<itp_category>;
+	static constexpr auto order = alg_category::order;
+};
+
+/// <summary>
+/// \brief CLASS, correlation solver options
+/// </summary>
 struct _Correlation_options {
 	size_t _Radius = 15;  //patch radius
 	size_t _Maxits = 50;  //maximum iterations
-	size_t _Stride =  7;  //node spacing
+	size_t _Stride = 7;  //node spacing
 	float_t _Znssd = 0.6; //correlation threshold
 	float_t _Coeff = 0.0; //damping coefficient
 	mutable float_t _Mytol = 1.0e-6;
@@ -66,21 +113,21 @@ struct _Correlation_options {
 	 */
 	template<typename _Ty = default_type>
 	decltype(auto) tol(_Ty const scale) const noexcept {
-		return (scale*_Mytol);
+		return (scale * _Mytol);
 	}
 
 	/**
 	 * \brief Get range of the patch centered at point '_Pos'.
 	 */
-	template<bool _Is_cutoff, typename _Ty, 
+	template<bool _Is_cutoff, typename _Ty,
 		typename _Ret = conditional_t<_Is_cutoff, index_t, typename _Ty::value_t>>
-	MATRICE_GLOBAL_INL auto range(const _Ty& _Pos)->tuple<_Ret, _Ret, _Ret, _Ret> {
+		MATRICE_GLOBAL_INL auto range(const _Ty& _Pos)->tuple<_Ret, _Ret, _Ret, _Ret> {
 		using tuple_type = tuple<_Ret, _Ret, _Ret, _Ret>;
 		if constexpr (_Is_cutoff) {
 			const auto x = floor<_Ret>(_Pos.x), y = floor<_Ret>(_Pos.y);
 			return tuple_type(x - _Radius, x + _Radius + 1, y - _Radius, y + _Radius + 1);
 		}
-		return tuple_type(_Pos.x-_Radius, _Pos.x+_Radius+1, _Pos.y - _Radius, _Pos.y + _Radius + 1);
+		return tuple_type(_Pos.x - _Radius, _Pos.x + _Radius + 1, _Pos.y - _Radius, _Pos.y + _Radius + 1);
 	}
 
 	/**
@@ -90,53 +137,24 @@ struct _Correlation_options {
 	MATRICE_HOST_INL bool range_check(const _Pty& _Pos, const _Sty& _Shape) {
 		auto _TL = _Pos - _Radius; auto _RB = _Pos + _Radius;
 		if (floor(_TL(0)) < 0 || floor(_TL(1)) < 0 ||
-			_RB(0)>=get<0>(_Shape) || _RB(1)>=get<1>(_Shape))
+			_RB(0) >= get<0>(_Shape) || _RB(1) >= get<1>(_Shape))
 			return false;
 		return true;
 	}
 };
 
-// \solver tag declarations
-template<size_t _Order> 
-struct _Alg_icgn : _TAG _Solver_tag {
-	static constexpr auto order = _Order;
-	static_assert(order < 3, "_Order must be 0, 1 or 2");
-}; // inverse-compositional GN
-template<size_t _Order> 
-struct _Alg_fagn : _TAG _Solver_tag {
-	static constexpr auto order = _Order;
-	static_assert(order < 3, "_Order must be 0, 1 or 2");
-}; // forward-additional GN
-
-// \forward solver declaration 
-template<typename _Ty, typename _Itag, typename _Atag>
-class _Corr_solver_impl {};
-
-// \update on warp parameters
-template<typename _Alg_tag> struct _Param_update_strategy {};
-template<typename _Itp_tag> struct _Corr_border_size {};
-
-template<typename _Ty, typename _Itag, typename _Atag>
-struct _Corr_solver_traits<_Corr_solver_impl<_Ty, _Itag, _Atag>> {
-	using value_type = _Ty;
-	using itp_category = _Itag;
-	using alg_category = _Atag;
-	using interpolator = interpolation<value_type, itp_category>;
-	using update_strategy = _Param_update_strategy<alg_category>;
-	using border_size = _Corr_border_size<itp_category>;
-	static constexpr auto order = alg_category::order;
-};
-
-// \correlation optimizer base class
+/// <summary>
+/// \brief CLASS TEMPLATE, correlation optimizer base
+/// </summary>
+/// <typeparam name="_Derived"></typeparam>
 template<typename _Derived> class _Corr_optim_base {
 	using _Myt = _Corr_optim_base;
 	using _Mydt = _Derived;
 protected:
 	using _Mytraits = _Corr_solver_traits<_Mydt>;
 public:
-	/// <summary>
-	/// \brief Number of parameters to be estimated.
-	/// </summary>
+
+	// \brief Number of parameters to be estimated.
 	static constexpr auto npar = conditional_size_v<
 		_Mytraits::order == 0, 2, _Mytraits::order * 6>;
 	using value_type = typename _Mytraits::value_type;
@@ -148,10 +166,12 @@ public:
 	using vector_type = Matrix_<value_type, ::dynamic, 1>;
 	using options_type = _Correlation_options;
 	using interp_type = typename _Mytraits::interpolator;
+	// \brief Smooth image type supported by spline interpolation.
 	using smooth_image_t = interp_type;
 	using update_strategy = typename _Mytraits::update_strategy;
 	using rect_type = rect<size_t>;
 
+	// \brief Loss function definition.
 	struct loss_fn {
 		value_type rho(value_type x) noexcept {
 			return scale * (1 - exp(-x/ scale));
