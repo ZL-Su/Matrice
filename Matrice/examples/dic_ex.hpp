@@ -13,19 +13,26 @@ using corr_optim_t = dgelom::correlation_optimizer::icgn_bic_1<float>;
 using raw_image_t = corr_optim_t::matrix_type;
 using smooth_image_t = corr_optim_t::smooth_image_t;
 
-int corr_optimer_eng() try 
+int corr_optimer_eng(fs::path&& apath, std::string&& dfolder) try 
 {
-	const auto path = dgelom::fs::current_path().append("noise_10");
-	auto image_loader = dgelom::make_loader(path, dgelom::io::tiff<raw_image_t::value_t>());
+	///\brief Attach image file info to a data loader (tiff herein).
+	decltype(auto) path = apath.append(dfolder);
+	auto image_loader = dgelom::make_loader(path, 
+		dgelom::io::tiff<raw_image_t::value_t>());
 
+	///\brief Get reference image info.
 	const auto ref_image = image_loader.forward().front();
 	const auto rows = ref_image.rows(), cols = ref_image.cols();
 
+	///\brief Set optimizer options and mesh computing domain.
 	const auto options = corr_optim_t::options_type{ 15 };
-	const auto x_space = dgelom::linspace<int>::_(options._Radius * 2, cols - options._Radius * 2, 40);
-	const auto y_space = dgelom::linspace<int>::_(options._Radius * 2, rows - options._Radius * 2, 40);
+	const auto x_space = dgelom::linspace<int>::_(
+		options.radius()<<1, cols - options.radius()<<1, 40);
+	const auto y_space = dgelom::linspace<int>::_(
+		options.radius()<<1, rows - options.radius()<<1, 40);
 
-	auto disp_x = corr_optim_t::matrix_type(x_space.size() * y_space.size(), image_loader.depth(), 0.);
+	auto disp_x = corr_optim_t::matrix_type(x_space.size() * y_space.size(),
+		image_loader.depth(), 0.);
 
 	smooth_image_t f{ ref_image };
 	for (; !image_loader.end(); ) {
@@ -40,8 +47,9 @@ int corr_optimer_eng() try
 				solver.init(x, y);
 				auto p = decltype(solver)::param_type();
 				std::cout << "-IT-" << "-----DISP----"
-					<< "----QUAD LOSS---" << "----RHO LOSS----" << "---||dp||----" << "ID: " << npoint << "\n";
-				for (auto nit = 0; nit < options._Maxits; ++nit) {
+					<< "----QUAD LOSS---" << "----RHO LOSS----" 
+					<< "---||dp||----" << "ID: " << npoint << "\n";
+				for (auto nit = 0; nit < options.maxiters(); ++nit) {
 					auto [squared_loss, rho_loss, nodp] = solver.robust_sol(p);
 					std::cout << " "
 						<< std::setiosflags(std::ios::left)
@@ -55,9 +63,9 @@ int corr_optimer_eng() try
 						<< rho_loss
 						<< std::setw(15)
 						<< nodp << "\n";
-					if (nodp < 1.0e-6)
+					if (nodp < options.tol(1))
 						break;
-					if (squared_loss < 1.e-2)
+					if (squared_loss < options.tol(100))
 						break;
 				}
 				disp_col[npoint] = p[0];
@@ -77,9 +85,10 @@ int corr_optimer_eng() try
 	return 0;
 }
 catch (dgelom::exception::error& e) {
-	std::cout << e.what() << "in function: " << e.location()._func
-		<< ". \n    See line " << e.location()._line
-		<< " in file: " << e.location()._file << std::endl;
+	std::cout << "Err: " << e.what() 
+		<< "in function: " << e.location()._func
+		<< ". (See line " << e.location()._line
+		<< " in file '" << e.location()._file <<"')\n";
 }
 catch (std::exception& e) {
 	std::cout << "Unknown exception with info: [" << e.what() << "]" << std::endl;
