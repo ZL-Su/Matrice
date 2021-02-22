@@ -52,7 +52,7 @@ public:
 	using path_type = fs::path;
 	using container = std::vector<value_type>;
 	/**
-	 * \_Root must has form "./folder_name/.../folder_name" or "/folder_name/.../folder_name"
+	 * \brief Argument '_Root' must has the form "./folder_name/.../folder_name" or "/folder_name/.../folder_name"
 	 */
 	_Dir_impl(value_type _Root, path_type&& _Workdir = fs::current_path())
 		:_Mypath(_Workdir) {
