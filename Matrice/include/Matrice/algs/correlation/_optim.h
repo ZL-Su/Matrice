@@ -29,12 +29,48 @@ struct _Correlation_options {
 	size_t _Stride =  7;  //node spacing
 	float_t _Znssd = 0.6; //correlation threshold
 	float_t _Coeff = 0.0; //damping coefficient
-
-	template<typename _Ty = default_type, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
-	static constexpr _Ty _Mytol = _Ty(1.0E-6); //iteration tolerance
+	mutable float_t _Mytol = 1.0e-6;
 
 	/**
-	 * \retrieve range of the patch centered on point _Pos
+	 * \brief Setter and geter of subset radius.
+	 */
+	decltype(auto) radius() const noexcept {
+		return (_Radius);
+	}
+	decltype(auto) radius() noexcept {
+		return (_Radius);
+	}
+
+	/**
+	 * \brief Setter and geter of max iterations.
+	 */
+	decltype(auto) maxiters() const noexcept {
+		return (_Maxits);
+	}
+	decltype(auto) maxiters() noexcept {
+		return (_Maxits);
+	}
+
+	/**
+	 * \brief Setter and geter of correlation threshold.
+	 */
+	decltype(auto) threshold() const noexcept {
+		return (_Znssd);
+	}
+	decltype(auto) threshold() noexcept {
+		return (_Znssd);
+	}
+
+	/**
+	 * \brief Geter of correlation threshold with base 1E-6.
+	 */
+	template<typename _Ty = default_type>
+	decltype(auto) tol(_Ty const scale) const noexcept {
+		return (scale*_Mytol);
+	}
+
+	/**
+	 * \brief Get range of the patch centered at point '_Pos'.
 	 */
 	template<bool _Is_cutoff, typename _Ty, 
 		typename _Ret = conditional_t<_Is_cutoff, index_t, typename _Ty::value_t>>
@@ -47,6 +83,9 @@ struct _Correlation_options {
 		return tuple_type(_Pos.x-_Radius, _Pos.x+_Radius+1, _Pos.y - _Radius, _Pos.y + _Radius + 1);
 	}
 
+	/**
+	 * \brief Check if point '_Pos' in the range '_Shape'.
+	 */
 	template<typename _Pty, typename _Sty>
 	MATRICE_HOST_INL bool range_check(const _Pty& _Pos, const _Sty& _Shape) {
 		auto _TL = _Pos - _Radius; auto _RB = _Pos + _Radius;
@@ -58,11 +97,13 @@ struct _Correlation_options {
 };
 
 // \solver tag declarations
-template<size_t _Order> struct _Alg_icgn : _TAG _Solver_tag {
+template<size_t _Order> 
+struct _Alg_icgn : _TAG _Solver_tag {
 	static constexpr auto order = _Order;
 	static_assert(order < 3, "_Order must be 0, 1 or 2");
 }; // inverse-compositional GN
-template<size_t _Order> struct _Alg_fagn : _TAG _Solver_tag {
+template<size_t _Order> 
+struct _Alg_fagn : _TAG _Solver_tag {
 	static constexpr auto order = _Order;
 	static_assert(order < 3, "_Order must be 0, 1 or 2");
 }; // forward-additional GN
@@ -93,6 +134,9 @@ template<typename _Derived> class _Corr_optim_base {
 protected:
 	using _Mytraits = _Corr_solver_traits<_Mydt>;
 public:
+	/// <summary>
+	/// \brief Number of parameters to be estimated.
+	/// </summary>
 	static constexpr auto npar = conditional_size_v<
 		_Mytraits::order == 0, 2, _Mytraits::order * 6>;
 	using value_type = typename _Mytraits::value_type;
@@ -110,17 +154,20 @@ public:
 
 	struct loss_fn {
 		value_type rho(value_type x) noexcept {
-			return sq(scale) / 2 * (1 - exp(-sq(x / scale)));
+			return scale * (1 - exp(-x/ scale));
+			//return scale * (1 - 1/(1+x/scale));
+			//return x;
 		}
 		value_type phi(value_type x) noexcept {
-			return x * exp(-sq(x / scale));
+			return exp(-x/scale);
+			//return 1/sq(1+x/scale);
+			//return 1;
 		}
-		value_type scale = one<value_type>;
+		value_type scale = 0.01*0.01;
 	};
 
 	/**
-	 *\brief This module is image-wise thread-safe.
-	         It allows us to eval. relative deformation of each point between current and reference state.
+	 *\brief This module is image-wise thread-safe. It allows us to eval. relative deformation of each point between current and reference state.
 	 *\param _Ref reference interpolated image;
 	 *\param _Cur current interpolated image;
 	 *\param _Opt options for the optimizer.
@@ -160,7 +207,8 @@ public:
 	 */
 	MATRICE_HOST_INL point_type guess(rect_type&& roi) {
 #ifdef MATRICE_DEBUG
-		DGELOM_CHECK(!_Myref.empty, "Call init(...) before calling method guess(...).");
+		DGELOM_CHECK(!_Myref.empty, 
+			"Call init(...) before calling method guess(...).");
 #endif
 		return this->_Guess(roi);
 	}
@@ -234,6 +282,7 @@ protected:
 	// for robust estimation, Dec/30/2020
 	vector_type  _Myweight;
 	loss_fn      _Myloss;
+	value_type   _Myissd;
 	Matrix_<value_type, npar, ::dynamic> _Myjaco_tw;
 
 	// reconstructed reference image with a specified interpolator
