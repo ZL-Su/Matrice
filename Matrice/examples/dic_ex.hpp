@@ -32,7 +32,7 @@ using smooth_image_t = corr_optim_t::smooth_image_t;
 /// <summary>
 /// \brief Example of correlation optimizer for image matching.
 /// </summary>
-/// <param name="'apath'">Path to current location of .</param>
+/// <param name="'apath'">Path to current location.</param>
 /// <param name="'dfolder'">Folder where the images are stored.</param>
 /// <returns>Make no sense.</returns>
 int corr_optimer_eng(fs::path&& apath, std::string&& dfolder) try
@@ -95,7 +95,7 @@ int corr_optimer_eng(fs::path&& apath, std::string&& dfolder) try
 			}
 		}
 	}
-	dgelom::IO::CSV csv(path.parent_path().string() + "\\res_noise_10\\Welsch_S0.01.csv");
+	dgelom::IO::CSV csv(path.parent_path().append("res_noise_10\\Welsch_S0.01.csv").string());
 	csv.open(dgelom::IO::app);
 	for (auto row = disp_x.rwbegin(); row != disp_x.rwend(); ++row) {
 		csv.append(row.begin(), row.end());
