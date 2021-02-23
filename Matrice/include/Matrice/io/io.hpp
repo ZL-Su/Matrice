@@ -58,32 +58,43 @@ public:
 	/**
 	 * \extracts folder(s) for a given absolute path.
 	 */
-	template<size_t _Nsubfolder = 0> struct Dir_  {
-		Dir_() : m_path(fs::current_path().string()) { _Init(); }
-		Dir_(const std::string& _path) : m_path(_path) { _Init(); }
+	template<size_t _Nsubfolder = 0> 
+	struct Dir_  {
+		Dir_() 
+			: m_path(fs::current_path().string()){ 
+			_Init(); 
+		}
+		Dir_(std::string&& _path) 
+			: m_path(_path){ 
+			_Init(); 
+		}
+		Dir_(fs::path&& _path) 
+			: m_path(_path.string()){ 
+			_Init(); 
+		}
 
-		MATRICE_HOST_INL const auto operator()(size_t i, size_t j) const {
+		MATRICE_HOST_INL decltype(auto)operator()(size_t i, size_t j) const {
 			return std::string(m_path + m_subpaths[i] + m_names[i][j]);
 		}
-		MATRICE_HOST_INL const auto operator()(size_t i) const {
+		MATRICE_HOST_INL decltype(auto)operator()(size_t i) const {
 			return std::string(m_path + m_names[0][i]);
 		}
-		MATRICE_HOST_FINL decltype(auto) names(size_t i = 0) {
+		MATRICE_HOST_INL decltype(auto)names(size_t i = 0) {
 			using names_type = typename decltype(m_names)::value_type;
 			return forward<names_type>(m_names)[i];
 		}
-		MATRICE_HOST_FINL const auto& names(size_t i = 0) const { 
+		MATRICE_HOST_INL decltype(auto)names(size_t i = 0) const {
 			using names_type = typename decltype(m_names)::value_type;
 			return forward<names_type>(m_names)[i];
 		}
-		MATRICE_HOST_FINL const size_t count(size_t _Idx = 0) const { 
+		MATRICE_HOST_INL decltype(auto)count(size_t _Idx = 0) const {
 			return m_names[_Idx].size(); 
 		}
 
-		MATRICE_HOST_FINL decltype(auto) path() noexcept { 
+		MATRICE_HOST_FINL decltype(auto)path() noexcept { 
 			return forward<decltype(m_path)>(m_path); 
 		}
-		MATRICE_HOST_FINL decltype(auto) path() const noexcept { 
+		MATRICE_HOST_FINL decltype(auto)path() const noexcept { 
 			return forward<decltype(m_path)>(m_path);
 		}
 	private:
@@ -97,7 +108,8 @@ public:
 					++_Cnt;
 				}
 			}
-			if constexpr (_Nsubfolder == 0) m_subpaths.emplace_back("");
+			if constexpr (_Nsubfolder == 0) 
+				m_subpaths.emplace_back("");
 			if (_Nsubfolder != 0 && _Nsubfolder > m_subpaths.size())
 				DGELOM_ERROR("No enough subfolders");
 			
@@ -107,6 +119,7 @@ public:
 				_List = filenames<Y>(m_path + m_subpaths[_Cnt++]);
 			});
 		}
+
 		std::string m_path;
 		std::vector<std::string> m_subpaths;
 		std::vector<std::vector<std::string>> m_names;
@@ -117,8 +130,10 @@ public:
 	 */
 	class CSV {
 	public:
-		CSV(const std::string& _Fname, const std::string& _Delm = ",")
+		CSV(std::string&& _Fname, const std::string& _Delm = ",")
 			:_My_filename(_Fname), _My_delimeter(_Delm){}
+		CSV(fs::path&& _Path, const std::string& _Delm = ",")
+			:_My_filename(_Path.string()), _My_delimeter(_Delm) {}
 
 		MATRICE_HOST_FINL void open(int _Mode) {
 			_My_file.open(_My_filename, _Mode);
@@ -192,23 +207,34 @@ public:
 #endif
 	}
 
+	/**
+	 *\brief Read data from a file.
+	 *\param <_Op> The operator to define the data reader.
+	 */
 	template<typename _Op> 
 	static MATRICE_HOST_INL auto read(std::string _path, _Op _op) {
-		DGELOM_CHECK(fs::exists(fs::path(_path)), "'" + _path + "' does not exist!");
+		DGELOM_CHECK(fs::exists(fs::path(_path)), 
+			"'" + _path + "' does not exist!");
 
 		std::ifstream _Fin(_path);
-
-		DGELOM_CHECK(_Fin.is_open(), "Fail to open the file in " + _path);
+		DGELOM_CHECK(_Fin.is_open(), 
+			"Fail to open the file in " + _path);
 			
 		return _op(_Fin);
 	}
+	template<typename _Op>
+	static MATRICE_HOST_INL auto read(fs::path _path, _Op _op) {
+		return read(_path.string(), _op);
+	}
 
 	/**
-	 *\brief read data from a file
-	 *\param <_N0, _N1> are the 1-based indices of the begin and end columns to be read. 
+	 *\brief Read data from a file
+	 *\param <_N0, _N1> 1-based indices of the begin and end columns to be read.
+	 *\param '_Path' refers to the location of target file.
+     *\param '_Skips' indicates how many lines to skip over.
 	 */
 	template<typename _Ty, diff_t _N0, diff_t _N1 = _N0>
-	static MATRICE_HOST_INL auto read(std::string _Path, size_t _Skips = 0) {
+	static MATRICE_HOST_INL auto read(std::string&& _Path, size_t _Skips = 0) {
 		static_assert(_N0 <= _N1, "_N1 must be greater than or equal to _N0");
 		using value_type = _Ty;
 		DGELOM_CHECK(fs::exists(fs::path(_Path)),"'"+_Path+"' does not exist!");
@@ -241,18 +267,24 @@ public:
 			return forward<decltype(_Data)>(_Data);
 		}
 	}
+	template<typename _Ty, diff_t _N0, diff_t _N1 = _N0>
+	static MATRICE_HOST_INL auto read(fs::path&& _Path, size_t _Skips = 0) {
+		return read<_Ty, _N0, _N1>(_Path.string(), _Skips);
+	}
 
 	/**
-	 *\brief read data from a file at _Path
-	 *\param [_Path] refers to the location of target file
-			 [_Skips] indicates how many lines to skip over
+	 *\brief Read data from a file with a given path.
+	 *\param '_Path' refers to the location of target file.
+     *\param '_Skips' indicates how many lines to skip over.
 	 */
 	template<typename _Ty>
-	static MATRICE_HOST_INL auto read(std::string _Path, size_t _Skips = 0) {
+	static MATRICE_HOST_INL auto read(std::string&& _Path, size_t _Skips = 0) {
 		using value_type = _Ty;
-		DGELOM_CHECK(fs::exists(fs::path(_Path)), "'" + _Path + "' does not exist!");
+		DGELOM_CHECK(fs::exists(fs::path(_Path)), 
+			"'" + _Path + "' does not exist!");
 		std::ifstream _Fin(_Path);
-		DGELOM_CHECK(_Fin.is_open(), "Cannot open file in " + _Path);
+		DGELOM_CHECK(_Fin.is_open(), 
+			"Cannot open file in " + _Path);
 
 		std::string _Line;
 		for (const auto _Idx : range(0, _Skips)) {
@@ -269,25 +301,32 @@ public:
 			_Res.rview(_Idx) = _Data[_Idx].data();
 		}
 
-		return std::forward<decltype(_Res)>(_Res);
+		return forward<decltype(_Res)>(_Res);
+	}
+	template<typename _Ty>
+	static MATRICE_HOST_INL auto read(fs::path&& _Path, size_t _Skips = 0) {
+		return read<_Ty>(_Path.string(), _Skips);
 	}
 
-	// \single-stream output
+	/**
+	 *\brief Single-stream writter to output data to a file in '_path'.
+	 */
 	template<typename _Op> 
-	static MATRICE_HOST_FINL void write(std::string _path, _Op _op) {
+	static MATRICE_HOST_FINL void write(std::string&& _path, _Op _op) {
 		std::ofstream _Fout(_path);
-		DGELOM_CHECK(_Fout.is_open(), "Fail to open file: " + _path);
+		DGELOM_CHECK(_Fout.is_open(), 
+			"Fail to open file: " + _path);
 		_Fout.setf(std::ios::fixed, std::ios::floatfield);
 		_op(forward<std::ofstream>(_Fout));
 		_Fout.close();
 	}
 	/**
-	 * \double-stream output, where _op should be a functor accepts a pair of std::ofstream instances.
+	 * \brief Double-stream output, where '_op' should be a functor that accepts a pair of std::ofstream instances.
 	 * \Example:
-			write("C:/data/", {"f1.txt", "f2.txt"}, [&](auto&& fs1, auto&& fs2){ ... })
+	    write("C:/data/", {"f1.txt", "f2.txt"}, [&](auto&& fs1, auto&& fs2){ ... })
 	 */
 	template<typename _Op>
-	static MATRICE_HOST_FINL void write(std::string _path, std::initializer_list<std::string> _fnames, _Op&& _op) {
+	static MATRICE_HOST_FINL void write(std::string&& _path, std::initializer_list<std::string> _fnames, _Op&& _op) {
 		std::cout << "Files are saved in folder: " << _path << std::endl;
 		const auto _N = _fnames.begin();
 		std::ofstream _O1(_path + _N[0]), _O2(_path + _N[1]);
@@ -388,18 +427,19 @@ public:
 	using value_type = std::string;
 	using const_value_type = std::add_const_t<value_type>;
 
-	template<typename _Ty = value_type> static
 	/**
-	 *\brief split a given string with a token 
-	 *\param [_Str] string being splitted; [_Tok] token.
+	 *\brief Split a given string with a token 
+	 *\param '_Str' a string to be splitted;
+	 *\param '_Tok' token.
 	 *\note: the template is used to specify the returned type.
 	 *\example:
 	   auto _Str1 = string_helper::value_type("dog,car,plane");
-		auto _Items1 = string_helper::split(_Str1,',');//{dog, car, plane}
-		auto _Str2 = string_helper::value_type("2,3,5");
-		auto _Items2 = string_helper::split<float>(_Str2,',');//{2.f, 3.f, 5.f}
+	   auto _Items1 = string_helper::split(_Str1,',');//{dog, car, plane}
+	   auto _Str2 = string_helper::value_type("2,3,5");
+	   auto _Items2 = string_helper::split<float>(_Str2,',');//{2.f, 3.f, 5.f}
 	 */
-	MATRICE_HOST_INL std::vector<_Ty> split(const value_type& _Str, basic_value_type _Tok) {
+	template<typename _Ty = value_type> static MATRICE_HOST_INL
+	std::vector<_Ty> split(const value_type& _Str, basic_value_type _Tok) {
 		std::vector<_Ty> _Res;
 		const_value_type _String = value_type(1, _Tok) + _Str;
 
