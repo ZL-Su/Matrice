@@ -177,7 +177,7 @@ public:
 		fs::directory_iterator _End;
 		for (fs::directory_iterator _Begin(_Path); _Begin != _End; ++_Begin) {
 			if (fs::is_regular_file(_Begin->status()))
-				_Ret.emplace_back(_Begin->path().string().substr(dir.size()));
+				_Ret.push_back(_Begin->path().string().substr(dir.size()));
 
 			if constexpr (_Fopt == is_skip_folder::N)
 				if (fs::is_directory(_Begin->status())) {
@@ -187,24 +187,6 @@ public:
 		}
 
 		return std::move(_Ret);
-	}
-
-	///<summary>
-	//@brief: Template function to cvt. any value to std::string 
-	//@author: Zhilong Su - Jan.10.2017 @SEU
-	///</summary>
-	template<typename _Ty> 
-	static MATRICE_HOST_FINL auto strf(_Ty _val) noexcept {
-		std::ostringstream strs; strs << _val; return strs.str();
-	}
-	// \TEMPLATE function to cvt. numeric value to std::string
-	template<typename _Ty> 
-	static MATRICE_HOST_FINL auto strfn(_Ty _val) noexcept {
-#ifdef __CXX11__
-		return (std::to_string(_val));
-#elif
-		return strf(_val);
-#endif
 	}
 
 	/**
