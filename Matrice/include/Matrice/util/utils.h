@@ -31,7 +31,7 @@ static_assert(_HAS_CXX20, "MATRICE requires to be compiled with C++ 20.");
 template<typename _Ty = long double> requires is_scalar_v<_Ty>
 MATRICE_GLOBAL_INL constexpr _Ty pi{ static_cast<_Ty>(3.14159265358979323846264338327950288419716939937510582097494459) };
 
-namespace detail {
+_DETAIL_BEGIN
 template<typename _Ty> struct string_to_numval {
 	static MATRICE_HOST_FINL auto value(const std::string& _Str)noexcept { 
 		return (_Str); }
@@ -68,7 +68,7 @@ template<> struct string_to_numval<unsigned long long> {
 	static MATRICE_HOST_FINL auto value(const std::string& _Str)noexcept {
 		return std::stoull(_Str); }
 };
-}
+_DETAIL_END
 
 /**
  * \brief Cast a string to a user specified type T.
@@ -154,24 +154,30 @@ tuple<U..., T> tuple_append(const tuple<U...>& _Tpl, const T& _Val) {
  * \brief Packs the first _N element from _E into a tuple.
  */
 template<size_t _N> struct tuple_n {
-	template<typename U> MATRICE_HOST_FINL static auto _(const U& _E) {
+	template<typename U> 
+	MATRICE_HOST_FINL static auto _(const U& _E) {
 		return tuple_append(tuple_n<_N - 1>::_(_E), _E);
 	}
-	template<typename U> MATRICE_HOST_FINL static auto _(const U* _E) {
+	template<typename U> 
+	MATRICE_HOST_FINL static auto _(const U* _E) {
 		return tuple_append(tuple_n<_N - 1>::_(_E), _E[_N]);
 	}
-	template<typename U, typename F> MATRICE_HOST_FINL static auto _(const U* _E, F&& _Op) {
+	template<typename U, typename F> 
+	MATRICE_HOST_FINL static auto _(const U* _E, F&& _Op) {
 		return tuple_append(tuple_n<_N - 1>::_(_E, _Op), _Op(_E[_N]));
 	}
 };
 template<> struct tuple_n<0> {
-	template<typename U> MATRICE_HOST_FINL static auto _(const U& _E) {
+	template<typename U> 
+	MATRICE_HOST_FINL static auto _(const U& _E) {
 		return std::make_tuple(_E);
 	}
-	template<typename U> MATRICE_HOST_FINL static auto _(const U* _E) {
+	template<typename U> 
+	MATRICE_HOST_FINL static auto _(const U* _E) {
 		return std::make_tuple(_E[0]);
 	}
-	template<typename U, typename F> MATRICE_HOST_FINL static auto _(const U* _E, F&& _Op) {
+	template<typename U, typename F> 
+	MATRICE_HOST_FINL static auto _(const U* _E, F&& _Op) {
 		return std::make_tuple(_Op(_E[0]));
 	}
 };
