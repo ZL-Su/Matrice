@@ -23,49 +23,24 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 MATRICE_ALG_BEGIN(corr)
 _DETAIL_BEGIN
 
-struct _Correlation_options {
-	size_t _Radius = 15;  //patch radius
-	size_t _Maxits = 50;  //maximum iterations
-	size_t _Stride =  7;  //node spacing
-	float_t _Znssd = 0.6; //correlation threshold
-	float_t _Coeff = 0.0; //damping coefficient
-
-	template<typename _Ty = default_type, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
-	static constexpr _Ty _Mytol = _Ty(1.0E-6); //iteration tolerance
-
-	/**
-	 * \retrieve range of the patch centered on point _Pos
-	 */
-	template<bool _Is_cutoff, typename _Ty, 
-		typename _Ret = conditional_t<_Is_cutoff, index_t, typename _Ty::value_t>>
-	MATRICE_GLOBAL_INL auto range(const _Ty& _Pos)->tuple<_Ret, _Ret, _Ret, _Ret> {
-		using tuple_type = tuple<_Ret, _Ret, _Ret, _Ret>;
-		if constexpr (_Is_cutoff) {
-			const auto x = floor<_Ret>(_Pos.x), y = floor<_Ret>(_Pos.y);
-			return tuple_type(x - _Radius, x + _Radius + 1, y - _Radius, y + _Radius + 1);
-		}
-		return tuple_type(_Pos.x-_Radius, _Pos.x+_Radius+1, _Pos.y - _Radius, _Pos.y + _Radius + 1);
-	}
-
-	template<typename _Pty, typename _Sty>
-	MATRICE_HOST_INL bool range_check(const _Pty& _Pos, const _Sty& _Shape) {
-		auto _TL = _Pos - _Radius; auto _RB = _Pos + _Radius;
-		if (floor(_TL(0)) < 0 || floor(_TL(1)) < 0 ||
-			_RB(0)>=get<0>(_Shape) || _RB(1)>=get<1>(_Shape))
-			return false;
-		return true;
-	}
+// \solver tag declarations
+/// <summary>
+/// \brief IC-GN algorithm tag for internal solver
+/// </summary>
+template<size_t _Order> 
+struct _Alg_icgn : _TAG _Solver_tag {
+	static constexpr auto order = _Order;
+	static_assert(order < 3, "_Order must be 0, 1 or 2");
 };
 
-// \solver tag declarations
-template<size_t _Order> struct _Alg_icgn : _TAG _Solver_tag {
+/// <summary>
+/// \brief FA-NR algorithm tag for internal solver
+/// </summary>
+template<size_t _Order> 
+struct _Alg_fanr : _TAG _Solver_tag {
 	static constexpr auto order = _Order;
 	static_assert(order < 3, "_Order must be 0, 1 or 2");
-}; // inverse-compositional GN
-template<size_t _Order> struct _Alg_fagn : _TAG _Solver_tag {
-	static constexpr auto order = _Order;
-	static_assert(order < 3, "_Order must be 0, 1 or 2");
-}; // forward-additional GN
+};
 
 // \forward solver declaration 
 template<typename _Ty, typename _Itag, typename _Atag>
@@ -75,6 +50,12 @@ class _Corr_solver_impl {};
 template<typename _Alg_tag> struct _Param_update_strategy {};
 template<typename _Itp_tag> struct _Corr_border_size {};
 
+/// <summary>
+/// \brief TRAITS CLASS, correlation optimizer traits
+/// </summary>
+/// <typeparam name="_Ty">Scalar, primitive value type</typeparam>
+/// <typeparam name="_Itag">Interpolation function tag</typeparam>
+/// <typeparam name="_Atag">Internal solver tag</typeparam>
 template<typename _Ty, typename _Itag, typename _Atag>
 struct _Corr_solver_traits<_Corr_solver_impl<_Ty, _Itag, _Atag>> {
 	using value_type = _Ty;
@@ -86,13 +67,94 @@ struct _Corr_solver_traits<_Corr_solver_impl<_Ty, _Itag, _Atag>> {
 	static constexpr auto order = alg_category::order;
 };
 
-// \correlation optimizer base class
+/// <summary>
+/// \brief CLASS, correlation solver options
+/// </summary>
+struct _Correlation_options {
+	size_t _Radius = 15;  //patch radius
+	size_t _Maxits = 50;  //maximum iterations
+	size_t _Stride = 7;  //node spacing
+	float_t _Znssd = 0.6; //correlation threshold
+	float_t _Coeff = 0.0; //damping coefficient
+	mutable float_t _Mytol = 1.0e-6;
+
+	/**
+	 * \brief Setter and geter of subset radius.
+	 */
+	decltype(auto) radius() const noexcept {
+		return (_Radius);
+	}
+	decltype(auto) radius() noexcept {
+		return (_Radius);
+	}
+
+	/**
+	 * \brief Setter and geter of max iterations.
+	 */
+	decltype(auto) maxiters() const noexcept {
+		return (_Maxits);
+	}
+	decltype(auto) maxiters() noexcept {
+		return (_Maxits);
+	}
+
+	/**
+	 * \brief Setter and geter of correlation threshold.
+	 */
+	decltype(auto) threshold() const noexcept {
+		return (_Znssd);
+	}
+	decltype(auto) threshold() noexcept {
+		return (_Znssd);
+	}
+
+	/**
+	 * \brief Geter of correlation threshold with base 1E-6.
+	 */
+	template<typename _Ty = default_type>
+	decltype(auto) tol(_Ty const scale) const noexcept {
+		return (scale * _Mytol);
+	}
+
+	/**
+	 * \brief Get range of the patch centered at point '_Pos'.
+	 */
+	template<bool _Is_cutoff, typename _Ty,
+		typename _Ret = conditional_t<_Is_cutoff, index_t, typename _Ty::value_t>>
+		MATRICE_GLOBAL_INL auto range(const _Ty& _Pos)->tuple<_Ret, _Ret, _Ret, _Ret> {
+		using tuple_type = tuple<_Ret, _Ret, _Ret, _Ret>;
+		if constexpr (_Is_cutoff) {
+			const auto x = floor<_Ret>(_Pos.x), y = floor<_Ret>(_Pos.y);
+			return tuple_type(x - _Radius, x + _Radius + 1, y - _Radius, y + _Radius + 1);
+		}
+		return tuple_type(_Pos.x - _Radius, _Pos.x + _Radius + 1, _Pos.y - _Radius, _Pos.y + _Radius + 1);
+	}
+
+	/**
+	 * \brief Check if point '_Pos' in the range '_Shape'.
+	 */
+	template<typename _Pty, typename _Sty>
+	MATRICE_HOST_INL bool range_check(const _Pty& _Pos, const _Sty& _Shape) {
+		auto _TL = _Pos - _Radius; auto _RB = _Pos + _Radius;
+		if (floor(_TL(0)) < 0 || floor(_TL(1)) < 0 ||
+			_RB(0) >= get<0>(_Shape) || _RB(1) >= get<1>(_Shape))
+			return false;
+		return true;
+	}
+};
+
+/// <summary>
+/// \brief CLASS TEMPLATE, correlation optimizer base
+/// </summary>
+/// <typeparam name="_Derived"></typeparam>
 template<typename _Derived> class _Corr_optim_base {
 	using _Myt = _Corr_optim_base;
 	using _Mydt = _Derived;
 protected:
 	using _Mytraits = _Corr_solver_traits<_Mydt>;
 public:
+
+	// \brief Number of parameters to be estimated.
 	static constexpr auto npar = conditional_size_v<
 		_Mytraits::order == 0, 2, _Mytraits::order * 6>;
 	using value_type = typename _Mytraits::value_type;
@@ -104,23 +166,28 @@ public:
 	using vector_type = Matrix_<value_type, ::dynamic, 1>;
 	using options_type = _Correlation_options;
 	using interp_type = typename _Mytraits::interpolator;
+	// \brief Smooth image type supported by spline interpolation.
 	using smooth_image_t = interp_type;
 	using update_strategy = typename _Mytraits::update_strategy;
 	using rect_type = rect<size_t>;
 
+	// \brief Loss function definition.
 	struct loss_fn {
 		value_type rho(value_type x) noexcept {
-			return sq(scale) / 2 * (1 - exp(-sq(x / scale)));
+			return scale * (1 - exp(-x/ scale));
+			//return scale * (1 - 1/(1+x/scale));
+			//return x;
 		}
 		value_type phi(value_type x) noexcept {
-			return x * exp(-sq(x / scale));
+			return exp(-x/scale);
+			//return 1/sq(1+x/scale);
+			//return 1;
 		}
-		value_type scale = one<value_type>;
+		value_type scale = 0.01*0.01;
 	};
 
 	/**
-	 *\brief This module is image-wise thread-safe.
-	         It allows us to eval. relative deformation of each point between current and reference state.
+	 *\brief This module is image-wise thread-safe. It allows us to eval. relative deformation of each point between current and reference state.
 	 *\param _Ref reference interpolated image;
 	 *\param _Cur current interpolated image;
 	 *\param _Opt options for the optimizer.
@@ -160,7 +227,8 @@ public:
 	 */
 	MATRICE_HOST_INL point_type guess(rect_type&& roi) {
 #ifdef MATRICE_DEBUG
-		DGELOM_CHECK(!_Myref.empty, "Call init(...) before calling method guess(...).");
+		DGELOM_CHECK(!_Myref.empty, 
+			"Call init(...) before calling method guess(...).");
 #endif
 		return this->_Guess(roi);
 	}
@@ -234,6 +302,7 @@ protected:
 	// for robust estimation, Dec/30/2020
 	vector_type  _Myweight;
 	loss_fn      _Myloss;
+	value_type   _Myissd;
 	Matrix_<value_type, npar, ::dynamic> _Myjaco_tw;
 
 	// reconstructed reference image with a specified interpolator
