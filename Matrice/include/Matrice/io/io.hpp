@@ -167,21 +167,20 @@ public:
 	}
 
 	template<is_skip_folder _Fopt = is_skip_folder::Y>
-	static MATRICE_HOST_INL auto filenames(const std::string& dir)
-	{
+	static MATRICE_HOST_INL auto filenames(std::string&& dir){
 		std::vector<std::string> _Ret;
 
 		fs::path _Path(dir);
 		if (!fs::exists(_Path)) return std::move(_Ret);
 
 		fs::directory_iterator _End;
-		for (fs::directory_iterator _Begin(_Path); _Begin != _End; ++_Begin) {
-			if (fs::is_regular_file(_Begin->status()))
-				_Ret.push_back(_Begin->path().string().substr(dir.size()));
+		for (decltype(_End) _It(_Path); _It != _End; ++_It) {
+			if (fs::is_regular_file(_It->status()))
+				_Ret.push_back(_It->path().string().substr(dir.size()));
 
 			if constexpr (_Fopt == is_skip_folder::N)
-				if (fs::is_directory(_Begin->status())) {
-					auto _Inner = filenames<_Fopt>(_Begin->path().string());
+				if (fs::is_directory(_It->status())) {
+					auto _Inner = filenames<_Fopt>(_It->path().string());
 					_Ret.insert(_Ret.end(), _Inner.begin(), _Inner.end());
 				}
 		}
@@ -194,7 +193,7 @@ public:
 	 *\param <_Op> The operator to define the data reader.
 	 */
 	template<typename _Op> 
-	static MATRICE_HOST_INL auto read(std::string _path, _Op _op) {
+	static MATRICE_HOST_INL auto read(std::string&& _path, _Op _op) {
 		DGELOM_CHECK(fs::exists(fs::path(_path)), 
 			"'" + _path + "' does not exist!");
 
@@ -205,7 +204,7 @@ public:
 		return _op(_Fin);
 	}
 	template<typename _Op>
-	static MATRICE_HOST_INL auto read(fs::path _path, _Op _op) {
+	static MATRICE_HOST_INL auto read(fs::path&& _path, _Op _op) {
 		return read(_path.string(), _op);
 	}
 
