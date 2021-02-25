@@ -390,13 +390,13 @@ _DETAIL_END
 /// <param name="_Gt">: Ground-truth.</param>
 /// <returns>Tuple with {mean, SD}</returns>
 template<typename _FwdIt>
-MATRICE_GLOBAL_INL auto eval_perf(const _FwdIt _Begin, const _FwdIt _End, primitive_type_t<_FwdIt> _Gt) noexcept {
+MATRICE_GLOBAL_INL auto eval_perf(_FwdIt _Begin, _FwdIt _End, default_type _Gt) noexcept {
 	decltype(_Gt) _Mean = 0;
 	for (auto _It = _Begin; _It != _End; ++_It) {
 		_Mean += *_It;
 	}
 	const auto _Count = _End - _Begin;
-	_Mean = (_Mean - _Gt) / _Count;
+	_Mean = _Mean / _Count - _Gt;
 
 	decltype(_Mean) _Stdv = 0;
 	for (auto _It = _Begin; _It != _End; ++_It) {
