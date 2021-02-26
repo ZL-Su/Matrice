@@ -143,6 +143,14 @@ public:
 		auto _Tmp = *this; 
 		return (_Tmp += _Mysize);
 	}
+
+	/// <summary>
+	/// \brief Get distance between adjacent iterator positions.
+	/// </summary>
+	MATRICE_GLOBAL_FINL decltype(auto)stride()const noexcept {
+		return (_Mystep);
+	}
+
 	// \current iterator position
 	MATRICE_GLOBAL_FINL size_t pos() const noexcept { 
 		return std::distance(_Mybegin, _Myptr)/_Mystep; 
