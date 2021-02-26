@@ -131,19 +131,31 @@ public:
 	class CSV {
 	public:
 		CSV(std::string&& _Fname, const std::string& _Delm = ",")
-			:_My_filename(_Fname), _My_delimeter(_Delm){}
-		CSV(fs::path&& _Path, const std::string& _Delm = ",")
-			:_My_filename(_Path.string()), _My_delimeter(_Delm) {}
+			:_Mypath(_Fname), _My_delimeter(_Delm){
+		}
+		CSV(const fs::path& _Path, const std::string& _Delm = ",")
+			:_Mypath(_Path), _My_delimeter(_Delm) {
+		}
+
+		CSV& reset(const fs::path& _Path) noexcept {
+			_Mypath = _Path;
+			return (*this);
+		}
 
 		MATRICE_HOST_FINL void open(int _Mode) {
-			_My_file.open(_My_filename, _Mode);
+			if (_Mode & out || _Mode & app) {
+				if (!fs::exists(_Mypath.parent_path())) {
+					fs::create_directories(_Mypath.parent_path());
+				}
+			}
+			_My_file.open(_Mypath.string(), _Mode);
 		}
 		MATRICE_HOST_FINL void close() noexcept {
 			_My_file.close(); 
 		}
 
 		template<typename _It> 
-		MATRICE_HOST_FINL size_t append(_It _First, _It _Last) {
+		MATRICE_HOST_INL size_t append(_It _First, _It _Last) {
 			for (; _First != _Last;) {
 				_My_file << *_First;
 				if (++_First != _Last) 
@@ -154,8 +166,22 @@ public:
 			return (_My_linecnt++);
 		}
 
+		MATRICE_HOST_INL size_t append(std::string&& _Str) {
+			_My_file << _Str << "\n";
+			return (_My_linecnt++);
+		}
+
+		/// <summary>
+		/// \brief Get count of lines written. 
+		/// </summary>
+		/// <returns>Number of lines written</returns>
+		MATRICE_HOST_INL size_t count() const noexcept {
+			return (_My_linecnt);
+		}
+
 	private:
-		std::string _My_filename, _My_delimeter;
+		fs::path _Mypath;
+		std::string _My_delimeter = ",";
 		std::size_t _My_linecnt = 0;
 		std::fstream _My_file;
 	};
@@ -507,12 +533,12 @@ MATRICE_HOST_FINL auto serial(const _Cont& _L) {
 	return tuple_n<_N - 1>::_(_L.data());
 }
 template<class _Op, typename _Vty = typename _Op::value_type>
-decltype(auto) make_loader(std::string path, _Op&& loader)noexcept {
+decltype(auto) make_loader(std::string&& path, _Op&& loader)noexcept {
 	using loader_type = data_loader<_Vty>;
 	return loader_type(directory{ path, path_t() }, loader);
 }
 template<class _Op>
-decltype(auto) make_loader(path_t path, _Op&& loader)noexcept {
+decltype(auto) make_loader(const path_t& path, _Op&& loader)noexcept {
 	using loader_type = data_loader<typename _Op::value_type>;
 	return loader_type(directory{ path.generic_string(), path_t() }, loader);
 }
