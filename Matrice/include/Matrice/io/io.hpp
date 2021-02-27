@@ -154,6 +154,13 @@ public:
 			_My_file.close(); 
 		}
 
+		/// <summary>
+		/// \brief Add a dummy line, with range [_First, _Last).
+		/// </summary>
+		/// <typeparam name="_It">Forward iterator type</typeparam>
+		/// <param name="_First">: Begin of the range.</param>
+		/// <param name="_Last">: End of the data range.</param>
+		/// <returns>Current line number.</returns>
 		template<typename _It> 
 		MATRICE_HOST_INL size_t append(_It _First, _It _Last) {
 			for (; _First != _Last;) {
@@ -166,8 +173,29 @@ public:
 			return (_My_linecnt++);
 		}
 
-		MATRICE_HOST_INL size_t append(std::string&& _Str) {
-			_My_file << _Str << "\n";
+		/// <summary>
+		/// \brief Add a labeled line, with range [_First, _Last).
+		/// </summary>
+		/// <typeparam name="_It">Forward iterator type</typeparam>
+		/// <param name="_Label">: Line label string.</param>
+		/// <param name="_First">: Begin of the range.</param>
+		/// <param name="_Last">: End of the data range.</param>
+		/// <returns>Current line number.</returns>
+		template<typename _It>
+		MATRICE_HOST_INL size_t append(std::string&& _Label, _It _First, _It _Last) {
+			_My_file << _Label << _My_delimeter;
+			for (; _First != _Last;) {
+				_My_file << *_First;
+				if (++_First != _Last)
+					_My_file << _My_delimeter;
+			}
+			_My_file << "\n";
+
+			return (_My_linecnt++);
+		}
+
+		MATRICE_HOST_INL size_t append(std::string&& _Label) {
+			_My_file << _Label << "\n";
 			return (_My_linecnt++);
 		}
 
