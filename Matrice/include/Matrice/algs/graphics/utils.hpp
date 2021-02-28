@@ -67,9 +67,10 @@ private:
 		}).y;
 		_Mybound = { _Minx, _Miny, _Maxx, _Maxy };
 	}
+
 	std::shared_ptr<ptlist_type> _Mypts;
-	Vec2_<int32_t> _Mymesz;
 	Matrix_<value_type, 2, 2> _Mybound;
+	Vec2_<int32_t> _Mymesz;
 };
 _DETAIL_END
 
@@ -77,8 +78,10 @@ _DETAIL_END
  *\brief CLASS TEMPLATE linspace<_Ty> </class>
  *\typename <_Ty> a scalar type
 */
-template<typename _Ty = float> class linspace {
-	static_assert(is_scalar_v<_Ty>, "_Ty in linspace<> must be a scalar.");
+template<typename _Ty = float> 
+class linspace {
+	static_assert(is_scalar_v<_Ty>, 
+		"_Ty in linspace<> must be a scalar.");
 	using _Myt = linspace<_Ty>;
 public:
 	using value_type = _Ty;
@@ -120,6 +123,7 @@ public:
 	MATRICE_GLOBAL_INL operator bool() const noexcept {
 		return (m_current <= m_end);
 	}
+
 	/// <summary>
 	/// \brief Return evenly spaced numbers over the specified interval [begin, end].
 	/// If paramerter 'endpoint' is false, then the end point of the interval is excluded.
@@ -149,6 +153,20 @@ private:
 	value_type m_step = 1, m_current = m_begin;
 	size_t m_num;
 };
+
+/// <summary>
+/// \brief Factory function to create evenly spaced numbers over the specified interval [begin, end].
+/// </summary>
+/// <typeparam name="_Ty"> Any scalar type. The type of generated numbers is the same as '_Ty'. </typeparam>
+/// <param name="'start'"> The staring value of the sequence. </param>
+/// <param name="'stop'"> The ending value of the sequence. </param>
+/// <param name="'num'"> Number of samples to generate. Default is 51.</param>
+/// <param name="'endpoint'">: Conditional argument. If endpoint is false, then the end point of the interval is excluded.</param>
+/// <returns></returns>
+template<typename _Ty> requires is_scalar_v<_Ty>
+MATRICE_GLOBAL_INL auto make_linspace(_Ty start, _Ty stop, size_t num = 51, bool endpoint = true) noexcept {
+	return linspace<_Ty>::_(start, stop, num, endpoint);
+}
 
 DGE_MATRICE_END
 
