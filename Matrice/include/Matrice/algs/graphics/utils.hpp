@@ -165,7 +165,8 @@ private:
 /// <returns></returns>
 template<typename _Ty> requires is_scalar_v<_Ty>
 MATRICE_GLOBAL_INL auto make_linspace(_Ty start, _Ty stop, size_t num = 51, bool endpoint = true) noexcept {
-	return linspace<_Ty>::_(start, stop, num, endpoint);
+	return linspace<conditional_t<std::is_unsigned_v<_Ty>, int, _Ty>>::
+		_(start, stop, num, endpoint);
 }
 
 DGE_MATRICE_END
