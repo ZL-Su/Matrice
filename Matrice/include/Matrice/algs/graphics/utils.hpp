@@ -74,8 +74,8 @@ private:
 _DETAIL_END
 
 /**
- *\brief <class> linspace<_Ty> </class>
- *\typen <_Ty> a scalar type
+ *\brief CLASS TEMPLATE linspace<_Ty> </class>
+ *\typename <_Ty> a scalar type
 */
 template<typename _Ty = float> class linspace {
 	static_assert(is_scalar_v<_Ty>, "_Ty in linspace<> must be a scalar.");
@@ -85,34 +85,33 @@ public:
 	using row_vector_type = Matrix_<value_type, 1, ::dynamic>;
 
 	/// <summary>
-	/// Ctor of class linspace
+	/// \brief Ctor of class linspace.
 	/// </summary>
 	/// <param name="'begin'"> The staring value of the sequence </param>
 	/// <param name="'end'"> The ending value of the sequence </param>
 	/// <param name="'num'"> Number of samples to generate. Default is 51.</param>
 	linspace(value_type begin, value_type end, size_t num = 51) noexcept
-		: m_begin(begin), m_end(end) {
-		m_num = num;
+		: m_begin(begin), m_end(end), m_num(num) {
 		m_step = num == 1 ? sub(m_end, m_begin) : safe_div(sub(m_end, m_begin), num - 1);
 	}
 
-	MATRICE_GLOBAL_INL const value_type& begin() const noexcept {
+	MATRICE_GLOBAL_INL decltype(auto) begin() const noexcept {
 		return (m_begin);
 	}
-	MATRICE_GLOBAL_INL value_type& begin() noexcept {
+	MATRICE_GLOBAL_INL decltype(auto) begin() noexcept {
 		return (m_begin);
 	}
-	MATRICE_GLOBAL_INL const value_type& end() const noexcept {
+	MATRICE_GLOBAL_INL decltype(auto) end() const noexcept {
 		return (m_end);
 	}
-	MATRICE_GLOBAL_INL value_type& end() noexcept {
+	MATRICE_GLOBAL_INL decltype(auto) end() noexcept {
 		return (m_end);
 	}
 
-	MATRICE_GLOBAL_INL value_type& operator++() {
+	MATRICE_GLOBAL_INL decltype(auto) operator++() {
 		return (m_current += m_step);
 	}
-	MATRICE_GLOBAL_INL value_type& operator++(int) {
+	MATRICE_GLOBAL_INL decltype(auto) operator++(int) {
 		return (m_current += m_step);
 	}
 	MATRICE_GLOBAL_INL operator value_type() const noexcept {
@@ -140,7 +139,7 @@ public:
 	/// <param name="'num'"> Number of samples to generate. Default is 51. </param>
 	/// <param name="'endpoint'"> If True, stop is the last sample. Otherwise, it is not included. Default is True. </param>
 	/// <returns> A row vector holds the generated number sequence. </returns>
-	static MATRICE_GLOBAL_INL row_vector_type _(_Ty start, _Ty stop, size_t num = 51, bool endpoint = true) {
+	static row_vector_type _(_Ty start, _Ty stop, size_t num = 51, bool endpoint = true) {
 		_Myt linspace(start, stop, num);
 		return linspace(endpoint);
 	}
