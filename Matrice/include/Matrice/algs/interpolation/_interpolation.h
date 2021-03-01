@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -38,15 +38,15 @@ public:
 		: type(args...){}
 
 	/**
-	 * \Get reference of interpolation kernel operator.
+	 * \brief Get shared operator of the interpolation kernel.
 	 * \Example:
-	 *		_Interpolation_wrapper<...> _Myname(...);
-	 *		const auto& _Itp = _Myname(); \\return interpolation kernel.
+	 *	  _Interpolation_wrapper<...> _Myname(...);
+	 *	  const auto& _Itp = _Myname(); \\return interpolation kernel.
 	 *    const auto& _Coeff = _Itp(); \\return interpolation coeff.
 	 *    auto _Value = _Itp(_Pos); \\return interpolated value at _Pos.
 	 *    auto[_Gx, _Gy] = _Itp.grad(_Pos); \\return iterpolated grad. at _Pos.
-	 *		_Gx = _Itp.grad<axis::x>(_Pos); \\return interpolated dI/dx.
-	 *		_Gy = _Itp.grad<axis::y>(_Pos); \\return interpolated dI/dy.
+	 *	  _Gx = _Itp.grad<axis::x>(_Pos); \\return interpolated dI/dx.
+	 *	  _Gy = _Itp.grad<axis::y>(_Pos); \\return interpolated dI/dy.
 	 */
 	MATRICE_HOST_FINL decltype(auto) shared() const {
 		return this->shared_from_this();
