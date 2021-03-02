@@ -22,20 +22,20 @@ DGE_MATRICE_BEGIN
 namespace dnn {
 _DETAIL_BEGIN
 template<typename _Ty>
-void _conv2d_impl(_TAG device_tag::cpu, const Matrix<_Ty>& _In, Matrix<_Ty>& _Out) {
+void _Conv2d_impl(_TAG device_tag::cpu, const Matrix<_Ty>& _In, Matrix<_Ty>& _Out) {
 
 }
 
 template<typename _Ty>
-void _conv2d_impl(_TAG device_tag::gpu, const Matrix<_Ty>& _In, Matrix<_Ty>& _Out) {
+void _Conv2d_impl(_TAG device_tag::gpu, const Matrix<_Ty>& _In, Matrix<_Ty>& _Out) {
 
 }
 _DETAIL_END
 
 template<typename _Tag, typename _Ty>
-MATRICE_HOST_INL void _conv2d(const Matrix<_Ty>& _In, Matrix<_Ty>& _Out) {
+MATRICE_HOST_INL void conv2d(const Matrix<_Ty>& _In, Matrix<_Ty>& _Out) {
 	static_assert(is_floating_point_v<_Ty>, "Only float or double type is allowed.");
-	detail::_conv2d_impl(_Tag(), _In, _Out);
+	detail::_Conv2d_impl(_Tag(), _In, _Out);
 }
 }
 DGE_MATRICE_END
