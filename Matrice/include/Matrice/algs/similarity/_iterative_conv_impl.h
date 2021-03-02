@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,16 +16,17 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #pragma once
-#include "../../core/matrix.h"
-#include "../../core/vector.h"
-#include "../../core/solver.h"
-#include "../../core/tensor.h"
-#include "../../private/math/_linear.h"
+#include "core/matrix.h"
+#include "core/vector.h"
+#include "core/solver.h"
+#include "core/tensor.h"
+#include "private/math/_linear.h"
 #include "../imageproc.hpp"
 #include "_similarity_traits.h"
 
 MATRICE_ALGS_BEGIN
-template<size_t _Options> struct _Iterative_conv_options
+template<size_t _Options> 
+struct _Iterative_conv_options
 {
 	// \interpolation type
 	enum { options = _Options };
@@ -60,7 +61,8 @@ template<> struct _Conv_border_size<_TAG bisspl_tag> {
 };
 
 // \TEMPLATE base class for Gaussian-Newton algorithm [thread-safe]
-template<typename _Derived> class _Iterative_conv_base
+template<typename _Derived> 
+class _Iterative_conv_base
 {
 	using _Mydt = _Derived;
 	using _Mytraits = internal::conv_solver_traits<_Mydt>;
