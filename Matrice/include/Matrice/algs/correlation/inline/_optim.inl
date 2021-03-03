@@ -390,19 +390,18 @@ _DETAIL_END
 /// <param name="_Gt">: Ground-truth.</param>
 /// <returns>Tuple with {mean, SD}</returns>
 template<typename _FwdIt>
-MATRICE_GLOBAL_INL auto eval_perf(const _FwdIt _Begin, const _FwdIt _End, primitive_type_t<_FwdIt> _Gt) noexcept {
-	decltype(_Gt) _Mean = 0;
+MATRICE_GLOBAL_INL auto eval_perf(_FwdIt _Begin, _FwdIt _End, default_type _Gt) noexcept {
+	size_t _Count = 0;
+	decltype(_Gt) _Sod = 0, _Ssd = 0;
 	for (auto _It = _Begin; _It != _End; ++_It) {
-		_Mean += *_It;
+		const auto _Diff = *_It - _Gt;
+		_Sod += _Diff;
+		_Ssd += sq(_Diff);
+		++_Count;
 	}
-	const auto _Count = _End - _Begin;
-	_Mean = (_Mean - _Gt) / _Count;
 
-	decltype(_Mean) _Stdv = 0;
-	for (auto _It = _Begin; _It != _End; ++_It) {
-		_Stdv += sq(abs(*_It - _Gt) - _Mean);
-	}
-	_Stdv = sqrt(_Stdv / (_Count - 1));
+	const auto _Mean = _Sod / _Count;
+	const auto _Stdv = sqrt((_Ssd - sq(_Sod)/_Count)/(_Count - 1));
 
 	return tuple{ _Mean, _Stdv };
 }

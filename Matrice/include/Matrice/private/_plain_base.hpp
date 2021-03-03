@@ -541,7 +541,7 @@ public:
 		return (m_data + size()); 
 	}
 	/**
-	 * \brief column iterator for accessing elements in i-th column.
+	 * \brief Column iterator for accessing elements in i-th column.
 	 * \example:
 	 *		auto _A = Matrix_<float,3,3>::rand();
 	 *		auto _Fwd_col = _A.cbegin(1); //get 1-th column iterator
@@ -561,7 +561,7 @@ public:
 	}
 
 	/**
-	 * \brief row iterator for accessing elements in i-th row.
+	 * \brief Row iterator for accessing elements in i-th row.
 	 */
 	MATRICE_GLOBAL_FINL _Myt_fwd_iterator rbegin(size_t i) noexcept {
 		return _Myt_fwd_iterator(m_data + i * m_cols, m_cols);

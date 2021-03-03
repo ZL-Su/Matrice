@@ -58,32 +58,43 @@ public:
 	/**
 	 * \extracts folder(s) for a given absolute path.
 	 */
-	template<size_t _Nsubfolder = 0> struct Dir_  {
-		Dir_() : m_path(fs::current_path().string()) { _Init(); }
-		Dir_(const std::string& _path) : m_path(_path) { _Init(); }
+	template<size_t _Nsubfolder = 0> 
+	struct Dir_  {
+		Dir_() 
+			: m_path(fs::current_path().string()){ 
+			_Init(); 
+		}
+		Dir_(std::string&& _path) 
+			: m_path(_path){ 
+			_Init(); 
+		}
+		Dir_(fs::path&& _path) 
+			: m_path(_path.string()){ 
+			_Init(); 
+		}
 
-		MATRICE_HOST_INL const auto operator()(size_t i, size_t j) const {
+		MATRICE_HOST_INL decltype(auto)operator()(size_t i, size_t j) const {
 			return std::string(m_path + m_subpaths[i] + m_names[i][j]);
 		}
-		MATRICE_HOST_INL const auto operator()(size_t i) const {
+		MATRICE_HOST_INL decltype(auto)operator()(size_t i) const {
 			return std::string(m_path + m_names[0][i]);
 		}
-		MATRICE_HOST_FINL decltype(auto) names(size_t i = 0) {
+		MATRICE_HOST_INL decltype(auto)names(size_t i = 0) {
 			using names_type = typename decltype(m_names)::value_type;
 			return forward<names_type>(m_names)[i];
 		}
-		MATRICE_HOST_FINL const auto& names(size_t i = 0) const { 
+		MATRICE_HOST_INL decltype(auto)names(size_t i = 0) const {
 			using names_type = typename decltype(m_names)::value_type;
 			return forward<names_type>(m_names)[i];
 		}
-		MATRICE_HOST_FINL const size_t count(size_t _Idx = 0) const { 
+		MATRICE_HOST_INL decltype(auto)count(size_t _Idx = 0) const {
 			return m_names[_Idx].size(); 
 		}
 
-		MATRICE_HOST_FINL decltype(auto) path() noexcept { 
+		MATRICE_HOST_FINL decltype(auto)path() noexcept { 
 			return forward<decltype(m_path)>(m_path); 
 		}
-		MATRICE_HOST_FINL decltype(auto) path() const noexcept { 
+		MATRICE_HOST_FINL decltype(auto)path() const noexcept { 
 			return forward<decltype(m_path)>(m_path);
 		}
 	private:
@@ -97,7 +108,8 @@ public:
 					++_Cnt;
 				}
 			}
-			if constexpr (_Nsubfolder == 0) m_subpaths.emplace_back("");
+			if constexpr (_Nsubfolder == 0) 
+				m_subpaths.emplace_back("");
 			if (_Nsubfolder != 0 && _Nsubfolder > m_subpaths.size())
 				DGELOM_ERROR("No enough subfolders");
 			
@@ -107,6 +119,7 @@ public:
 				_List = filenames<Y>(m_path + m_subpaths[_Cnt++]);
 			});
 		}
+
 		std::string m_path;
 		std::vector<std::string> m_subpaths;
 		std::vector<std::vector<std::string>> m_names;
@@ -117,18 +130,39 @@ public:
 	 */
 	class CSV {
 	public:
-		CSV(const std::string& _Fname, const std::string& _Delm = ",")
-			:_My_filename(_Fname), _My_delimeter(_Delm){}
+		CSV(std::string&& _Fname, const std::string& _Delm = ",")
+			:_Mypath(_Fname), _My_delimeter(_Delm){
+		}
+		CSV(const fs::path& _Path, const std::string& _Delm = ",")
+			:_Mypath(_Path), _My_delimeter(_Delm) {
+		}
+
+		CSV& reset(const fs::path& _Path) noexcept {
+			_Mypath = _Path;
+			return (*this);
+		}
 
 		MATRICE_HOST_FINL void open(int _Mode) {
-			_My_file.open(_My_filename, _Mode);
+			if (_Mode & out || _Mode & app) {
+				if (!fs::exists(_Mypath.parent_path())) {
+					fs::create_directories(_Mypath.parent_path());
+				}
+			}
+			_My_file.open(_Mypath.string(), _Mode);
 		}
 		MATRICE_HOST_FINL void close() noexcept {
 			_My_file.close(); 
 		}
 
+		/// <summary>
+		/// \brief Add a dummy line, with range [_First, _Last).
+		/// </summary>
+		/// <typeparam name="_It">Forward iterator type</typeparam>
+		/// <param name="_First">: Begin of the range.</param>
+		/// <param name="_Last">: End of the data range.</param>
+		/// <returns>Current line number.</returns>
 		template<typename _It> 
-		MATRICE_HOST_FINL size_t append(_It _First, _It _Last) {
+		MATRICE_HOST_INL size_t append(_It _First, _It _Last) {
 			for (; _First != _Last;) {
 				_My_file << *_First;
 				if (++_First != _Last) 
@@ -139,8 +173,43 @@ public:
 			return (_My_linecnt++);
 		}
 
+		/// <summary>
+		/// \brief Add a labeled line, with range [_First, _Last).
+		/// </summary>
+		/// <typeparam name="_It">Forward iterator type</typeparam>
+		/// <param name="_Label">: Line label string.</param>
+		/// <param name="_First">: Begin of the range.</param>
+		/// <param name="_Last">: End of the data range.</param>
+		/// <returns>Current line number.</returns>
+		template<typename _It>
+		MATRICE_HOST_INL size_t append(std::string&& _Label, _It _First, _It _Last) {
+			_My_file << _Label << _My_delimeter;
+			for (; _First != _Last;) {
+				_My_file << *_First;
+				if (++_First != _Last)
+					_My_file << _My_delimeter;
+			}
+			_My_file << "\n";
+
+			return (_My_linecnt++);
+		}
+
+		MATRICE_HOST_INL size_t append(std::string&& _Label) {
+			_My_file << _Label << "\n";
+			return (_My_linecnt++);
+		}
+
+		/// <summary>
+		/// \brief Get count of lines written. 
+		/// </summary>
+		/// <returns>Number of lines written</returns>
+		MATRICE_HOST_INL size_t count() const noexcept {
+			return (_My_linecnt);
+		}
+
 	private:
-		std::string _My_filename, _My_delimeter;
+		fs::path _Mypath;
+		std::string _My_delimeter = ",";
 		std::size_t _My_linecnt = 0;
 		std::fstream _My_file;
 	};
@@ -152,21 +221,20 @@ public:
 	}
 
 	template<is_skip_folder _Fopt = is_skip_folder::Y>
-	static MATRICE_HOST_INL auto filenames(const std::string& dir)
-	{
+	static MATRICE_HOST_INL auto filenames(std::string&& dir){
 		std::vector<std::string> _Ret;
 
 		fs::path _Path(dir);
 		if (!fs::exists(_Path)) return std::move(_Ret);
 
 		fs::directory_iterator _End;
-		for (fs::directory_iterator _Begin(_Path); _Begin != _End; ++_Begin) {
-			if (fs::is_regular_file(_Begin->status()))
-				_Ret.emplace_back(_Begin->path().string().substr(dir.size()));
+		for (decltype(_End) _It(_Path); _It != _End; ++_It) {
+			if (fs::is_regular_file(_It->status()))
+				_Ret.push_back(_It->path().string().substr(dir.size()));
 
 			if constexpr (_Fopt == is_skip_folder::N)
-				if (fs::is_directory(_Begin->status())) {
-					auto _Inner = filenames<_Fopt>(_Begin->path().string());
+				if (fs::is_directory(_It->status())) {
+					auto _Inner = filenames<_Fopt>(_It->path().string());
 					_Ret.insert(_Ret.end(), _Inner.begin(), _Inner.end());
 				}
 		}
@@ -174,41 +242,34 @@ public:
 		return std::move(_Ret);
 	}
 
-	///<summary>
-	//@brief: Template function to cvt. any value to std::string 
-	//@author: Zhilong Su - Jan.10.2017 @SEU
-	///</summary>
-	template<typename _Ty> 
-	static MATRICE_HOST_FINL auto strf(_Ty _val) noexcept {
-		std::ostringstream strs; strs << _val; return strs.str();
-	}
-	// \TEMPLATE function to cvt. numeric value to std::string
-	template<typename _Ty> 
-	static MATRICE_HOST_FINL auto strfn(_Ty _val) noexcept {
-#ifdef __CXX11__
-		return (std::to_string(_val));
-#elif
-		return strf(_val);
-#endif
-	}
-
+	/**
+	 *\brief Read data from a file.
+	 *\param <_Op> The operator to define the data reader.
+	 */
 	template<typename _Op> 
-	static MATRICE_HOST_INL auto read(std::string _path, _Op _op) {
-		DGELOM_CHECK(fs::exists(fs::path(_path)), "'" + _path + "' does not exist!");
+	static MATRICE_HOST_INL auto read(std::string&& _path, _Op _op) {
+		DGELOM_CHECK(fs::exists(fs::path(_path)), 
+			"'" + _path + "' does not exist!");
 
 		std::ifstream _Fin(_path);
-
-		DGELOM_CHECK(_Fin.is_open(), "Fail to open the file in " + _path);
+		DGELOM_CHECK(_Fin.is_open(), 
+			"Fail to open the file in " + _path);
 			
 		return _op(_Fin);
 	}
+	template<typename _Op>
+	static MATRICE_HOST_INL auto read(fs::path&& _path, _Op _op) {
+		return read(_path.string(), _op);
+	}
 
 	/**
-	 *\brief read data from a file
-	 *\param <_N0, _N1> are the 1-based indices of the begin and end columns to be read. 
+	 *\brief Read data from a file
+	 *\param <_N0, _N1> 1-based indices of the begin and end columns to be read.
+	 *\param '_Path' refers to the location of target file.
+     *\param '_Skips' indicates how many lines to skip over.
 	 */
 	template<typename _Ty, diff_t _N0, diff_t _N1 = _N0>
-	static MATRICE_HOST_INL auto read(std::string _Path, size_t _Skips = 0) {
+	static MATRICE_HOST_INL auto read(std::string&& _Path, size_t _Skips = 0) {
 		static_assert(_N0 <= _N1, "_N1 must be greater than or equal to _N0");
 		using value_type = _Ty;
 		DGELOM_CHECK(fs::exists(fs::path(_Path)),"'"+_Path+"' does not exist!");
@@ -241,18 +302,24 @@ public:
 			return forward<decltype(_Data)>(_Data);
 		}
 	}
+	template<typename _Ty, diff_t _N0, diff_t _N1 = _N0>
+	static MATRICE_HOST_INL auto read(fs::path&& _Path, size_t _Skips = 0) {
+		return read<_Ty, _N0, _N1>(_Path.string(), _Skips);
+	}
 
 	/**
-	 *\brief read data from a file at _Path
-	 *\param [_Path] refers to the location of target file
-			 [_Skips] indicates how many lines to skip over
+	 *\brief Read data from a file with a given path.
+	 *\param '_Path' refers to the location of target file.
+     *\param '_Skips' indicates how many lines to skip over.
 	 */
 	template<typename _Ty>
-	static MATRICE_HOST_INL auto read(std::string _Path, size_t _Skips = 0) {
+	static MATRICE_HOST_INL auto read(std::string&& _Path, size_t _Skips = 0) {
 		using value_type = _Ty;
-		DGELOM_CHECK(fs::exists(fs::path(_Path)), "'" + _Path + "' does not exist!");
+		DGELOM_CHECK(fs::exists(fs::path(_Path)), 
+			"'" + _Path + "' does not exist!");
 		std::ifstream _Fin(_Path);
-		DGELOM_CHECK(_Fin.is_open(), "Cannot open file in " + _Path);
+		DGELOM_CHECK(_Fin.is_open(), 
+			"Cannot open file in " + _Path);
 
 		std::string _Line;
 		for (const auto _Idx : range(0, _Skips)) {
@@ -269,25 +336,32 @@ public:
 			_Res.rview(_Idx) = _Data[_Idx].data();
 		}
 
-		return std::forward<decltype(_Res)>(_Res);
+		return forward<decltype(_Res)>(_Res);
+	}
+	template<typename _Ty>
+	static MATRICE_HOST_INL auto read(fs::path&& _Path, size_t _Skips = 0) {
+		return read<_Ty>(_Path.string(), _Skips);
 	}
 
-	// \single-stream output
+	/**
+	 *\brief Single-stream writter to output data to a file in '_path'.
+	 */
 	template<typename _Op> 
-	static MATRICE_HOST_FINL void write(std::string _path, _Op _op) {
+	static MATRICE_HOST_FINL void write(std::string&& _path, _Op _op) {
 		std::ofstream _Fout(_path);
-		DGELOM_CHECK(_Fout.is_open(), "Fail to open file: " + _path);
+		DGELOM_CHECK(_Fout.is_open(), 
+			"Fail to open file: " + _path);
 		_Fout.setf(std::ios::fixed, std::ios::floatfield);
 		_op(forward<std::ofstream>(_Fout));
 		_Fout.close();
 	}
 	/**
-	 * \double-stream output, where _op should be a functor accepts a pair of std::ofstream instances.
+	 * \brief Double-stream output, where '_op' should be a functor that accepts a pair of std::ofstream instances.
 	 * \Example:
-			write("C:/data/", {"f1.txt", "f2.txt"}, [&](auto&& fs1, auto&& fs2){ ... })
+	    write("C:/data/", {"f1.txt", "f2.txt"}, [&](auto&& fs1, auto&& fs2){ ... })
 	 */
 	template<typename _Op>
-	static MATRICE_HOST_FINL void write(std::string _path, std::initializer_list<std::string> _fnames, _Op&& _op) {
+	static MATRICE_HOST_FINL void write(std::string&& _path, std::initializer_list<std::string> _fnames, _Op&& _op) {
 		std::cout << "Files are saved in folder: " << _path << std::endl;
 		const auto _N = _fnames.begin();
 		std::ofstream _O1(_path + _N[0]), _O2(_path + _N[1]);
@@ -388,18 +462,19 @@ public:
 	using value_type = std::string;
 	using const_value_type = std::add_const_t<value_type>;
 
-	template<typename _Ty = value_type> static
 	/**
-	 *\brief split a given string with a token 
-	 *\param [_Str] string being splitted; [_Tok] token.
+	 *\brief Split a given string with a token 
+	 *\param '_Str' a string to be splitted;
+	 *\param '_Tok' token.
 	 *\note: the template is used to specify the returned type.
 	 *\example:
 	   auto _Str1 = string_helper::value_type("dog,car,plane");
-		auto _Items1 = string_helper::split(_Str1,',');//{dog, car, plane}
-		auto _Str2 = string_helper::value_type("2,3,5");
-		auto _Items2 = string_helper::split<float>(_Str2,',');//{2.f, 3.f, 5.f}
+	   auto _Items1 = string_helper::split(_Str1,',');//{dog, car, plane}
+	   auto _Str2 = string_helper::value_type("2,3,5");
+	   auto _Items2 = string_helper::split<float>(_Str2,',');//{2.f, 3.f, 5.f}
 	 */
-	MATRICE_HOST_INL std::vector<_Ty> split(const value_type& _Str, basic_value_type _Tok) {
+	template<typename _Ty = value_type> static MATRICE_HOST_INL
+	std::vector<_Ty> split(const value_type& _Str, basic_value_type _Tok) {
 		std::vector<_Ty> _Res;
 		const_value_type _String = value_type(1, _Tok) + _Str;
 
@@ -486,12 +561,12 @@ MATRICE_HOST_FINL auto serial(const _Cont& _L) {
 	return tuple_n<_N - 1>::_(_L.data());
 }
 template<class _Op, typename _Vty = typename _Op::value_type>
-decltype(auto) make_loader(std::string path, _Op&& loader)noexcept {
+decltype(auto) make_loader(std::string&& path, _Op&& loader)noexcept {
 	using loader_type = data_loader<_Vty>;
 	return loader_type(directory{ path, path_t() }, loader);
 }
 template<class _Op>
-decltype(auto) make_loader(path_t path, _Op&& loader)noexcept {
+decltype(auto) make_loader(const path_t& path, _Op&& loader)noexcept {
 	using loader_type = data_loader<typename _Op::value_type>;
 	return loader_type(directory{ path.generic_string(), path_t() }, loader);
 }

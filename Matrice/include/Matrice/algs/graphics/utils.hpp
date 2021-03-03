@@ -67,52 +67,54 @@ private:
 		}).y;
 		_Mybound = { _Minx, _Miny, _Maxx, _Maxy };
 	}
+
 	std::shared_ptr<ptlist_type> _Mypts;
-	Vec2_<int32_t> _Mymesz;
 	Matrix_<value_type, 2, 2> _Mybound;
+	Vec2_<int32_t> _Mymesz;
 };
 _DETAIL_END
 
 /**
- *\brief <class> linspace<_Ty> </class>
- *\typen <_Ty> a scalar type
+ *\brief CLASS TEMPLATE linspace<_Ty> </class>
+ *\typename <_Ty> a scalar type
 */
-template<typename _Ty = float> class linspace {
-	static_assert(is_scalar_v<_Ty>, "_Ty in linspace<> must be a scalar.");
+template<typename _Ty = float> 
+class linspace {
+	static_assert(is_scalar_v<_Ty>, 
+		"_Ty in linspace<> must be a scalar.");
 	using _Myt = linspace<_Ty>;
 public:
 	using value_type = _Ty;
 	using row_vector_type = Matrix_<value_type, 1, ::dynamic>;
 
 	/// <summary>
-	/// Ctor of class linspace
+	/// \brief Ctor of class linspace.
 	/// </summary>
 	/// <param name="'begin'"> The staring value of the sequence </param>
 	/// <param name="'end'"> The ending value of the sequence </param>
 	/// <param name="'num'"> Number of samples to generate. Default is 51.</param>
 	linspace(value_type begin, value_type end, size_t num = 51) noexcept
-		: m_begin(begin), m_end(end) {
-		m_num = num;
+		: m_begin(begin), m_end(end), m_num(num) {
 		m_step = num == 1 ? sub(m_end, m_begin) : safe_div(sub(m_end, m_begin), num - 1);
 	}
 
-	MATRICE_GLOBAL_INL const value_type& begin() const noexcept {
+	MATRICE_GLOBAL_INL decltype(auto) begin() const noexcept {
 		return (m_begin);
 	}
-	MATRICE_GLOBAL_INL value_type& begin() noexcept {
+	MATRICE_GLOBAL_INL decltype(auto) begin() noexcept {
 		return (m_begin);
 	}
-	MATRICE_GLOBAL_INL const value_type& end() const noexcept {
+	MATRICE_GLOBAL_INL decltype(auto) end() const noexcept {
 		return (m_end);
 	}
-	MATRICE_GLOBAL_INL value_type& end() noexcept {
+	MATRICE_GLOBAL_INL decltype(auto) end() noexcept {
 		return (m_end);
 	}
 
-	MATRICE_GLOBAL_INL value_type& operator++() {
+	MATRICE_GLOBAL_INL decltype(auto) operator++() {
 		return (m_current += m_step);
 	}
-	MATRICE_GLOBAL_INL value_type& operator++(int) {
+	MATRICE_GLOBAL_INL decltype(auto) operator++(int) {
 		return (m_current += m_step);
 	}
 	MATRICE_GLOBAL_INL operator value_type() const noexcept {
@@ -121,6 +123,7 @@ public:
 	MATRICE_GLOBAL_INL operator bool() const noexcept {
 		return (m_current <= m_end);
 	}
+
 	/// <summary>
 	/// \brief Return evenly spaced numbers over the specified interval [begin, end].
 	/// If paramerter 'endpoint' is false, then the end point of the interval is excluded.
@@ -140,7 +143,7 @@ public:
 	/// <param name="'num'"> Number of samples to generate. Default is 51. </param>
 	/// <param name="'endpoint'"> If True, stop is the last sample. Otherwise, it is not included. Default is True. </param>
 	/// <returns> A row vector holds the generated number sequence. </returns>
-	static MATRICE_GLOBAL_INL row_vector_type _(_Ty start, _Ty stop, size_t num = 51, bool endpoint = true) {
+	static row_vector_type _(_Ty start, _Ty stop, size_t num = 51, bool endpoint = true) {
 		_Myt linspace(start, stop, num);
 		return linspace(endpoint);
 	}
@@ -150,6 +153,21 @@ private:
 	value_type m_step = 1, m_current = m_begin;
 	size_t m_num;
 };
+
+/// <summary>
+/// \brief Factory function to create evenly spaced numbers over the specified interval [begin, end].
+/// </summary>
+/// <typeparam name="_Ty"> Any scalar type. The type of generated numbers is the same as '_Ty'. </typeparam>
+/// <param name="'start'"> The staring value of the sequence. </param>
+/// <param name="'stop'"> The ending value of the sequence. </param>
+/// <param name="'num'"> Number of samples to generate. Default is 51.</param>
+/// <param name="'endpoint'">: Conditional argument. If endpoint is false, then the end point of the interval is excluded.</param>
+/// <returns></returns>
+template<typename _Ty> requires is_scalar_v<_Ty>
+MATRICE_GLOBAL_INL auto make_linspace(_Ty start, _Ty stop, size_t num = 51, bool endpoint = true) noexcept {
+	return linspace<conditional_t<std::is_unsigned_v<_Ty>, int, _Ty>>::
+		_(start, stop, num, endpoint);
+}
 
 DGE_MATRICE_END
 
