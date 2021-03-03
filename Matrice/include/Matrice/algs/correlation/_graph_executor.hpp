@@ -29,30 +29,89 @@ _DETAIL_BEGIN
 class _Graph_executor {
 	using _Myt = _Graph_executor;
 public:
-	enum class computing_mode
+	enum computing_type
 	{
 		sequence = 0,
 		parallel = 1,
 		instant  = 3,
-		host     = 10,
-		device   = 11
 	};
 
-		//
-
-		// Specify computing mode.
-		computing_mode exec_mode = computing_mode::sequence;
-	};
-
-	struct node_type
+	enum device_type
 	{
-		// data
-
-		// operator
+		cpu = 0,
+		gpu = 1
 	};
+
+	struct options_type
+	{
+		// Specify capacity to prefetch node resources. 
+		size_t preload_capacity = 1;
+
+		// Specify computing paradigm.
+		size_t exec_mode = computing_type::sequence | device_type::cpu;
+
+		// Specify to update reference layer.
+		bool adjacent = false;
+	};
+
+	class layer_type
+	{
+		struct status
+		{
+			bool processed = false;
+			bool active = true;
+		};
+
+		// FIELD, data
+
+		// FIELD, operator
+
+		// FIELD, status
+		status _Mystatus;
+
+		// FIELD, parallel computing index
+		size_t _Myidx = 0;
+	public:
+		/**
+		 * \brief METHOD, detach this layer from the computational graph.
+		 */
+		void detach() noexcept {
+			_Mystatus.active = false;
+		}
+
+		/**
+		 * \brief METHOD, join this layer into the computational graph.
+		 */
+		void join() noexcept {
+			_Mystatus.active = true;
+		}
+
+		/**
+		 * \brief METHOD, check if this layer is detached or not.
+		 */
+		bool is_active() const noexcept {
+			return _Mystatus.active;
+		}
+
+		/**
+		 * \brief METHOD, check if this layer is processed or not.
+		 */
+		bool is_processed() const noexcept {
+			return _Mystatus.processed;
+		}
+		
+	};
+
+	/**
+	 * \brief METHOD, add a computing node.
+	 */
+	_Myt& add_layer(const layer_type& node) {
+		_Mylayers.push_back(node);
+		return (*this);
+	}
 
 private:
-	std::vector<node_type> _Mynodes;
+	std::vector<layer_type> _Mylayers;
 	
 };
 
