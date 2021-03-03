@@ -135,7 +135,8 @@ struct _Correlation_options {
 	 */
 	template<typename _Pty, typename _Sty>
 	MATRICE_HOST_INL bool range_check(const _Pty& _Pos, const _Sty& _Shape) {
-		auto _TL = _Pos - _Radius; auto _RB = _Pos + _Radius;
+		auto _TL = _Pos - _Radius; 
+		auto _RB = _Pos + _Radius;
 		if (floor(_TL(0)) < 0 || floor(_TL(1)) < 0 ||
 			_RB(0) >= get<0>(_Shape) || _RB(1) >= get<1>(_Shape))
 			return false;
@@ -156,7 +157,7 @@ public:
 
 	// \brief Number of parameters to be estimated.
 	static constexpr auto npar = conditional_size_v<
-		_Mytraits::order == 0, 2, _Mytraits::order * 6>;
+		_Mytraits::order == 0, 2, _Mytraits::order*6>;
 	using value_type = typename _Mytraits::value_type;
 	using matrix_type = Matrix<value_type>;
 	using matrix_fixed = Matrix_<value_type, npar, npar>;
@@ -174,16 +175,16 @@ public:
 	// \brief Loss function definition.
 	struct loss_fn {
 		value_type rho(value_type x) noexcept {
-			return scale * (1 - exp(-x/ scale));
-			//return scale * (1 - 1/(1+x/scale));
+			//return scale * (1 - exp(-x/ scale));
+			return scale * (1 - 1/(1+x/scale));
 			//return x;
 		}
 		value_type phi(value_type x) noexcept {
-			return exp(-x/scale);
-			//return 1/sq(1+x/scale);
+			//return exp(-x/scale);
+			return 1/sq(1+x/scale);
 			//return 1;
 		}
-		value_type scale = 0.01*0.01;
+		value_type scale = sq(0.001);
 	};
 
 	/**
@@ -261,7 +262,7 @@ public:
 
 	// \brief for robust estimation, Dec/30/2020
 	MATRICE_HOST_INL void set_loss_scale(value_type s) noexcept {
-		_Myloss.scale = s;
+		_Myloss.scale = sq(s);
 	}
 	// \brief for robust estimation, Dec/30/2020
 	// \return [squared_loss, rho_loss, norm2_of_pars] = robust_sol(pars);

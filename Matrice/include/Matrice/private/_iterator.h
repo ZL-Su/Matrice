@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -30,13 +30,13 @@ _InIt _End(const _InIt _Begin, size_t _Size, size_t _Stride = 1) {
 }
 
 /**********************************************************************
- Base for Forward Range Iterator[_Myptr, _Myend), which is compatible 
+    Forward iterator for range [_Myptr, _Myend), which is compatible 
                          with STD::ITERATOR
 	    Copyright (c) : Zhilong (Dgelom) Su, since 12/Jul/2018
  **********************************************************************/
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
-class _Iterator_base {
-	using _Myt = _Iterator_base;
+class _Iterator {
+	using _Myt = _Iterator;
 public:
 	using iterator_category = std::random_access_iterator_tag;
 	using value_type = _Ty;
@@ -45,9 +45,9 @@ public:
 	using difference_type = std::ptrdiff_t;
 	enum { rows_at_compiletime = 0, cols_at_compiletime = 0 };
 
-	MATRICE_GLOBAL_FINL _Iterator_base(pointer _Ptr) noexcept 
+	MATRICE_GLOBAL_FINL _Iterator(pointer _Ptr) noexcept 
 		:_Myptr(_Ptr), _Mybegin(_Ptr), _Mysize(0), _Mystep(1) {}
-	MATRICE_GLOBAL_FINL _Iterator_base(pointer _Ptr, size_t _Size, size_t _Step =  1) noexcept 
+	MATRICE_GLOBAL_FINL _Iterator(pointer _Ptr, size_t _Size, size_t _Step =  1) noexcept 
 		:_Myptr(_Ptr), _Mybegin(_Ptr), _Mysize(_Size), _Mystep(_Step) {}
 	
 	MATRICE_GLOBAL_FINL reference operator*() const noexcept { 
@@ -167,7 +167,7 @@ private:
 	const pointer _Mybegin = nullptr;
 };
 template<typename _Ty>
-MATRICE_GLOBAL_FINL _Iterator_base<_Ty> operator+ (typename _Iterator_base<_Ty>::difference_type _Offset, _Iterator_base<_Ty> _Next) {
+MATRICE_GLOBAL_FINL _Iterator<_Ty> operator+ (typename _Iterator<_Ty>::difference_type _Offset, _Iterator<_Ty> _Next) {
 	return (_Next += _Offset);
 }
 
@@ -176,9 +176,9 @@ MATRICE_GLOBAL_FINL _Iterator_base<_Ty> operator+ (typename _Iterator_base<_Ty>:
 		Copyright (c) : Zhilong (Dgelom) Su, since May/23/2020
  **********************************************************************/
 template<typename _Ty>
-class _Matrix_const_iterator : public _Iterator_base<_Ty>
+class _Matrix_const_iterator : public _Iterator<_Ty>
 {
-	using _Mybase = _Iterator_base<_Ty>;
+	using _Mybase = _Iterator<_Ty>;
 	using _Myt = _Matrix_const_iterator;
 public:
 	using typename _Mybase::pointer;
@@ -248,9 +248,9 @@ private:
 	    Copyright (c) : Zhilong (Dgelom) Su, since 12/Jul/2018
  **********************************************************************/
 template<typename _Ty>
-class _Matrix_forward_iterator : public _Iterator_base<_Ty>
+class _Matrix_forward_iterator : public _Iterator<_Ty>
 {
-	using _Mybase = _Iterator_base<_Ty>;
+	using _Mybase = _Iterator<_Ty>;
 public:
 	template<typename... _Args> 
 	MATRICE_GLOBAL_FINL _Matrix_forward_iterator(_Args... _args)noexcept
@@ -265,7 +265,7 @@ private:
 	    Copyright (c) : Zhilong (Dgelom) Su, since 12/Jul/2018
  **********************************************************************/
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
-class _Matrix_rwise_iterator : public _Iterator_base<_Ty>
+class _Matrix_rwise_iterator : public _Iterator<_Ty>
 {
 	/*<Note> 
 		_Myptr  := input pointer to row
@@ -273,7 +273,7 @@ class _Matrix_rwise_iterator : public _Iterator_base<_Ty>
 		_Mystep := number of cols
 		_Return  := i-th element in the row that _Myptr point to
 	  </Note>*/
-	using _Mybase = _Iterator_base<_Ty>;
+	using _Mybase = _Iterator<_Ty>;
 	using _Myt = _Matrix_rwise_iterator;
 public:
 	template<typename... _Args>
@@ -321,7 +321,7 @@ private:
 	    Copyright (c) : Zhilong (Dgelom) Su, since 12/Jul/2018
  **********************************************************************/
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
-class _Matrix_cwise_iterator : public _Iterator_base<_Ty>
+class _Matrix_cwise_iterator : public _Iterator<_Ty>
 {
 	/*<Note> 
 		_Myptr  := input pointer to column
@@ -329,7 +329,7 @@ class _Matrix_cwise_iterator : public _Iterator_base<_Ty>
 		_Mystep := 1
 		_Return := i-th element in the column that _Myptr point to
 	  </Note>*/
-	using _Mybase = _Iterator_base<_Ty>;
+	using _Mybase = _Iterator<_Ty>;
 	using _Myt = _Matrix_cwise_iterator;
 public:
 	template<typename... _Args>

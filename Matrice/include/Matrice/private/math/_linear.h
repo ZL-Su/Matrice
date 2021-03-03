@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,14 +21,21 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 DGE_MATRICE_BEGIN _DETAIL_BEGIN
 
-template<typename _Mty, typename _Tag> class _Matrix_decomposition {};
+// Forward declaration
+template<typename _Mty, typename _Tag> 
+class _Matrix_decomposition {};
 
+/// <summary>
+/// \brief CLASS template for matrix decomposition.
+/// </summary>
+/// <typeparam name="_Mty">matrix type</typeparam>
 template<typename _Mty> 
-class _Matrix_decomposition<_Mty, _TAG _Linear_spd_tag> {
+class _Matrix_decomposition<_Mty, tag::_Linear_spd_tag> {
 	static_assert(is_matrix_v<_Mty>, 
 		"_Mty in _Matrix_decomposition must be a Matrix_ type.");
 public:
-	using category = _TAG _Linear_spd_tag;
+	using value_type = typename _Mty::value_type;
+	using category = tag::_Linear_spd_tag;
 
 	/**
 	 * \brief Declare a matrix decomposition instance.
@@ -38,11 +45,11 @@ public:
 		: _Mycoef(_A) {}
 
 	/**
-	 * \brief Forward to perform matrix decomposition with specified linear kernel.
+	 * \brief Forward to perform matrix decomposition with a specified linear kernel.
 	 * \return A reference to the overwritten coefficient matrix A.
 	 */
 	MATRICE_HOST_INL decltype(auto) forward() {
-		_Lapack_kernel_impl<typename _Mty::value_type>::spd(_Mycoef);
+		_Lapack_kernel_impl<value_type>::spd(_Mycoef);
 		return (_Mycoef);
 	}
 
@@ -52,7 +59,7 @@ public:
 	 * \return The solution, which is stored in _X.
 	 */
 	template<typename _Rhs>
-	MATRICE_HOST_INL auto& backward(const _Rhs& _X) const {
+	MATRICE_HOST_INL decltype(auto) backward(const _Rhs& _X) const {
 		return _Lapack_backward_impl<CHD>::eval(_Mycoef, _X);
 	}
 
@@ -79,12 +86,18 @@ struct _Linear {
 		using matrix_type = _Maty;
 		using value_type = typename matrix_type::value_type;
 
-		MATRICE_HOST_INL _Base(matrix_type& _Data) : _Mydata(_Data) {}
+		MATRICE_HOST_INL _Base(matrix_type& _Data) noexcept
+			: _Mydata(_Data) {}
 
 		/**
 		 * \Return precomputed matrix.
 		 */
-		MATRICE_HOST_INL auto& operator()() { return (_Mydata); }
+		MATRICE_HOST_INL decltype(auto)operator()()const noexcept { 
+			return (_Mydata); 
+		}
+		MATRICE_HOST_INL decltype(auto)operator()()noexcept {
+			return (_Mydata);
+		}
 
 	protected:
 		matrix_type& _Mydata;
@@ -92,14 +105,16 @@ struct _Linear {
 	template<typename _Maty, solver_type _Tag> class _Decomp {};
 
 	template<typename _Maty>
-	class _Decomp<_Maty, solver_type::CHD> : _Base<_Maty> {
+	class _Decomp<_Maty, solver_type::CHD> 
+		: _Base<_Maty> {
 		using _Mybase = _Base<_Maty>;
 	public:
 		using typename _Mybase::matrix_type;
 		using typename _Mybase::value_type;
 		static constexpr auto solver_tag = solver_type::CHD;
 
-		MATRICE_HOST_INL _Decomp(matrix_type& _Data) : _Mybase(_Data) {
+		MATRICE_HOST_INL _Decomp(matrix_type& _Data) 
+			: _Mybase(_Data) {
 			this->operator();
 		}
 

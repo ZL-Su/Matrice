@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,34 +20,62 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "private/_type_traits.h"
 
 DGE_MATRICE_BEGIN
+// Tag base
 struct interpolation_tag {};
-struct lerp_tag   :interpolation_tag {}; //\sa. [l]inear int[erp]olation
-struct bilerp_tag :interpolation_tag {}; //\sa. [bil]inear int[erp]olation
-struct cubconerp_tag :interpolation_tag {}; //\sa. [cub]ic [con]volution int[erp]olation
-struct bicerp_tag :interpolation_tag {}; //\sa. [bic]ubic int[erp]olation
-struct biqerp_tag :interpolation_tag {}; //\sa. [biq]intic int[erp]olation
-struct biserp_tag :interpolation_tag {}; //\sa. [bis]eptic int[erp]olation
+
+// Tag, \sa [l]inear int[erp]olation
+struct lerp_tag   :interpolation_tag {};
+
+// Tag, \sa [bil]inear int[erp]olation
+struct bilerp_tag :interpolation_tag {};
+
+// Tag, \sa [cub]ic [con]volution int[erp]olation
+struct cubconerp_tag :interpolation_tag {};
+
+// Tag, \sa [bic]ubic int[erp]olation
+struct bicerp_tag :interpolation_tag {};
+
+// Tag, \sa [biq]intic int[erp]olation
+struct biqerp_tag :interpolation_tag {};
+
+// Tag, \sa [bis]eptic int[erp]olation
+struct biserp_tag :interpolation_tag {};
+
+// Tag, \sa 2d [m]ultilevel bicubic interpolation
 struct mbicerp_2d_tag :interpolation_tag {
 	static constexpr size_t dimension = 2;
 	static constexpr size_t max_levels = 8;
-}; //\sa. 2d [m]ultilevel bicubic interpolation
+};
+
+// Tag, \sa 3d [m]ultilevel bicubic interpolation
 struct mbicerp_3d_tag :interpolation_tag {
 	static constexpr size_t dimension = 3;
 	static constexpr size_t max_levels = 8;
-}; //\sa. 3d [m]ultilevel bicubic interpolation
+};
 
+// Forward declarations
 namespace algs {
 template<typename _Ty, typename _Tag> class _Interpolation_wrapper;
 template<typename _Ty, typename _Tag> class auto_interp_dispatcher;
 template<typename _Ty, unsigned _N>   class multilevel_bicerp_approx;
 }
 
+/// <summary>
+/// ALIAS class template for b-spline interpolator.
+/// </summary>
+/// <typeparam name="_Ty">data type</typeparam>
+/// <typeparam name="_Tag">interpolation algorithm tag</typeparam>
 template<
 	typename _Ty, 
 	typename _Tag = bicerp_tag, 
 	MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 using interpolation = algs::_Interpolation_wrapper<_Ty, _Tag>;
 
+/// <summary>
+/// ALIAS class template for interpolator dispatcher.
+/// </summary>
+/// <typeparam name="_Ty">data type</typeparam>
+/// <typeparam name="_Tag">interpolation algorithm tag</typeparam>
 template<
 	typename _Ty,
 	typename _Tag = bicerp_tag,

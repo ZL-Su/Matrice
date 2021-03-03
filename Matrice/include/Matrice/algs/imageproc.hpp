@@ -1,6 +1,6 @@
 /***************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library for SC.
-Copyright(C) 2018-2019, Zhilong (Dgelom) Su (su-zl@seu.edu.cn), all rights reserved.
+Copyright(C) 2018-2021, Zhilong (Dgelom) Su (su-zl@seu.edu.cn), all rights reserved.
 
 This program is free software : you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the Free
@@ -24,29 +24,30 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
-template<typename _Pixty, 
-	MATRICE_ENABLE_IF(is_arithmetic_v<_Pixty>)>
+template<typename _Pixty, MATRICE_ENABLE_IF(is_arithmetic_v<_Pixty>)>
 void _Grayscale_stretch(_Pixty* Img, size_t rows, size_t cols) {
 	using pixel_t = _Pixty;
 	using iterator = std::add_pointer_t<pixel_t>;
 
 	const auto N = rows * cols;
-	iterator _Begin = Img, _End = Img + N;
+	auto _Begin = Img, _End = Img + N;
 
-	pixel_t _Max = pixel_t(0), _Min = pixel_t(255);
+	auto _Max = pixel_t(0), _Min = pixel_t(255);
 	for (; _Begin != _End; (void)++_Begin) {
 		_Max = _Max > *_Begin ? _Max : *_Begin;
 		_Min = _Min < *_Begin ? _Min : *_Begin;
 	}
 
-	float_t _Scal = 255.f / float_t(_Max - _Min);
+	auto _Scal = 255.f / float_t(_Max - _Min);
 	for (_Begin -= N; _Begin != _End; (void)++_Begin)
 		*_Begin = pixel_t(_Scal * (*_Begin - _Min));
 }
-template<typename _Pixty, 
-	MATRICE_ENABLE_IF(is_scalar_v<_Pixty>)>
-void _Add_gaussian_noise(Matrix_<_Pixty, ::dynamic>& _Img, float _Sig) {
-	std::random_device rd{}; std::mt19937 gen{ rd() };
+
+template<typename _Pixty, MATRICE_ENABLE_IF(is_scalar_v<_Pixty>)>
+void _Add_gaussian_noise(Matrix_<_Pixty,::dynamic>&_Img, float _Sig) 
+{
+	std::random_device rd{}; 
+	std::mt19937 gen{ rd() };
 	normal_distribution<decltype(_Sig)> r{ 0, _Sig };
 	_Img.parallel_each([&r, &gen](auto& val) {
 		const auto _Noise = r(gen);
@@ -95,6 +96,14 @@ auto _Image_resize(const Matrix_<_Pixty, ::dynamic>& _Img, shape_t<2> _Size) {
 //}
 
 _DETAIL_END
+
+/// <summary>
+/// \brief FUNCTION, add Gaussian noise to an image.
+/// </summary>
+/// <typeparam name="_Ty"></typeparam>
+/// <param name="_Img">Source image</param>
+/// <param name="_Sigma">Sigma to control noise level.</param>
+/// <returns></returns>
 template<typename _Ty>
 inline auto imnoise(Matrix_<_Ty, ::dynamic>&& _Img, float _Sigma = 1) {
 	auto _Noise = forward<remove_all_t<decltype(_Img)>>(_Img);
@@ -102,13 +111,17 @@ inline auto imnoise(Matrix_<_Ty, ::dynamic>&& _Img, float _Sigma = 1) {
 	return forward<decltype(_Noise)>(_Noise);
 }
 
+/// <summary>
+/// \brief FUNCTION, resize an image.
+/// </summary>
+/// <typeparam name="_ItpTag"></typeparam>
+/// <typeparam name="_Ty"></typeparam>
+/// <param name="_Img">Source image.</param>
+/// <param name="_Size">Target shape to be generated.</param>
+/// <returns></returns>
 template<class _ItpTag = bicerp_tag, typename _Ty = uint8_t>
 inline auto resize(const Matrix_<_Ty, ::dynamic>& _Img, shape_t<2> _Size) {
 	return detail::_Image_resize<_ItpTag>(_Img, _Size);
-}
-
-namespace types { 
-	template<typename _Ty, int _M, int _N> class Matrix_; 
 }
 
 namespace detail {
@@ -160,7 +173,8 @@ template<> struct _Grad_range_clip<_TAG _Itped_grad_tag::bisspl> {
 /**
  * \Base class for gradient computation in interpolation way.
  */
-template<typename _Derived> class _Interpolated_gradient_base {
+template<typename _Derived> 
+class _Interpolated_gradient_base {
 	using _Mytraits = gradient_traits<_Derived>;
 	using _Myitp = interpolation<typename _Mytraits::value_type, category_type_t<_Mytraits>>;
 public:
@@ -188,7 +202,7 @@ public:
 		return _Myop.grad<_Axis>(_Pos); 
 	}
 	/**
-	 * \Get image gradient w.r.t. _Axis in rect. range [_L, _R) | [_U, _D)
+	 * \brief Get image gradient for _Axis in rect [_L, _R) | [_U, _D)
 	 */
 	template<axis _Axis> 
 	MATRICE_HOST_INL decltype(auto)at(int _L, int _R, int _U, int _D) const { 
@@ -204,7 +218,7 @@ public:
 			}
 		}
 
-		return std::forward<matrix_type>(_Grad);
+		return forward<matrix_type>(_Grad);
 	}
 	/**
 	 * \Get image interpolator
@@ -217,14 +231,23 @@ protected:
 	typename _Myitp::type _Myop;
 };
 
+/// <summary>
+/// \brief CLASS template for gradient computation with Sobel operator
+/// </summary>
+/// <typeparam name="_Ty">floating point type</typeparam>
 template<typename _Ty> 
 class _Gradient_impl<_Ty, _TAG _Sobel_grad_tag> {
 	using _Myt = _Gradient_impl;
 public:
 	using value_type = _Ty;
 	using image_type = Matrix<value_type>;
-	_Gradient_impl(const image_type& _Image) : _Myimg(_Image) {}
 
+	_Gradient_impl(const image_type& _Image) 
+		: _Myimg(_Image) {}
+
+	/**
+	 * \brief Eval gradient at point (_x, _y). 
+	 */
 	MATRICE_HOST_INL auto at(diff_t _x, diff_t _y) const {
 		auto gx = zero<value_type>, gy = gx;
 
@@ -259,7 +282,8 @@ public:
 	using typename _Mybase::image_type;
 	using typename _Mybase::value_type;
 
-	_Gradient_impl(const image_type& _Img) : _Mybase(_Img) {}
+	_Gradient_impl(const image_type& _Img) 
+		: _Mybase(_Img) {}
 };
 
 template<typename _Ty>
@@ -271,7 +295,8 @@ public:
 	using typename _Mybase::image_type;
 	using typename _Mybase::value_type;
 
-	_Gradient_impl(const image_type& _Img) : _Mybase(_Img) {}
+	_Gradient_impl(const image_type& _Img) 
+		: _Mybase(_Img) {}
 };
 
 template<typename _Ty>
@@ -283,7 +308,8 @@ public:
 	using typename _Mybase::image_type;
 	using typename _Mybase::value_type;
 
-	_Gradient_impl(const image_type& _Img) : _Mybase(_Img) {}
+	_Gradient_impl(const image_type& _Img) 
+		: _Mybase(_Img) {}
 };
 }
 
