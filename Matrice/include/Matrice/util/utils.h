@@ -75,15 +75,15 @@ _DETAIL_END
  * \example: 
 		const auto val = dgelom::stonv<float>("1.0"); //val = 1.0f;
  */
-template<typename T = std::string> MATRICE_HOST_FINL
-T stonv(const std::string& _Str) noexcept {
+template<typename T = std::string>
+MATRICE_HOST_FINL T stonv(const std::string& _Str) noexcept {
 #ifdef MATRICE_DEBUG
 	DGELOM_CHECK(!_Str.empty(), "_Str should not be empty.")
 #endif
 	return detail::string_to_numval<T>::value(_Str); 
 }
-template<typename T = std::string> MATRICE_HOST_FINL
-T cast_string_to(std::string&& _Str) noexcept {
+template<typename T = std::string>
+MATRICE_HOST_FINL T cast_string_to(std::string&& _Str) noexcept {
 #ifdef MATRICE_DEBUG
 	DGELOM_CHECK(!_Str.empty(), "_Str should not be empty.")
 #endif
@@ -95,10 +95,14 @@ T cast_string_to(std::string&& _Str) noexcept {
  * \example: 
 		const auto str = dgelom::cast_to_string(3.14159); //str = "3.14159"
  */
-template<typename T> MATRICE_HOST_INL
-std::string cast_to_string(T _Val) noexcept {
+template<typename T>
+MATRICE_HOST_INL std::string cast_to_string(T _Val) noexcept {
 	return std::to_string(_Val);
 }
+MATRICE_HOST_INL auto cast_to_string(const char* _Val) noexcept {
+	return std::string(_Val);
+}
+
 /**
  * \brief Cast T-typed (numeric) value to std::string with a given bit number.
  *	If the character bit is less than the bit number, zeros are filled in the vacancy at the left side.
@@ -113,27 +117,28 @@ std::string cast_to_string(T _Val, uint8_t _Ndigs) noexcept {
 	case 2: 
 		if (_Val < 10) _Pref = "0"; break;
 	case 3: 
-		if (_Val < 10)_Pref = "00"; break;
-		if (_Val < 100) _Pref = "0"; break;
+		if (_Val < 10)  _Pref = "00"; break;
+		if (_Val < 100) _Pref = "0";  break;
 	case 4:
-		if (_Val < 10)_Pref = "000"; break;
-		if (_Val < 100) _Pref = "00"; break;
-		if (_Val < 1000) _Pref = "0"; break;
+		if (_Val < 10)   _Pref = "000"; break;
+		if (_Val < 100)  _Pref = "00";  break;
+		if (_Val < 1000) _Pref = "0";   break;
 	case 5:
-		if (_Val < 10)_Pref = "0000"; break;
-		if (_Val < 100) _Pref = "000"; break;
-		if (_Val < 1000) _Pref = "00"; break;
-		if (_Val < 10000) _Pref = "0"; break;
+		if (_Val < 10)    _Pref = "0000"; break;
+		if (_Val < 100)   _Pref = "000";  break;
+		if (_Val < 1000)  _Pref = "00";   break;
+		if (_Val < 10000) _Pref = "0";    break;
 	case 6:
-		if (_Val < 10)_Pref = "00000"; break;
-		if (_Val < 100) _Pref = "0000"; break;
-		if (_Val < 1000) _Pref = "000"; break;
-		if (_Val < 10000) _Pref = "00"; break;
-		if (_Val < 100000) _Pref = "0"; break;
+		if (_Val < 10)     _Pref = "00000"; break;
+		if (_Val < 100)    _Pref = "0000";  break;
+		if (_Val < 1000)   _Pref = "000";   break;
+		if (_Val < 10000)  _Pref = "00";    break;
+		if (_Val < 100000) _Pref = "0";     break;
 	default: break;
 	}
 	return (_Pref + cast_to_string(_Val));
 }
+
 /**
  * \brief Driver of the above two functions cast_to_string(...).
  */
