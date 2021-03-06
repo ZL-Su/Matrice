@@ -62,11 +62,11 @@ private:
 };
 
 /// <summary>
-/// \brief CLASS TEMPLATE, General image type
+/// \brief CLASS TEMPLATE, partial-specialization for common image type
 /// </summary>
 /// <typeparam name="_Ty">Scalar value type</typeparam>
 template<typename _Ty>
-class _Image : public Matrix_<_Ty, ::dynamic, ::dynamic> {
+class _Image<_Ty, void> : public Matrix_<_Ty, ::dynamic, ::dynamic> {
 
 };
 _DETAIL_END
