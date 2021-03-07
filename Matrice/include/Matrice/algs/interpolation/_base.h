@@ -1,6 +1,6 @@
 /***********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -183,7 +183,6 @@ protected:
 	const value_type _Myeps{ value_type(1.0e-7) };
 	shared_matrix_t<value_type> _Mydata;
 	matrix_type _Mycoeff;
-	matrix_type _Mygrads;
 };
 
 MATRICE_ALGS_END
