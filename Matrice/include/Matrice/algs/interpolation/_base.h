@@ -25,7 +25,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../forward.hpp"
 
 MATRICE_ALGS_BEGIN
-enum {
+enum interp_algs {
 	INTERP     = 18,
 
 	BSPLINE    = 2307,
