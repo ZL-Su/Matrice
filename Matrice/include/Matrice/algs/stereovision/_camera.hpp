@@ -34,16 +34,55 @@ struct ortho_camera_tag {};
 /// </summary>
 struct refrap_camera_tag {};
 
+struct camera_tag {};
+
 inline _DETAIL_BEGIN
+
+template<typename _Ty, typename _Tag> class _Camera {
+	static_assert(true, 
+		"Invalid camera tag in dgelom::vision::detail::_Camera<_Ty, _Tag>.");
+};
+
+/// <summary>
+/// TRAIT, trait of a camera type
+/// </summary>
 template<typename _Ty, typename _Tag>
-requires is_floating_point_v<_Ty> class _Camera {
-	using _Myt = _Camera;
-public:
+struct traits<_Camera<_Ty, _Tag>> {
 	using value_type = _Ty;
 	using category = _Tag;
-	
+	enum {
+		// parameter size
+		_Size = conditional_size_v<is_same_v<_Tag, persp_camera_tag>, 5,
+		conditional_size_v<is_same_v<_Tag, ortho_camera_tag>, 4, 6>>;
+	};
+};
+
+/// <summary>
+/// CLASS TEMPLATE, the base of camera types
+/// </summary>
+template<typename _Derived>
+class _Camera<_Derived, camera_tag>  {
+	using _Myt = _Camera;
+	using _Mytraits = traits<_Derived>;
+	using _Mytraits::_Size;
+public:
+	using typename _Mytraits::value_type;
+	using typename _Mytraits::category;
+	using init_list = std::initializer_list<value_type>;
+
 	/**
-	 * \brief Eval forward projection.
+	 * \brief CTOR, initialize camera with an internal calibration. 
+	 */
+	explicit _Camera(init_list _Calib) noexcept
+		:_Mycalib(_Calib) {
+	}
+	explicit _Camera(init_list _Calib, init_list _Pose) noexcept
+		:_Mycalib(_Calib), _Mypose(_Pose) {
+
+	}
+
+	/**
+	 * \brief Eval forward projection. (Thread-safe method)
 	 * \param 'X' 3D coodinates of an object point.
 	 * \return auto [x, y, 1] = forward(X).
 	 */
@@ -51,9 +90,13 @@ public:
 
 	}
 
+	MATRICE_HOST_INL auto backward(const Vec2_<value_type>& x) const noexcept {
+
+	}
+
 protected:
 	// Camera calibration: $f_x, f_y, c_x, c_y$
-	Vec_<value_type, 4> _Mycalib;
+	Vec_<value_type, _Size> _Mycalib;
 
 	// Camera pose: $\r_x, r_y, r_z, t_x, t_y, t_z$
 	Vec_<value_type, 6> _Mypose;
