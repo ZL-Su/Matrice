@@ -857,96 +857,122 @@ template<
 	typename _Lhs, typename _Rhs,
 	typename value_t = conditional_t<is_scalar_v<_Rhs>, typename _Lhs::value_t, typename _Rhs::value_t>,
 	typename _Op = _Exp::EwiseBinaryExp<_Lhs, _Rhs, _Exp_op::_Ewise_add<value_t>>>
-	MATRICE_GLOBAL_FINL auto operator+(const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
+MATRICE_GLOBAL_FINL auto operator+(const _Lhs& _left, const _Rhs& _right) { 
+	return _Op(_left, _right); 
+}
 // *\element-wise subtraction
 template<
 	typename _Lhs, class _Rhs,
 	typename value_t = conditional_t<is_scalar_v<_Rhs>, typename _Lhs::value_t, typename _Rhs::value_t>,
 	typename     _Op = _Exp::EwiseBinaryExp<_Lhs, _Rhs, _Exp_op::_Ewise_sub<value_t>>>
-	MATRICE_GLOBAL_FINL auto operator-(const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
+MATRICE_GLOBAL_FINL auto operator-(const _Lhs& _left, const _Rhs& _right) { 
+	return _Op(_left, _right); 
+}
 // *\element-wise multiplication
 template<
 	typename _Lhs, typename _Rhs,
 	typename value_t = conditional_t<is_scalar_v<_Rhs>, typename _Lhs::value_t, typename _Rhs::value_t>,
 	typename _Op = _Exp::EwiseBinaryExp<_Lhs, _Rhs, _Exp_op::_Ewise_mul<value_t>>>
-	MATRICE_GLOBAL_FINL auto operator*(const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
+MATRICE_GLOBAL_FINL auto operator*(const _Lhs& _left, const _Rhs& _right) { 
+	return _Op(_left, _right); 
+}
 // *\element-wise division
 template<
 	typename _Lhs, typename _Rhs,
 	typename value_t = conditional_t<is_scalar_v<_Rhs>, _Rhs, typename _Rhs::value_t>,
 	typename _Op = _Exp::EwiseBinaryExp<_Lhs, _Rhs, _Exp_op::_Ewise_div<value_t>>>
-	MATRICE_GLOBAL_FINL auto operator/(const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
+MATRICE_GLOBAL_FINL auto operator/(const _Lhs& _left, const _Rhs& _right) { 
+	return _Op(_left, _right); 
+}
 // *\element-wise maximum
 template<
 	typename _Lhs, typename _Rhs,
 	typename value_t = conditional_t<is_scalar_v<_Rhs>, _Rhs, typename _Rhs::value_t>,
 	typename _Op = _Exp::EwiseBinaryExp<_Lhs, _Rhs, _Exp_op::_Ewise_max<value_t>>>
-	MATRICE_GLOBAL_FINL auto max(const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
+MATRICE_GLOBAL_FINL auto max(const _Lhs& _left, const _Rhs& _right) { 
+	return _Op(_left, _right); 
+}
 // *\element-wise minimum
 template<
 	typename _Lhs, typename _Rhs,
 	typename value_t = conditional_t<is_scalar_v<_Rhs>, typename _Lhs::value_t, typename _Rhs::value_t>,
 	typename _Op = _Exp::EwiseBinaryExp<_Lhs, _Rhs, _Exp_op::_Ewise_min<value_t>>>
-	MATRICE_GLOBAL_FINL auto min(const _Lhs& _left, const _Rhs& _right) { return _Op(_left, _right); }
+MATRICE_GLOBAL_FINL auto min(const _Lhs& _left, const _Rhs& _right) { 
+	return _Op(_left, _right); 
+}
 
 // *\element-wise square operation
 template<typename _Rhs>
-	MATRICE_GLOBAL_FINL constexpr auto sq(const _Rhs& _right) { return (_right*_right); }
+MATRICE_GLOBAL_FINL constexpr auto sq(const _Rhs& _right) { 
+	return (_right*_right); 
+}
 
 // *\element-wise squar root operation
 template<
 	typename _Rhs,
 	typename value_t = enable_if_t<is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>,
 	typename _Op = _Exp::EwiseUnaryExp<_Rhs, _Exp_op::_Ewise_sqrt<value_t>>>
-	MATRICE_GLOBAL_FINL auto sqrt(const _Rhs& _right) { return _Op(_right); }
+MATRICE_GLOBAL_FINL auto sqrt(const _Rhs& _right) { 
+	return _Op(_right); 
+}
 
 // *\element-wise exp()
 template<
 	typename _Rhs,
 	typename value_t = enable_if_t<is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>,
 	typename _Op = _Exp::EwiseUnaryExp<_Rhs, _Exp_op::_Ewise_exp<value_t>>>
-	MATRICE_GLOBAL_FINL auto exp(const _Rhs& _right) { return _Op(_right); }
+MATRICE_GLOBAL_FINL auto exp(const _Rhs& _right) { 
+	return _Op(_right); 
+}
 
 // *\element-wise log()
 template<
 	typename _Rhs,
 	typename value_t = enable_if_t<is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>,
 	typename _Op = _Exp::EwiseUnaryExp<_Rhs, _Exp_op::_Ewise_log<value_t>>>
-	MATRICE_GLOBAL_FINL auto log(const _Rhs& _right) { return _Op(_right); }
+MATRICE_GLOBAL_FINL auto log(const _Rhs& _right) { 
+	return _Op(_right); 
+}
 
 // *\element-wise abs()
 template<
 	typename _Rhs,
 	typename value_t = enable_if_t<is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>,
 	typename _Op = _Exp::EwiseUnaryExp<_Rhs, _Exp_op::_Ewise_abs<value_t>>>
-	MATRICE_GLOBAL_FINL auto abs(const _Rhs& _right) { return _Op(_right); }
+MATRICE_GLOBAL_FINL auto abs(const _Rhs& _right) { 
+	return _Op(_right); 
+}
 
 // *\element-wise floor()
 template<
 	typename _Rhs,
 	typename value_t = enable_if_t<is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>,
 	typename _Op = _Exp::EwiseUnaryExp<_Rhs, _Exp_op::_Ewise_floor<value_t>>>
-	MATRICE_GLOBAL_FINL auto floor(const _Rhs& _right) { return _Op(_right); }
+MATRICE_GLOBAL_FINL auto floor(const _Rhs& _right) { 
+	return _Op(_right); 
+}
 
 // *\transpose expression
 template<
 	typename _Rhs,
 	typename value_t = enable_if_t<is_scalar_v<typename _Rhs::value_t>, typename _Rhs::value_t>,
 	typename _Op = _Exp::MatUnaryExp<_Rhs, _Exp_op::_Mat_trp<value_t>>>
-	MATRICE_GLOBAL_FINL auto transpose(const _Rhs& _right) { return _Op(_right); }
+MATRICE_GLOBAL_FINL auto transpose(const _Rhs& _right) { 
+	return _Op(_right); 
+}
 
 // *\matmul expression
 template<
 	typename _Lhs, typename _Rhs,
 	typename value_t = common_type_t<typename _Lhs::value_t, typename _Rhs::value_t>,
 	typename _Op = _Exp::MatBinaryExp<_Lhs, _Rhs, _Exp_op::_Mat_mul<value_t>>>
-	MATRICE_GLOBAL_FINL auto matmul(const _Lhs& _left, const _Rhs& _right) {
+MATRICE_GLOBAL_FINL auto matmul(const _Lhs& _left, const _Rhs& _right) {
 	return _Op(_left, _right);
 }
 
 // *\outer product expression : xy^T
 template<typename _Lhs, typename _Rhs>
-	MATRICE_GLOBAL_FINL auto outer_product(const _Lhs& _left, const _Rhs& _right) {
+MATRICE_GLOBAL_FINL auto outer_product(const _Lhs& _left, const _Rhs& _right) {
 	return _left.mul(_right.t()).eval();
 }
 
