@@ -87,7 +87,9 @@ template<typename _Tag> struct require_coeff_lut {
 // \Interpolation auto dispatching
 template<typename _Ty, typename _Tag> 
 struct auto_interp_dispatcher {
-	using type = conditional_t<is_same_v<_Tag, bilerp_tag>, _Bilinear_interpolation<_Ty>, _Spline_interpolation<_Ty, _Tag>>;
+	using type = conditional_t<is_same_v<_Tag, bilerp_tag>, 
+		_Bilinear_interpolation<_Ty>, 
+		_Spline_interpolation<_Ty, _Tag>>;
 };
 template<typename _Ty = float, typename _Tag = bicerp_tag>
 using auto_interp_dispatcher_t = typename auto_interp_dispatcher<_Ty, _Tag>::type;
@@ -184,7 +186,7 @@ protected:
 	std::add_pointer_t<_Mydt> _Mydt_this = static_cast<_Mydt*>(this);
 
 protected:
-	constexpr value_type _Myeps{ value_type(1.0e-7) };
+	const value_type _Myeps{ value_type(1.0e-7) };
 	shared_matrix_t<value_type> _Mydata;
 	matrix_type _Mycoeff;
 };
