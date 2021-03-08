@@ -40,7 +40,7 @@ inline _DETAIL_BEGIN
 
 template<typename _Ty, typename _Tag> class _Camera {
 	static_assert(true, 
-		"Invalid camera tag in dgelom::vision::detail::_Camera<_Ty, _Tag>.");
+		"Invalid camera tag in dgelom::vision::detail::_Camera<_Ty, _Tag...>.");
 };
 
 /// <summary>
@@ -52,8 +52,10 @@ struct traits<_Camera<_Ty, _Tag>> {
 	using category = _Tag;
 	enum {
 		// parameter size
-		_Size = conditional_size_v<is_same_v<_Tag, persp_camera_tag>, 5,
-		conditional_size_v<is_same_v<_Tag, ortho_camera_tag>, 4, 6>>;
+		_Size = conditional_size_v<
+		is_same_v<category, vision::persp_camera_tag>, 5,
+		conditional_size_v<
+		is_same_v<category, vision::ortho_camera_tag>, 4, 6>>
 	};
 };
 
@@ -64,12 +66,11 @@ template<typename _Derived>
 class _Camera<_Derived, camera_tag>  {
 	using _Myt = _Camera;
 	using _Mytraits = traits<_Derived>;
-	using _Mytraits::_Size;
 public:
-	using typename _Mytraits::value_type;
-	using typename _Mytraits::category;
+	using value_type = typename _Mytraits::value_type;
+	using category = typename _Mytraits::category;
 	using init_list = std::initializer_list<value_type>;
-
+	_Camera() = default;
 	/**
 	 * \brief CTOR, initialize camera with an internal calibration. 
 	 */
@@ -95,6 +96,8 @@ public:
 	}
 
 protected:
+	static constexpr auto _Size = _Mytraits::_Size;
+
 	// Camera calibration: $f_x, f_y, c_x, c_y$
 	Vec_<value_type, _Size> _Mycalib;
 
@@ -102,5 +105,23 @@ protected:
 	Vec_<value_type, 6> _Mypose;
 
 };
+
+template<typename _Ty>
+class _Camera<_Ty, persp_camera_tag> 
+	: public _Camera<_Camera<_Ty, persp_camera_tag>, camera_tag>
+{
+	using _Myt = _Camera<_Ty, persp_camera_tag>;
+	using _Mybase = _Camera<_Myt, camera_tag>;
+	using _Mybase::_Size;
+public:
+	using typename _Mybase::value_type;
+
+	_Camera() {};
+	~_Camera() {};
+
+private:
+
+};
+
 _DETAIL_END
 MATRICE_ALG_END(vision)
