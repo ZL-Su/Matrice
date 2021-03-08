@@ -33,15 +33,15 @@ struct ortho_camera_tag {};
 /// TAG, refractive perspective camera
 /// </summary>
 struct refrap_camera_tag {};
-
+/// <summary>
+/// TAG, dummy camera
+/// </summary>
 struct camera_tag {};
 
 inline _DETAIL_BEGIN
 
-template<typename _Ty, typename _Tag> class _Camera {
-	static_assert(true, 
-		"Invalid camera tag in dgelom::vision::detail::_Camera<_Ty, _Tag...>.");
-};
+// Forward declaration
+template<typename _Ty, typename _Tag> class _Camera {};
 
 /// <summary>
 /// TRAIT, trait of a camera type
@@ -70,6 +70,9 @@ public:
 	using value_type = typename _Mytraits::value_type;
 	using category = typename _Mytraits::category;
 	using init_list = std::initializer_list<value_type>;
+	template<size_t N> using vector = auto_vector_t<value_type, N>;
+	template<size_t N> using point = vector<N>;
+
 	_Camera() = default;
 	/**
 	 * \brief CTOR, initialize camera with an internal calibration. 
@@ -87,11 +90,11 @@ public:
 	 * \param 'X' 3D coodinates of an object point.
 	 * \return auto [x, y, 1] = forward(X).
 	 */
-	MATRICE_HOST_INL auto forward(const Vec3_<value_type>& X) const noexcept {
+	MATRICE_HOST_INL auto forward(const point<3>& X) const noexcept {
 
 	}
 
-	MATRICE_HOST_INL auto backward(const Vec2_<value_type>& x) const noexcept {
+	MATRICE_HOST_INL auto backward(const point<2>& x) const noexcept {
 
 	}
 
@@ -99,29 +102,41 @@ protected:
 	static constexpr auto _Size = _Mytraits::_Size;
 
 	// Camera calibration: $f_x, f_y, c_x, c_y$
-	Vec_<value_type, _Size> _Mycalib;
+	vector<_Size> _Mycalib;
 
-	// Camera pose: $\r_x, r_y, r_z, t_x, t_y, t_z$
-	Vec_<value_type, 6> _Mypose;
+	// Camera pose with $r_x, r_y, r_z, t_x, t_y, t_z$
+	vector<6> _Mypose;
 
 };
 
 template<typename _Ty>
 class _Camera<_Ty, persp_camera_tag> 
-	: public _Camera<_Camera<_Ty, persp_camera_tag>, camera_tag>
-{
+	: public _Camera<_Camera<_Ty, persp_camera_tag>, camera_tag> {
 	using _Myt = _Camera<_Ty, persp_camera_tag>;
 	using _Mybase = _Camera<_Myt, camera_tag>;
 	using _Mybase::_Size;
 public:
 	using typename _Mybase::value_type;
 
-	_Camera() {};
-	~_Camera() {};
 
 private:
 
 };
 
 _DETAIL_END
+/// <summary>
+/// \brief ALIAS, Generic camera template
+/// </summary>
+/// <typeparam name="_Ty"></typeparam>
+/// <typeparam name="_Tag"></typeparam>
+template<typename _Ty, typename _Tag = persp_camera_tag>
+using camera_t = detail::_Camera<_Ty, _Tag>;
+
+/// <summary>
+/// \brief ALIAS, Perspective camera template
+/// </summary>
+/// <typeparam name="_Ty">float or double, default is double</typeparam>
+template<typename _Ty = default_type>
+using perspective_camera_t = camera_t<_Ty, persp_camera_tag>;
+
 MATRICE_ALG_END(vision)
