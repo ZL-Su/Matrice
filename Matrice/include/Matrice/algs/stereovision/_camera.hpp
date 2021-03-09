@@ -109,7 +109,12 @@ protected:
 
 };
 
-template<typename _Ty>
+/// <summary>
+/// \brief Specialization for perspective camera model
+/// </summary>
+/// <typeparam name="_Ty"></typeparam>
+template<typename _Ty> 
+requires is_floating_point_v<_Ty>
 class _Camera<_Ty, persp_camera_tag> 
 	: public _Camera<_Camera<_Ty, persp_camera_tag>, camera_tag> {
 	using _Myt = _Camera<_Ty, persp_camera_tag>;
