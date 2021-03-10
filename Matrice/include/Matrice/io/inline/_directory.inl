@@ -83,10 +83,23 @@ public:
 	}
 
 	/**
-	 * \return path of current directory
+	 * \brief Get path of the current directory
 	 */
-	MATRICE_HOST_INL value_type path() const {
-		return forward<value_type>(_Mypath.string());
+	MATRICE_HOST_INL decltype(auto) path() const {
+		return _Mypath;
+	}
+	MATRICE_HOST_INL decltype(auto) path() {
+		return _Mypath;
+	}
+
+	/**
+	 * \brief Get path string of the current directory
+	 */
+	MATRICE_HOST_INL const value_type path_str() const {
+		return _Mypath.string();
+	}
+	MATRICE_HOST_INL value_type path_str() {
+		return _Mypath.string();
 	}
 
 	/**

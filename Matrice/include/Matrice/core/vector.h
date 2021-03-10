@@ -315,32 +315,56 @@ public:
 };
 _DETAIL_END
 
-// \a generic managed vector type
+// \brief Generic managed vector type
 template<typename _Ty, int _Dim, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 using Vec_ = detail::Vec_<_Ty, _Dim>;
 template<typename _Ty, int _Dim>
 struct is_fxdvector<Vec_<_Ty, _Dim>> : std::true_type {};
 
-// \managed vector type with 2 entities: x, y
+// \brief Managed vector type with 2 entities: x, y
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 using Vec2_ = detail::Vec_<_Ty, 2>;
 template<typename _Ty>
 struct is_fxdvector<Vec2_<_Ty>> : std::true_type {};
 
-// \managed vector type with 3 entities: x, y, z
+// \brief Managed vector type with 3 entities: x, y, z
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 using Vec3_ = detail::Vec3_<_Ty>;
 template<typename _Ty>
 struct is_fxdvector<Vec3_<_Ty>> : std::true_type {};
 
-// \managed vector type with 4 entities: x, y, z, w
+// \brief Managed vector type with 4 entities: x, y, z, w
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 using Vec4_ = detail::Vec4_<_Ty>;
 template<typename _Ty>
 struct is_fxdvector<Vec4_<_Ty>> : std::true_type {};
 
+// \brief Dispatch vector type according to a given dimensionality _Dim.
+template<typename _Ty, size_t _Dim> struct auto_vector {
+	using type = Vec_<_Ty, _Dim>;
+};
+template<typename _Ty> struct auto_vector<_Ty, 2> { 
+	using type = Vec2_<_Ty>; 
+};
+template<typename _Ty> struct auto_vector<_Ty, 3> { 
+	using type = Vec3_<_Ty>; 
+};
+template<typename _Ty> struct auto_vector<_Ty, 4> { 
+	using type = Vec4_<_Ty>; 
+};
+template<typename _Ty> struct auto_vector<_Ty, ::dynamic> { 
+	using type = std::vector<_Ty>; 
+};
+
+/// <summary>
+/// ALIAS, auto_vector type
+/// </summary>
+/// <typeparam name="_Ty"></typeparam>
+template<typename _Ty, size_t _Dim>
+using auto_vector_t = typename auto_vector<_Ty, _Dim>::type;
+
 /**
- *\brief Matrice regards the std::array is also a fixed vector type
+ *\brief Matrice also regards std::array as a fixed vector type.
  */
 template<typename _Ty, int _Dim>
 struct is_fxdvector<std::array<_Ty,_Dim>> : std::true_type {};

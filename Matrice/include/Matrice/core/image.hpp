@@ -25,17 +25,48 @@ _DETAIL_BEGIN
 /// </summary>
 /// <typeparam name="_Ty">Floating point type</typeparam>
 /// <typeparam name="_Ip">Interpolation operator type</typeparam>
-template<typename _Ty, class _Ip> requires is_floating_point_v<_Ty>
+template<typename _Ty, class _Ip> 
+requires is_floating_point_v<_Ty>
 class _Image : public Matrix_<_Ty, ::dynamic, ::dynamic> {
+	using _Mybase = Matrix_<_Ty, ::dynamic, ::dynamic>;
+	using _Myt = _Image;
+	using _Myop = _Ip;
+public:
+	template<typename _Uy>
+	requires is_not_same_v<_Ty, _Uy>
+	_Image(Matrix_<_Uy, ::dynamic>&& _Src) {
 
+	}
+
+	/**
+	 * \brief OP, eval image value at coordinates (x, y). 
+	 */
+	template<typename _Uy>
+	decltype(auto) operator()(_Uy x, _Uy y) const {
+
+	}
+	template<typename _Uy>
+	decltype(auto) operator()(_Uy x, _Uy y) {
+
+	}
+
+	/**
+	 * \brief FUNCTION, serialize an '_Image<_Ty, _Ip>' object.
+	 */
+	template<typename _Ty, class _Ip>
+	friend auto serialize(const _Image<_Ty, _Ip>& img) noexcept {
+
+	}
+private:
+	_Myop _Myinst;
 };
 
 /// <summary>
-/// \brief CLASS TEMPLATE, General image type
+/// \brief CLASS TEMPLATE, partial-specialization for common image type
 /// </summary>
 /// <typeparam name="_Ty">Scalar value type</typeparam>
 template<typename _Ty>
-class _Image : public Matrix_<_Ty, ::dynamic, ::dynamic> {
+class _Image<_Ty, void> : public Matrix_<_Ty, ::dynamic, ::dynamic> {
 
 };
 _DETAIL_END
