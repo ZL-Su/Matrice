@@ -19,6 +19,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #include <type_traits>
 #include <mutex>
+#include "version.h"
 #include "_macros.h"
 #include "_std_wrapper.h"
 #include "_exception.h"
@@ -30,6 +31,13 @@ static_assert(_HAS_CXX20, "MATRICE requires to be compiled with C++ 20.");
 
 template<typename _Ty = long double> requires is_scalar_v<_Ty>
 MATRICE_GLOBAL_INL constexpr _Ty pi{ static_cast<_Ty>(3.14159265358979323846264338327950288419716939937510582097494459) };
+
+/**
+ *\brief Get matrix version. 
+ */
+constexpr auto version() noexcept {
+	return MATRICE_VERSION_STRING;
+}
 
 _DETAIL_BEGIN
 template<typename _Ty> struct string_to_numval {
