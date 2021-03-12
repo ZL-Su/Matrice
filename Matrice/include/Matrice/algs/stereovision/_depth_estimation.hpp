@@ -74,8 +74,8 @@ public:
 
 protected:
 	MATRICE_HOST_INL void _Update_interpolator() noexcept {
-		m_materp.set(m_matching);
-		m_referp.set(m_reference);
+		m_materp.reset(m_matching);
+		m_referp.reset(m_reference);
 	}
 
 	/// <summary>
