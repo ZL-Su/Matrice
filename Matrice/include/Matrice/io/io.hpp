@@ -1,5 +1,19 @@
 /*********************************************************************
-	  About License Agreement of this file, see "../lic/license.h"
+This file is part of Matrice, an effcient and elegant C++ library.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
+
+This program is free software : you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 #include <iostream>
@@ -425,7 +439,7 @@ MATRICE_HOST_INL auto write(_Args...args)->decltype(IO::write(args...)){
 // \definite a path under current folder
 template<typename T>
 MATRICE_HOST_INL decltype(auto) defpath(const T local) {
-	return forward<std::string>(IO::workspace().string() + "\\" + IO::strf(local)); 
+	return forward<std::string>(IO::workspace().string() + "\\" + str(local)); 
 };
 
 /// <summary>
@@ -446,16 +460,17 @@ void print(const Matrix_<_Ty, _M, _N>& m, const std::string& name = "Array") {
 	}
 	std::cout << "]\n";
 }
-template<typename _Ty>
+template<typename _Ty> requires is_scalar_v<_Ty>
 void print(const _Ty& m, const std::string& name = "Scalar") {
 	std::cout << "[" << name << ", dim:" << 1 << "x" << 1 << "\n";
 	std::cout << " " << std::setiosflags(std::ios::left)
-			<< std::setprecision(8) << std::setw(15) << m;
+			<< std::setprecision(8) << std::setw(15) << _Ty(m);
 	std::cout << "\n]\n";
 }
 
-// \Class: std::string helper  
-// \Coded by: dgelom su
+/// <summary>
+/// \brief CLASS, string_helper
+/// </summary>
 class string_helper MATRICE_NONHERITABLE {
 	using basic_value_type = char;
 public:

@@ -1,6 +1,6 @@
-/*  *************************************************************************
+/*  ******************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -14,10 +14,10 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
-*	*************************************************************************/
+*	*****************************************************************/
 #pragma once
 
-#include "../util/_macros.h"
+#include "util/_macros.h"
 
 DGE_MATRICE_BEGIN
 
@@ -53,28 +53,42 @@ constexpr int rs_host_v = compile_time_size<_M, _N>::RunTimeDeducedOnHost;
 template<int _M, int _N> MATRICE_GLOBAL_INL 
 constexpr int rs_device_v = compile_time_size<_M, _N>::RunTimeDeducedOnDevice;
 
+/// <summary>
+/// \brief Conditionally eval size at compile time.
+/// </summary>
 template<bool _Test, int _N1, int _N2> struct conditional_size {};
-template<int _N1, int _N2 > struct conditional_size<std::true_type::value, _N1, _N2> { 
+template<int _N1, int _N2 > 
+struct conditional_size<std::true_type::value, _N1, _N2> { 
 	enum { value = _N1 }; 
 };
-template<int _N1, int _N2 > struct conditional_size<std::false_type::value, _N1, _N2> { 
+template<int _N1, int _N2 > 
+struct conditional_size<std::false_type::value, _N1, _N2> { 
 	enum { value = _N2 }; 
 };
 template<bool _Test, int _N1, int _N2> MATRICE_GLOBAL_INL 
 constexpr int conditional_size_v = conditional_size<_Test, _N1, _N2>::value;
 
-
+/// <summary>
+/// \brief max_integer gets the max of _N1 and _N2.
+/// </summary>
 template<int _N1, int _N2> struct max_integer { 
 	enum { value = conditional_size_v<(_N1 > _N2), _N1, _N2> }; 
 };
 template<int _N1, int _N2> MATRICE_GLOBAL_INL 
 constexpr int max_integer_v = max_integer<_N1, _N2>::value;
+
+/// <summary>
+/// \brief max_integer gets the max of _N1 and _N2.
+/// </summary>
 template<int _N1, int _N2> struct min_integer { 
 	enum { value = conditional_size_v<(_N1 > _N2), _N2, _N1> }; 
 };
 template<int _N1, int _N2> MATRICE_GLOBAL_INL 
 constexpr int min_integer_v = min_integer<_N1, _N2>::value;
 
+/// <summary>
+/// \brief is_same_constval is true iff _N1 == _N2.
+/// </summary>
 template<size_t _N1, size_t _N2> struct is_same_constval {
 	static constexpr auto value = (_N1 == _N2);
 };

@@ -31,9 +31,6 @@
     <Filter Include="Source Files\Util">
       <UniqueIdentifier>{8fe01d56-4f66-434f-a2b3-de7013fd1a29}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Util\Eigen">
-      <UniqueIdentifier>{65df26c3-6157-41b0-8f03-6beeeb1f309b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\IO">
       <UniqueIdentifier>{ca68800b-af4a-47a4-a12c-13d3d3060204}</UniqueIdentifier>
     </Filter>
@@ -51,9 +48,6 @@
     </Filter>
     <Filter Include="Header Files\Arch\Inl">
       <UniqueIdentifier>{7a24d11a-4018-4aac-b89c-eb8b6042867b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Util\Eigen\src">
-      <UniqueIdentifier>{9d566996-b84a-460c-8f43-9b3cfcb16746}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Algs\Geometry">
       <UniqueIdentifier>{1d26a66c-7be6-40d6-8bcc-50f3ee2ee1a1}</UniqueIdentifier>
@@ -232,6 +226,9 @@
     <Filter Include="Header Files\Algs\Optimization">
       <UniqueIdentifier>{39eda61b-1f71-48e6-84f8-407609565393}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Algs\Spline">
+      <UniqueIdentifier>{81d8d0c7-b6cf-498f-ae95-a9368377c5b6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -275,48 +272,6 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\arch\inl\_ixops.hpp">
       <Filter>Header Files\Arch\Inl</Filter>
-    </ClInclude>
-    <ClInclude Include="addin\Eigen\src\Geometry\AlignedBox.h">
-      <Filter>Source Files\Util\Eigen\src</Filter>
-    </ClInclude>
-    <ClInclude Include="addin\Eigen\src\Geometry\AngleAxis.h">
-      <Filter>Source Files\Util\Eigen\src</Filter>
-    </ClInclude>
-    <ClInclude Include="addin\Eigen\src\Geometry\EulerAngles.h">
-      <Filter>Source Files\Util\Eigen\src</Filter>
-    </ClInclude>
-    <ClInclude Include="addin\Eigen\src\Geometry\Homogeneous.h">
-      <Filter>Source Files\Util\Eigen\src</Filter>
-    </ClInclude>
-    <ClInclude Include="addin\Eigen\src\Geometry\Hyperplane.h">
-      <Filter>Source Files\Util\Eigen\src</Filter>
-    </ClInclude>
-    <ClInclude Include="addin\Eigen\src\Geometry\OrthoMethods.h">
-      <Filter>Source Files\Util\Eigen\src</Filter>
-    </ClInclude>
-    <ClInclude Include="addin\Eigen\src\Geometry\ParametrizedLine.h">
-      <Filter>Source Files\Util\Eigen\src</Filter>
-    </ClInclude>
-    <ClInclude Include="addin\Eigen\src\Geometry\Quaternion.h">
-      <Filter>Source Files\Util\Eigen\src</Filter>
-    </ClInclude>
-    <ClInclude Include="addin\Eigen\src\Geometry\Rotation2D.h">
-      <Filter>Source Files\Util\Eigen\src</Filter>
-    </ClInclude>
-    <ClInclude Include="addin\Eigen\src\Geometry\RotationBase.h">
-      <Filter>Source Files\Util\Eigen\src</Filter>
-    </ClInclude>
-    <ClInclude Include="addin\Eigen\src\Geometry\Scaling.h">
-      <Filter>Source Files\Util\Eigen\src</Filter>
-    </ClInclude>
-    <ClInclude Include="addin\Eigen\src\Geometry\Transform.h">
-      <Filter>Source Files\Util\Eigen\src</Filter>
-    </ClInclude>
-    <ClInclude Include="addin\Eigen\src\Geometry\Translation.h">
-      <Filter>Source Files\Util\Eigen\src</Filter>
-    </ClInclude>
-    <ClInclude Include="addin\Eigen\src\Geometry\Umeyama.h">
-      <Filter>Source Files\Util\Eigen\src</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\geometry\transform.h">
       <Filter>Header Files\Algs\Geometry</Filter>
@@ -447,9 +402,6 @@
     <ClInclude Include="include\Matrice\algs\erroranalysis\_common.h">
       <Filter>Header Files\Algs\ErrorAnalysis</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\algs\graphics\_meshing.h">
-      <Filter>Header Files\Algs\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="include\Matrice\algs\dnn\kernels\_kernels.h">
       <Filter>Header Files\Algs\DeepLearning\Kernels</Filter>
     </ClInclude>
@@ -476,9 +428,6 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\graphics\_distance.hpp">
       <Filter>Header Files\Algs\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="examples\Invcomp_GaussNewton.hpp">
-      <Filter>Examples</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\util\_property.hpp">
       <Filter>Header Files\Util</Filter>
@@ -672,9 +621,6 @@
     <ClInclude Include="include\Matrice\algs\stereovis.hpp">
       <Filter>Header Files\Algs</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\solver.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Matrice\private\_bounded_pointer.hpp">
       <Filter>Header Files\Detail\accessors</Filter>
     </ClInclude>
@@ -695,6 +641,36 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\private\container\_queue.hpp">
       <Filter>Header Files\Detail\container</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\graphics\utils.hpp">
+      <Filter>Header Files\Algs\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\graphics.hpp">
+      <Filter>Header Files\Algs</Filter>
+    </ClInclude>
+    <ClInclude Include="examples\dic_ex.hpp">
+      <Filter>Examples</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\core\image.hpp">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\correlation\_graph_executor.hpp">
+      <Filter>Header Files\Algs\Correlation</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\stereovision\_camera.hpp">
+      <Filter>Header Files\Algs\Stereovision</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\solver.hpp">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\util\version.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\spline.h">
+      <Filter>Header Files\Algs\Spline</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\spline\_spline.hpp">
+      <Filter>Header Files\Algs\Spline</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -899,100 +875,13 @@
     <ClCompile Include="src\private\math\_linear_kernel.cpp">
       <Filter>Source Files\Details\math</Filter>
     </ClCompile>
+    <ClCompile Include="src\algorithm\_bsplines.cpp">
+      <Filter>Source Files\Algs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\Matrice\arch\inl\_ixpacket.inl">
       <Filter>Header Files\Arch\Inl</Filter>
-    </None>
-    <None Include="addin\Eigen\Cholesky">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\CholmodSupport">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\Core">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\Dense">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\Eigen">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\Eigenvalues">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\Geometry">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\Householder">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\IterativeLinearSolvers">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\Jacobi">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\KLUSupport">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\LU">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\MetisSupport">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\OrderingMethods">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\PardisoSupport">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\PaStiXSupport">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\QR">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\QtAlignedMalloc">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\Sparse">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\SparseCholesky">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\SparseCore">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\SparseLU">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\SparseQR">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\SPQRSupport">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\StdDeque">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\StdList">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\StdVector">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\SuperLUSupport">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\SVD">
-      <Filter>Source Files\Util\Eigen</Filter>
-    </None>
-    <None Include="addin\Eigen\UmfPackSupport">
-      <Filter>Source Files\Util\Eigen</Filter>
     </None>
     <None Include="include\Matrice\private\_similarity.inl">
       <Filter>Header Files\Detail\inline</Filter>

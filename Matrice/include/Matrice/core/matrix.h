@@ -422,9 +422,22 @@ public:
 #undef MATRICE_MAKE_METHOD_CREATE
 
 _DETAIL_END
-template<typename _Ty>
-inline auto make_shared(const Matrix<_Ty>& mat) noexcept {
-	return std::make_shared<Matrix<_Ty>>(mat);
+/**
+ * \brief Factory function to make a shared dynamic matrix copy.
+ */
+template<typename _Ty> MATRICE_HOST_FINL
+auto make_shared_matrix(const Matrix<_Ty>& Mat) noexcept {
+	MATRICE_USE_STD(make_shared);
+	return make_shared<remove_all_t<decltype(Mat)>>(Mat);
+}
+
+/**
+ * \brief Factory function to make a new shared dynamic matrix.
+ * \param '_Args...' can be any allowed values for constructing dynamic matrix.
+ */
+template<typename _Ty, typename... _Args> 
+MATRICE_HOST_FINL auto make_shared_matrix(_Args&&... Args) noexcept {
+	return shared_ptr<Matrix<_Ty>>(new Matrix<_Ty>(Args...));
 }
 DGE_MATRICE_END
 #include "../forward.hpp"

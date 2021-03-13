@@ -15,17 +15,18 @@
     <ProjectGuid>{E70FEE41-532B-437B-8129-F7F4E9E88BDB}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Matrice</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseIntelMKL>Parallel</UseIntelMKL>
     <UseILP64Interfaces>false</UseILP64Interfaces>
     <UseIntelTBB>false</UseIntelTBB>
+    <UseInteloneMKL>Parallel</UseInteloneMKL>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -35,11 +36,10 @@
     <CharacterSet>Unicode</CharacterSet>
     <UseIntelMKL>Parallel</UseIntelMKL>
     <UseILP64Interfaces>true</UseILP64Interfaces>
+    <UseInteloneMKL>Parallel</UseInteloneMKL>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 10.1.props" />
-  </ImportGroup>
+  <ImportGroup Label="ExtensionSettings" />
   <ImportGroup Label="Shared">
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -128,20 +128,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Librares\Ceres1130\ceres\include\ceres\dgelom\extras.h" />
-    <ClInclude Include="addin\Eigen\src\Geometry\AlignedBox.h" />
-    <ClInclude Include="addin\Eigen\src\Geometry\AngleAxis.h" />
-    <ClInclude Include="addin\Eigen\src\Geometry\EulerAngles.h" />
-    <ClInclude Include="addin\Eigen\src\Geometry\Homogeneous.h" />
-    <ClInclude Include="addin\Eigen\src\Geometry\Hyperplane.h" />
-    <ClInclude Include="addin\Eigen\src\Geometry\OrthoMethods.h" />
-    <ClInclude Include="addin\Eigen\src\Geometry\ParametrizedLine.h" />
-    <ClInclude Include="addin\Eigen\src\Geometry\Quaternion.h" />
-    <ClInclude Include="addin\Eigen\src\Geometry\Rotation2D.h" />
-    <ClInclude Include="addin\Eigen\src\Geometry\RotationBase.h" />
-    <ClInclude Include="addin\Eigen\src\Geometry\Scaling.h" />
-    <ClInclude Include="addin\Eigen\src\Geometry\Transform.h" />
-    <ClInclude Include="addin\Eigen\src\Geometry\Translation.h" />
-    <ClInclude Include="addin\Eigen\src\Geometry\Umeyama.h" />
     <ClInclude Include="addin\interface.h" />
     <ClInclude Include="addin\libpng\png.h" />
     <ClInclude Include="addin\libpng\pngconf.h" />
@@ -161,11 +147,12 @@
     <ClInclude Include="addin\libtiff\tif_predict.h" />
     <ClInclude Include="addin\libtiff\uvcode.h" />
     <ClInclude Include="examples\basic_matrix_usage.h" />
-    <ClInclude Include="examples\Invcomp_GaussNewton.hpp" />
+    <ClInclude Include="examples\dic_ex.hpp" />
     <ClInclude Include="examples\speckle_deformation_simulation_ex.hpp" />
     <ClInclude Include="include\Matrice\3rdparty\interface.hpp" />
     <ClInclude Include="include\Matrice\algs\correlation.hpp" />
     <ClInclude Include="include\Matrice\algs\correlation\_correlation_traits.h" />
+    <ClInclude Include="include\Matrice\algs\correlation\_graph_executor.hpp" />
     <ClInclude Include="include\Matrice\algs\correlation\_optim.h" />
     <ClInclude Include="include\Matrice\algs\correlation\_utils.hpp" />
     <ClInclude Include="include\Matrice\algs\dnn\conv\_conv_impl.hpp" />
@@ -188,8 +175,9 @@
     <ClInclude Include="include\Matrice\algs\geometry\quaternion.hpp" />
     <ClInclude Include="include\Matrice\algs\geometry\transform.h" />
     <ClInclude Include="include\Matrice\algs\geometry\_geo_utils.hpp" />
+    <ClInclude Include="include\Matrice\algs\graphics.hpp" />
     <ClInclude Include="include\Matrice\algs\graphics\_distance.hpp" />
-    <ClInclude Include="include\Matrice\algs\graphics\_meshing.h" />
+    <ClInclude Include="include\Matrice\algs\graphics\utils.hpp" />
     <ClInclude Include="include\Matrice\algs\imageproc.hpp" />
     <ClInclude Include="include\Matrice\algs\interpolation.h" />
     <ClInclude Include="include\Matrice\algs\interpolation\_base.h" />
@@ -202,7 +190,10 @@
     <ClInclude Include="include\Matrice\algs\similarity.h" />
     <ClInclude Include="include\Matrice\algs\similarity\_iterative_conv_impl.h" />
     <ClInclude Include="include\Matrice\algs\similarity\_similarity_traits.h" />
+    <ClInclude Include="include\Matrice\algs\spline.h" />
+    <ClInclude Include="include\Matrice\algs\spline\_spline.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovis.hpp" />
+    <ClInclude Include="include\Matrice\algs\stereovision\_camera.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_depth_estimation.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_projection.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_spatial_transform.hpp" />
@@ -212,6 +203,7 @@
     <ClInclude Include="include\Matrice\arch\ixpacket.h" />
     <ClInclude Include="include\Matrice\arch\_ixbase.h" />
     <ClInclude Include="include\Matrice\arch\_ixtraits.hpp" />
+    <ClInclude Include="include\Matrice\core\image.hpp" />
     <ClInclude Include="include\Matrice\core\matrix.h" />
     <ClInclude Include="include\Matrice\core\solver.h" />
     <ClInclude Include="include\Matrice\core\tensor.h" />
@@ -272,6 +264,7 @@
     <ClInclude Include="include\Matrice\thread\inline\_thread_parallel_nd.inl" />
     <ClInclude Include="include\Matrice\util\genalgs.h" />
     <ClInclude Include="include\Matrice\util\utils.h" />
+    <ClInclude Include="include\Matrice\util\version.h" />
     <ClInclude Include="include\Matrice\util\_exception.h" />
     <ClInclude Include="include\Matrice\util\_conditional_macros.h" />
     <ClInclude Include="include\Matrice\util\_macros.h" />
@@ -338,6 +331,7 @@
     <ClCompile Include="addin\libtiff\tif_win32.c" />
     <ClCompile Include="addin\libtiff\tif_write.c" />
     <ClCompile Include="include\Matrice\algs\dnn\functions\_functions.h" />
+    <ClCompile Include="src\algorithm\_bsplines.cpp" />
     <ClCompile Include="src\algorithm\_splineinterp.cpp" />
     <ClCompile Include="src\core\matrix_base_impl.cpp" />
     <ClCompile Include="src\core\matrix_dynamic_impl.cpp" />
@@ -352,36 +346,6 @@
     <ClCompile Include="src\private\_unified_memory.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="addin\Eigen\Cholesky" />
-    <None Include="addin\Eigen\CholmodSupport" />
-    <None Include="addin\Eigen\Core" />
-    <None Include="addin\Eigen\Dense" />
-    <None Include="addin\Eigen\Eigen" />
-    <None Include="addin\Eigen\Eigenvalues" />
-    <None Include="addin\Eigen\Geometry" />
-    <None Include="addin\Eigen\Householder" />
-    <None Include="addin\Eigen\IterativeLinearSolvers" />
-    <None Include="addin\Eigen\Jacobi" />
-    <None Include="addin\Eigen\KLUSupport" />
-    <None Include="addin\Eigen\LU" />
-    <None Include="addin\Eigen\MetisSupport" />
-    <None Include="addin\Eigen\OrderingMethods" />
-    <None Include="addin\Eigen\PardisoSupport" />
-    <None Include="addin\Eigen\PaStiXSupport" />
-    <None Include="addin\Eigen\QR" />
-    <None Include="addin\Eigen\QtAlignedMalloc" />
-    <None Include="addin\Eigen\Sparse" />
-    <None Include="addin\Eigen\SparseCholesky" />
-    <None Include="addin\Eigen\SparseCore" />
-    <None Include="addin\Eigen\SparseLU" />
-    <None Include="addin\Eigen\SparseQR" />
-    <None Include="addin\Eigen\SPQRSupport" />
-    <None Include="addin\Eigen\StdDeque" />
-    <None Include="addin\Eigen\StdList" />
-    <None Include="addin\Eigen\StdVector" />
-    <None Include="addin\Eigen\SuperLUSupport" />
-    <None Include="addin\Eigen\SVD" />
-    <None Include="addin\Eigen\UmfPackSupport" />
     <None Include="cpp.hint" />
     <None Include="include\algs" />
     <None Include="include\io" />
@@ -410,7 +374,5 @@
     <CudaCompile Include="src\private\_dev_ops.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 10.1.targets" />
-  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets" />
 </Project>

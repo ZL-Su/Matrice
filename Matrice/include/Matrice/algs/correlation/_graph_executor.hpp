@@ -42,8 +42,14 @@ public:
 		gpu = 1
 	};
 
+	/// <summary>
+	/// \brief Set the options to control the graph's computation. 
+	/// </summary>
 	struct options_type
 	{
+		// Specify window size of every node can view.
+		size_t node_field = 15;
+
 		// Specify capacity to prefetch node resources. 
 		size_t preload_capacity = 1;
 
@@ -54,6 +60,10 @@ public:
 		bool adjacent = false;
 	};
 
+	/// <summary>
+	/// \brief CLASS layer_type wraps an image to be processed.
+	/// Each layer contains a set of nodes, each of them 
+	/// </summary>
 	class layer_type
 	{
 		struct status
@@ -103,10 +113,19 @@ public:
 	};
 
 	/**
-	 * \brief METHOD, add a computing node.
+	 * \brief METHOD, add a computing layer.
 	 */
 	_Myt& add_layer(const layer_type& node) {
 		_Mylayers.push_back(node);
+		return (*this);
+	}
+
+	/**
+	 * \brief METHOD, insert a computing layer.
+	 */
+	_Myt& insert_layer(size_t pos, layer_type&& node) {
+		decltype(auto) _Where = _Mylayers.cbegin() + pos;
+		_Mylayers.insert(_Where, node);
 		return (*this);
 	}
 

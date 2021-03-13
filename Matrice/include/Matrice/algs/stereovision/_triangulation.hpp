@@ -44,7 +44,9 @@ public:
 		const auto tx = *(_It + 3), ty = *(_It + 4), tz = *(_It + 5);
 
 		rodrigues(vector_type{ rx, ry, rz }, m_rot[1]);
-		m_trs[1].x = tx, m_trs[1].y = ty, m_trs[1].z = tz;
+		m_trs[1].x = tx;
+		m_trs[1].y = ty;
+		m_trs[1].z = tz;
 		
 		return (*this);
 	}
@@ -56,7 +58,9 @@ public:
 	 */
 	MATRICE_HOST_INL _Myt& set_relat_geo(const vector_type& r, const vector_type& t) noexcept {
 		rodrigues(r, m_rot[1]);
-		m_trs[1].x = t.x, m_trs[1].y = t.y, m_trs[1].z = t.z;
+		m_trs[1].x = t.x;
+		m_trs[1].y = t.y;
+		m_trs[1].z = t.z;
 		return (*this);
 	}
 
@@ -134,7 +138,9 @@ public:
 		const auto tx = *(_It + 3), ty = *(_It + 4), tz = *(_It + 5);
 
 		rodrigues(vector_type{ rx, ry, rz }, _Mybase::m_rot[0]);
-		_Mybase::m_trs[0].x = tx, _Mybase::m_trs[0].y = ty, _Mybase::m_trs[0].z = tz;
+		_Mybase::m_trs[0].x = tx;
+		_Mybase::m_trs[0].y = ty;
+		_Mybase::m_trs[0].z = tz;
 
 		//compute the geometry bewtween the object and right cam frames.
 		_Mybase::m_trs[1] = _Mybase::m_trs[1] + _Mybase::m_rot[1].mul(_Mybase::m_trs[0]);

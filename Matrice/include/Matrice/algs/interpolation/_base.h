@@ -1,6 +1,6 @@
 /***********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "../forward.hpp"
 
 MATRICE_ALGS_BEGIN
-enum {
+enum interp_algs {
 	INTERP     = 18,
 
 	BSPLINE    = 2307,
@@ -87,7 +87,9 @@ template<typename _Tag> struct require_coeff_lut {
 // \Interpolation auto dispatching
 template<typename _Ty, typename _Tag> 
 struct auto_interp_dispatcher {
-	using type = conditional_t<is_same_v<_Tag, bilerp_tag>, _Bilinear_interpolation<_Ty>, _Spline_interpolation<_Ty, _Tag>>;
+	using type = conditional_t<is_same_v<_Tag, bilerp_tag>, 
+		_Bilinear_interpolation<_Ty>, 
+		_Spline_interpolation<_Ty, _Tag>>;
 };
 template<typename _Ty = float, typename _Tag = bicerp_tag>
 using auto_interp_dispatcher_t = typename auto_interp_dispatcher<_Ty, _Tag>::type;
@@ -103,10 +105,11 @@ public:
 	using point_type = Vec2_<value_type>;
 	static constexpr auto option = _Mytraits::option;
 
-	_Interpolation_base() noexcept {
+	_Interpolation_base() noexcept
+		: _Mydata() {
 	}
 	_Interpolation_base(const matrix_type& _Data) noexcept
-		: _Mydata(make_shared(_Data)) {
+		: _Mydata(make_shared_matrix(_Data)) {
 		if constexpr (require_coeff_lut<category>::value)
 			static_cast<_Mydt*>(this)->_Coeff_impl();
 	}
@@ -120,7 +123,7 @@ public:
 	}
 
 	/**
-	 * \get interpolation coeff. matrix.
+	 * \brief Get interpolation coeff. matrix.
 	 */
 	MATRICE_HOST_INL decltype(auto) operator()() const noexcept {
 		if constexpr (require_coeff_lut<category>::value)
@@ -130,7 +133,7 @@ public:
 	}
 
 	/**
-	 * \get the interpolated value at position _Pos(x, y). 
+	 * \brief Get the interpolated value at position _Pos(x, y). 
 	 */
 	MATRICE_HOST_INL auto operator()(const point_type& pos) const {
 		return static_cast<const _Mydt*>(this)->_Value_at(pos);
@@ -140,22 +143,22 @@ public:
 	}
 
 	/**
-	 * \get the original data matrix.
+	 * \brief Get the original data matrix.
 	 */
 	MATRICE_HOST_INL decltype(auto) data() const noexcept {
 		return (*_Mydata); 
 	}
 
 	/**
-	 * \set original data matrix.
+	 * \brief Set original data matrix.
 	 */
-	MATRICE_HOST_INL _Myt& set(const matrix_type& data)noexcept {
-		_Mydata = std::make_shared<matrix_type>(data);
+	MATRICE_HOST_INL _Myt& reset(const matrix_type& data)noexcept {
+		_Mydata = make_shared_matrix(data);
 		return (*this);
 	}
 
 	/**
-	 * \get the gradient at position _Pos.
+	 * \brief Eval gradient at the position _Pos.
 	 */
 	MATRICE_HOST_INL auto grad(const point_type& _Pos) const {
 		return std::make_tuple(
@@ -163,6 +166,10 @@ public:
 			(this)->_Grady_at(_Pos)
 		);
 	}
+
+	/**
+	 * \brief Eval gradient at the position '_Pos' along a specified axis '_Axis'.
+	 */
 	template<axis _Axis, 
 		typename = enable_if_t<_Axis==axis::x||_Axis==axis::y>>
 	MATRICE_HOST_INL auto grad(const point_type& _Pos) const {
@@ -183,7 +190,6 @@ protected:
 	const value_type _Myeps{ value_type(1.0e-7) };
 	shared_matrix_t<value_type> _Mydata;
 	matrix_type _Mycoeff;
-	matrix_type _Mygrads;
 };
 
 MATRICE_ALGS_END

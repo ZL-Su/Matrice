@@ -24,7 +24,7 @@ DGE_MATRICE_BEGIN
 	This module refers to tag definitions to construct footstone of 
 	template specialization and function overloading.
  **********************************************************************/
-namespace tag {
+inline namespace tag {
 	///<brief>definitions for device tag</brief>
 	struct device_tag { 
 		struct cpu { static constexpr uint8_t id = 0; };

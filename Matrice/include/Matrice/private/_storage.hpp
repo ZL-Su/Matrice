@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -827,11 +827,13 @@ _DETAIL_END
  *\note if both _RowsAtCT and _ColsAtCT are greater than zero, the allocator will create memory block on the stack; if they are zero, the allocator will be dynamically create memory block on the heap; else if they are equal to -1 or -2, the memory will be allocated on a device (GPU), or with the CUDA managed malloc technique.
  */
 template<typename _Ty, /*data type*/
-	diff_t _RowsAtCT = 0, /*rows at compile-time*/
-	diff_t _ColsAtCT = _RowsAtCT, /*cols at compile-time*/
+	diff_t _RowsAtCompileTime = 0, /*rows at compile-time*/
+	diff_t _ColsAtCompileTime = _RowsAtCompileTime, /*cols at compile-time*/
 	class _Ly=plain_layout::row_major /*storage order*/
 >
-using dense_allocator = detail::_Allocator<_Ty, _RowsAtCT, _ColsAtCT, allocator_traits_v<_RowsAtCT, _ColsAtCT>, _Ly>;
+using dense_allocator = detail::_Allocator<_Ty, 
+	_RowsAtCompileTime, _ColsAtCompileTime,
+	allocator_traits_v<_RowsAtCompileTime, _ColsAtCompileTime>, _Ly>;
 
 namespace internal {
 template<typename _Ty>

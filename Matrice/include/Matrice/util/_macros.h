@@ -1,6 +1,6 @@
-/**************************************************************************
+/*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
-**************************************************************************/
+*********************************************************************/
 #pragma once
 
 #ifndef __CXX11__
@@ -82,7 +82,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #define DGE_MATRICE_END }
 
 #define MATRICE_EXPR_BEGIN DGE_MATRICE_BEGIN \
-namespace exprs {
+inline namespace exprs {
 #define MATRICE_EXPR_END } DGE_MATRICE_END
 
 #define MATRICE_DEVICE_BEGIN DGE_MATRICE_BEGIN \
