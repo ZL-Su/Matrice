@@ -14,28 +14,44 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
-***********************************************************************/
+*********************************************************************/
 #pragma once
 #include "matrix.h"
+#include "algs/forward.hpp"
+
+MATRICE_ALGS_BEGIN
+
+MATRICE_ALGS_END
 
 DGE_MATRICE_BEGIN
+/// <summary>
+/// \brief ENUM, imgae_func_type, for specify the image function.
+/// </summary>
+enum class image_func_type {
+	identity,
+	bilinear,
+	bplineb3,
+	bplineb5,
+	bplineb7,
+};
+
 _DETAIL_BEGIN
+
 /// <summary>
 /// \brief CLASS TEMPLATE, Smooth image type
 /// </summary>
 /// <typeparam name="_Ty">Floating point type</typeparam>
 /// <typeparam name="_Ip">Interpolation operator type</typeparam>
-template<typename _Ty, class _Ip> 
-requires is_floating_point_v<_Ty>
-class _Image : public Matrix_<_Ty, ::dynamic, ::dynamic> {
-	using _Mybase = Matrix_<_Ty, ::dynamic, ::dynamic>;
+template<typename _Pre = bicerp_tag, typename _Ty = float>
+class _Image {
 	using _Myt = _Image;
-	using _Myop = _Ip;
+	using _Myctx = typename algs::auto_interp_dispatcher<_Ty, _Pre>::type;
 public:
-	template<typename _Uy>
-	requires is_not_same_v<_Ty, _Uy>
-	_Image(Matrix_<_Uy, ::dynamic>&& _Src) {
+	using matrix_type = typename _Myctx::matrix_type;
+	using value_type = typename matrix_type::value_type;
 
+	_Image(const matrix_type& _Src)
+		:_Context(std::make_shared<_Myctx>(_Src)) {
 	}
 
 	/**
@@ -43,31 +59,24 @@ public:
 	 */
 	template<typename _Uy>
 	decltype(auto) operator()(_Uy x, _Uy y) const {
-
+		return (*_Context)({ value_type(x), value_type(y) });
 	}
 	template<typename _Uy>
 	decltype(auto) operator()(_Uy x, _Uy y) {
-
+		return (*_Context)({ value_type(x), value_type(y) });
 	}
 
-	/**
-	 * \brief FUNCTION, serialize an '_Image<_Ty, _Ip>' object.
-	 */
-	template<typename _Ty, class _Ip>
-	friend auto serialize(const _Image<_Ty, _Ip>& img) noexcept {
-
-	}
 private:
-	_Myop _Myinst;
-};
-
-/// <summary>
-/// \brief CLASS TEMPLATE, partial-specialization for common image type
-/// </summary>
-/// <typeparam name="_Ty">Scalar value type</typeparam>
-template<typename _Ty>
-class _Image<_Ty, void> : public Matrix_<_Ty, ::dynamic, ::dynamic> {
-
+	shared_ptr<_Myctx> _Context;
 };
 _DETAIL_END
+
+/// <summary>
+/// \brief ALIAS TEMPLATE, smooth image type
+/// </summary>
+/// <typeparam name="_Ty"></typeparam>
+/// <typeparam name="_Func"></typeparam>
+template<typename _Ty, typename _Func = bicerp_tag>
+using image_t = detail::_Image<_Func, _Ty>;
+
 DGE_MATRICE_END
