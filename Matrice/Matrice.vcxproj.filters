@@ -226,6 +226,9 @@
     <Filter Include="Header Files\Algs\Optimization">
       <UniqueIdentifier>{39eda61b-1f71-48e6-84f8-407609565393}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Algs\Spline">
+      <UniqueIdentifier>{81d8d0c7-b6cf-498f-ae95-a9368377c5b6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -663,6 +666,12 @@
     <ClInclude Include="include\Matrice\util\version.h">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\algs\spline.h">
+      <Filter>Header Files\Algs\Spline</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\spline\_spline.hpp">
+      <Filter>Header Files\Algs\Spline</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
@@ -866,8 +875,8 @@
     <ClCompile Include="src\private\math\_linear_kernel.cpp">
       <Filter>Source Files\Details\math</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\image_impl.cpp">
-      <Filter>Source Files\Core</Filter>
+    <ClCompile Include="src\algorithm\_bsplines.cpp">
+      <Filter>Source Files\Algs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
