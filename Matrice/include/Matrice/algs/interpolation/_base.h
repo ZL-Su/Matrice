@@ -105,10 +105,11 @@ public:
 	using point_type = Vec2_<value_type>;
 	static constexpr auto option = _Mytraits::option;
 
-	_Interpolation_base() noexcept {
+	_Interpolation_base() noexcept
+		: _Mydata() {
 	}
 	_Interpolation_base(const matrix_type& _Data) noexcept
-		: _Mydata(make_shared(_Data)) {
+		: _Mydata(make_shared_matrix(_Data)) {
 		if constexpr (require_coeff_lut<category>::value)
 			static_cast<_Mydt*>(this)->_Coeff_impl();
 	}
@@ -151,8 +152,8 @@ public:
 	/**
 	 * \brief Set original data matrix.
 	 */
-	MATRICE_HOST_INL _Myt& set(const matrix_type& data)noexcept {
-		_Mydata = std::make_shared<matrix_type>(data);
+	MATRICE_HOST_INL _Myt& reset(const matrix_type& data)noexcept {
+		_Mydata = make_shared_matrix(data);
 		return (*this);
 	}
 

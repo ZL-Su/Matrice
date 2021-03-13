@@ -422,8 +422,8 @@ public:
 #undef MATRICE_MAKE_METHOD_CREATE
 
 _DETAIL_END
-template<typename _Ty>
-inline auto make_shared(const Matrix<_Ty>& mat) noexcept {
+template<typename _Ty> MATRICE_HOST_FINL
+auto make_shared_matrix(const Matrix<_Ty>& mat) noexcept {
 	return std::make_shared<Matrix<_Ty>>(mat);
 }
 DGE_MATRICE_END
