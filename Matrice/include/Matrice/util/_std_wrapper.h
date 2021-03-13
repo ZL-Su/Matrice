@@ -32,6 +32,7 @@ namespace dgelom {
 	using std::add_pointer_t;
 
 	using std::shared_ptr;
+	using std::unique_ptr;
 
 	using std::tuple;
 	using std::priority_queue;
