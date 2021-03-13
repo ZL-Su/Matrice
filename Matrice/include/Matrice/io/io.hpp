@@ -439,7 +439,7 @@ MATRICE_HOST_INL auto write(_Args...args)->decltype(IO::write(args...)){
 // \definite a path under current folder
 template<typename T>
 MATRICE_HOST_INL decltype(auto) defpath(const T local) {
-	return forward<std::string>(IO::workspace().string() + "\\" + IO::strf(local)); 
+	return forward<std::string>(IO::workspace().string() + "\\" + str(local)); 
 };
 
 /// <summary>

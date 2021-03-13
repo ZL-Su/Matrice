@@ -40,12 +40,12 @@ static_cast<_Derived*>(this)->operator()(i) = _OPERATION;\
 } return (*this)
 #define _MATRICE_DEFVIEW_ARITHOP(OP, NAME) \
 template<typename _Rhs> MATRICE_GLOBAL_FINL \
-auto operator##OP(const _Rhs& _Right) { \
+auto operator OP(const _Rhs& _Right) { \
 return Exp::EwiseBinaryExp<_Derived, _Rhs, _Exp_op::_Ewise_##NAME<value_t>>(\
 *static_cast<_Derived*>(this), _Right); \
 } \
 template<typename _Lhs> friend MATRICE_GLOBAL_FINL \
-auto operator##OP(const _Lhs& _Left, const _Derived& _Right) { \
+auto operator OP(const _Lhs& _Left, const _Derived& _Right) { \
 return Exp::EwiseBinaryExp<_Lhs, _Derived, _Exp_op::_Ewise_##NAME<value_t>>(\
 _Left, _Right); \
 }
@@ -398,7 +398,7 @@ public:
 	 *\brief Evaluate to a tensor
 	 */
 	MATRICE_GLOBAL_INL auto eval() const {
-		detail::_Tensor<value_t> _Ret{ 1, _Mycsize, _Myhsize, _Mywsize };
+		detail::_Tensor<value_t, ::dynamic> _Ret{ 1, _Mycsize, _Myhsize, _Mywsize };
 		return std::move(_Ret);
 	}
 private:

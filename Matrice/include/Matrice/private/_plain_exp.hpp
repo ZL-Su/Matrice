@@ -118,11 +118,11 @@ template<typename _Ty> struct _Ewise_##NAME { \
 };
 #define MATRICE_MAKE_ARITH_OP(OP, NAME) \
 template<typename _Rhs, MATRICE_ENABLE_IF(std::true_type::value)> \
-MATRICE_GLOBAL_FINL auto operator##OP(const _Rhs& _Right) { \
+MATRICE_GLOBAL_FINL auto operator OP(const _Rhs& _Right) { \
 	return EwiseBinaryExp<derived_t, _Rhs, Op::_Ewise_##NAME<value_t>>(*_CDTHIS, _Right); \
 } \
 template<typename _Lhs, MATRICE_ENABLE_IF(std::true_type::value)> friend \
-MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) { \
+MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) { \
 	return EwiseBinaryExp<_Lhs, derived_t, Op::_Ewise_##NAME<value_t>>(_Left, _Right); \
 } 
 	using default_type = double;
@@ -448,10 +448,10 @@ MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const_derived& _Right) 
 			return (Shape);
 		}
 
-		MATRICE_MAKE_ARITH_OP(+, add)
-		MATRICE_MAKE_ARITH_OP(-, sub)
-		MATRICE_MAKE_ARITH_OP(*, mul)
-		MATRICE_MAKE_ARITH_OP(/, div)
+		MATRICE_MAKE_ARITH_OP(+, add);
+		MATRICE_MAKE_ARITH_OP(-, sub);
+		MATRICE_MAKE_ARITH_OP(*, mul);
+		MATRICE_MAKE_ARITH_OP(/, div);
 
 	protected:
 		size_t M, K, N;

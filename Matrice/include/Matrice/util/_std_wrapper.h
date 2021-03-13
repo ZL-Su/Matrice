@@ -85,4 +85,25 @@ namespace dgelom {
 	using std::get;
 	using std::move;
 	using std::forward;
+
+#ifndef MATRICE_STD_NUMLIMITS
+#define MATRICE_STD_NUMLIMITS std::numeric_limits<_Ty>
+#endif
+	// Variable Template for std::numeric_limits<_Ty>::min()
+	template<typename _Ty>
+	constexpr auto min_v = MATRICE_STD_NUMLIMITS::min();
+	// Variable Template for std::numeric_limits<_Ty>::max()
+	template<typename _Ty>
+	constexpr auto max_v = MATRICE_STD_NUMLIMITS::max();
+	// Variable Template for std::numeric_limits<_Ty>::epsilon()
+	template<typename _Ty>
+	constexpr auto epsilon_v = MATRICE_STD_NUMLIMITS::epsilon();
+	// Variable Template for std::numeric_limits<_Ty>::infinity()
+	template<typename _Ty>
+	constexpr auto infinity_v = MATRICE_STD_NUMLIMITS::infinity();
+	// Variable Template for std::numeric_limits<_Ty>::quiet_NaN()
+	template<typename _Ty>
+	constexpr auto quiet_nan_v = MATRICE_STD_NUMLIMITS::quiet_NaN();
+
+#undef MATRICE_STD_NUMLIMITS
 }

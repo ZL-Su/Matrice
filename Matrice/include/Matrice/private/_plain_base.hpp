@@ -191,11 +191,11 @@ typename _Exp_op::_##DESC##_##NAME<_Valty>
 
 #define MATRICE_MAKE_ARITHOP(OP, NAME) \
 template<typename _Rhs> MATRICE_GLOBAL_INL \
-auto operator##OP(const _Rhs& _Right) const noexcept { \
+auto operator OP(const _Rhs& _Right) const noexcept { \
 	return Exp::EwiseBinaryExp<_Myt, _Rhs, _Xop_ewise_##NAME>(*this, _Right); \
 } \
 template<typename _Lhs, MATRICE_ENABLE_IF(is_scalar_v<_Lhs>)> friend \
-MATRICE_GLOBAL_FINL auto operator##OP(const _Lhs& _Left, const _Derived& _Right) noexcept { \
+MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const _Derived& _Right) noexcept { \
 	return Exp::EwiseBinaryExp<_Lhs, _Derived, _Xop_ewise_##NAME>(_Left, _Right); \
 }
 
