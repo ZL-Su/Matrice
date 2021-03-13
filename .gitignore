@@ -288,3 +288,5 @@ deps/mkl_1942_ilp64.props
 /UnitTest
 Matrice/Matrice.vcxproj
 *.filters
+*.vcxproj
+*.filters
