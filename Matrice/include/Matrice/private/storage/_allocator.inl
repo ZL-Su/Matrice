@@ -213,8 +213,7 @@ MATRICE_GLOBAL_INL void free(_Ty* data, _Tag) {
 }
 
 template<typename _Ty, class _Tag>
-void free(_Ty* data, size_t size, _Tag)
-{
+void free(_Ty* data, size_t size, _Tag) {
 	return impl::_Free(data, size, _Tag());
 }
 
@@ -290,8 +289,8 @@ MATRICE_HOST_INL void _Free(_Ty* data, heap_alloc_tag) {
 	}
 }
 
-template<typename _Ty>
-MATRICE_HOST_INL void _Free(_Ty* data, size_t size, heap_alloc_tag) {
+template<typename _Ty> MATRICE_HOST_INL 
+void _Free(_Ty* data, size_t size, heap_alloc_tag) {
 	constexpr size_t _Big_allocation_sentinel = 0xFAFAFAFAFAFAFAFAULL;
 	MATRICE_USE_STD(_New_alignof);
 	if (data && size < _Big_allocation_sentinel) {
@@ -310,7 +309,7 @@ MATRICE_HOST_INL decltype(auto) _Deleter(heap_alloc_tag) noexcept {
 		else std::free(_ptr_);
 	};*/
 	return [](auto _ptr_, auto _size_) {
-		_Free(_ptr_, _size_);
+		_Free(_ptr_, _size_, heap_alloc_tag());
 	};
 }
 
