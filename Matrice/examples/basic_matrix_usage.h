@@ -1,14 +1,28 @@
-/*************************************************************
-	This is an example illustrates how to use dgelom::Matrix_
- *************************************************************/
+/*********************************************************************
+This file is part of Matrice, an effcient and elegant C++ library.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
+
+This program is free software : you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.If not, see <http://www.gnu.org/licenses/>.
+**********************************************************************/
 #pragma once
 
-#include "../include/Matrice/core/matrix.h"
-#include "../include/Matrice/core/vector.h"
+#include <core/matrix.h>
+#include <core/vector.h>
 
 using default_type = dgelom::default_type;
 
-int main() try
+int basic_use_of_mtrix() try
 {
 #pragma region <!-- How to create a matrix -->
 	{
@@ -90,7 +104,8 @@ int main() try
 
 		// or use the 'eval()' method of the expression...
 		auto Ewise_sum_3 = A_plus_B_exp.eval(); 
-		// in the above way, the returned matrix type is inferred automatically, which generally is the optimal matrix type. If you wanna use the return type that you specified, the templated version of 'eval()' method should be called as follows
+		// in the above way, the returned matrix type is inferred automatically, which generally is the optimal matrix type.
+		// If you wanna use the return type that you specified, the templated version of 'eval()' method should be called as follows
 		auto Ewise_sum_4 = A_plus_B_exp.eval<dgelom::Matrix<default_type>>();
 
 		// \Metrix-level operations: matmul, transpose, inverse...
