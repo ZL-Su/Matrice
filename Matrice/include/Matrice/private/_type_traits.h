@@ -26,7 +26,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 DGE_MATRICE_BEGIN
 
 template<typename T> struct remove_reference { 
-	using type = typename std::remove_reference<T>::type; 
+	using type = MATRICE_STD(remove_reference_t)<T>;
 };
 template<typename T> 
 using remove_reference_t = typename remove_reference<T>::type;
@@ -35,7 +35,7 @@ using remove_reference_t = typename remove_reference<T>::type;
  *\brief retrieve plain type of type T.
  */
 template<typename T> struct remove_all { 
-	using type = std::remove_cv_t<remove_reference_t<T>>; 
+	using type = MATRICE_STD(remove_cv_t)<remove_reference_t<T>>;
 };
 template<typename T> 
 using remove_all_t = typename remove_all<T>::type;
@@ -47,7 +47,7 @@ template<typename T> struct type_bytes {
 	enum { value = sizeof(T) }; 
 };
 template<typename T> 
-inline constexpr int type_bytes_v = type_bytes<T>::value;
+constexpr int type_bytes_v = type_bytes<T>::value;
 
 /**
  *\brief conditional_t<_Cond, T, U> is T if _Cond is true, else it is U.
@@ -65,15 +65,18 @@ using conditional_t = typename conditional<_Cond, T, U>::type;
 /**
  *\brief has_value_t<T> is true iff T has value_t.
  */
-template<typename T, typename Enable = void> struct has_value_t : std::false_type {};
-template<typename T> inline constexpr auto has_value_t_v = has_value_t<T>::value;
+template<typename T, typename Enable = void> 
+struct has_value_t : MATRICE_STD(false_type) {};
+template<typename T> 
+constexpr auto has_value_t_v = has_value_t<T>::value;
 
 /**
  *\brief primitive_type<T> retrieves the primitive type of T.
  */
 template<typename T> struct primitive_type {
-	using type = std::decay_t<T>;
-	static_assert(std::is_fundamental_v<type>, "T in primitive_type<T> must be a primitive type.");
+	using type = MATRICE_STD(decay_t)<T>;
+	static_assert(MATRICE_STD(is_fundamental_v)<type>,
+		"T in primitive_type<T> must be a primitive type.");
 };
 template<typename T>
 struct primitive_type<T*> {
@@ -105,7 +108,7 @@ template<int _Val> inline constexpr auto is_zero_v = is_zero<_Val>::value;
  *\brief is_scalar_v<T> is true iff T is a scalar type.
  */
 template<typename T> struct is_scalar {
-	constexpr static auto value = std::is_scalar_v<T>;
+	constexpr static auto value = MATRICE_STD(is_scalar_v)<T>;
 };
 template<typename T> 
 inline constexpr auto is_scalar_v = is_scalar<T>::value;
@@ -130,7 +133,7 @@ inline constexpr auto is_common_int64_v = is_common_int64<T>::value;
  *\brief is_int64<T> is true iff T is a signed 64-bits integer type.
  */
 template<typename T> struct is_int64 { 
-	enum { value = std::is_signed_v<T> && is_common_int64_v<T> }; };
+	enum { value = MATRICE_STD(is_signed_v)<T> && is_common_int64_v<T> }; };
 template<typename T> 
 inline constexpr auto is_int64_v = is_int64<T>::value;
 
@@ -138,7 +141,7 @@ inline constexpr auto is_int64_v = is_int64<T>::value;
  *\brief is_int64<T> is true iff T is a unsigned 64-bits integer type.
  */
 template<typename T> struct is_uint64 { 
-	enum { value = std::is_unsigned_v<T> && is_common_int64_v<T> }; };
+	enum { value = MATRICE_STD(is_unsigned_v)<T> && is_common_int64_v<T> }; };
 template<typename T> 
 inline constexpr auto is_uint64_v = is_uint64<T>::value;
 
@@ -146,7 +149,7 @@ inline constexpr auto is_uint64_v = is_uint64<T>::value;
  *\brief is_float32<T> is true iff T is a 32-bits floating point type.
  */
 template<typename T> struct is_float32 { 
-	enum { value = std::is_floating_point<T>::value && (sizeof(T) == 4) }; };
+	enum { value = MATRICE_STD(is_floating_point_v)<T> && (sizeof(T) == 4) }; };
 template<typename T> 
 inline constexpr auto is_float32_v = is_float32<T>::value;
 
@@ -154,7 +157,7 @@ inline constexpr auto is_float32_v = is_float32<T>::value;
  *\brief is_float64<T> is true iff T is a 64-bits floating point type.
  */
 template<typename T> struct is_float64 { 
-	enum { value = std::is_floating_point<T>::value && (sizeof(T) == 8) }; };
+	enum { value = MATRICE_STD(is_floating_point_v)<T>&&(sizeof(T) == 8) }; };
 template<typename T> 
 inline constexpr auto is_float64_v = is_float64<T>::value;
 
@@ -204,14 +207,14 @@ template<typename T> inline constexpr auto plane_view_v = _View_trait<T>::value;
 
 template<typename T> struct traits {};
 
-template<typename T> struct is_matrix : std::false_type {};
+template<typename T> struct is_matrix : MATRICE_STD(false_type) {};
 template<typename T> inline constexpr 
 bool is_matrix_v = is_matrix<T>::value;
 template<typename Mty>
 struct matrix_traits : traits<Mty> {};
 
 template<typename Exp> struct expression_options { enum { value = Exp::flag | expr }; };
-template<typename Exp> struct is_expression :std::false_type {};
+template<typename Exp> struct is_expression :MATRICE_STD(false_type) {};
 template<typename Exp> inline constexpr 
 bool is_expression_v = is_expression<Exp>::value;
 template<class Exp, typename = enable_if_t<is_expression_v<Exp>>>
@@ -219,14 +222,14 @@ struct expression_traits : traits<Exp> {};
 template<class Ade>
 struct autodiff_exp_traits : traits<Ade> {};
 
-template<typename T> struct is_mtxview : std::false_type {};
+template<typename T> struct is_mtxview : MATRICE_STD(false_type) {};
 /**
  *\brief is_mtxview_v<T> is true iff T is dgelom::detail::_Matrix_view or its derived type.
  */
 template<typename T> inline constexpr bool is_mtxview_v = is_mtxview<T>::value;
 template<typename View> struct mtxview_traits : traits<View> {};
 
-template<typename T> struct is_fxdvector : std::false_type {};
+template<typename T> struct is_fxdvector : MATRICE_STD(false_type) {};
 /**
  *\brief is_fxdvector_v<T> is true iff T is dgelom::Vec_ or its derived type.
  */
