@@ -35,34 +35,44 @@ using smooth_image_t = corr_optim_t::smooth_image_t;
 /// <param name="'apath'">Path to current location.</param>
 /// <param name="'dfolder'">Folder where the images are stored.</param>
 /// <returns>Make no sense.</returns>
-int corr_optimer_eng(fs::path&& apath, std::string&& dfolder) try
-{
+int corr_optimer_eng(fs::path&& apath, auto dfolder, auto val)
+try {
 	///\brief Attach image file info to a data loader (tiff herein).
-	decltype(auto) path = apath.append(dfolder);
+	const auto path = apath.append(dfolder);
 	auto image_loader = dgelom::make_loader(path,
 		dgelom::io::tiff<raw_image_t::value_t>());
 
 	///\brief Get reference image info.
 	const auto ref_image = image_loader.forward().front();
 	const auto rows = ref_image.rows(), cols = ref_image.cols();
+	smooth_image_t f{ ref_image };
 
 	///\brief Set optimizer options and mesh computing domain.
 	const auto options = corr_optim_t::options_type{ 15 };
-	const auto x_space = dgelom::linspace<int>::_(
-		options.radius() << 1, cols - options.radius() << 1, 40);
-	const auto y_space = dgelom::linspace<int>::_(
-		options.radius() << 1, rows - options.radius() << 1, 40);
+	const auto subsize = options.radius() << 1;
+	const auto x_space = dgelom::make_linspace(
+		subsize, cols - subsize, 20);
+	const auto y_space = dgelom::make_linspace(
+		subsize, rows - subsize, 20);
 
-	auto disp_x = corr_optim_t::matrix_type(x_space.size() * y_space.size(),
+	auto disp_x = corr_optim_t::matrix_type(x_space.size()*y_space.size(),
 		image_loader.depth(), 0.);
+	auto error = dgelom::Matrix_<float, ::dynamic, 2>(image_loader.depth());
 
-	smooth_image_t f{ ref_image };
+	///\brief Move loader back one step to start from reference.
+	image_loader.shift(-1);
+
+	auto loss_scale = val;
+
 	for (; !image_loader.end(); ) {
 		const auto cur_image = image_loader.forward().front();
 		decltype(f) g{ cur_image };
 
-		auto disp_col = disp_x.cview(image_loader.pos() - 1);
+		const auto idx = image_loader.pos() - 1;
+		auto disp_col = disp_x.cview(idx);
 		corr_optim_t solver(f, g, options);
+		solver.set_loss_scale(loss_scale);
+
 		size_t npoint = 0;
 		for (const auto y : y_space) {
 			for (const auto x : x_space) {
@@ -94,15 +104,33 @@ int corr_optimer_eng(fs::path&& apath, std::string&& dfolder) try
 				++npoint;
 			}
 		}
+		
+		const auto u = disp_x.cbegin(idx);
+		const auto [mean, stdv] = corr::eval_perf(u.begin(), u.end(), /*Groundtruth=*/idx*0.05);
+		error.view<0>(idx) = { float(mean), float(stdv) };
 	}
-	dgelom::IO::CSV csv(path.parent_path().append("res_noise_10\\Welsch_S0.01.csv").string());
+
+	dgelom::IO::CSV csv("empty");
+	std::array<std::string, 2> labels{ "Mean", "Stdv" };
+
+	csv.reset(path.parent_path().append("res\\error_uniform.csv"));
+	csv.open(dgelom::IO::app);
+	csv.append("Impulse-Welsch-"+dgelom::str(loss_scale));
+	//csv.append("Impulse-Gaussian");
+	for (auto col = error.cwbegin(); col!=error.cwend(); ++col) {
+		csv.append(std::move(labels[col.pos()]), 
+			col.begin(), col.end());
+	}
+	csv.close();
+
+	/*csv.reset(path.parent_path().append("res\\disp_gn0_welch_0.01.csv"));
 	csv.open(dgelom::IO::app);
 	for (auto row = disp_x.rwbegin(); row != disp_x.rwend(); ++row) {
 		csv.append(row.begin(), row.end());
 	}
-	csv.close();
+	csv.close();*/
 
-	std::cout << " >> [Matrice message] finish!\n";
+	std::cout << " >> [Matrice message] finish for scale " + dgelom::str(loss_scale) + "\n";
 
 	return 0;
 }
