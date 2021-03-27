@@ -424,6 +424,16 @@ public:
 
 };
 
+/// <summary>
+/// \brief Concate a file path and a file name.
+/// </summary>
+/// <param name="path">File path</param>
+/// <param name="fname">File name</param>
+MATRICE_HOST_INL auto concat(const fs::path& path, const std::string& fname) noexcept {
+	auto _Path = path;
+	return forward<fs::path>(_Path.append(fname));
+}
+
 // \read interface
 template<typename _Ty, typename... _Args>
 MATRICE_HOST_INL auto read(_Args...args){
