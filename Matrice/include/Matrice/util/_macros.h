@@ -139,6 +139,9 @@ typename = std::enable_if_t<_COND>
 #endif
 
 #ifndef MATRICE_USE_STD
-#define MATRICE_USE_STD(NAME) \
-using std::NAME;
+#define MATRICE_USE_STD(NAME) using std::NAME;
+#endif
+
+#ifndef MATRICE_STD
+#define MATRICE_STD(NAME) std::NAME
 #endif

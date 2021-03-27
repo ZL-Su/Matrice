@@ -21,6 +21,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
+/// <summary>
+/// \brief CRTP, base interface for spline transform
+/// </summary>
+/// <typeparam name="_Derived">derived spline type</typeparam>
 template<typename _Derived> class _Spline {
 	using _Mytraits = traits<_Derived>;
 	using _Myt = _Spline;
@@ -28,16 +32,19 @@ public:
 	using value_type = typename _Mytraits::value_type;
 	using matrix_type = Matrix<value_type>;
 
-	template<typename... _Ty>
-	MATRICE_HOST_INL auto operator()(_Ty&&..._Pos) const noexcept {
+	template<typename... _Tys>
+	MATRICE_HOST_INL auto operator()(_Tys&&..._Pos) const noexcept {
 		return derived()._Value_at(_Pos...);
 	}
 
-	template<typename... _Ty>
-	MATRICE_HOST_INL auto grad(_Ty&&..._Pos) const noexcept {
+	template<typename... _Tys>
+	MATRICE_HOST_INL auto grad(_Tys&&..._Pos) const noexcept {
 		return derived()._Grad_at(_Pos...);
 	}
 
+	/**
+	 * \brief Get reference to the derived object. 
+	 */
 	MATRICE_GLOBAL_INL const _Derived& derived() const noexcept {
 		return *static_cast<_Derived*>(this);
 	}
@@ -49,7 +56,11 @@ protected:
 	shared_matrix_t<value_type> _Mycoef;
 };
 
-template<typename _Ty> 
+/// <summary>
+/// \brief Specialization to bicubic b-spline transform
+/// </summary>
+/// <typeparam name="_Ty">requires a scalar type</typeparam>
+template<typename _Ty>
 class _Bspline<_Ty, bicubic_tag>
 	: public _Spline<_Bspline<_Ty, bicubic_tag>> {
 	using _Myt = _Bspline<_Ty, bicubic_tag>;
@@ -58,7 +69,20 @@ public:
 	using typename _Mybase::value_type;
 	using typename _Mybase::matrix_type;
 
+	/**
+	 * \brief CTOR, create an empty object for lazy coef computation
+	 */
+	_Bspline();
+
+	/**
+	 * \brief CTOR, create an object with instant coef computation
+	 */
 	_Bspline(const matrix_type& _Data);
+
+	/**
+	 * \brief METHOD, set data to perform coef evaluation
+	 */
+	void set(const matrix_type& _Data);
 
 private:
 	void _Precompute(const matrix_type& _Data);
