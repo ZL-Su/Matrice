@@ -11,7 +11,7 @@ A more efficient and portable version is being released in the file "_refractive
 template<typename _Ty> requires is_floating_point_v<_Ty>
 class _Refractive_reconstruction;
 ```
-Of course, an user friendly interface is provided with the alias template as:
+Of course, user friendly interface is provided with the alias template as:
 ```
 template<typename _Ty>
 using refractive_reconstruction = detail::_Refractive_reconstruction;
