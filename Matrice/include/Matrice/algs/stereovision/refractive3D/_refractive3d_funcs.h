@@ -31,13 +31,8 @@ vec3d_t<_Ty> _Cross(vec3d_t<_Ty> left, vec3d_t<_Ty> right) noexcept {
 template<typename _Ty> requires real_type<_Ty>
 vec3d_t<_Ty> _Normalize(_Ty x, _Ty y, _Ty z) noexcept {
 	MATRICE_USE_STD(pow);
-
-	vec3d_t<_Ty> result;
-	auto a = pow((pow(x, 2) + pow(y, 2) + pow(z, 2)), 0.5);
-	result[0] = x / a;
-	result[1] = y / a;
-	result[2] = z / a;
-	return result;
+	const auto a = pow(sqsum(x, y, z), 0.5);
+	return{x / a, y / a, z / a};
 }
 
 // \brief Compute intersection of a line and a plane.
@@ -64,20 +59,36 @@ _Ty _Vector_angle(vec3d_t<_Ty> vec1, vec3d_t<_Ty> vec2) noexcept {
 	return acos(vec11[0] * vec22[0] + vec11[1] * vec22[1] + vec11[2] * vec22[2]);
 }
 
-//从入射光线方向向量获得折射光线方向向量.vec1 直线方向向量，N1 平面法向量，n1 n2入射和折射介质的折射率，angel1 angel2 入射和折射角
+/// <summary>
+/// \brief Compute the unit direction of the refracted ray. 
+/// </summary>
+/// <param name="'vec1'">Incident vector</param>
+/// <param name="'N1'">Normal of the interface</param>
+/// <param name="'n1'">Refractive index of incident medium</param>
+/// <param name="'n2'">Refractive index of emergent medium</param>
+/// <param name="'theta1'">Incident angle</param>
+/// <param name="'theta2'">Emergent angle</param>
+/// <returns>Unit direction vector</returns>
 template<typename _Ty> requires real_type<_Ty>
 vec3d_t<_Ty> _Get_refracted_vector(vec3d_t<_Ty> vec1, vec3d_t<_Ty> N1, 
-	_Ty n1, _Ty n2, _Ty angle1, _Ty angle2) {
+	_Ty n1, _Ty n2, _Ty theta1, _Ty theta2) noexcept {
 	MATRICE_USE_STD(cos);
 
-	const auto _X = n1 / n2 * vec1[0] - (n1 / n2 * cos(angle1) - cos(angle2)) * N1[0];
-	const auto _Y = n1 / n2 * vec1[1] - (n1 / n2 * cos(angle1) - cos(angle2)) * N1[1];
-	const auto _Z = n1 / n2 * vec1[2] - (n1 / n2 * cos(angle1) - cos(angle2)) * N1[2];
+	const auto _X = n1 / n2 * vec1[0] - (n1 / n2 * cos(theta1) - cos(theta2)) * N1[0];
+	const auto _Y = n1 / n2 * vec1[1] - (n1 / n2 * cos(theta1) - cos(theta2)) * N1[1];
+	const auto _Z = n1 / n2 * vec1[2] - (n1 / n2 * cos(theta1) - cos(theta2)) * N1[2];
 
 	return { _X, _Y, _Z };
 }
 
-// 求空间中两点法式直线的交点坐标。point1和vec1，直线1的点和法，point2和vec2，直线2的点和法.
+/// <summary>
+/// \brief Compute the intersection of two lines.
+/// </summary>
+/// <param name="'point1'">End point of line 1;</param>
+/// <param name="'vec1'">Direction of line 1;</param>
+/// <param name="'point2'">End point of line 2;</param>
+/// <param name="'vec2'">Direction of line 2.</param>
+/// <returns>Coordinates of the intersection</returns>
 template<typename _Ty> requires real_type<_Ty>
 vec3d_t<_Ty> _Intersection_of_lines(vec3d_t<_Ty> point1, vec3d_t<_Ty> vec1,
 	vec3d_t<_Ty> point2, vec3d_t<_Ty> vec2) noexcept {
@@ -164,56 +175,58 @@ vec3d_t<_Ty> refractive_3d_reconstruction(
 	MATRICE_USE_STD(sin);
 	MATRICE_USE_STD(cos);
 
-	////根据折射面1的方程求折射面2的方程。
-	auto d2 = interf1[3] - thickness * pow(interf1[0] * interf1[0] + interf1[1] * interf1[1] + interf1[2] * interf1[2], 0.5);
-	decltype(interf1) interf2 = { interf1[0], interf1[1], interf1[2], d2 };
+	const auto d = thickness;
+	const auto t = translation;
+	
+	// Build the interface 2
+	const auto D2 = interf1[3] - d * pow(sqsum(interf1[0], interf1[1], interf1[2]), 0.5);
+	decltype(interf1) interf2 = { interf1[0], interf1[1], interf1[2], D2 };
 
-	////折射面1，2的法向量，归一化后的
-	auto N1 = detail::_Normalize(interf1[0], interf1[1], interf1[2]);
-	auto N2 = detail::_Normalize(interf2[0], interf2[1], interf2[2]);
+	// Compute the normalized normal of the interfaces 1 and 2
+	const auto N1 = detail::_Normalize(interf1[0], interf1[1], interf1[2]);
+	const auto N2 = detail::_Normalize(interf2[0], interf2[1], interf2[2]);
 
-	////光线1的方向向量
+	// Direction vectors of the ray L1 and L1'
 	auto nlineL1 = detail::_Normalize(raw_point[0], raw_point[1], raw_point[2]);
-	auto nlineR1 = detail::_Normalize(raw_point[0] + translation[0], raw_point[1] + translation[1], raw_point[2] + translation[2]);
+	auto nlineR1 = detail::_Normalize(raw_point[0] + t[0], raw_point[1] + t[1], raw_point[2] + t[2]);
 
-	////求光线1和折射面1的交点坐标
+	// Incident points P1 and P1' of L1 and L1' at the interface 1
 	auto pointL1 = detail::_Line_and_plane_intersection({ 0.0, 0.0, 0.0 }, nlineL1, interf1);
-	auto pointR1 = detail::_Line_and_plane_intersection({ -translation[0], -translation[1], -translation[2] }, nlineR1, interf1);
+	auto pointR1 = detail::_Line_and_plane_intersection({ -t[0], -t[1], -t[2] }, nlineR1, interf1);
 
-	//求折射面1入射角
-	auto angleL1 = detail::_Vector_angle(nlineL1, N1);
-	auto angleR1 = detail::_Vector_angle(nlineR1, N1);
+	// Incident angles of rays L1 and L1'
+	const auto angleL1 = detail::_Vector_angle(nlineL1, N1);
+	const auto angleR1 = detail::_Vector_angle(nlineR1, N1);
 
-	//求折射面1折射角
-	auto angleL2 = asin(n1 * sin(angleL1) / n2);
-	auto angleR2 = asin(n1 * sin(angleR1) / n2);
+	// Refracted angles of rays L1 and L1' 
+	const auto angleL2 = asin(n1 * sin(angleL1) / n2);
+	const auto angleR2 = asin(n1 * sin(angleR1) / n2);
 
-	//求光线2的方向向量
+	// Direction vectors of the ray L2 and L2'
 	auto nlineL2 = detail::_Get_refracted_vector(nlineL1, N1, n1, n2, angleL1, angleL2);
 	auto nlineR2 = detail::_Get_refracted_vector(nlineR1, N1, n1, n2, angleR1, angleR2);
 	nlineL2 = detail::_Normalize(nlineL2[0], nlineL2[1], nlineL2[2]);
 	nlineR2 = detail::_Normalize(nlineR2[0], nlineR2[1], nlineR2[2]);
 
-	//求光线2和折射面2的交点坐标
+	// Incident points P2 and P2' of L2 and L2' at the interface 2
 	auto pointL2 = detail::_Line_and_plane_intersection(pointL1, nlineL2, interf2);
 	auto pointR2 = detail::_Line_and_plane_intersection(pointR1, nlineR2, interf2);
 
-	//求折射面2入射角
+	// Incident angles of rays L2 and L2'
 	const auto angleL3 = angleL2;
 	const auto angleR3 = angleR2;
 
-	//求折射面2折射角
+	// Refracted angles of rays L2 and L2'
 	auto angleL4 = asin(n1 * sin(angleL3) / n2);
 	auto angleR4 = asin(n1 * sin(angleR3) / n2);
 
-	//求光线3的方向向量
+	// Direction vectors of the ray L3 and L3'
 	const auto nlineL3 = detail::_Get_refracted_vector(nlineL2, N2, n2, n3, angleL3, angleL4);
 	const auto nlineR3 = detail::_Get_refracted_vector(nlineR2, N2, n2, n3, angleR3, angleR4);
 
-	////求光线3的公垂线方向向量
 	//auto nCommonVerticalLine3 = detail::_Cross(nlineL3, nlineR3);
 	
-	//求光线3的交点坐标
+	// Compute the true object point Q
 	return detail::_Intersection_of_lines(pointL2, nlineL3, pointR2, nlineR3);
 }
 
