@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library for 
-3D vision and photo-mechanics.
+3D Vision and Photo-Mechanics.
 Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 *********************************************************************/
 #pragma once
@@ -42,8 +42,26 @@ public:
 	using value_type = _Ty;
 	template<size_t _Dim> using vector_t = auto_vector_t<value_type, _Dim>;
 
+	/// <summary>
+	/// \brief Refracting interface type with normalized normal.
+	/// </summary>
 	struct interface_type
 	{
+		MATRICE_HOST_FINL interface_type() = default;
+		MATRICE_HOST_FINL
+		interface_type(value_type _Nx, value_type _Ny, value_type _Nz) noexcept
+			: _Mynormal{_Nx, _Ny, _Nz} {
+			const auto _Norm = _Mynormal.norm<2>();
+			_Norm == 1 ? _Mynormal.normalize(_Norm) : ;
+		}
+
+		MATRICE_HOST_FINL decltype(auto) normal() const noexcept {
+			return _Mynormal;
+		}
+		MATRICE_HOST_FINL decltype(auto) normal() noexcept {
+			return _Mynormal;
+		}
+
 		// normal vector
 		vector_t<3> _Mynormal;
 
@@ -54,6 +72,9 @@ public:
 		value_type  _Myshift{ 0 };
 	};
 
+	/// <summary>
+	/// \brief Light ray type with origin and direction.
+	/// </summary>
 	struct ray_type
 	{
 		vector_t<3> _Myorigin;
@@ -89,12 +110,12 @@ public:
 	 * \return 'Q' the true object point.
 	 */
 	auto compute(const vector_t<3>& _P) const noexcept {
-		
+		const auto [left_direc, right_direc] = _Eval_incident_directions(_P);
+
 	}
 
 private:
-	template<typename _Tag, MATRICE_ENABLE_IF(is_refractive_tag_v<_Tag>)>
-	auto _Eval_directions(_Tag, const vector_t<3>& _P) const noexcept;
+	auto _Eval_incident_directions(const vector_t<3>& _P) const noexcept;
 
 	template<typename _Tag, MATRICE_ENABLE_IF(is_refractive_tag_v<_Tag>)>
 	auto _Eval_intersections(_Tag, const ray_type& l) const noexcept;
@@ -119,3 +140,5 @@ template<typename _Ty>
 using refractive_reconstruction = detail::_Refractive_reconstruction;
 
 MATRICE_ALG_END(vision)
+
+#include "_refractive3d.inl"
