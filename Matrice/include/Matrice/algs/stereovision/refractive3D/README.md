@@ -1,8 +1,8 @@
 # CODE NOTICE
 The first release of "Refractive 3D Reconstruction" is in header file "_refractive3d_funcs.h", where the function template:
 ```
-template<typename _Ty>
-vec3d_t<_Ty> refractive_3d_reconstruction(vec3d_t<_Ty>, vec3d_t<_Ty>, vec4d_t<_Ty>, _Ty...)
+template<typename _Ty, typename... _Args>
+vec3d_t<_Ty> refractive_3d_reconstruction(vec3d_t<_Ty>, vec3d_t<_Ty>, vec4d_t<_Ty>, _Args&&...)
 ```
 is the driver for performing the 3D estimation in step by step. However, it is not cache-friendly.
 
