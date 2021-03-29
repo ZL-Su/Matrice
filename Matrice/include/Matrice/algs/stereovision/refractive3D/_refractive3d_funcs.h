@@ -2,6 +2,19 @@
 This file is part of Matrice, an effcient and elegant C++ library for
 3D vision and photo-mechanics.
 Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
+
+This program is free software : you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 #include "../core.hpp"
@@ -21,10 +34,7 @@ namespace detail {
 // \brief Cross product of two 3-vectors.
 template<typename _Ty> requires real_type<_Ty>
 vec3d_t<_Ty> _Cross(vec3d_t<_Ty> left, vec3d_t<_Ty> right) noexcept {
-	const auto _X = left[1] * right[2] - left[2] * right[1];
-	const auto _Y = -left[0] * right[2] + left[2] * right[0];
-	const auto _Z = left[0] * right[1] - left[1] * right[0];
-	return {_X, _Y, _Z};
+	return left.cross(right);
 }
 
 // \brief Compute normalization of a 3-vector.
@@ -57,10 +67,9 @@ vec3d_t<_Ty> _Intersection(vec3d_t<_Ty> point, vec3d_t<_Ty> normal, vec4d_t<_Ty>
 template<typename _Ty> requires real_type<_Ty>
 _Ty _Vector_angle(vec3d_t<_Ty> vec1, vec3d_t<_Ty> vec2) noexcept {
 	MATRICE_USE_STD(acos);
-
-	const auto vec11 = _Normalize(vec1[0], vec1[1], vec1[2]);
-	const auto vec22 = _Normalize(vec2[0], vec2[1], vec2[2]);
-	return acos(vec11[0] * vec22[0] + vec11[1] * vec22[1] + vec11[2] * vec22[2]);
+	const auto vec11 = _Normalize(vec1);
+	const auto vec22 = _Normalize(vec2);
+	return acos(vec11.dot(vec22));
 }
 
 /// <summary>
@@ -74,15 +83,12 @@ _Ty _Vector_angle(vec3d_t<_Ty> vec1, vec3d_t<_Ty> vec2) noexcept {
 /// <param name="'theta2'">Emergent angle</param>
 /// <returns>Unit direction vector</returns>
 template<typename _Ty> requires real_type<_Ty>
-vec3d_t<_Ty> _Get_refracted_vector(vec3d_t<_Ty> vec1, vec3d_t<_Ty> N1, 
+vec3d_t<_Ty> _Get_refracted_vector(vec3d_t<_Ty> vec1, vec3d_t<_Ty> N, 
 	_Ty n1, _Ty n2, _Ty theta1, _Ty theta2) noexcept {
 	MATRICE_USE_STD(cos);
-
-	const auto _X = n1 / n2 * vec1[0] - (n1 / n2 * cos(theta1) - cos(theta2)) * N1[0];
-	const auto _Y = n1 / n2 * vec1[1] - (n1 / n2 * cos(theta1) - cos(theta2)) * N1[1];
-	const auto _Z = n1 / n2 * vec1[2] - (n1 / n2 * cos(theta1) - cos(theta2)) * N1[2];
-
-	return { _X, _Y, _Z };
+	const auto _Prev = (n1 / n2) * vec1;
+	const auto _Tail = (n1 / n2 * cos(theta1) - cos(theta2)) * N;
+	return { _Prev(0) - _Tail(0), _Prev(1) - _Tail(1), _Prev(1) - _Tail(1) };
 }
 
 /// <summary>
