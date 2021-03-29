@@ -31,8 +31,12 @@ vec3d_t<_Ty> _Cross(vec3d_t<_Ty> left, vec3d_t<_Ty> right) noexcept {
 template<typename _Ty> requires real_type<_Ty>
 vec3d_t<_Ty> _Normalize(_Ty x, _Ty y, _Ty z) noexcept {
 	MATRICE_USE_STD(pow);
-	const auto a = pow(sqsum(x, y, z), 0.5);
+	const auto a = sqrt(sqsum(x, y, z));
 	return{x / a, y / a, z / a};
+}
+template<typename _Ty> requires real_type<_Ty>
+vec3d_t<_Ty> _Normalize(const vec3d_t<_Ty>& v) noexcept {
+	return v.normalize(v.norm());
 }
 
 // \brief Compute intersection of a line and a plane.
@@ -40,7 +44,7 @@ vec3d_t<_Ty> _Normalize(_Ty x, _Ty y, _Ty z) noexcept {
 // \param 'normal' direction of the line.
 // \param 'plane' coefs A, B, C, and D of the plane: Ax + By + Cz + D = 0.
 template<typename _Ty> requires real_type<_Ty>
-vec3d_t<_Ty> _Line_and_plane_intersection(vec3d_t<_Ty> point, vec3d_t<_Ty> normal, vec4d_t<_Ty> plane)
+vec3d_t<_Ty> _Intersection(vec3d_t<_Ty> point, vec3d_t<_Ty> normal, vec4d_t<_Ty> plane)
 {
 	const auto x = -((plane[3] * normal[0] - plane[1] * normal[1] * point[0] - plane[2] * normal[2] * point[0] + plane[1] * normal[0] * point[1] + plane[2] * normal[0] * point[2]) / (plane[0] * normal[0] + plane[1] * normal[1] + plane[2] * normal[2]));
 	const auto y = -((plane[3] * normal[1] + plane[0] * normal[1] * point[0] - plane[0] * normal[0] * point[1] - plane[2] * normal[2] * point[1] + plane[2] * normal[1] * point[2]) / (plane[0] * normal[0] + plane[1] * normal[1] + plane[2] * normal[2]));
@@ -90,9 +94,9 @@ vec3d_t<_Ty> _Get_refracted_vector(vec3d_t<_Ty> vec1, vec3d_t<_Ty> N1,
 /// <param name="'vec2'">Direction of line 2.</param>
 /// <returns>Coordinates of the intersection</returns>
 template<typename _Ty> requires real_type<_Ty>
-vec3d_t<_Ty> _Intersection_of_lines(vec3d_t<_Ty> point1, vec3d_t<_Ty> vec1,
+vec3d_t<_Ty> _Intersection(vec3d_t<_Ty> point1, vec3d_t<_Ty> vec1,
 	vec3d_t<_Ty> point2, vec3d_t<_Ty> vec2) noexcept {
-	const auto vec3 = _Cross(vec1, vec2);
+	const auto vec3 = vec1.cross(vec2);
 	const auto x1 = -((point1[2] * vec1[0] * vec2[1] * vec3[0] - point2[2] * vec1[0] * vec2[1] * vec3[0] -
 		point1[0] * vec1[2] * vec2[1] * vec3[0] - point1[1] * vec1[0] * vec2[2] * vec3[0] +
 		point2[1] * vec1[0] * vec2[2] * vec3[0] + point1[0] * vec1[1] * vec2[2] * vec3[0] -
@@ -153,6 +157,11 @@ vec3d_t<_Ty> _Intersection_of_lines(vec3d_t<_Ty> point1, vec3d_t<_Ty> vec1,
 
 	return { (x1 + x2) / 2,	(y1 + y2) / 2, (z1 + z2) / 2 };
 }
+
+template<typename _Ty>
+auto _Get_packed_args(_Ty t, _Ty n1, _Ty n2, _Ty n3) noexcept {
+	return tuple(t, n1, n2, n3);
+}
 }
 
 /********************************************************************************************
@@ -160,39 +169,42 @@ vec3d_t<_Ty> _Intersection_of_lines(vec3d_t<_Ty> point1, vec3d_t<_Ty> vec1,
  * \param 'raw_point' distorted object point P.
  * \param 'translation' translation vector of the right camera relative to the frame O-XYZ.
  * \param 'interf1' refracting interface Ax + By + Cz +D = 0, with N = (A. B. C).
- * \param 'thickness' distance between the two interfaces.
- * \param 'n1, n2, n3' refractive indices.
+ * \param 'opargs' package of the interface thickness and refractive indices.
  * \returns The true 3D coordinates of the object point.
  ********************************************************************************************/
-template<typename _Ty> requires real_type<_Ty>
+template<typename _Ty, typename... _Args> 
+requires real_type<_Ty>
 vec3d_t<_Ty> refractive_3d_reconstruction(
 	vec3d_t<_Ty> raw_point, 
 	vec3d_t<_Ty> translation, 
 	vec4d_t<_Ty> interf1, 
-	_Ty thickness, _Ty n1, _Ty n2, _Ty n3)
+	_Args&& ...opargs)
 {
 	MATRICE_USE_STD(pow);
 	MATRICE_USE_STD(sin);
 	MATRICE_USE_STD(cos);
+	
+	const auto [thickness, n1, n2, n3] = detail::_Get_packed_args(opargs...);
 
-	const auto d = thickness;
+	const auto delta = thickness;
 	const auto t = translation;
+	const auto near_d = interf1.w;
 	
 	// Build the interface 2
-	const auto D2 = interf1[3] - d * pow(sqsum(interf1[0], interf1[1], interf1[2]), 0.5);
-	decltype(interf1) interf2 = { interf1[0], interf1[1], interf1[2], D2 };
+	const auto far_d = near_d - delta *sqrt(sqsum(interf1.x, interf1.y, interf1.z));
+	decltype(interf1) interf2 = { interf1.x, interf1.y, interf1.z, far_d };
 
 	// Compute the normalized normal of the interfaces 1 and 2
-	const auto N1 = detail::_Normalize(interf1[0], interf1[1], interf1[2]);
-	const auto N2 = detail::_Normalize(interf2[0], interf2[1], interf2[2]);
+	const auto N1 = detail::_Normalize(interf1.x, interf1.y, interf1.z);
+	const auto N2 = detail::_Normalize(interf2.x, interf2.y, interf2.z);
 
 	// Direction vectors of the ray L1 and L1'
-	auto nlineL1 = detail::_Normalize(raw_point[0], raw_point[1], raw_point[2]);
-	auto nlineR1 = detail::_Normalize(raw_point[0] + t[0], raw_point[1] + t[1], raw_point[2] + t[2]);
+	auto nlineL1 = detail::_Normalize(raw_point);
+	auto nlineR1 = detail::_Normalize(raw_point + t);
 
 	// Incident points P1 and P1' of L1 and L1' at the interface 1
-	auto pointL1 = detail::_Line_and_plane_intersection({ 0.0, 0.0, 0.0 }, nlineL1, interf1);
-	auto pointR1 = detail::_Line_and_plane_intersection({ -t[0], -t[1], -t[2] }, nlineR1, interf1);
+	auto pointL1 = detail::_Intersection({}, nlineL1, interf1);
+	auto pointR1 = detail::_Intersection(-t, nlineR1, interf1);
 
 	// Incident angles of rays L1 and L1'
 	const auto angleL1 = detail::_Vector_angle(nlineL1, N1);
@@ -205,12 +217,10 @@ vec3d_t<_Ty> refractive_3d_reconstruction(
 	// Direction vectors of the ray L2 and L2'
 	auto nlineL2 = detail::_Get_refracted_vector(nlineL1, N1, n1, n2, angleL1, angleL2);
 	auto nlineR2 = detail::_Get_refracted_vector(nlineR1, N1, n1, n2, angleR1, angleR2);
-	nlineL2 = detail::_Normalize(nlineL2[0], nlineL2[1], nlineL2[2]);
-	nlineR2 = detail::_Normalize(nlineR2[0], nlineR2[1], nlineR2[2]);
 
 	// Incident points P2 and P2' of L2 and L2' at the interface 2
-	auto pointL2 = detail::_Line_and_plane_intersection(pointL1, nlineL2, interf2);
-	auto pointR2 = detail::_Line_and_plane_intersection(pointR1, nlineR2, interf2);
+	auto pointL2 = detail::_Intersection(pointL1, nlineL2, interf2);
+	auto pointR2 = detail::_Intersection(pointR1, nlineR2, interf2);
 
 	// Incident angles of rays L2 and L2'
 	const auto angleL3 = angleL2;
@@ -227,7 +237,7 @@ vec3d_t<_Ty> refractive_3d_reconstruction(
 	//auto nCommonVerticalLine3 = detail::_Cross(nlineL3, nlineR3);
 	
 	// Compute the true object point Q
-	return detail::_Intersection_of_lines(pointL2, nlineL3, pointR2, nlineR3);
+	return detail::_Intersection(pointL2, nlineL3, pointR2, nlineR3);
 }
 
 MATRICE_ALG_END(vision)
