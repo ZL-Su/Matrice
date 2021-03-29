@@ -2,6 +2,19 @@
 This file is part of Matrice, an effcient and elegant C++ library for 
 3D Vision and Photo-Mechanics.
 Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
+
+This program is free software : you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 #include "../core.hpp"
@@ -62,6 +75,17 @@ public:
 			return _Mynormal;
 		}
 
+		MATRICE_HOST_FINL decltype(auto) near_distance() const noexcept {
+			return _Mydist;
+		}
+		MATRICE_HOST_FINL decltype(auto) near_distance() noexcept {
+			return _Mydist;
+		}
+
+		MATRICE_HOST_FINL decltype(auto) far_distance() const noexcept {
+			return _Mydist + _Myshift;
+		}
+
 		// normal vector
 		vector_t<3> _Mynormal;
 
@@ -115,8 +139,10 @@ public:
 	}
 
 private:
+	// \brief Compute the directions of the leading incident rays L1 and L2.
 	auto _Eval_incident_directions(const vector_t<3>& _P) const noexcept;
 
+	// \brief Compute the intersection of a ray and an interface.
 	template<typename _Tag, MATRICE_ENABLE_IF(is_refractive_tag_v<_Tag>)>
 	auto _Eval_intersections(_Tag, const ray_type& l) const noexcept;
 
