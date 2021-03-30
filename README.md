@@ -1,5 +1,6 @@
 
-# DPU(R) Matrice Library 
+# 3D Vision & Photomechanics (R) 
+# Matrice Library 
 <img src="https://img.shields.io/github/v/release/ZL-Su/Matrice?include_prereleases&label=version"/>
 
 A general numeric computation libary for 2/3-dimensional deformation perception and understanding, with modern C++ programming language. The library, referred to as Matrice, covers the fundamental differentiable algebraic containers (including Scalar, Vector, Matrix and Tensor) and the associated algorithms (e.g., linear algebra operations), expression system, geometric algorithms, nonlinear optimization, and network building blocks.
