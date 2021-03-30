@@ -27,10 +27,10 @@ The library is optimized for the systems based on
 and compatible processors.
 
 The software dependencies are:
-* C++ compiler with C++11 standart support (at least)
+* C++ compiler with C++17 standart support (at least)
 * Optinal dependencies:
   * Intel OpenMP
-  * CUDA 8.0 or later
+  * CUDA 9.0 or later
 ## Reference
 ### *BibTex*
 @misc{Su:2021,
@@ -38,5 +38,5 @@ The software dependencies are:
   year = {2021},
   url = {https://github.com/ZL-Su/Matrice},
   urldate = {February 02, 2020},
-  title = {Matrice Library}
+  title = {Matrice: A library of performance primitives in 3D vision and photomechanics}
 }
