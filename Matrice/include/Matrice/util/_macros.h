@@ -112,6 +112,9 @@ namespace ALG {
 #define _INTERNAL_BEGIN namespace internal {
 #define _INTERNAL_END }
 
+#define MATRICE_INLINE_DETAIL_BEGIN inline _DETAIL_BEGIN
+#define MATRICE_INLINE_DETAIL_END _DETAIL_END
+
 #ifndef MATRICE_CONSTEXPR_IF
 #if defined (_HAS_CXX17)
 #define MATRICE_CONSTEXPR_IF(_COND) \
