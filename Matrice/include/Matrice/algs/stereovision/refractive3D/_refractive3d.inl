@@ -39,8 +39,10 @@ _Eval_incident_directions(const vector_t<3>& _P) const noexcept
 	return tuple{ _Diff_po, _Diff_pt };
 }
 
-template<typename _Ty> template<typename _Tag, typename> MATRICE_HOST_FINL
-auto detail::_Refractive_reconstruction<_Ty>::_Eval_incident_points(_Tag, ray_pair_t&& ray_pair) const noexcept
+template<typename _Ty> 
+template<typename _Tag, typename> MATRICE_HOST_FINL
+auto detail::_Refractive_reconstruction<_Ty>::
+_Eval_incident_points(_Tag, ray_pair_t&& ray_pair) const noexcept
 {
 	const auto [_Lray, _Rray] = ray_pair;
 	const auto _P1 = internal::_Interf_ray_intersection(_Myinterface, _Lray, air2glass_tag());
