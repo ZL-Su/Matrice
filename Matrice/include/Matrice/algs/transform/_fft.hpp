@@ -23,13 +23,18 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "core.hpp"
 
 MATRICE_ALG_BEGIN()
-MATRICE_INLINE_DETAIL_BEGIN
+_DETAIL_BEGIN
 template<typename _Ty>
 class _Fft_descriptor {
 	using _Myt = _Fft_descriptor;
 public:
 	using value_type = _Ty;
 	using pointer = add_pointer_t<value_type>;
+
+	struct status_type : long
+	{
+		long value;
+	};
 
 	struct options_type
 	{
@@ -62,13 +67,21 @@ public:
 		return (_Myoptions);
 	}
 
+private:
+	status_type _Forward() noexcept;
+	status_type _Backward() noexcept;
+
 protected:
 	options_type _Myoptions;
+
 	size_t  _Mysize;
 	pointer _Mysrc = nullptr;
 
+	pointer _Myreal = nullptr;
+	pointer _Myimag = nullptr;
+
 };
-MATRICE_INLINE_DETAIL_END
+_DETAIL_END
 
 template<typename _Ty>
 using fft_t = detail::_Fft_descriptor<_Ty>;
