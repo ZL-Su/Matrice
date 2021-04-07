@@ -23,12 +23,18 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 MATRICE_ALG_BEGIN(corr)
 _DETAIL_BEGIN
 
+// Forward declarations
+template<typename _Ty, class _Ip> class _Image;
+
 /// <summary>
 /// \brief CLASS, graph based correlation pipeline. 
 /// </summary>
+template<typename _Ty>
 class _Graph_executor {
 	using _Myt = _Graph_executor;
 public:
+	using value_type = _Ty;
+
 	enum computing_type
 	{
 		sequence = 0,
@@ -72,9 +78,10 @@ public:
 			bool active = true;
 		};
 
-		// FIELD, data
+		// FIELD, smooth image data
+		_Image<value_type, void> _Mydata;
 
-		// FIELD, operator
+		// FIELD, operator to 
 
 		// FIELD, status
 		status _Mystatus;
