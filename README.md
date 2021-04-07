@@ -1,9 +1,9 @@
-<img src="../master/ivm.svg" width="800">
 
-# IVM(R) Matrice Library 
-<img src="../master/version.svg" width="80"/>
+# 3D Vision & Photomechanics (R) 
+# Matrice Library 
+<img src="https://img.shields.io/github/v/release/ZL-Su/Matrice?include_prereleases&label=version"/>
 
-A libary for numerical computation, includes basic linear algebra (vector, matrix, linear system) operations, auto-differentiation, and non-linear optimization, etc. The library contains two parts, the first part is a Fortran kernel library which supplies the basic linear arithmatic operations; the second part is a modern C++ library which aims to implement efficient and elegant numeric computation.
+A general numeric computation libary for 2/3-dimensional deformation perception and understanding, with modern C++ programming language. The library, referred to as Matrice, covers the fundamental differentiable algebraic containers (including Scalar, Vector, Matrix and Tensor) and the associated algorithms (e.g., linear algebra operations), expression system, geometric algorithms, nonlinear optimization, and network building blocks.
 
 ## Features
 * Unified memory and basic type management.
@@ -27,16 +27,16 @@ The library is optimized for the systems based on
 and compatible processors.
 
 The software dependencies are:
-* C++ compiler with C++11 standart support (at least)
+* C++ compiler with C++17 standart support (at least)
 * Optinal dependencies:
   * Intel OpenMP
-  * CUDA 8.0 or later
+  * CUDA 9.0 or later
 ## Reference
 ### *BibTex*
-@misc{Su:2019,
+@misc{Su:2021,
   author = {Zhilong Su},
-  year = {2019},
+  year = {2021},
   url = {https://github.com/ZL-Su/Matrice},
-  urldate = {February 25, 2019},
-  title = {Matrice Library}
+  urldate = {February 02, 2020},
+  title = {Matrice: A library of performance primitives in 3D vision and photomechanics}
 }
