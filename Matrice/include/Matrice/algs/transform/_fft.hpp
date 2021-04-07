@@ -17,9 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
-#if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
-#include <oneapi/mkl/dfti.hpp>
-#endif
+
 #include "core.hpp"
 
 MATRICE_ALG_BEGIN()
@@ -31,7 +29,7 @@ public:
 	using value_type = _Ty;
 	using pointer = add_pointer_t<value_type>;
 
-	struct status_type : long
+	struct status_type
 	{
 		long value;
 	};
