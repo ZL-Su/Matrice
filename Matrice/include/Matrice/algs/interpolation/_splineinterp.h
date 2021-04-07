@@ -1,6 +1,7 @@
-/**************************************************************************
-This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
+/**********************************************************************
+This file is part of Matrice, an effcient and elegant C++ library for
+3D vision and photo-mechanics.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -14,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
-**************************************************************************/
+**********************************************************************/
 #pragma once
 
 #include "_base.h"

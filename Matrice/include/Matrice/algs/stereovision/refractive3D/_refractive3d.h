@@ -12,6 +12,7 @@ This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
 GNU General Public License for more details.
+
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
@@ -36,7 +37,9 @@ struct glass2water_tag {
 // Traits
 template<typename _Ty> 
 struct is_refractive_tag : std::false_type {};
+template<>
 struct is_refractive_tag<air2glass_tag> : std::true_type {};
+template<>
 struct is_refractive_tag<glass2water_tag> : std::true_type {};
 template<typename _Ty>
 constexpr auto is_refractive_tag_v = is_refractive_tag<_Ty>::value;
@@ -74,6 +77,17 @@ public:
 			return _Mynormal;
 		}
 
+		MATRICE_HOST_FINL decltype(auto) near_distance() const noexcept {
+			return _Mydist;
+		}
+		MATRICE_HOST_FINL decltype(auto) near_distance() noexcept {
+			return _Mydist;
+		}
+
+		MATRICE_HOST_FINL decltype(auto) far_distance() const noexcept {
+			return _Mydist + _Myshift;
+		}
+
 		// normal vector
 		vector_t<3> _Mynormal;
 
@@ -91,7 +105,23 @@ public:
 	{
 		vector_t<3> _Myorigin;
 		vector_t<3> _Mydirection;
+
+		vector_t<3> operator()(value_type s) const noexcept {
+			return _Mydirection * s - _Myorigin;
+		}
+
+		MATRICE_HOST_FINL friend 
+		vector_t<3> intersection(const ray_type& _R1, const ray_type& _R2) noexcept {
+			const auto _Coef = concat(_R1._Mydirection, _R2._Mydirection);
+			auto _A = _Coef.t().mul(_Coef).eval();
+			auto _B = _Coef.t().mul(_R1._Myorigin - _R2._Myorigin);
+			const auto _S = _A.inv().mul(_B);
+
+			return (_R1(_S(0)) + _R2(_S(1)))/2
+		}
 	};
+
+	using ray_pair_t = tuple<ray_type, ray_type>;
 
 	/**
 	 * \brief CTOR, create an object with a given interface.
@@ -127,10 +157,12 @@ public:
 	}
 
 private:
+	// \brief Compute the directions of the leading incident rays L1 and L2.
 	auto _Eval_incident_directions(const vector_t<3>& _P) const noexcept;
 
+	// \brief Compute the intersection of a ray and an interface.
 	template<typename _Tag, MATRICE_ENABLE_IF(is_refractive_tag_v<_Tag>)>
-	auto _Eval_intersections(_Tag, const ray_type& l) const noexcept;
+	auto _Eval_incident_points(_Tag, ray_pair_t&& ray_pair) const noexcept;
 
 	interface_type _Myinterface;
 
