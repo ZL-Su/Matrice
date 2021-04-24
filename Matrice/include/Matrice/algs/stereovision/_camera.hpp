@@ -123,9 +123,14 @@ class _Camera<_Ty, persp_camera_tag>
 public:
 	using typename _Mybase::value_type;
 
-
+	decltype(auto) distortion_model() const noexcept {
+		return _Mydist;
+	}
+	decltype(auto) distortion_model() noexcept {
+		return _Mydist;
+	}
 private:
-
+	typename _Mybase::vector<4> _Mydist;
 };
 
 _DETAIL_END
