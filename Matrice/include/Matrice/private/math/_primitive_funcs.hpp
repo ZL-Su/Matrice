@@ -182,7 +182,7 @@ MATRICE_GLOBAL_FINL constexpr T arctan(const T& x) noexcept {
 /// </summary>
 /// <typeparam name="...Ts">Scalar types</typeparam>
 /// <param name="...args">A scalar number sequence, such as 'x, y, ...'.</param>
-/// <returns>
+/// <returns> Sum of square sequence: x^2 + y^2 + ...; 
 /// \e.g. auto sum_of_squares = dgelom::sqsum(x, y, ...);
 /// </returns>
 template<typename ...Ts>
