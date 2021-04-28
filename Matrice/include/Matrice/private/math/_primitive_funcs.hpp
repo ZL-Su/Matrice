@@ -146,6 +146,10 @@ template<typename T, MATRICE_ENABLE_IF(is_scalar_v<T>)>
 MATRICE_GLOBAL_FINL constexpr T cos(const T& x) noexcept {
 	return std::cos(T(x));
 }
+template<typename T, MATRICE_ENABLE_IF(is_scalar_v<T>)>
+MATRICE_GLOBAL_FINL constexpr T sinc(const T& x) noexcept {
+	return sin(pi<T>*x) / (pi<T>*x);
+}
 
 /// <summary>
 /// \brief Return sine and cose values of a given scalar number.
