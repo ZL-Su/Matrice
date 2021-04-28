@@ -91,7 +91,7 @@ public:
 	 * \return auto [x, y, 1] = forward(X).
 	 */
 	MATRICE_HOST_INL auto forward(const point<3>& X) const noexcept {
-
+		decltype(auto) _U = static_cast<const _Derived*>(this)->distortion_model();
 	}
 
 	MATRICE_HOST_INL auto backward(const point<2>& x) const noexcept {
@@ -123,14 +123,68 @@ class _Camera<_Ty, persp_camera_tag>
 public:
 	using typename _Mybase::value_type;
 
+	/**
+	 * \brief GETER/SETTER, access to distortion model.
+	 */
 	decltype(auto) distortion_model() const noexcept {
-		return _Mydist;
+		return _MyU;
 	}
 	decltype(auto) distortion_model() noexcept {
-		return _Mydist;
+		return _MyU;
+	}
+
+	/**
+	 * \brief Undistortion with distortion correction model 'U()'.
+	 * \return [x, y] tuple of undistorted image coordinates in image domain.  
+	 */
+	MATRICE_HOST_INL auto U(value_type u, value_type v)const noexcept {
+		using _Mybase::_Mycalib;
+
+		// backward transform in image space
+		const auto fx = _Mycalib[0], fy = _Mycalib[1];
+		const auto cx = _Mycalib[2], cy = _Mycalib[3];
+		const auto x_d = (u - cx) / fx, y_d = (v - cy) / fy;
+
+		// compute distortion correcting factor
+		const auto r_2 = sqsum(x_d, y_d);
+		const auto k1 = _MyU[0], k2 = _MyU[1];
+		const auto p1 = _MyU[2], p2 = _MyU[3];
+		const auto tmp = 1 + k1*r_2 + k2*sq(r_2) + 2*(p1*x_d + p2*y_d);
+
+		// eval corrected image coordinates
+		const auto x = tmp * x_d + p2 * r_2;
+		const auto y = tmp * y_d + p1 * r_2;
+
+		return tuple{ x, y };
+	}
+	/**
+	 * \brief Distort an ideal image point [x, y] with distortion model 'D()'.
+	 * \return [u, v] tuple of distorted pixel coordinates.
+	 */
+	MATRICE_HOST_INL auto D(value_type x, value_type y)const noexcept {
+		using _Mybase::_Mycalib;
+
+		// compute distortion factor
+		const auto r_2 = sqsum(x, y);
+		const auto k1 = _MyD[0], k2 = _MyD[1];
+		const auto p1 = _MyD[2], p2 = _MyD[3];
+		const auto tmp = 1 + k1*r_2 + k2*sq(r_2) + 2*(p1*x + p2*y);
+
+		// eval distorted image coordinates
+		const auto x_d = tmp * x + p2 * r_2;
+		const auto y_d = tmp * y + p1 * r_2;
+
+		// forward transform in image space
+		const auto fx = _Mycalib[0], fy = _Mycalib[1];
+		const auto cx = _Mycalib[2], cy = _Mycalib[3];
+		const auto u = x_d * fx + cx, v = y_d * fy + cy;
+
+		return tuple{ u, v };
 	}
 private:
-	typename _Mybase::vector<4> _Mydist;
+	// Distortion coefs: $k_1, k_2, p_1, p_2$
+	auto_vector_t<value_type, 4> _MyU;
+	auto_vector_t<value_type, 4> _MyD;
 };
 
 _DETAIL_END
