@@ -18,6 +18,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <core.hpp>
+#include <algs/geometry.hpp>
 
 MATRICE_ALG_BEGIN(vision)
 
@@ -73,6 +74,15 @@ public:
 	template<size_t N> using vector = auto_vector_t<value_type, N>;
 	template<size_t N> using point = vector<N>;
 
+	struct pose_type {
+		MATRICE_HOST_INL pose_type(init_list pos) noexcept {
+			r = pos.begin();
+			t = pos.begin() + 3;
+		}
+		vector<3> r; // rotation vector (rx, ry, rz)
+		vector<3> t; // translation vector (tx, ty, tz)
+	};
+
 	_Camera() = default;
 	/**
 	 * \brief CTOR, initialize camera with an internal calibration. 
@@ -86,16 +96,23 @@ public:
 	}
 
 	/**
-	 * \brief Eval forward projection. (Thread-safe method)
+	 * \brief Eval forward projection to image domain (Thread-safe).
 	 * \param 'X' 3D coodinates of an object point.
 	 * \return auto [x, y, 1] = forward(X).
 	 */
 	MATRICE_HOST_INL auto forward(const point<3>& X) const noexcept {
-		decltype(auto) _U = static_cast<const _Derived*>(this)->distortion_model();
+		const auto _R = dgelom::rodrigues(_Mypose.r);
+		const auto _X = _R.mul(X) + _Mypose.t;
+		return tuple{ _X(0), _X(1), _X(2) };
 	}
-
-	MATRICE_HOST_INL auto backward(const point<2>& x) const noexcept {
-
+	/**
+	 * \brief Eval backward projection to image domain (Thread-safe).
+	 * \param 'p' observed pixel point.
+	 * \return auto [x, y, 1] = backward(p).
+	 */
+	MATRICE_HOST_INL auto backward(const point<2>& p) const noexcept {
+		const auto [x, y] = static_cast<const _Derived*>(this)->U(p);
+		return point<3>{x, y, 1};
 	}
 
 protected:
@@ -105,7 +122,7 @@ protected:
 	vector<_Size> _Mycalib;
 
 	// Camera pose with $r_x, r_y, r_z, t_x, t_y, t_z$
-	vector<6> _Mypose;
+	pose_type _Mypose;
 
 };
 
