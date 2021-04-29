@@ -1,7 +1,7 @@
 #pragma once
 #include "../transform.h"
 #ifdef MATRICE_SIMD_ARCH
-#include "../../../arch/ixpacket.h"
+#include "arch/ixpacket.h"
 #endif
 
 DGE_MATRICE_BEGIN
