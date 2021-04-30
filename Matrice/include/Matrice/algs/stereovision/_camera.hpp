@@ -101,9 +101,9 @@ public:
 	 * \return auto [x, y, 1] = forward(X).
 	 */
 	MATRICE_HOST_INL auto forward(const point<3>& X) const noexcept {
-		const auto _R = dgelom::rodrigues(_Mypose.r);
+		const auto _R = rodrigues(_Mypose.r);
 		const auto _X = _R.mul(X) + _Mypose.t;
-		return tuple{ _X(0), _X(1), _X(2) };
+		return _X.eval<point<3>>();
 	}
 	/**
 	 * \brief Eval backward projection to image domain (Thread-safe).
