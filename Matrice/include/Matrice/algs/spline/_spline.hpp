@@ -54,6 +54,8 @@ public:
 
 protected:
 	shared_matrix_t<value_type> _Mycoef;
+	// zero padding tag, true for zero padding, false for none.
+	bool _Myzp{ true };
 };
 
 /// <summary>
@@ -70,14 +72,17 @@ public:
 	using typename _Mybase::matrix_type;
 
 	/**
-	 * \brief CTOR, create an empty object for lazy coef computation
+	 * \brief CTOR, create an empty object for lazy coef computation.
+	 * \param '_Zp' true for zero-padding and false for none.
 	 */
-	_Bspline();
+	_Bspline(bool _Zp = true);
 
 	/**
 	 * \brief CTOR, create an object with instant coef computation
+	 * \param '_Data' source data.
+	 * \param '_Zp' true for zero-padding and false for none.
 	 */
-	_Bspline(const matrix_type& _Data);
+	_Bspline(const matrix_type& _Data, bool _Zp = true);
 
 	/**
 	 * \brief METHOD, set data to perform coef evaluation
