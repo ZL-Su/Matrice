@@ -147,8 +147,9 @@
     <ClInclude Include="addin\libtiff\tif_predict.h" />
     <ClInclude Include="addin\libtiff\uvcode.h" />
     <ClInclude Include="examples\basic_matrix_usage.h" />
+    <ClInclude Include="examples\csvio_ex.hpp" />
     <ClInclude Include="examples\dic_ex.hpp" />
-    <ClInclude Include="examples\speckle_deformation_simulation_ex.hpp" />
+    <ClInclude Include="examples\speckle_ex.hpp" />
     <ClInclude Include="include\Matrice\3rdparty\interface.hpp" />
     <ClInclude Include="include\Matrice\algs\correlation.hpp" />
     <ClInclude Include="include\Matrice\algs\correlation\_correlation_traits.h" />
@@ -193,11 +194,14 @@
     <ClInclude Include="include\Matrice\algs\spline.h" />
     <ClInclude Include="include\Matrice\algs\spline\_spline.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovis.hpp" />
+    <ClInclude Include="include\Matrice\algs\stereovision\refractive3D\_refractive3d_funcs.h" />
+    <ClInclude Include="include\Matrice\algs\stereovision\refractive3D\_refractive3d.h" />
     <ClInclude Include="include\Matrice\algs\stereovision\_camera.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_depth_estimation.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_projection.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_spatial_transform.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_triangulation.hpp" />
+    <ClInclude Include="include\Matrice\algs\transform\_fft.hpp" />
     <ClInclude Include="include\Matrice\arch\inl\_ixops.hpp" />
     <ClInclude Include="include\Matrice\arch\inl\_ixop_impls.hpp" />
     <ClInclude Include="include\Matrice\arch\ixpacket.h" />
@@ -331,6 +335,7 @@
     <ClCompile Include="addin\libtiff\tif_win32.c" />
     <ClCompile Include="addin\libtiff\tif_write.c" />
     <ClCompile Include="include\Matrice\algs\dnn\functions\_functions.h" />
+    <ClCompile Include="src\algorithm\transforms\_fft.cpp" />
     <ClCompile Include="src\algorithm\_bsplines.cpp" />
     <ClCompile Include="src\algorithm\_splineinterp.cpp" />
     <ClCompile Include="src\core\matrix_base_impl.cpp" />
@@ -353,6 +358,7 @@
     <None Include="include\Matrice\algs\geometry\inline\_transform.inl" />
     <None Include="include\Matrice\algs\interpolation\_base.inl" />
     <None Include="include\Matrice\algs\similarity\inline\_iterative_conv_impl.inl" />
+    <None Include="include\Matrice\algs\stereovision\refractive3D\_refractive3d.inl" />
     <None Include="include\Matrice\arch\inl\_ixpacket.inl" />
     <None Include="include\Matrice\io\inline\_data_loader.inl" />
     <None Include="include\Matrice\io\inline\_directory.inl" />

@@ -28,8 +28,48 @@ namespace example {
 void read_and_write_csv_eng(fs::path&& apath) try
 {
 	// \c Read data with a float type...
-	auto raw_shape = dgelom::read<float>(apath.append("pcloud_0mm.txt"));  // from file pcloud_0mm.txt
-	auto true_shape = dgelom::read<float>(apath.append("pcloud_1mm.txt")); // from file pcloud_1mm.txt
+	auto raw_shape = dgelom::IO::read<float>(dgelom::concat(apath, "sphere_air.txt"));  // from file pcloud_0mm.txt
+	auto true_shape = dgelom::IO::read<float>(dgelom::concat(apath, "sphere_our.txt")); // from file pcloud_1mm.txt
+
+	auto diff = (raw_shape - true_shape).eval();
+
+	{
+		dgelom::IO::CSV csv(dgelom::concat(apath, "sphere_dx.csv"));
+		csv.open(dgelom::IO::out | dgelom::IO::app);
+		csv.append("GL_POINTS");
+		for (auto i = 0; i < diff.rows(); ++i) {
+			dgelom::auto_vector_t<float_t, 3> tmp;
+			tmp.x = raw_shape[i][0];
+			tmp.y = raw_shape[i][1];
+			tmp.z = diff[i][0];
+			csv.append(tmp.begin(), tmp.end());
+		}
+		csv.close();
+
+		csv.reset(dgelom::concat(apath, "sphere_dy.csv"));
+		csv.open(dgelom::IO::out | dgelom::IO::app);
+		csv.append("GL_POINTS");
+		for (auto i = 0; i < diff.rows(); ++i) {
+			dgelom::auto_vector_t<float_t, 3> tmp;
+			tmp.x = raw_shape[i][0];
+			tmp.y = raw_shape[i][1];
+			tmp.z = diff[i][1];
+			csv.append(tmp.begin(), tmp.end());
+		}
+		csv.close();
+
+		csv.reset(dgelom::concat(apath, "sphere_dz.csv"));
+		csv.open(dgelom::IO::out | dgelom::IO::app);
+		csv.append("GL_POINTS");
+		for (auto i = 0; i < diff.rows(); ++i) {
+			dgelom::auto_vector_t<float_t, 3> tmp;
+			tmp.x = raw_shape[i][0];
+			tmp.y = raw_shape[i][1];
+			tmp.z = (diff[i][2]+0.1)/5;
+			csv.append(tmp.begin(), tmp.end());
+		}
+		csv.close();
+	}
 
 	// \c Do some processing...
 	std::vector<dgelom::Vec4_<float>> raw_dmap, true_dmap;

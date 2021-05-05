@@ -103,11 +103,13 @@ struct _Bspline_par_7 : _Bspline_par_based<_Ty> {
 /// \brief Bicubic B-spline constructor
 /// </summary>
 template<typename _Ty>
-_Bspline<_Ty, bicubic_tag>::_Bspline() {
+_Bspline<_Ty, bicubic_tag>::_Bspline(bool _Zp) {
 	_Mybase::_Mycoef = make_shared_matrix<_Ty>();
+	_Mybase::_Myzp = _Zp;
 }
 template<typename _Ty>
-_Bspline<_Ty, bicubic_tag>::_Bspline(const matrix_type& _Data) {
+_Bspline<_Ty, bicubic_tag>::_Bspline(const matrix_type& _Data, bool _Zp) {
+	_Mybase::_Myzp = _Zp;
 	_Mybase::_Mycoef = make_shared_matrix<_Ty>(_Data.shape());
 	_Precompute(_Data);
 }

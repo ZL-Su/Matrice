@@ -1,4 +1,4 @@
-/**************************************************************************
+/**********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
 Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
@@ -14,11 +14,11 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
-**************************************************************************/
+**********************************************************************/
 #pragma once
 #include <cmath>
 #include "_config.h"
-#include "../_type_traits.h"
+#include "_type_traits.h"
 #ifdef MATRICE_ENABLE_CUDA
 #include <device_functions.h>
 #include <thrust\complex.h>
@@ -146,6 +146,10 @@ template<typename T, MATRICE_ENABLE_IF(is_scalar_v<T>)>
 MATRICE_GLOBAL_FINL constexpr T cos(const T& x) noexcept {
 	return std::cos(T(x));
 }
+template<typename T, MATRICE_ENABLE_IF(is_scalar_v<T>)>
+MATRICE_GLOBAL_FINL constexpr T sinc(const T& x) noexcept {
+	return sin(pi<T>*x) / (pi<T>*x);
+}
 
 /// <summary>
 /// \brief Return sine and cose values of a given scalar number.
@@ -182,7 +186,7 @@ MATRICE_GLOBAL_FINL constexpr T arctan(const T& x) noexcept {
 /// </summary>
 /// <typeparam name="...Ts">Scalar types</typeparam>
 /// <param name="...args">A scalar number sequence, such as 'x, y, ...'.</param>
-/// <returns>
+/// <returns> Sum of square sequence: x^2 + y^2 + ...; 
 /// \e.g. auto sum_of_squares = dgelom::sqsum(x, y, ...);
 /// </returns>
 template<typename ...Ts>
