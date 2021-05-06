@@ -1,6 +1,7 @@
 /*********************************************************************
-This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
+This file is part of Matrice, an effcient and elegant C++ library for
+3D vision & photo-mechanics.
+Copyright(C) 2018-2021, Zhilong (Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -14,17 +15,72 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
-***********************************************************************/
+**********************************************************************/
 #pragma once
 
 #include <vector>
 #include "_correlation_traits.h"
+#include "core/image.hpp"
 
 MATRICE_ALG_BEGIN(corr)
 _DETAIL_BEGIN
+/// <summary>
+/// \brief CLASS _Corr_layer wraps an image to be processed.
+/// Each layer contains a set of nodes, each of them defines a POI.
+/// </summary>
+template<typename _Ty, typename _Pre>
+requires is_floating_point_v<_Ty>
+class _Corr_layer
+{
+	using _Myt = _Corr_layer<_Ty, _Pre>;
+public:
+	using value_type = _Ty;
+	// Define status of a correlation layer
+	struct status {
+		bool processed = false;
+		bool active = true;
+	};
 
-// Forward declarations
-template<typename _Ty, class _Ip> class _Image;
+	/**
+	 * \brief METHOD, detach this layer from the computational graph.
+	 */
+	void detach() noexcept {
+		_Mystatus.active = false;
+	}
+
+	/**
+	 * \brief METHOD, join this layer into the computational graph.
+	 */
+	void join() noexcept {
+		_Mystatus.active = true;
+	}
+
+	/**
+	 * \brief METHOD, check if this layer is detached or not.
+	 */
+	bool is_active() const noexcept {
+		return _Mystatus.active;
+	}
+
+	/**
+	 * \brief METHOD, check if this layer is processed or not.
+	 */
+	bool is_processed() const noexcept {
+		return _Mystatus.processed;
+	}
+
+private:
+	// FIELD, smooth image data
+	image_t<value_type, _Pre> _Mydata;
+
+	// FIELD, operator to 
+
+	// FIELD, status
+	status _Mystatus;
+
+	// FIELD, parallel computing index
+	size_t _Myidx = 0;
+};
 
 /// <summary>
 /// \brief CLASS, graph based correlation pipeline. 
@@ -34,11 +90,17 @@ class _Graph_executor {
 	using _Myt = _Graph_executor;
 public:
 	using value_type = _Ty;
+	using layer_type = _Corr_layer<value_type, bicerp_tag>;
 
 	enum computing_type
 	{
+		// Off-line sequential computation
 		sequence = 0,
+
+		// Off-line parallel computation
 		parallel = 1,
+
+		// For real-time computation
 		instant  = 3,
 	};
 
@@ -66,59 +128,6 @@ public:
 		bool adjacent = false;
 	};
 
-	/// <summary>
-	/// \brief CLASS layer_type wraps an image to be processed.
-	/// Each layer contains a set of nodes, each of them 
-	/// </summary>
-	class layer_type
-	{
-		struct status
-		{
-			bool processed = false;
-			bool active = true;
-		};
-
-		// FIELD, smooth image data
-		_Image<value_type, void> _Mydata;
-
-		// FIELD, operator to 
-
-		// FIELD, status
-		status _Mystatus;
-
-		// FIELD, parallel computing index
-		size_t _Myidx = 0;
-	public:
-		/**
-		 * \brief METHOD, detach this layer from the computational graph.
-		 */
-		void detach() noexcept {
-			_Mystatus.active = false;
-		}
-
-		/**
-		 * \brief METHOD, join this layer into the computational graph.
-		 */
-		void join() noexcept {
-			_Mystatus.active = true;
-		}
-
-		/**
-		 * \brief METHOD, check if this layer is detached or not.
-		 */
-		bool is_active() const noexcept {
-			return _Mystatus.active;
-		}
-
-		/**
-		 * \brief METHOD, check if this layer is processed or not.
-		 */
-		bool is_processed() const noexcept {
-			return _Mystatus.processed;
-		}
-		
-	};
-
 	/**
 	 * \brief METHOD, add a computing layer.
 	 */
@@ -137,7 +146,7 @@ public:
 	}
 
 private:
-	std::vector<layer_type> _Mylayers;
+	MATRICE_STD(vector)<layer_type> _Mylayers;
 	
 };
 
