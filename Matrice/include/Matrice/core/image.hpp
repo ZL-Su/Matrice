@@ -25,7 +25,7 @@ MATRICE_ALGS_END
 
 DGE_MATRICE_BEGIN
 /// <summary>
-/// \brief ENUM, imgae_func_type, for specify the image function.
+/// \brief ENUM, image_func_type, for specify the image function.
 /// </summary>
 enum class image_func_type {
 	identity,
@@ -41,7 +41,7 @@ _DETAIL_BEGIN
 /// \brief CLASS TEMPLATE, Smooth image type
 /// </summary>
 /// <typeparam name="_Ty">Floating point type</typeparam>
-/// <typeparam name="_Ip">Interpolation operator type</typeparam>
+/// <typeparam name="_Pre">Interpolation operator type</typeparam>
 template<typename _Pre = bicerp_tag, typename _Ty = float>
 class _Image {
 	using _Myt = _Image;
@@ -51,7 +51,7 @@ public:
 	using value_type = typename matrix_type::value_type;
 
 	_Image(const matrix_type& _Src)
-		:_Context(std::make_shared<_Myctx>(_Src)) {
+		:_Context(MATRICE_STD(make_shared)<_Myctx>(_Src)) {
 	}
 
 	/**
