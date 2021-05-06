@@ -1388,7 +1388,7 @@ MATRICE_HOST_INL void swap(_Mty& _L, _Mty& _R) noexcept;
 
 /**
  *\func dgelom::copy<_Mty>(_Mty&, _Mty&)
- *\brief Copy a given matrix. Always wrap a dynamic matrix with the function If a deep copy is required.
+ *\brief Copy a given matrix. Always wrap a dynamic matrix with the function if a deep copy is required.
  */
 template<typename _Mty, MATRICE_ENABLE_IF(is_matrix_v<_Mty>)>
 MATRICE_HOST_INL _Mty copy(const _Mty& _M);
