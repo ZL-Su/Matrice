@@ -42,6 +42,16 @@ public:
 	};
 
 	/**
+	 * \brief METHOD, load image data.
+	 */
+	template<typename _Loader>
+	_Myt& load(_Loader op) noexcept {
+		auto _Img = op();
+		_Mydata = image_t<value_type, _Pre>(_Img);
+		return (*this);
+	}
+
+	/**
 	 * \brief METHOD, detach this layer from the computational graph.
 	 */
 	void detach() noexcept {
@@ -118,7 +128,7 @@ public:
 		// Specify window size of every node can view.
 		size_t node_field = 15;
 
-		// Specify capacity to prefetch node resources. 
+		// Specify capacity to prefetch image resources. 
 		size_t preload_capacity = 1;
 
 		// Specify computing paradigm.
@@ -143,6 +153,10 @@ public:
 		decltype(auto) _Where = _Mylayers.cbegin() + pos;
 		_Mylayers.insert(_Where, node);
 		return (*this);
+	}
+
+	void forward() noexcept {
+
 	}
 
 private:
