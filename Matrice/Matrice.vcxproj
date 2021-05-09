@@ -146,6 +146,7 @@
     <ClInclude Include="addin\libtiff\tif_fax3.h" />
     <ClInclude Include="addin\libtiff\tif_predict.h" />
     <ClInclude Include="addin\libtiff\uvcode.h" />
+    <ClInclude Include="examples\2dresfrep_ex.hpp" />
     <ClInclude Include="examples\basic_matrix_usage.h" />
     <ClInclude Include="examples\csvio_ex.hpp" />
     <ClInclude Include="examples\dic_ex.hpp" />
@@ -207,6 +208,7 @@
     <ClInclude Include="include\Matrice\arch\ixpacket.h" />
     <ClInclude Include="include\Matrice\arch\_ixbase.h" />
     <ClInclude Include="include\Matrice\arch\_ixtraits.hpp" />
+    <ClInclude Include="include\Matrice\core\functional.hpp" />
     <ClInclude Include="include\Matrice\core\image.hpp" />
     <ClInclude Include="include\Matrice\core\matrix.h" />
     <ClInclude Include="include\Matrice\core\solver.h" />
@@ -219,6 +221,7 @@
     <ClInclude Include="include\Matrice\io\_png_wrapper.hpp" />
     <ClInclude Include="include\Matrice\io\_tiff_wrapper.hpp" />
     <ClInclude Include="include\Matrice\lic\license.h" />
+    <ClInclude Include="include\Matrice\math\complex.h" />
     <ClInclude Include="include\Matrice\math_forward.hpp" />
     <ClInclude Include="include\Matrice\private\autograd\_ad_exps.h" />
     <ClInclude Include="include\Matrice\private\autograd\_ad_ops.h" />
@@ -228,6 +231,7 @@
     <ClInclude Include="include\Matrice\private\container\_multi_array.hpp" />
     <ClInclude Include="include\Matrice\private\math\fast_native_math_funcs.hpp" />
     <ClInclude Include="include\Matrice\private\math\kernel_wrapper.hpp" />
+    <ClInclude Include="include\Matrice\private\math\_complex.hpp" />
     <ClInclude Include="include\Matrice\private\math\_config.h" />
     <ClInclude Include="include\Matrice\private\math\_linear.h" />
     <ClInclude Include="include\Matrice\private\math\_linear_solver.h" />
