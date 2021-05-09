@@ -37,17 +37,51 @@ public:
 	using imag_type = real_type;
 	using element_type = _Complex<value_type, 1, 1>;
 
+	_Complex(auto... _Size) 
+		: _Myreal(_Size...), _Myimag(_Size...) {
+	}
+
 	/**
-	 * \brief Get complex element in a linear manner.
+	 * \brief Get complex element pointer in row-wise manner.
+	 * \return A tuple of pointers with statement "auto [Re, Im] = Z[i];".
 	 */
-	MATRICE_HOST_INL element_type operator[](index_t i) const noexcept {
+	MATRICE_HOST_INL auto operator[](index_t i) const noexcept {
+		return MATRICE_STD(tuple)(_Myreal[i], _Myimag[i]);
+	}
+	/**
+	 * \brief Get complex element in 1d linear manner.
+	 * \return A complex number with statement "auto z = Z(i);".
+	 */
+	MATRICE_HOST_INL element_type operator()(index_t i) const noexcept {
 		return element_type{ _Myreal(i), _Myimag(i) };
 	}
 	/**
-	 * \brief Get complex element in a grid manner.
+	 * \brief Get complex element in 2d grid manner.
+	 * \return A complex number with statement "auto z = Z(i, j);".
 	 */
 	MATRICE_HOST_INL element_type operator()(index_t i, index_t j) const noexcept {
 		return element_type{ _Myreal[i][j], _Myimag[i][j] };
+	}
+
+	/**
+	 * \brief Compute modulus or magnitude.
+	 */
+	MATRICE_GLOBAL_FINL auto ampl() const noexcept {
+		real_type _A(_Myreal.shape());
+
+		_A = sqrt(sq(_Myreal) + sq(_Myimag));
+
+		return forward<decltype(_A)>(_A);
+	}
+	/**
+	 * \brief Compute the phase angle.
+	 */
+	MATRICE_GLOBAL_FINL auto phase() const noexcept {
+		real_type _Phi(_Myreal.shape());
+		for (auto i = 0; i < _Phi.size(); ++i) {
+			_Phi(i) = atan2(_Myimag(i), _Myreal(i));
+		}
+		return forward<decltype(_Phi)>(_Phi);
 	}
 
 private:
@@ -124,6 +158,19 @@ public:
 	}
 
 	/**
+	 * \brief Compute modulus or magnitude.
+	 */
+	MATRICE_GLOBAL_FINL auto ampl() const noexcept {
+		return sqrt(sqsum(_Myreal, _Myimag));
+	}
+	/**
+	 * \brief Compute the phase angle.
+	 */
+	MATRICE_GLOBAL_FINL auto phase() const noexcept {
+		return atan2(_Myimag, _Myreal);
+	}
+
+	/**
 	 * \brief Complex number multiplication.
 	 */
 	MATRICE_GLOBAL_FINL _Myt operator*(const _Myt& _Other) const noexcept {
@@ -154,7 +201,7 @@ _DETAIL_END
 /// \brief ALIAS TEMPLATE, generic type for complex number or structure.
 /// </summary>
 /// <typeparam name="_Ty"></typeparam>
-template<typename _Ty, size_t _M, size_t _N = _M>
+template<typename _Ty, size_t _M = 1, size_t _N = _M>
 requires is_scalar_v<_Ty>
 using complex_t = detail::_Complex<_Ty, _M, _N>;
 
