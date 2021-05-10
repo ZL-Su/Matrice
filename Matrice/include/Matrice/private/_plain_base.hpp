@@ -218,7 +218,7 @@ return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 
 	using _Myt = Base_;
 	using _Mybase = _Basic_plane_view_base<_Valty>;
-	using _Myreference = std::add_lvalue_reference_t<_Myt>;
+	using _Myreference = MATRICE_STD(add_lvalue_reference_t)<_Myt>;
 	using _Myt_fwd_iterator = _Matrix_forward_iterator<_Valty>;
 	using _Myt_rwise_iterator = _Matrix_rwise_iterator<_Valty>;
 	using _Myt_cwise_iterator = _Matrix_cwise_iterator<_Valty>;
@@ -246,7 +246,7 @@ public:
 	using reference = value_type&;
 	using iterator = pointer;
 	using const_iterator = _Matrix_const_iterator<value_type>;
-	using const_initlist = std::add_const_t<initlist<value_t>>;
+	using const_initlist = MATRICE_STD(add_const_t)<initlist<value_t>>;
 	using derived_t = _Derived;
 	using loctn_t = Location;
 	using category = typename _Mytraits::category;
