@@ -217,7 +217,7 @@ public:
 	/// </summary>
 	/// <returns> A 3-by-3 skew-symmetric matrix </returns>
 	MATRICE_GLOBAL_INL 
-		typename _Mybase::template extend<3>skew()const noexcept {
+		typename _Mybase::template extend<3> skew()const noexcept {
 		return {0, -z, y, z, 0, -x, -y, x, 0};
 	}
 
@@ -319,25 +319,25 @@ _DETAIL_END
 template<typename _Ty, int _Dim, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 using Vec_ = detail::Vec_<_Ty, _Dim>;
 template<typename _Ty, int _Dim>
-struct is_fxdvector<Vec_<_Ty, _Dim>> : std::true_type {};
+struct is_fxdvector<Vec_<_Ty, _Dim>> : MATRICE_STD(true_type) {};
 
 // \brief Managed vector type with 2 entities: x, y
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 using Vec2_ = detail::Vec_<_Ty, 2>;
 template<typename _Ty>
-struct is_fxdvector<Vec2_<_Ty>> : std::true_type {};
+struct is_fxdvector<Vec2_<_Ty>> : MATRICE_STD(true_type) {};
 
 // \brief Managed vector type with 3 entities: x, y, z
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 using Vec3_ = detail::Vec3_<_Ty>;
 template<typename _Ty>
-struct is_fxdvector<Vec3_<_Ty>> : std::true_type {};
+struct is_fxdvector<Vec3_<_Ty>> : MATRICE_STD(true_type) {};
 
 // \brief Managed vector type with 4 entities: x, y, z, w
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 using Vec4_ = detail::Vec4_<_Ty>;
 template<typename _Ty>
-struct is_fxdvector<Vec4_<_Ty>> : std::true_type {};
+struct is_fxdvector<Vec4_<_Ty>> : MATRICE_STD(true_type) {};
 
 // \brief Dispatch vector type according to a given dimensionality _Dim.
 template<typename _Ty, size_t _Dim> struct auto_vector {
@@ -353,7 +353,7 @@ template<typename _Ty> struct auto_vector<_Ty, 4> {
 	using type = Vec4_<_Ty>; 
 };
 template<typename _Ty> struct auto_vector<_Ty, ::dynamic> { 
-	using type = std::vector<_Ty>; 
+	using type = MATRICE_STD(vector)<_Ty>; 
 };
 
 /// <summary>
@@ -367,7 +367,7 @@ using auto_vector_t = typename auto_vector<_Ty, _Dim>::type;
  *\brief Matrice also regards std::array as a fixed vector type.
  */
 template<typename _Ty, int _Dim>
-struct is_fxdvector<std::array<_Ty,_Dim>> : std::true_type {};
+struct is_fxdvector< MATRICE_STD(array)<_Ty,_Dim>> : MATRICE_STD(true_type) {};
 
 template<size_t _Dim, typename _Ty> MATRICE_GLOBAL_INL 
 auto cross_prod_matrix(const Vec3_<_Ty>& v) noexcept {
@@ -385,7 +385,7 @@ auto cross_prod_matrix(const Vec3_<_Ty>& v) noexcept {
  * \brief Concatenate two vectors as a matrix in column-by-column order.
  */
 template<typename _Ty, size_t _N> MATRICE_GLOBAL_INL
-auto concat(const Vec_<_Ty, _N>& prev, const Vec_<_Ty, _N>& next) noexcept {
+auto concat(const Vec_<_Ty,_N>& prev, const Vec_<_Ty,_N>& next)noexcept {
 	typename Vec_<_Ty, _N>::template extend<2> _Ret;
 	_Ret.cview(0) = prev, _Ret.cview(1) = next;
 	return _Ret;
@@ -405,4 +405,20 @@ auto skew(const initlist<_Ty> v) noexcept {
 	return Vec3_<_Ty>(v).skew();
 }
 
+/**
+ * \brief Get the index of the maximum value.
+ * \param 'v' Input vector supported by the auto_vector_t<_Ty, _Dim>.
+ * \returns Index of the maximum entry.
+ */
+template<typename _Ty, size_t _Dim>
+MATRICE_GLOBAL_INL size_t argmax(const auto_vector_t<_Ty, _Dim>& v) noexcept {
+	auto _Itr = v.begin();
+	auto _First = v.begin();
+	for (; _First < v.end(); ++_First) {
+		if (*_Itr < *_First) {
+			_Itr = _First;
+		}
+	}
+	return (_Itr - v.begin());
+}
 DGE_MATRICE_END
