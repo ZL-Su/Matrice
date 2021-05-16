@@ -46,35 +46,43 @@ template<typename _Ty> struct string_to_numval {
 };
 template<> struct string_to_numval<int> {
 	static MATRICE_HOST_FINL auto value(const std::string& _Str)noexcept {
-		return std::stoi(_Str); }
+		return MATRICE_STD(stoi)(_Str); 
+	}
 };
 template<> struct string_to_numval<long> {
 	static MATRICE_HOST_FINL auto value(const std::string& _Str)noexcept {
-		return std::stol(_Str); }
+		return MATRICE_STD(stol)(_Str); 
+	}
 };
 template<> struct string_to_numval<float> {
 	static MATRICE_HOST_FINL auto value(const std::string& _Str)noexcept {
-		return std::stof(_Str); }
+		return MATRICE_STD(stof)(_Str); 
+	}
 };
 template<> struct string_to_numval<double> {
 	static MATRICE_HOST_FINL auto value(const std::string& _Str)noexcept {
-		return std::stod(_Str); }
+		return MATRICE_STD(stod)(_Str); 
+	}
 };
 template<> struct string_to_numval<long double> {
 	static MATRICE_HOST_FINL auto value(const std::string& _Str)noexcept {
-		return std::stold(_Str); }
+		return MATRICE_STD(stold)(_Str); 
+	}
 };
 template<> struct string_to_numval<long long> {
 	static MATRICE_HOST_FINL auto value(const std::string& _Str)noexcept {
-		return std::stoll(_Str); }
+		return MATRICE_STD(stoll)(_Str); 
+	}
 };
 template<> struct string_to_numval<unsigned long> {
 	static MATRICE_HOST_FINL auto value(const std::string& _Str)noexcept {
-		return std::stoul(_Str); }
+		return MATRICE_STD(stoul)(_Str); 
+	}
 };
 template<> struct string_to_numval<unsigned long long> {
 	static MATRICE_HOST_FINL auto value(const std::string& _Str)noexcept {
-		return std::stoull(_Str); }
+		return MATRICE_STD(stoull)(_Str); 
+	}
 };
 _DETAIL_END
 
@@ -83,15 +91,15 @@ _DETAIL_END
  * \example: 
 		const auto val = dgelom::stonv<float>("1.0"); //val = 1.0f;
  */
-template<typename T = std::string>
-MATRICE_HOST_FINL T stonv(const std::string& _Str) noexcept {
+template<typename T = MATRICE_STD(string)>
+MATRICE_HOST_FINL T stonv(const MATRICE_STD(string)& _Str) noexcept {
 #ifdef MATRICE_DEBUG
 	DGELOM_CHECK(!_Str.empty(), "_Str should not be empty.")
 #endif
 	return detail::string_to_numval<T>::value(_Str); 
 }
-template<typename T = std::string>
-MATRICE_HOST_FINL T cast_string_to(std::string&& _Str) noexcept {
+template<typename T = MATRICE_STD(string)>
+MATRICE_HOST_FINL T cast_string_to(MATRICE_STD(string)&& _Str) noexcept {
 #ifdef MATRICE_DEBUG
 	DGELOM_CHECK(!_Str.empty(), "_Str should not be empty.")
 #endif
@@ -104,11 +112,11 @@ MATRICE_HOST_FINL T cast_string_to(std::string&& _Str) noexcept {
 		const auto str = dgelom::cast_to_string(3.14159); //str = "3.14159"
  */
 template<typename T>
-MATRICE_HOST_INL std::string cast_to_string(T _Val) noexcept {
-	return std::to_string(_Val);
+MATRICE_HOST_INL MATRICE_STD(string) cast_to_string(T _Val) noexcept {
+	return MATRICE_STD(to_string)(_Val);
 }
 MATRICE_HOST_INL auto cast_to_string(const char* _Val) noexcept {
-	return std::string(_Val);
+	return MATRICE_STD(string)(_Val);
 }
 
 /**
@@ -118,8 +126,8 @@ MATRICE_HOST_INL auto cast_to_string(const char* _Val) noexcept {
 		const auto str = dgelom::cast_to_string(10, 4); //str = "0010"
  */
 template<typename T> MATRICE_HOST_INL
-std::string cast_to_string(T _Val, uint8_t _Ndigs) noexcept {
-	std::string _Pref{};
+MATRICE_STD(string) cast_to_string(T _Val, uint8_t _Ndigs) noexcept {
+	MATRICE_STD(string) _Pref{};
 	switch (_Ndigs)
 	{
 	case 2: 
@@ -183,15 +191,15 @@ template<size_t _N> struct tuple_n {
 template<> struct tuple_n<0> {
 	template<typename U> 
 	MATRICE_HOST_FINL static auto _(const U& _E) {
-		return std::make_tuple(_E);
+		return MATRICE_STD(make_tuple)(_E);
 	}
 	template<typename U> 
 	MATRICE_HOST_FINL static auto _(const U* _E) {
-		return std::make_tuple(_E[0]);
+		return MATRICE_STD(make_tuple)(_E[0]);
 	}
 	template<typename U, typename F> 
 	MATRICE_HOST_FINL static auto _(const U* _E, F&& _Op) {
-		return std::make_tuple(_Op(_E[0]));
+		return MATRICE_STD(make_tuple)(_Op(_E[0]));
 	}
 };
 
@@ -230,7 +238,7 @@ MATRICE_HOST_INL constexpr size_t size(const _Cont& _) noexcept {
  */
 template<typename _Mtx, typename _Fn, typename... _Args>
 MATRICE_HOST_INL auto locked_call(_Mtx& mtx, _Fn&& func, _Args...args){
-	std::lock_guard<_Mtx> __guard__(mtx);
+	MATRICE_STD(lock_guard)<_Mtx> __guard__(mtx);
 	return func(args...);
 }
 
@@ -241,7 +249,7 @@ template<typename _Ity>
 MATRICE_GLOBAL_INL auto unroll_linear_index(_Ity idx, _Ity width) noexcept {
 	const auto y = safe_div(idx, width);
 	const auto x = idx - y * width;
-	return std::make_tuple(y, x);
+	return MATRICE_STD(make_tuple)(y, x);
 }
 
 struct matrix_index_adapter {
