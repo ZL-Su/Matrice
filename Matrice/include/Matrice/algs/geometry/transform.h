@@ -39,7 +39,7 @@ MATRICE_GLOBAL_FINL constexpr auto operator""_rads(long double _Val) noexcept {
 	return (_Val);
 }
 
-DGE_MATRICE_BEGIN 
+DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
 
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
@@ -121,6 +121,20 @@ Matrix_<_Ty, 3> _Rotation_between(const Vec3_<_Ty>& _V1, const Vec3_<_Ty>& _V2) 
 	return decltype(_R)::diag(1) + _R + (_R*_R)*(1-_V1.dot(_V2)) / pow(_A.norm(), 2);
 }
 
+/// <summary>
+/// \brief ENUM, defines geometric transform tags.
+/// </summary>
+enum class _Geotf_tag {
+	ISO2D = 00, // 1d isometry or rigid-body transform
+	ISO3D = 01, // 2d isometry or rigid-body transform
+	SIM2D = 10, // similarity
+	SIM3D = 11, // similarity
+	AFF2D = 20, // affine
+	AFF3D = 21, // affine
+	PRO2D = 30, // projective
+	PRO3D = 31, // projective
+};
+
 template<uint8_t, uint8_t> struct _Axis_type {};
 
 /**
@@ -135,11 +149,9 @@ template<typename, size_t> class _Axis_angle_rep {};
 template<typename> class _Geotf_isometry {};
 
 /// <summary>
-/// \brief TEMPLATE CLASS for linear transformations.
+/// \brief TEMPLATE CLASS, forward declaration for geometric transform.
 /// </summary>
-/// <typeparam name="_Derived"></typeparam>
-template<typename _Derived>
-class _Linear_transform {};
+template<typename _Ty, _Geotf_tag... _Tag> class _Geo_transform{};
 
 _DETAIL_END
 
@@ -190,12 +202,21 @@ using axis_x_t = detail::_Axis_type<0, 3>;
 using axis_y_t = detail::_Axis_type<1, 3>;
 using axis_z_t = detail::_Axis_type<2, 3>;
 
+using geotf_tag = detail::_Geotf_tag;
+
 /// <summary>
-/// \brief TEMPLATE CLASS for rigid transformation
+/// \brief ALIAS TEMPLATE for rigid transformation.
 /// </summary>
 /// <typeparam name="_Ty"></typeparam>
 template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
 using isometry_t = detail::_Geotf_isometry<_Ty>;
+
+/// <summary>
+/// \brief ALIAS TEMPLATE for affine transformation
+/// </summary>
+/// <typeparam name="_Ty"></typeparam>
+template<typename _Ty>
+using affine_t = detail::_Geo_transform<_Ty, geotf_tag::ISO2D>;
 
 template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
 // *\brief TEMPLATE CLASS for axis-angle representation
