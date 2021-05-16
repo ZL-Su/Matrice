@@ -199,6 +199,68 @@ public:
 		return (_Rotation_between(v1, v2));
 	}
 };
+
+template<typename _Derived>
+class _Geo_transform<_Derived> {
+	using _Myt = _Geo_transform;
+	using _Mytraits = traits<_Derived>;
+public:
+	using value_type = _Mytraits::value_type;
+	using vector = auto_vector_t<value_type, _Mytraits::dof>;
+
+protected:
+	Matrix_<value_type, 4> _Mycoef;
+};
+
+template<typename _Ty>
+class _Geo_transform<_Ty, _Geotf_tag::ISO2D> 
+	: public _Geo_transform<_Geo_transform<_Ty, _Geotf_tag::ISO2D>> {
+	using _Myt = _Geo_transform<_Ty, _Geotf_tag::ISO2D>;
+	using _Mybase = _Geo_transform<_Myt>;
+	using _Mybase::_Mycoef;
+public:
+	using vector = typename _Mybase::vector;
+	using value_type = _Mybase::value_type;
+	_Geo_transform() = default;
+	_Geo_transform(value_type angle, value_type tx, value_type ty) noexcept
+		:_Mytx(_Mycoef(3)), _Myty(_Mycoef(7)), _Myxx(_Mycoef(0)), 
+		_Myxy(_Mycoef(1)), _Myyx(_Mycoef(4)), _Myyy(_Mycoef(5)){
+		_Mytx = tx, _Myty = ty;
+		_Myxx = cos(angle), _Myxy = -sin(angle);
+		_Myyx = -_Myxy, _Myyy = _Myxx;
+	}
+
+	MATRICE_GLOBAL_INL decltype(auto)update(value_type angle, value_type tx, value_type ty) noexcept {
+		_Mytx = tx, _Myty = ty;
+		_Myxx = cos(angle), _Myxy = -sin(angle);
+		_Myyx = -_Myxy, _Myyy = _Myxx;
+		return (*this);
+	}
+
+	MATRICE_GLOBAL_INL auto _Forward(const vector& _V) noexcept {
+		const auto _x = _Myxx *_V.x + _Myxy *_V.y + _Mytx;
+		const auto _y = _Myyx *_V.x + _Myyy *_V.y + _Myty;
+		return vector{ _x, _y };
+	}
+
+private:
+	value_type &_Myxx, &_Myxy, &_Mytx;
+	value_type &_Myyx, &_Myyy, &_Myty;
+};
+
+template<typename _Ty>
+struct traits<_Geo_transform<_Ty, _Geotf_tag::ISO2D>> {
+	using value_type = _Ty;
+	static constexpr auto tag = geotf_tag::ISO2D;
+	static constexpr auto dof = 2;
+};
+template<typename _Ty>
+struct traits<_Geo_transform<_Ty, _Geotf_tag::ISO3D>> {
+	using value_type = _Ty;
+	static constexpr auto tag = geotf_tag::ISO3D;
+	static constexpr auto dof = 3;
+};
+
 _DETAIL_END
 
 template<>
