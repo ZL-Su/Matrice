@@ -20,7 +20,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #include <vector>
 #include "_correlation_traits.h"
-#include "core/image.hpp"
+#include "core/image.h"
 
 MATRICE_ALG_BEGIN(corr)
 _DETAIL_BEGIN
