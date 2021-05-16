@@ -19,6 +19,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #include <array>
 #include "matrix.h"
+#include "algorithm.h"
 #ifdef MATRICE_SIMD_ARCH
 #include "arch/ixpacket.h"
 #endif
@@ -411,14 +412,11 @@ auto skew(const initlist<_Ty> v) noexcept {
  * \returns Index of the maximum entry.
  */
 template<typename _Ty, size_t _Dim>
-MATRICE_GLOBAL_INL size_t argmax(const auto_vector_t<_Ty, _Dim>& v) noexcept {
-	auto _Itr = v.begin();
-	auto _First = v.begin();
-	for (; _First < v.end(); ++_First) {
-		if (*_Itr < *_First) {
-			_Itr = _First;
-		}
-	}
-	return (_Itr - v.begin());
+MATRICE_GLOBAL_INL size_t argmax(const Vec_<_Ty, _Dim>& v) noexcept {
+	return detail::_Argmax(v.begin(), v.end());
+}
+template<typename _Ty>
+MATRICE_GLOBAL_INL size_t argmax(const MATRICE_STD(vector<_Ty>)& v)noexcept{
+	return detail::_Argmax(v.begin(), v.end());
 }
 DGE_MATRICE_END
