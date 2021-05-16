@@ -1217,7 +1217,7 @@ public:
 		return forward<_Derived>(_Ret);
 	}
 	/**
-	 *\brief creates a matrix filled by real numbers of uniform distribution.
+	 *\brief Creates a matrix filled by real numbers of uniform distribution.
 	 *\param [_Rows, Cols] the height and width of a matrix, only needed to specify for dynamic memory alloc cases.
 	 */
 	static MATRICE_GLOBAL_INL _Derived rand(diff_t _Rows=0, diff_t _Cols=0) {
@@ -1228,7 +1228,7 @@ public:
 	}
 
 	/**
-	 *\brief creates a matrix filled by random numbers of normal distribution.
+	 *\brief Creates a matrix filled by random numbers of normal distribution.
 	 *\param [_Pars] = {Mean, STD}
 	 */
 	MATRICE_REQUIRES(rows_at_compiletime>0&&cols_at_compiletime>0)
