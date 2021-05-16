@@ -109,11 +109,11 @@ MATRICE_HOST_INL Matrix_<_Ty, 3> _Rodrigues_impl(const Vec3_<_Ty>& _r) noexcept 
 }
 
 /**
- *\brief Compute rotation matrix between two 3d vectors
- *\param [_V1, _V2] the given two vectors
+ * \brief Compute rotation matrix between two 3d vectors
+ * \param '_V1, _V2' A pair of 3-vectors.
  */
-template<typename _Ty>
-MATRICE_HOST_INL Matrix_<_Ty, 3, 3> _Rot_from(const Vec3_<_Ty>& _V1, const Vec3_<_Ty>& _V2) {
+template<typename _Ty> MATRICE_DEVICE_INL
+Matrix_<_Ty, 3> _Rotation_between(const Vec3_<_Ty>& _V1, const Vec3_<_Ty>& _V2) {
 	const auto _A = _V1.cross(_V2);
 	const auto _R = Matrix_<_Ty, 3, 3>{0, _A[2],  _A[1], _A[2], 0, -_A[0],
 		-_A[1], _A[0], 0};
@@ -124,15 +124,22 @@ MATRICE_HOST_INL Matrix_<_Ty, 3, 3> _Rot_from(const Vec3_<_Ty>& _V1, const Vec3_
 template<uint8_t, uint8_t> struct _Axis_type {};
 
 /**
- *\brief TEMPLATE CLASS for axis-angle representation
- *\cite{https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation}
+ * \brief TEMPLATE CLASS for axis-angle representation
+ * \cite{https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation}
  */
 template<typename, size_t> class _Axis_angle_rep {};
 
 /**
- *\brief TEMPLATE CLASS for rigid transformation
+ * \brief TEMPLATE CLASS for rigid transformation
  */
 template<typename> class _Geotf_isometry {};
+
+/// <summary>
+/// \brief TEMPLATE CLASS for linear transformations.
+/// </summary>
+/// <typeparam name="_Derived"></typeparam>
+template<typename _Derived>
+class _Linear_transform {};
 
 _DETAIL_END
 
@@ -183,12 +190,15 @@ using axis_x_t = detail::_Axis_type<0, 3>;
 using axis_y_t = detail::_Axis_type<1, 3>;
 using axis_z_t = detail::_Axis_type<2, 3>;
 
+/// <summary>
+/// \brief TEMPLATE CLASS for rigid transformation
+/// </summary>
+/// <typeparam name="_Ty"></typeparam>
 template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
-// *\brief TEMPLATE CLASS for rigid transformation
 using isometry_t = detail::_Geotf_isometry<_Ty>;
 
 template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
 // *\brief TEMPLATE CLASS for axis-angle representation
 using axisangle_t = detail::_Axis_angle_rep<_Ty, 3>;
 DGE_MATRICE_END
-#include "inline\_transform.inl"
+#include "inline\_transform.hpp"
