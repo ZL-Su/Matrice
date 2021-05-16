@@ -6,35 +6,49 @@
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
+/// <summary>
+/// \brief X axis represetation
+/// </summary>
 template<> struct _Axis_type<0, 3> {
 	MATRICE_GLOBAL_FINL auto operator()() const {
 		return Vec3_<bool>(1, 0, 0);
 	}
 };
+/// <summary>
+/// \brief Y axis represetation
+/// </summary>
 template<> struct _Axis_type<1, 3> {
 	MATRICE_GLOBAL_FINL auto operator()() const {
 		return Vec3_<bool>(0, 1, 0);
 	}
 };
+/// <summary>
+/// \brief Z axis represetation
+/// </summary>
 template<> struct _Axis_type<2, 3> {
 	MATRICE_GLOBAL_FINL auto operator()() const {
 		return Vec3_<bool>(0, 0, 1);
 	}
 };
 
-template<typename _Ty> class _Axis_angle_rep<_Ty, 3> {
+template<typename _Ty> 
+class _Axis_angle_rep<_Ty, 3> {
 public:
 	using angle_type = _Ty;
 	using axis_type = Vec3_<angle_type>;
 
 	_Axis_angle_rep(const axis_type& _Axis, const angle_type& _Angl)
-		:_Data(_Axis, _Angl) {}
+		:_Mydata(_Axis, _Angl) {}
 	template<uint8_t... _Dims>
 	_Axis_angle_rep(const _Axis_type<_Dims...>& _Axis, const angle_type& _Angl)
-		:_Data(_Axis(), _Angl) {}
+		: _Mydata(_Axis(), _Angl) {}
 
-	MATRICE_GLOBAL_INL constexpr auto& axis() const { return std::get<0>(_Data); }
-	MATRICE_GLOBAL_INL constexpr auto& angle() const { return std::get<1>(_Data); }
+	MATRICE_GLOBAL_INL constexpr auto& axis() const noexcept { 
+		return MATRICE_STD(get)<0>(_Mydata);
+	}
+	MATRICE_GLOBAL_INL constexpr auto& angle() const noexcept { 
+		return MATRICE_STD(get) <1>(_Mydata);
+	}
 
 	/**
 	 *\brief Converts to an equivalent rotation matrix
@@ -51,7 +65,7 @@ public:
 		return sqr_matrix_t(sqr_matrix_t::diag(1) + s*K + c*K*K);
 	}
 private:
-	tuple<axis_type, angle_type> _Data;
+	tuple<axis_type, angle_type> _Mydata;
 };
 
 #ifdef MATRICE_SIMD_ARCH
@@ -111,7 +125,7 @@ public:
 	 *\param [R] 3-by-3 rotation matrix
 	 *\param [T] 3-translation vector
 	 */
-	_Geotf_base(const Matrix_<value_type, 3, 3>& R, const vec3_type& T)
+	_Geotf_base(const Matrix_<value_type, 3>& R, const vec3_type& T)
 		: _Mymat(R.data(), R.rows()) {
 		_Mymat._pa[3] = T[0], _Mymat._pb[3] = T[1], _Mymat._pc[3] = T[2];
 	}
@@ -120,48 +134,56 @@ public:
 	 *\brief In-place transformation
 	 *\param [p] input point, overwritten by the transformed data
 	 */
-	template<typename _Vty, typename = enable_if_t<is_fxdvector_v<_Vty>>>
-	MATRICE_HOST_INL auto& operator()(const _Vty& p) const {
-		_Mymat.mul<p.Size>(p.data());
+	template<typename _Vty, MATRICE_ENABLE_IF(is_fxdvector_v<_Vty>)>
+	MATRICE_HOST_INL decltype(auto) operator()(const _Vty& p) const {
+		constexpr auto _Size = p.Size;
+		static_assert(_Size >= 3, 
+			"Size of the input 'p' must be not less than 3.");
+		_Mymat.mul<_Size>(p.data());
 		return (p);
 	}
 protected:
 	mutable _Avxmat4_<value_type> _Mymat;
 #else
 	/**
-	 *\brief Constructor from 4-by-4 transformation matrix
-	 *\param [m] 4-by-4 transformation matrix
+	 * \brief Ctor from 4-by-4 transformation matrix.
+	 * \param 'm' 4-by-4 transformation matrix.
 	 */
 	_Geotf_base(const matrix_type& m) noexcept
 		: _Mymat(m) {
 	}
 	/**
-	 *\brief Constructor from axis-angle representation
-	 *\param [a] axis-angle data
+	 * \brief Ctor from axis-angle representation.
+	 * \param 'a' axis-angle data.
 	 */
 	_Geotf_base(const _Axis_angle_rep<value_type, 3>& a) noexcept
-		: _Geotf_base(a.matrix<4>()) {
+		: _Geotf_base(a.matrix<matrix_type::rows_at_compiletime>()) {
 	}
 	/**
-	 *\brief Constructor from a rotation matrix and a translation vector
-	 *\param [R] 3-by-3 rotation matrix
-	 *\param [T] 3-translation vector
+	 * \brief Ctor from a rotation matrix and a translation vector.
+	 * \param 'R' 3-by-3 rotation matrix.
+	 * \param 'T' 3-translation vector.
 	 */
-	_Geotf_base(const Matrix_<value_type, 3, 3>& R, const vec3_type& T) noexcept {
+	_Geotf_base(const Matrix_<value_type, 3>& R, const vec3_type& T) noexcept {
 		_Mymat.block(0, 3, 0, 3) = R;
-		_Mymat[0][3] = T[0];
-		_Mymat[1][3] = T[1];
-		_Mymat[2][3] = T[2];
+		_Mymat[0][3] = T[0], _Mymat[1][3] = T[1], _Mymat[2][3] = T[2];
 		_Mymat.rview(3) = { 0, 0, 0, 1 };
 	}
 
 	/**
-	 *\brief In-place transformation
-	 *\param [p] input point, overwritten by the transformed data
+	 *\brief In-place transformation.
+	 *\param 'p' input point, overwritten by the transformed data.
 	 */
 	template<typename _Vty, MATRICE_ENABLE_IF(is_fxdvector_v<_Vty>)>
-	MATRICE_HOST_INL auto& operator()(const _Vty& p) const {
-		p = _Mymat.mul(p);
+	MATRICE_HOST_INL decltype(auto) operator()(const _Vty& p) const {
+		constexpr auto _Size = p.Size;
+		static_assert(_Size >= 3,
+			"Size of the input 'p' must be not less than 3.");
+		vec4_type tmp(p);
+		if constexpr (_Size == 3) {
+			tmp(3) = 1;
+		}
+		p = _Mymat.mul(tmp);
 		return (p);
 	}
 protected:
@@ -174,7 +196,7 @@ public:
 	 *\param [v1, v2] the given two vectors
 	*/
 	static MATRICE_HOST_INL auto rotation(const vec3_type& v1, const vec3_type& v2) {
-		return std::move(_Rot_from(v1, v2));
+		return (_Rotation_between(v1, v2));
 	}
 };
 _DETAIL_END
