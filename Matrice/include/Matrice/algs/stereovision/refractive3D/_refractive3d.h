@@ -36,11 +36,11 @@ struct glass2water_tag {
 
 // Traits
 template<typename _Ty> 
-struct is_refractive_tag : std::false_type {};
+struct is_refractive_tag : MATRICE_STD(false_type) {};
 template<>
-struct is_refractive_tag<air2glass_tag> : std::true_type {};
+struct is_refractive_tag<air2glass_tag> : MATRICE_STD(true_type) {};
 template<>
-struct is_refractive_tag<glass2water_tag> : std::true_type {};
+struct is_refractive_tag<glass2water_tag> : MATRICE_STD(true_type) {};
 template<typename _Ty>
 constexpr auto is_refractive_tag_v = is_refractive_tag<_Ty>::value;
 
