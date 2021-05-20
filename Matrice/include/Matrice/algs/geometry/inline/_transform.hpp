@@ -192,9 +192,9 @@ protected:
 
 public:
 	/**
-	 *\brief Compute rotation matrix between two 3d vectors
-	 *\param [v1, v2] the given two vectors
-	*/
+	 * \brief Compute rotation matrix between two 3d vectors
+	 * \param [v1, v2] the given two vectors
+	 */
 	static MATRICE_HOST_INL auto rotation(const vec3_type& v1, const vec3_type& v2) {
 		return (_Rotation_between(v1, v2));
 	}
@@ -208,7 +208,24 @@ public:
 	using value_type = _Mytraits::value_type;
 	using vector = auto_vector_t<value_type, _Mytraits::dof>;
 
+	/**
+	 * \brief Eval rigid transformation of a given vector (or point).
+	 * \param 'x' Input vector (or point).
+	 */
+	MATRICE_GLOBAL_INL vector operator()(const vector& x)const noexcept {
+		return static_cast(const _Derived*)(this)->_Rigid_trans(x);
+	}
+
+	/**
+	 * \brief Translate a given vector (or point) to a new position.
+	 * \param 'x' Input vector (or point).
+	 */
+	MATRICE_GLOBAL_INL vector trans(const vector& x)const noexcept {
+		return _Mycoef.cview(3) + x;
+	}
+
 protected:
+	// Compact representation of transform coefficients
 	Matrix_<value_type, 4> _Mycoef;
 };
 
@@ -237,7 +254,7 @@ public:
 		return (*this);
 	}
 
-	MATRICE_GLOBAL_INL auto _Forward(const vector& _V) noexcept {
+	MATRICE_GLOBAL_INL auto _Rigid_trans(const vector& _V) noexcept {
 		const auto _x = _Myxx *_V.x + _Myxy *_V.y + _Mytx;
 		const auto _y = _Myyx *_V.x + _Myyy *_V.y + _Myty;
 		return vector{ _x, _y };
@@ -247,12 +264,25 @@ private:
 	value_type &_Myxx, &_Myxy, &_Mytx;
 	value_type &_Myyx, &_Myyy, &_Myty;
 };
-
 template<typename _Ty>
 struct traits<_Geo_transform<_Ty, _Geotf_tag::ISO2D>> {
 	using value_type = _Ty;
 	static constexpr auto tag = geotf_tag::ISO2D;
 	static constexpr auto dof = 2;
+};
+
+template<typename _Ty>
+class _Geo_transform<_Ty, _Geotf_tag::ISO3D>
+	: public _Geo_transform<_Geo_transform<_Ty, _Geotf_tag::ISO3D>> {
+	using _Myt = _Geo_transform<_Ty, _Geotf_tag::ISO3D>;
+	using _Mybase = _Geo_transform<_Myt>;
+	using _Mybase::_Mycoef;
+public:
+	using vector = typename _Mybase::vector;
+	using value_type = _Mybase::value_type;
+	_Geo_transform() = default;
+
+
 };
 template<typename _Ty>
 struct traits<_Geo_transform<_Ty, _Geotf_tag::ISO3D>> {
