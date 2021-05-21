@@ -146,6 +146,7 @@
     <ClInclude Include="addin\libtiff\tif_fax3.h" />
     <ClInclude Include="addin\libtiff\tif_predict.h" />
     <ClInclude Include="addin\libtiff\uvcode.h" />
+    <ClInclude Include="examples\2dresfrep_ex.hpp" />
     <ClInclude Include="examples\basic_matrix_usage.h" />
     <ClInclude Include="examples\csvio_ex.hpp" />
     <ClInclude Include="examples\dic_ex.hpp" />
@@ -153,7 +154,7 @@
     <ClInclude Include="include\Matrice\3rdparty\interface.hpp" />
     <ClInclude Include="include\Matrice\algs\correlation.hpp" />
     <ClInclude Include="include\Matrice\algs\correlation\_correlation_traits.h" />
-    <ClInclude Include="include\Matrice\algs\correlation\_graph_executor.hpp" />
+    <ClInclude Include="include\Matrice\algs\correlation\_graph_executor.h" />
     <ClInclude Include="include\Matrice\algs\correlation\_optim.h" />
     <ClInclude Include="include\Matrice\algs\correlation\_utils.hpp" />
     <ClInclude Include="include\Matrice\algs\dnn\conv\_conv_impl.hpp" />
@@ -163,6 +164,7 @@
     <ClInclude Include="include\Matrice\algs\dnn\layer\_layers.hpp" />
     <ClInclude Include="include\Matrice\algs\dnn\layer\_layer_base.hpp" />
     <ClInclude Include="include\Matrice\algs\dnn\models\_basic_model.hpp" />
+    <ClInclude Include="include\Matrice\algs\dnn\_dataset_ops.hpp" />
     <ClInclude Include="include\Matrice\algs\erroranalysis\_common.h" />
     <ClInclude Include="include\Matrice\algs\forward.hpp" />
     <ClInclude Include="include\Matrice\algs\geometry.hpp" />
@@ -207,7 +209,9 @@
     <ClInclude Include="include\Matrice\arch\ixpacket.h" />
     <ClInclude Include="include\Matrice\arch\_ixbase.h" />
     <ClInclude Include="include\Matrice\arch\_ixtraits.hpp" />
-    <ClInclude Include="include\Matrice\core\image.hpp" />
+    <ClInclude Include="include\Matrice\core\algorithm.h" />
+    <ClInclude Include="include\Matrice\core\functional.h" />
+    <ClInclude Include="include\Matrice\core\image.h" />
     <ClInclude Include="include\Matrice\core\matrix.h" />
     <ClInclude Include="include\Matrice\core\solver.h" />
     <ClInclude Include="include\Matrice\core\tensor.h" />
@@ -219,6 +223,7 @@
     <ClInclude Include="include\Matrice\io\_png_wrapper.hpp" />
     <ClInclude Include="include\Matrice\io\_tiff_wrapper.hpp" />
     <ClInclude Include="include\Matrice\lic\license.h" />
+    <ClInclude Include="include\Matrice\math\complex.h" />
     <ClInclude Include="include\Matrice\math_forward.hpp" />
     <ClInclude Include="include\Matrice\private\autograd\_ad_exps.h" />
     <ClInclude Include="include\Matrice\private\autograd\_ad_ops.h" />
@@ -228,6 +233,7 @@
     <ClInclude Include="include\Matrice\private\container\_multi_array.hpp" />
     <ClInclude Include="include\Matrice\private\math\fast_native_math_funcs.hpp" />
     <ClInclude Include="include\Matrice\private\math\kernel_wrapper.hpp" />
+    <ClInclude Include="include\Matrice\private\math\_complex.hpp" />
     <ClInclude Include="include\Matrice\private\math\_config.h" />
     <ClInclude Include="include\Matrice\private\math\_linear.h" />
     <ClInclude Include="include\Matrice\private\math\_linear_solver.h" />
@@ -355,7 +361,7 @@
     <None Include="include\algs" />
     <None Include="include\io" />
     <None Include="include\Matrice\algs\correlation\inline\_optim.inl" />
-    <None Include="include\Matrice\algs\geometry\inline\_transform.inl" />
+    <None Include="include\Matrice\algs\geometry\inline\_transform.hpp" />
     <None Include="include\Matrice\algs\interpolation\_base.inl" />
     <None Include="include\Matrice\algs\similarity\inline\_iterative_conv_impl.inl" />
     <None Include="include\Matrice\algs\stereovision\refractive3D\_refractive3d.inl" />

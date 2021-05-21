@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ struct Index<_Ty, tag::_Tensor_tag> {
 		return 0;
 	}
 
-	std::array<_Ty, 3> data;
+	MATRICE_STD(array)<_Ty, 3> data;
 };
 
 /**
@@ -244,7 +244,7 @@ public:
 	MATRICE_HOST_INL auto at(size_t n) const {
 		_Myt _Ret({ 1,dims().get(1),dims().get(2),dims().get(3) });
 		auto _Begin = this->begin() + n * _Ret.size();
-		std::copy(_Begin, _Begin + _Ret.size(), _Ret.begin());
+		MATRICE_STD(copy)(_Begin, _Begin + _Ret.size(), _Ret.begin());
 		return forward<_Myt>(_Ret);
 	}
 	/**
@@ -254,7 +254,7 @@ public:
 	MATRICE_HOST_INL auto at(size_t n, size_t c) const {
 		_Myt _Ret({ 1, 1, m_shape.get(2), m_shape.get(3) });
 		auto _Begin = this->begin() + n * _Ret.size()*m_shape.get(1) + c * _Ret.size();
-		std::copy(_Begin, _Begin + _Ret.size(), _Ret.begin());
+		MATRICE_STD(copy)(_Begin, _Begin + _Ret.size(), _Ret.begin());
 		return forward<_Myt>(_Ret);
 	}
 
@@ -310,7 +310,7 @@ struct tensor_traits<_Tensor<_Ty, _Depth>> {
 	using category = tag::_Tensor_tag;
 	static constexpr auto depth = _Depth;
 	static constexpr auto _M = 0, _N = 0;
-	static constexpr bool Is_base = std::false_type::value;
+	static constexpr bool Is_base = MATRICE_STD(false_type)::value;
 };
 _DETAIL_END
 DGE_MATRICE_END

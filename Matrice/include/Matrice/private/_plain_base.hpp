@@ -1,4 +1,4 @@
-/**************************************************************************
+/**********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
 Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
@@ -14,7 +14,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
-**************************************************************************/
+**********************************************************************/
 #pragma once
 
 #include <valarray>
@@ -218,7 +218,7 @@ return (*static_cast<_Derived*>(&_Ex.assign(*this))); \
 
 	using _Myt = Base_;
 	using _Mybase = _Basic_plane_view_base<_Valty>;
-	using _Myreference = std::add_lvalue_reference_t<_Myt>;
+	using _Myreference = MATRICE_STD(add_lvalue_reference_t)<_Myt>;
 	using _Myt_fwd_iterator = _Matrix_forward_iterator<_Valty>;
 	using _Myt_rwise_iterator = _Matrix_rwise_iterator<_Valty>;
 	using _Myt_cwise_iterator = _Matrix_cwise_iterator<_Valty>;
@@ -246,7 +246,7 @@ public:
 	using reference = value_type&;
 	using iterator = pointer;
 	using const_iterator = _Matrix_const_iterator<value_type>;
-	using const_initlist = std::add_const_t<initlist<value_t>>;
+	using const_initlist = MATRICE_STD(add_const_t)<initlist<value_t>>;
 	using derived_t = _Derived;
 	using loctn_t = Location;
 	using category = typename _Mytraits::category;
@@ -1217,7 +1217,7 @@ public:
 		return forward<_Derived>(_Ret);
 	}
 	/**
-	 *\brief creates a matrix filled by real numbers of uniform distribution.
+	 *\brief Creates a matrix filled by real numbers of uniform distribution.
 	 *\param [_Rows, Cols] the height and width of a matrix, only needed to specify for dynamic memory alloc cases.
 	 */
 	static MATRICE_GLOBAL_INL _Derived rand(diff_t _Rows=0, diff_t _Cols=0) {
@@ -1228,7 +1228,7 @@ public:
 	}
 
 	/**
-	 *\brief creates a matrix filled by random numbers of normal distribution.
+	 *\brief Creates a matrix filled by random numbers of normal distribution.
 	 *\param [_Pars] = {Mean, STD}
 	 */
 	MATRICE_REQUIRES(rows_at_compiletime>0&&cols_at_compiletime>0)
@@ -1388,7 +1388,7 @@ MATRICE_HOST_INL void swap(_Mty& _L, _Mty& _R) noexcept;
 
 /**
  *\func dgelom::copy<_Mty>(_Mty&, _Mty&)
- *\brief Copy a given matrix. Always wrap a dynamic matrix with the function If a deep copy is required.
+ *\brief Copy a given matrix. Always wrap a dynamic matrix with the function if a deep copy is required.
  */
 template<typename _Mty, MATRICE_ENABLE_IF(is_matrix_v<_Mty>)>
 MATRICE_HOST_INL _Mty copy(const _Mty& _M);

@@ -14,23 +14,26 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
-**********************************************************************/
+*********************************************************************/
 #pragma once
-
-#include "core/matrix.h"
+#include "util/_macros.h"
+#include <algorithm>
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
-template<typename _Ty>
-class _Error_analysis {
-	using value_type = _Ty;
-	using array_type = Matrix<_Ty>;
-public:
-	MATRICE_HOST_INL 
-	static auto mean_bias(const array_type& _Vals, const value_type _Ref) {
-		return (_Vals - _Ref).sum() / _Vals.size();
+/**
+ * INTERNAL FUNC, get the index of the maximum value in range [_First, _Last).
+ */
+template<typename _FwdIt>
+MATRICE_DEVICE_INL size_t _Argmax(_FwdIt _First, _FwdIt _Last) noexcept {
+	auto _Iter = _First;
+	auto _Max = _Iter;
+	for (; _Iter != _Last; ++_Iter) {
+		if (*_Max < *_Iter) {
+			_Max = _Iter;
+		}
 	}
-
-};
+	return (_Max - _First);
+}
 _DETAIL_END
 DGE_MATRICE_END

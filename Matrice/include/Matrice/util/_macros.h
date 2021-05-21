@@ -64,6 +64,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #define MATRICE_DEVICE_ONLY 
 #define MATRICE_GLOBAL
 #define MATRICE_HOST_INL inline
+#define MATRICE_HOST_STAINL static inline
 #define MATRICE_DEVICE_INL inline
 #define MATRICE_GLOBAL_INL __inline
 #define MATRICE_HOST_FINL __forceinline

@@ -1,6 +1,7 @@
 /*********************************************************************
-This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+This file is part of Matrice, an effcient and elegant C++ library for
+3D Vision and Photo-Mechanics.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -14,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
-***********************************************************************/
+*********************************************************************/
 #pragma once
 
 #include "_type_traits.h"
@@ -54,17 +55,17 @@ public:
 		return (&_Myval);
 	}
 
-	template<typename _Inty>
-	MATRICE_GLOBAL_INL _Myt& operator=(const _Inty arg) noexcept {
-		if constexpr (is_pointer_v<_Inty>) _Myval = *arg;
-		if constexpr (is_expression_v<_Inty>) _Myval = arg;
+	template<typename _Uy>
+	MATRICE_GLOBAL_INL _Myt& operator=(const _Uy arg) noexcept {
+		if constexpr (is_pointer_v<_Uy>) _Myval = *arg;
+		if constexpr (is_expression_v<_Uy>) _Myval = arg;
 		return (*this);
 	}
 
-	MATRICE_GLOBAL_INL decltype(auto)operator()(index_t)const noexcept {
+	MATRICE_GLOBAL_INL decltype(auto)operator()(auto)const noexcept {
 		return (_Myval);
 	}
-	MATRICE_GLOBAL_INL decltype(auto)operator()(index_t) noexcept {
+	MATRICE_GLOBAL_INL decltype(auto)operator()(auto) noexcept {
 		return (_Myval);
 	}
 
@@ -73,10 +74,10 @@ public:
 	}
 
 	/**
-	 *\brief Compute scalar gradient.
+	 *\brief Compute scalar derivative.
 	 */
 	MATRICE_GLOBAL_INL const _Myt grad()const noexcept {
-		return _Myt(value_type(0));
+		return _Myt();
 	}
 	/**
 	 *\brief Compute reciprocal of this scalar.
@@ -88,8 +89,8 @@ public:
 private:
 	value_type _Myval;
 };
-template<typename _Ty>
-struct is_scalar<Scalar<_Ty>> {
+
+template<typename _Ty> struct is_scalar<Scalar<_Ty>> {
 	static constexpr auto value = true;
 };
 template<typename _Ty> struct remove_all<Scalar<_Ty>> {

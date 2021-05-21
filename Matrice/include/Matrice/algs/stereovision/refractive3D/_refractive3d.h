@@ -36,11 +36,11 @@ struct glass2water_tag {
 
 // Traits
 template<typename _Ty> 
-struct is_refractive_tag : std::false_type {};
+struct is_refractive_tag : MATRICE_STD(false_type) {};
 template<>
-struct is_refractive_tag<air2glass_tag> : std::true_type {};
+struct is_refractive_tag<air2glass_tag> : MATRICE_STD(true_type) {};
 template<>
-struct is_refractive_tag<glass2water_tag> : std::true_type {};
+struct is_refractive_tag<glass2water_tag> : MATRICE_STD(true_type) {};
 template<typename _Ty>
 constexpr auto is_refractive_tag_v = is_refractive_tag<_Ty>::value;
 
@@ -113,7 +113,7 @@ public:
 		MATRICE_HOST_FINL friend 
 		vector_t<3> intersection(const ray_type& _R1, const ray_type& _R2) noexcept {
 			const auto _Coef = concat(_R1._Mydirection, _R2._Mydirection);
-			auto _A = _Coef.t().mul(_Coef).eval();
+			const auto _A = _Coef.t().mul(_Coef).eval();
 			auto _B = _Coef.t().mul(_R1._Myorigin - _R2._Myorigin);
 			const auto _S = _A.inv().mul(_B);
 
@@ -147,12 +147,23 @@ public:
 	}
 
 	/**
-	 * \brief METHOD, compute the true object point $\mathbf{Q}$.
+	 * \brief METHOD, compute the true object point $\mathbf{Q}$ from triangulation.
 	 * \param '_P' the distorted object point $\mathbf{P}$, estimated by regular triangulation.
 	 * \return 'Q' the true object point.
 	 */
 	auto compute(const vector_t<3>& _P) const noexcept {
 		const auto [left_direc, right_direc] = _Eval_incident_directions(_P);
+
+	}
+
+	/**
+	 * \brief METHOD, compute the true object point $\mathbf{Q}$ from a stereo correspondence.
+	 * \param '_x <-> _y' stereo correspondence in undistorted image domain.
+	 * \return 'Q' the true object point.
+	 */
+	auto compute(const vector_t<3>& _x, const vector_t<3>& _y) const noexcept {
+		decltype(_x) b_left = _x - _Myorigin;
+		decltype(_y) b_right = _y - _Mytrans;
 
 	}
 

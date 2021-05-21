@@ -19,6 +19,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #include "core/matrix.h"
 #include "core/vector.h"
+#include "_geo_utils.hpp"
 
 MATRICE_GLOBAL_FINL constexpr auto operator""_mm(long double _Val) noexcept {
 	return (_Val);
@@ -39,7 +40,7 @@ MATRICE_GLOBAL_FINL constexpr auto operator""_rads(long double _Val) noexcept {
 	return (_Val);
 }
 
-DGE_MATRICE_BEGIN 
+DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
 
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
@@ -54,7 +55,7 @@ MATRICE_HOST_INL Vec3_<_Ty> _Rodrigues_impl(const Matrix_<_Ty, 3>& _R) {
 	const auto s = _Ret.norm<2>() * _Half;
 	auto c = (_R.trace() - _Unit)*_Half;
 	c = c > _Unit ? _Unit : c < -_Unit ? -_Unit : c;
-	auto a = std::acos(c);
+	auto a = MATRICE_STD(acos)(c);
 
 	if (s < 1e-5) {
 		if (c > _Zero) return (Vec3_<value_t>(_Zero));
@@ -109,11 +110,11 @@ MATRICE_HOST_INL Matrix_<_Ty, 3> _Rodrigues_impl(const Vec3_<_Ty>& _r) noexcept 
 }
 
 /**
- *\brief Compute rotation matrix between two 3d vectors
- *\param [_V1, _V2] the given two vectors
+ * \brief Compute rotation matrix between two 3d vectors
+ * \param '_V1, _V2' A pair of 3-vectors.
  */
-template<typename _Ty>
-MATRICE_HOST_INL Matrix_<_Ty, 3, 3> _Rot_from(const Vec3_<_Ty>& _V1, const Vec3_<_Ty>& _V2) {
+template<typename _Ty> MATRICE_DEVICE_INL
+Matrix_<_Ty, 3> _Rotation_between(const Vec3_<_Ty>& _V1, const Vec3_<_Ty>& _V2) {
 	const auto _A = _V1.cross(_V2);
 	const auto _R = Matrix_<_Ty, 3, 3>{0, _A[2],  _A[1], _A[2], 0, -_A[0],
 		-_A[1], _A[0], 0};
@@ -121,18 +122,37 @@ MATRICE_HOST_INL Matrix_<_Ty, 3, 3> _Rot_from(const Vec3_<_Ty>& _V1, const Vec3_
 	return decltype(_R)::diag(1) + _R + (_R*_R)*(1-_V1.dot(_V2)) / pow(_A.norm(), 2);
 }
 
+/// <summary>
+/// \brief ENUM, defines geometric transform tags.
+/// </summary>
+enum class _Geotf_tag {
+	ISO2D = 00, // 1d isometry or rigid-body transform
+	ISO3D = 01, // 2d isometry or rigid-body transform
+	SIM2D = 10, // similarity
+	SIM3D = 11, // similarity
+	AFF2D = 20, // affine
+	AFF3D = 21, // affine
+	PRO2D = 30, // projective
+	PRO3D = 31, // projective
+};
+
 template<uint8_t, uint8_t> struct _Axis_type {};
 
 /**
- *\brief TEMPLATE CLASS for axis-angle representation
- *\cite{https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation}
+ * \brief TEMPLATE CLASS for axis-angle representation
+ * \cite{https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation}
  */
 template<typename, size_t> class _Axis_angle_rep {};
 
 /**
- *\brief TEMPLATE CLASS for rigid transformation
+ * \brief TEMPLATE CLASS for rigid transformation
  */
 template<typename> class _Geotf_isometry {};
+
+/// <summary>
+/// \brief TEMPLATE CLASS, forward declaration for geometric transform.
+/// </summary>
+template<typename _Ty, _Geotf_tag... _Tag> class _Geo_transform{};
 
 _DETAIL_END
 
@@ -179,16 +199,46 @@ MATRICE_HOST_INL auto rodrigues(const _Input& _In) noexcept {
 	return detail::_Rodrigues_impl(_In);
 }
 
+/// <summary>
+/// \brief Define X axis in 3d space.
+/// </summary>
 using axis_x_t = detail::_Axis_type<0, 3>;
+/// <summary>
+/// \brief Define Y axis in 3d space.
+/// </summary>
 using axis_y_t = detail::_Axis_type<1, 3>;
+/// <summary>
+/// \brief Define Z axis in 3d space.
+/// </summary>
 using axis_z_t = detail::_Axis_type<2, 3>;
 
+/// <summary>
+/// \brief ALIAS TEMPLATE for axis-angle representation
+/// </summary>
+/// <typeparam name="_Ty"></typeparam>
 template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
-// *\brief TEMPLATE CLASS for rigid transformation
-using isometry_t = detail::_Geotf_isometry<_Ty>;
-
-template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
-// *\brief TEMPLATE CLASS for axis-angle representation
 using axisangle_t = detail::_Axis_angle_rep<_Ty, 3>;
+
+/// <summary>
+/// \brief ALIAS of geometric transform tag.
+/// </summary>
+using geotf_tag = detail::_Geotf_tag;
+
+/// <summary>
+/// \brief ALIAS TEMPLATE for rigid transformation.
+/// </summary>
+/// <typeparam name="_Ty"></typeparam>
+template<typename _Ty, MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
+using Isometry_t = detail::_Geotf_isometry<_Ty>;
+
+/// <summary>
+/// \brief ALIAS TEMPLATE for 2d/3d Euclidean transformation.
+/// </summary>
+/// <typeparam name="_Ty">Floating-point scalar type</typeparam>
+/// <valueparam name="_Dim">Dimentionality of 2 or 3</valueparam>
+template<typename _Ty, dim_t _Dim = 3D, 
+	MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
+using isometry_t = detail::_Geo_transform<_Ty, _Dim == 2D ? geotf_tag::ISO2D : geotf_tag::ISO3D>;
+
 DGE_MATRICE_END
-#include "inline\_transform.inl"
+#include "inline\_transform.hpp"

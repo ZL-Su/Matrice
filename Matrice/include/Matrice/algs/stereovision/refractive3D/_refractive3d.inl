@@ -72,7 +72,7 @@ auto _Interf_ray_intersection(const _Ty& _Plane, const _Uy& _Ray, _Cat) {
 	typename type::template extend<3> _M;
 	_M.cview(0) = _U, _M.cview(1) = _V, _M.cview(2) = _W;
 
-	const auto _Exp = (_M.t().mul(_Normal) - _Dist * _Direc) / _Normal.dot(_Direc);
+	const auto _Exp = (_M.t().mul(_Normal) - _Dist * _Direc)/_Normal.dot(_Direc);
 	return type(_Exp(0), _Exp(1), _Exp(2));
 }
 }

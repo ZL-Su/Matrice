@@ -1,5 +1,6 @@
 /*********************************************************************
-This file is part of Matrice, an effcient and elegant C++ library.
+This file is part of Matrice, an effcient and elegant C++ library for
+3D Vision and Photo-Mechanics.
 Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
@@ -14,23 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
-**********************************************************************/
+*********************************************************************/
 #pragma once
 
-#include "core/matrix.h"
-
-DGE_MATRICE_BEGIN
-_DETAIL_BEGIN
-template<typename _Ty>
-class _Error_analysis {
-	using value_type = _Ty;
-	using array_type = Matrix<_Ty>;
-public:
-	MATRICE_HOST_INL 
-	static auto mean_bias(const array_type& _Vals, const value_type _Ref) {
-		return (_Vals - _Ref).sum() / _Vals.size();
-	}
-
-};
-_DETAIL_END
-DGE_MATRICE_END
+#include "private/math/_complex.hpp"
