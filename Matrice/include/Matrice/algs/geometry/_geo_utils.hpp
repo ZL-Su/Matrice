@@ -23,12 +23,31 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma warning(push)
 #endif
 
-DGE_MATRICE_BEGIN 
+DGE_MATRICE_BEGIN
+/// <summary>
+/// \brief datatype for defining dimensionality.
+/// </summary>
+enum dim_type : uint8_t {
+	d1 = 1,
+	d2 = 2,
+	d3 = 3
+};
+using dim_t = dim_type;
+
 namespace geo 
 {
 
 }
 DGE_MATRICE_END
+
+/// <summary>
+/// \brief Lateral operator for specifying geometric dimensionality.
+/// </summary>
+/// <param name="_Dim">Dim with values of 1, 2, or 3.</param>
+/// <returns>dgelom::dim_type</returns>
+MATRICE_GLOBAL_FINL constexpr auto operator""D(size_t _Dim) noexcept {
+	return dgelom::dim_t(static_cast<uint8_t>(_Dim));
+}
 
 #ifdef _MSC_VER
 #pragma warning(pop)
