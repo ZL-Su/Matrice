@@ -43,26 +43,31 @@ public:
 	_Axis_angle_rep(const _Axis_type<_Dims...>& _Axis, const angle_type& _Angl)
 		: _Mydata(_Axis(), _Angl) {}
 
-	MATRICE_GLOBAL_INL constexpr auto& axis() const noexcept { 
+	/**
+	 *\brief Get axis(ref) of the axis-angle representation.
+	 */
+	MATRICE_GLOBAL_INL constexpr decltype(auto)(axis)()const noexcept { 
 		return MATRICE_STD(get)<0>(_Mydata);
-	}
-	MATRICE_GLOBAL_INL constexpr auto& angle() const noexcept { 
-		return MATRICE_STD(get) <1>(_Mydata);
 	}
 
 	/**
-	 *\brief Converts to an equivalent rotation matrix
+	 *\brief Get angle(ref) of the axis-angle representation.
+	 */
+	MATRICE_GLOBAL_INL constexpr decltype(auto)(angle)()const noexcept {
+		return MATRICE_STD(get)<1>(_Mydata);
+	}
+
+	/**
+	 *\brief Converts to an equivalent rotation matrix.
 	 *\cite{https://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation}
 	 */
 	template<size_t _Dim = 3, MATRICE_ENABLE_IF(_Dim==3||_Dim==4)>
 	MATRICE_GLOBAL_INL auto matrix() const {
-		using sqr_matrix_t = Matrix_<angle_type, _Dim, _Dim>;
-
+		using sqr_matrix_t = Matrix_<angle_type, _Dim>;
 		const auto s = sin(angle());
 		const auto c = cos(angle());
 		const auto K = cross_prod_matrix<_Dim>(axis());
-		
-		return sqr_matrix_t(sqr_matrix_t::diag(1) + s*K + c*K*K);
+		return sqr_matrix_t(sqr_matrix_t::diag(1) + s*K + (1-c)*K*K);
 	}
 private:
 	tuple<axis_type, angle_type> _Mydata;
@@ -103,7 +108,7 @@ public:
 	using value_type = _Ty;
 	using vec4_type = Vec4_<value_type>;
 	using vec3_type = Vec3_<value_type>;
-	using matrix_type = Matrix_<value_type, 4, 4>;
+	using matrix_type = Matrix_<value_type, 4>;
 
 #ifdef MATRICE_SIMD_ARCH
 	/**
@@ -192,10 +197,10 @@ protected:
 
 public:
 	/**
-	 * \brief Compute rotation matrix between two 3d vectors
+	 * \brief Compute rotation matrix between two 3d vectors.
 	 * \param [v1, v2] the given two vectors
 	 */
-	static MATRICE_HOST_INL auto rotation(const vec3_type& v1, const vec3_type& v2) {
+	MATRICE_HOST_STAINL auto rotation(const vec3_type& v1, const vec3_type& v2) {
 		return (_Rotation_between(v1, v2));
 	}
 };
@@ -213,7 +218,7 @@ public:
 	 * \param 'x' Input vector (or point).
 	 */
 	MATRICE_GLOBAL_INL vector operator()(const vector& x)const noexcept {
-		return static_cast(const _Derived*)(this)->_Rigid_trans(x);
+		return static_cast<const _Derived*>(this)->_Rigid_trans(x);
 	}
 
 	/**
@@ -254,7 +259,7 @@ public:
 		return (*this);
 	}
 
-	MATRICE_GLOBAL_INL auto _Rigid_trans(const vector& _V) noexcept {
+	MATRICE_GLOBAL_INL auto _Rigid_trans(const vector& _V)const noexcept {
 		const auto _x = _Myxx *_V.x + _Myxy *_V.y + _Mytx;
 		const auto _y = _Myyx *_V.x + _Myyy *_V.y + _Myty;
 		return vector{ _x, _y };
