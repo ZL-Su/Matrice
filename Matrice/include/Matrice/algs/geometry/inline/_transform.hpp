@@ -1,3 +1,21 @@
+/*********************************************************************
+This file is part of Matrice, an effcient and elegant C++ library for
+3D Vision and Photo-Mechanics.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
+
+This program is free software : you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************/
 #pragma once
 #include "../transform.h"
 #ifdef MATRICE_SIMD_ARCH
@@ -234,6 +252,10 @@ protected:
 	Matrix_<value_type, 4> _Mycoef;
 };
 
+/// <summary>
+/// \brief Specialized 2D Euclidean isometry transformation.
+/// </summary>
+/// <typeparam name="_Ty"></typeparam>
 template<typename _Ty>
 class _Geo_transform<_Ty, _Geotf_tag::ISO2D> 
 	: public _Geo_transform<_Geo_transform<_Ty, _Geotf_tag::ISO2D>> {
@@ -252,7 +274,7 @@ public:
 		_Myyx = -_Myxy, _Myyy = _Myxx;
 	}
 
-	MATRICE_GLOBAL_INL decltype(auto)update(value_type angle, value_type tx, value_type ty) noexcept {
+	MATRICE_GLOBAL_INL decltype(auto) update(value_type angle, value_type tx, value_type ty) noexcept {
 		_Mytx = tx, _Myty = ty;
 		_Myxx = cos(angle), _Myxy = -sin(angle);
 		_Myyx = -_Myxy, _Myyy = _Myxx;
@@ -276,6 +298,10 @@ struct traits<_Geo_transform<_Ty, _Geotf_tag::ISO2D>> {
 	static constexpr auto dof = 2;
 };
 
+/// <summary>
+/// \brief Specialized 3D Euclidean isometry transformation.
+/// </summary>
+/// <typeparam name="_Ty"></typeparam>
 template<typename _Ty>
 class _Geo_transform<_Ty, _Geotf_tag::ISO3D>
 	: public _Geo_transform<_Geo_transform<_Ty, _Geotf_tag::ISO3D>> {
