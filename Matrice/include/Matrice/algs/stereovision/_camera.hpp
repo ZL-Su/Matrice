@@ -70,7 +70,7 @@ class _Camera<_Derived, camera_tag>  {
 public:
 	using value_type = typename _Mytraits::value_type;
 	using category = typename _Mytraits::category;
-	using init_list = std::initializer_list<value_type>;
+	using init_list = MATRICE_STD(initializer_list)<value_type>;
 	template<size_t N> using vector = auto_vector_t<value_type, N>;
 	template<size_t N> using point = vector<N>;
 
@@ -85,14 +85,26 @@ public:
 
 	_Camera() = default;
 	/**
-	 * \brief CTOR, initialize camera with an internal calibration. 
+	 * \brief CTOR, initialize camera with internal calibration. 
 	 */
 	explicit _Camera(init_list _Calib) noexcept
 		:_Mycalib(_Calib) {
 	}
+	/**
+	 * \brief CTOR, initialize camera with internal calibration and pose.
+	 */
 	explicit _Camera(init_list _Calib, init_list _Pose) noexcept
-		:_Mycalib(_Calib), _Mypose(_Pose) {
+		:_Camera(_Calib), _Mypose(_Pose) {
+	}
 
+	/**
+	 * \brief Set or reset the camera pose.
+	 * \param '_Pose' camera pose relative to the reference frame.
+	 * \return Reference of the specified camera object.
+	 */
+	MATRICE_HOST_INL _Derived& set_pose(const pose_type& _Pose) noexcept {
+		_Mypose = _Pose;
+		return static_cast<_Derived>(*this);
 	}
 
 	/**
@@ -118,7 +130,7 @@ public:
 protected:
 	static constexpr auto _Size = _Mytraits::_Size;
 
-	// Camera calibration: $f_x, f_y, c_x, c_y$
+	// Camera calibration: $f_x, f_y, c_x, c_y [, f_s]$
 	vector<_Size> _Mycalib;
 
 	// Camera pose with $r_x, r_y, r_z, t_x, t_y, t_z$
