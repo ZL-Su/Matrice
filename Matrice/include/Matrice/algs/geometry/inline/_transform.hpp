@@ -240,11 +240,25 @@ public:
 	}
 
 	/**
-	 * \brief Translate a given vector (or point) to a new position.
+	 * \brief Translate a given vector (or point) to a new one.
 	 * \param 'x' Input vector (or point).
 	 */
 	MATRICE_GLOBAL_INL vector trans(const vector& x)const noexcept {
 		return _Mycoef.cview(3) + x;
+	}
+
+	/**
+	 * \brief Rotate a given vector (or point) to a new one.
+	 * \param 'x' Input vector (or point).
+	 */
+	MATRICE_GLOBAL_INL vector rot(const vector& x)const noexcept {
+		vector _Ret;
+		for (auto _Idx = 0; _Idx < x.size(); ++_Idx) {
+			vector y;
+			_Mycoef.rview(_Idx).eval_to(y);
+			_Ret[_Idx] = (y*x).sum();
+		}
+		return _Ret;
 	}
 
 protected:
@@ -265,7 +279,11 @@ class _Geo_transform<_Ty, _Geotf_tag::ISO2D>
 public:
 	using vector = typename _Mybase::vector;
 	using value_type = _Mybase::value_type;
+
 	_Geo_transform() = default;
+	/**
+	 * \brief Ctor with a rotation angle and translation in x and y axes.
+	 */
 	_Geo_transform(value_type angle, value_type tx, value_type ty) noexcept
 		:_Mytx(_Mycoef(3)), _Myty(_Mycoef(7)), _Myxx(_Mycoef(0)), 
 		_Myxy(_Mycoef(1)), _Myyx(_Mycoef(4)), _Myyy(_Mycoef(5)){
@@ -273,8 +291,17 @@ public:
 		_Myxx = cos(angle), _Myxy = -sin(angle);
 		_Myyx = -_Myxy, _Myyy = _Myxx;
 	}
+	/**
+	 * \brief Ctor with a rotation angle and translation vector.
+	 */
+	_Geo_transform(value_type angle, const vector& t) noexcept
+		:_Geo_transform(angle, t.x, t.y) {
+	}
 
-	MATRICE_GLOBAL_INL decltype(auto) update(value_type angle, value_type tx, value_type ty) noexcept {
+	/**
+	 * \brief Update transform coefficients.
+	 */
+	MATRICE_GLOBAL_INL decltype(auto)update(value_type angle, value_type tx, value_type ty) noexcept {
 		_Mytx = tx, _Myty = ty;
 		_Myxx = cos(angle), _Myxy = -sin(angle);
 		_Myyx = -_Myxy, _Myyy = _Myxx;
@@ -309,11 +336,22 @@ class _Geo_transform<_Ty, _Geotf_tag::ISO3D>
 	using _Mybase = _Geo_transform<_Myt>;
 	using _Mybase::_Mycoef;
 public:
-	using vector = typename _Mybase::vector;
+	using vector = _Mybase::vector;
 	using value_type = _Mybase::value_type;
 	_Geo_transform() = default;
-
-
+	/**
+	 * \brief Ctor with a 3-by-3 rotation matrix and a translation vector.
+	 */
+	_Geo_transform(const vector::extend<3>& R, const vector& t) noexcept {
+		_Mycoef.cview(3) = t;
+		_Mycoef.block(0, 3, 0, 3) = R;
+	}
+	/**
+	 * \brief Ctor with a rotation vector and a translation vector.
+	 */
+	_Geo_transform(const vector& r, const vector& t) noexcept
+		:_Geo_transform(_Rodrigues_impl(r), t) {
+	}
 };
 template<typename _Ty>
 struct traits<_Geo_transform<_Ty, _Geotf_tag::ISO3D>> {
