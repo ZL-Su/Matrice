@@ -91,17 +91,15 @@ public:
 			_Mybase::operator = (_Mybase::normalize(_val))); 
 	}
 
-	MATRICE_GLOBAL_FINL
 	/// <summary>
 	/// \brief Compute dot-product with other vector. 
 	/// </summary>
 	/// <param name="'_other'">Other vector with the same type.</param>
 	/// <returns></returns>
-	value_t dot(const _Myt& _other) const noexcept {
+	MATRICE_GLOBAL_FINL value_t dot(const _Myt& _other) const noexcept {
 		return _Mybase::dot(_other); 
 	}
 
-	MATRICE_GLOBAL_INL
 	/// <summary>
 	/// \brief Return evenly spaced values within a given interval. 
 	/// The step is automatically according to the interval span and the vector dim.
@@ -109,7 +107,7 @@ public:
 	/// <param name= "'start'">Start of interval. The interval includes this value.</param>
 	/// <param name= "'stop'">End of interval. The interval does not include this value.</param>
 	/// <returns>Values are generated within the half-open interval [start, stop).</returns>
-	static _Myt arange(value_t start, value_t end) noexcept {
+	MATRICE_GLOBAL_INL static _Myt arange(value_t start, value_t end) noexcept {
 		_Myt ret;
 		const auto step = (end - start) / rows_at_compiletime;
 		for (auto idx = 0; idx < rows_at_compiletime; ++idx) {
