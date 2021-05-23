@@ -110,7 +110,7 @@ try {
 		error.view<0>(idx) = { float(mean), float(stdv) };
 	}
 
-	dgelom::IO::CSV csv("empty");
+	dgelom::IO::CSV csv;
 	std::array<std::string, 2> labels{ "Mean", "Stdv" };
 
 	csv.reset(path.parent_path().append("res\\error_uniform.csv"));
