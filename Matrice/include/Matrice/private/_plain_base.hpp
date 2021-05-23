@@ -650,7 +650,7 @@ public:
 		if constexpr (_Axis == 1) return cview(i);
 	}
 
-	// \View of submatrix: x \in [x0, x1) and y \in [y0, y1)
+	// \View of submatrix: x in range [x0, x1) and y in range [y0, y1)
 	MATRICE_GLOBAL_INL auto block(index_t x0, index_t x1, index_t y0, index_t y1) {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(x1<=m_cols, "Input var. 'x1' must not be greater than m_cols.")
