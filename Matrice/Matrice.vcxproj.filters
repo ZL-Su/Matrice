@@ -247,6 +247,9 @@
     <Filter Include="Header Files\Utils">
       <UniqueIdentifier>{4e312bcb-d0eb-4cca-ae67-73b4291a5eca}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Arch\Sys">
+      <UniqueIdentifier>{6671fb84-a0ff-43bc-81b8-c90be9dc8a0b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -719,6 +722,9 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\core\algorithm.h">
       <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\arch\sys\info_rep.h">
+      <Filter>Header Files\Arch\Sys</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
