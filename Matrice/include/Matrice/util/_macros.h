@@ -106,6 +106,10 @@ namespace simd {
 namespace ALG {
 #define MATRICE_ALG_END(ALG) } DGE_MATRICE_END
 
+#define MATRICE_EXPERIMENTAL_BEGIN DGE_MATRICE_BEGIN \
+namespace experimental{
+#define MATRICE_EXPERIMENTAL_END } DGE_MATRICE_END
+
 #define _CONDITIONS_BEGIN namespace conds {
 #define _CONDITIONS_END }
 #define _DETAIL_BEGIN namespace detail {
