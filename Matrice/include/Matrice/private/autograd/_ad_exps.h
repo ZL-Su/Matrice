@@ -305,9 +305,9 @@ struct autodiff_exp_traits<diff_mul_exp<T, U>> {
 		template<class _Ety> \
 	    MATRICE_GLOBAL_FINL constexpr auto _Eval() const noexcept { \
 	    if constexpr (is_same_v<_Ety, typename _Mybase::_Myval_tag>) \
-		    VEXP; \
+		{	VEXP;  } \
 	    if constexpr (is_same_v<_Ety, typename _Mybase::_Mydiff_tag>) \
-		    DEXP; \
+		{   DEXP;  }\
 	    static_assert(is_any_of_v<_Ety, typename _Mybase::_Myval_tag, \
 			typename _Mybase::_Mydiff_tag>, \
 		    "Invalid type parameter in ::_Eval<_Ety>."); \
@@ -327,19 +327,24 @@ struct autodiff_exp_traits<diff_mul_exp<T, U>> {
 	}
 
 DGELOM_MAKE_UNARY_AUTODIFF_EXP(sin,
-	return std::sin(m_varx.value()),
+	MATRICE_USE_STD(sin)
+	return sin(m_varx.value()),
 	return this->value() * m_varx.deriv()
 );
 DGELOM_MAKE_UNARY_AUTODIFF_EXP(cos,
-	return std::cos(m_varx.value()),
-	return -std::sin(m_varx.value()) * m_varx.deriv()
+	MATRICE_USE_STD(cos)
+	return cos(m_varx.value()),
+	MATRICE_USE_STD(sin)
+	return -sin(m_varx.value()) * m_varx.deriv()
 );
 DGELOM_MAKE_UNARY_AUTODIFF_EXP(exp,
-	return std::exp(m_varx.value()),
+	MATRICE_USE_STD(exp)
+	return exp(m_varx.value()),
 	return this->value() * m_varx.deriv()
 );
 DGELOM_MAKE_UNARY_AUTODIFF_EXP(cube,
-	return std::pow(m_varx.value(), 3),
+	MATRICE_USE_STD(pow)
+	return pow(m_varx.value(), 3),
 	return 3 * m_varx.value() * m_varx.value() * m_varx.deriv()
 );
 DGELOM_MAKE_UNARY_AUTODIFF_EXP(sq,
