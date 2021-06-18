@@ -80,10 +80,10 @@ MATRICE_HOST_INL Vec3_<_Ty> _Rodrigues_impl(const Matrix_<_Ty, 3>& _R) {
 }
 
 /// <summary>
-/// Rodrigues transform from a vector to a matrix in 3-dimensional.
+/// \brief Rodrigues transform from a vector to a matrix in 3-dimensional.
 /// </summary>
 /// <typeparam name="_Ty"> scalar </typeparam>
-/// <param name="_r"> roration vector </param>
+/// <param name="'_r'"> roration vector </param>
 /// <returns>rotation matrix </returns>
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 MATRICE_HOST_INL Matrix_<_Ty, 3> _Rodrigues_impl(const Vec3_<_Ty>& _r) noexcept {
