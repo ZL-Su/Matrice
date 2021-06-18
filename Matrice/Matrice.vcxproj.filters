@@ -726,6 +726,9 @@
     <ClInclude Include="include\Matrice\arch\sys\info_rep.h">
       <Filter>Header Files\Arch\Sys</Filter>
     </ClInclude>
+    <ClInclude Include="examples\autodiff_ex.hpp">
+      <Filter>Examples</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
