@@ -68,8 +68,13 @@ private:
 template<class T>
 struct is_autodiff_exp<auto_diff_exp<T>> : std::true_type {};
 
+/// <summary>
+/// \brief 
+/// </summary>
+/// <typeparam name="_Ty"></typeparam>
 template<typename _Ty>
 class auto_diff_variable : public auto_diff_exp<auto_diff_variable<_Ty>> {
+	using _Myt = auto_diff_variable;
 	using _Mybase = auto_diff_exp<auto_diff_variable<_Ty>>;
 public:
 	using typename _Mybase::value_type;
@@ -77,6 +82,11 @@ public:
 	MATRICE_GLOBAL_INL auto_diff_variable() noexcept = default;
 	MATRICE_GLOBAL_INL auto_diff_variable(value_type x) noexcept
 		:_Myval(x) {}
+
+	MATRICE_GLOBAL_INL _Myt& operator=(const value_type& x) noexcept {
+		_Myval = x;
+		return (*this);
+	}
 
 	template<class _Ety>
 	MATRICE_GLOBAL_FINL constexpr auto _Eval() const noexcept {
@@ -94,9 +104,13 @@ template<typename _Ty>
 struct is_autodiff_exp<auto_diff_variable<_Ty>> : std::true_type {};
 template<typename _Ty>
 struct autodiff_exp_traits<auto_diff_variable<_Ty>> { using value_type = remove_all_t<_Ty>; };
+template<typename _Ty>
+MATRICE_GLOBAL_INL auto make_variable(const _Ty& _Val) noexcept {
+	return auto_diff_variable<_Ty>(_Val);
+}
 
 /// <summary>
-/// Auto differential expression for binary addition.
+/// \brief Auto differential expression for binary addition.
 /// </summary>
 /// <typeparam name="_Lty">Type for left hand side operand</typeparam>
 /// <typeparam name="_Rty">Type for right hand side operand</typeparam>
@@ -291,45 +305,46 @@ template<typename T, typename U>
 struct is_autodiff_exp<diff_mul_exp<T, U>> : std::true_type {};
 template<typename T, typename U>
 struct autodiff_exp_traits<diff_mul_exp<T, U>> {
-	using value_type = conditional_t<is_scalar_v<T>, T, typename T::value_type>;
+	using value_type = conditional_t<is_scalar_v<remove_all_t<T>>, T, typename T::value_type>;
 };
 
 #define DGELOM_MAKE_UNARY_AUTODIFF_EXP(NAME, VEXP, DEXP) \
-	template<class _Lty> class diff_##NAME##_exp \
-	: public auto_diff_exp<diff_##NAME##_exp<_Lty>> { \
-		using _Mybase = auto_diff_exp<diff_##NAME##_exp<_Lty>>; \
-	public: \
-		using _Mybase::value_type; \
-		MATRICE_GLOBAL_INL diff_##NAME##_exp(const _Lty& x) noexcept \
-			:m_varx(x) {} \
-		template<class _Ety> \
-	    MATRICE_GLOBAL_FINL constexpr auto _Eval() const noexcept { \
-	    if constexpr (is_same_v<_Ety, typename _Mybase::_Myval_tag>) \
-		{	VEXP;  } \
-	    if constexpr (is_same_v<_Ety, typename _Mybase::_Mydiff_tag>) \
-		{   DEXP;  }\
-	    static_assert(is_any_of_v<_Ety, typename _Mybase::_Myval_tag, \
-			typename _Mybase::_Mydiff_tag>, \
-		    "Invalid type parameter in ::_Eval<_Ety>."); \
-		}\
-	private: \
-		const _Lty& m_varx; \
-	}; \
-	template<typename T> \
-	struct is_autodiff_exp<diff_##NAME##_exp<T>> : std::true_type {}; \
-	template<typename T> \
-	struct autodiff_exp_traits<diff_##NAME##_exp<T>> { \
-		using value_type = conditional_t<is_scalar_v<T>, T, typename T::value_type>; \
-	}; \
-	template<class _Lty, MATRICE_ENABLE_IF(is_autodiff_exp_v<_Lty>)> \
-	MATRICE_GLOBAL_FINL auto NAME(const _Lty& x) noexcept { \
-		return diff_##NAME##_exp{ x }; \
-	}
+template<class _Lty> class diff_##NAME##_exp \
+: public auto_diff_exp<diff_##NAME##_exp<_Lty>> { \
+	using _Mybase = auto_diff_exp<diff_##NAME##_exp<_Lty>>; \
+public: \
+	using _Mybase::value_type; \
+	MATRICE_GLOBAL_INL diff_##NAME##_exp(const _Lty& x) noexcept \
+		:m_varx(x) {} \
+	template<class _Ety> \
+	MATRICE_GLOBAL_FINL constexpr auto _Eval() const noexcept { \
+	if constexpr (is_same_v<_Ety, typename _Mybase::_Myval_tag>) \
+	{	VEXP;  } \
+	if constexpr (is_same_v<_Ety, typename _Mybase::_Mydiff_tag>) \
+	{   DEXP;  }\
+	static_assert(is_any_of_v<_Ety, typename _Mybase::_Myval_tag, \
+		typename _Mybase::_Mydiff_tag>, \
+		"Invalid type parameter in ::_Eval<_Ety>."); \
+	}\
+private: \
+	const _Lty& m_varx; \
+}; \
+template<typename T> \
+struct is_autodiff_exp<diff_##NAME##_exp<T>> : std::true_type {}; \
+template<typename T> \
+struct autodiff_exp_traits<diff_##NAME##_exp<T>> { \
+	using value_type = conditional_t<is_scalar_v<T>, T, typename T::value_type>; \
+}; \
+template<class _Lty, MATRICE_ENABLE_IF(is_autodiff_exp_v<_Lty>)> \
+MATRICE_GLOBAL_FINL auto NAME(const _Lty& x) noexcept { \
+	return diff_##NAME##_exp{ x }; \
+}
 
 DGELOM_MAKE_UNARY_AUTODIFF_EXP(sin,
 	MATRICE_USE_STD(sin)
 	return sin(m_varx.value()),
-	return this->value() * m_varx.deriv()
+	MATRICE_USE_STD(cos)
+	return cos(m_varx.value()) * m_varx.deriv()
 );
 DGELOM_MAKE_UNARY_AUTODIFF_EXP(cos,
 	MATRICE_USE_STD(cos)
