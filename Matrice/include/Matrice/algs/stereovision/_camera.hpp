@@ -39,10 +39,14 @@ struct refrap_camera_tag {};
 /// </summary>
 struct camera_tag {};
 
-inline _DETAIL_BEGIN
+MATRICE_HOST_INL
+_DETAIL_BEGIN
 
 // Forward declaration
-template<typename _Ty, typename _Tag> class _Camera {};
+template<typename _Ty, typename _Tag> class _Camera {
+	static_assert(true, 
+		"Unsupported camera tag '_Tag' in _Camera<_Ty, _Tag>.");
+};
 
 /// <summary>
 /// TRAIT, trait of a camera type
@@ -52,7 +56,7 @@ struct traits<_Camera<_Ty, _Tag>> {
 	using value_type = _Ty;
 	using category = _Tag;
 	enum {
-		// parameter size
+		/// \brief *Number of parameters (fx, fy, cx, cy, [fs=0]).
 		_Size = conditional_size_v<
 		is_same_v<category, vision::persp_camera_tag>, 5,
 		conditional_size_v<
@@ -61,7 +65,7 @@ struct traits<_Camera<_Ty, _Tag>> {
 };
 
 /// <summary>
-/// CLASS TEMPLATE, the base of camera types
+/// CLASS TEMPLATE, base of camera types
 /// </summary>
 template<typename _Derived>
 class _Camera<_Derived, camera_tag>  {
