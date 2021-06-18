@@ -342,7 +342,8 @@ public:
 	/**
 	 * \brief Ctor with a 3-by-3 rotation matrix and a translation vector.
 	 */
-	_Geo_transform(const vector::extend<3>& R, const vector& t) noexcept {
+	_Geo_transform(const auto& R, const vector& t) noexcept {
+		static_assert(is_matrix_v<decltype(R)>, "Type of R must be dgelom::Matrix_.");
 		_Mycoef.cview(3) = t;
 		_Mycoef.block(0, 3, 0, 3) = R;
 	}
