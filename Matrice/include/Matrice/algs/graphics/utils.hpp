@@ -162,7 +162,7 @@ private:
 /// <param name="'stop'"> The ending value of the sequence. </param>
 /// <param name="'num'"> Number of samples to generate. Default is 51.</param>
 /// <param name="'endpoint'">: Conditional argument. If endpoint is false, then the end point of the interval is excluded.</param>
-/// <returns></returns>
+/// <returns>dgelom::Matrix_ with size of 1-by-::dynamic</returns>
 template<typename _Ty> requires is_scalar_v<_Ty>
 MATRICE_GLOBAL_INL auto make_linspace(_Ty start, _Ty stop, size_t num = 51, bool endpoint = true) noexcept {
 	return linspace<conditional_t<std::is_unsigned_v<_Ty>, int, _Ty>>::
