@@ -141,15 +141,16 @@ MATRICE_GLOBAL_INL remove_all_t<_Ty>& make_zero(_Ty& data) noexcept {
 }
 
 /**
- * \brief Make a copy from the given matrix _M
+ * \brief Make a copy from the given matrix _M.
  */
-template<typename _Mty, MATRICE_ENABLE_IF(is_matrix_v<_Mty>)>
+template<typename _Mty>
 MATRICE_HOST_INL _Mty copy(const _Mty& _M) {
+	static_assert(is_matrix_v<_Mty>, "_Mty should be Matrix_<_Ty, _M, _N> in copy(const _Mty&).");
 	return { _M };
 }
 
 /**
- * \brief Swap matrice _L and _R
+ * \brief Swap matrice _L and _R.
  */
 template<typename _Mty>
 MATRICE_HOST_INL void swap(_Mty& _L, _Mty& _R) noexcept
