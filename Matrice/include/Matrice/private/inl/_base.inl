@@ -3,8 +3,8 @@
 *********************************************************************/
 #pragma once
 #include <execution>
-#include "../_plain_base.hpp"
-#include "../_range.h"
+#include "private/_plain_base.hpp"
+#include "private/_range.h"
 #include "private/nonfree/blas_lapack_kernel.h"
 #include "private/math/kernel_wrapper.hpp"
 
@@ -12,8 +12,8 @@ DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
 template<typename _Derived, typename _Traits, typename _Type>
 template<typename _Rhs> MATRICE_HOST_INL
-auto Base_<_Derived, _Traits, _Type>::sub_inplace(const _Rhs& _Right) {
-#ifdef MATRICE_SIMD_ARCH
+decltype(auto) Base_<_Derived, _Traits, _Type>::sub_inplace(const _Rhs& _Right) {
+#ifdef MATRICE_SIMD_ARCH_
 	using packet_t = simd::Packet_<value_type>;
 	constexpr auto step = packet_t::size;
 	const auto plen = simd::vsize<step>(this->size());
@@ -28,9 +28,9 @@ auto Base_<_Derived, _Traits, _Type>::sub_inplace(const _Rhs& _Right) {
 		}
     }
 	else if constexpr (is_matrix_v<_Rhs>) {
-		DGELOM_CHECK(this->dims()==_Right.dims(), "Inconsistent shapes.");
+		DGELOM_CHECK(this->shape()==_Right.shape(), "Inconsistent shapes.");
 		const auto rdata = _Right.data();
-		for (const auto i : range(0, plen, step)) {
+		for (const auto i : range(0, plen, size_t(step))) {
 			(packet_t(m_data+i)-packet_t(rdata+i)).unpack(m_data+i);
 		}
 		for (auto i = plen; i < this->size(); ++i) {
@@ -41,20 +41,10 @@ auto Base_<_Derived, _Traits, _Type>::sub_inplace(const _Rhs& _Right) {
 		throw("No implemented error");
 	}
 #else
-	if constexpr (is_matrix_v<_Rhs>) {
-		MATRICE_USE_STD(transform);
-		MATRICE_USE_STD(execution::par);
-		transform(par, _Right.begin(), _Right.end(), begin(),
-			[](auto& _Val1, auto _Val2) {
-				_Val1 -= _Val2;
-			});
-	}
-	else {
-		for (auto _Idx = 0; _Idx < this->size(); ++_Idx)
-			m_data[_Idx] -= _Right(_Idx);
-	}
+	for (auto _Idx = 0; _Idx < this->size(); ++_Idx)
+		m_data[_Idx] -= _Right(_Idx);
 #endif
-	return forward<_Myt>(*this);
+	return this->derived();
 }
 
 template<typename _Derived, typename _Traits, typename _Type>
