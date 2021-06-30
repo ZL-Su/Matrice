@@ -116,9 +116,11 @@ _Bspline<_Ty, bicubic_tag>::_Bspline(const matrix_type& _Data, bool _Zp) {
 
 template<typename _Ty>
 void _Bspline<_Ty, bicubic_tag>::set(const matrix_type& _Data) {
+	// require zero padding
 	if (_Data.shape() != _Mybase::_Mycoef->shape()) {
-		constexpr auto _LT = ~-(4 >> 1), _RB = -~(4 >> 1);
-		_Mybase::_Mycoef->create(_Data.shape());
+		constexpr auto _Bound= ~-(4 >> 1) + -~(4 >> 1);
+		const auto [_H, _W, _] = _Data.shape();
+		_Mybase::_Mycoef->create(_H, _W);
 	}
 	_Precompute(_Data);
 }
