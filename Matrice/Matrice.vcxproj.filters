@@ -22,6 +22,9 @@
     <Filter Include="Header Files\Arch">
       <UniqueIdentifier>{81d78cf3-732d-46a4-b66b-f36f799d7465}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Util">
+      <UniqueIdentifier>{4e312bcb-d0eb-4cca-ae67-73b4291a5eca}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Header Files\Addin">
       <UniqueIdentifier>{db5e8904-7c79-4de7-8d5b-1120cb31251a}</UniqueIdentifier>
     </Filter>
@@ -124,6 +127,9 @@
     <Filter Include="Header Files\Detail\inline">
       <UniqueIdentifier>{09339ca4-a7f2-41af-9dce-ed8962478bb9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Algs\ErrorAnalysis">
+      <UniqueIdentifier>{bc759b18-c791-4c6d-9888-7e0b7e7e079b}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Header Files\Algs\Graphics">
       <UniqueIdentifier>{4b58a893-2f5c-426b-a86f-050ce06b1848}</UniqueIdentifier>
     </Filter>
@@ -138,12 +144,6 @@
     </Filter>
     <Filter Include="Header Files\Addin\eigen">
       <UniqueIdentifier>{11407415-926f-477d-90df-0cfc810a66d0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Addin\eigen\autodiff">
-      <UniqueIdentifier>{e5827951-4548-4191-9cf1-290b0b418598}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Addin\gui">
-      <UniqueIdentifier>{da48dbfb-df67-4870-a0a6-8f87648ca827}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Detail\math\nonfree">
       <UniqueIdentifier>{c5af5bf5-c77b-41c2-b880-4a6b9604f5a0}</UniqueIdentifier>
@@ -223,33 +223,6 @@
     <Filter Include="Header Files\Algs\Spline">
       <UniqueIdentifier>{81d8d0c7-b6cf-498f-ae95-a9368377c5b6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Algs\Stereovision\refractive">
-      <UniqueIdentifier>{f051172f-23e2-4827-9613-1168f1cf15a1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Algs\Stereovision\refractive\inline">
-      <UniqueIdentifier>{e71e77d2-ae79-4cbb-a8f1-2c4c9fe0f5b1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Algs\transform">
-      <UniqueIdentifier>{abbc4ff7-5025-44de-8fcb-bb1b0fa65caf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Algs\transforms">
-      <UniqueIdentifier>{8a8f45e6-77e2-441d-ae88-3cc2fed294f1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Math">
-      <UniqueIdentifier>{04d9fcfb-b471-4a20-ba1c-7c96dcbb1397}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Algs\Statistics">
-      <UniqueIdentifier>{bc759b18-c791-4c6d-9888-7e0b7e7e079b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Algs\DeepLearning\Data">
-      <UniqueIdentifier>{88fb4997-7b29-4508-88ce-59eaf23fdd86}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Utils">
-      <UniqueIdentifier>{4e312bcb-d0eb-4cca-ae67-73b4291a5eca}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Arch\Sys">
-      <UniqueIdentifier>{6671fb84-a0ff-43bc-81b8-c90be9dc8a0b}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -265,16 +238,16 @@
       <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\util\_macros.h">
-      <Filter>Header Files\Utils</Filter>
+      <Filter>Header Files\Util</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\core\solver.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\util\_type_defs.h">
-      <Filter>Header Files\Utils</Filter>
+      <Filter>Header Files\Util</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\util\genalgs.h">
-      <Filter>Header Files\Utils</Filter>
+      <Filter>Header Files\Util</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\arch\_ixbase.h">
       <Filter>Header Files\Arch</Filter>
@@ -364,7 +337,7 @@
       <Filter>Header Files\Arch\Inl</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\util\utils.h">
-      <Filter>Header Files\Utils</Filter>
+      <Filter>Header Files\Util</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\funcs\_functions.h">
       <Filter>Header Files\Funcs</Filter>
@@ -406,10 +379,10 @@
       <Filter>Header Files\License</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\util\_exception.h">
-      <Filter>Header Files\Utils</Filter>
+      <Filter>Header Files\Util</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\util\_std_wrapper.h">
-      <Filter>Header Files\Utils</Filter>
+      <Filter>Header Files\Util</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\thread\inline\_thread_parallel_nd.inl">
       <Filter>Header Files\Thread\inl</Filter>
@@ -421,7 +394,7 @@
       <Filter>Header Files\Detail\math</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\erroranalysis\_common.h">
-      <Filter>Header Files\Algs\Statistics</Filter>
+      <Filter>Header Files\Algs\ErrorAnalysis</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\dnn\kernels\_kernels.h">
       <Filter>Header Files\Algs\DeepLearning\Kernels</Filter>
@@ -451,7 +424,7 @@
       <Filter>Header Files\Algs\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\util\_property.hpp">
-      <Filter>Header Files\Utils</Filter>
+      <Filter>Header Files\Util</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\stereovision\_projection.hpp">
       <Filter>Header Files\Algs\Stereovision</Filter>
@@ -580,7 +553,7 @@
       <Filter>Header Files\Algs</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\util\_conditional_macros.h">
-      <Filter>Header Files\Utils</Filter>
+      <Filter>Header Files\Util</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\interpolation\_cubic_conv_interp.hpp">
       <Filter>Header Files\Algs\Interpolation</Filter>
@@ -669,10 +642,10 @@
     <ClInclude Include="examples\dic_ex.hpp">
       <Filter>Examples</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\core\image.h">
+    <ClInclude Include="include\Matrice\core\image.hpp">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\algs\correlation\_graph_executor.h">
+    <ClInclude Include="include\Matrice\algs\correlation\_graph_executor.hpp">
       <Filter>Header Files\Algs\Correlation</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\stereovision\_camera.hpp">
@@ -682,7 +655,7 @@
       <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\util\version.h">
-      <Filter>Header Files\Utils</Filter>
+      <Filter>Header Files\Util</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\spline.h">
       <Filter>Header Files\Algs\Spline</Filter>
@@ -709,24 +682,9 @@
       <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="examples\2dresfrep_ex.hpp">
+    <ClInclude Include="examples\autodiff_ex.hpp">
       <Filter>Examples</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\private\math\_complex.hpp">
-      <Filter>Header Files\Detail\math</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Matrice\math\complex.h">
-      <Filter>Header Files\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Matrice\algs\dnn\_dataset_ops.hpp">
-      <Filter>Header Files\Algs\DeepLearning\Data</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Matrice\core\algorithm.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Matrice\arch\sys\info_rep.h">
-      <Filter>Header Files\Arch\Sys</Filter>
-    </ClInclude>
-    <ClInclude Include="examples\autodiff_ex.hpp">
       <Filter>Examples</Filter>
     </ClInclude>
   </ItemGroup>
@@ -933,10 +891,10 @@
       <Filter>Source Files\Details\math</Filter>
     </ClCompile>
     <ClCompile Include="src\algorithm\_bsplines.cpp">
-      <Filter>Source Files\Algs\transforms</Filter>
+      <Filter>Source Files\Algs</Filter>
     </ClCompile>
-    <ClCompile Include="src\algorithm\transforms\_fft.cpp">
-      <Filter>Source Files\Algs\transforms</Filter>
+    <ClCompile Include="src\algorithm\_bsplines.cpp">
+      <Filter>Source Files\Algs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -967,7 +925,7 @@
     <None Include="include\Matrice\private\inl\_base.inl">
       <Filter>Header Files\Detail\core\inline</Filter>
     </None>
-    <None Include="include\Matrice\algs\geometry\inline\_transform.hpp">
+    <None Include="include\Matrice\algs\geometry\inline\_transform.inl">
       <Filter>Header Files\Algs\Geometry</Filter>
     </None>
     <None Include="include\io">
@@ -997,9 +955,6 @@
     </None>
     <None Include="include\Matrice\private\nonfree\inl\blas_lapack_impl.inl">
       <Filter>Header Files\Detail\math\nonfree\inl</Filter>
-    </None>
-    <None Include="include\Matrice\algs\stereovision\refractive3D\_refractive3d.inl">
-      <Filter>Header Files\Algs\Stereovision\refractive\inline</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
