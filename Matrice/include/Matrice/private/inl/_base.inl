@@ -2,9 +2,9 @@
 	  About License Agreement of this file, see "../lic/license.h"
 *********************************************************************/
 #pragma once
+#include <execution>
 #include "../_plain_base.hpp"
 #include "../_range.h"
-#include "../../thread/_thread.h"
 #include "private/nonfree/blas_lapack_kernel.h"
 #include "private/math/kernel_wrapper.hpp"
 
@@ -38,11 +38,21 @@ auto Base_<_Derived, _Traits, _Type>::sub_inplace(const _Rhs& _Right) {
 		}
 	}
 	else {
-		parallel_nd([&](const auto& i) { m_data[i] -= _Right(i); });
+		throw("No implemented error");
 	}
 #else
-	for (auto _Idx = 0; _Idx < this->size(); ++_Idx) 
-		m_data[_Idx] -= _Right(_Idx);
+	if constexpr (is_matrix_v<_Rhs>) {
+		MATRICE_USE_STD(transform);
+		MATRICE_USE_STD(execution::par);
+		transform(par, _Right.begin(), _Right.end(), begin(),
+			[](auto& _Val1, auto _Val2) {
+				_Val1 -= _Val2;
+			});
+	}
+	else {
+		for (auto _Idx = 0; _Idx < this->size(); ++_Idx)
+			m_data[_Idx] -= _Right(_Idx);
+	}
 #endif
 	return forward<_Myt>(*this);
 }
@@ -143,10 +153,8 @@ MATRICE_GLOBAL_INL remove_all_t<_Ty>& make_zero(_Ty& data) noexcept {
 /**
  * \brief Make a copy from the given matrix _M.
  */
-template<typename _Mty>
+template<typename _Mty, typename>
 MATRICE_HOST_INL _Mty copy(const _Mty& _M) {
-	static_assert(is_matrix_v<_Mty>, 
-		"_Mty should be Matrix_<_Ty, _M, _N> in copy(const _Mty&).");
 	return { _M };
 }
 
