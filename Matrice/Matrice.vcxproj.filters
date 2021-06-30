@@ -705,7 +705,7 @@
     <ClInclude Include="include\Matrice\algs\transform\_fft.hpp">
       <Filter>Header Files\Algs\transform</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\core\functional.h">
+    <ClInclude Include="include\Matrice\core\functions.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="examples\2dresfrep_ex.hpp">
