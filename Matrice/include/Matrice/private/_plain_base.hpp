@@ -939,7 +939,6 @@ public:
 #pragma endregion
 
 	///<brief> in-time matrix arithmetic </brief>
-	MATRICE_GLOBAL_FINL auto(max)()const noexcept { 
 		return (*std::max_element(begin(), end())); 
 	}
 	MATRICE_GLOBAL_FINL auto(min)()const noexcept {
@@ -1014,7 +1013,7 @@ public:
 	 *\param [_Right] can be scalar or any compatible types
 	 */
 	template<typename _Rhs>
-	MATRICE_HOST_INL auto sub_inplace(const _Rhs& _Right);
+	MATRICE_HOST_INL decltype(auto) sub_inplace(const _Rhs& _Right);
 
 	/**
 	 *\brief in-place matrix-vector multiplication. Note that if the number of rows of this matrix A equals to the size of the right column vector x, this method returns (A^T)x.
