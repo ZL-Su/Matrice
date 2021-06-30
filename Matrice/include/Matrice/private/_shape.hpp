@@ -20,7 +20,6 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "util/_macros.h"
 #include "util/_std_wrapper.h"
 #include "util/_exception.h"
-#include "private/math/_primitive_funcs.hpp"
 #include "_size_traits.h"
 
 DGE_MATRICE_BEGIN
