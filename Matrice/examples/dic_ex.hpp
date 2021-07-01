@@ -48,22 +48,21 @@ try {
 	smooth_image_t f{ ref_image };
 
 	///\brief Set optimizer options and mesh computing domain.
-	const auto options = corr_optim_t::options_type{ 15 };
+	const auto options = corr_optim_t::options_type{ 20 };
 	const auto subsize = options.radius() << 1;
-	const auto x_space = dgelom::make_linspace(
-		subsize, cols - subsize, 20);
-	const auto y_space = dgelom::make_linspace(
-		subsize, rows - subsize, 20);
-
-	auto disp_x = corr_optim_t::matrix_type(x_space.size()*y_space.size(),
-		image_loader.depth(), 0.);
+	/*const */auto x_space = dgelom::make_linspace(
+		subsize, cols - subsize, 2);
+	/*const */auto y_space = dgelom::make_linspace(
+		subsize, rows - subsize, 2);
+	x_space(0) = 933, x_space(1) = 1523;
+	y_space(0) = 915, y_space(1) = 921;
+	auto disp_x = corr_optim_t::matrix_type(x_space.size()*y_space.size()*2, image_loader.depth(), 0.);
 	auto error = dgelom::Matrix_<float, ::dynamic, 2>(image_loader.depth());
 
 	///\brief Move loader back one step to start from reference.
 	image_loader.shift(-1);
 
 	auto loss_scale = val;
-
 	for (; !image_loader.end(); ) {
 		const auto cur_image = image_loader.forward().front();
 		decltype(f) g{ cur_image };
@@ -81,8 +80,9 @@ try {
 				std::cout << "-IT-" << "-----DISP----"
 					<< "----QUAD LOSS---" << "----RHO LOSS----"
 					<< "---||dp||----" << "ID: " << npoint << "\n";
-				for (auto nit = 0; nit < options.maxiters(); ++nit) {
+				for (auto nit = 0; nit < min(10,options.maxiters()); ++nit) {
 					auto [squared_loss, rho_loss, nodp] = solver.robust_sol(p);
+					//auto [squared_loss, nodp] = solver(p);
 					std::cout << " "
 						<< std::setiosflags(std::ios::left)
 						<< dgelom::str(nit, 2).append("  ")
@@ -95,40 +95,41 @@ try {
 						<< rho_loss
 						<< std::setw(15)
 						<< nodp << "\n";
-					if (nodp < options.tol(1))
+					if (nodp < options.tol(10))
 						break;
 					if (squared_loss < options.tol(100))
 						break;
 				}
-				disp_col[npoint] = p[0];
+				disp_col[(npoint)<<1] = p[0];
+				disp_col[(npoint)<<1|1] = p[3];
 				++npoint;
 			}
 		}
 		
-		const auto u = disp_x.cbegin(idx);
-		const auto [mean, stdv] = corr::eval_perf(u.begin(), u.end(), /*Groundtruth=*/idx*0.05);
-		error.view<0>(idx) = { float(mean), float(stdv) };
+		//const auto u = disp_x.cbegin(idx);
+		//const auto [mean, stdv] = corr::eval_perf(u.begin(), u.end(), /*Groundtruth=*/idx*0.05);
+		//error.view<0>(idx) = { float(mean), float(stdv) };
 	}
 
 	dgelom::IO::CSV csv;
 	std::array<std::string, 2> labels{ "Mean", "Stdv" };
 
-	csv.reset(path.parent_path().append("res\\error_uniform.csv"));
-	csv.open(dgelom::IO::app);
-	csv.append("Impulse-Welsch-"+dgelom::str(loss_scale));
-	//csv.append("Impulse-Gaussian");
-	for (auto col = error.cwbegin(); col!=error.cwend(); ++col) {
-		csv.append(std::move(labels[col.pos()]), 
-			col.begin(), col.end());
-	}
-	csv.close();
+	//csv.reset(path.parent_path().append("res\\error_uniform.csv"));
+	//csv.open(dgelom::IO::app);
+	//csv.append("Impulse-Welsch-"+dgelom::str(loss_scale));
+	////csv.append("Impulse-Gaussian");
+	//for (auto col = error.cwbegin(); col!=error.cwend(); ++col) {
+	//	csv.append(std::move(labels[col.pos()]), 
+	//		col.begin(), col.end());
+	//}
+	//csv.close();
 
-	/*csv.reset(path.parent_path().append("res\\disp_gn0_welch_0.01.csv"));
+	csv.reset(path.parent_path().append("res\\disp_4pts_0.0005.csv"));
 	csv.open(dgelom::IO::app);
 	for (auto row = disp_x.rwbegin(); row != disp_x.rwend(); ++row) {
 		csv.append(row.begin(), row.end());
 	}
-	csv.close();*/
+	csv.close();
 
 	std::cout << " >> [Matrice message] finish for scale " + dgelom::str(loss_scale) + "\n";
 
