@@ -939,6 +939,7 @@ public:
 #pragma endregion
 
 	///<brief> in-time matrix arithmetic </brief>
+	MATRICE_GLOBAL_FINL auto(max)()const noexcept {
 		return (*std::max_element(begin(), end())); 
 	}
 	MATRICE_GLOBAL_FINL auto(min)()const noexcept {
