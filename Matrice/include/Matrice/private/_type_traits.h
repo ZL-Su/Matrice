@@ -444,4 +444,11 @@ template<typename T> struct is_autodiff_exp : std::false_type {};
  */
 template<typename T>
 inline constexpr auto is_autodiff_exp_v = is_autodiff_exp<T>::value;
+
+/**
+ *\brief pi<T> for evaluating an optimal PI from type T.
+ */
+template<typename T = long double>
+inline constexpr T pi{ static_cast<T>(3.14159265358979323846264338327950288419716939937510582097494459)
+};
 DGE_MATRICE_END

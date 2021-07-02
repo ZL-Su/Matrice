@@ -62,4 +62,6 @@ template<typename _Ty, typename... _Ts> struct Index {};
 enum {
 	non_external_callable,
 };
+
+static_assert(sizeof(void*) == 8, "MATRICE supports 64 bit only.");
 }

@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2019, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 #include "forward.hpp"
-#include "../../math/_primitive_funcs.hpp"
-#include "../../math/kernel_wrapper.hpp"
+#include "math/_primitive_funcs.hpp"
+#include "math/kernel_wrapper.hpp"
 
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 

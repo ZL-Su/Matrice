@@ -18,6 +18,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include "util/_macros.h"
 #include "_type_traits.h"
+#include "_shape.hpp"
 
 DGE_MATRICE_BEGIN
 template<typename _Mty> class Ref {
@@ -54,6 +55,38 @@ private:
 };
 template<class... T>
 struct is_ref<Ref<T...>> : std::true_type {};
+
+/// <summary>
+/// \brief HELPER CLASS, wrap data pointer and shape of a matrix or tensor.
+/// </summary>
+/// <typeparam name="_Ty">Any scalar type</typeparam>
+template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)> 
+class Ref_ {
+public:
+	using value_type = _Ty;
+	using pointer = value_type*;
+	using reference = value_type&;
+
+	template<class _Mty, 
+		MATRICE_ENABLE_IF(is_matrix_v<remove_all_t<_Mty>>)>
+	explicit Ref_(_Mty& _M) noexcept
+		: _Mydata(_M.data()), _Myshape(_M.shape()) {
+	}
+
+	MATRICE_GLOBAL_INL decltype(auto)data() const noexcept {
+		return _Mydata;
+	}
+	MATRICE_GLOBAL_INL decltype(auto)data() noexcept {
+		return _Mydata;
+	}
+	MATRICE_GLOBAL_INL decltype(auto)shape() const noexcept {
+		return (_Myshape);
+	}
+
+private:
+	pointer _Mydata;
+	const shape_t<3>& _Myshape;
+};
 
 template<typename _Mty>
 MATRICE_GLOBAL_FINL decltype(auto) ref(_Mty& cont, bool t=false)noexcept {
