@@ -143,7 +143,7 @@ MATRICE_GLOBAL_INL remove_all_t<_Ty>& make_zero(_Ty& data) noexcept {
 /**
  * \brief Make a copy from the given matrix _M
  */
-template<typename _Mty, MATRICE_ENABLE_IF(is_matrix_v<_Mty>)>
+template<typename _Mty, typename>
 MATRICE_HOST_INL _Mty copy(const _Mty& _M) {
 	return { _M };
 }
