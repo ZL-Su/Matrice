@@ -62,7 +62,7 @@ auto Base_<_Derived, _Traits, _Type>::mul_inplace(const _Rhs& _Right) const{
 }
 
 template<typename _Derived, typename _Traits, typename _Type>
-template<int Rows, int Cols> MATRICE_GLOBAL_INL 
+template<index_t Rows, index_t Cols> MATRICE_GLOBAL_INL
 _Type Base_<_Derived, _Traits, _Type>::contract(const Matrix_<_Type, Rows, Cols>& other) const
 {
 #ifdef MATRICE_DEBUG
