@@ -19,7 +19,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "util/_macros.h"
 #include "util/_type_defs.h"
 #include "util/_std_wrapper.h"
-#ifdef __cpp_concepts
+#ifdef MATRICE_ENABLE_CXX20
 #include <concepts>
 #endif
 
