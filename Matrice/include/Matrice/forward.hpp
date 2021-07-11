@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,17 +16,21 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
-#include "util/_std_wrapper.h"
+#include "util/_type_defs.h"
+#include "private/_concepts.hpp"
 
 namespace dgelom {
+
 namespace detail {
-	template<typename _Ty, int _M, int _N> class Matrix_;
-	template<typename _Ty, int _Dim> class Vec_;
+	template<typename _Ty, index_t _M, index_t _N> class Matrix_;
+	template<typename _Ty, index_t _Dim> class Vec_;
 	template<typename _Ty> class Vec3_;
 	template<typename _Ty> class Vec4_;
 }
 
-template<typename _Ty, int _RowsAtCompileTime, int _ColsAtCompileTime=_RowsAtCompileTime> 
+template<typename _Ty, 
+	index_t _RowsAtCompileTime,
+	index_t _ColsAtCompileTime=_RowsAtCompileTime>
 using Matrix_ = detail::Matrix_<_Ty, _RowsAtCompileTime, _ColsAtCompileTime>;
 
 //\matrix type with host dynamic memory allocator
@@ -54,10 +58,10 @@ using matrix_f32 = Matrix<float>;
 using matrix_f64 = Matrix<double>;
 
 //\N-dimensional array with host managed memory
-template<typename T, int _N> 
+template<typename T, index_t _N>
 using array_n = Matrix_<T, _N, 1>;
 
-template<typename _Ty, int _Size>
+template<typename _Ty, index_t _Size>
 using Array_ = Matrix_<_Ty, _Size, (_Size > 0 ? 1 : _Size)> ;
 
 //\brief shared matrix pointer
