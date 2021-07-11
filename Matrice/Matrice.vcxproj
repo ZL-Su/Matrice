@@ -67,7 +67,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;MATRICE_DEBUG;_LIB;_SCL_SECURE_NO_WARNINGS;_ENABLE_EXTENDED_ALIGNED_STORAGE;MATRICE_THR=MATRICE_THR_OMP;MATRICE_MATH_KERNEL=MATRICE_USE_MKL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
@@ -86,8 +86,6 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <BrowseInformation>true</BrowseInformation>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <RuntimeTypeInfo>true</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -158,7 +156,7 @@
     <ClInclude Include="include\Matrice\3rdparty\interface.hpp" />
     <ClInclude Include="include\Matrice\algs\correlation.hpp" />
     <ClInclude Include="include\Matrice\algs\correlation\_correlation_traits.h" />
-    <ClInclude Include="include\Matrice\algs\correlation\_graph_executor.hpp" />
+    <ClInclude Include="include\Matrice\algs\correlation\_graph_executor.h" />
     <ClInclude Include="include\Matrice\algs\correlation\_optim.h" />
     <ClInclude Include="include\Matrice\algs\correlation\_utils.hpp" />
     <ClInclude Include="include\Matrice\algs\dnn\conv\_conv_impl.hpp" />
@@ -168,6 +166,7 @@
     <ClInclude Include="include\Matrice\algs\dnn\layer\_layers.hpp" />
     <ClInclude Include="include\Matrice\algs\dnn\layer\_layer_base.hpp" />
     <ClInclude Include="include\Matrice\algs\dnn\models\_basic_model.hpp" />
+    <ClInclude Include="include\Matrice\algs\dnn\_dataset_ops.hpp" />
     <ClInclude Include="include\Matrice\algs\erroranalysis\_common.h" />
     <ClInclude Include="include\Matrice\algs\forward.hpp" />
     <ClInclude Include="include\Matrice\algs\geometry.hpp" />
@@ -199,14 +198,18 @@
     <ClInclude Include="include\Matrice\algs\spline.h" />
     <ClInclude Include="include\Matrice\algs\spline\_spline.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovis.hpp" />
+    <ClInclude Include="include\Matrice\algs\stereovision\refractive3D\_refractive3d_funcs.h" />
+    <ClInclude Include="include\Matrice\algs\stereovision\refractive3D\_refractive3d.h" />
     <ClInclude Include="include\Matrice\algs\stereovision\_camera.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_depth_estimation.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_projection.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_spatial_transform.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_triangulation.hpp" />
+    <ClInclude Include="include\Matrice\algs\transform\_fft.hpp" />
     <ClInclude Include="include\Matrice\arch\inl\_ixops.hpp" />
     <ClInclude Include="include\Matrice\arch\inl\_ixop_impls.hpp" />
     <ClInclude Include="include\Matrice\arch\ixpacket.h" />
+    <ClInclude Include="include\Matrice\arch\sys\info_rep.h" />
     <ClInclude Include="include\Matrice\arch\_ixbase.h" />
     <ClInclude Include="include\Matrice\arch\_ixtraits.hpp" />
     <ClInclude Include="include\Matrice\core\algorithm.h" />
@@ -223,6 +226,7 @@
     <ClInclude Include="include\Matrice\io\_png_wrapper.hpp" />
     <ClInclude Include="include\Matrice\io\_tiff_wrapper.hpp" />
     <ClInclude Include="include\Matrice\lic\license.h" />
+    <ClInclude Include="include\Matrice\math\complex.h" />
     <ClInclude Include="include\Matrice\math_forward.hpp" />
     <ClInclude Include="include\Matrice\private\autograd\_ad_exps.h" />
     <ClInclude Include="include\Matrice\private\autograd\_ad_ops.h" />
@@ -232,6 +236,7 @@
     <ClInclude Include="include\Matrice\private\container\_multi_array.hpp" />
     <ClInclude Include="include\Matrice\private\math\fast_native_math_funcs.hpp" />
     <ClInclude Include="include\Matrice\private\math\kernel_wrapper.hpp" />
+    <ClInclude Include="include\Matrice\private\math\_complex.hpp" />
     <ClInclude Include="include\Matrice\private\math\_config.h" />
     <ClInclude Include="include\Matrice\private\math\_linear.h" />
     <ClInclude Include="include\Matrice\private\math\_linear_solver.h" />
@@ -340,6 +345,7 @@
     <ClCompile Include="addin\libtiff\tif_win32.c" />
     <ClCompile Include="addin\libtiff\tif_write.c" />
     <ClCompile Include="include\Matrice\algs\dnn\functions\_functions.h" />
+    <ClCompile Include="src\algorithm\transforms\_fft.cpp" />
     <ClCompile Include="src\algorithm\_bsplines.cpp" />
     <ClCompile Include="src\algorithm\_splineinterp.cpp" />
     <ClCompile Include="src\core\matrix_base_impl.cpp" />
@@ -359,9 +365,10 @@
     <None Include="include\algs" />
     <None Include="include\io" />
     <None Include="include\Matrice\algs\correlation\inline\_optim.inl" />
-    <None Include="include\Matrice\algs\geometry\inline\_transform.inl" />
+    <None Include="include\Matrice\algs\geometry\inline\_transform.hpp" />
     <None Include="include\Matrice\algs\interpolation\_base.inl" />
     <None Include="include\Matrice\algs\similarity\inline\_iterative_conv_impl.inl" />
+    <None Include="include\Matrice\algs\stereovision\refractive3D\_refractive3d.inl" />
     <None Include="include\Matrice\arch\inl\_ixpacket.inl" />
     <None Include="include\Matrice\io\inline\_data_loader.inl" />
     <None Include="include\Matrice\io\inline\_directory.inl" />
