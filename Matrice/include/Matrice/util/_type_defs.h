@@ -1,6 +1,6 @@
 /***************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library for SC.
-Copyright(C) 2018-2020, Zhilong (Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2021, Zhilong (Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the Free
@@ -18,11 +18,13 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include <functional>
 #include <cstdint>
+#include "_std_wrapper.h"
 
 namespace dgelom 
 {
 using default_type = double;
-using index_t = long long;
+using index_t = int32_t;
+
 enum solver_type {
 	AUTO = 0x0000, LUF = 0x0001, CHD = 0x0002, QRD = 0x0003,
 	SVD = 0x0004, ITER = 0x0005, SPAR = 0x0006, GLS = 0x0007
