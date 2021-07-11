@@ -26,7 +26,7 @@ const size_t _Size = min(size(),_N); \
 for(size_t _Idx = 0; _Idx < _Size; ++_Idx) { \
 	_LEFT(_Idx) = this->operator()(_Idx); \
 }
-template<typename _Ty, int _Rows, int _Cols> class Matrix_;
+template<typename _Ty, index_t _Rows, index_t _Cols> class Matrix_;
 /**********************************************************************
 						   Matrix view base class 
 	    Copyright (c) : Zhilong (Dgelom) Su, since 25/Jul/2018

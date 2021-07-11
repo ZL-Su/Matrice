@@ -1006,7 +1006,7 @@ public:
 	 * \contraction of two matrices (rank-2 tensors)
 	 //tex: $\text{res} = \mathbf{A}:\mathbf{B}$
 	 */
-	template<int Rows, int Cols>
+	template<index_t Rows, index_t Cols>
 	MATRICE_GLOBAL_INL value_type contract(const Matrix_<value_type, Rows, Cols>& _Rhs)const;
 
 	/**
