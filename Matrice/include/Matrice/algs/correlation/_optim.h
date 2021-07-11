@@ -180,9 +180,12 @@ public:
 			//return x;
 		}
 		value_type phi(value_type x) noexcept {
-			return exp(-x/scale);
-			//return 1/sq(1+x/scale);
-			//return 1;
+			x = sq(x);
+			//return 1; // Gaussian
+			return exp(-x/scale); // Welsch
+			//return 1/sq(1+x/scale); //Geman-McClure
+			//return scale*x/(sq(scale)+sq(x)); // Cauchy
+			//return 1/(1+x/scale); // Cauchy
 		}
 		value_type scale = sq(0.001);
 	};

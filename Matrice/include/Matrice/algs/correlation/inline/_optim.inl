@@ -213,7 +213,7 @@ auto _Corr_optim_base<_Derived>::robust_sol(param_type& Par)
 
 	// \compute robustness and weight Jacobian
 	for (auto i = 0; i < _Myweight.size(); ++i) {
-		const auto wi = _Myloss.phi(sq(_Mydiff(i)));
+		const auto wi = _Myloss.phi(_Mydiff(i));
 		_Myweight(i) = wi;
 		for (auto j = 0; j < _Myjaco.cols(); ++j) {
 			_Myjaco_tw.cview(i)(j) = _Myjaco[i][j] * wi;
@@ -236,7 +236,7 @@ auto _Corr_optim_base<_Derived>::robust_sol(param_type& Par)
 
 	auto _Loss = value_type(0);
 	for (auto i = 0; i < _Mydiff.size(); ++i) {
-		_Loss += _Myloss.rho(sq(_Mydiff(i)));
+		_Loss += _Myloss.rho(_Mydiff(i));
 	}
 
 	// \report least square correlation coeff., param. error, and loss.
