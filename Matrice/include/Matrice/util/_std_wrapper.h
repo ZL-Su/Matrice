@@ -42,7 +42,7 @@ namespace dgelom {
 	using std::uniform_real;
 	using std::normal_distribution;
 
-	using diff_t = std::ptrdiff_t;
+	using diff_t = std::int32_t;
 
 	template<typename _Ty>
 	using initlist = std::initializer_list<_Ty>;
