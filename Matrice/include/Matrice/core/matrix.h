@@ -31,7 +31,7 @@ MATRICE_GLOBAL void __create_impl(size_t M, size_t N)
 	Generic Matrix Class with Aligned Static Memory Allocation
 	       Copyright (c) : Zhilong Su, since 14/Feb/2018
 *******************************************************************/
-template<typename _Ty, int M, int N = M>
+template<typename _Ty, index_t M, index_t N = M>
 class Matrix_ : public Base_<Matrix_<_Ty, M, N>>
 {
 	using _Myt = Matrix_;

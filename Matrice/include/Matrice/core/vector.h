@@ -26,7 +26,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
-template<typename _Ty, int _Dim = 2> 
+template<typename _Ty, index_t _Dim = 2>
 class Vec_ : public Matrix_<_Ty, _Dim, compile_time_size<>::val_1>
 {
 	using _Myt = Vec_;
@@ -147,10 +147,10 @@ public:
 	}
 #endif
 
-	template<int rows>
+	template<index_t rows>
 	using lite = typename _Mybase::template 
 		lite<rows, cols_at_compiletime>;
-	template<int cols>
+	template<index_t cols>
 	using extend = typename _Mybase::template 
 		lite<rows_at_compiletime, cols>;
 };
@@ -315,9 +315,9 @@ public:
 _DETAIL_END
 
 // \brief Generic managed vector type
-template<typename _Ty, int _Dim, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
+template<typename _Ty, index_t _Dim, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 using Vec_ = detail::Vec_<_Ty, _Dim>;
-template<typename _Ty, int _Dim>
+template<typename _Ty, index_t _Dim>
 struct is_fxdvector<Vec_<_Ty, _Dim>> : MATRICE_STD(true_type) {};
 
 // \brief Managed vector type with 2 entities: x, y
