@@ -1,11 +1,31 @@
+/*********************************************************************
+This file is part of Matrice, an effcient and elegant C++ library.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
+
+This program is free software : you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.If not, see <http://www.gnu.org/licenses/>.
+***********************************************************************/
 #pragma once
 
 #include "core/matrix.h"
+#ifdef MATRICE_SIMD_ARCH
 #include "arch/simd.h"
+#endif // MATRICE_SIMD_ARCH
 
-MATRICE_NAMESPACE_BEGIN_
+DGE_MATRICE_BEGIN
 
-template<typename _Data_type, typename value_t = typename _Data_type::value_t>
+template<typename _Data_type, 
+	typename value_t = typename _Data_type::value_t>
 class normalization MATRICE_NONHERITABLE
 {
 	using data_t = _Data_type;
@@ -38,11 +58,13 @@ private:
 	mutable std::future<void> _My_future = std::async(std::launch::async, [&] {
 		const auto _N = m_data.cols();
 		m_params[0][0] = reduce<value_t>(m_data[0], m_data[0] + _N) / _N;
-		m_params[0][1] = reduce<std::minus>(m_data[0], m_data[0] + _N, m_params(0), [&](auto _Val)->value_t {return (_Val*_Val); }) / _N;
+		m_params[0][1] = reduce<std::minus>(m_data[0], m_data[0] + _N, m_params(0),
+			[&](auto _Val)->value_t {return (_Val*_Val); }) / _N;
 	
 		m_params[1][0] = reduce<value_t>(m_data[1], m_data[1] + _N) / _N;
-		m_params[1][1] = reduce<std::minus>(m_data[1], m_data[1] + _N, m_params(2), [&](auto _Val)->value_t {return (_Val*_Val); }) / _N;
+		m_params[1][1] = reduce<std::minus>(m_data[1], m_data[1] + _N, m_params(2),
+			[&](auto _Val)->value_t {return (_Val*_Val); }) / _N;
 	});
 };
 
-_MATRICE_NAMESPACE_END
+DGE_MATRICE_END
