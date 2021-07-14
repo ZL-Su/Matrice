@@ -152,6 +152,7 @@
     <ClInclude Include="examples\basic_matrix_usage.h" />
     <ClInclude Include="examples\csvio_ex.hpp" />
     <ClInclude Include="examples\dic_ex.hpp" />
+    <ClInclude Include="examples\simd_ex.hpp" />
     <ClInclude Include="examples\speckle_ex.hpp" />
     <ClInclude Include="include\Matrice\3rdparty\interface.hpp" />
     <ClInclude Include="include\Matrice\algs\correlation.hpp" />
@@ -209,6 +210,7 @@
     <ClInclude Include="include\Matrice\arch\inl\_ixops.hpp" />
     <ClInclude Include="include\Matrice\arch\inl\_ixop_impls.hpp" />
     <ClInclude Include="include\Matrice\arch\ixpacket.h" />
+    <ClInclude Include="include\Matrice\arch\simd.h" />
     <ClInclude Include="include\Matrice\arch\sys\info_rep.h" />
     <ClInclude Include="include\Matrice\arch\_ixbase.h" />
     <ClInclude Include="include\Matrice\arch\_ixtraits.hpp" />
