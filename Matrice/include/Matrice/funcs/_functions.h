@@ -25,7 +25,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "private/_size_traits.h"
 #include "private/math/_config.h"
 #ifdef MATRICE_SIMD_ARCH
-#include "arch/ixpacket.h"
+#include "arch/simd.h"
 #endif
 
 DGE_MATRICE_BEGIN

@@ -19,7 +19,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #include "../_optim.h"
 #ifdef MATRICE_SIMD_ARCH
-#include "arch/ixpacket.h"
+#include "arch/simd.h"
 #endif
 #include "../../similarity.h"
 #include "private/math/_linear_solver.hpp"

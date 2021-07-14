@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/matrix.h"
-#include "arch/ixpacket.h"
+#include "arch/simd.h"
 
 MATRICE_NAMESPACE_BEGIN_
 
