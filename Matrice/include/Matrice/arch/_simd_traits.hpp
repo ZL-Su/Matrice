@@ -17,14 +17,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
 #include "private/_type_traits.h"
-#include "private/_size_traits.h"
 
 #ifdef MATRICE_SIMD_ARCH
 #include <xmmintrin.h>
 #include <immintrin.h>
 #include <emmintrin.h>
-
-#define MATRICE_SIMD_ARCH MATRICE_SIMD_AVX
 
 MATRICE_ARCH_BEGIN
 /// <summary>
@@ -40,7 +37,7 @@ concept packetable_scalar = is_any_of_v<T,
 /// \brief Determine the allowed element size for SIMD vector.  
 /// </summary>
 template<packetable_scalar T>
-struct packet_size {
+struct packet_size_v1 {
 	static constexpr uint8_t value =
 #if MATRICE_SIMD_ARCH==MATRICE_SIMD_SSE      // __m128
 	((1 << 7) >> 3) / sizeof(T);
@@ -57,13 +54,13 @@ struct packet_size {
 /// </summary>
 /// <typeparam name="T">Any scalar type supported in SIMD</typeparam>
 template<packetable_scalar T>
-inline constexpr auto packet_size_v = packet_size<T>::value;
+inline constexpr auto packet_size_v1_v = packet_size_v1<T>::value;
 
 /// <summary>
 /// \brief Deduce vector data type in SIMD.
 /// </summary>
 template<packetable_scalar T, uint8_t N> struct packed_vector {
-	static_assert(false, 
+	static_assert(true, 
 		"Parameter N must be 2, 4, 8, 16, 32, or 64 in packed_vector<T, N>.");
 };
 template<packetable_scalar T> struct packed_vector<T, 2> {
@@ -97,7 +94,7 @@ template<packetable_scalar T> struct packed_vector<T, 64> {
 	using type = conditional_t<is_any_of_v<T, int8_t, uint8_t>, __m512i, void>;
 };
 template<packetable_scalar T>
-using packed_vector_t = packed_vector<T, packet_size_v<T>>::type;
+using packed_vector_t = packed_vector<T, packet_size_v1_v<T>>::type;
 
 /// <summary>
 /// \brief TRAITS, for auto-deduce data type and size in SIMD.
@@ -106,9 +103,7 @@ template<packetable_scalar T>
 struct packet_traits : traits<T> {
 	using value_type = remove_all_t<T>;
 	using type = packed_vector_t<value_type>;
-	static constexpr auto size = packet_size_v<value_type>;
+	static constexpr auto size = packet_size_v1_v<value_type>;
 };
-
-
 MATRICE_ARCH_END
 #endif // MATRICE_SIMD_ARCH
