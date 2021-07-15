@@ -214,6 +214,7 @@
     <ClInclude Include="include\Matrice\arch\sys\info_rep.h" />
     <ClInclude Include="include\Matrice\arch\_ixbase.h" />
     <ClInclude Include="include\Matrice\arch\_ixtraits.hpp" />
+    <ClInclude Include="include\Matrice\arch\_simd_accessors.h" />
     <ClInclude Include="include\Matrice\arch\_simd_traits.hpp" />
     <ClInclude Include="include\Matrice\core\algorithm.h" />
     <ClInclude Include="include\Matrice\core\functions.h" />
