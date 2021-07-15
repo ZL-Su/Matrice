@@ -17,3 +17,30 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **********************************************************************/
 #pragma once
 #include <arch/simd.h>
+DGE_MATRICE_BEGIN
+namespace example {
+	// SIMD vector type deduction, pass
+	using simd_vector_f32 = simd::packet_traits<uint8_t>::type;
+	using simd_vector_f64 = simd::packet_traits<double>::type;
+	auto a = simd_vector_f32{};
+	auto b = simd_vector_f64{};
+	auto c = decltype(b){};
+
+	simd::accessor<double, 2> acc;
+	auto vec_a = acc(1., 2.);
+	const double val[2]{ 0.5, 1.2 };
+	auto vec_b = acc(val);
+
+	auto vec_c = vec_b;
+	// Alias of SIMD type.
+	using packet_t = simd::Packet_<float>;
+
+	index_t packed_size = packet_t::size;
+
+	packet_t add(const packet_t& _Left, const packet_t _Right) {
+		return _Left + _Right;
+	}
+	
+	
+}
+DGE_MATRICE_END
