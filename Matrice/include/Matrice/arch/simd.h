@@ -16,4 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **********************************************************************/
 #pragma once
+#include "_simd_traits.hpp"
+#include "_simd_accessors.h"
 #include "ixpacket.h"
