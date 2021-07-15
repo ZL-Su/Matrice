@@ -69,7 +69,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;MATRICE_DEBUG;_LIB;_SCL_SECURE_NO_WARNINGS;_ENABLE_EXTENDED_ALIGNED_STORAGE;MATRICE_THR=MATRICE_THR_OMP;MATRICE_MATH_KERNEL=MATRICE_USE_MKL;MATRICE_SIMD_ARCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;MATRICE_DEBUG;_LIB;_SCL_SECURE_NO_WARNINGS;_ENABLE_EXTENDED_ALIGNED_STORAGE;MATRICE_THR=MATRICE_THR_OMP;MATRICE_MATH_KERNEL=MATRICE_USE_MKL;MATRICE_SIMD_ARCH=MATRICE_SIMD_SSE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <DisableSpecificWarnings>4006;4221;</DisableSpecificWarnings>
