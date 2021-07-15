@@ -25,7 +25,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "forward.hpp"
 #include "math/_primitive_funcs.hpp"
 #if defined(MATRICE_SIMD_ARCH)
-#include "arch/ixpacket.h"
+#include "arch/simd.h"
 #endif
 
 #ifdef _MSC_VER
