@@ -738,6 +738,9 @@
     <ClInclude Include="include\Matrice\arch\simd.h">
       <Filter>Header Files\Arch</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\arch\_simd_traits.hpp">
+      <Filter>Header Files\Arch</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
