@@ -209,6 +209,7 @@
     <ClInclude Include="include\Matrice\algs\transform\_fft.hpp" />
     <ClInclude Include="include\Matrice\arch\inl\_ixops.hpp" />
     <ClInclude Include="include\Matrice\arch\inl\_ixop_impls.hpp" />
+    <ClInclude Include="include\Matrice\arch\inl\_simd_accessor.hpp" />
     <ClInclude Include="include\Matrice\arch\ixpacket.h" />
     <ClInclude Include="include\Matrice\arch\simd.h" />
     <ClInclude Include="include\Matrice\arch\sys\info_rep.h" />
