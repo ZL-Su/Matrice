@@ -650,7 +650,7 @@ public:
 		if constexpr (_Axis == 1) return cview(i);
 	}
 
-	// \View of submatrix: x \in [x0, x1) and y \in [y0, y1)
+	// \View of submatrix: x in range [x0, x1) and y in range [y0, y1)
 	MATRICE_GLOBAL_INL auto block(index_t x0, index_t x1, index_t y0, index_t y1) {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(x1<=m_cols, "Input var. 'x1' must not be greater than m_cols.")
@@ -939,7 +939,7 @@ public:
 #pragma endregion
 
 	///<brief> in-time matrix arithmetic </brief>
-	MATRICE_GLOBAL_FINL auto(max)()const noexcept { 
+	MATRICE_GLOBAL_FINL auto(max)()const noexcept {
 		return (*std::max_element(begin(), end())); 
 	}
 	MATRICE_GLOBAL_FINL auto(min)()const noexcept {
@@ -1006,7 +1006,7 @@ public:
 	 * \contraction of two matrices (rank-2 tensors)
 	 //tex: $\text{res} = \mathbf{A}:\mathbf{B}$
 	 */
-	template<int Rows, int Cols>
+	template<index_t Rows, index_t Cols>
 	MATRICE_GLOBAL_INL value_type contract(const Matrix_<value_type, Rows, Cols>& _Rhs)const;
 
 	/**
@@ -1014,7 +1014,7 @@ public:
 	 *\param [_Right] can be scalar or any compatible types
 	 */
 	template<typename _Rhs>
-	MATRICE_HOST_INL auto sub_inplace(const _Rhs& _Right);
+	MATRICE_HOST_INL decltype(auto) sub_inplace(const _Rhs& _Right);
 
 	/**
 	 *\brief in-place matrix-vector multiplication. Note that if the number of rows of this matrix A equals to the size of the right column vector x, this method returns (A^T)x.

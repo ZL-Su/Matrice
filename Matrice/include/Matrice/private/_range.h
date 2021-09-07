@@ -1,8 +1,27 @@
+/*********************************************************************
+This file is part of Matrice, an effcient and elegant C++ library for
+3D Vision and Photo-Mechanics.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
+
+This program is free software : you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************/
 #pragma once
-#include "../core/vector.h"
+#include "core/vector.h"
+#include <ranges>
 
-DGE_MATRICE_BEGIN namespace detail {
-
+DGE_MATRICE_BEGIN
+namespace detail {
 // \class range base : [begin, end)
 template<typename _Ty, 
 	typename _Iy = conditional_t<is_iterator_v<_Ty>, int64_t, _Ty>>
@@ -11,9 +30,9 @@ class _Range_base {
 public:
 	using value_t = _Ty;
 	using stride_t = _Iy;
-	using const_value_t = std::add_const_t<value_t>;
-	using const_stride_t = std::add_const_t<stride_t>;
-	using reference = std::add_lvalue_reference_t<value_t>;
+	using const_value_t = MATRICE_STD(add_const_t)<value_t>;
+	using const_stride_t = MATRICE_STD(add_const_t)<stride_t>;
+	using reference = MATRICE_STD(add_lvalue_reference_t)<value_t>;
 
 	class _My_iterator {
 	public:

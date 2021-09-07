@@ -62,5 +62,24 @@ auto _Gen_signal_2d(size_t nfreq, size_t M, size_t N = size_t()) noexcept {
 	}
 	return forward<decltype(Z)>(Z);
 }
+
+/// <summary>
+/// \brief Generate 1-D sinusoidal time sequence. 
+/// </summary>
+/// <param name="'a'">Amplitude of the signal to be generated.</param>
+/// <param name="'f'">Frequence of the signal to be generated.</param>
+/// <returns>A </returns>
+auto _Gen_sinusoidal_1d(auto a, auto f, auto T, auto dT) noexcept {
+	static_assert(is_floating_point_v<decltype(a)>, "");
+
+	const auto _W = 2 * pi<decltype(f)>*f;
+	Matrix_<decltype(f), ::dynamic, 2> _Ret(size_t(T / dT) + 1);
+	for (const auto t : range<size_t>(0, _Ret.rows())) {
+		const auto x = _W*(_Ret[t][0] = t*dT);
+		const auto sx = sin(x);
+		_Ret[t][1] = a*sx;
+	}
+	return _Ret;
+}
 }
 DGE_MATRICE_END

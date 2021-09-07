@@ -50,7 +50,10 @@ public:
 	MATRICE_GLOBAL_FINL _Iterator(pointer _Ptr, size_t _Size, size_t _Step =  1) noexcept 
 		:_Myptr(_Ptr), _Mybegin(_Ptr), _Mysize(_Size), _Mystep(_Step) {}
 	
-	MATRICE_GLOBAL_FINL reference operator*() const noexcept { 
+	MATRICE_GLOBAL_FINL const reference operator*() const noexcept { 
+		return ((reference)(*_Myptr));
+	}
+	MATRICE_GLOBAL_FINL reference operator*() noexcept {
 		return ((reference)(*_Myptr));
 	}
 	MATRICE_GLOBAL_FINL pointer operator->() const { 
@@ -183,7 +186,8 @@ class _Matrix_const_iterator : public _Iterator<_Ty>
 public:
 	using typename _Mybase::pointer;
 	using typename _Mybase::value_type;
-	_Matrix_const_iterator(pointer ptr, size_t size) noexcept 
+	using typename _Mybase::reference;
+	_Matrix_const_iterator(pointer ptr=nullptr, size_t size=0) noexcept 
 		:_Mybase{ ptr, size } {
 	}
 
@@ -195,8 +199,8 @@ public:
 		_Mybase::_Mylast = other._Mylast;
 		return (*this);
 	}
-
-	MATRICE_GLOBAL_FINL const _Ty& operator*() const noexcept {
+	
+	MATRICE_GLOBAL_FINL const reference operator*() const noexcept {
 		return _Mybase::operator*();
 	}
 	MATRICE_GLOBAL_FINL _Myt& operator++() noexcept {

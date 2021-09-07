@@ -31,7 +31,7 @@ MATRICE_GLOBAL void __create_impl(size_t M, size_t N)
 	Generic Matrix Class with Aligned Static Memory Allocation
 	       Copyright (c) : Zhilong Su, since 14/Feb/2018
 *******************************************************************/
-template<typename _Ty, int M, int N = M>
+template<typename _Ty, index_t M, index_t N = M>
 class Matrix_ : public Base_<Matrix_<_Ty, M, N>>
 {
 	using _Myt = Matrix_;
@@ -144,6 +144,28 @@ public:
 	template<typename _Arg> _Myt& ref(_Arg& _) noexcept = delete;
 };
 
+/// <summary>
+/// \brief CLASS TEMPLATE, specialization for 1-by-1 matrix.
+/// </summary>
+/// <typeparam name="_Ty">scalar type</typeparam>
+template<typename _Ty>
+class Matrix_<_Ty, 1, 1> 
+	:public Base_<Matrix_<_Ty, 1, 1>> {
+	using _Myt = Matrix_;
+	using _Mybase = Base_<Matrix_<_Ty, 1, 1>>;
+public:
+	using typename _Mybase::scalar_type;
+
+	MATRICE_GLOBAL_FINL Matrix_() noexcept
+		: _Mybase{} {};
+	MATRICE_GLOBAL_FINL Matrix_(int, int) noexcept
+		: Matrix_{} {};
+
+	MATRICE_GLOBAL_INL operator scalar_type() const noexcept {
+		return {*_Mybase::m_data};
+	}
+};
+
 template<typename _Ty, size_t Rows>
 class Matrix_<_Ty, Rows, ::dynamic> 
 	:public Base_<Matrix_<_Ty, Rows, ::dynamic>> {
@@ -248,7 +270,8 @@ public:
 	         Copyright (c) : Zhilong Su since 14/Feb/2018
  ******************************************************************/
 template<typename _Ty>
-class Matrix_<_Ty, ::dynamic> : public Base_<Matrix_<_Ty, ::dynamic>>
+class Matrix_<_Ty, ::dynamic> 
+	: public Base_<Matrix_<_Ty, ::dynamic>>
 {
 	using _Myt = Matrix_<_Ty, ::dynamic>;
 	using _Mybase = Base_<_Myt>;

@@ -112,7 +112,7 @@ struct _Correlation_options {
 	 * \brief Geter of correlation threshold with base 1E-6.
 	 */
 	template<typename _Ty = default_type>
-	decltype(auto) tol(_Ty const scale) const noexcept {
+	decltype(auto) tol(const _Ty scale = 1) const noexcept {
 		return (scale * _Mytol);
 	}
 
@@ -175,13 +175,13 @@ public:
 	// \brief Loss function definition.
 	struct loss_fn {
 		value_type rho(value_type x) noexcept {
-			//return scale * (1 - exp(-x/ scale));
-			return scale * (1 - 1/(1+x/scale));
+			return scale * (1 - exp(-x/ scale));
+			//return scale * (1 - 1/(1+x/scale));
 			//return x;
 		}
 		value_type phi(value_type x) noexcept {
-			//return exp(-x/scale);
-			return 1/sq(1+x/scale);
+			return exp(-x/scale);
+			//return 1/sq(1+x/scale);
 			//return 1;
 		}
 		value_type scale = sq(0.001);

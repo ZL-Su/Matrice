@@ -31,13 +31,13 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #endif //enable shared memory allocator
 
 #if _HAS_CXX20
-#define __cpp_concepts 202007L
+#define MATRICE_ENABLE_CXX20
 #endif
 
 #define MATRICE_SIMD_DISABLE 0
-#define MATRICE_SIMD_SSE    2 //*\SIMD-128
-#define MATRICE_SIMD_AVX    3 //*\SIMD-256
-#define MATRICE_SIMD_AVX512 4 //*\SIMD-512
+#define MATRICE_SIMD_SSE     2 //*\SIMD-128
+#define MATRICE_SIMD_AVX     3 //*\SIMD-256
+#define MATRICE_SIMD_AVX512  4 //*\SIMD-512
 
 #define MATRICE_USE_NAT     0 //*\use native kernel code
 #define MATRICE_USE_MKL     1 //*\use intel mkl lib
@@ -105,6 +105,10 @@ namespace simd {
 #define MATRICE_ALG_BEGIN(ALG) DGE_MATRICE_BEGIN \
 namespace ALG {
 #define MATRICE_ALG_END(ALG) } DGE_MATRICE_END
+
+#define MATRICE_EXPERIMENTAL_BEGIN DGE_MATRICE_BEGIN \
+namespace experimental{
+#define MATRICE_EXPERIMENTAL_END } DGE_MATRICE_END
 
 #define _CONDITIONS_BEGIN namespace conds {
 #define _CONDITIONS_END }

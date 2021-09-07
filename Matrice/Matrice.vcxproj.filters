@@ -43,9 +43,6 @@
     <Filter Include="Source Files\Funcs">
       <UniqueIdentifier>{77d6a935-87c7-44b6-aba6-a12695ca2fb0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Arch\Inl">
-      <UniqueIdentifier>{7a24d11a-4018-4aac-b89c-eb8b6042867b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Algs\Geometry">
       <UniqueIdentifier>{1d26a66c-7be6-40d6-8bcc-50f3ee2ee1a1}</UniqueIdentifier>
     </Filter>
@@ -247,6 +244,12 @@
     <Filter Include="Header Files\Utils">
       <UniqueIdentifier>{4e312bcb-d0eb-4cca-ae67-73b4291a5eca}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Arch\Sys">
+      <UniqueIdentifier>{6671fb84-a0ff-43bc-81b8-c90be9dc8a0b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Arch\Inline">
+      <UniqueIdentifier>{7a24d11a-4018-4aac-b89c-eb8b6042867b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -289,7 +292,7 @@
       <Filter>Header Files\Arch</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\arch\inl\_ixops.hpp">
-      <Filter>Header Files\Arch\Inl</Filter>
+      <Filter>Header Files\Arch\Inline</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\geometry\transform.h">
       <Filter>Header Files\Algs\Geometry</Filter>
@@ -358,7 +361,7 @@
       <Filter>Header Files\Detail\traits</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\arch\inl\_ixop_impls.hpp">
-      <Filter>Header Files\Arch\Inl</Filter>
+      <Filter>Header Files\Arch\Inline</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\util\utils.h">
       <Filter>Header Files\Utils</Filter>
@@ -702,7 +705,7 @@
     <ClInclude Include="include\Matrice\algs\transform\_fft.hpp">
       <Filter>Header Files\Algs\transform</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\core\functional.h">
+    <ClInclude Include="include\Matrice\core\functions.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="examples\2dresfrep_ex.hpp">
@@ -719,6 +722,30 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\core\algorithm.h">
       <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\arch\sys\info_rep.h">
+      <Filter>Header Files\Arch\Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="examples\autodiff_ex.hpp">
+      <Filter>Examples</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\_concepts.hpp">
+      <Filter>Header Files\Detail\core</Filter>
+    </ClInclude>
+    <ClInclude Include="examples\simd_ex.hpp">
+      <Filter>Examples</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\arch\simd.h">
+      <Filter>Header Files\Arch</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\arch\_simd_traits.hpp">
+      <Filter>Header Files\Arch</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\arch\_simd_accessors.h">
+      <Filter>Header Files\Arch</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\arch\inl\_simd_accessor.hpp">
+      <Filter>Header Files\Arch\Inline</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -932,7 +959,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="include\Matrice\arch\inl\_ixpacket.inl">
-      <Filter>Header Files\Arch\Inl</Filter>
+      <Filter>Header Files\Arch\Inline</Filter>
     </None>
     <None Include="include\Matrice\private\_similarity.inl">
       <Filter>Header Files\Detail\inline</Filter>

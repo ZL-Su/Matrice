@@ -21,12 +21,12 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "matrix.h"
 #include "algorithm.h"
 #ifdef MATRICE_SIMD_ARCH
-#include "arch/ixpacket.h"
+#include "arch/simd.h"
 #endif
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
-template<typename _Ty, int _Dim = 2> 
+template<typename _Ty, index_t _Dim = 2>
 class Vec_ : public Matrix_<_Ty, _Dim, compile_time_size<>::val_1>
 {
 	using _Myt = Vec_;
@@ -91,17 +91,15 @@ public:
 			_Mybase::operator = (_Mybase::normalize(_val))); 
 	}
 
-	MATRICE_GLOBAL_FINL
 	/// <summary>
 	/// \brief Compute dot-product with other vector. 
 	/// </summary>
 	/// <param name="'_other'">Other vector with the same type.</param>
 	/// <returns></returns>
-	value_t dot(const _Myt& _other) const noexcept {
+	MATRICE_GLOBAL_FINL value_t dot(const _Myt& _other) const noexcept {
 		return _Mybase::dot(_other); 
 	}
 
-	MATRICE_GLOBAL_INL
 	/// <summary>
 	/// \brief Return evenly spaced values within a given interval. 
 	/// The step is automatically according to the interval span and the vector dim.
@@ -109,7 +107,7 @@ public:
 	/// <param name= "'start'">Start of interval. The interval includes this value.</param>
 	/// <param name= "'stop'">End of interval. The interval does not include this value.</param>
 	/// <returns>Values are generated within the half-open interval [start, stop).</returns>
-	static _Myt arange(value_t start, value_t end) noexcept {
+	MATRICE_GLOBAL_INL static _Myt arange(value_t start, value_t end) noexcept {
 		_Myt ret;
 		const auto step = (end - start) / rows_at_compiletime;
 		for (auto idx = 0; idx < rows_at_compiletime; ++idx) {
@@ -149,10 +147,10 @@ public:
 	}
 #endif
 
-	template<int rows>
+	template<index_t rows>
 	using lite = typename _Mybase::template 
 		lite<rows, cols_at_compiletime>;
-	template<int cols>
+	template<index_t cols>
 	using extend = typename _Mybase::template 
 		lite<rows_at_compiletime, cols>;
 };
@@ -317,9 +315,9 @@ public:
 _DETAIL_END
 
 // \brief Generic managed vector type
-template<typename _Ty, int _Dim, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
+template<typename _Ty, index_t _Dim, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 using Vec_ = detail::Vec_<_Ty, _Dim>;
-template<typename _Ty, int _Dim>
+template<typename _Ty, index_t _Dim>
 struct is_fxdvector<Vec_<_Ty, _Dim>> : MATRICE_STD(true_type) {};
 
 // \brief Managed vector type with 2 entities: x, y

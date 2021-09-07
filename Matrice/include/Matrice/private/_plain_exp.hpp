@@ -25,7 +25,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "forward.hpp"
 #include "math/_primitive_funcs.hpp"
 #if defined(MATRICE_SIMD_ARCH)
-#include "arch/ixpacket.h"
+#include "arch/simd.h"
 #endif
 
 #ifdef _MSC_VER
@@ -579,7 +579,7 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 		}
 
 	private:
-		const value_t _Scalar = std::numeric_limits<value_t>::infinity();
+		const value_t _Scalar = infinity_v<value_t>;
 		const T& _LHS;
 		_BinaryOp _Op;
 		using _Mybase::M;
@@ -660,9 +660,13 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 
 		template<typename _Mty>
 		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const noexcept {
-//#pragma omp parallel for if (res.size() > 100)
+#if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
+			for (int i = 0; i < res.size(); ++i)
+				res(i) = this->operator()(i);
+#else
 			for (int i = 0; i < res.size(); ++i) 
 				res(i) = this->operator()(i);
+#endif
 		}
 	private:
 		const T& _LHS; 

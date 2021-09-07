@@ -69,7 +69,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;MATRICE_DEBUG;_LIB;_SCL_SECURE_NO_WARNINGS;_ENABLE_EXTENDED_ALIGNED_STORAGE;MATRICE_THR=MATRICE_THR_OMP;MATRICE_MATH_KERNEL=MATRICE_USE_MKL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;MATRICE_DEBUG;_LIB;_SCL_SECURE_NO_WARNINGS;_ENABLE_EXTENDED_ALIGNED_STORAGE;MATRICE_THR=MATRICE_THR_OMP;MATRICE_MATH_KERNEL=MATRICE_USE_MKL;MATRICE_SIMD_ARCH=MATRICE_SIMD_SSE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <DisableSpecificWarnings>4006;4221;</DisableSpecificWarnings>
@@ -85,6 +85,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <BrowseInformation>true</BrowseInformation>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -147,9 +148,11 @@
     <ClInclude Include="addin\libtiff\tif_predict.h" />
     <ClInclude Include="addin\libtiff\uvcode.h" />
     <ClInclude Include="examples\2dresfrep_ex.hpp" />
+    <ClInclude Include="examples\autodiff_ex.hpp" />
     <ClInclude Include="examples\basic_matrix_usage.h" />
     <ClInclude Include="examples\csvio_ex.hpp" />
     <ClInclude Include="examples\dic_ex.hpp" />
+    <ClInclude Include="examples\simd_ex.hpp" />
     <ClInclude Include="examples\speckle_ex.hpp" />
     <ClInclude Include="include\Matrice\3rdparty\interface.hpp" />
     <ClInclude Include="include\Matrice\algs\correlation.hpp" />
@@ -206,11 +209,16 @@
     <ClInclude Include="include\Matrice\algs\transform\_fft.hpp" />
     <ClInclude Include="include\Matrice\arch\inl\_ixops.hpp" />
     <ClInclude Include="include\Matrice\arch\inl\_ixop_impls.hpp" />
+    <ClInclude Include="include\Matrice\arch\inl\_simd_accessor.hpp" />
     <ClInclude Include="include\Matrice\arch\ixpacket.h" />
+    <ClInclude Include="include\Matrice\arch\simd.h" />
+    <ClInclude Include="include\Matrice\arch\sys\info_rep.h" />
     <ClInclude Include="include\Matrice\arch\_ixbase.h" />
     <ClInclude Include="include\Matrice\arch\_ixtraits.hpp" />
+    <ClInclude Include="include\Matrice\arch\_simd_accessors.h" />
+    <ClInclude Include="include\Matrice\arch\_simd_traits.hpp" />
     <ClInclude Include="include\Matrice\core\algorithm.h" />
-    <ClInclude Include="include\Matrice\core\functional.h" />
+    <ClInclude Include="include\Matrice\core\functions.h" />
     <ClInclude Include="include\Matrice\core\image.h" />
     <ClInclude Include="include\Matrice\core\matrix.h" />
     <ClInclude Include="include\Matrice\core\solver.h" />
@@ -248,6 +256,7 @@
     <ClInclude Include="include\Matrice\private\tensor\_tensor_exp.hpp" />
     <ClInclude Include="include\Matrice\private\tensor\_tensor_wrapper.hpp" />
     <ClInclude Include="include\Matrice\private\_bounded_pointer.hpp" />
+    <ClInclude Include="include\Matrice\private\_concepts.hpp" />
     <ClInclude Include="include\Matrice\private\_decl_dev_funcs.h" />
     <ClInclude Include="include\Matrice\private\_devops.h" />
     <ClInclude Include="include\Matrice\private\_dev_matrix_base.h" />

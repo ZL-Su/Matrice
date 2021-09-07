@@ -19,7 +19,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <algorithm>
 #include "algs/similarity.h"
 #ifdef MATRICE_SIMD_ARCH
-#include "arch/ixpacket.h"
+#include "arch/simd.h"
 #endif
 
 MATRICE_ALGS_BEGIN

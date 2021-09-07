@@ -60,8 +60,8 @@ enum is_skip_folder { N = 0, Y = 1 };
  */
 struct image_instance;
 
-class IO : std::ios {
-	using _Mybase = std::ios;
+class IO : MATRICE_STD(ios) {
+	using _Mybase = MATRICE_STD(ios);
 public:
 	using FileMap = std::map<std::string, std::string>;
 	using FileInfo = std::vector<FileMap>;
@@ -147,7 +147,10 @@ public:
 		CSV(std::string&& _Fname, const std::string& _Delm = ",")
 			:_Mypath(_Fname), _My_delimeter(_Delm){
 		}
-		CSV(const fs::path& _Path, const std::string& _Delm = ",")
+		CSV(const fs::path& _Path = {}, const std::string& _Delm = ",")
+			:_Mypath(_Path), _My_delimeter(_Delm) {
+		}
+		CSV(fs::path&& _Path, const std::string& _Delm = ",")
 			:_Mypath(_Path), _My_delimeter(_Delm) {
 		}
 
@@ -447,9 +450,9 @@ MATRICE_HOST_INL auto write(_Args...args)->decltype(IO::write(args...)){
 	catch (std::exception& _E) { throw _E; } 
 };
 // \definite a path under current folder
-template<typename T>
-MATRICE_HOST_INL decltype(auto) defpath(const T local) {
-	return forward<std::string>(IO::workspace().string() + "\\" + str(local)); 
+template<typename _Str>
+MATRICE_HOST_INL auto defpath(const _Str local) noexcept {
+	return IO::workspace().append(str(local));
 };
 
 /// <summary>
@@ -517,7 +520,14 @@ public:
 
 };
 
-namespace io { 
+namespace io {
+using path_t = MATRICE_STD(filesystem::path);
+enum class fmt {
+	txt,
+	csv,
+	xml,
+	jsn
+};
 _DETAIL_BEGIN
 
 struct folder_tag {};
@@ -549,6 +559,29 @@ template<typename _Ty, class _Tag> class _Data_loader_impl{};
  * \file loader: tiff
  */
 template<typename _Ty, class _Tag> struct _Loader_impl {};
+
+/**
+ * \save data to a file with a given format '_Fmt'.
+ */
+template<fmt _Fmt> void _Save(const auto& _Data, path_t _Path) {
+#ifdef MATRICE_DEBUG
+	DGELOM_CHECK(fs::exists(_Path.parent_path()),
+		"The given folder path is not exist.");
+#endif
+	if constexpr (_Fmt == fmt::csv)
+		_Path.replace_extension("csv");
+	if constexpr (_Fmt == fmt::txt)
+		_Path.replace_extension("txt");
+
+	IO::CSV csv(_Path);
+	csv.open(IO::out);
+	if constexpr (is_matrix_v<remove_all_t<decltype(_Data)>>) {
+		for (auto _It = _Data.rwbegin(); _It < _Data.rwend(); ++_It) {
+			csv.append(_It.begin(), _It.end());
+		}
+	}
+	csv.close();
+}
 _DETAIL_END
 
 
@@ -568,9 +601,8 @@ DGE_MATRICE_BEGIN namespace io {
 using directory = detail::_Dir_impl<detail::folder_tag>;
 using folder_collector = detail::_Collector<detail::folder_tag>;
 using file_collector = detail::_Collector<detail::file_tag>;
-using path_t = typename directory::path_type;
 
-template<typename _Ty = std::float_t>
+template<typename _Ty = float_t>
 using data_loader = detail::_Data_loader_impl<_Ty, detail::loader_tag>;
 using data_loader_uint8 = data_loader<uint8_t>;
 using data_loader_uint32 = data_loader<uint32_t>;
@@ -594,6 +626,11 @@ template<class _Op>
 decltype(auto) make_loader(const path_t& path, _Op&& loader)noexcept {
 	using loader_type = data_loader<typename _Op::value_type>;
 	return loader_type(directory{ path.generic_string(), path_t() }, loader);
+}
+
+template<fmt _Fmt>
+MATRICE_HOST_INL void save(auto data, path_t path) noexcept {
+	return detail::_Save<_Fmt>(data, path);
 }
 }
 

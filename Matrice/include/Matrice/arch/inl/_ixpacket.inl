@@ -18,7 +18,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 #include "util/genalgs.h"
 #ifdef MATRICE_SIMD_ARCH
-#include "../ixpacket.h"
+#include "../simd.h"
 MATRICE_ARCH_BEGIN
 template<typename T, int _Elems> MATRICE_HOST_FINL
 Packet_<T, _Elems>& Packet_<T, _Elems>::operator+(const Packet_<T, _Elems>& _other)

@@ -20,40 +20,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "util/_macros.h"
 #include "util/_std_wrapper.h"
 #include "util/_exception.h"
-#include "private/math/_primitive_funcs.hpp"
+#include "math/_primitive_funcs.hpp"
 #include "_size_traits.h"
 
 DGE_MATRICE_BEGIN
-template<typename _Ity = size_t>
-class shape_ : public std::array<_Ity, 4>
-{
-	using _Mybase = std::array<_Ity, 4>;
-public:
-	using index_type = typename _Mybase::value_type;
-
-	shape_(initlist<index_type> shape) noexcept {
-	}
-
-	const index_type& h() const noexcept {
-		return (*this)[0];
-	}
-	index_type& h() noexcept {
-		return (*this)[0];
-	}
-	const index_type& w() const noexcept {
-		return (*this)[1];
-	}
-	index_type& w() noexcept {
-		return (*this)[1];
-	}
-	const index_type& d() const noexcept {
-		return (*this)[2];
-	}
-	index_type& d() noexcept {
-		return (*this)[2];
-	}
-};
-
 template<size_t _Dim> struct shape_t {
 	static_assert(_Dim==0||_Dim>3, 
 		"_Dim in shape_t<_Dim> must be in the range [1, 3].");
@@ -146,6 +116,8 @@ template<> struct shape_t<3> {
 	constexpr void reset() noexcept { h = w = 0; d = 1; }
 	constexpr auto rows() const noexcept { return h * d; }
 	constexpr auto cols() const noexcept { return w; }
+	constexpr auto depth() const noexcept { return d; }
+
 	/**
 	 *\brief tile the 3d-shape to 2d-shape
 	 */

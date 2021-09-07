@@ -21,6 +21,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "core/vector.h"
 #include "_geo_utils.hpp"
 
+// clang-format off
 MATRICE_GLOBAL_FINL constexpr auto operator""_mm(long double _Val) noexcept {
 	return (_Val);
 }
@@ -39,6 +40,7 @@ MATRICE_GLOBAL_FINL constexpr auto operator""_degs(long double _Val) noexcept {
 MATRICE_GLOBAL_FINL constexpr auto operator""_rads(long double _Val) noexcept {
 	return (_Val);
 }
+// clang-format on
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
@@ -80,10 +82,10 @@ MATRICE_HOST_INL Vec3_<_Ty> _Rodrigues_impl(const Matrix_<_Ty, 3>& _R) {
 }
 
 /// <summary>
-/// Rodrigues transform from a vector to a matrix in 3-dimensional.
+/// \brief Rodrigues transform from a vector to a matrix in 3-dimensional.
 /// </summary>
 /// <typeparam name="_Ty"> scalar </typeparam>
-/// <param name="_r"> roration vector </param>
+/// <param name="'_r'"> roration vector </param>
 /// <returns>rotation matrix </returns>
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
 MATRICE_HOST_INL Matrix_<_Ty, 3> _Rodrigues_impl(const Vec3_<_Ty>& _r) noexcept {
@@ -199,6 +201,7 @@ MATRICE_HOST_INL auto rodrigues(const _Input& _In) noexcept {
 	return detail::_Rodrigues_impl(_In);
 }
 
+// clang-format off
 /// <summary>
 /// \brief Define X axis in 3d space.
 /// </summary>
@@ -239,6 +242,6 @@ using Isometry_t = detail::_Geotf_isometry<_Ty>;
 template<typename _Ty, dim_t _Dim = 3D, 
 	MATRICE_ENABLE_IF(is_floating_point_v<_Ty>)>
 using isometry_t = detail::_Geo_transform<_Ty, _Dim == 2D ? geotf_tag::ISO2D : geotf_tag::ISO3D>;
-
+// clang-format on
 DGE_MATRICE_END
 #include "inline\_transform.hpp"

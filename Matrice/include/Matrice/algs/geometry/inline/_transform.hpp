@@ -1,7 +1,25 @@
+/*********************************************************************
+This file is part of Matrice, an effcient and elegant C++ library for
+3D Vision and Photo-Mechanics.
+Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
+
+This program is free software : you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************/
 #pragma once
 #include "../transform.h"
 #ifdef MATRICE_SIMD_ARCH
-#include "arch/ixpacket.h"
+#include "arch/simd.h"
 #endif
 
 DGE_MATRICE_BEGIN
@@ -222,11 +240,25 @@ public:
 	}
 
 	/**
-	 * \brief Translate a given vector (or point) to a new position.
+	 * \brief Translate a given vector (or point) to a new one.
 	 * \param 'x' Input vector (or point).
 	 */
 	MATRICE_GLOBAL_INL vector trans(const vector& x)const noexcept {
 		return _Mycoef.cview(3) + x;
+	}
+
+	/**
+	 * \brief Rotate a given vector (or point) to a new one.
+	 * \param 'x' Input vector (or point).
+	 */
+	MATRICE_GLOBAL_INL vector rot(const vector& x)const noexcept {
+		vector _Ret;
+		for (auto _Idx = 0; _Idx < x.size(); ++_Idx) {
+			vector y;
+			_Mycoef.rview(_Idx).eval_to(y);
+			_Ret[_Idx] = (y*x).sum();
+		}
+		return _Ret;
 	}
 
 protected:
@@ -234,6 +266,10 @@ protected:
 	Matrix_<value_type, 4> _Mycoef;
 };
 
+/// <summary>
+/// \brief Specialized 2D Euclidean isometry transformation.
+/// </summary>
+/// <typeparam name="_Ty"></typeparam>
 template<typename _Ty>
 class _Geo_transform<_Ty, _Geotf_tag::ISO2D> 
 	: public _Geo_transform<_Geo_transform<_Ty, _Geotf_tag::ISO2D>> {
@@ -243,7 +279,11 @@ class _Geo_transform<_Ty, _Geotf_tag::ISO2D>
 public:
 	using vector = typename _Mybase::vector;
 	using value_type = _Mybase::value_type;
+
 	_Geo_transform() = default;
+	/**
+	 * \brief Ctor with a rotation angle and translation in x and y axes.
+	 */
 	_Geo_transform(value_type angle, value_type tx, value_type ty) noexcept
 		:_Mytx(_Mycoef(3)), _Myty(_Mycoef(7)), _Myxx(_Mycoef(0)), 
 		_Myxy(_Mycoef(1)), _Myyx(_Mycoef(4)), _Myyy(_Mycoef(5)){
@@ -251,7 +291,16 @@ public:
 		_Myxx = cos(angle), _Myxy = -sin(angle);
 		_Myyx = -_Myxy, _Myyy = _Myxx;
 	}
+	/**
+	 * \brief Ctor with a rotation angle and translation vector.
+	 */
+	_Geo_transform(value_type angle, const vector& t) noexcept
+		:_Geo_transform(angle, t.x, t.y) {
+	}
 
+	/**
+	 * \brief Update transform coefficients.
+	 */
 	MATRICE_GLOBAL_INL decltype(auto)update(value_type angle, value_type tx, value_type ty) noexcept {
 		_Mytx = tx, _Myty = ty;
 		_Myxx = cos(angle), _Myxy = -sin(angle);
@@ -276,6 +325,10 @@ struct traits<_Geo_transform<_Ty, _Geotf_tag::ISO2D>> {
 	static constexpr auto dof = 2;
 };
 
+/// <summary>
+/// \brief Specialized 3D Euclidean isometry transformation.
+/// </summary>
+/// <typeparam name="_Ty"></typeparam>
 template<typename _Ty>
 class _Geo_transform<_Ty, _Geotf_tag::ISO3D>
 	: public _Geo_transform<_Geo_transform<_Ty, _Geotf_tag::ISO3D>> {
@@ -283,11 +336,23 @@ class _Geo_transform<_Ty, _Geotf_tag::ISO3D>
 	using _Mybase = _Geo_transform<_Myt>;
 	using _Mybase::_Mycoef;
 public:
-	using vector = typename _Mybase::vector;
+	using vector = _Mybase::vector;
 	using value_type = _Mybase::value_type;
 	_Geo_transform() = default;
-
-
+	/**
+	 * \brief Ctor with a 3-by-3 rotation matrix and a translation vector.
+	 */
+	_Geo_transform(const auto& R, const vector& t) noexcept {
+		static_assert(is_matrix_v<decltype(R)>, "Type of R must be dgelom::Matrix_.");
+		_Mycoef.cview(3) = t;
+		_Mycoef.block(0, 3, 0, 3) = R;
+	}
+	/**
+	 * \brief Ctor with a rotation vector and a translation vector.
+	 */
+	_Geo_transform(const vector& r, const vector& t) noexcept
+		:_Geo_transform(_Rodrigues_impl(r), t) {
+	}
 };
 template<typename _Ty>
 struct traits<_Geo_transform<_Ty, _Geotf_tag::ISO3D>> {
