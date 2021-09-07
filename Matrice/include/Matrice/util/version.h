@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
 #pragma once
+#include "_macros.h"
 
 #define MATRICE_VERSION_MAJOR 2021
 #define MATRICE_VERSION_MINOR 3
@@ -23,11 +24,10 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 // Classic CPP stringifcation; the extra level of indirection allows the
 // preprocessor to expand the macro before being converted to a string.
-#define MATRICE_TO_STRING_HELPER(x) #x
-#define MATRICE_TO_STRING(x) MATRICE_TO_STRING_HELPER(x)
+#define MATRICE_VER_STRING(x) MATRICE_STRINGFY(x)
 
 // The Matrice version as a string; for example "2021.3.10".
 #define MATRICE_VERSION_STRING \
-MATRICE_TO_STRING(MATRICE_VERSION_MAJOR) "." \
-MATRICE_TO_STRING(MATRICE_VERSION_MINOR) "." \
-MATRICE_TO_STRING(MATRICE_VERSION_REVISION)
+MATRICE_VER_STRING(MATRICE_VERSION_MAJOR) "." \
+MATRICE_VER_STRING(MATRICE_VERSION_MINOR) "." \
+MATRICE_VER_STRING(MATRICE_VERSION_REVISION)
