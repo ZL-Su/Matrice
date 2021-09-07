@@ -21,6 +21,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 MATRICE_ARCH_BEGIN
 _DETAIL_BEGIN
+namespace internal{
 template<> MATRICE_HOST_FINL
 auto _Load(packed_vector<int64_t, 2>, int64_t _Val1, int64_t _Val2) {
 	return _mm_set_epi64x(_Val2, _Val1);
@@ -48,6 +49,7 @@ auto _Load(packed_vector<float, 4>, const float* _Src) {
 template<> MATRICE_HOST_FINL
 auto _Load(packed_vector<float, 4>, float _Val1, float _Val2, float _Val3, float _Val4) {
 	return _mm_set_ps(_Val4, _Val3, _Val2, _Val1);
+}
 }
 _DETAIL_END
 MATRICE_ARCH_END
