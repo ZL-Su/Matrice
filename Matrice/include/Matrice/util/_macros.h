@@ -153,3 +153,7 @@ typename = std::enable_if_t<_COND>
 #ifndef MATRICE_STD
 #define MATRICE_STD(NAME) std::NAME
 #endif
+
+#ifndef MATRICE_STRINGFY
+#define MATRICE_STRINGFY(x) #x
+#endif
