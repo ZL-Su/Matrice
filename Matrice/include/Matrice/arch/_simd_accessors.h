@@ -21,33 +21,54 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_simd_traits.hpp"
 
 MATRICE_ARCH_BEGIN
+struct load {};
+struct store {};
 _DETAIL_BEGIN
 
+// For internal use...
+namespace internal {
 template<typename... _Args>
 MATRICE_HOST_FINL auto _Load(_Args... _) {};
+template<typename... _Args>
+MATRICE_HOST_FINL auto _Store(_Args... _) {};
+template<typename... _Args>
+MATRICE_HOST_FINL auto _Set_zero() {};
+}
 
-template<packetable_scalar _Ty,
-	uint8_t _N = packet_traits<_Ty>::size> struct _Accessor {};
-
-template<packetable_scalar _Ty>
-struct _Accessor<_Ty, 2> : packed_vector<_Ty, 2>
-{
-	using _Mybase = packed_vector<_Ty, 2>;
-
-	template<typename... _Args>
-	MATRICE_HOST_FINL auto operator()(_Args&&... _Src) noexcept {
-		return _Load(_Mybase{}, _Src...);
+// Register storer
+template<typename _Vec> struct _Storer {
+	const _Vec& _Data;
+	_Storer(const _Vec& _Src) : _Data(_Src) {}
+	template<typename _Ty>
+	MATRICE_HOST_FINL auto operator()(_Ty* _Dst) noexcept {
+		return internal::_Store(_Data, _Dst);
 	}
 };
 
-template<> MATRICE_HOST_FINL 
-auto _Load(packed_vector<double, 2>, const double* _Src) {
-	return _mm_load_pd(_Src);
-}
-template<> MATRICE_HOST_FINL 
-auto _Load(packed_vector<double, 2>, double _Val1, double _Val2) {
-	return _mm_set_pd(_Val2, _Val1);
-}
+// Register loader
+template<typename _Vec> struct _Loader {
+	template<typename... _Args>
+	MATRICE_HOST_FINL auto operator()(_Args... _Src) const noexcept {
+		return internal::_Load(_Vec{}, _Src...);
+	}
+};
+
+/// <summary>
+/// \brief CLASS TEMPLATE, uniform interface for accessing the register.
+/// </summary>
+template<packetable_scalar _Ty, 
+	uint8_t _N = packet_traits<_Ty>::size> 
+class _Accessor : public packed_vector<_Ty, _N> {
+	using _Mybase = packed_vector<_Ty, _N>;
+	using _Native_type = typename _Mybase::type;
+public:
+	MATRICE_HOST_FINL static _Loader<_Mybase> fwd() noexcept {
+		return _Loader<_Mybase>();
+	}
+	MATRICE_HOST_FINL static _Storer<_Native_type> bwd(const _Native_type& _Reg) noexcept {
+		return _Storer<_Native_type>{_Reg};
+	}
+};
 
 _DETAIL_END
 
@@ -55,5 +76,5 @@ template<typename _Ty, uint8_t _Size= packet_traits<_Ty>::size>
 using accessor = detail::_Accessor<_Ty, _Size>;
 
 MATRICE_ARCH_END
-
+#include "inl/_simd_accessor.hpp"
 #endif // MATRICE_SIMD_ARCH
