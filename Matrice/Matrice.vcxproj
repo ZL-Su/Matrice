@@ -152,6 +152,7 @@
     <ClInclude Include="examples\basic_matrix_usage.h" />
     <ClInclude Include="examples\csvio_ex.hpp" />
     <ClInclude Include="examples\dic_ex.hpp" />
+    <ClInclude Include="examples\intro_to_algs.h" />
     <ClInclude Include="examples\simd_ex.hpp" />
     <ClInclude Include="examples\speckle_ex.hpp" />
     <ClInclude Include="include\Matrice\3rdparty\interface.hpp" />
