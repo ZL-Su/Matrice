@@ -157,3 +157,11 @@ typename = std::enable_if_t<_COND>
 #ifndef MATRICE_STRINGFY
 #define MATRICE_STRINGFY(x) #x
 #endif
+
+#ifndef MATRICE_NOALIAS
+// MATRICE_NOALIAS attribute tells the compiler optimizer that pointers 
+// going into the modified algorithms won't be stored beyond the lifetime 
+// of the function, and that the function will only reference arrays 
+// denoted by those pointers.
+#define MATRICE_NOALIAS __declspec(noalias)
+#endif
