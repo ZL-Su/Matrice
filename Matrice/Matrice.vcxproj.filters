@@ -750,6 +750,9 @@
     <ClInclude Include="examples\intro_to_algs.h">
       <Filter>Examples</Filter>
     </ClInclude>
+    <ClInclude Include="examples\lazy_eval_with_std.hpp">
+      <Filter>Examples</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
