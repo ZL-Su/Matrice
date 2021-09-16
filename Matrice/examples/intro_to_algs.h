@@ -4,7 +4,7 @@
 
 DGE_MATRICE_BEGIN
 
-template<typename _It>
+template<typename _It> MATRICE_NOALIAS 
 void _Insertion_sort(const _It _Begin, const _It _End) noexcept {
 	const auto _Len = (_End - _Begin);
 	auto _First = _Begin;
