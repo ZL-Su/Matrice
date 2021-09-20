@@ -62,6 +62,11 @@ class _Accessor : public packed_vector<_Ty, _N> {
 	using _Mybase = packed_vector<_Ty, _N>;
 	using _Native_type = typename _Mybase::type;
 public:
+
+	MATRICE_HOST_INL auto set() noexcept {
+		return internal::_Set_zero();
+	}
+
 	MATRICE_HOST_FINL static _Loader<_Mybase> fwd() noexcept {
 		return _Loader<_Mybase>();
 	}
