@@ -14,20 +14,24 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************/
+**********************************************************************/
 #pragma once
-#include "_macros.h"
+#include <ranges>
+#include <core/matrix.h>
 
-#define MATRICE_VERSION_MAJOR 2021
-#define MATRICE_VERSION_MINOR 3
-#define MATRICE_VERSION_REVISION 10
-
-// Classic CPP stringifcation; the extra level of indirection allows the
-// preprocessor to expand the macro before being converted to a string.
-#define MATRICE_VER_STRING(x) MATRICE_STRINGFY(x)
-
-// The Matrice version as a string; for example "2021.3.10".
-#define MATRICE_VERSION_STRING \
-MATRICE_VER_STRING(MATRICE_VERSION_MAJOR) "." \
-MATRICE_VER_STRING(MATRICE_VERSION_MINOR) "." \
-MATRICE_VER_STRING(MATRICE_VERSION_REVISION)
+DGE_MATRICE_BEGIN
+namespace example {
+void _Lazy_eval_with_std_ranges() {
+	dgelom::Matrix<int> _Vec = { 1, 2, 3, 4, 5, 6, 7, 8 };
+	auto&& _Exp = _Vec
+		| std::ranges::views::filter([](const auto& x) {return x % 2 == 0; }) // 2, 4, 6, 8
+		| std::ranges::views::transform([](auto& x) {return x += 2; }) // 4, 6, 8, 10
+		| std::ranges::views::take(3); // 4, 6, 8
+	decltype(_Vec) _Res(3, 1);
+	for (auto _It = _Exp.begin(); _It != _Exp.end(); ++_It) {
+		const auto _Idx = _It - _Exp.begin();
+		_Res(_Idx) = *_It;
+	}
+}
+}
+DGE_MATRICE_END

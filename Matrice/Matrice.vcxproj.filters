@@ -226,9 +226,6 @@
     <Filter Include="Header Files\Algs\Stereovision\refractive\inline">
       <UniqueIdentifier>{e71e77d2-ae79-4cbb-a8f1-2c4c9fe0f5b1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Algs\transform">
-      <UniqueIdentifier>{abbc4ff7-5025-44de-8fcb-bb1b0fa65caf}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Algs\transforms">
       <UniqueIdentifier>{8a8f45e6-77e2-441d-ae88-3cc2fed294f1}</UniqueIdentifier>
     </Filter>
@@ -249,6 +246,9 @@
     </Filter>
     <Filter Include="Header Files\Arch\Inline">
       <UniqueIdentifier>{7a24d11a-4018-4aac-b89c-eb8b6042867b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Algs\Transforms">
+      <UniqueIdentifier>{abbc4ff7-5025-44de-8fcb-bb1b0fa65caf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -703,7 +703,7 @@
       <Filter>Header Files\Algs\Stereovision\refractive</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\transform\_fft.hpp">
-      <Filter>Header Files\Algs\transform</Filter>
+      <Filter>Header Files\Algs\Transforms</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\core\functions.h">
       <Filter>Header Files\Core</Filter>
@@ -746,6 +746,18 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\arch\inl\_simd_accessor.hpp">
       <Filter>Header Files\Arch\Inline</Filter>
+    </ClInclude>
+    <ClInclude Include="examples\intro_to_algs.h">
+      <Filter>Examples</Filter>
+    </ClInclude>
+    <ClInclude Include="examples\lazy_eval_with_std.hpp">
+      <Filter>Examples</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\io\_dir.hpp">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\io\_collectors.hpp">
+      <Filter>Header Files\IO</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
