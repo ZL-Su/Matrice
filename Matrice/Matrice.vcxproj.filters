@@ -753,6 +753,12 @@
     <ClInclude Include="examples\lazy_eval_with_std.hpp">
       <Filter>Examples</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\io\_dir.hpp">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\io\_collectors.hpp">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
