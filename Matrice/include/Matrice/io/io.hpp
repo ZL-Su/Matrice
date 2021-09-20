@@ -39,6 +39,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "util/_conditional_macros.h"
 #include "util/_exception.h"
 #include "private/_range.h"
+#include "_dir.hpp"
 
 DGE_MATRICE_BEGIN
 /**
