@@ -250,6 +250,9 @@
     <Filter Include="Header Files\Algs\Transforms">
       <UniqueIdentifier>{abbc4ff7-5025-44de-8fcb-bb1b0fa65caf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Arch">
+      <UniqueIdentifier>{4c7901f9-95f5-45e7-9367-30bb8d7ac9fd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -759,6 +762,9 @@
     <ClInclude Include="include\Matrice\io\_collectors.hpp">
       <Filter>Header Files\IO</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\arch\internal\_regix.hpp">
+      <Filter>Header Files\Arch</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
@@ -967,6 +973,9 @@
     </ClCompile>
     <ClCompile Include="src\algorithm\transforms\_fft.cpp">
       <Filter>Source Files\Algs\transforms</Filter>
+    </ClCompile>
+    <ClCompile Include="src\arch\_regix.cpp">
+      <Filter>Source Files\Arch</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
