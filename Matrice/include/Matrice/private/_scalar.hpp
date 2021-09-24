@@ -62,10 +62,10 @@ public:
 		return (*this);
 	}
 
-	MATRICE_GLOBAL_INL decltype(auto)operator()(auto)const noexcept {
+	MATRICE_GLOBAL_INL decltype(auto)operator()()const noexcept {
 		return (_Myval);
 	}
-	MATRICE_GLOBAL_INL decltype(auto)operator()(auto) noexcept {
+	MATRICE_GLOBAL_INL decltype(auto)operator()() noexcept {
 		return (_Myval);
 	}
 
