@@ -39,8 +39,28 @@ template<> struct _Regix<double_t> {};
 template<> struct _Regix<__m128> {
 	using value_t = float_t;
 	using pointer = value_t*;
+	explicit _Regix() = default;
+	explicit _Regix(pointer const _Src) noexcept
+		:_Myreg{ _mm_load_ps(_Src) } {
+	}
+	explicit _Regix(const value_t _Val) noexcept
+		:_Myreg{ _mm_set1_ps(_Val) } {
+	}
+	explicit _Regix(initlist<value_t> _Vals) noexcept
+		:_Myreg{ _mm_set_ps(*(_Vals.begin()+3), *(_Vals.begin()+2), 
+			*(_Vals.begin() + 1), *_Vals.begin()) } {
+	}
 
-	MATRICE_HOST_FINL decltype(auto) operator<<(const pointer const _Src) noexcept {
+	MATRICE_HOST_FINL decltype(auto) operator=(const pointer _Src) noexcept {
+		_Myreg = (_mm_load_ps)(_Src);
+		return (*this);
+	}
+	MATRICE_HOST_FINL decltype(auto) operator=(initlist<value_t> _Src) noexcept {
+		_Myreg = _mm_set_ps(*(_Src.begin() + 3), *(_Src.begin() + 2),
+			*(_Src.begin() + 1), *_Src.begin());
+		return (*this);
+	}
+	MATRICE_HOST_FINL decltype(auto) operator<<(const pointer _Src) noexcept {
 		_Myreg = (_mm_load_ps)(_Src);
 		return (*this);
 	}
