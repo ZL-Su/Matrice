@@ -115,6 +115,10 @@ public:
 		}
 		return ret;
 	}
+
+	MATRICE_GLOBAL_INL static _Myt zeros() noexcept {
+		return {};
+	}
 	
 #ifdef _MSVC_LANG
 	///<brief> properties </brief>
@@ -387,6 +391,20 @@ template<typename _Ty, size_t _N> MATRICE_GLOBAL_INL
 auto concat(const Vec_<_Ty,_N>& prev, const Vec_<_Ty,_N>& next)noexcept {
 	typename Vec_<_Ty, _N>::template extend<2> _Ret;
 	_Ret.cview(0) = prev, _Ret.cview(1) = next;
+	return _Ret;
+}
+
+/**
+ * \brief Concatenate a _M-by-_N matrix and a _M-vector.
+ * \param "mat" the left matrix.
+ * \param "vec" the right vector.
+ * \returns A matrix with type of Matrix_<_Ty, _M, _N + 1>.
+ */
+template<typename _Ty, size_t _M, size_t _N> MATRICE_GLOBAL_INL
+auto concat(const Matrix_<_Ty, _M, _N>& mat, const Vec_<_Ty, _M>& vec)noexcept {
+	typename Vec_<_Ty, _N>::template extend<_N + 1> _Ret;
+	_Ret.block(0, _N, 0, _M) = mat;
+	_Ret.cview(_N) = vec;
 	return _Ret;
 }
 
