@@ -1268,6 +1268,16 @@ public:
 	MATRICE_GET(bool, empty, !bool(size()));
 	MATRICE_GET(size_t, format, _Myfmt);
 
+	/*@{ Special methods*/
+	/**
+	 *\brief Convert to cv::Mat without copy data.
+	 *\return A cv::Mat typed wrapper.
+	 */
+	template<typename _CvMat, MATRICE_ENABLE_IF(is_floating_point_v<value_type>)>
+	MATRICE_HOST_FINL _CvMat cv() const noexcept {
+		return { int(rows()), int(cols()), int(is_float32_v<value_type> ? 5 : 6), data() };
+	}
+	/*@}*/
 protected:
 	using _Mybase::m_rows;
 	using _Mybase::m_cols;
@@ -1387,7 +1397,7 @@ template<typename _Mty>
 MATRICE_HOST_INL void swap(_Mty& _L, _Mty& _R) noexcept;
 
 /**
- *\func dgelom::copy<_Mty>(_Mty&, _Mty&)
+ *\func dgelom::copy<_Mty>(const _Mty&)
  *\brief Copy a given matrix. Always wrap a dynamic matrix with the function if a deep copy is required.
  */
 template<typename _Mty, MATRICE_ENABLE_IF(is_matrix_v<_Mty>)>
