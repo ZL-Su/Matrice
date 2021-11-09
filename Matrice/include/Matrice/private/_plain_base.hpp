@@ -984,7 +984,7 @@ public:
 	 */
 	MATRICE_GLOBAL_FINL value_type norm()const noexcept {
 		auto _Ans = dot(*this); 
-		return (_Ans > eps ? ::sqrt(_Ans) : inf); 
+		return (0 <= _Ans ? ::sqrt(_Ans) : inf); 
 	}
 	/**
 	 * \matrix p-norm: $[\sum_{i=1}^{m}\sum_{j=1}^{}|a_{ij}|^p]^{1/p}$
