@@ -1194,6 +1194,21 @@ public:
 	}
 
 	/**
+	 *\brief Compute the symetric part of the matrix/tensor.
+	 *\return Symetric expression but not an instance, call eval() for obtaining the instance. 
+	 */
+	MATRICE_GLOBAL_INL auto sym() noexcept {
+		return (derived() + derived().t()) / value_type(2);
+	}
+	/**
+	 *\brief Compute the skew part of the matrix/tensor.
+	 *\return Skew expression but not an instance, call eval() for obtaining the instance. 
+	 */
+	MATRICE_GLOBAL_INL auto skew() noexcept {
+		return (derived() - derived().t()) / value_type(2);
+	}
+
+	/**
 	 *\brief Create a zero-value filled matrix
 	 *\param [_Rows, Cols] height and width of matrix, only specified for dynamic created matrix
 	 */
