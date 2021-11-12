@@ -152,6 +152,8 @@
     <ClInclude Include="examples\basic_matrix_usage.h" />
     <ClInclude Include="examples\csvio_ex.hpp" />
     <ClInclude Include="examples\dic_ex.hpp" />
+    <ClInclude Include="examples\intro_to_algs.h" />
+    <ClInclude Include="examples\lazy_eval_with_std.hpp" />
     <ClInclude Include="examples\simd_ex.hpp" />
     <ClInclude Include="examples\speckle_ex.hpp" />
     <ClInclude Include="include\Matrice\3rdparty\interface.hpp" />
@@ -209,6 +211,8 @@
     <ClInclude Include="include\Matrice\algs\transform\_fft.hpp" />
     <ClInclude Include="include\Matrice\arch\inl\_ixops.hpp" />
     <ClInclude Include="include\Matrice\arch\inl\_ixop_impls.hpp" />
+    <ClInclude Include="include\Matrice\arch\inl\_simd_accessor.hpp" />
+    <ClInclude Include="include\Matrice\arch\internal\_regix.hpp" />
     <ClInclude Include="include\Matrice\arch\ixpacket.h" />
     <ClInclude Include="include\Matrice\arch\simd.h" />
     <ClInclude Include="include\Matrice\arch\sys\info_rep.h" />
@@ -227,6 +231,8 @@
     <ClInclude Include="include\Matrice\funcs\_functions.h" />
     <ClInclude Include="include\Matrice\io\hrc.hpp" />
     <ClInclude Include="include\Matrice\io\io.hpp" />
+    <ClInclude Include="include\Matrice\io\_collectors.hpp" />
+    <ClInclude Include="include\Matrice\io\_dir.hpp" />
     <ClInclude Include="include\Matrice\io\_png_wrapper.hpp" />
     <ClInclude Include="include\Matrice\io\_tiff_wrapper.hpp" />
     <ClInclude Include="include\Matrice\lic\license.h" />
@@ -352,6 +358,7 @@
     <ClCompile Include="src\algorithm\transforms\_fft.cpp" />
     <ClCompile Include="src\algorithm\_bsplines.cpp" />
     <ClCompile Include="src\algorithm\_splineinterp.cpp" />
+    <ClCompile Include="src\arch\_regix.cpp" />
     <ClCompile Include="src\core\matrix_base_impl.cpp" />
     <ClCompile Include="src\core\matrix_dynamic_impl.cpp" />
     <ClCompile Include="src\core\matrix_expr_op_impl.cpp" />

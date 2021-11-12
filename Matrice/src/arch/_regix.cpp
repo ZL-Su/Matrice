@@ -15,19 +15,22 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************/
-#pragma once
-#include "_macros.h"
+#ifdef MATRICE_SIMD_ARCH
+#include "arch/internal/_regix.hpp"
 
-#define MATRICE_VERSION_MAJOR 2021
-#define MATRICE_VERSION_MINOR 3
-#define MATRICE_VERSION_REVISION 10
+MATRICE_ARCH_BEGIN
+_DETAIL_BEGIN
 
-// Classic CPP stringifcation; the extra level of indirection allows the
-// preprocessor to expand the macro before being converted to a string.
-#define MATRICE_VER_STRING(x) MATRICE_STRINGFY(x)
+#define MATRICE_MAKE_REGIX(INTR, TYPE) \
+template<> struct _Regix<INTR> {       \
+using value_t = TYPE;                  \
+using pointer = value_t*;              \
+INTR _Myreg;
+#define MATRICE_END_REGIX };
 
-// The Matrice version as a string; for example "2021.3.10".
-#define MATRICE_VERSION_STRING \
-MATRICE_VER_STRING(MATRICE_VERSION_MAJOR) "." \
-MATRICE_VER_STRING(MATRICE_VERSION_MINOR) "." \
-MATRICE_VER_STRING(MATRICE_VERSION_REVISION)
+#undef MATRICE_MAKE_REGIX
+#undef MATRICE_END_REGIX
+
+_DETAIL_END
+MATRICE_ARCH_END
+#endif

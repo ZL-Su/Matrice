@@ -214,6 +214,10 @@ public:
 		_Mybase::_Myalloc.alloc(rows(), cols);
 		_Mybase::_Xfields({ size_t(rows()), cols });
 	}
+
+	MATRICE_GLOBAL_FINL _Myt& resize(size_t cols) {
+		return this->create(rows(), cols);
+	}
 };
 
 template<typename _Ty, size_t Cols>
@@ -263,6 +267,10 @@ public:
 		_Mybase::_Myalloc.alloc(rows, cols());
 		_Mybase::_Xfields({ rows, size_t(cols()) });
 	}
+
+	MATRICE_GLOBAL_FINL _Myt& resize(size_t rows) {
+		return this->create(rows, cols());
+	}
 };
 
 /*******************************************************************
@@ -306,6 +314,10 @@ public:
 	//MATRICE_HOST_INL _Myt& operator=(_Arg&& _arg) {
 	//	return _Mybase::operator=(_arg);
 	//}
+
+	MATRICE_GLOBAL_FINL _Myt& resize(size_t rows, size_t cols) {
+		return this->create(rows, cols);
+	}
 
 	MATRICE_MAKE_METHOD_CREATE(rows, cols = 1);
 };

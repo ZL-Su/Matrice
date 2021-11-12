@@ -25,13 +25,7 @@ namespace example {
 	auto a = simd_vector_f32{};
 	auto b = simd_vector_f64{};
 	auto c = decltype(b){};
-
-	simd::accessor<double, 2> acc;
-	auto vec_a = acc(1., 2.);
-	const double val[2]{ 0.5, 1.2 };
-	auto vec_b = acc(val);
-
-	auto vec_c = vec_b;
+	
 	// Alias of SIMD type.
 	using packet_t = simd::Packet_<float>;
 
