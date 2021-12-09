@@ -165,3 +165,14 @@ typename = std::enable_if_t<_COND>
 // by those pointers. Functions using MATRICE_NOALIAS must usually return void.
 #define MATRICE_NOALIAS __declspec(noalias)
 #endif
+
+#ifndef MATRICE_USED_VARIABLE
+// MATRICE_USED_VARIABLE suppresses 'unused variable' warnings.
+DGE_MATRICE_BEGIN
+namespace internal {
+    template<typename T>
+    MATRICE_DEVICE_FINL void ignore_unused_variable(const T&) {}
+}
+DGE_MATRICE_END
+#define MATRICE_USED_VARIABLE(var) dgelom::internal::ignore_unused_variable(var);
+#endif
