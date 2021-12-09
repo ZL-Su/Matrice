@@ -225,6 +225,7 @@
     <ClInclude Include="include\Matrice\core\image.h" />
     <ClInclude Include="include\Matrice\core\matrix.h" />
     <ClInclude Include="include\Matrice\core\solver.h" />
+    <ClInclude Include="include\Matrice\core\span.h" />
     <ClInclude Include="include\Matrice\core\tensor.h" />
     <ClInclude Include="include\Matrice\core\vector.h" />
     <ClInclude Include="include\Matrice\forward.hpp" />

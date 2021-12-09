@@ -765,6 +765,9 @@
     <ClInclude Include="include\Matrice\arch\internal\_regix.hpp">
       <Filter>Header Files\Arch</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\core\span.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
