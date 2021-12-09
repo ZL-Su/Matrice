@@ -1,4 +1,4 @@
-/**********************************************************************
+﻿/**********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
 Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
@@ -94,10 +94,19 @@ public:
 	/// <summary>
 	/// \brief Compute dot-product with other vector. 
 	/// </summary>
-	/// <param name="'_other'">Other vector with the same type.</param>
-	/// <returns></returns>
+	/// <param name="'_other'">Another vector with the same type.</param>
+	/// <returns>A scalar value</returns>
 	MATRICE_GLOBAL_FINL value_t dot(const _Myt& _other) const noexcept {
 		return _Mybase::dot(_other); 
+	}
+
+	/// <summary>
+	/// \brief Perform dyadic product of two vectors.
+	/// </summary>
+	/// <returns>An expression of vector dyadics ‘u ⊗ v’ </returns>
+	template<int32_t _N = _Dim>
+	MATRICE_GLOBAL_INL auto dyadic(const Vec_<value_t, _N>& _other) const noexcept {
+		return _Mybase::mul(_other);
 	}
 
 	/// <summary>
