@@ -27,6 +27,10 @@ MATRICE_ALG_BEGIN(vision)
 /// </summary>
 struct persp_camera_tag {};
 /// <summary>
+/// TAG, pinhole camera
+/// </summary>
+struct pinho_camera_tag {};
+/// <summary>
 /// TAG, orthographic camera
 /// </summary>
 struct ortho_camera_tag {};
@@ -43,7 +47,8 @@ MATRICE_HOST_INL
 _DETAIL_BEGIN
 
 // Forward declaration
-template<typename _Ty, typename _Tag> class _Camera {
+template<typename _Ty, typename _Tag> 
+class _Camera {
 	static_assert(true, 
 		"Unsupported camera tag '_Tag' in _Camera<_Ty, _Tag>.");
 };
@@ -235,5 +240,29 @@ using camera_t = detail::_Camera<_Ty, _Tag>;
 /// <typeparam name="_Ty">float or double, default is double</typeparam>
 template<typename _Ty = default_type>
 using perspective_camera_t = camera_t<_Ty, persp_camera_tag>;
+/// <summary>
+/// \brief ALIAS, Pinhole camera template
+/// </summary>
+template<typename _Ty = default_type>
+using pinhole_camera_t = perspective_camera_t<_Ty>;
+
+///<summary>
+/// \brief FUNCTION, get camera category according to the tag of a given camera. 
+///</summary>
+template<typename _Ty, class _Tag>
+MATRICE_HOST_FINL auto get_camera_category(camera_t<_Ty, _Tag>) noexcept {
+	if constexpr (is_same_v<_Tag, persp_camera_tag>) {
+		return "perspective camera";
+	}
+	if constexpr (is_same_v<_Tag, pinho_camera_tag>) {
+		return "pinhole camera";
+	}
+	if constexpr (is_same_v<_Tag, ortho_camera_tag>) {
+		return "orthographic camera";
+	}
+	if constexpr (is_same_v<_Tag, refrap_camera_tag>) {
+		return "refractive pinhole camera";
+	}
+}
 
 MATRICE_ALG_END(vision)
