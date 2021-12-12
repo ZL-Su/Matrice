@@ -205,6 +205,7 @@
     <ClInclude Include="include\Matrice\algs\stereovision\refractive3D\_refractive3d.h" />
     <ClInclude Include="include\Matrice\algs\stereovision\_camera.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_depth_estimation.hpp" />
+    <ClInclude Include="include\Matrice\algs\stereovision\_camera_pose.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_projection.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_spatial_transform.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_triangulation.hpp" />

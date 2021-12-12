@@ -768,6 +768,9 @@
     <ClInclude Include="include\Matrice\core\span.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\algs\stereovision\_camera_pose.hpp">
+      <Filter>Header Files\Algs\Geovision</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
