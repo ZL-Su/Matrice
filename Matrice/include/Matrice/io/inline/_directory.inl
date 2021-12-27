@@ -62,6 +62,15 @@ public:
 		_Mysubfolders = _Collector<folder_tag>::get(_Mypath.string());
 	}
 
+	_Dir_impl(const path_type& _Path) noexcept
+		:_Mypath(_Path) {
+		//_Mysubfolders = _Collector<folder_tag>::get(_Mypath.string());
+	}
+	_Dir_impl(path_type&& _Path) noexcept
+		:_Mypath(_Path) {
+		//_Mysubfolders = _Collector<folder_tag>::get(_Mypath.string());
+	}
+
 	/**
 	 * \return full path of _Idx-th folder
 	 */
