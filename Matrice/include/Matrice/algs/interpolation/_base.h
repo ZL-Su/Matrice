@@ -110,8 +110,9 @@ public:
 	}
 	_Interpolation_base(const matrix_type& _Data) noexcept
 		: _Mydata(make_shared_matrix(_Data)) {
-		if constexpr (require_coeff_lut<category>::value)
-			static_cast<_Mydt*>(this)->_Coeff_impl();
+		if constexpr (require_coeff_lut<category>::value) {
+			_Mycoeff = std::move(static_cast<_Mydt*>(this)->_Coeff_impl());
+		}
 	}
 	_Interpolation_base(const _Myt& _Other) noexcept
 		: _Mydata(_Other._Mydata), _Mycoeff(_Other._Mycoeff) {
@@ -119,8 +120,7 @@ public:
 	_Interpolation_base(_Myt&& _Other) noexcept
 		: _Mydata(_Other._Mydata), _Mycoeff(move(_Other._Mycoeff)) {
 	}
-	~_Interpolation_base() {
-	}
+	~_Interpolation_base() = default;
 
 	/**
 	 * \brief Get interpolation coeff. matrix.
@@ -185,10 +185,10 @@ protected:
 	MATRICE_HOST_INL auto _Grady_at(const point_type& _Pos) const;
 
 	std::add_pointer_t<_Mydt> _Mydt_this = static_cast<_Mydt*>(this);
-
-protected:
 	const value_type _Myeps{ value_type(1.0e-7) };
 	shared_matrix_t<value_type> _Mydata;
+
+private:
 	matrix_type _Mycoeff;
 };
 
