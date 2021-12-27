@@ -96,9 +96,8 @@ public:
 	MATRICE_GLOBAL_INL _Dense_allocator_base(_Al&& other) noexcept {
 		_Alloc_move(other);
 	}
-
-	MATRICE_GLOBAL_INL ~_Dense_allocator_base() noexcept {
-		if (m_data) {
+	MATRICE_GLOBAL_INL ~_Dense_allocator_base() {
+		if (this->m_data) {
 			this->destroy();
 		}
 	}
@@ -147,7 +146,8 @@ public:
 	 */
 	MATRICE_GLOBAL_INL allocator& alloc(size_t rows=0, size_t cols=0) {
 		if constexpr (is_not_same_v<category, stack_alloc_tag>) {
-			m_rows = rows, m_cols = cols;
+			m_rows = rows;
+			m_cols = cols;
 		}
 		return this->derived()._Alloc();
 	}
@@ -306,7 +306,6 @@ public:
 	MATRICE_HOST_INL _Allocator(_Argt&& arg) noexcept
 		:_Mybase(forward<_Argt>(arg)){
 	}
-	//MATRICE_HOST_INL ~_Allocator();
 
 	MATRICE_HOST_INL _Myt& operator=(const _Myt& othr) noexcept {
 		return _Mybase::operator=(othr);
@@ -349,7 +348,6 @@ public:
 	MATRICE_HOST_INL _Allocator(_Argt&& arg) noexcept
 		:_Mybase(forward<_Argt>(arg)) {
 	}
-	//MATRICE_HOST_INL ~_Allocator();
 
 	MATRICE_HOST_INL _Myt& operator=(const _Myt& othr) noexcept {
 		return _Mybase::operator=(othr);
@@ -396,7 +394,6 @@ public:
 	MATRICE_HOST_INL _Allocator(_Argt&& arg) noexcept
 		:_Mybase(forward<_Argt>(arg)) {
 	}
-	//MATRICE_HOST_INL ~_Allocator();
 
 	MATRICE_HOST_INL _Myt& operator=(const _Myt& othr) noexcept {
 		return _Mybase::operator=(othr);
