@@ -837,8 +837,8 @@ public:
 			m_cols = _other.m_cols;
 			m_rows = _other.m_rows;
 			m_shape = _other.shape();
-			if (_other._Myalloc) {
-				m_data = _Myalloc = _other._Myalloc;
+			if (_other.allocator().data()) {
+				m_data = _Myalloc = _other.allocator();
 			}
 			else {
 				m_data = _other.data();
@@ -857,13 +857,13 @@ public:
 			m_cols = _other.m_cols;
 			m_rows = _other.m_rows;
 			m_shape = _other.shape();
-			if (_other._Myalloc) {
+			if (_other.allocator().data()) {
 				if constexpr (Size > 0) {
-					//copy if they allocated on the stack
-					m_data = _Myalloc = (_other._Myalloc);
+					//copy if they are allocated on the stack
+					m_data = _Myalloc = (_other.allocator());
 				}
 				else {
-					m_data = _Myalloc = move(_other._Myalloc);
+					m_data = _Myalloc = move(_other.allocator());
 					_other._Myalloc.destroy();
 				}
 			}
