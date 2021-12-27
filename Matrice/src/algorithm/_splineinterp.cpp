@@ -86,18 +86,17 @@ template<typename _Ty> struct _It_hypar_7 : _Itpar_base<_Ty> {
 	}
 };
 
-template<typename _Ty> 
-void _Spline_interpolation<_Ty, bicerp_tag>::_Coeff_impl() {
+template<typename _Ty>
+_Spline_interpolation<_Ty, bicerp_tag>::matrix_type
+_Spline_interpolation<_Ty, bicerp_tag>::_Coeff_impl() const {
 	const auto& _Data = *_Mybase::_Mydata;
-	auto& _Mycoeff = _Mybase::_Mycoeff;
-
-	auto[_Height, _Width, _ph] = _Data.shape();
-	_Mycoeff.create(_Height, _Width, zero<value_type>);
+	const auto [_Height, _Width, _] = _Data.shape();
 
 	//initialization
 	const auto[_Z, _A, _K] = _It_hypar_3<value_type>::value();
 
 	matrix_type _Buff(_Height, _Width);
+	matrix_type _Mycoeff(_Height, _Width, zero<value_type>);
 
 	//Recursion over each column
 
@@ -124,20 +123,21 @@ void _Spline_interpolation<_Ty, bicerp_tag>::_Coeff_impl() {
 		}
 	}
 	_SPLCOEFF_RWISE_RECURSION(_A, _Z);
+
+	return _Mycoeff;
 }
 
 template<typename _Ty> 
-void _Spline_interpolation<_Ty, biqerp_tag>::_Coeff_impl() {
+_Spline_interpolation<_Ty, biqerp_tag>::matrix_type
+_Spline_interpolation<_Ty, biqerp_tag>::_Coeff_impl() const {
 	const auto& _Data = *_Mybase::_Mydata;
-	auto& _Mycoeff = _Mybase::_Mycoeff;
-
 	const auto[_Height, _Width, _ph] = _Data.shape();
-	_Mycoeff.create(_Height, _Width, zero<value_type>);
 
 	//initialization
 	const auto[_Z1, _Z2, _A1, _A2, _K1, _K2] = _It_hypar_5<value_type>::value();
 
 	matrix_type _Buff(_Height, _Width);
+	matrix_type _Mycoeff(_Height, _Width, zero<value_type>);
 
 	// \Recursion over each column...
 
@@ -184,19 +184,20 @@ void _Spline_interpolation<_Ty, biqerp_tag>::_Coeff_impl() {
 		}
 	}
 	_SPLCOEFF_RWISE_RECURSION(_A2, _Z2);
+
+	return _Mycoeff;
 }
 template<typename _Ty> 
-void _Spline_interpolation<_Ty, biserp_tag>::_Coeff_impl() {
+_Spline_interpolation<_Ty, biserp_tag>::matrix_type
+_Spline_interpolation<_Ty, biserp_tag>::_Coeff_impl() const {
 	const auto& _Data = *_Mybase::_Mydata;
-	auto& _Mycoeff = _Mybase::_Mycoeff;
-
 	const auto[_Height, _Width, _ph] = _Data.shape();
-	_Mycoeff.create(_Height, _Width, zero<value_type>);
 
 	//initialization
 	const auto[_Z1, _Z2, _Z3, _A1, _A2, _A3, _K1, _K2, _K3]=
 		_It_hypar_7<value_type>::value();
 
+	matrix_type _Mycoeff(_Height, _Width, zero<value_type>);
 	matrix_type _Buff(_Height, _Width);
 
 	auto _R0 = _Buff.rview(0) = zero<value_type>;
@@ -258,6 +259,8 @@ void _Spline_interpolation<_Ty, biserp_tag>::_Coeff_impl() {
 		}
 	}
 	_SPLCOEFF_RWISE_RECURSION(_A3, _Z3);
+
+	return _Mycoeff;
 }
 
 template class _Spline_interpolation<float,  bicerp_tag>;
