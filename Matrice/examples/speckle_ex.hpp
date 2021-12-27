@@ -56,7 +56,9 @@ public:
 	}
 
 	inline decltype(auto) get_block_range() const noexcept {
-		return std::make_tuple(m_rect.begin().x, m_rect.end().x, m_rect.begin().y, m_rect.end().y);
+		return std::make_tuple(
+			m_rect.begin().x, m_rect.end().x, 
+			m_rect.begin().y, m_rect.end().y);
 	}
 
 	template<uint16_t _Order>
