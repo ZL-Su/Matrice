@@ -16,6 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **********************************************************************/
 #pragma once
+#include <array>
+
 #include <io/io.hpp>
 #include <algs/correlation.hpp>
 #include <algs/graphics.hpp>
@@ -146,6 +148,40 @@ catch (std::exception& e) {
 }
 catch (...) {
 	std::cout << "Unknown exception." << std::endl;
+}
+
+void multi_points_optimizer(std::vector<std::array<corr_optim_t::value_type, 4>>&& nodes, fs::path&& path)
+try {
+	using value_t = corr_optim_t::value_type;
+	const auto refimg = io::imread(path.string() + "\\tension_00.tif").matrix<value_t>();
+	const auto curimg = io::imread(path.string() + "\\tension_01.tif").matrix<value_t>();
+
+	const auto opts = corr_optim_t::options_type{ 20 };
+	auto disp = corr_optim_t::matrix_type(nodes.size(), 2, 0.);
+
+	smooth_image_t f(refimg), g(curimg);
+	auto optim = corr_optim_t{f, g, opts};
+	auto rview = disp.rwbegin();
+	for (decltype(auto) node : nodes) {
+		optim.init(node[0], node[1]);
+		auto p = decltype(optim)::param_type{};
+		p[0] = node[2] - node[0];
+		p[3] = node[3] - node[1];
+		for (auto i = 0; i < min(10, opts.maxiters()); ++i) {
+			const auto [coef, error] = optim(p);
+			if (error < opts.tol()) {
+				break;
+			}
+		}
+		rview = { p[0], p[3] };
+		++rview;
+	}
+}
+catch (dgelom::exception::error& e) {
+	std::cout << "Err: " << e.what()
+		<< "in function: " << e.location()._func
+		<< ". (See line " << e.location()._line
+		<< " in file '" << e.location()._file << "')\n";
 }
 }
 DGE_MATRICE_END
