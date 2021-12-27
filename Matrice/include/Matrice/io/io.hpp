@@ -626,7 +626,12 @@ decltype(auto) make_loader(std::string&& path, _Op&& loader)noexcept {
 template<class _Op>
 decltype(auto) make_loader(const path_t& path, _Op&& loader)noexcept {
 	using loader_type = data_loader<typename _Op::value_type>;
-	return loader_type(directory{ path.generic_string(), path_t() }, loader);
+	return loader_type(directory(path), loader);
+}
+template<class _Op>
+decltype(auto) make_loader(path_t&& path, _Op&& loader)noexcept {
+	using loader_type = data_loader<typename _Op::value_type>;
+	return loader_type(directory(std::move(path)), loader);
 }
 
 template<fmt _Fmt>
