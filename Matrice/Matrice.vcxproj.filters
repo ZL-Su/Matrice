@@ -771,6 +771,12 @@
     <ClInclude Include="include\Matrice\algs\stereovision\_camera_pose.hpp">
       <Filter>Header Files\Algs\Geovision</Filter>
     </ClInclude>
+    <ClInclude Include="examples\rotation.hpp">
+      <Filter>Examples</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\io\text_loader.hpp">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
