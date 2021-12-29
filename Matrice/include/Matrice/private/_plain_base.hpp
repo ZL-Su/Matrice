@@ -498,7 +498,7 @@ public:
 	 * \brief returns a reference to the derived object.
 	 */
 	MATRICE_GLOBAL_INL const _Derived& derived() const noexcept {
-		return *static_cast<_Derived*>(this);
+		return *static_cast<const _Derived*>(this);
 	}
 	MATRICE_GLOBAL_INL _Derived& derived() noexcept {
 		return *static_cast<_Derived*>(this);
