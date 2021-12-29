@@ -130,7 +130,7 @@ public:
 	}
 
 	/**
-	 * \brief set reference geometry between the world coord. sys. and the ref. cam.
+	 * \brief set reference geometry between frames of the object and the ref. cam.
 	 */
 	MATRICE_HOST_INL _Myt& set_refer_geo(initlist<value_type> rt) noexcept {
 		decltype(auto) _It = rt.begin();
@@ -143,8 +143,8 @@ public:
 		_Mybase::m_trs[0].z = tz;
 
 		//compute the geometry bewtween the object and right cam frames.
-		_Mybase::m_trs[1] = _Mybase::m_trs[1] + _Mybase::m_rot[1].mul(_Mybase::m_trs[0]);
-		auto r_temp = _Mybase::m_rot[1].mul(_Mybase::m_rot[0]).eval();
+		_Mybase::m_trs[1] = this->m_trs[1] + this->m_rot[1].mul(this->m_trs[0]);
+		const auto r_temp = _Mybase::m_rot[1].mul(_Mybase::m_rot[0]).eval();
 		_Mybase::m_rot[1] = r_temp;
 
 		return (*this);
@@ -165,8 +165,12 @@ public:
 		_Mybase::remove_distortion(0, p.x, p.y);
 		auto x = p.x - cx, y = p.y - cy;
 		auto R = _Mybase::m_rot[0];
-		A.rview(0) = { x*R[2][0] - fx*R[0][0], x*R[2][1] - fx*R[0][1], x*R[2][2] - fx*R[0][2] };
-		A.rview(1) = { y*R[2][0] - fy*R[1][0], y*R[2][1] - fy*R[1][1], y*R[2][2] - fy*R[1][2] };
+		A.rview(0) = { x*R[2][0] - fx*R[0][0], 
+			x*R[2][1] - fx*R[0][1], 
+			x*R[2][2] - fx*R[0][2] };
+		A.rview(1) = { y*R[2][0] - fy*R[1][0], 
+			y*R[2][1] - fy*R[1][1], 
+			y*R[2][2] - fy*R[1][2] };
 		b(0) = fx * _Mybase::m_trs[0].x - x * _Mybase::m_trs[0].z;
 		b(1) = fy * _Mybase::m_trs[0].y - y * _Mybase::m_trs[0].z;
 
@@ -175,8 +179,12 @@ public:
 		_Mybase::remove_distortion(1, q.x, q.y);
 		x = q.x - cx, y = q.y - cy;
 		R = _Mybase::m_rot[1];
-		A.rview(2) = { x*R[2][0] - fx*R[0][0], x*R[2][1] - fx*R[0][1], x*R[2][2] - fx*R[0][2] };
-		A.rview(3) = { y*R[2][0] - fy*R[1][0], y*R[2][1] - fy*R[1][1], y*R[2][2] - fy*R[1][2] };
+		A.rview(2) = { x*R[2][0] - fx*R[0][0], 
+			x*R[2][1] - fx*R[0][1], 
+			x*R[2][2] - fx*R[0][2] };
+		A.rview(3) = { y*R[2][0] - fy*R[1][0], 
+			y*R[2][1] - fy*R[1][1], 
+			y*R[2][2] - fy*R[1][2] };
 		b(2) = fx * _Mybase::m_trs[1].x - x * _Mybase::m_trs[1].z;
 		b(3) = fy * _Mybase::m_trs[1].y - y * _Mybase::m_trs[1].z;
 
