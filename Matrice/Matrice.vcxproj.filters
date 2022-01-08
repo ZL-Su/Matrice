@@ -154,9 +154,6 @@
     <Filter Include="Header Files\Detail\container">
       <UniqueIdentifier>{964b65b8-9a9a-47d9-9bec-7d76d0720b9f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Algs\Stereovision">
-      <UniqueIdentifier>{2ea01202-bb99-4419-a408-aba73b399ad6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Algs\DeepLearning\Layers">
       <UniqueIdentifier>{c6ab27da-58e3-4fba-8f90-233f84fd5fa5}</UniqueIdentifier>
     </Filter>
@@ -220,12 +217,6 @@
     <Filter Include="Header Files\Algs\Spline">
       <UniqueIdentifier>{81d8d0c7-b6cf-498f-ae95-a9368377c5b6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Algs\Stereovision\refractive">
-      <UniqueIdentifier>{f051172f-23e2-4827-9613-1168f1cf15a1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Algs\Stereovision\refractive\inline">
-      <UniqueIdentifier>{e71e77d2-ae79-4cbb-a8f1-2c4c9fe0f5b1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Algs\transforms">
       <UniqueIdentifier>{8a8f45e6-77e2-441d-ae88-3cc2fed294f1}</UniqueIdentifier>
     </Filter>
@@ -249,6 +240,18 @@
     </Filter>
     <Filter Include="Header Files\Algs\Transforms">
       <UniqueIdentifier>{abbc4ff7-5025-44de-8fcb-bb1b0fa65caf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Arch">
+      <UniqueIdentifier>{4c7901f9-95f5-45e7-9367-30bb8d7ac9fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Algs\Geovision">
+      <UniqueIdentifier>{2ea01202-bb99-4419-a408-aba73b399ad6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Algs\Geovision\refractive">
+      <UniqueIdentifier>{f051172f-23e2-4827-9613-1168f1cf15a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Algs\Geovision\refractive\inline">
+      <UniqueIdentifier>{e71e77d2-ae79-4cbb-a8f1-2c4c9fe0f5b1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -454,7 +457,7 @@
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\stereovision\_projection.hpp">
-      <Filter>Header Files\Algs\Stereovision</Filter>
+      <Filter>Header Files\Algs\Geovision</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\dnn\layer\_layer_base.hpp">
       <Filter>Header Files\Algs\DeepLearning\Layers</Filter>
@@ -574,7 +577,7 @@
       <Filter>Header Files\Detail\core</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\stereovision\_depth_estimation.hpp">
-      <Filter>Header Files\Algs\Stereovision</Filter>
+      <Filter>Header Files\Algs\Geovision</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\correlation.hpp">
       <Filter>Header Files\Algs</Filter>
@@ -631,10 +634,10 @@
       <Filter>Header Files\Algs\Geometry\manifold\Lie</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\stereovision\_spatial_transform.hpp">
-      <Filter>Header Files\Algs\Stereovision</Filter>
+      <Filter>Header Files\Algs\Geovision</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\stereovision\_triangulation.hpp">
-      <Filter>Header Files\Algs\Stereovision</Filter>
+      <Filter>Header Files\Algs\Geovision</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\stereovis.hpp">
       <Filter>Header Files\Algs</Filter>
@@ -676,7 +679,7 @@
       <Filter>Header Files\Algs\Correlation</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\stereovision\_camera.hpp">
-      <Filter>Header Files\Algs\Stereovision</Filter>
+      <Filter>Header Files\Algs\Geovision</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\solver.hpp">
       <Filter>Header Files\Core</Filter>
@@ -697,10 +700,10 @@
       <Filter>Examples</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\stereovision\refractive3D\_refractive3d.h">
-      <Filter>Header Files\Algs\Stereovision\refractive</Filter>
+      <Filter>Header Files\Algs\Geovision\refractive</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\stereovision\refractive3D\_refractive3d_funcs.h">
-      <Filter>Header Files\Algs\Stereovision\refractive</Filter>
+      <Filter>Header Files\Algs\Geovision\refractive</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\algs\transform\_fft.hpp">
       <Filter>Header Files\Algs\Transforms</Filter>
@@ -757,6 +760,21 @@
       <Filter>Header Files\IO</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\io\_collectors.hpp">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\arch\internal\_regix.hpp">
+      <Filter>Header Files\Arch</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\core\span.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\stereovision\_camera_pose.hpp">
+      <Filter>Header Files\Algs\Geovision</Filter>
+    </ClInclude>
+    <ClInclude Include="examples\rotation.hpp">
+      <Filter>Examples</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\io\text_loader.hpp">
       <Filter>Header Files\IO</Filter>
     </ClInclude>
   </ItemGroup>
@@ -968,6 +986,9 @@
     <ClCompile Include="src\algorithm\transforms\_fft.cpp">
       <Filter>Source Files\Algs\transforms</Filter>
     </ClCompile>
+    <ClCompile Include="src\arch\_regix.cpp">
+      <Filter>Source Files\Arch</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="include\Matrice\arch\inl\_ixpacket.inl">
@@ -1029,7 +1050,7 @@
       <Filter>Header Files\Detail\math\nonfree\inl</Filter>
     </None>
     <None Include="include\Matrice\algs\stereovision\refractive3D\_refractive3d.inl">
-      <Filter>Header Files\Algs\Stereovision\refractive\inline</Filter>
+      <Filter>Header Files\Algs\Geovision\refractive\inline</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

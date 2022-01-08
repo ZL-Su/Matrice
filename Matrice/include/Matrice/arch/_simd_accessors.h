@@ -32,7 +32,7 @@ MATRICE_HOST_FINL auto _Load(_Args... _) {};
 template<typename... _Args>
 MATRICE_HOST_FINL auto _Store(_Args... _) {};
 template<typename... _Args>
-MATRICE_HOST_FINL auto _Set_zero() {};
+MATRICE_HOST_FINL auto _Set_zero(_Args...) {};
 }
 
 // Register storer

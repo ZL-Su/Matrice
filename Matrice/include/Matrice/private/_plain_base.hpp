@@ -498,7 +498,7 @@ public:
 	 * \brief returns a reference to the derived object.
 	 */
 	MATRICE_GLOBAL_INL const _Derived& derived() const noexcept {
-		return *static_cast<_Derived*>(this);
+		return *static_cast<const _Derived*>(this);
 	}
 	MATRICE_GLOBAL_INL _Derived& derived() noexcept {
 		return *static_cast<_Derived*>(this);
@@ -837,8 +837,8 @@ public:
 			m_cols = _other.m_cols;
 			m_rows = _other.m_rows;
 			m_shape = _other.shape();
-			if (_other._Myalloc) {
-				m_data = _Myalloc = _other._Myalloc;
+			if (_other.allocator().data()) {
+				m_data = _Myalloc = _other.allocator();
 			}
 			else {
 				m_data = _other.data();
@@ -857,13 +857,13 @@ public:
 			m_cols = _other.m_cols;
 			m_rows = _other.m_rows;
 			m_shape = _other.shape();
-			if (_other._Myalloc) {
+			if (_other.allocator().data()) {
 				if constexpr (Size > 0) {
-					//copy if they allocated on the stack
-					m_data = _Myalloc = (_other._Myalloc);
+					//copy if they are allocated on the stack
+					m_data = _Myalloc = (_other.allocator());
 				}
 				else {
-					m_data = _Myalloc = move(_other._Myalloc);
+					m_data = _Myalloc = move(_other.allocator());
 					_other._Myalloc.destroy();
 				}
 			}
@@ -984,7 +984,7 @@ public:
 	 */
 	MATRICE_GLOBAL_FINL value_type norm()const noexcept {
 		auto _Ans = dot(*this); 
-		return (_Ans > eps ? ::sqrt(_Ans) : inf); 
+		return (0 <= _Ans ? ::sqrt(_Ans) : inf); 
 	}
 	/**
 	 * \matrix p-norm: $[\sum_{i=1}^{m}\sum_{j=1}^{}|a_{ij}|^p]^{1/p}$
@@ -1194,6 +1194,19 @@ public:
 	}
 
 	/**
+	 *\brief Compute the symetric part of the matrix/tensor.
+	 */
+	MATRICE_GLOBAL_INL auto sym() noexcept {
+		return ((derived() + derived().t())*value_type(0.5)).eval();
+	}
+	/**
+	 *\brief Compute the skew part of the matrix/tensor.
+	 */
+	MATRICE_GLOBAL_INL auto skew() noexcept {
+		return ((derived() - derived().t())*value_type(0.5)).eval();
+	}
+
+	/**
 	 *\brief Create a zero-value filled matrix
 	 *\param [_Rows, Cols] height and width of matrix, only specified for dynamic created matrix
 	 */
@@ -1268,6 +1281,16 @@ public:
 	MATRICE_GET(bool, empty, !bool(size()));
 	MATRICE_GET(size_t, format, _Myfmt);
 
+	/*@{ Special methods*/
+	/**
+	 *\brief Convert to cv::Mat without copy data.
+	 *\return A cv::Mat typed wrapper.
+	 */
+	template<typename _CvMat, MATRICE_ENABLE_IF(is_floating_point_v<value_type>)>
+	MATRICE_HOST_FINL _CvMat cv() const noexcept {
+		return { int(rows()), int(cols()), int(is_float32_v<value_type> ? 5 : 6), data() };
+	}
+	/*@}*/
 protected:
 	using _Mybase::m_rows;
 	using _Mybase::m_cols;
@@ -1387,7 +1410,7 @@ template<typename _Mty>
 MATRICE_HOST_INL void swap(_Mty& _L, _Mty& _R) noexcept;
 
 /**
- *\func dgelom::copy<_Mty>(_Mty&, _Mty&)
+ *\func dgelom::copy<_Mty>(const _Mty&)
  *\brief Copy a given matrix. Always wrap a dynamic matrix with the function if a deep copy is required.
  */
 template<typename _Mty, MATRICE_ENABLE_IF(is_matrix_v<_Mty>)>

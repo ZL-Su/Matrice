@@ -46,11 +46,13 @@ public:
 	_Spline_interpolation(const _Myt& _Other) 
 		: _Mybase(_Other) {
 	}
-	_Spline_interpolation(_Myt&& _Other) 
+	_Spline_interpolation(_Myt&& _Other) noexcept
 		: _Mybase(move(_Other)) {
 	}
+	~_Spline_interpolation() {
+	}
 
-	MATRICE_HOST_INL void _Coeff_impl();
+	MATRICE_HOST_INL matrix_type _Coeff_impl() const;
 	MATRICE_HOST_INL auto _Val_dx_n(const value_type& _) const {
 		return Matrix_<value_type, Ldv, 1>{1, _, _*_, _*_*_};
 	}
@@ -93,9 +95,9 @@ public:
 
 	_Spline_interpolation(const matrix_type& _Data) : _Mybase(_Data) {}
 	_Spline_interpolation(const _Myt& _Other) : _Mybase(_Other) {}
-	_Spline_interpolation(_Myt&& _Other) : _Mybase(move(_Other)) {}
+	_Spline_interpolation(_Myt&& _Other) noexcept : _Mybase(move(_Other)) {}
 
-	MATRICE_HOST_INL void _Coeff_impl();
+	MATRICE_HOST_INL matrix_type _Coeff_impl() const;
 	MATRICE_HOST_INL auto _Val_dx_n(const value_type& _) const {
 		return Matrix_<value_type, Ldv, 1>{1, _, _*_, _*_*_, _*_*_*_, _*_*_*_*_};
 	}
@@ -139,9 +141,9 @@ public:
 
 	_Spline_interpolation(const matrix_type& _Data) : _Mybase(_Data) {}
 	_Spline_interpolation(const _Myt& _Other) : _Mybase(_Other) {}
-	_Spline_interpolation(_Myt&& _Other) : _Mybase(move(_Other)) {}
+	_Spline_interpolation(_Myt&& _Other) noexcept : _Mybase(move(_Other)) {}
 
-	MATRICE_HOST_INL void _Coeff_impl();
+	MATRICE_HOST_INL matrix_type _Coeff_impl() const;
 	MATRICE_HOST_INL auto _Val_dx_n(const value_type& _) const {
 		return Matrix_<value_type, Ldv, 1>{1, _, _*_, _*_*_, _*_*_*_, _*_*_*_*_, _*_*_*_*_*_, _*_*_*_*_*_*_};
 	}

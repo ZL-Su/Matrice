@@ -22,6 +22,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 MATRICE_ARCH_BEGIN
 _DETAIL_BEGIN
 namespace internal{
+// Specialization of simd "load" instructions
 template<> MATRICE_HOST_FINL
 auto _Load(packed_vector<int64_t, 2>, int64_t _Val1, int64_t _Val2) {
 	return _mm_set_epi64x(_Val2, _Val1);
@@ -50,7 +51,22 @@ template<> MATRICE_HOST_FINL
 auto _Load(packed_vector<float, 4>, float _Val1, float _Val2, float _Val3, float _Val4) {
 	return _mm_set_ps(_Val4, _Val3, _Val2, _Val1);
 }
+
+// Specialization of simd "set" instructions
+template<> MATRICE_HOST_FINL
+auto _Set_zero(packed_vector<int64_t, 2>) {
+	return _mm_setzero_si128();
 }
+template<> MATRICE_HOST_FINL
+auto _Set_zero(packed_vector<double, 2>) {
+	return _mm_setzero_pd();
+}
+template<> MATRICE_HOST_FINL
+auto _Set_zero(packed_vector<float, 4>) {
+	return _mm_setzero_ps();
+}
+}
+
 _DETAIL_END
 MATRICE_ARCH_END
 

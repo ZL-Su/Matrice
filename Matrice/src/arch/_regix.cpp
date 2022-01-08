@@ -14,9 +14,23 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
-**********************************************************************/
-#pragma once
+*********************************************************************/
+#ifdef MATRICE_SIMD_ARCH
+#include "arch/internal/_regix.hpp"
 
-#include "internal/_regix.hpp"
-#include "_simd_accessors.h"
-#include "ixpacket.h"
+MATRICE_ARCH_BEGIN
+_DETAIL_BEGIN
+
+#define MATRICE_MAKE_REGIX(INTR, TYPE) \
+template<> struct _Regix<INTR> {       \
+using value_t = TYPE;                  \
+using pointer = value_t*;              \
+INTR _Myreg;
+#define MATRICE_END_REGIX };
+
+#undef MATRICE_MAKE_REGIX
+#undef MATRICE_END_REGIX
+
+_DETAIL_END
+MATRICE_ARCH_END
+#endif

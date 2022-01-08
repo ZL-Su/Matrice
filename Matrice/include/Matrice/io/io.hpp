@@ -40,6 +40,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "util/_exception.h"
 #include "private/_range.h"
 #include "_dir.hpp"
+#include "text_loader.hpp"
 
 DGE_MATRICE_BEGIN
 /**
@@ -303,11 +304,13 @@ public:
 			std::array<value_type, -~(_N1 - _N0)> _Myline;
 			std::vector<decltype(_Myline)> _Data;
 			while (std::getline(_Fin, _Line)) {
-				auto _Res = split<value_type>(_Line, ',');
-				for (auto _Idx = ~- _N0; _Idx < _N1; ++_Idx) {
-					_Myline[-~(_Idx - _N0)] = _Res[_Idx];
+				const auto _Res = split<value_type>(_Line, ',');
+				if (_Res.size() >= _N1-1) {
+					for (auto _Idx = ~- _N0; _Idx < _N1; ++_Idx) {
+						_Myline[-~(_Idx - _N0)] = _Res[_Idx];
+					}
+					_Data.push_back(_Myline);
 				}
-				_Data.emplace_back(_Myline);
 			}
 			return forward<decltype(_Data)>(_Data);
 		}
@@ -315,7 +318,7 @@ public:
 			std::vector<value_type> _Data;
 			while (std::getline(_Fin, _Line)) {
 				auto _Res = split<value_type>(_Line, ',');
-				_Data.emplace_back(_Res[_N0-1]);
+				_Data.push_back(_Res[_N0-1]);
 			}
 			return forward<decltype(_Data)>(_Data);
 		}
@@ -401,17 +404,8 @@ public:
 
 	// \split a string with the given token
 	template<typename _Ty = std::string> static 
-	MATRICE_HOST_FINL auto split(const std::string& _str, char _tok = ',') {
-		MATRICE_USE_STD(vector);
-		MATRICE_USE_STD(distance);
-		if constexpr (std::is_arithmetic_v<_Ty>) {
-			const auto _Tok = std::find_if(_str.begin(), _str.end(), 
-				[](const auto _Val) {
-					return !(std::isdigit(_Val) || _Val == '.' || _Val == '-');
-				});
-			_tok = *_Tok;
-		}
-		vector<_Ty> _Res;
+	MATRICE_HOST_FINL auto split(const std::string& _str, char _tok) {
+		MATRICE_USE_STD(vector); vector<_Ty> _Res;
 		const auto _String = std::string(1, _tok) + _str;
 		auto _Pos = _String.begin(), _End = _String.end();
 		if (_String.back() == _tok) --_End;
@@ -419,7 +413,37 @@ public:
 		while (_Pos != _End) {
 			auto _Pos_last = _Pos+1;
 			_Pos = std::find(_Pos_last, _End, _tok);
-			_Res.push_back(stonv<_Ty>(_String.substr(distance(_String.begin(), _Pos_last), 
+			MATRICE_USE_STD(distance);
+			const auto _Sub = _String.substr(
+				distance(_String.begin(), _Pos_last), distance(_Pos_last, _Pos));
+			if (!_Sub.empty()) {
+				_Res.push_back(stonv<_Ty>(_Sub));
+			}
+		}
+
+		return (_Res);
+	}
+	template<typename _Ty = std::string> static
+	MATRICE_HOST_FINL auto split(const std::string& _str) {
+		char _tok = ',';
+		if constexpr (std::is_arithmetic_v<_Ty>) {
+			const auto _Tok = std::find_if(_str.begin(), _str.end(),
+				[](const auto _Val) {
+					return !(std::isdigit(_Val) || _Val == '.' || _Val == '-');
+				});
+			_tok = *_Tok;
+		}
+
+		MATRICE_USE_STD(vector); vector<_Ty> _Res;
+		const auto _String = std::string(1, _tok) + _str;
+		auto _Pos = _String.begin(), _End = _String.end();
+		if (_String.back() == _tok) --_End;
+
+		while (_Pos != _End) {
+			auto _Pos_last = _Pos + 1;
+			_Pos = std::find(_Pos_last, _End, _tok);
+			MATRICE_USE_STD(distance);
+			_Res.push_back(stonv<_Ty>(_String.substr(distance(_String.begin(), _Pos_last),
 				distance(_Pos_last, _Pos))));
 		}
 
@@ -626,7 +650,12 @@ decltype(auto) make_loader(std::string&& path, _Op&& loader)noexcept {
 template<class _Op>
 decltype(auto) make_loader(const path_t& path, _Op&& loader)noexcept {
 	using loader_type = data_loader<typename _Op::value_type>;
-	return loader_type(directory{ path.generic_string(), path_t() }, loader);
+	return loader_type(directory(path), loader);
+}
+template<class _Op>
+decltype(auto) make_loader(path_t&& path, _Op&& loader)noexcept {
+	using loader_type = data_loader<typename _Op::value_type>;
+	return loader_type(directory(std::move(path)), loader);
 }
 
 template<fmt _Fmt>

@@ -85,11 +85,17 @@ _DETAIL_END
  * \example: 
 		const auto val = dgelom::stonv<float>("1.0"); //val = 1.0f;
  */
-template<typename T = MATRICE_STD(string)>
+template<typename T>
 MATRICE_HOST_FINL T stonv(const MATRICE_STD(string)& _Str) noexcept {
 #ifdef MATRICE_DEBUG
 	DGELOM_CHECK(!_Str.empty(), "_Str should not be empty.")
 #endif
+	if constexpr (is_scalar_v<T>) {
+		if (_Str.end() != std::find_if(_Str.begin(), _Str.end(), 
+			[](const auto& v) { return std::isalpha(v); })) {
+			return std::numeric_limits<T>::quiet_NaN();
+		}
+	}
 	return detail::string_to_numval<T>::value(_Str); 
 }
 template<typename T = MATRICE_STD(string)>

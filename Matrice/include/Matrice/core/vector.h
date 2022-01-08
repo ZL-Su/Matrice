@@ -1,4 +1,4 @@
-/**********************************************************************
+﻿/**********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
 Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
 
@@ -94,10 +94,19 @@ public:
 	/// <summary>
 	/// \brief Compute dot-product with other vector. 
 	/// </summary>
-	/// <param name="'_other'">Other vector with the same type.</param>
-	/// <returns></returns>
+	/// <param name="'_other'">Another vector with the same type.</param>
+	/// <returns>A scalar value</returns>
 	MATRICE_GLOBAL_FINL value_t dot(const _Myt& _other) const noexcept {
 		return _Mybase::dot(_other); 
+	}
+
+	/// <summary>
+	/// \brief Perform dyadic product of two vectors.
+	/// </summary>
+	/// <returns>An expression of vector dyadics ‘u ⊗ v’ </returns>
+	template<int32_t _N = _Dim>
+	MATRICE_GLOBAL_INL auto dyadic(const Vec_<value_t, _N>& _other) const noexcept {
+		return _Mybase::mul(_other);
 	}
 
 	/// <summary>
@@ -114,6 +123,10 @@ public:
 			ret[idx] = start + idx * step;
 		}
 		return ret;
+	}
+
+	MATRICE_GLOBAL_INL static _Myt zeros() noexcept {
+		return {};
 	}
 	
 #ifdef _MSVC_LANG
@@ -387,6 +400,20 @@ template<typename _Ty, size_t _N> MATRICE_GLOBAL_INL
 auto concat(const Vec_<_Ty,_N>& prev, const Vec_<_Ty,_N>& next)noexcept {
 	typename Vec_<_Ty, _N>::template extend<2> _Ret;
 	_Ret.cview(0) = prev, _Ret.cview(1) = next;
+	return _Ret;
+}
+
+/**
+ * \brief Concatenate a _M-by-_N matrix and a _M-vector.
+ * \param "mat" the left matrix.
+ * \param "vec" the right vector.
+ * \returns A matrix with type of Matrix_<_Ty, _M, _N + 1>.
+ */
+template<typename _Ty, size_t _M, size_t _N> MATRICE_GLOBAL_INL
+auto concat(const Matrix_<_Ty, _M, _N>& mat, const Vec_<_Ty, _M>& vec)noexcept {
+	typename Vec_<_Ty, _N>::template extend<_N + 1> _Ret;
+	_Ret.block(0, _N, 0, _M) = mat;
+	_Ret.cview(_N) = vec;
 	return _Ret;
 }
 

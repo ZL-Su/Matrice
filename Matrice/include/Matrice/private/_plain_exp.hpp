@@ -988,6 +988,18 @@ template<
 	return _op(_right);
 }
 
+// *\expression of the symetric part: sym(x)
+template<typename _Ty>
+MATRICE_GLOBAL_FINL auto sym(const _Ty& _x) noexcept {
+	return (_x + transpose(_x)) * _Ty::value_t(0.5);
+}
+
+// *\expression of the skew part: skew(x)
+template<typename _Ty>
+MATRICE_GLOBAL_FINL auto skew(const _Ty& _x) noexcept {
+	return (_x - transpose(_x)) * _Ty::value_t(0.5);
+}
+
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
