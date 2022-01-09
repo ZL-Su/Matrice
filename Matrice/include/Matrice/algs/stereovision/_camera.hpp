@@ -96,14 +96,14 @@ public:
 	/**
 	 * \brief CTOR, initialize camera with internal calibration. 
 	 */
-	explicit _Camera(init_list _Calib) noexcept
-		:_Mycalib(_Calib) {
+	explicit _Camera(init_list _Pars) noexcept
+		:_Mypars(_Pars) {
 	}
 	/**
 	 * \brief CTOR, initialize camera with internal calibration and pose.
 	 */
-	explicit _Camera(init_list _Calib, init_list _Pose) noexcept
-		:_Camera(_Calib), _Mypose(_Pose) {
+	explicit _Camera(init_list _Pars, init_list _Pose) noexcept
+		:_Camera(_Pars), _Mypose(_Pose) {
 	}
 
 	/**
@@ -111,9 +111,12 @@ public:
 	 * \param '_Pose' camera pose relative to the reference frame.
 	 * \return Reference of the specified camera object.
 	 */
-	MATRICE_HOST_INL _Derived& set_pose(const pose_type& _Pose) noexcept {
+	MATRICE_HOST_INL _Derived& pose(const pose_type& _Pose) noexcept {
 		_Mypose = _Pose;
 		return static_cast<_Derived>(*this);
+	}
+	MATRICE_HOST_INL decltype(auto) pose() const noexcept {
+		return (_Mypose);
 	}
 
 	/**
@@ -139,8 +142,8 @@ public:
 protected:
 	static constexpr auto _Size = _Mytraits::_Size;
 
-	// Camera calibration: $f_x, f_y, c_x, c_y [, f_s]$
-	vector<_Size> _Mycalib;
+	// Camera intrinsic parameters: $f_x, f_y, c_x, c_y [, f_s]$
+	vector<_Size> _Mypars;
 
 	// Camera pose with $r_x, r_y, r_z, t_x, t_y, t_z$
 	pose_type _Mypose;
@@ -176,11 +179,11 @@ public:
 	 * \return [x, y] tuple of undistorted image coordinates in image domain.  
 	 */
 	MATRICE_HOST_INL auto U(value_type u, value_type v)const noexcept {
-		using _Mybase::_Mycalib;
+		using _Mybase::_Mypars;
 
 		// backward transform in image space
-		const auto fx = _Mycalib[0], fy = _Mycalib[1];
-		const auto cx = _Mycalib[2], cy = _Mycalib[3];
+		const auto fx = _Mypars[0], fy = _Mypars[1];
+		const auto cx = _Mypars[2], cy = _Mypars[3];
 		const auto x_d = (u - cx) / fx, y_d = (v - cy) / fy;
 
 		// compute distortion correcting factor
@@ -200,7 +203,7 @@ public:
 	 * \return [u, v] tuple of distorted pixel coordinates.
 	 */
 	MATRICE_HOST_INL auto D(value_type x, value_type y)const noexcept {
-		using _Mybase::_Mycalib;
+		using _Mybase::_Mypars;
 
 		// compute distortion factor
 		const auto r_2 = sqsum(x, y);
@@ -213,8 +216,8 @@ public:
 		const auto y_d = tmp * y + p1 * r_2;
 
 		// forward transform in image space
-		const auto fx = _Mycalib[0], fy = _Mycalib[1];
-		const auto cx = _Mycalib[2], cy = _Mycalib[3];
+		const auto fx = _Mypars[0], fy = _Mypars[1];
+		const auto cx = _Mypars[2], cy = _Mypars[3];
 		const auto u = x_d * fx + cx, v = y_d * fy + cy;
 
 		return tuple{ u, v };

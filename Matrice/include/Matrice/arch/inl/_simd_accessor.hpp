@@ -54,15 +54,15 @@ auto _Load(packed_vector<float, 4>, float _Val1, float _Val2, float _Val3, float
 
 // Specialization of simd "set" instructions
 template<> MATRICE_HOST_FINL
-auto _Set0(packed_vector<int64_t, 2>) {
+auto _Set_zero(packed_vector<int64_t, 2>) {
 	return _mm_setzero_si128();
 }
 template<> MATRICE_HOST_FINL
-auto _Set0(packed_vector<double, 2>) {
+auto _Set_zero(packed_vector<double, 2>) {
 	return _mm_setzero_pd();
 }
 template<> MATRICE_HOST_FINL
-auto _Set0(packed_vector<float, 4>) {
+auto _Set_zero(packed_vector<float, 4>) {
 	return _mm_setzero_ps();
 }
 }

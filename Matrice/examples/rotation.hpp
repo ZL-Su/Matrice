@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2021, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -17,6 +17,30 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **********************************************************************/
 #pragma once
 
-#include "internal/_regix.hpp"
-#include "_simd_accessors.h"
-#include "ixpacket.h"
+#include <core/vector.h>
+#include <algs/geometry.hpp>
+
+DGE_MATRICE_BEGIN
+namespace example {
+template<typename _Ty, size_t _Dim>
+class rotation {
+public:
+	using value_t = _Ty;
+	using vector_t = auto_vector_t<value_t, _Dim>;
+
+	explicit rotation(const vector_t& data) noexcept {
+		_Data = data;
+	}
+	explicit rotation(const vector_t& data, value_t scale) noexcept {
+		_Data = data*scale;
+	}
+
+	inline auto matrix() const noexcept {
+		return rodrigues(_Data);
+	}
+
+private:
+	vector_t _Data;
+};
+}
+DGE_MATRICE_END
