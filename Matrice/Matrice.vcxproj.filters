@@ -786,6 +786,9 @@
     <ClInclude Include="include\Matrice\internal\special_matrix_exprs.hpp">
       <Filter>Header Files\Detail\expressions</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\math\linear_decomposer.hpp">
+      <Filter>Header Files\Detail\math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
