@@ -19,6 +19,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 #ifdef MATRICE_SIMD_ARCH
 #include "_simd_traits.hpp"
+#include "internal/_regix.hpp"
 
 MATRICE_ARCH_BEGIN
 struct load {};
