@@ -18,7 +18,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <core.hpp>
-#include <algs/geometry.hpp>
+#include "_camera_pose.hpp"
 
 MATRICE_ALG_BEGIN(vision)
 
@@ -69,6 +69,11 @@ struct traits<_Camera<_Ty, _Tag>> {
 	};
 };
 
+template<class _Cam, typename _Ty = typename traits<_Cam>::value_type>
+MATRICE_HOST_INL auto _Apply_distortion(const _Cam& cam, _Ty x, _Ty y) noexcept;
+template<class _Cam, typename _Ty = typename traits<_Cam>::value_type>
+MATRICE_HOST_INL auto _Remove_distortion(const _Cam& cam, _Ty u, _Ty v) noexcept;
+
 /// <summary>
 /// CLASS TEMPLATE, base of camera types
 /// </summary>
@@ -117,6 +122,15 @@ public:
 	}
 	MATRICE_HOST_INL decltype(auto) pose() const noexcept {
 		return (_Mypose);
+	}
+
+	/**
+	 * \brief Get projection matrix.
+	 * \return A 3-by-4 projection matrix.
+	 */
+	MATRICE_HOST_INL auto pmatrix() noexcept {
+		const auto _R = rodrigues(_Mypose.r);
+
 	}
 
 	/**
