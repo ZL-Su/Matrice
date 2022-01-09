@@ -253,6 +253,9 @@
     <Filter Include="Header Files\Algs\Geovision\refractive\inline">
       <UniqueIdentifier>{e71e77d2-ae79-4cbb-a8f1-2c4c9fe0f5b1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Detail\expressions">
+      <UniqueIdentifier>{d9e8f796-683b-47cc-87e4-5650d528d6d7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -776,6 +779,12 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\io\text_loader.hpp">
       <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\internal\expr_base.hpp">
+      <Filter>Header Files\Detail\expressions</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\internal\special_matrix_exprs.hpp">
+      <Filter>Header Files\Detail\expressions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
