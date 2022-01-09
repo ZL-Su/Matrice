@@ -341,7 +341,8 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 		}
 
 		/**
-		 *\brief spread this to multiply with _rhs element-wisely; if _rhs can be evaluated to a square matrix, this should be unrolled to a 1D array if it is not.
+		 *\brief spread this to multiply with _rhs element-wisely; 
+		 if _rhs can be evaluated to a square matrix, this should be unrolled to a 1D array if it is not.
 		 *\param [_rhs] must be a matrix with a type of Matrix_<>, or an expression can be evaluated to a matrix.
 		 */
 		template<typename _Rhs>
