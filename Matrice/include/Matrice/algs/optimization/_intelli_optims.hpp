@@ -19,7 +19,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <core/matrix.h>
 #include "../similarity.h"
 
-MATRICE_ALG_BEGIN(pso)
+MATRICE_ALG_BEGIN(optim)
 _DETAIL_BEGIN
 
 struct _Constant_tag {};
