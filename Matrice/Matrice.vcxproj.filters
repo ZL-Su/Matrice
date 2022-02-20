@@ -789,6 +789,9 @@
     <ClInclude Include="include\Matrice\math\linear_decomposer.hpp">
       <Filter>Header Files\Detail\math</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\algs\optimization\least_abs_deviations.hpp">
+      <Filter>Header Files\Algs\Optimization</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
