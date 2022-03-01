@@ -95,6 +95,13 @@ public:
 		}
 		vector<3> r; // rotation vector (rx, ry, rz)
 		vector<3> t; // translation vector (tx, ty, tz)
+
+		MATRICE_GLOBAL_INL auto R() const noexcept {
+			return rodrigues(r);
+		}
+		MATRICE_GLOBAL_INL auto matrix() const noexcept {
+			return concat(this->R(), t);
+		}
 	};
 
 	_Camera() = default;
@@ -193,11 +200,11 @@ public:
 	 * \return [x, y] tuple of undistorted image coordinates in image domain.  
 	 */
 	MATRICE_HOST_INL auto U(value_type u, value_type v)const noexcept {
-		using _Mybase::_Mypars;
+		const auto& _Myk = _Mybase::_Mypars;
 
 		// backward transform in image space
-		const auto fx = _Mypars[0], fy = _Mypars[1];
-		const auto cx = _Mypars[2], cy = _Mypars[3];
+		const auto fx = _Myk[0], fy = _Myk[1];
+		const auto cx = _Myk[2], cy = _Myk[3];
 		const auto x_d = (u - cx) / fx, y_d = (v - cy) / fy;
 
 		// compute distortion correcting factor
@@ -217,7 +224,7 @@ public:
 	 * \return [u, v] tuple of distorted pixel coordinates.
 	 */
 	MATRICE_HOST_INL auto D(value_type x, value_type y)const noexcept {
-		using _Mybase::_Mypars;
+		const auto& _Myk = _Mybase::_Mypars;
 
 		// compute distortion factor
 		const auto r_2 = sqsum(x, y);
@@ -230,8 +237,8 @@ public:
 		const auto y_d = tmp * y + p1 * r_2;
 
 		// forward transform in image space
-		const auto fx = _Mypars[0], fy = _Mypars[1];
-		const auto cx = _Mypars[2], cy = _Mypars[3];
+		const auto fx = _Myk[0], fy = _Myk[1];
+		const auto cx = _Myk[2], cy = _Myk[3];
 		const auto u = x_d * fx + cx, v = y_d * fy + cy;
 
 		return tuple{ u, v };
