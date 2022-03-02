@@ -792,7 +792,7 @@
     <ClInclude Include="include\Matrice\algs\optimization\least_abs_deviations.hpp">
       <Filter>Header Files\Algs\Optimization</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\internal\_placeholders.hpp">
+    <ClInclude Include="include\Matrice\internal\placeholders.hpp">
       <Filter>Header Files\Detail\core</Filter>
     </ClInclude>
   </ItemGroup>
