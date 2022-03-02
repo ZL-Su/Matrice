@@ -93,6 +93,8 @@ using exception = detail::_Exception_wrapper;
 	if(!(_Cond)) { \
 		DGELOM_ERROR(::dgelom::exception::msg_type(__VA_ARGS__)); \
 	}
+
 #define MATRICE_FAIL_TO_SPECIALIZATION \
 static_assert(std::false_type::value, "Fail to specialization!");
+
 DGE_MATRICE_END
