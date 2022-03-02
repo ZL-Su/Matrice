@@ -28,7 +28,7 @@ template<typename _Derived> class _Index_base
 public:
 	MATRICE_GLOBAL_INL _Derived& operator++() noexcept {
 		static_cast<_Derived*>(this)->_Myval += 1;
-		return (*this);
+		return *static_cast<_Derived*>(this);
 	}
 	MATRICE_GLOBAL_INL _Derived operator++(int) noexcept {
 		auto _Tmp = *static_cast<_Derived*>(this);
@@ -37,7 +37,7 @@ public:
 	}
 	MATRICE_GLOBAL_INL _Derived& operator--() noexcept {
 		static_cast<_Derived*>(this)->_Myval -= 1;
-		return (*this);
+		return *static_cast<_Derived*>(this);
 	}
 	MATRICE_GLOBAL_INL _Derived operator--(int) noexcept {
 		auto _Tmp = *static_cast<_Derived*>(this);
@@ -46,11 +46,11 @@ public:
 	}
 	MATRICE_GLOBAL_INL _Derived& operator+=(diff_t _Offset) noexcept {
 		static_cast<_Derived*>(this)->_Myval += _Offset;
-		return (*this);
+		return *static_cast<_Derived*>(this);
 	}
 	MATRICE_GLOBAL_INL _Derived& operator-=(diff_t _Offset) noexcept {
 		static_cast<_Derived*>(this)->_Myval -= _Offset;
-		return (*this);
+		return *static_cast<_Derived*>(this);
 	}
 };
 _DETAIL_END
@@ -63,7 +63,6 @@ struct Index<int64_t>: detail::_Index_base<Index<int64_t>> {
 	using value_type = int64_t;
 	using category = tag::scalar;
 
-	Index() = delete;
 	Index(value_type val = 0) noexcept :_Myval(val) {}
 	template<typename _Uy>
 	Index& operator=(const _Uy val)noexcept {
@@ -71,18 +70,6 @@ struct Index<int64_t>: detail::_Index_base<Index<int64_t>> {
 	}
 
 	MATRICE_GLOBAL_INL operator value_type() {
-		return _Myval;
-	}
-	MATRICE_GLOBAL_INL operator size_t() {
-		return _Myval;
-	}
-	MATRICE_GLOBAL_INL operator int() {
-		return _Myval;
-	}
-	MATRICE_GLOBAL_INL operator float() {
-		return _Myval;
-	}
-	MATRICE_GLOBAL_INL operator double() {
 		return _Myval;
 	}
 
