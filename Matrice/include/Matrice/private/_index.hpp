@@ -61,6 +61,7 @@ _DETAIL_END
 template<>
 struct Index<int64_t>: detail::_Index_base<Index<int64_t>> {
 	using value_type = int64_t;
+	using value_t = value_type;
 	using category = tag::scalar;
 
 	Index(value_type val = 0) noexcept :_Myval(val) {}
@@ -69,7 +70,7 @@ struct Index<int64_t>: detail::_Index_base<Index<int64_t>> {
 		_Myval = value_type(val);
 	}
 
-	MATRICE_GLOBAL_INL operator value_type() {
+	MATRICE_GLOBAL_INL operator value_type() const noexcept {
 		return _Myval;
 	}
 
