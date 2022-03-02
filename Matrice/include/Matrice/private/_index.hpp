@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2020, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2020-2022, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -35,7 +35,23 @@ public:
 		static_cast<_Derived*>(this)->_Myval += 1;
 		return (_Tmp);
 	}
-
+	MATRICE_GLOBAL_INL _Derived& operator--() noexcept {
+		static_cast<_Derived*>(this)->_Myval -= 1;
+		return (*this);
+	}
+	MATRICE_GLOBAL_INL _Derived operator--(int) noexcept {
+		auto _Tmp = *static_cast<_Derived*>(this);
+		static_cast<_Derived*>(this)->_Myval -= 1;
+		return (_Tmp);
+	}
+	MATRICE_GLOBAL_INL _Derived& operator+=(diff_t _Offset) noexcept {
+		static_cast<_Derived*>(this)->_Myval += _Offset;
+		return (*this);
+	}
+	MATRICE_GLOBAL_INL _Derived& operator-=(diff_t _Offset) noexcept {
+		static_cast<_Derived*>(this)->_Myval -= _Offset;
+		return (*this);
+	}
 };
 _DETAIL_END
 
