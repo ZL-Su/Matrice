@@ -27,11 +27,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
 template<typename _Ty, index_t _Dim = 2>
-class Vec_ : public Matrix_<_Ty, _Dim, compile_time_size<>::val_1>
+class Vec_ : public Matrix_<_Ty, _Dim, compile_time_size<>::_1>
 {
 	using _Myt = Vec_;
 protected:
-	using _Mybase = Matrix_<_Ty, _Dim, compile_time_size<>::val_1>;
+	using _Mybase = Matrix_<_Ty, _Dim, compile_time_size<>::_1>;
 	using const_initlist = typename _Mybase::const_initlist;
 public:
 	enum{rows_at_compiletime = _Dim, cols_at_compiletime = 1};
@@ -107,6 +107,30 @@ public:
 	template<int32_t _N = _Dim>
 	MATRICE_GLOBAL_INL auto dyadic(const Vec_<value_t, _N>& _other) const noexcept {
 		return _Mybase::mul(_other);
+	}
+
+	template<size_t _N = _Dim>
+	MATRICE_GLOBAL_INL auto first(size_t n = N) const noexcept {
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(n <= this->size(), "n/N overs the size of this vector.");
+#endif
+		Vec_<value_type, _N> _Ret(n);
+		for (auto i = 0; i < _Ret.size(); ++i) {
+			_Ret[i] = data()[i];
+		}
+		return _Ret;
+	}
+	template<size_t _N = _Dim>
+	MATRICE_GLOBAL_INL auto last(size_t n = N) const noexcept {
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(n <= this->size(), "n/N overs the size of this vector.");
+#endif
+		Vec_<value_type, _N> _Ret(n);
+		const auto i0 = this->size() - _Ret.size();
+		for (auto i = 0; i < _Ret.size(); ++i) {
+			_Ret[i] = data()[i0 + i];
+		}
+		return _Ret;
 	}
 
 	/// <summary>
