@@ -128,6 +128,10 @@ public:
 	MATRICE_GLOBAL_INL static _Myt zeros() noexcept {
 		return {};
 	}
+
+	MATRICE_GLOBAL_INL static _Myt rand(size_t rows = _Dim) noexcept {
+		return _Mybase::rand(rows, 1);
+	}
 	
 #ifdef _MSVC_LANG
 	///<brief> properties </brief>
@@ -391,6 +395,40 @@ auto cross_prod_matrix(const Vec3_<_Ty>& v) noexcept {
 		return _Rety{ 0, -v.z, v.y, v.z, 0, -v.x, -v.y, v.x, 0 };
 	else
 		return _Rety{ 0, -v.z, v.y, 0, v.z, 0, -v.x, 0, -v.y, v.x, 0, 0, 0, 0, 0, 0 };
+}
+
+/**
+ * \brief Get the first-n element with a fixed or dynamic sized vector.
+ * \param vec the source vector whose type is auto-deduced with '_Ty' and '_Dim'.
+ * \param n the number of element to be retrieved.
+ */
+template<size_t _N, typename _Ty, size_t _Dim>
+MATRICE_GLOBAL_INL auto first(const Vec_<_Ty, _Dim>& vec, size_t n=N) noexcept {
+#ifdef MATRICE_DEBUG
+	DGELOM_CHECK(n <= vec.size(), "n/N overs the size of the source vector.");
+#endif
+	auto_vector_t<_Ty, _N> _Ret(n);
+	for (auto i = 0; i < _Ret.size(); ++i) {
+		_Ret[i] = vec[i];
+	}
+	return _Ret;
+}
+/**
+ * \brief Get the last-n element with a fixed or dynamic sized vector.
+ * \param vec the source vector whose type is auto-deduced with '_Ty' and '_Dim'.
+ * \param n the number of element to be retrieved.
+ */
+template<size_t _N, typename _Ty, size_t _Dim>
+MATRICE_GLOBAL_INL auto last(const Vec_<_Ty, _Dim>& vec, size_t n=N) noexcept {
+#ifdef MATRICE_DEBUG
+	DGELOM_CHECK(n <= vec.size(), "n/N overs the size of the source vector.");
+#endif
+	auto_vector_t<_Ty, _N> _Ret(n);
+	const auto i0 = vec.size() - _Ret.size();
+	for (auto i = 0; i < _Ret.size(); ++i) {
+		_Ret[i] = vec[i0 + i];
+	}
+	return _Ret;
 }
 
 /**
