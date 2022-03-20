@@ -795,6 +795,12 @@
     <ClInclude Include="include\Matrice\internal\placeholders.hpp">
       <Filter>Header Files\Detail\core</Filter>
     </ClInclude>
+    <ClInclude Include="src\private\math\_eigen_solver.cpp">
+      <Filter>Source Files\Details\math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\math\eigen_solver.hpp">
+      <Filter>Header Files\Detail\math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
