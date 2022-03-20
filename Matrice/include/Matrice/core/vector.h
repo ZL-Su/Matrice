@@ -109,8 +109,13 @@ public:
 		return _Mybase::mul(_other);
 	}
 
+	/// <summary>
+	/// \brief Get the first n entries of this vector.
+	/// </summary>
+	/// <param name="n">the number of the entries to be retrieved, which can be fixed or dynamic.</param>
+	/// <returns>A fixed or dynamic vector with size of n.</returns>
 	template<size_t _N = _Dim>
-	MATRICE_GLOBAL_INL auto first(size_t n = N) const noexcept {
+	MATRICE_GLOBAL_INL auto first(size_t n = _N) const noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(n <= this->size(), "n/N overs the size of this vector.");
 #endif
@@ -120,8 +125,14 @@ public:
 		}
 		return _Ret;
 	}
+
+	/// <summary>
+	/// \brief Get the last n entries of this vector.
+	/// </summary>
+	/// <param name="n">the number of the entries to be retrieved, which can be fixed or dynamic.</param>
+	/// <returns>A fixed or dynamic vector with size of n.</returns>
 	template<size_t _N = _Dim>
-	MATRICE_GLOBAL_INL auto last(size_t n = N) const noexcept {
+	MATRICE_GLOBAL_INL auto last(size_t n = _N) const noexcept {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(n <= this->size(), "n/N overs the size of this vector.");
 #endif
