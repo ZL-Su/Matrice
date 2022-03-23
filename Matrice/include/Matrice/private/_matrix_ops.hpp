@@ -59,7 +59,6 @@ template<size_t _P> struct _Matrix_norm_impl {
 	template<typename _Mty>
 	MATRICE_GLOBAL_FINL static constexpr auto value(const _Mty& _A) {
 		static_assert(is_matrix_v<_Mty>, "_Mty is not matrix type.");
-
 		auto _Ret = typename _Mty::value_type(0);
 		for(const auto& _Val : _A){ 
 			_Ret += detail::_Power_n<_P>::value(abs(_Val)); 
