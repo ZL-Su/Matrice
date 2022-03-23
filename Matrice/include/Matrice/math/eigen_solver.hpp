@@ -42,22 +42,47 @@ MATRICE_NAMESPACE_BEGIN(detail)
 /// </typeparam>
 template<class _Xtype>
 class _Eigen_solver : public xpr::__xpr__ {
-	using _Mytraits = conditional_t<is_matrix_v<_Xtype>, 
-		matrix_traits<_Xtype>, expression_traits<_Xtype>>;
+	using _Mytraits = matrix_traits<_Xtype>;
+		//conditional_t<is_matrix_v<_Xtype>, matrix_traits<_Xtype>, expression_traits<_Xtype>>;
 public:
 	using value_type = _Mytraits::value_type;
 
-	_Eigen_solver(const _Xtype& a) noexcept
-		:_Myobj(a) {
+	_Eigen_solver(const _Xtype& src) noexcept
+		:_Myobj(src) {
 	}
 
-	MATRICE_HOST_INL auto compute(bool eigenvector = false) {
+	MATRICE_HOST_INL auto compute(bool eigvec = false) {
 		auto _Mat = _Myobj.eval();
+		_Myvals.create(_Mat.cols());
+		_Myvecs.create(_Mat.shape());
+
+		auto view = _Mat.view();
+	}
+
+	MATRICE_GLOBAL_INL decltype(auto) operator()() const noexcept {
+		return std::make_tuple(_Myvals, _Myvecs);
+	}
+	MATRICE_GLOBAL_INL decltype(auto) values() const noexcept {
+		return (_Myvals);
+	}
+	MATRICE_GLOBAL_INL decltype(auto) vectors() const noexcept {
+		return (_Myvecs);
 	}
 
 private:
 	const _Xtype& _Myobj;
 
+	Matrix_<value_type, _Mytraits::cols, 1> _Myvals;
+	Matrix_<value_type, _Mytraits::rows, _Mytraits::cols> _Myvecs;
 };
 
 MATRICE_NAMESPACE_END(detail)
+
+namespace dgelom {
+/// <summary>
+/// \brief ALIAS TEMPLATE of class detail::_Eigen_solver.
+/// </summary>
+/// <typeparam name="_Ty"></typeparam>
+template<class _Ty>
+using eigsolver_t = detail::_Eigen_solver<remove_all_t<_Ty>>;
+}
