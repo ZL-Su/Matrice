@@ -235,6 +235,7 @@
     <ClInclude Include="include\Matrice\funcs\_functions.h" />
     <ClInclude Include="include\Matrice\internal\expr_base.hpp" />
     <ClInclude Include="include\Matrice\internal\special_matrix_exprs.hpp" />
+    <ClInclude Include="include\Matrice\internal\placeholders.hpp" />
     <ClInclude Include="include\Matrice\io\hrc.hpp" />
     <ClInclude Include="include\Matrice\io\io.hpp" />
     <ClInclude Include="include\Matrice\io\text_loader.hpp" />

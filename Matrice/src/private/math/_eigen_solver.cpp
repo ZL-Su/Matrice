@@ -14,24 +14,14 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
-**********************************************************************/
+***********************************************************************/
 #pragma once
 
-#include "util/_macros.h"
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
+#include <mkl_lapacke.h>
+#endif
+#include "core/matrix.h"
 
-DGE_MATRICE_BEGIN
-namespace xpr {
-/// <summary>
-/// \brief Provide a unified identity for expression.
-/// </summary>
-struct __xpr__{};
+MATRICE_NAMESPACE_BEGIN(internal)
 
-}
-
-/// <summary>
-/// \brief Expression concept. 
-/// _Xpr is a concept iff it's derived from class xpr::__xpr__.
-/// </summary>
-template<typename _Xpr>
-concept Expr = std::is_base_of_v<xpr::__xpr__, _Xpr>;
-DGE_MATRICE_END
+MATRICE_NAMESPACE_END(internal)

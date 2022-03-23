@@ -27,11 +27,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN
 template<typename _Ty, index_t _Dim = 2>
-class Vec_ : public Matrix_<_Ty, _Dim, compile_time_size<>::val_1>
+class Vec_ : public Matrix_<_Ty, _Dim, compile_time_size<>::_1>
 {
 	using _Myt = Vec_;
 protected:
-	using _Mybase = Matrix_<_Ty, _Dim, compile_time_size<>::val_1>;
+	using _Mybase = Matrix_<_Ty, _Dim, compile_time_size<>::_1>;
 	using const_initlist = typename _Mybase::const_initlist;
 public:
 	enum{rows_at_compiletime = _Dim, cols_at_compiletime = 1};
@@ -110,6 +110,41 @@ public:
 	}
 
 	/// <summary>
+	/// \brief Get the first n entries of this vector.
+	/// </summary>
+	/// <param name="n">the number of the entries to be retrieved, which can be fixed or dynamic.</param>
+	/// <returns>A fixed or dynamic vector with size of n.</returns>
+	template<size_t _N = _Dim>
+	MATRICE_GLOBAL_INL auto first(size_t n = _N) const noexcept {
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(n <= this->size(), "n/N overs the size of this vector.");
+#endif
+		Vec_<value_type, _N> _Ret(n);
+		for (auto i = 0; i < _Ret.size(); ++i) {
+			_Ret[i] = data()[i];
+		}
+		return _Ret;
+	}
+
+	/// <summary>
+	/// \brief Get the last n entries of this vector.
+	/// </summary>
+	/// <param name="n">the number of the entries to be retrieved, which can be fixed or dynamic.</param>
+	/// <returns>A fixed or dynamic vector with size of n.</returns>
+	template<size_t _N = _Dim>
+	MATRICE_GLOBAL_INL auto last(size_t n = _N) const noexcept {
+#ifdef MATRICE_DEBUG
+		DGELOM_CHECK(n <= this->size(), "n/N overs the size of this vector.");
+#endif
+		Vec_<value_type, _N> _Ret(n);
+		const auto i0 = this->size() - _Ret.size();
+		for (auto i = 0; i < _Ret.size(); ++i) {
+			_Ret[i] = data()[i0 + i];
+		}
+		return _Ret;
+	}
+
+	/// <summary>
 	/// \brief Return evenly spaced values within a given interval. 
 	/// The step is automatically according to the interval span and the vector dim.
 	/// </summary>
@@ -170,6 +205,93 @@ public:
 	template<index_t cols>
 	using extend = typename _Mybase::template 
 		lite<rows_at_compiletime, cols>;
+};
+
+template<typename _Ty, size_t _Dim> 
+class Vector : public Vec_<_Ty, _Dim>{};
+
+template<typename _Ty>
+class Vector<_Ty, 3> : public Vec_<_Ty, 3> {
+	using _Myt = Vector;
+	using _Mybase = Vec_<_Ty, 3>;
+	using typename _Mybase::reference;
+	using typename _Mybase::const_initlist;
+public:
+	using typename _Mybase::value_t;
+	using typename _Mybase::value_type;
+	using Matrix = _Mybase::template extend<3>;
+	using _Mybase::rows_at_compiletime;
+	using _Mybase::cols_at_compiletime;
+	using _Mybase::data;
+	using _Mybase::x;
+	using _Mybase::y;
+	using _Mybase::Vec_;
+	using _Mybase::operator=;
+	using _Mybase::operator[];
+
+	MATRICE_GLOBAL_FINL
+		Vector()noexcept {}
+	MATRICE_GLOBAL_FINL
+		Vector(value_t _x, value_t _y, value_t _z)noexcept
+		: _Mybase({ _x, _y, _z }) {}
+	template<typename _Uy>
+	MATRICE_GLOBAL_FINL
+		Vector(const Vec_<_Uy>& _other)noexcept
+		: Vector(_other.x, _other.y, _other.z) {}
+
+	MATRICE_GLOBAL_FINL
+		_Myt& operator=(const _Myt& _other)noexcept {
+		return static_cast<_Myt&>(_Mybase::operator=(_other));
+	}
+	template<typename _Rval>
+	MATRICE_GLOBAL_FINL
+		_Myt& operator=(const _Rval& _rval)noexcept {
+		return static_cast<_Myt&>(_Mybase::operator= (_rval));
+	}
+
+	MATRICE_GLOBAL_FINL
+		_Myt& normalize(value_t _val = _Mybase::inf)noexcept {
+		return static_cast<_Myt&>(_Mybase::normalize(_val));
+	}
+	MATRICE_GLOBAL_FINL
+		value_t dot(const _Myt& _other)const noexcept {
+		return _Mybase::dot(_other);
+	}
+	MATRICE_GLOBAL_FINL
+		_Myt cross(const _Myt& _rhs) const noexcept {
+		return _Myt(
+			y * _rhs[2] - z * _rhs[1],
+			z * _rhs[0] - x * _rhs[2],
+			x * _rhs[1] - y * _rhs[0]
+		);
+	}
+
+	/// <summary>
+	/// \brief Span a 3-vector to a 3-by-3 skew-symmetric matrix.
+	/// </summary>
+	/// <returns> A 3-by-3 skew-symmetric matrix </returns>
+	MATRICE_GLOBAL_INL
+		typename _Mybase::template extend<3> skew()const noexcept {
+		return { 0, -z, y, z, 0, -x, -y, x, 0 };
+	}
+
+#ifdef _MSVC_LANG
+	///<brief> properties </brief>
+	__declspec(
+		property(get = _z_getter, put = _z_setter)
+		) reference z;
+	MATRICE_GLOBAL_FINL
+		reference _z_getter()const noexcept { return data()[2]; }
+	MATRICE_GLOBAL_FINL
+		void _z_setter(value_t _z)noexcept { data()[2] = _z; }
+#else
+	MATRICE_GLOBAL_INL const reference z() const noexcept {
+		return data()[2];
+	}
+	MATRICE_GLOBAL_INL reference z() noexcept {
+		return data()[2];
+	}
+#endif
 };
 
 template<typename _Ty> 
@@ -330,6 +452,12 @@ public:
 #endif
 };
 _DETAIL_END
+
+// \brief ALIAS template for detail::Vector<_Ty, 3>
+template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
+using Vector3 = detail::Vector<_Ty, 3>;
+template<typename _Ty>
+struct is_fxdvector<Vector3<_Ty>> : MATRICE_STD(true_type) {};
 
 // \brief Generic managed vector type
 template<typename _Ty, index_t _Dim, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
