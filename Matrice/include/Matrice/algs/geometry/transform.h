@@ -88,13 +88,13 @@ MATRICE_HOST_INL Vec3_<_Ty> _Rodrigues_impl(const Matrix_<_Ty, 3>& _R) {
 /// <param name="'_r'"> roration vector </param>
 /// <returns>rotation matrix </returns>
 template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
-MATRICE_HOST_INL Matrix_<_Ty, 3> _Rodrigues_impl(const Vec3_<_Ty>& _r) noexcept {
+MATRICE_HOST_INL Matrix_<_Ty, 3> _Rodrigues_impl(const Vec_<_Ty, 3>& w) noexcept {
 	using value_t = _Ty;
 	auto _Ret = Matrix_<value_t, 3>::diag(1);
 
-	const auto theta = _r.norm();
+	const auto theta = w.norm();
 	if (theta != 0) {
-		auto u = (_r / theta).eval();
+		auto u = (w / theta).eval();
 		const auto [s, c] = sin_cos(theta);
 		_Ret(0) *= c, _Ret(4) *= c, _Ret(8) *= c;
 
