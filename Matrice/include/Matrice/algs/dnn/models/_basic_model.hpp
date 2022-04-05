@@ -21,7 +21,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 DGE_MATRICE_BEGIN
 namespace dnn {
 
-	using dnn_default_value_type = float;
+using dnn_default_value_type = float;
 
 _DETAIL_BEGIN
 template<typename _Ty, uint32_t _Depth, bool _Req_biases> 
