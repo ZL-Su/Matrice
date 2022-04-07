@@ -21,7 +21,15 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 MATRICE_NAMESPACE_BEGIN(dnn)
 namespace detail {
+/// <summary>
+/// \brief CLASS interface, _Linear_layer<_Input, _OutSize, _HasBias>.
+/// </summary>
+/// <typeparam name="_Input"></typeparam>
 template<typename _Input, size_t _Out, bool _HasBias> class _Linear_layer{};
+/// <summary>
+/// \brief TRAITS, for _Linear_layer type.
+/// </summary>
+/// <typeparam name="_Input"></typeparam>
 template<typename _Input, size_t _Out, bool _HasBias>
 struct _Layer_traits<_Linear_layer<_Input, _Out, _HasBias>> {
 	static constexpr auto depth = _Layer_traits<_Input>::depth;
@@ -29,6 +37,10 @@ struct _Layer_traits<_Linear_layer<_Input, _Out, _HasBias>> {
 	using value_type = typename _Input::value_type;
 };
 
+/// <summary>
+/// \brief Specialize to the input with type of 1-row and fixed-column matrix.
+/// </summary>
+/// <typeparam name="_Ty"></typeparam>
 template<typename _Ty, int _N, size_t _Out>
 class _Linear_layer<_Input_layer<Matrix_<_Ty, 1, _N>>, _Out, false> 
 	: public _Layer<_Linear_layer<_Input_layer<Matrix_<_Ty, 1, _N>>, _Out, false>> {
@@ -71,6 +83,15 @@ public:
 protected:
 	Matrix_<value_t, _N, _Out> _Myweights;
 };
+
+/// <summary>
+/// \brief Specialize to the input with type of fixed vector.
+/// </summary>
+template<typename _Ty, int _N, size_t _Out>
+class _Linear_layer<_Input_layer<Vec_<_Ty, _N>>, _Out, false> :
+	public _Linear_layer<_Input_layer<Matrix_<_Ty, 1, _N>>, _Out, false> {
+};
+
 }
 template<typename _Input, size_t _Out, bool _HasBias=false>
 using linear_layer = detail::_Linear_layer<_Input, _Out, _HasBias>;
