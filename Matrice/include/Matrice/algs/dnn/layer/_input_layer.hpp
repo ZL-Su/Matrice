@@ -28,12 +28,59 @@ template<typename _Ity> class _Input_layer {
 		dgelom::Tensor or array of dgelom::Matrix_.");
 };
 
+template<typename _Ty, int _N>
+class _Input_layer<Vec_<_Ty, _N>> {
+	using _Myt = _Input_layer;
+public:
+	using value_type = _Ty;
+	using input_t = Vec_<value_type, _N>;
+	using category = typename _Layer_tag::input;
+
+	_Input_layer(const _Myt& _Other) noexcept
+		: _Mydata(_Other._Mydata) {
+	}
+	_Input_layer(const input_t& _Input) noexcept
+		: _Mydata(_Input) {
+	}
+
+	/**
+	 *\brief Get rows of the input feature matrix.
+	 */
+	MATRICE_HOST_INL constexpr auto rows() const noexcept {
+		return _Mydata.rows();
+	}
+	/**
+	 *\brief Get rows of the input feature matrix.
+	 */
+	MATRICE_HOST_INL constexpr auto cols() const noexcept {
+		return _Mydata.cols();
+	}
+
+	MATRICE_HOST_INL decltype(auto) data() const noexcept {
+		return (_Mydata);
+	}
+	MATRICE_HOST_INL decltype(auto) data() noexcept {
+		return (_Mydata);
+	}
+private:
+	input_t _Mydata;
+};
+template<typename _Ty, int _N>
+struct _Layer_traits<_Input_layer<Vec_<_Ty, _N>>>
+{
+	static constexpr auto depth = 1;
+	static constexpr auto insize = _N;
+	static constexpr auto outsize = _N;
+	static constexpr auto has_bias = false;
+	using value_type = _Ty;
+};
+
 template<typename _Ty, int _M, int _N>
 class _Input_layer<Matrix_<_Ty, _M, _N>> {
 	using _Myt = _Input_layer;
 public:
 	using value_type = _Ty;
-	using input_t = Matrix_<_Ty, _M, _N>;
+	using input_t = Matrix_<value_type, _M, _N>;
 	using category = typename _Layer_tag::input;
 
 	_Input_layer(const _Myt& _Other) noexcept
