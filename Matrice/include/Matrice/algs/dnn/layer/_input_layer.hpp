@@ -83,6 +83,8 @@ public:
 	using input_t = Matrix_<value_type, _M, _N>;
 	using category = typename _Layer_tag::input;
 
+	_Input_layer() noexcept {
+	}
 	_Input_layer(const _Myt& _Other) noexcept
 		: _Mydata(_Other._Mydata) {
 	}
@@ -121,7 +123,15 @@ struct _Layer_traits<_Input_layer<Matrix_<_Ty, 1, _N>>>
 	static constexpr auto has_bias = false;
 	using value_type = _Ty;
 };
-
+template<typename _Ty, int _M, int _N>
+struct _Layer_traits<_Input_layer<Matrix_<_Ty, _M, _N>>>
+{
+	static constexpr auto depth = _M;
+	static constexpr auto insize = _N;
+	static constexpr auto outsize = _N;
+	static constexpr auto has_bias = false;
+	using value_type = _Ty;
+};
 
 template<typename _Ty, int _M, int _N, size_t _D>
 class _Input_layer<std::array<Matrix_<_Ty, _M, _N>, _D>> {
