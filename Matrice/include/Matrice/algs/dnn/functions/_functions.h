@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #include <core/matrix.h>
+#include <core/scalar.h>
 #include <internal/expr_base.hpp>
 
 DGE_MATRICE_BEGIN
@@ -146,10 +147,10 @@ struct relu {
 /// </summary>
 template<class _Ty>
 class softmax : public xpr::__xpr__ {
-	using _Myop_t = _Exp::EwiseUnaryExp<_Ty, 
-		_Exp_op::_Ewise_exp<typename _Ty::value_t>>;
+	using _Myop_t = conditional_t<is_scalar_v<_Ty>, Scalar<_Ty>, 
+		_Exp::EwiseUnaryExp<_Ty,_Exp_op::_Ewise_exp<typename traits<_Ty>::value_t>>>;
 public:
-	using value_type = _Ty::value_t;
+	using value_type = _Myop_t::value_t;
 	using value_t = value_type;
 
 	softmax(const _Ty& x) noexcept 
@@ -170,7 +171,9 @@ public:
 	 * \return A scalar value.
 	 */
 	MATRICE_GLOBAL_INL auto eval() noexcept {
-		_Ty _Ret(_Myop.shape());
+		using _Rety = conditional_t<is_scalar_v<_Ty>, Scalar<_Ty>, 
+			remove_all_t<_Ty>>;
+		_Rety _Ret(_Myop.shape());
 		for (auto _Idx = 0; _Idx < _Ret.size(); ++_Idx) {
 			_Ret(_Idx) = (*this)(_Idx);
 		}
