@@ -147,8 +147,8 @@ struct relu {
 /// </summary>
 template<class _Ty>
 class softmax : public xpr::__xpr__ {
-	using _Myop_t = conditional_t<is_scalar_v<_Ty>, Scalar<_Ty>, 
-		_Exp::EwiseUnaryExp<_Ty,_Exp_op::_Ewise_exp<typename traits<_Ty>::value_t>>>;
+	using _Myop_t = conditional_t<is_scalar_v<_Ty>, _Ty, 
+		_Exp::EwiseUnaryExp<_Ty,_Exp_op::_Ewise_exp<typename _Ty::value_type>>>;
 public:
 	using value_type = _Myop_t::value_t;
 	using value_t = value_type;
