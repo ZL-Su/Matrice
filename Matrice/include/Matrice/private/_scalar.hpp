@@ -37,6 +37,9 @@ public:
 	MATRICE_GLOBAL_INL Scalar() noexcept
 		: _Myval(0) {
 	}
+	MATRICE_GLOBAL_INL Scalar(shape_t<3>) noexcept
+		: _Myval(0) {
+	}
 	template<typename _Uy>
 	MATRICE_GLOBAL_INL Scalar(const _Uy s) noexcept 
 		: _Myval(s) {
@@ -79,6 +82,9 @@ public:
 	MATRICE_GLOBAL_INL constexpr decltype(auto)(rows)() const noexcept {
 		return 1;
 	}
+	MATRICE_GLOBAL_INL constexpr auto(shape)() const noexcept {
+		return shape_t<3>{1, 1, 1};
+	}
 
 	/**
 	 *\brief Compute scalar derivative.
@@ -102,6 +108,15 @@ public:
 
 private:
 	value_type _Myval;
+};
+
+template<> struct traits<Scalar<float>> {
+	using value_type = float;
+	using value_t = value_type;
+};
+template<> struct traits<Scalar<double>> {
+	using value_type = double;
+	using value_t = value_type;
 };
 
 template<typename _Ty> struct is_scalar<Scalar<_Ty>> {
