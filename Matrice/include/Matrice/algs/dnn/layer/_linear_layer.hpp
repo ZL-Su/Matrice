@@ -41,12 +41,12 @@ struct _Layer_traits<_Linear_layer<_Input, _Out, _HasBias>> {
 /// \brief Specialize to the input with type of 1-row and fixed-column matrix.
 /// </summary>
 /// <typeparam name="_Ty"></typeparam>
-template<typename _Ty, int _N, size_t _Out>
-class _Linear_layer<_Input_layer<Matrix_<_Ty, 1, _N>>, _Out, false> 
-	: public _Layer<_Linear_layer<_Input_layer<Matrix_<_Ty, 1, _N>>, _Out, false>> {
+template<typename _Ty, int _M, int _N, size_t _Out>
+class _Linear_layer<_Input_layer<Matrix_<_Ty, _M, _N>>, _Out, false> 
+	: public _Layer<_Linear_layer<_Input_layer<Matrix_<_Ty, _M, _N>>, _Out, false>> {
 public:
 	using category = _Layer_tag::linear;
-	using input_t = _Input_layer<Matrix_<_Ty, 1, _N>>;
+	using input_t = _Input_layer<Matrix_<_Ty, _M, _N>>;
 	using value_t = _Ty;
 
 	_Linear_layer() noexcept {
@@ -60,7 +60,7 @@ public:
 		return _Out;
 	}
 	MATRICE_GLOBAL_INL constexpr auto depth() const noexcept {
-		return 1;
+		return _M;
 	}
 
 	/**
@@ -75,6 +75,49 @@ public:
 	/**
 	 * \brief Inplace forward evaluation.
 	 * \return The resulted feature vector. 
+	 */
+	MATRICE_GLOBAL_INL auto forward(const input_t& _X) const {
+		return this->operator()(_X).eval();
+	}
+
+protected:
+	Matrix_<value_t, _N, _Out> _Myweights;
+};
+
+template<typename _Ty, int _N, size_t _Out>
+class _Linear_layer<_Input_layer<Matrix_<_Ty, 1, _N>>, _Out, false>
+	: public _Layer<_Linear_layer<_Input_layer<Matrix_<_Ty, 1, _N>>, _Out, false>> {
+public:
+	using category = _Layer_tag::linear;
+	using input_t = _Input_layer<Matrix_<_Ty, 1, _N>>;
+	using value_t = _Ty;
+
+	_Linear_layer() noexcept {
+		_Myweights = decltype(_Myweights)::randn();
+	}
+
+	MATRICE_GLOBAL_INL constexpr auto insize() const noexcept {
+		return _N;
+	}
+	MATRICE_GLOBAL_INL constexpr auto outsize() const noexcept {
+		return _Out;
+	}
+	MATRICE_GLOBAL_INL constexpr auto depth() const noexcept {
+		return 1;
+	}
+
+	/**
+	 * \brief Forward computation with lazy evaluation.
+	 * \return Expression of $matmul(X,W)$, and requires
+			   to call the method 'eval()' to collect the
+			   output feature vector.
+	 */
+	MATRICE_GLOBAL_INL auto operator()(const input_t& _X) const noexcept {
+		return _X.data().mul(_Myweights);
+	}
+	/**
+	 * \brief Inplace forward evaluation.
+	 * \return The resulted feature vector.
 	 */
 	MATRICE_GLOBAL_INL auto forward(const input_t& _X) const {
 		return this->operator()(_X).eval();
