@@ -1,7 +1,7 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library for
 3D Vision and Photo-Mechanics.
-Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2022, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,11 +25,12 @@ DGE_MATRICE_BEGIN
 template<typename _Ty = default_type>
 class Scalar {
 	static_assert(is_scalar_v<remove_all_t<_Ty>>, 
-		"_Ty in Scalar must be a primitive scalar type.");
+		"_Ty in Scalar<_Ty> must be a primitive scalar type.");
 	using _Myt = Scalar;
 public:
 	enum { Size = 1, rows_at_compiletime = 1, cols_at_compiletime = 1 };
 	using value_type = remove_all_t<_Ty>;
+	using value_t = value_type;
 	using reference = value_type&;
 	using pointer = value_type*;
 
@@ -62,14 +63,20 @@ public:
 		return (*this);
 	}
 
-	MATRICE_GLOBAL_INL decltype(auto)operator()()const noexcept {
+	MATRICE_GLOBAL_INL decltype(auto)operator()(size_t)const noexcept {
 		return (_Myval);
 	}
-	MATRICE_GLOBAL_INL decltype(auto)operator()() noexcept {
+	MATRICE_GLOBAL_INL decltype(auto)operator()(size_t) noexcept {
 		return (_Myval);
 	}
 
 	MATRICE_GLOBAL_INL constexpr decltype(auto)(size)() const noexcept {
+		return 1;
+	}
+	MATRICE_GLOBAL_INL constexpr decltype(auto)(cols)() const noexcept {
+		return 1;
+	}
+	MATRICE_GLOBAL_INL constexpr decltype(auto)(rows)() const noexcept {
 		return 1;
 	}
 
@@ -84,6 +91,13 @@ public:
 	 */
 	MATRICE_GLOBAL_INL const _Myt inv()const noexcept {
 		return _Myt(_Myval == 0 ? 0 : 1 / _Myval);
+	}
+
+	MATRICE_GLOBAL_INL decltype(auto)sum() const noexcept {
+		return (_Myval);
+	}
+	MATRICE_GLOBAL_INL decltype(auto)reduce() const noexcept {
+		return (_Myval);
 	}
 
 private:
