@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2022, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,38 +16,16 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #pragma once
-#include <core/tensor.h>
+#include "util/_macros.h"
+#include "util/_type_defs.h"
+#include "private/_tag_defs.h"
 
-DGE_MATRICE_BEGIN
-namespace dnn {
+MATRICE_NAMESPACE_BEGIN(placeholders)
 
-using dnn_default_value_type = float;
+struct all_t { all_t() {}; };
+/// <summary>
+/// \brief VAR all, can be used to Matrix, Array, or Vector slicing and indexing.
+/// </summary>
+inline static const auto all = all_t{};
 
-_DETAIL_BEGIN
-template<typename _Ty, uint32_t _Depth, bool _Req_biases> 
-class _Model {
-	static_assert("Undefined dnn::detail::_Model<>.");
-};
-
-template<typename _Ty, uint32_t _Depth>
-class _Model<_Ty, _Depth, std::false_type::value> {
-public:
-	using value_type = _Ty;
-	using tensor_type = Tensor<value_type, _Depth>;
-
-protected:
-	tensor_type m_weights;
-};
-
-template<typename _Ty, uint32_t _Depth>
-class _Model<_Ty, _Depth, std::true_type::value> {
-public:
-	using value_type = _Ty;
-	using tensor_type = Tensor<value_type, _Depth>;
-
-protected:
-	tensor_type m_weights, m_biases;
-};
-_DETAIL_END
-}
-DGE_MATRICE_END
+MATRICE_NAMESPACE_END(placeholders)

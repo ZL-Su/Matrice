@@ -58,7 +58,6 @@ DGE_MATRICE_BEGIN
 /// it's not a good idea to use a `span` to store values in a data
 /// structure (unless you are really sure you know what you're doing).
 ///
-/// 
 
 static inline constexpr auto dynamic_extent = size_t(0);
 
@@ -239,9 +238,9 @@ constexpr bool operator!= (span<T,X> l, span<U,Y> r) {
 }
 
 /// span_strided<T> : a non-owning, mutable reference to a contiguous
-/// array with known length and optionally non-default strides through the
-/// data.  An span_strided<T> is mutable (the values in the array may
-/// be modified), whereas an span_strided<const T> is not mutable.
+/// array with known length and optionally non-default strides through
+/// the data. An span_strided<T> is mutable (the values in the array
+/// may be modified), whereas an span_strided<const T> is not mutable.
 template <typename T, size_t Extent = dynamic_extent>
 class span_strided {
     static_assert (std::is_array<T>::value == false,

@@ -1,6 +1,6 @@
 /*  *******************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2022, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -111,7 +111,7 @@ template<typename T> struct is_scalar {
 	constexpr static auto value = MATRICE_STD(is_scalar_v)<T>;
 };
 template<typename T> 
-inline constexpr auto is_scalar_v = is_scalar<T>::value;
+inline constexpr auto is_scalar_v = is_scalar<remove_all_t<T>>::value;
 
 /**
  *\brief is_static_v<_R, _C> is true iff both _R and _C is greater than 0.
@@ -205,11 +205,19 @@ template<> struct _View_trait<float> { enum { value = 0x0032 }; };
 template<> struct _View_trait<double> { enum { value = 0x0064 }; };
 template<typename T> inline constexpr auto plane_view_v = _View_trait<T>::value;
 
-template<typename T> struct traits {};
+/**
+ *\brief traits<T> deduces the value_type for all primitive scalar types,
+ * but not for other class types. So it should be specailized if a new
+ * class is created.
+ */
+template<typename T> struct traits {
+	using type = remove_all_t<T>;
+	using value_type = conditional_t<is_scalar_v<type>, type, void>;
+	using value_t = value_type;
+};
 
 template<typename T> struct is_matrix : MATRICE_STD(false_type) {};
-template<typename T> inline constexpr 
-bool is_matrix_v = is_matrix<T>::value;
+template<typename T> inline constexpr bool is_matrix_v = is_matrix<T>::value;
 template<typename Mty>
 struct matrix_traits : traits<Mty> {};
 

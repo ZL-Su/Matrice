@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2022, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #include <core/matrix.h>
+#include <core/scalar.h>
+#include <internal/expr_base.hpp>
 
 DGE_MATRICE_BEGIN
 namespace dnn {
@@ -138,6 +140,58 @@ struct relu {
 		const auto jac = relu::grad(y);
 		return (g);
 	}
+};
+
+/// <summary>
+/// \brief Expression template for SoftMax function.
+/// </summary>
+template<class _Ty>
+class softmax : public xpr::__xpr__ {
+	using _Myop_t = conditional_t<is_scalar_v<_Ty>, Scalar<_Ty>, 
+		_Exp::EwiseUnaryExp<_Ty,_Exp_op::_Ewise_exp<typename traits<_Ty>::value_t>>>;
+public:
+	using value_type = _Myop_t::value_t;
+	using value_t = value_type;
+
+	softmax(const _Ty& x) noexcept 
+		: _Myop(x) {
+		_Mysum = _Myop.sum();
+	}
+
+	/**
+	 * \brief Evaluate softmax for the i-th element.
+	 * \return A scalar value.
+	 */
+	MATRICE_GLOBAL_INL auto operator()(size_t i) noexcept {
+		return safe_div(_Myop(i), _Mysum);
+	}
+
+	/**
+	 * \brief Evaluate all the softmax values.
+	 * \return A scalar value.
+	 */
+	MATRICE_GLOBAL_INL auto eval() noexcept {
+		using _Rety = conditional_t<is_scalar_v<_Ty>, Scalar<_Ty>, 
+			remove_all_t<_Ty>>;
+		_Rety _Ret(_Myop.shape());
+		for (auto _Idx = 0; _Idx < _Ret.size(); ++_Idx) {
+			_Ret(_Idx) = (*this)(_Idx);
+		}
+		return _Ret;
+	}
+
+	/**
+	 *\brief for executing nodal activation(s) with expression of
+	  $\text{softmax}(x) = \dfrac{e^{x_i}}{\sum_i e^{x_i}}$
+	 *\param [x] input data with a type of scalar, ::Matrix or ::tensor.
+	 */
+	MATRICE_GLOBAL_INL static auto forward(const _Ty& x) noexcept {
+		return softmax<_Ty>(x).eval();
+	}
+
+private:
+	_Myop_t _Myop;
+	value_t _Mysum;
 };
 
 };

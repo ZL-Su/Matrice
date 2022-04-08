@@ -167,8 +167,21 @@ try {
 		auto p = decltype(optim)::param_type{};
 		p[0] = node[2] - node[0];
 		p[3] = node[3] - node[1];
+		std::cout << "\n-IT-" 
+			<< "--------DISP-XY--------"
+			<< "---ERROR----" << "ID: " << rview.pos() << "\n";
 		for (auto i = 0; i < min(10, opts.maxiters()); ++i) {
 			const auto [coef, error] = optim(p);
+			std::cout << " "
+				<< std::setiosflags(std::ios::left)
+				<< dgelom::str(i, 2).append("  ")
+				<< std::setprecision(7)
+				<< std::setw(10)
+				<< p[0] << " "
+				<< std::setw(10)
+				<< p[3] << " "
+				<< std::setw(15)
+				<< error << "\n";
 			if (error < opts.tol()) {
 				break;
 			}

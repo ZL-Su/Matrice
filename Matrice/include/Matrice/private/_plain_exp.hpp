@@ -72,21 +72,30 @@ struct is_tensor<detail::_Tensor<_Ty, _Depth>> : std::true_type {};
 template<class _Derived, class _Traits, typename _Ty>
 struct matrix_traits<detail::Base_<_Derived, _Traits, _Ty>> {
 	using type = remove_all_t<_Ty>;
+	using value_type = remove_all_t<_Ty>;
 	enum { _M = _Traits::_M, _N = _Traits::_N };
+	static constexpr auto rows = _M;
+	static constexpr auto cols = _N;
 	static constexpr bool Is_base = std::true_type::value;
 };
 template<typename _Ty, int _Rows, int _Cols> 
 struct matrix_traits<Matrix_<_Ty, _Rows, _Cols>> {
 	using type = remove_all_t<_Ty>;
+	using value_type = remove_all_t<_Ty>;
 	using category = tag::_Matrix_tag;
 	enum { _M = _Rows, _N = _Cols };
+	static constexpr auto rows = _Rows;
+	static constexpr auto cols = _Cols;
 	static constexpr bool Is_base = std::false_type::value;
 };
 template<typename _Ty>
 struct matrix_traits<detail::_Tensor<_Ty, 0>> {
 	using type = remove_all_t<_Ty>;
+	using value_type = remove_all_t<_Ty>;
 	using category = tag::_Tensor_tag;
 	static constexpr auto _M = 0, _N = 0;
+	static constexpr auto rows = _M;
+	static constexpr auto cols = _N;
 	static constexpr auto Is_base = std::false_type::value;
 };
 
@@ -341,7 +350,8 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 		}
 
 		/**
-		 *\brief spread this to multiply with _rhs element-wisely; if _rhs can be evaluated to a square matrix, this should be unrolled to a 1D array if it is not.
+		 *\brief spread this to multiply with _rhs element-wisely; 
+		 if _rhs can be evaluated to a square matrix, this should be unrolled to a 1D array if it is not.
 		 *\param [_rhs] must be a matrix with a type of Matrix_<>, or an expression can be evaluated to a matrix.
 		 */
 		template<typename _Rhs>

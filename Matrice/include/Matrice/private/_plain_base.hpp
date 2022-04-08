@@ -1235,7 +1235,9 @@ public:
 	 */
 	static MATRICE_GLOBAL_INL _Derived rand(diff_t _Rows=0, diff_t _Cols=0) {
 		_Derived _Ret(_Rows, _Cols);
-		uniform_real<value_type> _Rand; mt19937 _Eng;
+		MATRICE_STD(random_device) _Dev {};
+		MATRICE_STD(default_random_engine) _Eng { _Dev() };
+		uniform_real<value_type> _Rand;
 		return forward<_Derived>(_Ret.each([&](auto& _Val) {
 			_Val = _Rand(_Eng); }));
 	}
@@ -1247,22 +1249,25 @@ public:
 	MATRICE_REQUIRES(rows_at_compiletime>0&&cols_at_compiletime>0)
 	static MATRICE_HOST_INL _Derived randn(const_initlist& _Pars = {/*mean=*/0, /*STD=*/1}) {
 		_Derived _Ret;
+		MATRICE_STD(random_device) _Dev{};
+		MATRICE_STD(default_random_engine) _Eng { _Dev() };
 		normal_distribution<value_type> _Rand{ *_Pars.begin(), *(_Pars.begin() + 1) };
-		mt19937 _Eng;
 		return forward<_Derived>(_Ret.each([&](auto& _Val) {
 			_Val = _Rand(_Eng); }));
 	}
 	static MATRICE_HOST_INL _Derived randn(diff_t _Extent, const_initlist& _Pars = {/*mean=*/0, /*STD=*/1 }) {
 		_Derived _Ret(_Extent);
+		MATRICE_STD(random_device) _Dev {};
+		MATRICE_STD(default_random_engine) _Eng { _Dev() };
 		normal_distribution<value_type> _Rand{ *_Pars.begin(), *(_Pars.begin() + 1) };
-		mt19937 _Eng;
 		return forward<_Derived>(_Ret.each([&](auto& _Val) {
 			_Val = _Rand(_Eng); }));
 	}
 	static MATRICE_HOST_INL _Derived randn(diff_t _Rows, diff_t _Cols, const_initlist& _Pars = {/*mean=*/0, /*STD=*/1 }) {
 		_Derived _Ret(_Rows, _Cols);
+		MATRICE_STD(random_device) _Dev {};
+		MATRICE_STD(default_random_engine) _Eng { _Dev() };
 		normal_distribution<value_type> _Rand{ *_Pars.begin(), *(_Pars.begin() + 1) };
-		mt19937 _Eng;
 		return forward<_Derived>(_Ret.each([&](auto& _Val) {
 			_Val = _Rand(_Eng); }));
 	}

@@ -253,6 +253,9 @@
     <Filter Include="Header Files\Algs\Geovision\refractive\inline">
       <UniqueIdentifier>{e71e77d2-ae79-4cbb-a8f1-2c4c9fe0f5b1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Detail\expressions">
+      <UniqueIdentifier>{d9e8f796-683b-47cc-87e4-5650d528d6d7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addin\interface.h">
@@ -776,6 +779,39 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\io\text_loader.hpp">
       <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\internal\expr_base.hpp">
+      <Filter>Header Files\Detail\expressions</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\internal\special_matrix_exprs.hpp">
+      <Filter>Header Files\Detail\expressions</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\math\linear_decomposer.hpp">
+      <Filter>Header Files\Detail\math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\optimization\least_abs_deviations.hpp">
+      <Filter>Header Files\Algs\Optimization</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\internal\placeholders.hpp">
+      <Filter>Header Files\Detail\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\private\math\_eigen_solver.cpp">
+      <Filter>Source Files\Details\math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\math\eigen_solver.hpp">
+      <Filter>Header Files\Detail\math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\dnn\models\_self_attentions.hpp">
+      <Filter>Header Files\Algs\DeepLearning\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\dnn\layer\_linear_layer.hpp">
+      <Filter>Header Files\Algs\DeepLearning\Layers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\dnn\modules.h">
+      <Filter>Header Files\Algs\DeepLearning</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\core\scalar.h">
+      <Filter>Header Files\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
