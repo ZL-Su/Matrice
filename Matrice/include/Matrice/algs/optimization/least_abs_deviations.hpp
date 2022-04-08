@@ -48,8 +48,7 @@ public:
 	using options_t = options_type;
 
 	explicit LAD(const matrix_t& A, const matrix_t& b, const options_t& opt = {})
-		:_Myopt{ opt } {
-
+		:_Myopt{ opt }, _Mya(A), _Myb(b) {
 	}
 
 	MATRICE_HOST_INL auto solve() const {
@@ -67,6 +66,8 @@ public:
 
 			}
 		}
+
+		return x;
 	}
 
 private:

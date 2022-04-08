@@ -801,6 +801,18 @@
     <ClInclude Include="include\Matrice\math\eigen_solver.hpp">
       <Filter>Header Files\Detail\math</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\algs\dnn\models\_self_attentions.hpp">
+      <Filter>Header Files\Algs\DeepLearning\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\dnn\layer\_linear_layer.hpp">
+      <Filter>Header Files\Algs\DeepLearning\Layers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\dnn\modules.h">
+      <Filter>Header Files\Algs\DeepLearning</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\core\scalar.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">
