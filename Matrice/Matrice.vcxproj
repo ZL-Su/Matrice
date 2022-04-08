@@ -230,6 +230,7 @@
     <ClInclude Include="include\Matrice\core\functions.h" />
     <ClInclude Include="include\Matrice\core\image.h" />
     <ClInclude Include="include\Matrice\core\matrix.h" />
+    <ClInclude Include="include\Matrice\core\scalar.h" />
     <ClInclude Include="include\Matrice\core\solver.h" />
     <ClInclude Include="include\Matrice\core\span.h" />
     <ClInclude Include="include\Matrice\core\tensor.h" />
