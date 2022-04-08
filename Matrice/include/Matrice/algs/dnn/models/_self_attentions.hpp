@@ -49,7 +49,7 @@ public:
 	using value_type = value_t;
 
 	_PlainSelfAttention() noexcept 
-		:_Myinput{} {
+		:_Myinput() {
 	}
 	_PlainSelfAttention(const input_t& x) noexcept
 		:_Myinput{ x } {
@@ -60,10 +60,13 @@ public:
 
 	MATRICE_GLOBAL_INL auto forward() const {
 		const auto _Score = _MyWQ.dot(_MyWK);
-		Vec_<value_t, depth> _Weights(_Score);
-		using SoltMax_t = functional::softmax<decltype(_Weights)>;
-		_Weights = SoltMax_t::forward(_Weights);
-		return (_Weights(0) * _MyWV).eval();
+		const auto _Weight = functional::softmax<value_t>::forward(_Score);
+		return (_Weight * _MyWV).eval();
+	}
+
+	MATRICE_HOST_INL auto qkv() const noexcept {
+		MATRICE_USE_STD(make_tuple);
+		return make_tuple(_MyWQ, _MyWK, _MyWV);
 	}
 
 protected:
