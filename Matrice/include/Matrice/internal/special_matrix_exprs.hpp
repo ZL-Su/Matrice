@@ -65,6 +65,10 @@ public:
 	}
 };
 
+/// <summary>
+/// \brief Specialization for dynamic identity matrix.
+/// </summary>
+/// <typeparam name="_Ty"></typeparam>
 template<typename _Ty>
 class identity_matrix_exp<_Ty, 0, 0> : public __xpr__ {
 
