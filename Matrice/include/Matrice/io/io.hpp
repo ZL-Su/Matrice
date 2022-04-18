@@ -642,9 +642,9 @@ MATRICE_HOST_FINL auto serial(const _Cont& _L) {
 	DGELOM_CHECK(_N<=_L.size(), "The size _N being serialized over range of _L.");
 	return tuple_n<_N - 1>::_(_L.data());
 }
-template<class _Op, typename _Vty = typename _Op::value_type>
+template<class _Op>
 decltype(auto) make_loader(std::string&& path, _Op&& loader)noexcept {
-	using loader_type = data_loader<_Vty>;
+	using loader_type = data_loader<typename _Op::value_type>;
 	return loader_type(directory{ path, path_t() }, loader);
 }
 template<class _Op>
