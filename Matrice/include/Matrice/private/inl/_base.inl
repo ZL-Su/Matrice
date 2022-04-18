@@ -2,7 +2,7 @@
 	  About License Agreement of this file, see "../lic/license.h"
 *********************************************************************/
 #pragma once
-#include <execution>
+
 #include "private/_plain_base.hpp"
 #include "private/_range.h"
 #include "private/nonfree/blas_lapack_kernel.h"
