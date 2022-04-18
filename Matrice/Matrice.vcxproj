@@ -279,6 +279,7 @@
     <ClInclude Include="include\Matrice\private\_decl_dev_funcs.h" />
     <ClInclude Include="include\Matrice\private\_devops.h" />
     <ClInclude Include="include\Matrice\private\_dev_matrix_base.h" />
+    <ClInclude Include="include\Matrice\private\_execution.hpp" />
     <ClInclude Include="include\Matrice\private\_function_traits.h" />
     <ClInclude Include="include\Matrice\private\_index.hpp" />
     <ClInclude Include="include\Matrice\private\_iterator.h" />
