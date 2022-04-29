@@ -150,4 +150,30 @@ shape_t<max_integer_v<_N1, _N2>> _Union(const shape_t<_N1>& _1, const shape_t<_N
 	return _Union<max_integer_v<_N1, _N2>>(_1, _2);
 }
 _DETAIL_END
+template<size_t _N> MATRICE_GLOBAL_INL
+shape_t<_N> min(const shape_t<_N>& _1, const shape_t<_N>& _2) noexcept {
+	if constexpr (_N == 1)
+		return shape_t<_N>{min(_1.h, _2.h)};
+	if constexpr (_N == 2)
+		return shape_t<_N>{min(_1.h, _2.h), min(_1.w, _2.w)};
+	if constexpr (_N == 3)
+		return shape_t<_N>{min(_1.h, _2.h), min(_1.w, _2.w), min(_1.d, _2.d)};
+}
+template<size_t _N1, size_t _N2> MATRICE_GLOBAL_INL
+shape_t<max_integer_v<_N1, _N2>> min(const shape_t<_N1>& _1, const shape_t<_N2>& _2) noexcept {
+	return min<max_integer_v<_N1, _N2>>(_1, _2);
+}
+template<size_t _N> MATRICE_GLOBAL_INL
+shape_t<_N> max(const shape_t<_N>& _1, const shape_t<_N>& _2) noexcept {
+	if constexpr (_N == 1)
+		return shape_t<_N>{max(_1.h, _2.h)};
+	if constexpr (_N == 2)
+		return shape_t<_N>{max(_1.h, _2.h), max(_1.w, _2.w)};
+	if constexpr (_N == 3)
+		return shape_t<_N>{max(_1.h, _2.h), max(_1.w, _2.w), max(_1.d, _2.d)};
+}
+template<size_t _N1, size_t _N2> MATRICE_GLOBAL_INL
+shape_t<max_integer_v<_N1, _N2>> max(const shape_t<_N1>& _1, const shape_t<_N2>& _2) noexcept {
+	return max<max_integer_v<_N1, _N2>>(_1, _2);
+}
 DGE_MATRICE_END
