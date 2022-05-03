@@ -120,7 +120,7 @@ struct traits<EwiseComparison<T, U, _Op>> {
 	static constexpr auto rows = xpr::common_rows_v<T, U>;
 	static constexpr auto cols = xpr::common_cols_v<T, U>;
 	using return_type = conditional_t<is_scalar_v<T>&&is_scalar_v<U>, 
-		Scalar<value_type>, detail::Matrix_<retval_type, rows, cols>>;
+		Scalar<retval_type>, Matrix_<retval_type, rows, cols>>;
 };
 
 MATRICE_NAMESPACE_END(xpr)
