@@ -32,7 +32,7 @@ class Vec_ : public Matrix_<_Ty, _Dim, compile_time_size<>::_1>
 	using _Myt = Vec_;
 protected:
 	using _Mybase = Matrix_<_Ty, _Dim, compile_time_size<>::_1>;
-	using const_initlist = typename _Mybase::const_initlist;
+	
 public:
 	enum{rows_at_compiletime = _Dim, cols_at_compiletime = 1};
 	using _Mybase::data;
@@ -40,6 +40,7 @@ public:
 	using typename _Mybase::value_type;
 	using reference = value_type&;
 	using const_reference = const reference;
+	using const_initlist = typename _Mybase::const_initlist;
 
 	MATRICE_GLOBAL_FINL Vec_() noexcept
 		: _Mybase(0) {}
