@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2022, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,27 +21,26 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "_camera_pose.hpp"
 
 MATRICE_ALG_BEGIN(vision)
-
-/// <summary>
-/// TAG, perspective camera
-/// </summary>
-struct persp_camera_tag {};
-/// <summary>
-/// TAG, pinhole camera
-/// </summary>
-struct pinho_camera_tag {};
-/// <summary>
-/// TAG, orthographic camera
-/// </summary>
-struct ortho_camera_tag {};
-/// <summary>
-/// TAG, refractive perspective camera
-/// </summary>
-struct refrap_camera_tag {};
 /// <summary>
 /// TAG, dummy camera
 /// </summary>
 struct camera_tag {};
+/// <summary>
+/// TAG, perspective camera
+/// </summary>
+struct persp_camera_tag : camera_tag {};
+/// <summary>
+/// TAG, pinhole camera
+/// </summary>
+struct pinho_camera_tag : camera_tag {};
+/// <summary>
+/// TAG, orthographic camera
+/// </summary>
+struct ortho_camera_tag : camera_tag {};
+/// <summary>
+/// TAG, refractive perspective camera
+/// </summary>
+struct refrap_camera_tag : camera_tag {};
 
 MATRICE_HOST_INL
 _DETAIL_BEGIN
@@ -169,7 +168,7 @@ protected:
 /// </summary>
 /// <typeparam name="_Ty"></typeparam>
 template<typename _Ty> 
-requires is_floating_point_v<_Ty>
+	requires is_floating_point_v<_Ty>
 class _Camera<_Ty, persp_camera_tag> 
 	: public _Camera<_Camera<_Ty, persp_camera_tag>, camera_tag> {
 	using _Myt = _Camera<_Ty, persp_camera_tag>;
@@ -179,12 +178,12 @@ public:
 	using typename _Mybase::value_type;
 
 	/**
-	 * \brief GETER/SETTER, access to distortion model.
+	 * \brief GETER/SETTER, access to factors of distortion.
 	 */
-	decltype(auto) distortion_model() const noexcept {
+	decltype(auto) fod() const noexcept {
 		return _MyU;
 	}
-	decltype(auto) distortion_model() noexcept {
+	decltype(auto) fod() noexcept {
 		return _MyU;
 	}
 
@@ -243,6 +242,13 @@ private:
 };
 
 _DETAIL_END
+
+/// <summary>
+/// \brief CONCEPT, camtype: set constraint of camera types defined above.
+/// </summary>
+template<typename _Cam>
+concept camtype = std::is_base_of_v<camera_tag, typename _Cam::category>;
+
 /// <summary>
 /// \brief ALIAS, Generic camera template
 /// </summary>
