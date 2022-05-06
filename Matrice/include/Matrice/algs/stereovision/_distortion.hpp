@@ -24,13 +24,9 @@ MATRICE_NAMESPACE_BEGIN(vision)
 struct fwd { enum { forward = 0 }; };
 struct bwd { enum { backward = 0 }; };
 
-template<typename _Ty, typename _Tag>
+template<typename _Ty, class _Tag = void>
 requires is_floating_point_v<_Ty>
-class distortion : public xpr::__xpr__ {};
-
-template<typename _Ty>
-requires is_floating_point_v<_Ty>
-class distortion<_Ty, fwd> : public xpr::__xpr__ {
+class distortion : public xpr::__xpr__ {
 	using _Myt = distortion;
 	using _Mydt = Vec4_<_Ty>;
 public:
@@ -52,18 +48,41 @@ private:
 	_Mydt _Mydata;
 	MATRICE_GLOBAL_FINL auto _Apply(value_t x, value_t y) const noexcept;
 };
-
-template<typename _Ty> requires is_floating_point_v<_Ty>
-MATRICE_GLOBAL_FINL auto distortion<_Ty, fwd>::_Apply(value_t x, value_t y)const noexcept
+template<typename _Ty, class _Tag> requires is_floating_point_v<_Ty>
+MATRICE_GLOBAL_FINL auto distortion<_Ty, _Tag>::_Apply(value_t x, value_t y)const noexcept
 {
 	const auto r_2 = sqsum(x, y);
 	const auto [k1, k2, p1, p2] = _Mydata.unbind();
-	const auto tmp = 1 + k1 * r_2 + k2 * sq(r_2) + 2 * (p1 * x + p2 * y);
+	const auto tmp = 1 + k1*r_2 + k2*sq(r_2) + 2*(p1*x + p2*y);
 	const auto x_d = tmp * x + p2 * r_2;
 	const auto y_d = tmp * y + p1 * r_2;
 	MATRICE_USE_STD(make_tuple);
 	return make_tuple(x_d, y_d);
 }
 
+template<typename _Ty>
+	requires is_floating_point_v<_Ty>
+class distortion<_Ty, bwd> : public distortion<_Ty, void> {
+	using _Myt = distortion;
+	using _Mybase = distortion<_Ty, void>;
+	using _Mydt = Vec4_<_Ty>;
+public:
+	using value_t = _Mydt::value_type;
+
+};
+
+template<typename _Ty>
+	requires is_floating_point_v<_Ty>
+class distortion<_Ty, fwd> : public distortion<_Ty, void> {
+	using _Myt = distortion;
+	using _Mybase = distortion<_Ty, void>;
+	using _Mydt = Vec4_<_Ty>;
+public:
+	using value_t = _Mydt::value_type;
+
+};
+
+template<typename _Ty> using fwd_dmodel_t = distortion<_Ty, fwd>;
+template<typename _Ty> using bwd_dmodel_t = distortion<_Ty, bwd>;
 
 MATRICE_NAMESPACE_END(vision)
