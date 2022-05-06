@@ -205,12 +205,13 @@
     <ClInclude Include="include\Matrice\algs\similarity\_similarity_traits.h" />
     <ClInclude Include="include\Matrice\algs\spline.h" />
     <ClInclude Include="include\Matrice\algs\spline\_spline.hpp" />
-    <ClInclude Include="include\Matrice\algs\stereovis.hpp" />
+    <ClInclude Include="include\Matrice\algs\vision.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\refractive3D\_refractive3d_funcs.h" />
     <ClInclude Include="include\Matrice\algs\stereovision\refractive3D\_refractive3d.h" />
     <ClInclude Include="include\Matrice\algs\stereovision\_camera.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_depth_estimation.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_camera_pose.hpp" />
+    <ClInclude Include="include\Matrice\algs\stereovision\_distortion.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_projection.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_spatial_transform.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_triangulation.hpp" />
