@@ -216,10 +216,10 @@ class Vector<_Ty, 3> : public Vec_<_Ty, 3> {
 	using _Myt = Vector;
 	using _Mybase = Vec_<_Ty, 3>;
 	using typename _Mybase::reference;
-	using typename _Mybase::const_initlist;
 public:
 	using typename _Mybase::value_t;
 	using typename _Mybase::value_type;
+	using typename _Mybase::const_initlist;
 	using Matrix = _Mybase::template extend<3>;
 	using _Mybase::rows_at_compiletime;
 	using _Mybase::cols_at_compiletime;
@@ -301,10 +301,10 @@ class Vec3_ MATRICE_NONHERITABLE : public Vec_<_Ty, 3>
 	using _Myt = Vec3_;
 	using _Mybase = Vec_<_Ty, 3>;
 	using typename _Mybase::reference;
-	using typename _Mybase::const_initlist;
 public:
 	using typename _Mybase::value_t;
 	using typename _Mybase::value_type;
+	using typename _Mybase::const_initlist;
 	using _Mybase::rows_at_compiletime;
 	using _Mybase::cols_at_compiletime;
 	using _Mybase::data;
@@ -386,10 +386,10 @@ class Vec4_ MATRICE_NONHERITABLE : public Vec_<_Ty, 4>
 	using _Myt = Vec4_;
 	using _Mybase = Vec_<_Ty, 4>;
 	using typename _Mybase::reference;
-	using typename _Mybase::const_initlist;
 public:
 	using typename _Mybase::value_t;
 	using typename _Mybase::value_type;
+	using typename _Mybase::const_initlist;
 	using _Mybase::rows_at_compiletime;
 	using _Mybase::cols_at_compiletime;
 	using _Mybase::data;
@@ -421,6 +421,10 @@ public:
 		return static_cast<_Myt&>(_Mybase::normalize(_val)); 
 	}
 
+	MATRICE_HOST_FINL auto unbind() const noexcept {
+		MATRICE_USE_STD(make_tuple);
+		return make_tuple(data()[0], data()[1], data()[2], data()[3]);
+	}
 #ifdef _MSVC_LANG
 	///<brief> properties </brief>
 	__declspec(
