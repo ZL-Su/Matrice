@@ -659,7 +659,7 @@ decltype(auto) make_loader(path_t&& path, _Op&& loader)noexcept {
 }
 
 template<fmt _Fmt>
-MATRICE_HOST_INL void save(auto data, path_t path) noexcept {
+MATRICE_HOST_INL void save(const auto& data, path_t path) noexcept {
 	return detail::_Save<_Fmt>(data, path);
 }
 }
