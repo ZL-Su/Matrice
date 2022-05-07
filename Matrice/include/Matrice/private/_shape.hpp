@@ -36,6 +36,14 @@ template<> struct shape_t<1> {
 	constexpr auto rows() const noexcept { return h; }
 	constexpr auto cols() const noexcept { return 1; }
 
+	using _Myt = shape_t;
+	/**
+	 *\brief swap the height and width values.
+	 */
+	MATRICE_GLOBAL_FINL _Myt t() const noexcept {
+		return { h };
+	}
+
 	friend bool operator==(const shape_t<1>& _Left, const shape_t<1>& _Right) noexcept {
 		MATRICE_USE_STD(tie);
 		return tie(_Left.h) == tie(_Right.h);
@@ -45,6 +53,7 @@ template<> struct shape_t<1> {
 };
 template<> struct shape_t<2> {
 	using value_type = size_t;
+	using _Myt = shape_t;
 
 	shape_t(size_t _h, size_t _w) noexcept
 		:h(_h), w(_w) {
@@ -66,6 +75,14 @@ template<> struct shape_t<2> {
 	constexpr void reset() noexcept { h = w = 0; }
 	constexpr auto rows() const noexcept { return h; }
 	constexpr auto cols() const noexcept { return w; }
+
+	/**
+	 *\brief swap the height and width values.
+	 */
+	MATRICE_GLOBAL_FINL _Myt t() const noexcept {
+		return { w, h};
+	}
+
 	/**
 	 *\brief tile the 3d-shape to 2d-shape
 	 */
@@ -81,7 +98,7 @@ template<> struct shape_t<2> {
 };
 template<> struct shape_t<3> {
 	using value_type = size_t;
-	using _Myt = shape_t<3>;
+	using _Myt = shape_t;
 	shape_t(size_t _h, size_t _w, size_t _d=1) noexcept
 		:h(_h), w(_w), d(_d) {
 	}
@@ -117,6 +134,13 @@ template<> struct shape_t<3> {
 	constexpr auto rows() const noexcept { return h * d; }
 	constexpr auto cols() const noexcept { return w; }
 	constexpr auto depth() const noexcept { return d; }
+
+	/**
+	 *\brief swap the height and width values.
+	 */
+	MATRICE_GLOBAL_FINL _Myt t() const noexcept { 
+		return { w, h, d };
+	}
 
 	/**
 	 *\brief tile the 3d-shape to 2d-shape
