@@ -294,7 +294,13 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 
 		MATRICE_GLOBAL_FINL Base_() {}
 		MATRICE_GLOBAL_FINL Base_(const shape_t<3>& _Shape) 
-			: Shape(_Shape), M(_Shape.rows()), N(_Shape.cols()) {}
+			: Shape(_Shape) {
+			M = (Shape.rows()), N = (Shape.cols());
+#ifdef MATRICE_DEBUG
+			DGELOM_CHECK(M != 0, "Input rows in Base_<_Op> is zero!");
+			DGELOM_CHECK(N != 0, "Input cols in Base_<_Op> is zero!");
+#endif
+		}
 
 		/**
 		 * \method Base_<_Op>::eval()
@@ -303,7 +309,7 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 	     */
 		MATRICE_GLOBAL_INL auto eval() const {
 			matrix_type _Ret(M, N);
-			derived_pointer(this)->assign_to(_Ret);
+			derived().assign_to(_Ret);
 			return forward<matrix_type>(_Ret);
 		}
 
@@ -664,8 +670,12 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 			return _Op(_LHS, _RHS, r, c);
 		}
 		MATRICE_GLOBAL_FINL value_t operator() (int _idx) const noexcept {
-			int r = _idx / N, c = _idx - r * N;
+			const int r = _idx / N, c = _idx - r * N;
 			return _Op(_LHS, _RHS, r, c);
+		}
+
+		MATRICE_GLOBAL_INL auto eval() const noexcept {
+			return _Mybase::eval();
 		}
 
 		template<typename _Mty>
@@ -704,17 +714,11 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 			:_Mybase(inout.shape()), _RHS(inout), _ANS(inout) {
 			if constexpr (options == trp) { 
 				std::swap(M, N); 
-				_Mybase::Shape.h = M;
-				_Mybase::Shape.w = N;
+				_Mybase::Shape = _Mybase::Shape.t();
 			}
 		}
 		MATRICE_GLOBAL_INL MatUnaryExp(const T& _rhs, T& _ans)
-			: _Mybase(_rhs.shape()), _RHS(_rhs), _ANS(_ans) {
-			if constexpr (options == trp) {
-				std::swap(M, N);
-				_Mybase::Shape.h = M;
-				_Mybase::Shape.w = N;
-			}
+			: _Mybase(_rhs), _ANS(_ans) {
 		}
 		MATRICE_GLOBAL_INL MatUnaryExp(MatUnaryExp&& _other)
 			: _Mybase(_other.shape()), options(_other.options) {
@@ -1010,6 +1014,12 @@ MATRICE_GLOBAL_FINL auto skew(const _Ty& _x) noexcept {
 	return (_x - transpose(_x)) * _Ty::value_t(0.5);
 }
 
+// *\expression of the covar of given data '_x'.
+template<typename _Ty>
+MATRICE_GLOBAL_FINL auto covar(const _Ty& _x) noexcept {
+	const auto temp = _x - accum(_x) / _x.size();
+	return matmul(transpose(temp), temp);
+}
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
