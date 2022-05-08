@@ -100,7 +100,7 @@ public:
 		if constexpr (is_scalar_v<_Lhs> || is_scalar_v<_Rhs>) {
 			return max(_Myrhs.shape(), _Mylhs.shape());
 		}
-		else {
+		else { // Take the intersection of both shapes to prevent index overflow
 			return min(_Myrhs.shape(), _Mylhs.shape());
 		}
 	}
