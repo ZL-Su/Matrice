@@ -822,6 +822,9 @@
     <ClInclude Include="include\Matrice\algs\stereovision\_distortion.hpp">
       <Filter>Header Files\Algs\Geovision</Filter>
     </ClInclude>
+    <ClInclude Include="include\Matrice\algs\geometry\_plane_fitting.hpp">
+      <Filter>Header Files\Algs\Geometry</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\matrix_base_impl.cpp">

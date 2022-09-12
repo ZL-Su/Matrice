@@ -187,6 +187,7 @@
     <ClInclude Include="include\Matrice\algs\geometry\quaternion.hpp" />
     <ClInclude Include="include\Matrice\algs\geometry\transform.h" />
     <ClInclude Include="include\Matrice\algs\geometry\_geo_utils.hpp" />
+    <ClInclude Include="include\Matrice\algs\geometry\_plane_fitting.hpp" />
     <ClInclude Include="include\Matrice\algs\graphics.hpp" />
     <ClInclude Include="include\Matrice\algs\graphics\_distance.hpp" />
     <ClInclude Include="include\Matrice\algs\graphics\utils.hpp" />
