@@ -36,6 +36,14 @@ template<> struct shape_t<1> {
 	constexpr auto rows() const noexcept { return h; }
 	constexpr auto cols() const noexcept { return 1; }
 
+	using _Myt = shape_t;
+	/**
+	 *\brief swap the height and width values.
+	 */
+	MATRICE_GLOBAL_FINL _Myt t() const noexcept {
+		return { h };
+	}
+
 	friend bool operator==(const shape_t<1>& _Left, const shape_t<1>& _Right) noexcept {
 		MATRICE_USE_STD(tie);
 		return tie(_Left.h) == tie(_Right.h);
@@ -45,6 +53,7 @@ template<> struct shape_t<1> {
 };
 template<> struct shape_t<2> {
 	using value_type = size_t;
+	using _Myt = shape_t;
 
 	shape_t(size_t _h, size_t _w) noexcept
 		:h(_h), w(_w) {
@@ -66,6 +75,14 @@ template<> struct shape_t<2> {
 	constexpr void reset() noexcept { h = w = 0; }
 	constexpr auto rows() const noexcept { return h; }
 	constexpr auto cols() const noexcept { return w; }
+
+	/**
+	 *\brief swap the height and width values.
+	 */
+	MATRICE_GLOBAL_FINL _Myt t() const noexcept {
+		return { w, h};
+	}
+
 	/**
 	 *\brief tile the 3d-shape to 2d-shape
 	 */
@@ -81,7 +98,7 @@ template<> struct shape_t<2> {
 };
 template<> struct shape_t<3> {
 	using value_type = size_t;
-	using _Myt = shape_t<3>;
+	using _Myt = shape_t;
 	shape_t(size_t _h, size_t _w, size_t _d=1) noexcept
 		:h(_h), w(_w), d(_d) {
 	}
@@ -119,6 +136,13 @@ template<> struct shape_t<3> {
 	constexpr auto depth() const noexcept { return d; }
 
 	/**
+	 *\brief swap the height and width values.
+	 */
+	MATRICE_GLOBAL_FINL _Myt t() const noexcept { 
+		return { w, h, d };
+	}
+
+	/**
 	 *\brief tile the 3d-shape to 2d-shape
 	 */
 	MATRICE_GLOBAL_FINL auto tile()const noexcept { 
@@ -150,4 +174,30 @@ shape_t<max_integer_v<_N1, _N2>> _Union(const shape_t<_N1>& _1, const shape_t<_N
 	return _Union<max_integer_v<_N1, _N2>>(_1, _2);
 }
 _DETAIL_END
+template<size_t _N> MATRICE_GLOBAL_INL
+shape_t<_N> min(const shape_t<_N>& _1, const shape_t<_N>& _2) noexcept {
+	if constexpr (_N == 1)
+		return shape_t<_N>{min(_1.h, _2.h)};
+	if constexpr (_N == 2)
+		return shape_t<_N>{min(_1.h, _2.h), min(_1.w, _2.w)};
+	if constexpr (_N == 3)
+		return shape_t<_N>{min(_1.h, _2.h), min(_1.w, _2.w), min(_1.d, _2.d)};
+}
+template<size_t _N1, size_t _N2> MATRICE_GLOBAL_INL
+shape_t<max_integer_v<_N1, _N2>> min(const shape_t<_N1>& _1, const shape_t<_N2>& _2) noexcept {
+	return min<max_integer_v<_N1, _N2>>(_1, _2);
+}
+template<size_t _N> MATRICE_GLOBAL_INL
+shape_t<_N> max(const shape_t<_N>& _1, const shape_t<_N>& _2) noexcept {
+	if constexpr (_N == 1)
+		return shape_t<_N>{max(_1.h, _2.h)};
+	if constexpr (_N == 2)
+		return shape_t<_N>{max(_1.h, _2.h), max(_1.w, _2.w)};
+	if constexpr (_N == 3)
+		return shape_t<_N>{max(_1.h, _2.h), max(_1.w, _2.w), max(_1.d, _2.d)};
+}
+template<size_t _N1, size_t _N2> MATRICE_GLOBAL_INL
+shape_t<max_integer_v<_N1, _N2>> max(const shape_t<_N1>& _1, const shape_t<_N2>& _2) noexcept {
+	return max<max_integer_v<_N1, _N2>>(_1, _2);
+}
 DGE_MATRICE_END

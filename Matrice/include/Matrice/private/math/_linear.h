@@ -39,7 +39,8 @@ public:
 
 	/**
 	 * \brief Declare a matrix decomposition instance.
-	 * \param "_A" The coeff matrix to be processed. We take a reference of the matrix such that the decomposition is built inplace.
+	 * \param "_A" The coeff matrix to be processed. 
+	   We take a reference of the matrix such that the decomposition is built inplace.
 	 */
 	MATRICE_HOST_INL _Matrix_decomposition(const _Mty& _A) 
 		: _Mycoef(_A) {}

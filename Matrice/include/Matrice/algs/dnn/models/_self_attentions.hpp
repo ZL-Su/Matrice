@@ -30,9 +30,56 @@ namespace detail {
 /// </summary>
 /// <typeparam name="_Input"></typeparam>
 template<class _Input, size_t _Embed, size_t _Depth> 
-class _PlainSelfAttention{
-	static_assert(std::true_type::value, "Unsupported type '_Input'\
-		in _PlainSelfAttention<_Input, _Embed, _Depth>.");
+class _PlainSelfAttention : public xpr::__xpr__ {
+	using _Myt = _PlainSelfAttention;
+public:
+	static constexpr auto depth = _Depth;
+	using input_t = input_layer<_Input>;
+	using linear_t = linear_layer<input_t, _Embed>;
+	using value_t = _Input::value_t;
+	using value_type = value_t;
+
+	_PlainSelfAttention() noexcept
+		:_Myinput() {
+	}
+	_PlainSelfAttention(const input_t& X) noexcept
+		:_Myinput{ X } {
+		_MyQ = _Myproj_q(_Myinput);
+		_MyK = _Myproj_k(_Myinput);
+		_MyV = _Myproj_v(_Myinput);
+	}
+
+	MATRICE_GLOBAL_INL auto forward() const {
+		Matrix_<value_t, depth, _Embed> _Out;
+		for (auto d = 0; d < depth; ++d) {
+			// compute 'self' scores
+			const auto Q = _MyQ.rview(d).eval();;
+			auto _Scores = _MyK.mul(Q.t()).eval();
+
+			// softmax weights
+			using softmax = functional::softmax<decltype(_Scores)>;
+			_Scores = softmax::forward(_Scores);
+
+			// averaging
+			auto V = _Scores.spreadmul(_MyV).eval();
+
+			// sum over all averaged values
+			_Out.rview(d) = V.reduce<0>();
+		}
+		return _Out;
+	}
+
+	MATRICE_HOST_INL auto qkv() const noexcept {
+		MATRICE_USE_STD(make_tuple);
+		return make_tuple(_MyQ, _MyK, _MyV);
+	}
+
+protected:
+	linear_t _Myproj_q, _Myproj_k, _Myproj_v;
+	input_t _Myinput;
+	Matrix_<value_type, _Depth, _Embed> _MyQ;
+	Matrix_<value_type, _Depth, _Embed> _MyK;
+	Matrix_<value_type, _Depth, _Embed> _MyV;
 };
 
 /// <summary>
@@ -53,27 +100,27 @@ public:
 	}
 	_PlainSelfAttention(const input_t& x) noexcept
 		:_Myinput{ x } {
-		_MyWQ = linear_t()(_Myinput);
-		_MyWK = linear_t()(_Myinput);
-		_MyWV = linear_t()(_Myinput);
+		_MyQ = linear_t()(_Myinput);
+		_MyK = linear_t()(_Myinput);
+		_MyV = linear_t()(_Myinput);
 	}
 
 	MATRICE_GLOBAL_INL auto forward() const {
-		const auto _Score = _MyWQ.dot(_MyWK);
-		const auto _Weight = functional::softmax<value_t>::forward(_Score);
-		return (_Weight * _MyWV).eval();
+		const auto _Score = _MyQ.dot(_MyK);
+		const auto _Weight = functional::softmax<Scalar<value_t>>::forward(_Score);
+		return (_Weight * _MyV).eval();
 	}
 
 	MATRICE_HOST_INL auto qkv() const noexcept {
 		MATRICE_USE_STD(make_tuple);
-		return make_tuple(_MyWQ, _MyWK, _MyWV);
+		return make_tuple(_MyQ, _MyK, _MyV);
 	}
 
 protected:
 	input_t _Myinput;
-	Matrix_<value_type, 1, _Embed> _MyWQ;
-	Matrix_<value_type, 1, _Embed> _MyWK;
-	Matrix_<value_type, 1, _Embed> _MyWV;
+	Matrix_<value_type, 1, _Embed> _MyQ;
+	Matrix_<value_type, 1, _Embed> _MyK;
+	Matrix_<value_type, 1, _Embed> _MyV;
 };
 }
 
