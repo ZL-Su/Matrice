@@ -305,6 +305,7 @@
     <ClInclude Include="include\Matrice\thread\_thread.h" />
     <ClInclude Include="include\Matrice\thread\inline\_thread_parallel_nd.inl" />
     <ClInclude Include="include\Matrice\util\genalgs.h" />
+    <ClInclude Include="include\Matrice\util\perf.h" />
     <ClInclude Include="include\Matrice\util\utils.h" />
     <ClInclude Include="include\Matrice\util\version.h" />
     <ClInclude Include="include\Matrice\util\_exception.h" />
