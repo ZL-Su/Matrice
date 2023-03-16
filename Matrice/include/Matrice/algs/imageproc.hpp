@@ -251,7 +251,7 @@ public:
 	MATRICE_HOST_INL auto at(diff_t _x, diff_t _y) const {
 		auto gx = zero<value_type>, gy = gx;
 
-		if (_x > 0 && _y > 0 && _x < _Myimg.cols() && _y < _Myimg.rows()) {
+		if (_x > 0 && _y > 0 && _x < _Myimg.cols()-1 && _y < _Myimg.rows()-1) {
 			const auto pu = _Myimg[_y - 1], pc = _Myimg[_y], pl = _Myimg[_y + 1];
 
 			const auto I00 = pu[_x - 1], I01 = pu[_x], I02 = pu[_x + 1];

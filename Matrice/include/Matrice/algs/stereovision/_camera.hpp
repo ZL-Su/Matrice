@@ -74,7 +74,7 @@ template<class _Cam, typename _Ty = typename traits<_Cam>::value_type>
 MATRICE_HOST_INL auto _Remove_distortion(const _Cam& cam, _Ty u, _Ty v) noexcept;
 
 /// <summary>
-/// CLASS TEMPLATE, base of camera types
+/// CLASS TEMPLATE, base of camera types.
 /// </summary>
 template<typename _Derived>
 class _Camera<_Derived, camera_tag>  {
