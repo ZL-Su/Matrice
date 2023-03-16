@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2023, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,9 +20,6 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "algs/interpolation/_cubic_conv_interp.hpp"
 #include "_projection.hpp"
 #include "_spatial_transform.hpp"
-#ifdef MATRICE_DEBUG
-#include "io/io.hpp"
-#endif
 
 MATRICE_ALGS_BEGIN
 _DETAIL_BEGIN
@@ -76,20 +73,6 @@ protected:
 	MATRICE_HOST_INL void _Update_interpolator() noexcept {
 		m_materp.reset(m_matching);
 		m_referp.reset(m_reference);
-	}
-
-	/// <summary>
-	/// Used to report some computation information.
-	/// </summary>
-	/// <param name="s">report string stream</param>
-	MATRICE_HOST_INL void _Report(std::stringstream&& s) {
-		/* 
-		 s << "it=" << std::setfill('0') << std::setw(4) << iterations
-		   << std::fixed << std::showpoint << std::setprecision(6)
-		   << "    name1=" << val_1 << "    name2=" << val_2;
-		 */
-		MATRICE_USE_STD(cout);
-		cout << s.str() << "\n";
 	}
 
 	projection_t m_projection;
