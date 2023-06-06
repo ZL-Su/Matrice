@@ -28,8 +28,9 @@ public:
 	_Cubic_conv_interpolation(const Matrix<_Pixty>& img)
 		:m_data(img.rows() + 1 + 2, img.cols() + 1 + 2, 0) {
 		m_data.block(1, img.cols() + 1, 1, img.rows() + 1) = img;
-		if constexpr (is_not_same_v<_Ty, _Pixty> && is_same_v<_Pixty, uint8_t>)
+		if constexpr (is_not_same_v<_Ty, _Pixty> && is_same_v<_Pixty, uint8_t>) {
 			m_data = m_data / value_type(255);
+		}
 	}
 
 	MATRICE_HOST_INL value_type operator()(value_type x, value_type y) const noexcept {
@@ -38,10 +39,8 @@ public:
 		const auto blk = m_data.block(ix, ix + 3, iy, iy + 3);
 
 		value_type b[] = { 
-			_Kernel(dx, blk[0]), 
-			_Kernel(dx, blk[1]),
-			_Kernel(dx, blk[2]), 
-			_Kernel(dx, blk[3]) };
+			_Kernel(dx, blk[0]), _Kernel(dx, blk[1]),
+			_Kernel(dx, blk[2]), _Kernel(dx, blk[3]) };
 
 		return _Kernel(dy, b);
 	}
@@ -59,6 +58,8 @@ private:
 		};
 		return value_type(0.5) * (v[0] + v[1] * dx + v[2] * dx * dx + v[3] * dx * dx * dx);
 	}
-	Matrix<_Ty> m_data;
+	Matrix<_Ty> m_data; //Default is zero-padding
 };
+template<typename _Ty, MATRICE_ENABLE_IF(is_scalar_v<_Ty>)>
+using bicubic_conv_interp = _Cubic_conv_interpolation<_Ty>;
 MATRICE_ALGS_END
