@@ -959,21 +959,27 @@ public:
 	/// \brief Reduction along a given axis.
 	/// </summary>
 	/// <param name="keep_dims"></param>
-	/// <returns></returns>
+	/// <returns>Reduced matrix (can be improved to deduce the returned dimension) </returns>
 	template<char Axis = -1> 
 	MATRICE_GLOBAL_INL auto sum(bool keep_dims = false) const {
 		if constexpr (Axis == -1) {
 			return reduce(begin(), end());
 		}
-		if constexpr (Axis == 0) {
+		if constexpr (Axis == 0) { // sum alone row
 			_Derived _Ret(shape_t<3>(1, m_shape.w, m_shape.d));
+			for (auto col = 0; col < _Ret.cols(); ++col) {
+				_Ret(col) = this->cview(col).sum();
+			}
 			return _Ret;
 		}
-		if constexpr (Axis == 1) {
+		if constexpr (Axis == 1) { // sum alone column
 			_Derived _Ret(shape_t<3>(m_shape.h, 1, m_shape.d));
+			for (auto row = 0; row < _Ret.rows(); ++row) {
+				_Ret(row) = this->rview(row).sum();
+			}
 			return _Ret;
 		}
-		if constexpr (Axis == 2) {
+		if constexpr (Axis == 2) { // reserved for tensor type
 			_Derived _Ret(shape_t<3>(m_shape.h, m_shape.w, 1));
 			return _Ret;
 		}
@@ -1171,11 +1177,11 @@ public:
 	}
 
 	/**
-	 *\brief set to the identity matrix
-	 *\param [_Size] _Size-by-_Size matrix
+	 *\brief Set the matrix as the identity
+	 *\param [size] size-x-size matrix, available only for dynamic matrix and ignored for a static one
 	 */
-	MATRICE_GLOBAL_INL _Derived& identity(diff_t _Size=0) noexcept {
-		if(empty) this->create(_Size, _Size, 0);
+	MATRICE_GLOBAL_INL _Derived& identity(diff_t size=0) noexcept {
+		if(empty) this->create(size, size, 0);
 		else this->operator= ((value_type)(0));
 		for (auto _Idx = 0; _Idx < rows(); ++_Idx)
 			this->operator[](_Idx)[_Idx] = one<value_type>;
@@ -1218,7 +1224,7 @@ public:
 	/**
 	 *\brief Create a diagonal square matrix
 	 *\param [_Val] diagonal element value, 
-	 *\param [_Size] matrix size, only specified for dynamic case
+	 *\param [_Size] matrix size, only available for dynamic case
 	 */
 	template<typename _Uy, MATRICE_ENABLE_IF(is_scalar_v<_Uy>)>
 	static MATRICE_GLOBAL_INL _Derived diag(_Uy _Val = 1, diff_t _Size = 0) {
