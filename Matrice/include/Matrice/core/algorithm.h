@@ -38,12 +38,12 @@ MATRICE_DEVICE_INL size_t _Argmax(_FwdIt _First, _FwdIt _Last) noexcept {
 
 template<class _Mty, typename _Cmp>
 requires is_matrix_v<_Mty> || is_expression_v<_Mty>
-MATRICE_HOST_INL auto _Argsort(const _Mty & _Arr, _Cmp && _Op) {
+MATRICE_HOST_INL auto _Argsort(const _Mty& _Arr, _Cmp&& _Op) {
 	Matrix_<size_t, _Arr.rows_at_compiletime, 1> _Ids(_Arr.rows());
 	for (auto _Idx = 0; _Idx < _Ids.rows(); ++_Idx) {
 		_Ids(_Idx) = _Idx;
 	}
-	MATRICE_USE_STD(stable_sort)(_Ids.begin(), _Ids.end(), _Op);
+	MATRICE_STD(stable_sort)(_Ids.begin(), _Ids.end(), _Op);
 	return _Ids;
 }
 _DETAIL_END
