@@ -966,14 +966,14 @@ public:
 			return reduce(begin(), end());
 		}
 		if constexpr (Axis == 0) { // sum alone row
-			_Derived _Ret(shape_t<3>(1, m_shape.w, m_shape.d));
+			Matrix_<value_t, 1, cols_at_compiletime> _Ret(shape_t<3>(1, m_shape.w, m_shape.d));
 			for (auto col = 0; col < _Ret.cols(); ++col) {
 				_Ret(col) = this->cview(col).sum();
 			}
 			return _Ret;
 		}
 		if constexpr (Axis == 1) { // sum alone column
-			_Derived _Ret(shape_t<3>(m_shape.h, 1, m_shape.d));
+			Matrix_<value_t, rows_at_compiletime, 1> _Ret(shape_t<3>(m_shape.h, 1, m_shape.d));
 			for (auto row = 0; row < _Ret.rows(); ++row) {
 				_Ret(row) = this->rview(row).sum();
 			}
