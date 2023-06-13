@@ -139,7 +139,7 @@ public:
 	 *\param '_Oth' another view input
 	 */
 	MATRICE_GLOBAL_FINL _Myt& operator=(const _Myt& _Oth)noexcept {
-		MATRICE_VIEW_EWISE_OP(_Oth(i));
+		MATRICE_VIEW_EWISE_OP(static_cast<const _Derived&>(_Oth)(i));
 	}
 	/**
 	 *\brief Fill view memory from a given pointer.
@@ -163,7 +163,7 @@ public:
 	 *\brief Fill view memory from a customer class type.
 	 *\param '_M' _M should have element accessor ::operator(i)
 	 */
-	template<typename _Mty, MATRICE_ENABLE_IF(is_class_v<_Mty>)>
+	template<typename _Mty>
 	MATRICE_GLOBAL_INL _Myt& operator=(const _Mty& _M)noexcept {
 		MATRICE_VIEW_EWISE_OP(_M(i));
 	}
