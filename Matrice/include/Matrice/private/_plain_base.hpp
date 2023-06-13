@@ -672,18 +672,33 @@ public:
 
 	// \View of submatrix: x \in [x0, x1) and y \in [y0, y1).
 	template<int _Extent>
-	MATRICE_GLOBAL_INL auto block(index_t start, size_t num) {
+	MATRICE_GLOBAL_INL auto block(index_t start, index_t last) const {
 		if constexpr (_Extent == ::extent_x) {
 #ifdef MATRICE_DEBUG
-		DGELOM_CHECK(start + num - 1 <= m_rows, "Over range in the row direction.");
+		DGELOM_CHECK(last <= m_rows, "Over range in the row direction.");
 #endif
-		return this->block(0, m_cols, start, start + num);
+		return this->block(0, m_cols, start, last);
 		}
 		if constexpr (_Extent == ::extent_y) {
 #ifdef MATRICE_DEBUG
-		DGELOM_CHECK(start + num - 1 <= m_cols, "Over range in the col direction.");
+		DGELOM_CHECK(last <= m_cols, "Over range in the col direction.");
 #endif
-		return this->block(start, start + num, 0, m_rows);
+		return this->block(start, last, 0, m_rows);
+		}
+	}
+	template<int _Extent>
+	MATRICE_GLOBAL_INL auto block(index_t start, index_t last) {
+		if constexpr (_Extent == ::extent_x) {
+#ifdef MATRICE_DEBUG
+			DGELOM_CHECK(last <= m_rows, "Over range in the row direction.");
+#endif
+			return this->block(0, m_cols, start, last);
+		}
+		if constexpr (_Extent == ::extent_y) {
+#ifdef MATRICE_DEBUG
+			DGELOM_CHECK(last <= m_cols, "Over range in the col direction.");
+#endif
+			return this->block(start, last, 0, m_rows);
 		}
 	}
 
