@@ -292,9 +292,11 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 			rows_at_compiletime = myt_traits::rows, 
 			cols_at_compiletime = myt_traits::cols};
 
-		MATRICE_GLOBAL_FINL Base_() {}
-		MATRICE_GLOBAL_FINL Base_(const shape_t<3>& _Shape) 
-			: Shape(_Shape), M(_Shape.rows()), N(_Shape.cols()) {}
+		MATRICE_GLOBAL_FINL Base_() noexcept {
+		}
+		MATRICE_GLOBAL_FINL Base_(const shape_t<3>& _Shape) noexcept
+			: Shape(_Shape), M(_Shape.rows()), N(_Shape.cols()) {
+		}
 
 		/**
 		 * \method Base_<_Op>::eval()
@@ -533,8 +535,9 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 		using category = category_type_t<_BinaryOp>;
 		enum { options = option<ewise>::value };
 
-		MATRICE_GLOBAL_INL EwiseBinaryExp(const T _scalar, const U& _rhs)
-			noexcept :_Mybase(_rhs.shape()), _Scalar(_scalar), _RHS(_rhs) {}
+		MATRICE_GLOBAL_INL EwiseBinaryExp(const T _scalar, const U& _rhs) noexcept 
+			:_Mybase(_rhs.shape()), _Scalar(_scalar), _RHS(_rhs) {
+		}
 
 		/*MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) {
 			return _Op(_Scalar, _RHS(_idx));
@@ -1008,6 +1011,34 @@ MATRICE_GLOBAL_FINL auto sym(const _Ty& _x) noexcept {
 template<typename _Ty>
 MATRICE_GLOBAL_FINL auto skew(const _Ty& _x) noexcept {
 	return (_x - transpose(_x)) * _Ty::value_t(0.5);
+}
+
+// *\Expression of summation along a specified axis
+template<axis _Ax, typename _Exp>
+requires is_expression_v<_Exp> MATRICE_GLOBAL_FINL auto sum(_Exp&& _exp) {
+	if constexpr(_Ax == axis::y) {
+		auto _Ret = detail::Matrix_<_Exp::value_t, 1, _Exp::cols_at_compiletime>(_exp.cols());
+		for (auto cidx = 0; cidx < _exp.cols(); ++cidx) {
+			_Ret(cidx) = 0;
+			for (auto ridx = 0; ridx < _exp.rows(); ++ridx) {
+				_Ret(cidx) += _exp(cidx, ridx);
+			}
+		}
+		return _Ret;
+	}
+	else if constexpr(_Ax == axis::x) {
+		auto _Ret = detail::Matrix_<_Exp::value_t, _Exp::rows_at_compiletime, 1>(_exp.cols());;
+		for (auto ridx = 0; ridx < _exp.rows(); ++ridx) {
+			_Ret(ridx) = 0;
+			for (auto cidx = 0; cidx < _exp.cols(); ++cidx) {
+				_Ret(cidx) += _exp(cidx, ridx);
+			}
+		}
+		return _Ret;
+	}
+	else /*constexpr(_Ax == axis::all)*/ {
+		return detail::Matrix_<_Exp::value_type, 1, 1>(_exp.sum());
+	}
 }
 
 #ifdef _MSC_VER
