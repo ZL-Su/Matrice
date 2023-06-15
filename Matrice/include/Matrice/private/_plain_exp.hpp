@@ -1027,17 +1027,19 @@ requires is_expression_v<_Exp> MATRICE_GLOBAL_FINL auto sum(_Exp&& _exp) {
 		return _Ret;
 	}
 	else if constexpr(_Ax == axis::x) {
-		auto _Ret = detail::Matrix_<_Exp::value_t, _Exp::rows_at_compiletime, 1>(_exp.cols());;
+		auto _Ret = detail::Matrix_<_Exp::value_t, _Exp::rows_at_compiletime, 1>(_exp.rows());;
 		for (auto ridx = 0; ridx < _exp.rows(); ++ridx) {
 			_Ret(ridx) = 0;
 			for (auto cidx = 0; cidx < _exp.cols(); ++cidx) {
-				_Ret(cidx) += _exp(cidx, ridx);
+				_Ret(ridx) += _exp(cidx, ridx);
 			}
 		}
 		return _Ret;
 	}
 	else /*constexpr(_Ax == axis::all)*/ {
-		return detail::Matrix_<_Exp::value_type, 1, 1>(_exp.sum());
+		auto _Ret = detail::Matrix_<_Exp::value_type, 1, 1>();
+		_Ret(0) = _exp.sum();
+		return _Ret;
 	}
 }
 
