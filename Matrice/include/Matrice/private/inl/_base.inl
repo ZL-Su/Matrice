@@ -158,4 +158,40 @@ MATRICE_HOST_INL void swap(_Mty& _L, _Mty& _R) noexcept
 	_L = move(_R);
 	_R = move(_Tmp);
 }
+
+/**
+ *\func dgelom::stack<_Axis>(initlist<const _Mty&>)
+ *\brief Stack a matrix or vector list to make a new matrix.
+ *\param list Argument holds the given matrix or vector list with std::initializer_list
+ */
+template<axis _Axis, typename _Mty, typename>
+MATRICE_HOST_FINL auto stack(const initlist<_Mty>& list)
+{
+	// Stack along the row dimension
+	if constexpr(_Axis == axis::y) {
+		static constexpr auto ctcols = _Mty::cols_at_compiletime;
+		const auto rows = list.size() * list.begin()->rows();
+		const auto cols = list.begin()->cols();
+		auto _Ret = detail::Matrix_<_Mty::value_type, ::dynamic, ctcols>(rows, cols);
+		auto off = size_t(0);
+		for (auto _It = list.begin(); _It != list.end(); ++_It) {
+			_Ret.block<0>(off, off+_It->rows()) = *_It;
+			off += _It->rows();
+		}
+		return _Ret;
+	}
+	// Stack along the column dimension
+	if constexpr(_Axis == axis::x) {
+		static constexpr auto ctrows = _Mty::rows_at_compiletime;
+		const auto cols = list.size() * list.begin()->cols();
+		const auto rows = list.begin()->rows();
+		auto _Ret = detail::Matrix_<_Mty::value_type, ctrows, ::dynamic>(rows, cols);
+		auto off = size_t(0);
+		for (auto _It = list.begin(); _It != list.end(); ++_It) {
+			_Ret.block<1>(off, off+_It->cols()) = *_It;
+			off += _It->cols();
+		}
+		return _Ret;
+	}
+}
 DGE_MATRICE_END
