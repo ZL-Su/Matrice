@@ -964,7 +964,7 @@ public:
 		return (reduce(begin(), end())); 
 	}
 	MATRICE_GLOBAL_FINL auto(det)() const { 
-		return (det_impl(*static_cast<const _Derived*>(this))); 
+		return (internal::det_impl(*static_cast<const _Derived*>(this)));
 	}
 	MATRICE_GLOBAL_FINL auto(trace)()const noexcept {
 		return (reduce(begin().stride(cols()+1), end().stride(cols()+1), 1));
