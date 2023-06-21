@@ -18,7 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "core/matrix.h"
 
 DGE_MATRICE_BEGIN
-
+_INTERNAL_BEGIN
 template<typename _Rhs, typename value_t> 
 value_t det_impl(const _Rhs & a) {
 	const int N = a.rows(); const auto p = a.data();
@@ -40,5 +40,5 @@ template float det_impl(const detail::Matrix_<float, 0, 0>&);
 template double det_impl(const detail::Matrix_<double, 2, 2>&);
 template double det_impl(const detail::Matrix_<double, 3, 3>&);
 template double det_impl(const detail::Matrix_<double, 0, 0>&);
-
+_INTERNAL_END
 DGE_MATRICE_END
