@@ -334,7 +334,7 @@ public:
      *\param '_Skips' indicates how many lines to skip over.
 	 */
 	template<typename _Ty>
-	static MATRICE_HOST_INL auto read(std::string&& _Path, size_t _Skips = 0) {
+	static MATRICE_HOST_INL auto read(std::string&& _Path, size_t _Skips = 0, char _Sep=',') {
 		using value_type = _Ty;
 		DGELOM_CHECK(fs::exists(fs::path(_Path)), 
 			"'" + _Path + "' does not exist!");
@@ -349,7 +349,7 @@ public:
 		std::vector<std::vector<value_type>> _Data;
 		while (std::getline(_Fin, _Line)) {
 			if(!_Line.empty())
-				_Data.push_back(split<value_type>(_Line, ','));
+				_Data.push_back(split<value_type>(_Line, _Sep));
 		}
 
 		Matrix<value_type> _Res(_Data.size(),_Data.front().size());
