@@ -41,6 +41,10 @@ int corr_optimer_eng(fs::path&& apath, auto dfolder, auto val)
 try {
 	///\brief Attach image file info to a data loader (tiff herein).
 	const auto path = apath.append(dfolder);
+	if (!fs::exists(path) || fs::is_empty(path)) {
+		std::cout << " >> [Matrice message] Invalid file path: " << path<<"\n";
+		return 0;
+	}
 	auto image_loader = dgelom::make_loader(path,
 		dgelom::io::tiff<raw_image_t::value_t>());
 
@@ -56,8 +60,8 @@ try {
 		subsize, cols - subsize, 2);
 	/*const */auto y_space = dgelom::make_linspace(
 		subsize, rows - subsize, 2);
-	x_space(0) = 933, x_space(1) = 1523;
-	y_space(0) = 915, y_space(1) = 921;
+	/*x_space(0) = 933, x_space(1) = 1523;
+	y_space(0) = 915, y_space(1) = 921;*/
 	auto disp_x = corr_optim_t::matrix_type(x_space.size()*y_space.size()*2, image_loader.depth(), 0.);
 	auto error = dgelom::Matrix_<float, ::dynamic, 2>(image_loader.depth());
 
