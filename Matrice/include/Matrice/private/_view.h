@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2023, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -247,6 +247,8 @@ public:
 		return forward<decltype(_Ret)>(_Ret);
 	}
 };
+template<typename _Ty, int _Cols>
+struct is_mtxview<_Matrix_rview<_Ty, _Cols>> : MATRICE_STD(true_type) {};
 
 /**********************************************************************
 						     Column view for Matrix 
@@ -289,6 +291,8 @@ public:
 		return forward<decltype(_Ret)>(_Ret);
 	}
 };
+template<typename _Ty, int _Rows>
+struct is_mtxview<_Matrix_cview<_Ty, _Rows>> : MATRICE_STD(true_type) {};
 
 /**********************************************************************
 						      Block view for Matrix 
@@ -362,6 +366,8 @@ private:
 	pointer _Myorigin;
 	range_type _Myrange;
 };
+template<typename _Ty>
+struct is_mtxview<_Matrix_block<_Ty>> : MATRICE_STD(true_type) {};
 
 /**********************************************************************
 								Tensor CHW view
