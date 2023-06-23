@@ -1,6 +1,6 @@
 /**********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2023, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -405,6 +405,22 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 		}
 			return (_Ret);
 		}
+
+		/**
+		 * \L2 norm of the vectorizable expression: \sqrt(x_0^2+x_1^2+...+x_n^2)
+		 */
+		MATRICE_GLOBAL_INL auto norm() const noexcept {
+			auto _Ret = value_t(0); 
+			int _Size = derived_pointer(this)->size();
+#pragma omp parallel if(_Size > 1000)
+		{
+#pragma omp for reduction(+:_Ret)
+			for (int i = 0; i < _Size; ++i) 
+				_Ret += sq(derived_pointer(this)->operator()(i));
+		}
+			return sqrt(_Ret);
+		}
+
 		/**
 		 * \average of all entries
 		 */
