@@ -1447,7 +1447,7 @@ MATRICE_HOST_INL _Mty copy(const _Mty& _M);
  *\brief Stack a matrix or vector list to make a new matrix.
  *\param list Argument holds the given matrix or vector list with std::initializer_list
  */
-template<axis _Axis, typename _Mty, MATRICE_ENABLE_IF(is_matrix_v<_Mty> || is_fxdvector_v<_Mty>)>
+template<axis _Axis, typename _Mty, MATRICE_ENABLE_IF(is_matrix_convertible_v<_Mty>)>
 MATRICE_HOST_FINL auto stack(const initlist<_Mty>& list);
 
 DGE_MATRICE_END
