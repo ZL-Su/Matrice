@@ -29,7 +29,7 @@ namespace example {
 	// Alias of SIMD type.
 	using packet_t = simd::Packet_<float>;
 
-	index_t packed_size = packet_t::size;
+	constexpr index_t packed_size = packet_t::size;
 
 	packet_t add(const packet_t& _Left, const packet_t _Right) {
 		return _Left + _Right;
