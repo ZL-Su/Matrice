@@ -229,7 +229,7 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 			using category = tag::_Matrix_mul_tag;
 			using value_type = _Ty;
 #ifdef MATRICE_SIMD_ARCH
-			using packet_type = simd::Packet_<value_type, packet_size_v>;
+			using packet_type = simd::Packet_<value_type>;
 #endif
 
 			template<typename _Rhs> MATRICE_GLOBAL_FINL
@@ -415,8 +415,10 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 #pragma omp parallel if(_Size > 1000)
 		{
 #pragma omp for reduction(+:_Ret)
-			for (int i = 0; i < _Size; ++i) 
-				_Ret += sq(derived_pointer(this)->operator()(i));
+				for (int i = 0; i < _Size; ++i) {
+					const auto _Val = derived_pointer(this)->operator()(i);
+					_Ret += _Val * _Val;
+			}
 		}
 			return sqrt(_Ret);
 		}
