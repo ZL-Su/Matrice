@@ -1,6 +1,6 @@
 /***************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library for SC.
-Copyright(C) 2018-2021, Zhilong (Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2023, Zhilong (Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the Free
@@ -41,8 +41,15 @@ enum {
 	ltri = 108,
 	spar = 109,
 };
-enum { SOBEL = 0, BSPL3 = 3, BSPL5 = 5, BSPL7 = 7 };
-enum class axis {all = 0x00, x = 0x01, y = 0x02, z = 0x03 };
+enum { SOBEL = 0x00, BSPL3 = 0x03, BSPL5 = 0x05, BSPL7 = 0x07 };
+
+/**
+ * \enum type for axis tag
+ * aixs::y for axis along row dimension
+ * axis::x for axis along column dimension
+ * modified on Jun/14/2023
+ */
+enum class axis {all = 0x03, x = 0x01, y = 0x00, z = 0x02 };
 
 /**
  * \enum type for matrix transpose tag

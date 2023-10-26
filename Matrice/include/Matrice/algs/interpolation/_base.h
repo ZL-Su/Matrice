@@ -87,9 +87,8 @@ template<typename _Tag> struct require_coeff_lut {
 // \Interpolation auto dispatching
 template<typename _Ty, typename _Tag> 
 struct auto_interp_dispatcher {
-	using type = conditional_t<is_same_v<_Tag, bilerp_tag>, 
-		_Bilinear_interpolation<_Ty>, 
-		_Spline_interpolation<_Ty, _Tag>>;
+	using type = conditional_t<is_same_v<_Tag, bilerp_tag>, _Bilinear_interpolation<_Ty>, 
+		conditional_t<is_same_v<_Tag, cubconerp_tag>, _Cubic_conv_interpolation<_Ty>, _Spline_interpolation<_Ty, _Tag>>>;
 };
 template<typename _Ty = float, typename _Tag = bicerp_tag>
 using auto_interp_dispatcher_t = typename auto_interp_dispatcher<_Ty, _Tag>::type;

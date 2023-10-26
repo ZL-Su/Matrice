@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2023, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -35,5 +35,27 @@ MATRICE_DEVICE_INL size_t _Argmax(_FwdIt _First, _FwdIt _Last) noexcept {
 	}
 	return (_Max - _First);
 }
+
+template<class _Mty, typename _Cmp>
+requires is_matrix_v<_Mty> || is_expression_v<_Mty>
+MATRICE_HOST_INL auto _Argsort(const _Mty& _Arr, _Cmp&& _Op) {
+	Matrix_<size_t, ::dynamic> _Ids(_Arr.shape());
+	for (auto _Idx = 0; _Idx < _Ids.size(); ++_Idx) {
+		_Ids(_Idx) = _Idx;
+	}
+	MATRICE_STD(stable_sort)(_Ids.begin(), _Ids.end(), _Op);
+	return _Ids;
+}
 _DETAIL_END
+
+template<typename... Args>
+/**
+ * \brief Sort an array by tracking the element index.
+ * \param Args... Argpack of a `dgelom::Matrix` and a user defined comparator. 
+          See `detail::_Argsort` for more details.
+ * \returns Sorted indices in a linear `dgelom::Matrix`.
+ */
+MATRICE_HOST_FINL auto argsort(Args&&... _Args) noexcept {
+	return detail::_Argsort(_Args...);
+}
 DGE_MATRICE_END

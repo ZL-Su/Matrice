@@ -1,6 +1,6 @@
 /*********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2020, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2023, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -28,11 +28,12 @@ MATRICE_ARCH_BEGIN
  *\param <T> must be a scalar type
  *\param <_Elems> the number of packet elements, which default value is auto-deduced
 </brief>*/
-template<typename T, int _Elems = packet_size_v<T>>
-class Packet_ MATRICE_NONHERITABLE : public simd::simd_base_<T, _Elems>
+template<typename T>
+class Packet_ MATRICE_NONHERITABLE 
+	: public simd::simd_base_<T, packet_size_v<T>>
 {
 	using Myt = Packet_;
-	using _Mybase = simd::simd_base_<T, _Elems>;
+	using _Mybase = simd::simd_base_<T, packet_size_v<T>>;
 	using typename _Mybase::initlist_t;
 	using typename _Mybase::internal_t;
 	using typename _Mybase::op_t;
@@ -64,53 +65,53 @@ public:
 	MATRICE_HOST_FINL Myt& operator/ (const Packet_& _other);
 	MATRICE_HOST_FINL Myt  abs() const;
 
-	template<typename T, int _Elems, typename Packet> friend
-	MATRICE_HOST_FINL Packet abs(const Packet_<T, _Elems>& _Right);
-	template<typename T, int _Elems, typename> friend
-	MATRICE_HOST_FINL T reduce(const Packet_<T, _Elems>& _Right);
+	template<typename T, typename Packet> friend
+	MATRICE_HOST_FINL Packet abs(const Packet_<T>& _Right);
+	template<typename T, typename> friend
+	MATRICE_HOST_FINL T reduce(const Packet_<T>& _Right);
 };
 
 #pragma region <!-- operators -->
-template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>>
-MATRICE_HOST_FINL Packet operator+ (const Packet_<T, _Elems>& _Left, const Packet_<T, _Elems>& _Right);
-template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>>
-MATRICE_HOST_FINL Packet operator- (const Packet_<T, _Elems>& _Left, const Packet_<T, _Elems>& _Right);
-template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>>
-MATRICE_HOST_FINL Packet operator* (const Packet_<T, _Elems>& _Left, const Packet_<T, _Elems>& _Right);
-template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>>
-MATRICE_HOST_FINL Packet operator/ (const Packet_<T, _Elems>& _Left, const Packet_<T, _Elems>& _Right);
-template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>>
-MATRICE_HOST_FINL Packet operator+ (const Packet_<T, _Elems>& _Left, T _Right);
-template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>>
-MATRICE_HOST_FINL Packet operator- (const Packet_<T, _Elems>& _Left, T _Right);
-template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>>
-MATRICE_HOST_FINL Packet operator* (const Packet_<T, _Elems>& _Left, T _Right);
-template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>>
-MATRICE_HOST_FINL Packet operator/ (const Packet_<T, _Elems>& _Left, T _Right);
-template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>>
-MATRICE_HOST_FINL Packet operator+ (T _Left, const Packet_<T, _Elems>& _Right);
-template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>>
-MATRICE_HOST_FINL Packet operator- (T _Left, const Packet_<T, _Elems>& _Right);
-template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>>
-MATRICE_HOST_FINL Packet operator* (T _Left, const Packet_<T, _Elems>& _Right);
-template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>>
-MATRICE_HOST_FINL Packet operator/ (T _Left, const Packet_<T, _Elems>& _Right);
-template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>>
-MATRICE_HOST_FINL Packet operator+ (const Packet_<T, _Elems>& _Left, T* _Right);
-template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>>
-MATRICE_HOST_FINL Packet operator- (const Packet_<T, _Elems>& _Left, T* _Right);
-template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>>
-MATRICE_HOST_FINL Packet operator* (const Packet_<T, _Elems>& _Left, T* _Right);
-template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>>
-MATRICE_HOST_FINL Packet operator/ (const Packet_<T, _Elems>& _Left, T* _Right);
-template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>>
-MATRICE_HOST_FINL Packet operator+ (T* _Left, const Packet_<T, _Elems>& _Right);
-template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>>
-MATRICE_HOST_FINL Packet operator- (T* _Left, const Packet_<T, _Elems>& _Right);
-template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>>
-MATRICE_HOST_FINL Packet operator* (T* _Left, const Packet_<T, _Elems>& _Right);
-template<typename T, int _Elems, typename Packet = Packet_<T, _Elems>>
-MATRICE_HOST_FINL Packet operator/ (T* _Left, const Packet_<T, _Elems>& _Right);
+template<typename T, typename Packet = Packet_<T>>
+MATRICE_HOST_FINL Packet operator+ (const Packet_<T>& _Left, const Packet_<T>& _Right);
+template<typename T, typename Packet = Packet_<T>>
+MATRICE_HOST_FINL Packet operator- (const Packet_<T>& _Left, const Packet_<T>& _Right);
+template<typename T, typename Packet = Packet_<T>>
+MATRICE_HOST_FINL Packet operator* (const Packet_<T>& _Left, const Packet_<T>& _Right);
+template<typename T, typename Packet = Packet_<T>>
+MATRICE_HOST_FINL Packet operator/ (const Packet_<T>& _Left, const Packet_<T>& _Right);
+template<typename T, typename Packet = Packet_<T>>
+MATRICE_HOST_FINL Packet operator+ (const Packet_<T>& _Left, T _Right);
+template<typename T, typename Packet = Packet_<T>>
+MATRICE_HOST_FINL Packet operator- (const Packet_<T>& _Left, T _Right);
+template<typename T, typename Packet = Packet_<T>>
+MATRICE_HOST_FINL Packet operator* (const Packet_<T>& _Left, T _Right);
+template<typename T, typename Packet = Packet_<T>>
+MATRICE_HOST_FINL Packet operator/ (const Packet_<T>& _Left, T _Right);
+template<typename T, typename Packet = Packet_<T>>
+MATRICE_HOST_FINL Packet operator+ (T _Left, const Packet_<T>& _Right);
+template<typename T, typename Packet = Packet_<T>>
+MATRICE_HOST_FINL Packet operator- (T _Left, const Packet_<T>& _Right);
+template<typename T, typename Packet = Packet_<T>>
+MATRICE_HOST_FINL Packet operator* (T _Left, const Packet_<T>& _Right);
+template<typename T, typename Packet = Packet_<T>>
+MATRICE_HOST_FINL Packet operator/ (T _Left, const Packet_<T>& _Right);
+template<typename T, typename Packet = Packet_<T>>
+MATRICE_HOST_FINL Packet operator+ (const Packet_<T>& _Left, T* _Right);
+template<typename T, typename Packet = Packet_<T>>
+MATRICE_HOST_FINL Packet operator- (const Packet_<T>& _Left, T* _Right);
+template<typename T, typename Packet = Packet_<T>>
+MATRICE_HOST_FINL Packet operator* (const Packet_<T>& _Left, T* _Right);
+template<typename T, typename Packet = Packet_<T>>
+MATRICE_HOST_FINL Packet operator/ (const Packet_<T>& _Left, T* _Right);
+template<typename T, typename Packet = Packet_<T>>
+MATRICE_HOST_FINL Packet operator+ (T* _Left, const Packet_<T>& _Right);
+template<typename T, typename Packet = Packet_<T>>
+MATRICE_HOST_FINL Packet operator- (T* _Left, const Packet_<T>& _Right);
+template<typename T, typename Packet = Packet_<T>>
+MATRICE_HOST_FINL Packet operator* (T* _Left, const Packet_<T>& _Right);
+template<typename T, typename Packet = Packet_<T>>
+MATRICE_HOST_FINL Packet operator/ (T* _Left, const Packet_<T>& _Right);
 #pragma endregion
 
 MATRICE_ARCH_END

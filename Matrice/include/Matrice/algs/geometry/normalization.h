@@ -29,9 +29,9 @@ template<typename _Data_type,
 class normalization MATRICE_NONHERITABLE
 {
 	using data_t = _Data_type;
-#ifdef MATRICE_SIMD_ARCH
-	using packet_t = simd::Packet_<value_t, 4>;
-#endif
+//#ifdef MATRICE_SIMD_ARCH
+//	using packet_t = simd::Packet_<value_t, 4>;
+//#endif
 public:
 	MATRICE_HOST_INL normalization(const data_t& _Data) : m_data(_Data) {}
 
@@ -47,10 +47,13 @@ public:
 
 		auto _Mx = m_params(0), _My = m_params(2);
 		auto _Sx = sqrt(2/m_params(1)), _Sy = sqrt(2/m_params(3));
-
 		const auto _Size = m_data.cols();
-		std::transform(m_data[0], m_data[0] + _Size, _Data[0], [&](auto _X)->value_t { return (_Sx*(_X - _Mx)); });
-		std::transform(m_data[1], m_data[1] + _Size, _Data[1], [&](auto _Y)->value_t { return (_Sy*(_Y - _My)); });
+		MATRICE_STD(transform)(m_data[0], m_data[0] + _Size, _Data[0], [&](auto _X){ 
+			return (_Sx*(_X - _Mx)); 
+			});
+		MATRICE_STD(transform)(m_data[1], m_data[1] + _Size, _Data[1], [&](auto _Y){
+			return (_Sy*(_Y - _My)); 
+			});
 	}
 private:
 	const data_t& m_data;

@@ -1,6 +1,6 @@
 /**********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2023, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -673,18 +673,33 @@ public:
 
 	// \View of submatrix: x \in [x0, x1) and y \in [y0, y1).
 	template<int _Extent>
-	MATRICE_GLOBAL_INL auto block(index_t start, size_t num) {
+	MATRICE_GLOBAL_INL auto block(index_t start, index_t last) const {
 		if constexpr (_Extent == ::extent_x) {
 #ifdef MATRICE_DEBUG
-		DGELOM_CHECK(start + num - 1 <= m_rows, "Over range in the row direction.");
+		DGELOM_CHECK(last <= m_rows, "Over range in the row direction.");
 #endif
-		return this->block(0, m_cols, start, start + num);
+		return this->block(0, m_cols, start, last);
 		}
 		if constexpr (_Extent == ::extent_y) {
 #ifdef MATRICE_DEBUG
-		DGELOM_CHECK(start + num - 1 <= m_cols, "Over range in the col direction.");
+		DGELOM_CHECK(last <= m_cols, "Over range in the col direction.");
 #endif
-		return this->block(start, start + num, 0, m_rows);
+		return this->block(start, last, 0, m_rows);
+		}
+	}
+	template<int _Extent>
+	MATRICE_GLOBAL_INL auto block(index_t start, index_t last) {
+		if constexpr (_Extent == ::extent_x) {
+#ifdef MATRICE_DEBUG
+			DGELOM_CHECK(last <= m_rows, "Over range in the row direction.");
+#endif
+			return this->block(0, m_cols, start, last);
+		}
+		if constexpr (_Extent == ::extent_y) {
+#ifdef MATRICE_DEBUG
+			DGELOM_CHECK(last <= m_cols, "Over range in the col direction.");
+#endif
+			return this->block(start, last, 0, m_rows);
 		}
 	}
 
@@ -950,7 +965,7 @@ public:
 		return (reduce(begin(), end())); 
 	}
 	MATRICE_GLOBAL_FINL auto(det)() const { 
-		return (det_impl(*static_cast<const _Derived*>(this))); 
+		return (internal::det_impl(*static_cast<const _Derived*>(this)));
 	}
 	MATRICE_GLOBAL_FINL auto(trace)()const noexcept {
 		return (reduce(begin().stride(cols()+1), end().stride(cols()+1), 1));
@@ -960,21 +975,27 @@ public:
 	/// \brief Reduction along a given axis.
 	/// </summary>
 	/// <param name="keep_dims"></param>
-	/// <returns></returns>
+	/// <returns>Reduced matrix (can be improved to deduce the returned dimension) </returns>
 	template<char Axis = -1> 
 	MATRICE_GLOBAL_INL auto sum(bool keep_dims = false) const {
 		if constexpr (Axis == -1) {
 			return reduce(begin(), end());
 		}
-		if constexpr (Axis == 0) {
-			_Derived _Ret(shape_t<3>(1, m_shape.w, m_shape.d));
+		if constexpr (Axis == 0) { // sum alone row
+			Matrix_<value_t, 1, cols_at_compiletime> _Ret(shape_t<3>(1, m_shape.w, m_shape.d));
+			for (auto col = 0; col < _Ret.cols(); ++col) {
+				_Ret(col) = this->cview(col).sum();
+			}
 			return _Ret;
 		}
-		if constexpr (Axis == 1) {
-			_Derived _Ret(shape_t<3>(m_shape.h, 1, m_shape.d));
+		if constexpr (Axis == 1) { // sum alone column
+			Matrix_<value_t, rows_at_compiletime, 1> _Ret(shape_t<3>(m_shape.h, 1, m_shape.d));
+			for (auto row = 0; row < _Ret.rows(); ++row) {
+				_Ret(row) = this->rview(row).sum();
+			}
 			return _Ret;
 		}
-		if constexpr (Axis == 2) {
+		if constexpr (Axis == 2) { // reserved for tensor type
 			_Derived _Ret(shape_t<3>(m_shape.h, m_shape.w, 1));
 			return _Ret;
 		}
@@ -1183,11 +1204,11 @@ public:
 	}
 
 	/**
-	 *\brief set to the identity matrix
-	 *\param [_Size] _Size-by-_Size matrix
+	 *\brief Set the matrix as the identity
+	 *\param [size] size-x-size matrix, available only for dynamic matrix and ignored for a static one
 	 */
-	MATRICE_GLOBAL_INL _Derived& identity(diff_t _Size=0) noexcept {
-		if(empty) this->create(_Size, _Size, 0);
+	MATRICE_GLOBAL_INL _Derived& identity(diff_t size=0) noexcept {
+		if(empty) this->create(size, size, 0);
 		else this->operator= ((value_type)(0));
 		for (auto _Idx = 0; _Idx < rows(); ++_Idx)
 			this->operator[](_Idx)[_Idx] = one<value_type>;
@@ -1230,7 +1251,7 @@ public:
 	/**
 	 *\brief Create a diagonal square matrix
 	 *\param [_Val] diagonal element value, 
-	 *\param [_Size] matrix size, only specified for dynamic case
+	 *\param [_Size] matrix size, only available for dynamic case
 	 */
 	template<typename _Uy, MATRICE_ENABLE_IF(is_scalar_v<_Uy>)>
 	static MATRICE_GLOBAL_INL _Derived diag(_Uy _Val = 1, diff_t _Size = 0) {
@@ -1432,6 +1453,14 @@ MATRICE_HOST_INL void swap(_Mty& _L, _Mty& _R) noexcept;
  */
 template<typename _Mty, MATRICE_ENABLE_IF(is_matrix_v<_Mty>)>
 MATRICE_HOST_INL _Mty copy(const _Mty& _M);
+
+/**
+ *\func dgelom::stack<_Axis>(initlist<const _Mty&>)
+ *\brief Stack a matrix or vector list to make a new matrix.
+ *\param list Argument holds the given matrix or vector list with std::initializer_list
+ */
+template<axis _Axis, typename _Mty, MATRICE_ENABLE_IF(is_matrix_convertible_v<_Mty>)>
+MATRICE_HOST_FINL auto stack(const initlist<_Mty>& list);
 
 DGE_MATRICE_END
 

@@ -93,7 +93,7 @@ private:
 
 #ifdef MATRICE_SIMD_ARCH
 template<typename _Ty> struct _Avxmat4_ {
-	using type = simd::Packet_<_Ty, 4>;
+	using type = simd::Packet_<_Ty>;
 	using iterator = typename type::pointer;
 	MATRICE_HOST_INL _Avxmat4_(const iterator _Data)
 		:_pa(_Data),

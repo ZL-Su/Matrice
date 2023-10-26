@@ -1,6 +1,6 @@
 /**********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2022, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2023, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -229,7 +229,7 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 			using category = tag::_Matrix_mul_tag;
 			using value_type = _Ty;
 #ifdef MATRICE_SIMD_ARCH
-			using packet_type = simd::Packet_<value_type, packet_size_v>;
+			using packet_type = simd::Packet_<value_type>;
 #endif
 
 			template<typename _Rhs> MATRICE_GLOBAL_FINL
@@ -294,10 +294,10 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 			rows_at_compiletime = traits_t::rows, 
 			cols_at_compiletime = traits_t::cols};
 
-		MATRICE_GLOBAL_FINL Base_() {}
-		MATRICE_GLOBAL_FINL Base_(const shape_t<3>& _Shape) 
-			: Shape(_Shape) {
-			M = (Shape.rows()), N = (Shape.cols());
+		MATRICE_GLOBAL_FINL Base_() noexcept {
+		}
+		MATRICE_GLOBAL_FINL Base_(const shape_t<3>& _Shape) noexcept
+			: Shape(_Shape), M(_Shape.rows()), N(_Shape.cols()) {
 #ifdef MATRICE_DEBUG
 			DGELOM_CHECK(M != 0, "Input rows in Base_<_Op> is zero!");
 			DGELOM_CHECK(N != 0, "Input cols in Base_<_Op> is zero!");
@@ -413,6 +413,24 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 		}
 			return (_Ret);
 		}
+
+		/**
+		 * \L2 norm of the vectorizable expression: \sqrt(x_0^2+x_1^2+...+x_n^2)
+		 */
+		MATRICE_GLOBAL_INL auto norm() const noexcept {
+			auto _Ret = value_t(0); 
+			int _Size = derived_pointer(this)->size();
+#pragma omp parallel if(_Size > 1000)
+		{
+#pragma omp for reduction(+:_Ret)
+				for (int i = 0; i < _Size; ++i) {
+					const auto _Val = derived_pointer(this)->operator()(i);
+					_Ret += _Val * _Val;
+			}
+		}
+			return sqrt(_Ret);
+		}
+
 		/**
 		 * \average of all entries
 		 */
@@ -554,8 +572,9 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 		using category = category_type_t<_BinaryOp>;
 		enum { options = option<ewise>::value };
 
-		MATRICE_GLOBAL_INL EwiseBinaryExp(const T _scalar, const U& _rhs)
-			noexcept :_Mybase(_rhs.shape()), _Scalar(_scalar), _RHS(_rhs) {}
+		MATRICE_GLOBAL_INL EwiseBinaryExp(const T _scalar, const U& _rhs) noexcept 
+			:_Mybase(_rhs.shape()), _Scalar(_scalar), _RHS(_rhs) {
+		}
 
 		MATRICE_GLOBAL_FINL auto eval() const noexcept {
 			return _Mybase::eval();
@@ -1078,6 +1097,36 @@ MATRICE_GLOBAL_FINL auto skew(const _Ty& _x) noexcept {
 	return (_x - transpose(_x)) * _Ty::value_t(0.5);
 }
 
+// *\Expression of summation along a specified axis
+template<axis _Ax, typename _Exp>
+requires is_expression_v<_Exp> MATRICE_GLOBAL_FINL auto sum(_Exp&& _exp) {
+	if constexpr(_Ax == axis::y) {
+		auto _Ret = detail::Matrix_<_Exp::value_t, 1, _Exp::cols_at_compiletime>(_exp.cols());
+		for (auto cidx = 0; cidx < _exp.cols(); ++cidx) {
+			_Ret(cidx) = 0;
+			for (auto ridx = 0; ridx < _exp.rows(); ++ridx) {
+				_Ret(cidx) += _exp(cidx, ridx);
+			}
+		}
+		return _Ret;
+	}
+	else if constexpr(_Ax == axis::x) {
+		auto _Ret = detail::Matrix_<_Exp::value_t, _Exp::rows_at_compiletime, 1>(_exp.rows());;
+		for (auto ridx = 0; ridx < _exp.rows(); ++ridx) {
+			_Ret(ridx) = 0;
+			for (auto cidx = 0; cidx < _exp.cols(); ++cidx) {
+				_Ret(ridx) += _exp(cidx, ridx);
+			}
+		}
+		return _Ret;
+	}
+	else /*constexpr(_Ax == axis::all)*/ {
+		auto _Ret = detail::Matrix_<_Exp::value_type, 1, 1>();
+		_Ret(0) = _exp.sum();
+		return _Ret;
+	}
+}
+
 // *\expression of the covariance of the given data matrix '_x'.
 template<typename _Ty>
 MATRICE_GLOBAL_FINL auto covar(const _Ty& _x) noexcept {
@@ -1085,6 +1134,7 @@ MATRICE_GLOBAL_FINL auto covar(const _Ty& _x) noexcept {
 	const auto fact = 2. / (_x.rows() + _x.cols());
 	return (transpose(temp).mul(temp)*fact).eval();
 }
+
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
