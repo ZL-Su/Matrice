@@ -157,41 +157,42 @@ catch (...) {
 void multi_points_optimizer(std::vector<std::array<corr_optim_t::value_type, 4>>&& nodes, fs::path&& path)
 try {
 	using value_t = corr_optim_t::value_type;
-	const auto refimg = io::imread(path.string() + "\\tension_00.tif").matrix<value_t>();
-	const auto curimg = io::imread(path.string() + "\\tension_01.tif").matrix<value_t>();
+	const auto loader = io::make_loader(path, io::tiff<value_t>());
+	const auto refimg = loader.forward().front();
 
 	const auto opts = corr_optim_t::options_type{ 20 };
 	auto disp = corr_optim_t::matrix_type(nodes.size(), 2, 0.);
-
-	smooth_image_t f(refimg), g(curimg);
-	auto optim = corr_optim_t{f, g, opts};
-	auto rview = disp.rwbegin();
-	for (decltype(auto) node : nodes) {
-		optim.init(node[0], node[1]);
-		auto p = decltype(optim)::param_type{};
-		p[0] = node[2] - node[0];
-		p[3] = node[3] - node[1];
-		std::cout << "\n-IT-" 
-			<< "--------DISP-XY--------"
-			<< "---ERROR----" << "ID: " << rview.pos() << "\n";
-		for (auto i = 0; i < min(10, opts.maxiters()); ++i) {
-			const auto [coef, error] = optim(p);
-			std::cout << " "
-				<< std::setiosflags(std::ios::left)
-				<< dgelom::str(i, 2).append("  ")
-				<< std::setprecision(7)
-				<< std::setw(10)
-				<< p[0] << " "
-				<< std::setw(10)
-				<< p[3] << " "
-				<< std::setw(15)
-				<< error << "\n";
-			if (error < opts.tol()) {
-				break;
+	for (smooth_image_t f(refimg); loader; ) {
+		const auto curimg = loader.forward().front();
+		smooth_image_t g(curimg);
+		auto optim = corr_optim_t{ f, g, opts };
+		auto rview = disp.rwbegin();
+		for (decltype(auto) node : nodes) {
+			optim.init(node[0], node[1]);
+			auto p = decltype(optim)::param_type{};
+			p[0] = node[2] - node[0];
+			p[3] = node[3] - node[1];
+			std::cout << "\n-IT-" << "--------DISP-XY--------"
+				<< "---ERROR----" << "ID: " << rview.pos() << "\n";
+			for (auto i = 0; i < min(50, opts.maxiters()); ++i) {
+				const auto [coef, error] = optim(p);
+				std::cout << " "
+					<< std::setiosflags(std::ios::left)
+					<< dgelom::str(i, 2).append("  ")
+					<< std::setprecision(7)
+					<< std::setw(10) << p[0] << " "
+					<< std::setw(10) << p[3] << " "
+					<< std::setw(15) << error << "\n";
+				if (error < opts.tol()) {
+					break;
+				}
 			}
+			rview = { p[0], p[3] };
+			++rview;
 		}
-		rview = { p[0], p[3] };
-		++rview;
+		const auto out_path = path.parent_path().string() + "/" + str(loader.pos() - 1) + ".csv";
+		std::cout << "[MSG] Output loc: " << out_path << std::endl;
+		io::save<io::fmt::csv>(disp, out_path);
 	}
 }
 catch (dgelom::exception::error& e) {
@@ -199,6 +200,9 @@ catch (dgelom::exception::error& e) {
 		<< "in function: " << e.location()._func
 		<< ". (See line " << e.location()._line
 		<< " in file '" << e.location()._file << "')\n";
+}
+catch (std::exception& e) {
+	std::cout << "Unknown exception with info: [" << e.what() << "]" << std::endl;
 }
 }
 DGE_MATRICE_END

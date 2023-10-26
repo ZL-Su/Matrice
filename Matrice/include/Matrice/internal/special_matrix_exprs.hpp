@@ -20,8 +20,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include "expr_base.hpp"
 #include "forward.hpp"
 
-namespace dgelom {
-namespace xpr {
+MATRICE_NAMESPACE_BEGIN(xpr)
 
 template<typename _Ty, size_t _Rows=0, size_t _Cols = _Rows>
 class identity_matrix_exp : public __xpr__ {
@@ -65,6 +64,10 @@ public:
 	}
 };
 
+/// <summary>
+/// \brief Specialization for dynamic identity matrix.
+/// </summary>
+/// <typeparam name="_Ty"></typeparam>
 template<typename _Ty>
 class identity_matrix_exp<_Ty, 0, 0> : public __xpr__ {
 
@@ -112,5 +115,4 @@ private:
 	size_t _Myrows{0}, _Mycols{0};
 };
 
-}
-}
+MATRICE_NAMESPACE_END(xpr)
