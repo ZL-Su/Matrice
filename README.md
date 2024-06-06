@@ -1,5 +1,5 @@
 
-# 3D Vision & Photomechanics (R) 
+# Geometric Optical Sensing and Visual Intelligence (R) 
 # Matrice Library 
 <img src="https://img.shields.io/github/v/release/ZL-Su/Matrice?include_prereleases&label=version"/>
 
