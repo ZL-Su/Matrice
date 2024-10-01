@@ -1028,14 +1028,14 @@
     <ClCompile Include="src\private\math\_linear_kernel.cpp">
       <Filter>Source Files\Details\math</Filter>
     </ClCompile>
-    <ClCompile Include="src\algorithm\_bsplines.cpp">
-      <Filter>Source Files\Algs\transforms</Filter>
-    </ClCompile>
     <ClCompile Include="src\algorithm\transforms\_fft.cpp">
       <Filter>Source Files\Algs\transforms</Filter>
     </ClCompile>
     <ClCompile Include="src\arch\_regix.cpp">
       <Filter>Source Files\Arch</Filter>
+    </ClCompile>
+    <ClCompile Include="src\algorithm\_bsplines.cpp">
+      <Filter>Source Files\Algs\Interpolation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
