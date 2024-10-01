@@ -46,7 +46,7 @@ DGE_MATRICE_END
 /// <param name="_Dim">Dim with values of 1, 2, or 3.</param>
 /// <returns>dgelom::dim_type</returns>
 MATRICE_GLOBAL_FINL constexpr auto operator""D(size_t _Dim) noexcept {
-	return dgelom::dim_t(static_cast<uint8_t>(_Dim));
+	return dgelom::dim_type(static_cast<uint8_t>(_Dim));
 }
 
 #ifdef _MSC_VER

@@ -15,13 +15,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
-#include "math/_linear_solver.hpp"
+#include "private/math/_linear_solver.hpp"
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
-#include "math/kernel_wrapper.hpp"
+#include "private/math/kernel_wrapper.hpp"
 #else
-#include "math/_linear_kernel.hpp"
+#include "private/math/_linear_kernel.hpp"
 #endif
-#include "math/_linear_kernel.hpp" // for debug
+#include "private/math/_linear_kernel.hpp" // for debug
 
 #include "core/matrix.h"
 

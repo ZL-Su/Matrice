@@ -1,6 +1,6 @@
 
-#include "../../include/Matrice/util/_exception.h"
-#include "../../include/Matrice/private/_unified_memory.h"
+#include "Matrice/util/_exception.h"
+#include "Matrice/private/_unified_memory.h"
 
 #ifdef MATRICE_ENABLE_CUDA
 #include <cuda_runtime.h>

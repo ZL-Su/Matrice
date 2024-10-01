@@ -1,4 +1,4 @@
-#include "core/matrix.h"
+#include "Matrice/core/matrix.h"
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN

@@ -17,7 +17,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 #include <type_traits>
-#include "../../../include/Matrice/util/_macros.h"
+#include "Matrice/util/_macros.h"
 
 #ifdef MATRICE_ENABLE_CUDA
 #include <cublas.h>
