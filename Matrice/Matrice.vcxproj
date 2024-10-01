@@ -54,19 +54,19 @@
     <OutDir>x64\Debug\</OutDir>
     <IntDir>IntDir\Debug\</IntDir>
     <TargetName>matrice</TargetName>
-    <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;.\include\Matrice;.\include\Matrice\private;$(IncludePath)</IncludePath>
+    <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;.\include;.\include\Matrice;.\include\Matrice\private;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>x64\Release\</OutDir>
     <IntDir>IntDir\Release\</IntDir>
     <TargetName>matrice</TargetName>
-    <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;.\include\Matrice;.\include\Matrice\private;$(IncludePath)</IncludePath>
+    <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;.\include;.\include\Matrice;.\include\Matrice\private;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level1</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;MATRICE_DEBUG;_LIB;_SCL_SECURE_NO_WARNINGS;_ENABLE_EXTENDED_ALIGNED_STORAGE;MATRICE_THR=MATRICE_THR_OMP;MATRICE_MATH_KERNEL=MATRICE_USE_MKL;MATRICE_SIMD_ARCH=MATRICE_SIMD_SSE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -97,6 +97,7 @@
     </Lib>
     <Lib>
       <AdditionalLibraryDirectories>C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <Bscmake>
       <PreserveSbr>true</PreserveSbr>
@@ -126,6 +127,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>_dev_base.def</ModuleDefinitionFile>
     </Link>
+    <Lib>
+      <AdditionalOptions>/FORCE /IGNORE:4006 %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Librares\Ceres1130\ceres\include\ceres\dgelom\extras.h" />
@@ -408,12 +412,12 @@
     <None Include="include\Matrice\private\storage\_allocator.inl" />
     <None Include="include\Matrice\private\_similarity.inl" />
     <None Include="include\core" />
+    <None Include="src\private\cuda\_dev_funcs.cu" />
+    <None Include="src\private\cuda\_dev_ops.cu" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="src\private\cuda\_dev_matrix_base.cu" />
-    <CudaCompile Include="src\private\_dev_funcs.cu" />
     <CudaCompile Include="src\private\_dev_memory.cpp" />
-    <CudaCompile Include="src\private\_dev_ops.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
