@@ -1,11 +1,13 @@
 #include <functional>
 #include <numeric>
-#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
-#include <mkl.h>
-#endif
+
 #include "private/_plain_exp.hpp"
 #include "private/_memory.h"
 #include "../private/generic_fast_math.hpp"
+
+#if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
+#include <mkl.h>
+#endif
 
 #define _EXPOP_EXPLICIT_INSTANTIATION(_Type, _Desc, _Name) \
 template _Type* Exp::Op::_##_Desc##_##_Name<_Type>::operator()(\
@@ -22,14 +24,14 @@ _Ty* Exp::Op::_Mat_inv<_Ty>::operator()(int M, _Ty* Out, _Ty* In) const
 
 	if constexpr (type_bytes<_Ty>::value == 4) {
 #ifdef MATRICE_MATH_KERNEL==MATRICE_USE_MKL
-		LAPACKE_sgetri(LAPACK_ROW_MAJOR, M, Out, M, nullptr);
+		LAPACKE_sgetri(/*LAPACK_ROW_MAJOR*/101, M, Out, M, nullptr);
 #else
 		DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
 #endif
 	}
 	if constexpr (type_bytes<_Ty>::value == 8) {
 #ifdef MATRICE_MATH_KERNEL==MATRICE_USE_MKL
-		LAPACKE_dgetri(LAPACK_ROW_MAJOR, M, Out, M, nullptr);
+		LAPACKE_dgetri(/*LAPACK_ROW_MAJOR*/101, M, Out, M, nullptr);
 #else
 		DGELOM_ERROR("Undefined math kernel, matrice supports a kernel with preprocessor definition of MATRICE_MATH_KERNEL=MATRICE_USE_MKL.");
 #endif

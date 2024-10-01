@@ -17,7 +17,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 #include <type_traits>
 #include <core.hpp>
-#include "math/_linear_kernel.hpp"
+#include "private/math/_linear_kernel.hpp"
 
 DGE_MATRICE_BEGIN
 _DETAIL_BEGIN

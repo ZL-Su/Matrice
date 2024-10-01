@@ -17,8 +17,8 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #pragma once
 #include "forward.hpp"
-#include "math/_primitive_funcs.hpp"
-#include "math/kernel_wrapper.hpp"
+#include "private/math/_primitive_funcs.hpp"
+#include "private/math/kernel_wrapper.hpp"
 
 #if MATRICE_MATH_KERNEL==MATRICE_USE_MKL
 

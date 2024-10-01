@@ -1028,14 +1028,14 @@
     <ClCompile Include="src\private\math\_linear_kernel.cpp">
       <Filter>Source Files\Details\math</Filter>
     </ClCompile>
-    <ClCompile Include="src\algorithm\_bsplines.cpp">
-      <Filter>Source Files\Algs\transforms</Filter>
-    </ClCompile>
     <ClCompile Include="src\algorithm\transforms\_fft.cpp">
       <Filter>Source Files\Algs\transforms</Filter>
     </ClCompile>
     <ClCompile Include="src\arch\_regix.cpp">
       <Filter>Source Files\Arch</Filter>
+    </ClCompile>
+    <ClCompile Include="src\algorithm\_bsplines.cpp">
+      <Filter>Source Files\Algs\Interpolation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1100,14 +1100,14 @@
     <None Include="include\Matrice\algs\stereovision\refractive3D\_refractive3d.inl">
       <Filter>Header Files\Algs\Geovision\refractive\inline</Filter>
     </None>
+    <None Include="src\private\cuda\_dev_funcs.cu">
+      <Filter>Source Files\Details\CUDA\Kernels</Filter>
+    </None>
+    <None Include="src\private\cuda\_dev_ops.cu">
+      <Filter>Source Files\Details\CUDA\Kernels</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="src\private\_dev_funcs.cu">
-      <Filter>Source Files\Details\CUDA</Filter>
-    </CudaCompile>
-    <CudaCompile Include="src\private\_dev_ops.cu">
-      <Filter>Source Files\Details\CUDA</Filter>
-    </CudaCompile>
     <CudaCompile Include="src\private\cuda\_dev_matrix_base.cu">
       <Filter>Source Files\Details\CUDA</Filter>
     </CudaCompile>

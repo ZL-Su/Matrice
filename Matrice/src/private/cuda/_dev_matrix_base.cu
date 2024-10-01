@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.If not, see <http://www.gnu.org/licenses/>.
 **************************************************************************/
 #include <utility>
-#include "../../../include/Matrice/private/_dev_matrix_base.h"
+#include "Matrice/private/_dev_matrix_base.h"
 
 #ifdef MATRICE_ENABLE_CUDA
 #include "_ewise_kernels.cuh"
