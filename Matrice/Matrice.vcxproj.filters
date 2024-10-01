@@ -642,7 +642,7 @@
     <ClInclude Include="include\Matrice\algs\stereovision\_triangulation.hpp">
       <Filter>Header Files\Algs\Geovision</Filter>
     </ClInclude>
-    <ClInclude Include="include\Matrice\algs\stereovis.hpp">
+    <ClInclude Include="include\Matrice\algs\vision.hpp">
       <Filter>Header Files\Algs</Filter>
     </ClInclude>
     <ClInclude Include="include\Matrice\private\_bounded_pointer.hpp">
@@ -812,6 +812,18 @@
     </ClInclude>
     <ClInclude Include="include\Matrice\core\scalar.h">
       <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\private\_execution.hpp">
+      <Filter>Header Files\Detail\core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\internal\comparison_exprs.hpp">
+      <Filter>Header Files\Detail\expressions</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\stereovision\_distortion.hpp">
+      <Filter>Header Files\Algs\Geovision</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Matrice\algs\geometry\_plane_fitting.hpp">
+      <Filter>Header Files\Algs\Geometry</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

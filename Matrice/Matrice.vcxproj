@@ -191,6 +191,7 @@
     <ClInclude Include="include\Matrice\algs\geometry\quaternion.hpp" />
     <ClInclude Include="include\Matrice\algs\geometry\transform.h" />
     <ClInclude Include="include\Matrice\algs\geometry\_geo_utils.hpp" />
+    <ClInclude Include="include\Matrice\algs\geometry\_plane_fitting.hpp" />
     <ClInclude Include="include\Matrice\algs\graphics.hpp" />
     <ClInclude Include="include\Matrice\algs\graphics\_distance.hpp" />
     <ClInclude Include="include\Matrice\algs\graphics\utils.hpp" />
@@ -209,12 +210,13 @@
     <ClInclude Include="include\Matrice\algs\similarity\_similarity_traits.h" />
     <ClInclude Include="include\Matrice\algs\spline.h" />
     <ClInclude Include="include\Matrice\algs\spline\_spline.hpp" />
-    <ClInclude Include="include\Matrice\algs\stereovis.hpp" />
+    <ClInclude Include="include\Matrice\algs\vision.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\refractive3D\_refractive3d_funcs.h" />
     <ClInclude Include="include\Matrice\algs\stereovision\refractive3D\_refractive3d.h" />
     <ClInclude Include="include\Matrice\algs\stereovision\_camera.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_depth_estimation.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_camera_pose.hpp" />
+    <ClInclude Include="include\Matrice\algs\stereovision\_distortion.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_projection.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_spatial_transform.hpp" />
     <ClInclude Include="include\Matrice\algs\stereovision\_triangulation.hpp" />
@@ -241,6 +243,7 @@
     <ClInclude Include="include\Matrice\core\vector.h" />
     <ClInclude Include="include\Matrice\forward.hpp" />
     <ClInclude Include="include\Matrice\funcs\_functions.h" />
+    <ClInclude Include="include\Matrice\internal\comparison_exprs.hpp" />
     <ClInclude Include="include\Matrice\internal\expr_base.hpp" />
     <ClInclude Include="include\Matrice\internal\special_matrix_exprs.hpp" />
     <ClInclude Include="include\Matrice\internal\placeholders.hpp" />
@@ -283,6 +286,7 @@
     <ClInclude Include="include\Matrice\private\_decl_dev_funcs.h" />
     <ClInclude Include="include\Matrice\private\_devops.h" />
     <ClInclude Include="include\Matrice\private\_dev_matrix_base.h" />
+    <ClInclude Include="include\Matrice\private\_execution.hpp" />
     <ClInclude Include="include\Matrice\private\_function_traits.h" />
     <ClInclude Include="include\Matrice\private\_index.hpp" />
     <ClInclude Include="include\Matrice\private\_iterator.h" />

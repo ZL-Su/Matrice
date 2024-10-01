@@ -181,7 +181,7 @@ MATRICE_GLOBAL_FINL constexpr T arctan(const T& x) noexcept {
 }
 
 /// <summary>
-/// \brief Sum of squares for an input scalar sequence.
+/// \brief Square-sum of an input scalar sequence 'x, y, ...'.
 /// (Require C++ 17 support.)
 /// </summary>
 /// <typeparam name="...Ts">Scalar types</typeparam>

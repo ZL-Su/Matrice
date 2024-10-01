@@ -20,6 +20,7 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 #include <valarray>
 #include <functional>
 #include "_type_traits.h"
+#include "_execution.hpp"
 #include "_plain_exp.hpp"
 #include "_matrix_ops.hpp"
 #include "_storage.hpp"
@@ -1037,8 +1038,19 @@ public:
 	template<typename _Rhs>
 	MATRICE_HOST_INL decltype(auto) sub_inplace(const _Rhs& _Right);
 
+	template<typename _Rhs>
+	MATRICE_HOST_INL auto sub(policy::inplace, const _Rhs& _Right) {
+		return (this->derived() - _Right).eval();
+	}
+	template<typename _Rhs>
+	MATRICE_HOST_INL auto sub(policy::lazy, const _Rhs& _Right) {
+		return this->derived() - _Right();
+	}
+
 	/**
-	 *\brief in-place matrix-vector multiplication. Note that if the number of rows of this matrix A equals to the size of the right column vector x, this method returns (A^T)x.
+	 *\brief in-place matrix-vector multiplication. 
+	   Note that if the number of rows of this matrix A equals to the size
+	   of the right column vector x, this method returns (A^T)x.
 	 *\param [_Right] will be unrolled to a column vector x if it is not.
 	 */
 	template<typename _Rhs>

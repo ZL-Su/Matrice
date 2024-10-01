@@ -110,6 +110,12 @@ template<int _Val> inline constexpr auto is_zero_v = is_zero<_Val>::value;
 template<typename T> struct is_scalar {
 	constexpr static auto value = MATRICE_STD(is_scalar_v)<T>;
 };
+template<> struct is_scalar<float> {
+	constexpr static auto value = true;
+};
+template<> struct is_scalar<double> {
+	constexpr static auto value = true;
+};
 template<typename T> 
 inline constexpr auto is_scalar_v = is_scalar<remove_all_t<T>>::value;
 

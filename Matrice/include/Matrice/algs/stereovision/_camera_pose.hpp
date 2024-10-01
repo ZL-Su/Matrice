@@ -36,9 +36,11 @@ public:
 	using vector = auto_vector_t<value_type, _Dim>;
 
 	explicit camera_pose() noexcept = default;
-	explicit camera_pose(initlist<value_type> rt) noexcept {
-		_Myr = rt.begin();
-		_Myt = rt.begin() + 3;
+	camera_pose(initlist<value_type> rt) noexcept {
+		_Myr.from(rt.begin());
+		if (rt.size() == 6) {
+			_Myt.from(rt.begin() + 3);
+		}
 	}
 
 	/// <summary>
@@ -53,15 +55,22 @@ public:
 	/// <summary>
 	/// \brief Get 3x3 rotation matrix.
 	/// </summary>
-	MATRICE_GLOBAL_INL auto R() noexcept {
+	MATRICE_GLOBAL_INL auto R() const noexcept {
 		return rodrigues(_Myr);
+	}
+
+	/// <summary>
+	/// \brief Get 3x1 translation vector.
+	/// </summary>
+	MATRICE_GLOBAL_INL decltype(auto)t()const noexcept {
+		return (_Myt);
 	}
 
 	/// <summary>
 	/// \brief Get 3x4 transformation matrix
 	/// </summary>
 	/// <typeparam name="_Ty"></typeparam>
-	MATRICE_GLOBAL_INL auto T() noexcept {
+	MATRICE_GLOBAL_INL auto T() const noexcept {
 		return concat(R(), _Myt);
 	}
 

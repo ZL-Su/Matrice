@@ -247,7 +247,9 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 			value_type operator() (const _Lhs& lhs, const _Rhs& rhs, int r, int c) const noexcept {
 				value_type _Ret = value_type(0);
 
-				const int K = rhs.rows(), N = rhs.cols(), _Idx = r * lhs.cols();
+				//const int K = rhs.rows(), N = rhs.cols(), _Idx = r * lhs.cols();
+				const auto K = rhs.shape().h, N = rhs.shape().w;
+				const auto _Idx = r * lhs.shape().w;
 				for (auto k = 0; k < K; ++k) 
 					_Ret += lhs(_Idx + k) * rhs(k*N + c);
 
@@ -280,22 +282,26 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 	template<typename _Op> struct Base_
 	{
 #define _CDTHIS static_cast<const_derived_pointer>(this)
-		using myt_traits = expression_traits<_Op>;
-		using value_type = typename myt_traits::value_type;
+		using traits_t = expression_traits<_Op>;
+		using value_type = typename traits_t::value_type;
 		using value_t = value_type;
-		using matrix_type = typename myt_traits::auto_matrix_type;
-		using derived_t = typename myt_traits::type;
+		using eval_type = typename traits_t::auto_matrix_type;
+		using derived_t = typename traits_t::type;
 		using derived_pointer = derived_t*;
 		using const_derived = const derived_t;
 		using const_derived_pointer = const derived_pointer;
-		enum {options = myt_traits::options,
-			rows_at_compiletime = myt_traits::rows, 
-			cols_at_compiletime = myt_traits::cols};
+		enum {options = traits_t::options,
+			rows_at_compiletime = traits_t::rows, 
+			cols_at_compiletime = traits_t::cols};
 
 		MATRICE_GLOBAL_FINL Base_() noexcept {
 		}
 		MATRICE_GLOBAL_FINL Base_(const shape_t<3>& _Shape) noexcept
 			: Shape(_Shape), M(_Shape.rows()), N(_Shape.cols()) {
+#ifdef MATRICE_DEBUG
+			DGELOM_CHECK(M != 0, "Input rows in Base_<_Op> is zero!");
+			DGELOM_CHECK(N != 0, "Input cols in Base_<_Op> is zero!");
+#endif
 		}
 
 		/**
@@ -303,10 +309,10 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 		 * \brief Evaluate this expression to the matrix type which is deduced according to the optimal type recorded by the expression.
 		 * Specially, this method returns Scalar<value_type> iff the shape of matrix_type is deduced as 1-by-1 in compile time.
 	     */
-		MATRICE_GLOBAL_INL auto eval() const {
-			matrix_type _Ret(M, N);
+		MATRICE_GLOBAL_FINL auto eval() const {
+			eval_type _Ret(shape());
 			derived_pointer(this)->assign_to(_Ret);
-			return forward<matrix_type>(_Ret);
+			return forward<eval_type>(_Ret);
 		}
 
 		/** 
@@ -315,36 +321,38 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 		 * \param <_Rety> any Matrix_<> compatible type.
 		 */
 		template<typename _Rety> 
-		MATRICE_GLOBAL_INL _Rety eval() const {
-			_Rety ret(M, N);
+		MATRICE_GLOBAL_FINL _Rety eval() const {
+			_Rety ret(derived().shape());
 			return forward<_Rety>(ret = *derived_pointer(this));
 		}
 
 		// \retrieve the evaluated result
 		template<typename _Ret>
-		MATRICE_GLOBAL_INL _Ret& assign(_Ret& res) const noexcept {
-			if (res.size() == 0) res.create(M, N);
+		MATRICE_GLOBAL_FINL _Ret& assign(_Ret& res) const noexcept {
+			if (res.size() == 0) res.create(rows(), cols());
 			derived_pointer(this)->assign_to(res);
 			return (res);
 		}
 
-		MATRICE_GLOBAL_INL derived_t& derived() noexcept {
+		MATRICE_GLOBAL_FINL derived_t& derived() noexcept {
 			return *derived_pointer(this);
 		}
-		MATRICE_GLOBAL_INL const derived_t& derived() const noexcept {
+		MATRICE_GLOBAL_FINL const derived_t& derived() const noexcept {
 			return *derived_pointer(this);
 		}
 
 		// \formulate matmul expression
 		template<typename _Rhs>
-		MATRICE_GLOBAL_INL auto mul(const _Rhs& _rhs) const noexcept {
+		MATRICE_GLOBAL_FINL auto mul(const _Rhs& _rhs) const noexcept {
 			return MatBinaryExp<derived_t, _Rhs, Op::_Mat_mul<value_t>>(*_CDTHIS, _rhs);
 		}
 
 		template<typename _Rhs>
 		MATRICE_HOST_INL auto mul_inplace(const _Rhs& _rhs) const {
 #if MATRICE_MATH_KERNEL == MATRICE_USE_MKL
-			typename expression_traits<MatBinaryExp<Base_,_Rhs, Op::_Mat_mul<value_type>>>::auto_matrix_type _Ret(rows(), _rhs.cols());
+			typename expression_traits<
+				MatBinaryExp<Base_,_Rhs, Op::_Mat_mul<value_type>>
+			>::auto_matrix_type _Ret(rows(), _rhs.cols());
 			return detail::_Blas_kernel_wrapper::gemm(derived(), _rhs, _Ret);
 #else
 			return mul(_rhs).eval();
@@ -361,7 +369,7 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 			conditional_t<is_matrix_v<_Rhs>, 
 				_Rhs, typename _Rhs::matrix_type> _Res(_rhs.shape());
 			//spread this along each row to mul. with _rhs
-			if (N == 1 || size() == _rhs.rows()) {
+			if (cols() == 1 || size() == _rhs.rows()) {
 #pragma omp parallel for if(_Res.rows() > 100)
 				{
 					for (index_t r = 0; r < _Res.rows(); ++r) {
@@ -374,7 +382,7 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 				}
 			}
 			// spread each entry along column to mul. with _rhs
-			else if (M == 1 || size() == _Res.cols()) {
+			else if (rows() == 1 || size() == _Res.cols()) {
 #pragma omp parallel for if(_Res.cols() > 100)
 				{
 					for (index_t r = 0; r < _Res.rows(); ++r) {
@@ -432,9 +440,9 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 		/**
 		 * \variation of all entries
 		 */
-		MATRICE_GLOBAL_INL auto var() const {
+		MATRICE_GLOBAL_INL auto var() const noexcept {
 			const auto _Avg = this->avg();
-			auto _Diff = Exp::EwiseBinaryExp< derived_t, decltype(_Avg),
+			const auto _Diff = Exp::EwiseBinaryExp< derived_t, decltype(_Avg),
 				Exp::Op::_Ewise_sub<value_t>>( *static_cast<const derived_t*>(this), _Avg);
 			return (_Diff * _Diff).avg();
 		}
@@ -443,23 +451,29 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 		 * \operator for expression evaluation
 		 */
 		MATRICE_GLOBAL_INL auto operator()(tag::_Expression_eval_tag) const {
-			matrix_type _Ret(M, N);
+			eval_type _Ret(rows(), cols());
 			_CDTHIS->assign_to(_Ret);
-			return forward<matrix_type>(_Ret);
+			return forward<eval_type>(_Ret);
 		}
 		/**
 		 * \2-d ewise evaluation operator
 		 */
 		MATRICE_GLOBAL_FINL auto operator()(size_t x, size_t y) noexcept {
-			return _CDTHIS->operator()(x + y * N);
+			return _CDTHIS->operator()(x + y * cols());
 		}
 		MATRICE_GLOBAL_FINL const auto operator()(size_t x, size_t y)const noexcept {
-			return _CDTHIS->operator()(x + y * N);
+			return _CDTHIS->operator()(x + y * cols());
 		}
 
-		MATRICE_GLOBAL_FINL constexpr size_t size() const noexcept { return M*N; }
-		MATRICE_GLOBAL_FINL constexpr size_t rows() const noexcept { return M; }
-		MATRICE_GLOBAL_FINL constexpr size_t cols() const noexcept { return N; }
+		MATRICE_GLOBAL_FINL constexpr size_t rows() const noexcept { 
+			return derived().shape().h;;
+		}
+		MATRICE_GLOBAL_FINL constexpr size_t cols() const noexcept { 
+			return derived().shape().w;
+		}
+		MATRICE_GLOBAL_FINL constexpr size_t size() const noexcept {
+			return rows() * cols();
+		}
 
 		/**
 		 *\brief Get full shape of dst. {Height, Width, Depth}
@@ -503,7 +517,7 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 		using _Mybase::rows_at_compiletime;
 		using _Mybase::cols_at_compiletime;
 		using typename _Mybase::value_t;
-		using typename _Mybase::matrix_type;
+		using typename _Mybase::eval_type;
 		using _Mybase::operator();
 		using category = category_type_t<_BinaryOp>;
 		enum { options = option<ewise>::value };
@@ -512,15 +526,15 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 		 :_Mybase(detail::_Union(_lhs.shape(),_rhs.shape())),
 			_LHS(_lhs), _RHS(_rhs) {}
 
-		/*MATRICE_GLOBAL_FINL value_t operator()(size_t _idx) noexcept { 
-			return _Op(_LHS(_idx), _RHS(_idx));
-		}*/
-		MATRICE_GLOBAL_FINL value_t operator()(size_t _idx) const noexcept{
+		MATRICE_GLOBAL_FINL auto eval() const noexcept {
+			return _Mybase::eval();
+		}
+		MATRICE_GLOBAL_FINL auto operator()(size_t _idx) const noexcept{
 			return _Op(_LHS(_idx), _RHS(_idx));
 		}
 
 		template<typename _Mty> 
-		MATRICE_GLOBAL_INL void assign_to(_Mty& _Res) const noexcept{
+		MATRICE_GLOBAL_FINL void assign_to(_Mty& _Res) const noexcept{
 			if (_LHS.size() == _RHS.size()) { //element-wise operation
 //#pragma omp parallel for if(_Res.size() > 100)
 				for (index_t i = 0; i < _Res.size(); ++i)
@@ -529,8 +543,13 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 			else { //spreaded element-wise operation
 //#pragma omp parallel for if(_Res.size() > 100)
 				for (index_t i = 0; i < _Res.size(); ++i)
-					_Res(i) = _Op(_LHS(i/N), _RHS(i));
+					_Res(i) = _Op(_LHS(i/_Mybase::cols()), _RHS(i));
 			}
+		}
+
+		// Added at May/6/2022
+		MATRICE_GLOBAL_FINL auto shape() const noexcept {
+			return min(_LHS.shape(), _RHS.shape());
 		}
 
 	private:
@@ -548,7 +567,7 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 		using _Mybase::rows_at_compiletime;
 		using _Mybase::cols_at_compiletime;
 		using typename _Mybase::value_t;
-		using typename _Mybase::matrix_type;
+		using typename _Mybase::eval_type;
 		using _Mybase::operator();
 		using category = category_type_t<_BinaryOp>;
 		enum { options = option<ewise>::value };
@@ -557,9 +576,9 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 			:_Mybase(_rhs.shape()), _Scalar(_scalar), _RHS(_rhs) {
 		}
 
-		/*MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) {
-			return _Op(_Scalar, _RHS(_idx));
-		}*/
+		MATRICE_GLOBAL_FINL auto eval() const noexcept {
+			return _Mybase::eval();
+		}
 		MATRICE_GLOBAL_FINL value_t operator()(size_t _idx) const noexcept {
 			return _Op(_Scalar, _RHS(_idx));
 		}
@@ -569,6 +588,11 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 //#pragma omp parallel for
 			for (index_t i = 0; i < res.size(); ++i) 
 				res(i) = this->operator()(i);
+		}
+
+		// Added at May/6/2022
+		MATRICE_GLOBAL_FINL auto shape() const noexcept {
+			return _RHS.shape();
 		}
 
 	private:
@@ -587,18 +611,19 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 		using _Mybase::rows_at_compiletime;
 		using _Mybase::cols_at_compiletime;
 		using typename _Mybase::value_t;
-		using typename _Mybase::matrix_type;
+		using typename _Mybase::eval_type;
 		using _Mybase::operator();
 		using category = category_type_t<_BinaryOp>;
 		enum { options = option<ewise>::value };
 
 		MATRICE_GLOBAL_INL EwiseBinaryExp(const T& _lhs, const U _scalar)
-			noexcept :_Mybase(_lhs.shape()), _Scalar(_scalar), _LHS(_lhs) {}
+			noexcept :_Mybase(_lhs.shape()), _Scalar(_scalar), _LHS(_lhs) {
+		}
 
-		/*MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) {
-			return _Op(_LHS(_idx), _Scalar);
-		}*/
-		MATRICE_GLOBAL_FINL value_t operator() (size_t _idx) const noexcept {
+		MATRICE_GLOBAL_FINL auto eval() const noexcept {
+			return _Mybase::eval();
+		}
+		MATRICE_GLOBAL_FINL auto operator()(size_t _idx) const noexcept {
 			return _Op(_LHS(_idx), _Scalar);
 		}
 
@@ -609,6 +634,10 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 				res(i) = this->operator()(i);
 		}
 
+		// \returns Shape of the evaluated type. Added at May/6/2022
+		MATRICE_GLOBAL_FINL auto shape() const noexcept {
+			return _LHS.shape();
+		}
 	private:
 		const value_t _Scalar = infinity_v<value_t>;
 		const T& _LHS;
@@ -627,7 +656,7 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 		using _Mybase::rows_at_compiletime;
 		using _Mybase::cols_at_compiletime;
 		using typename _Mybase::value_t;
-		using typename _Mybase::matrix_type;
+		using typename _Mybase::eval_type;
 		using _Mybase::operator();
 		using category = category_type_t<_UnaryOp>;
 		enum { options = expression_options<_UnaryOp>::value };
@@ -635,12 +664,15 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 		EwiseUnaryExp(const_reference_t _rhs) noexcept
 			:_Mybase(_rhs.shape()), _RHS(_rhs) {}
 
-		MATRICE_GLOBAL_FINL const value_t operator()(size_t _idx) const noexcept {
+		MATRICE_GLOBAL_FINL auto eval() const noexcept {
+			return _Mybase::eval();
+		}
+		MATRICE_GLOBAL_FINL auto operator()(size_t _idx) const noexcept {
 			return _Op(_RHS(_idx));
 		}
 
 		template<typename _Mty> 
-		MATRICE_GLOBAL_INL void assign_to(_Mty& res) const noexcept {
+		MATRICE_GLOBAL_FINL void assign_to(_Mty& res) const noexcept {
 			for (index_t i = 0; i < res.size(); ++i) 
 				res(i) = this->operator()(i);
 		}
@@ -648,8 +680,13 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 		/**
 		 * \brief returns the pointer of the source object
 		 */
-		MATRICE_GLOBAL_INL decltype(auto) data() const noexcept {
+		MATRICE_GLOBAL_FINL decltype(auto) data() const noexcept {
 			return _RHS.data();
+		}
+
+		// Added at May/6/2022
+		MATRICE_GLOBAL_FINL auto shape() const noexcept {
+			return _RHS.shape();
 		}
 	private:
 		_UnaryOp _Op;
@@ -668,24 +705,32 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 		using _Mybase::rows_at_compiletime;
 		using _Mybase::cols_at_compiletime;
 		using typename _Mybase::value_t;
-		using typename _Mybase::matrix_type;
+		using typename _Mybase::eval_type;
 		using category = category_type_t<_BinaryOp>;
 		enum{options = option<_BinaryOp::flag>::value};
 
 		MATRICE_GLOBAL_INL MatBinaryExp(const T& _lhs, const U& _rhs) 
 			noexcept :_Mybase(_lhs.shape()), _LHS(_lhs), _RHS(_rhs) {
 			M = _LHS.rows(), K = _LHS.cols(), N = _RHS.cols();
-			if (K != _RHS.rows() && K == N) N = _RHS.rows();
+			// If K is not equal to the rows of _RHS but equal to its cols,
+			// we set N to the rows of _RHS. This case happens for transpose.
+			if (K != _RHS.rows() && K == N) {
+				N = _RHS.rows();
+			}
 		}
 
-		MATRICE_HOST_FINL value_t* operator() (value_t* res) const {
+		MATRICE_GLOBAL_FINL auto eval() const noexcept {
+			return _Mybase::eval();
+		}
+		MATRICE_HOST_FINL value_t* operator()(value_t* res) const {
 			return _Op(_LHS.data(), _RHS.data(), res, M, K, N);
 		}
-		MATRICE_GLOBAL_FINL value_t operator() (int r, int c) const {
+		MATRICE_GLOBAL_FINL value_t operator()(int r, int c) const {
 			return _Op(_LHS, _RHS, r, c);
 		}
-		MATRICE_GLOBAL_FINL value_t operator() (int _idx) const noexcept {
-			int r = _idx / N, c = _idx - r * N;
+		MATRICE_GLOBAL_FINL value_t operator()(int _idx) const noexcept {
+			const int r = _idx / _Mybase::cols();
+			const auto c = _idx - r * _Mybase::cols();
 			return _Op(_LHS, _RHS, r, c);
 		}
 
@@ -698,6 +743,13 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 			for (int i = 0; i < res.size(); ++i) 
 				res(i) = this->operator()(i);
 #endif
+		}
+
+		// \return Shape of resulted type.
+		// \note Added at May/6/2022
+		MATRICE_GLOBAL_FINL auto shape() const noexcept {
+			return shape_t<3>(_LHS.shape().h, _RHS.shape().w, 
+				min(_LHS.shape().d, _RHS.shape().d));
 		}
 	private:
 		const T& _LHS; 
@@ -717,7 +769,7 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 		using _Mybase::rows_at_compiletime;
 		using _Mybase::cols_at_compiletime;
 		using typename _Mybase::value_t;
-		using typename _Mybase::matrix_type;
+		using typename _Mybase::eval_type;
 		using category = category_type_t<_UnaryOp>;
 		enum {options = option<_UnaryOp::flag>::value};
 
@@ -725,38 +777,40 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 			:_Mybase(inout.shape()), _RHS(inout), _ANS(inout) {
 			if constexpr (options == trp) { 
 				std::swap(M, N); 
-				_Mybase::Shape.h = M;
-				_Mybase::Shape.w = N;
+				_Mybase::Shape = _Mybase::Shape.t();
 			}
 		}
 		MATRICE_GLOBAL_INL MatUnaryExp(const T& _rhs, T& _ans)
-			: _Mybase(_rhs.shape()), _RHS(_rhs), _ANS(_ans) {
-			if constexpr (options == trp) {
-				std::swap(M, N);
-				_Mybase::Shape.h = M;
-				_Mybase::Shape.w = N;
-			}
+			: _Mybase(_rhs), _ANS(_ans) {
 		}
 		MATRICE_GLOBAL_INL MatUnaryExp(MatUnaryExp&& _other)
 			: _Mybase(_other.shape()), options(_other.options) {
 			*this = move(_other);
 		}
 
-		MATRICE_GLOBAL_FINL auto operator()() const noexcept { 
-			return _Op(M, _ANS.data(), _RHS.data());
+		MATRICE_GLOBAL_FINL auto eval() const noexcept {
+			return _Mybase::eval();
 		}
-		MATRICE_GLOBAL_FINL value_t operator() (int r, int c) const { 
+		MATRICE_GLOBAL_FINL auto operator()() const noexcept { 
+			return _Op(_Mybase::rows(), _ANS.data(), _RHS.data());
+		}
+		MATRICE_GLOBAL_FINL value_t operator()(int r, int c) const { 
 			if constexpr (options == inv) return _ANS(c + r * N);
 			if constexpr (options == trp) return _ANS(r + c * N);
 		}
-		MATRICE_GLOBAL_FINL value_t operator() (int _idx) const { 
+		MATRICE_GLOBAL_FINL value_t operator()(int _idx) const { 
 			if constexpr (options == trp)
-				_idx = _idx * M + _idx / N * (1 - N * M);
+				//_idx = _idx * M + _idx / N * (1 - N * M); //Comment on May/8/2022
+				_idx = _idx *this->rows() + _idx / this->cols() * (1 - this->size());
 			return _ANS(_idx);
 		}
 
-		MATRICE_GLOBAL_FINL T& ans() { return _ANS; }
-		MATRICE_GLOBAL_FINL const T& ans() const { return _ANS; }
+		MATRICE_GLOBAL_FINL T& ans() noexcept { 
+			return _ANS; 
+		}
+		MATRICE_GLOBAL_FINL const T& ans() const noexcept { 
+			return _ANS; 
+		}
 
 		template<typename _Rhs, 
 			typename _Ret = MatBinaryExp<MatUnaryExp, _Rhs, Op::_Mat_mul<value_t>>> 
@@ -791,6 +845,16 @@ MATRICE_GLOBAL_FINL auto operator OP(const _Lhs& _Left, const_derived& _Right) {
 		 */
 		MATRICE_GLOBAL_INL decltype(auto) data() const noexcept {
 			return _RHS.data();
+		}
+
+		// Added at May/6/2022
+		MATRICE_GLOBAL_FINL auto shape() const noexcept {
+			if constexpr (options == trp) {
+				return _RHS.shape().t();
+			}
+			else {
+				return _RHS.shape();
+			}
 		}
 
 	private:
@@ -881,8 +945,10 @@ struct expression_traits<_Exp::MatUnaryExp<T, _Op>> {
 	using type = _Exp::MatUnaryExp<T, _Op>;
 	using value_type = typename T::value_t;
 	enum { options = expression_options<_Op>::value };
-	static constexpr auto rows = conditional_size_v<(options & _Exp_tag::trp) == _Exp_tag::trp, T::cols_at_compiletime, T::rows_at_compiletime>;
-	static constexpr auto cols = conditional_size_v<(options & _Exp_tag::trp) == _Exp_tag::trp, T::rows_at_compiletime, T::cols_at_compiletime>;
+	static constexpr auto rows = conditional_size_v<(options & _Exp_tag::trp) == 
+		_Exp_tag::trp, T::cols_at_compiletime, T::rows_at_compiletime>;
+	static constexpr auto cols = conditional_size_v<(options & _Exp_tag::trp) == 
+		_Exp_tag::trp, T::rows_at_compiletime, T::cols_at_compiletime>;
 	using auto_matrix_type = detail::Matrix_<value_type, rows, cols>;
 };
 
@@ -1059,6 +1125,14 @@ requires is_expression_v<_Exp> MATRICE_GLOBAL_FINL auto sum(_Exp&& _exp) {
 		_Ret(0) = _exp.sum();
 		return _Ret;
 	}
+}
+
+// *\expression of the covariance of the given data matrix '_x'.
+template<typename _Ty>
+MATRICE_GLOBAL_FINL auto covar(const _Ty& _x) noexcept {
+	auto temp = _x - accum(_x) / _x.size();
+	const auto fact = 2. / (_x.rows() + _x.cols());
+	return (transpose(temp).mul(temp)*fact).eval();
 }
 
 #ifdef _MSC_VER
