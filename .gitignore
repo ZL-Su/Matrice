@@ -292,3 +292,5 @@ Matrice/Matrice.vcxproj
 *.filters
 *.pptx
 /.vscode
+*.bsc
+*.idb
