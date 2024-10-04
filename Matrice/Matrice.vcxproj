@@ -53,14 +53,14 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>x64\Debug\</OutDir>
     <IntDir>IntDir\Debug\</IntDir>
-    <TargetName>matrice</TargetName>
+    <TargetName>matrice_x64d</TargetName>
     <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;.\include;.\include\Matrice;.\include\Matrice\private;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>x64\Release\</OutDir>
     <IntDir>IntDir\Release\</IntDir>
-    <TargetName>matrice</TargetName>
+    <TargetName>matrice_x64</TargetName>
     <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;.\include;.\include\Matrice;.\include\Matrice\private;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
