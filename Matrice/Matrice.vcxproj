@@ -51,14 +51,14 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>x64\Debug\</OutDir>
+    <OutDir>build\</OutDir>
     <IntDir>IntDir\Debug\</IntDir>
     <TargetName>matrice_x64d</TargetName>
     <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;.\include;.\include\Matrice;.\include\Matrice\private;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>x64\Release\</OutDir>
+    <OutDir>build\</OutDir>
     <IntDir>IntDir\Release\</IntDir>
     <TargetName>matrice_x64</TargetName>
     <IncludePath>.\addin;.\addin\libtiff;.\addin\libpng;.\addin\zlib;.\include;.\include\Matrice;.\include\Matrice\private;$(IncludePath)</IncludePath>
