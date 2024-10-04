@@ -134,9 +134,14 @@ struct LinearOp MATRICE_NONHERITABLE
 			Op::_Aview.ref(U), Op::_Bview.ref(S), Op::_Cview.ref(Vt);
 			Op::_Impl(Op::_Aview, Op::_Bview, Op::_Cview);
 		};
-		MATRICE_GLOBAL_FINL constexpr auto operator() (std::_Ph<0> _ph = {}) {
+		/**
+		 * Return nullspace $X$ of the src matrix, s.t. $AX=0$.
+		 */
+		MATRICE_GLOBAL_FINL constexpr auto operator()()const noexcept {
 			Matrix_<value_t, N, 1> X(Vt.cols(), 1);
-			X.from(Vt[Vt.rows() - 1]);
+			const size_t last = Vt.rows() - 1;
+			const value_t* head = vt()[last];
+			X.from(head);
 			return std::forward<decltype(X)>(X);
 		}
 		template<typename _Ret = Matrix_<value_t, N, min(N, 1)>> 
@@ -146,9 +151,11 @@ struct LinearOp MATRICE_NONHERITABLE
 			return (X);
 		}
 		//\return singular values
-		MATRICE_HOST_FINL auto& sv() { return (S); }
-		//\return V^{T} expression
-		MATRICE_HOST_FINL auto vt() { return (Vt); }
+		MATRICE_HOST_FINL const auto& sv()const noexcept { return (S); }
+		MATRICE_HOST_FINL auto& sv()noexcept { return (S); }
+		//\return $V^T$ expression
+		MATRICE_HOST_FINL const auto& vt()const noexcept { return (Vt); }
+		MATRICE_HOST_FINL auto& vt()noexcept { return (Vt); }
 	private:
 		const _Mty& U;
 		Matrix_<value_t, _Mty::cols_at_compiletime, min(_Mty::cols_at_compiletime,1)> S;
