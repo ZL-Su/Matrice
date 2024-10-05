@@ -23,11 +23,11 @@ along with this program.If not, see <http://www.gnu.org/licenses/>.
 
 MATRICE_ARCH_BEGIN
 
-/*<brief>
- *\class template for SIMD vectorization 
- *\param <T> must be a scalar type
- *\param <_Elems> the number of packet elements, which default value is auto-deduced
-</brief>*/
+/**
+ * CLASS TEMPLATE ```Packet_<T>``` for SIMD vectorization.
+ * @param <T> Value type which must be a scalar type
+ * @param <_Elems> Number of packet elements, which default is auto-deduced according to the value type T.
+*/
 template<typename T>
 class Packet_ MATRICE_NONHERITABLE 
 	: public simd::simd_base_<T, packet_size_v<T>>
