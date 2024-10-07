@@ -1,6 +1,6 @@
 /**************************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2023, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2024, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -153,18 +153,19 @@ MATRICE_HOST_FINL Packet operator/(T* _Left, const Packet_<T>& _Right)
 }
 
 template<typename T, typename Packet = Packet_<T>>
-MATRICE_HOST_FINL Packet abs(const Packet_<T>& _Right)
+MATRICE_HOST_FINL Packet abs(const Packet_<T>& _Pkt) noexcept
 {
-	return (transform<Packet::op_t::abs<Packet::size>>(_Right));
+	return (transform<Packet::op_t::abs<Packet::size>>(_Pkt));
 }
 template<typename T, typename = enable_if_t<is_arithmetic_v<T>>>
-MATRICE_HOST_FINL T reduce(const Packet_<T>& _Right)
+MATRICE_HOST_FINL T reduce(const Packet_<T>& _Pkt) noexcept
 {
-	return (dgelom::reduce_n_t<Packet_<T>::size>::value(_Right.begin()));
+	return (dgelom::reduce_n_t<Packet_<T>::size>::value(_Pkt.begin()));
 }
 template<typename _InIt, typename _OutIt, typename _Op, 
 	typename = enable_if_t<is_pointer_v<_InIt>&&is_pointer_v<_OutIt>>>
-void transform(const _InIt _Begin, const _InIt _End, _OutIt _Dst, _Op _Fn) {
+MATRICE_HOST_FINL void transform(const _InIt _Begin, const _InIt _End, _OutIt _Dst, _Op _Fn) noexcept
+{
 	enum { _Elems = 4 };
 	using value_t = remove_reference_t<decltype(*_Begin)>;
 
