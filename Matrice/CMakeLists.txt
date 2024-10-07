@@ -16,6 +16,12 @@ file(GLOB_RECURSE SRC_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cxx"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/addin/libtiff/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/addin/libtiff/*.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/addin/libpng/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/addin/libpng/*.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/addin/zlib/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/addin/zlib/*.c"
 )
 add_library(matrice STATIC ${SRC_FILES})
 
@@ -24,6 +30,7 @@ add_library(matrice STATIC ${SRC_FILES})
 target_include_directories(matrice
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Matrice>
         $<INSTALL_INTERFACE:include>
 )
 
@@ -49,6 +56,9 @@ if(MATRICE_MATH_KERNEL STREQUAL "MATRICE_USE_MKL")
 else()
     message(STATUS "MATRICE_MATH_KERNEL is not set to MATRICE_USE_MKL. MKL disabled.")
 endif()
+
+# Specify the installation prefix
+set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/install" CACHE PATH "Installation directory")
 
 # Install the library and headers
 install(TARGETS matrice
