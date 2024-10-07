@@ -66,9 +66,9 @@ public:
 	MATRICE_HOST_FINL Myt  abs() const;
 
 	template<typename T, typename Packet> friend
-	MATRICE_HOST_FINL Packet abs(const Packet_<T>& _Right);
+	MATRICE_HOST_FINL Packet abs(const Packet_<T>& pkt) noexcept;
 	template<typename T, typename> friend
-	MATRICE_HOST_FINL T reduce(const Packet_<T>& _Right);
+	MATRICE_HOST_FINL T reduce(const Packet_<T>& pkt) noexcept;
 };
 
 #pragma region <!-- operators -->
