@@ -160,6 +160,12 @@ public:
 		: _Mybase{} {};
 	MATRICE_GLOBAL_FINL Matrix_(int, int) noexcept
 		: Matrix_{} {};
+	template<typename _Uy, MATRICE_ENABLE_IF(is_scalar_v<_Uy>)>
+	MATRICE_GLOBAL_FINL constexpr Matrix_(_Uy _val) noexcept
+		: _Mybase(1, 1, _val) {};
+	template<typename... _Args> 
+	MATRICE_GLOBAL_FINL Matrix_(_Args&&... args)noexcept
+		: _Mybase(forward<_Args>(args)...) {};
 
 	MATRICE_GLOBAL_INL operator scalar_type() const noexcept {
 		return {*_Mybase::m_data};

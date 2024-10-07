@@ -200,16 +200,20 @@ public:
 	}
 #endif
 
-	template<index_t rows>
-	using lite = typename _Mybase::template 
-		lite<rows, cols_at_compiletime>;
-	template<index_t cols>
-	using extend = typename _Mybase::template 
-		lite<rows_at_compiletime, cols>;
+	//template<index_t rows>
+	//using lite = typename _Mybase::template lite<rows, cols_at_compiletime>;
+	//template<index_t cols>
+	//using extend = typename _Mybase::template lite<rows_at_compiletime, cols>;
 };
 
 template<typename _Ty, size_t _Dim> 
-class Vector : public Vec_<_Ty, _Dim>{};
+class Vector : public Vec_<_Ty, _Dim>{
+public:
+	template<typename _Arg>
+	MATRICE_GLOBAL_FINL Vector(const _Arg& _arg) noexcept
+		:Vec_<_Ty, _Dim>(_arg) {
+	}
+};
 
 template<typename _Ty>
 class Vector<_Ty, 3> : public Vec_<_Ty, 3> {
