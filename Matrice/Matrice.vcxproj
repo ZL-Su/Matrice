@@ -423,6 +423,9 @@
     <CudaCompile Include="src\private\cuda\_dev_matrix_base.cu" />
     <CudaCompile Include="src\private\_dev_memory.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>

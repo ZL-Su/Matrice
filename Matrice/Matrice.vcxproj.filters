@@ -1115,4 +1115,7 @@
       <Filter>Source Files\Details\CUDA</Filter>
     </CudaCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt" />
+  </ItemGroup>
 </Project>
