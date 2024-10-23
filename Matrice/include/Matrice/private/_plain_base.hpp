@@ -611,22 +611,37 @@ public:
 #pragma endregion
 
 #pragma region <!-- views -->
-	// \View of i-th row.
-	MATRICE_GLOBAL_FINL _Myt_rview_type rview(size_t i) noexcept {
-		return _Myt_rview_type(m_data + m_cols * i, m_cols);
-	}
+	/**
+	 * Row-view to access the elements in `i`-th row with zero-copy.
+	 * @param `i` Row index to be accessed.
+	 * @return A view with type of internal type `_Matrix_rview`, 
+	           in which the elements can be fetched via operators `[]` or `()`.
+	 */
 	MATRICE_GLOBAL_FINL const _Myt_rview_type rview(size_t i) const noexcept {
 		return _Myt_rview_type(m_data + m_cols * i, m_cols);
 	}
-	// \View of i-th column.
-	MATRICE_GLOBAL_FINL _Myt_cview_type cview(size_t i) noexcept {
-		return _Myt_cview_type(m_data + i, m_rows, m_cols, i);
+	MATRICE_GLOBAL_FINL _Myt_rview_type rview(size_t i) noexcept {
+		return _Myt_rview_type(m_data + m_cols * i, m_cols);
 	}
+	
+	/**
+	 * Column-view to access the elements in `i`-th column with zero-copy.
+	 * @param `i` Column index to be accessed.
+	 * @return A view with type of internal type `_Matrix_cview`,
+			   in which the elements can be fetched via operators `[]` or `()`.
+	 */
 	MATRICE_GLOBAL_FINL const _Myt_cview_type cview(size_t i) const noexcept {
 		return _Myt_cview_type(m_data + i, m_rows, m_cols, i);
 	}
+	MATRICE_GLOBAL_FINL _Myt_cview_type cview(size_t i) noexcept {
+		return _Myt_cview_type(m_data + i, m_rows, m_cols, i);
+	}
 
-	// \View of this object.
+	/**
+	 * View to access the elements in the plain containter with zero-copy.
+	 * @return A view with type of internal type `_Matrix_block`,
+			   in which the elements can be fetched via operators `pointer[]` or `reference()`.
+	 */
 	MATRICE_GLOBAL_INL const auto view() const noexcept {
 		return _Myt_blockview_type(m_data, m_cols, m_rows);
 	}
@@ -651,7 +666,12 @@ public:
 		if constexpr (_Axis == 1) return cview(i);
 	}
 
-	// \View of submatrix: x in range [x0, x1) and y in range [y0, y1)
+	/**
+	 *  View of a submatrix in ranges `[x0, x1)` and `[y0, y1)`.
+	 * @param `x0, x1` Starting and ending indices in x(column)-direction.
+	 * @param `y0, y1` Starting and ending indices in y(row)-direction.
+	 * @return Block view with internal type `_Matrix_block`.
+	 */
 	MATRICE_GLOBAL_INL auto block(index_t x0, index_t x1, index_t y0, index_t y1) {
 #ifdef MATRICE_DEBUG
 		DGELOM_CHECK(x1<=m_cols, "Input var. 'x1' must not be greater than m_cols.")
