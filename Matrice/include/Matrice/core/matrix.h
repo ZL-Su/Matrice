@@ -218,7 +218,7 @@ public:
 
 	MATRICE_MAKE_METHOD_CREATE(cols, ) {
 		_Mybase::_Myalloc.alloc(rows(), cols);
-		_Mybase::_Xfields({ size_t(rows()), cols });
+		_Mybase::_Xfields({ size_t(rows()), cols, 1});
 	}
 
 	MATRICE_GLOBAL_FINL _Myt& resize(size_t cols) {
@@ -271,7 +271,7 @@ public:
 
 	MATRICE_MAKE_METHOD_CREATE(rows, ) {
 		_Mybase::_Myalloc.alloc(rows, cols());
-		_Mybase::_Xfields({ rows, size_t(cols()) });
+		_Mybase::_Xfields({ rows, size_t(cols()), 1});
 	}
 
 	MATRICE_GLOBAL_FINL _Myt& resize(size_t rows) {
