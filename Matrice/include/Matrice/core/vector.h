@@ -1,6 +1,6 @@
 ﻿/**********************************************************************
 This file is part of Matrice, an effcient and elegant C++ library.
-Copyright(C) 2018-2021, Zhilong(Dgelom) Su, all rights reserved.
+Copyright(C) 2018-2024, Zhilong(Dgelom) Su, all rights reserved.
 
 This program is free software : you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -200,10 +200,10 @@ public:
 	}
 #endif
 
-	//template<index_t rows>
-	//using lite = typename _Mybase::template lite<rows, cols_at_compiletime>;
-	//template<index_t cols>
-	//using extend = typename _Mybase::template lite<rows_at_compiletime, cols>;
+	template<index_t rows>
+	using lite = typename _Mybase::template lite<rows, cols_at_compiletime>;
+	template<index_t cols>
+	using extend = typename _Mybase::template lite<rows_at_compiletime, cols>;
 };
 
 template<typename _Ty, size_t _Dim> 
